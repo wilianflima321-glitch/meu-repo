@@ -783,7 +783,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
             <Controls className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded" />
             <MiniMap 
               className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded"
-              nodeColor="#3b82f6"
+              nodeColor="var(--aethel-primary)"
             />
             
             <Panel position="top-right" className="bg-[var(--aethel-surface-tertiary)] p-2 rounded border border-[var(--aethel-border-secondary)] text-xs text-[var(--aethel-text-tertiary)]">

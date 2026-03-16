@@ -289,32 +289,32 @@ function ParticleRenderer({ emitters, isPlaying }: ParticleRendererProps) {
 }
 const nodeStyles = {
   emitter: {
-    background: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)',
-    border: '2px solid #a93226',
+    background: 'linear-gradient(135deg, var(--aethel-error) 0%, color-mix(in_srgb,var(--aethel-error)_70%,var(--aethel-surface-primary)) 100%)',
+    border: '2px solid color-mix(in_srgb,var(--aethel-error)_70%,var(--aethel-surface-primary))',
   },
   spawn: {
-    background: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
-    border: '2px solid #1f618d',
+    background: 'linear-gradient(135deg, var(--aethel-primary) 0%, color-mix(in_srgb,var(--aethel-primary)_70%,var(--aethel-surface-primary)) 100%)',
+    border: '2px solid color-mix(in_srgb,var(--aethel-primary)_70%,var(--aethel-surface-primary))',
   },
   velocity: {
-    background: 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
-    border: '2px solid #1e8449',
+    background: 'linear-gradient(135deg, var(--aethel-success) 0%, color-mix(in_srgb,var(--aethel-success)_70%,var(--aethel-surface-primary)) 100%)',
+    border: '2px solid color-mix(in_srgb,var(--aethel-success)_70%,var(--aethel-surface-primary))',
   },
   size: {
-    background: 'linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)',
-    border: '2px solid #7d3c98',
+    background: 'linear-gradient(135deg, var(--aethel-accent) 0%, color-mix(in_srgb,var(--aethel-accent)_70%,var(--aethel-surface-primary)) 100%)',
+    border: '2px solid color-mix(in_srgb,var(--aethel-accent)_70%,var(--aethel-surface-primary))',
   },
   color: {
-    background: 'linear-gradient(135deg, #f39c12 0%, #d68910 100%)',
-    border: '2px solid #b9770e',
+    background: 'linear-gradient(135deg, var(--aethel-warning) 0%, color-mix(in_srgb,var(--aethel-warning)_70%,var(--aethel-surface-primary)) 100%)',
+    border: '2px solid color-mix(in_srgb,var(--aethel-warning)_70%,var(--aethel-surface-primary))',
   },
   force: {
-    background: 'linear-gradient(135deg, #1abc9c 0%, #16a085 100%)',
-    border: '2px solid #117864',
+    background: 'linear-gradient(135deg, var(--aethel-info) 0%, color-mix(in_srgb,var(--aethel-info)_70%,var(--aethel-surface-primary)) 100%)',
+    border: '2px solid color-mix(in_srgb,var(--aethel-info)_70%,var(--aethel-surface-primary))',
   },
   render: {
-    background: 'linear-gradient(135deg, #34495e 0%, #2c3e50 100%)',
-    border: '2px solid #1c2833',
+    background: 'linear-gradient(135deg, var(--aethel-text-muted) 0%, color-mix(in_srgb,var(--aethel-text-muted)_70%,var(--aethel-surface-primary)) 100%)',
+    border: '2px solid color-mix(in_srgb,var(--aethel-text-muted)_70%,var(--aethel-surface-primary))',
   },
 };
 interface NiagaraNodeProps {
@@ -344,7 +344,7 @@ function NiagaraNode({ data, selected }: NiagaraNodeProps) {
         {data.label}
       </div>
       {data.params && Object.entries(data.params).slice(0, 3).map(([key, value]) => (
-        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'rgba(255,255,255,0.8)', marginBottom: '2px' }}>
+        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'color-mix(in_srgb,var(--aethel-text-primary) 80%, transparent)', marginBottom: '2px' }}>
           <span>{key}:</span>
           <span style={{ fontWeight: 'bold' }}>{typeof value === 'number' ? value.toFixed(2) : String(value)}</span>
         </div>
@@ -928,10 +928,10 @@ export default function NiagaraVFX() {
                 args={[20, 20]}
                 cellSize={1}
                 cellThickness={0.5}
-                cellColor="#333"
+                cellColor="var(--aethel-border-primary)"
                 sectionSize={5}
                 sectionThickness={1}
-                sectionColor="#555"
+                sectionColor="var(--aethel-border-secondary)"
                 fadeDistance={50}
                 infiniteGrid
               />
@@ -1041,7 +1041,7 @@ export default function NiagaraVFX() {
                       <path
                         d="M 0 60 L 40 30 L 100 45 L 160 10 L 220 60"
                         fill="none"
-                        stroke="#9b59b6"
+                        stroke="var(--aethel-accent)"
                         strokeWidth="2"
                       />
                     </svg>
@@ -1058,7 +1058,7 @@ export default function NiagaraVFX() {
                       <path
                         d="M 0 10 L 80 10 L 180 50 L 220 60"
                         fill="none"
-                        stroke="#2ecc71"
+                        stroke="var(--aethel-success)"
                         strokeWidth="2"
                       />
                     </svg>
@@ -1071,7 +1071,7 @@ export default function NiagaraVFX() {
                       <path
                         d="M 0 10 L 220 50"
                         fill="none"
-                        stroke="#3498db"
+                        stroke="var(--aethel-primary)"
                         strokeWidth="2"
                       />
                     </svg>

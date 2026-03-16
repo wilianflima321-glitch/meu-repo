@@ -59,22 +59,22 @@ export interface ImportOptions {
 // ============================================================================
 
 export const ASSET_CONFIG: Record<AssetType, { icon: string; color: string; extensions: string[] }> = {
-  folder: { icon: '📁', color: '#ffc107', extensions: [] },
-  mesh: { icon: '🔷', color: '#2196f3', extensions: ['.fbx', '.obj', '.gltf', '.glb', '.dae', '.3ds'] },
-  texture: { icon: '🖼️', color: '#4caf50', extensions: ['.png', '.jpg', '.jpeg', '.webp', '.tga', '.bmp', '.exr', '.hdr'] },
-  material: { icon: '🎨', color: '#9c27b0', extensions: ['.mat', '.material'] },
-  blueprint: { icon: '📐', color: '#3f51b5', extensions: ['.blueprint', '.bp'] },
-  animation: { icon: '🎬', color: '#ff9800', extensions: ['.anim', '.fbx'] },
-  audio: { icon: '🔊', color: '#00bcd4', extensions: ['.mp3', '.wav', '.ogg', '.flac', '.m4a'] },
-  video: { icon: '🎥', color: '#e91e63', extensions: ['.mp4', '.webm', '.mov', '.avi'] },
-  level: { icon: '🗺️', color: '#795548', extensions: ['.level', '.scene', '.map'] },
-  particle: { icon: '✨', color: '#ff5722', extensions: ['.vfx', '.particle'] },
-  physics: { icon: '⚡', color: '#607d8b', extensions: ['.physics', '.collision'] },
-  font: { icon: '🔤', color: '#9e9e9e', extensions: ['.ttf', '.otf', '.woff', '.woff2'] },
-  data: { icon: '📊', color: '#673ab7', extensions: ['.json', '.xml', '.csv', '.yaml'] },
-  script: { icon: '📜', color: '#8bc34a', extensions: ['.ts', '.js', '.tsx', '.jsx'] },
-  prefab: { icon: '📦', color: '#00acc1', extensions: ['.prefab'] },
-  unknown: { icon: '❓', color: '#bdbdbd', extensions: [] },
+  folder: { icon: '📁', color: 'var(--aethel-warning)', extensions: [] },
+  mesh: { icon: '🔷', color: 'var(--aethel-primary)', extensions: ['.fbx', '.obj', '.gltf', '.glb', '.dae', '.3ds'] },
+  texture: { icon: '🖼️', color: 'var(--aethel-success)', extensions: ['.png', '.jpg', '.jpeg', '.webp', '.tga', '.bmp', '.exr', '.hdr'] },
+  material: { icon: '🎨', color: 'var(--aethel-accent)', extensions: ['.mat', '.material'] },
+  blueprint: { icon: '📐', color: 'var(--aethel-primary)', extensions: ['.blueprint', '.bp'] },
+  animation: { icon: '🎬', color: 'var(--aethel-warning)', extensions: ['.anim', '.fbx'] },
+  audio: { icon: '🔊', color: 'var(--aethel-info)', extensions: ['.mp3', '.wav', '.ogg', '.flac', '.m4a'] },
+  video: { icon: '🎥', color: 'var(--aethel-secondary)', extensions: ['.mp4', '.webm', '.mov', '.avi'] },
+  level: { icon: '🗺️', color: 'var(--aethel-text-quaternary)', extensions: ['.level', '.scene', '.map'] },
+  particle: { icon: '✨', color: 'var(--aethel-warning)', extensions: ['.vfx', '.particle'] },
+  physics: { icon: '⚡', color: 'var(--aethel-text-tertiary)', extensions: ['.physics', '.collision'] },
+  font: { icon: '🔤', color: 'var(--aethel-text-tertiary)', extensions: ['.ttf', '.otf', '.woff', '.woff2'] },
+  data: { icon: '📊', color: 'var(--aethel-primary)', extensions: ['.json', '.xml', '.csv', '.yaml'] },
+  script: { icon: '📜', color: 'var(--aethel-success)', extensions: ['.ts', '.js', '.tsx', '.jsx'] },
+  prefab: { icon: '📦', color: 'var(--aethel-info)', extensions: ['.prefab'] },
+  unknown: { icon: '❓', color: 'var(--aethel-text-tertiary)', extensions: [] },
 };
 
 export function getAssetType(filename: string): AssetType {
