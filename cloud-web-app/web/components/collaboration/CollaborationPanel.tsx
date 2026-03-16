@@ -3,8 +3,8 @@
 /**
  * Collaboration Panel Component
  * 
- * Interface para colaboração em tempo real com
- * lista de usuários, cursores e chat integrado.
+ * Interface para colaboracao em tempo real com
+ * lista de usuarios, cursores e chat integrado.
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -43,24 +43,24 @@ import {
 // ============================================================================
 
 const colors = {
-  base: '#1e1e2e',
-  mantle: '#181825',
-  crust: '#11111b',
-  surface0: '#313244',
-  surface1: '#45475a',
-  surface2: '#585b70',
-  text: '#cdd6f4',
-  subtext0: '#a6adc8',
-  subtext1: '#bac2de',
-  blue: '#89b4fa',
-  green: '#a6e3a1',
-  red: '#f38ba8',
-  yellow: '#f9e2af',
-  mauve: '#cba6f7',
-  peach: '#fab387',
-  teal: '#94e2d5',
-  cyan: '#f5c2e7',
-  overlay0: '#6c7086',
+  base: 'var(--aethel-surface-primary)',
+  mantle: 'var(--aethel-surface-secondary)',
+  crust: 'var(--aethel-surface-primary)',
+  surface0: 'var(--aethel-surface-tertiary)',
+  surface1: 'var(--aethel-surface-quaternary)',
+  surface2: 'var(--aethel-surface-elevated)',
+  text: 'var(--aethel-text-primary)',
+  subtext0: 'var(--aethel-text-secondary)',
+  subtext1: 'var(--aethel-text-tertiary)',
+  blue: 'var(--aethel-primary)',
+  green: 'var(--aethel-success)',
+  red: 'var(--aethel-error)',
+  yellow: 'var(--aethel-warning)',
+  mauve: 'var(--aethel-accent)',
+  peach: 'var(--aethel-warning-light)',
+  teal: 'var(--aethel-info)',
+  cyan: 'var(--aethel-secondary)',
+  overlay0: 'var(--aethel-text-quaternary)',
 };
 
 // ============================================================================
@@ -224,7 +224,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
   onReaction,
 }) => {
   const [showReactions, setShowReactions] = useState(false);
-  const reactionEmojis = ['👍', '❤️', '😄', '🎉', '👀', '🤔'];
+  const reactionEmojis = ['', '', '', '', '', ''];
   
   return (
     <motion.div
