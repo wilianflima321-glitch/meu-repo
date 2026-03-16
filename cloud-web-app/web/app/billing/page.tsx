@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { API_BASE } from '@/lib/api'
 import { UsageDashboard } from '@/components/billing/UsageDashboard'
 import StudioGlobalNav from '@/components/studio/StudioGlobalNav'
+import { Badge } from '@/components/ui/Badge'
 import { useToast } from '@/components/ui/Toast'
 
 type Currency = 'USD' | 'BRL'
@@ -186,7 +187,7 @@ export default function BillingPage() {
               >
                 <div className="aethel-flex aethel-items-center aethel-justify-between mb-2">
                   <h3 className="text-xl font-bold">{plan.name}</h3>
-                  {plan.popular ? <span className="badge badge-primary">Recomendado</span> : null}
+                  {plan.popular ? <Badge variant="primary" size="sm">Recomendado</Badge> : null}
                 </div>
                 <p className="text-sm text-[var(--aethel-text-secondary)] mb-4">{plan.description || 'Plano sem descricao detalhada.'}</p>
 

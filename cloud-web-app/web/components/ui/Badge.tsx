@@ -11,23 +11,30 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantClasses: Record<string, string> = {
-  default: 'bg-slate-700 text-slate-200 border-slate-600',
-  secondary: 'bg-slate-700 text-slate-200 border-slate-600',
-  primary: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
-  success: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  warning: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  error: 'bg-red-500/20 text-red-300 border-red-500/30',
-  info: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  default:
+    'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)] border-[var(--aethel-border-secondary)]',
+  secondary:
+    'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)] border-[var(--aethel-border-secondary)]',
+  primary:
+    'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)] border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]',
+  success:
+    'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)] border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)]',
+  warning:
+    'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)]',
+  error:
+    'bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] text-[var(--aethel-error-light)] border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)]',
+  info:
+    'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]',
 }
 
 const dotColors: Record<string, string> = {
-  default: 'bg-slate-400',
-  secondary: 'bg-slate-400',
-  primary: 'bg-sky-400',
-  success: 'bg-emerald-400',
-  warning: 'bg-amber-400',
-  error: 'bg-red-400',
-  info: 'bg-blue-400',
+  default: 'bg-[var(--aethel-text-tertiary)]',
+  secondary: 'bg-[var(--aethel-text-tertiary)]',
+  primary: 'bg-[var(--aethel-primary-light)]',
+  success: 'bg-[var(--aethel-success-light)]',
+  warning: 'bg-[var(--aethel-warning-light)]',
+  error: 'bg-[var(--aethel-error-light)]',
+  info: 'bg-[var(--aethel-info-light)]',
 }
 
 const sizeClasses: Record<string, string> = {

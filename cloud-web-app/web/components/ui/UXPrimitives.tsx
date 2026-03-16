@@ -23,11 +23,11 @@ interface EmptyStateProps {
 export function EmptyState({ icon = 'inbox', title, description, action, secondaryAction, compact }: EmptyStateProps) {
   return (
     <div className={`flex flex-col items-center justify-center text-center ${compact ? 'py-8' : 'py-16'}`} role="status">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-zinc-500">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] text-[var(--aethel-text-tertiary)]">
         <Codicon name={icon} />
       </div>
-      <h3 className="mt-4 text-sm font-semibold text-zinc-200">{title}</h3>
-      <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-zinc-500">{description}</p>
+      <h3 className="mt-4 text-sm font-semibold text-[var(--aethel-text-primary)]">{title}</h3>
+      <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-[var(--aethel-text-secondary)]">{description}</p>
       {(action || secondaryAction) && (
         <div className="mt-5 flex items-center gap-3">
           {action && (
@@ -47,7 +47,7 @@ export function EmptyState({ icon = 'inbox', title, description, action, seconda
             <button
               type="button"
               onClick={secondaryAction.onClick}
-              className="text-sm text-zinc-500 transition-colors hover:text-white"
+              className="text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]"
             >
               {secondaryAction.label}
             </button>
@@ -64,7 +64,7 @@ interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {}
 export function Skeleton({ className = '', ...props }: SkeletonProps) {
   return (
     <div
-      className={`animate-pulse rounded-md bg-zinc-800/60 ${className}`}
+      className={`animate-pulse rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] ${className}`}
       aria-hidden="true"
       {...props}
     />
@@ -74,7 +74,7 @@ export function Skeleton({ className = '', ...props }: SkeletonProps) {
 // --- Card Skeleton ---
 export function CardSkeleton({ rows = 3 }: { rows?: number }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+    <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-5">
       <Skeleton className="mb-4 h-4 w-1/3" />
       <div className="space-y-3">
         {Array.from({ length: rows }).map((_, i) => (
@@ -90,7 +90,7 @@ export function ListSkeleton({ items = 5 }: { items?: number }) {
   return (
     <div className="space-y-2" aria-label="Carregando..." role="status">
       {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-lg border border-zinc-800/60 bg-zinc-900/30 p-3">
+        <div key={i} className="flex items-center gap-3 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
           <Skeleton className="h-8 w-8 rounded-lg flex-shrink-0" />
           <div className="flex-1 space-y-1.5">
             <Skeleton className="h-3 w-2/5" />
@@ -107,7 +107,7 @@ export function StatsSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Carregando estatisticas..." role="status">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+        <div key={i} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-4">
           <Skeleton className="h-3 w-1/2 mb-3" />
           <Skeleton className="h-7 w-2/3 mb-2" />
           <Skeleton className="h-2.5 w-3/4" />
@@ -132,17 +132,23 @@ export function ProgressStepper({ steps }: { steps: ProgressStep[] }) {
           <div
             className={`flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors ${
               step.completed
-                ? 'bg-emerald-500/15 text-emerald-400'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
                 : step.active
-                ? 'bg-blue-500/15 text-blue-400'
-                : 'bg-zinc-800/60 text-zinc-600'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]'
+                : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-tertiary)]'
             }`}
           >
             {step.completed ? <Codicon name="check" /> : null}
             <span className="hidden sm:inline">{step.label}</span>
           </div>
           {i < steps.length - 1 && (
-            <div className={`h-px w-4 ${step.completed ? 'bg-emerald-500/30' : 'bg-zinc-800'}`} />
+            <div
+              className={`h-px w-4 ${
+                step.completed
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
+                  : 'bg-[var(--aethel-border-subtle)]'
+              }`}
+            />
           )}
         </div>
       ))}
@@ -160,10 +166,14 @@ interface ToastProps {
 
 export function Toast({ message, type = 'info', onDismiss, action }: ToastProps) {
   const styles = {
-    success: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
-    error: 'border-red-500/30 bg-red-500/10 text-red-200',
-    warning: 'border-amber-500/30 bg-amber-500/10 text-amber-200',
-    info: 'border-blue-500/30 bg-blue-500/10 text-blue-200',
+    success:
+      'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]',
+    error:
+      'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]',
+    warning:
+      'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]',
+    info:
+      'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]',
   }
 
   const icons = {
@@ -208,11 +218,11 @@ interface BadgeProps {
 
 export function StatusBadge({ label, variant = 'active' }: BadgeProps) {
   const styles = {
-    active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    partial: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    blocked: 'bg-red-500/10 text-red-400 border-red-500/20',
-    absent: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
-    frozen: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    active: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)] border-[color-mix(in_srgb,var(--aethel-success)_25%,transparent)]',
+    partial: 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)]',
+    blocked: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)] border-[color-mix(in_srgb,var(--aethel-error)_25%,transparent)]',
+    absent: 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-tertiary)] border-[var(--aethel-border-subtle)]',
+    frozen: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)]',
   }
 
   return (
@@ -225,7 +235,7 @@ export function StatusBadge({ label, variant = 'active' }: BadgeProps) {
 // --- Keyboard shortcut display ---
 export function Kbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="inline-flex h-5 min-w-[20px] items-center justify-center rounded border border-zinc-700 bg-zinc-800 px-1.5 text-[10px] font-medium text-zinc-400">
+    <kbd className="inline-flex h-5 min-w-[20px] items-center justify-center rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-1.5 text-[10px] font-medium text-[var(--aethel-text-tertiary)]">
       {children}
     </kbd>
   )
