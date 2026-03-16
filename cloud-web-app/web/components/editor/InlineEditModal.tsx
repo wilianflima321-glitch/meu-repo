@@ -171,14 +171,14 @@ export function InlineEditModal({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.95 }}
           transition={{ type: 'spring', duration: 0.3 }}
-          className="w-full max-w-2xl bg-[#1e1e2e] border border-[#313244] rounded-xl shadow-2xl overflow-hidden"
+          className="w-full max-w-2xl bg-[var(--aethel-surface-elevated)] border border-[var(--aethel-border-primary)] rounded-xl shadow-[var(--aethel-shadow-xl)] overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#313244]">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-blue-400" />
-              <span className="text-sm font-medium text-white">Edição Inline</span>
-              <kbd className="px-1.5 py-0.5 text-xs bg-[#313244] text-[#cdd6f4] rounded">
+              <Sparkles className="h-5 w-5 text-[var(--aethel-primary)]" />
+              <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Edição Inline</span>
+              <kbd className="px-1.5 py-0.5 text-xs bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] rounded border border-[var(--aethel-border-primary)]">
                 ⌘K
               </kbd>
             </div>
@@ -186,7 +186,7 @@ export function InlineEditModal({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 text-[#6c7086] hover:text-white"
+              className="h-8 w-8 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -194,9 +194,9 @@ export function InlineEditModal({
 
           {/* Selected Code Preview */}
           {selectedCode && (
-            <div className="px-4 py-2 border-b border-[#313244] bg-[#181825]">
-              <div className="text-xs text-[#6c7086] mb-1">Código selecionado:</div>
-              <pre className="text-xs text-[#cdd6f4] font-mono max-h-24 overflow-auto">
+            <div className="px-4 py-2 border-b border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)]">
+              <div className="text-xs text-[var(--aethel-text-quaternary)] mb-1">Código selecionado:</div>
+              <pre className="text-xs text-[var(--aethel-text-secondary)] font-mono max-h-24 overflow-auto">
                 {selectedCode.slice(0, 500)}
                 {selectedCode.length > 500 && '...'}
               </pre>
@@ -204,14 +204,14 @@ export function InlineEditModal({
           )}
 
           {/* Quick Actions */}
-          <div className="flex gap-2 px-4 py-3 border-b border-[#313244]">
+          <div className="flex gap-2 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
             {QUICK_ACTIONS.map((action) => (
               <Button
                 key={action.id}
                 variant="outline"
                 size="sm"
                 onClick={() => handleQuickAction(action.prompt)}
-                className="bg-[#313244] border-[#45475a] text-[#cdd6f4] hover:bg-[#45475a] hover:text-white"
+                className="bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)]"
                 disabled={isProcessing}
               >
                 <action.icon className="h-3.5 w-3.5 mr-1.5" />
@@ -228,7 +228,7 @@ export function InlineEditModal({
                 value={instruction}
                 onChange={(e) => setInstruction(e.target.value)}
                 placeholder="O que você quer fazer com este código?"
-                className="min-h-[60px] bg-[#181825] border-[#313244] text-white placeholder:text-[#6c7086] resize-none pr-24"
+                className="min-h-[60px] bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] resize-none pr-24"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -240,7 +240,7 @@ export function InlineEditModal({
                 size="sm"
                 onClick={handleSubmit}
                 disabled={isProcessing || (!instruction.trim() && !selectedCode)}
-                className="absolute bottom-2 right-2 bg-blue-600 hover:bg-blue-700"
+                className="absolute bottom-2 right-2 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]"
               >
                 {isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -256,13 +256,13 @@ export function InlineEditModal({
             {/* Recent Commands */}
             {!instruction && !suggestion && (
               <div className="mt-3">
-                <div className="text-xs text-[#6c7086] mb-2">Comandos recentes:</div>
+                <div className="text-xs text-[var(--aethel-text-quaternary)] mb-2">Comandos recentes:</div>
                 <div className="flex flex-wrap gap-1.5">
                   {recentCommands.map((cmd, i) => (
                     <button
                       key={i}
                       onClick={() => setInstruction(cmd)}
-                      className="px-2 py-1 text-xs bg-[#313244] text-[#a6adc8] rounded hover:bg-[#45475a] hover:text-white transition-colors"
+                      className="px-2 py-1 text-xs bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] rounded hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                     >
                       {cmd}
                     </button>
@@ -274,8 +274,8 @@ export function InlineEditModal({
 
           {/* Error */}
           {error && (
-            <div className="px-4 py-3 bg-red-500/10 border-t border-red-500/20">
-              <div className="flex items-center gap-2 text-red-400">
+            <div className="px-4 py-3 bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] border-t border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]">
+              <div className="flex items-center gap-2 text-[var(--aethel-error)]">
                 <AlertCircle className="h-4 w-4" />
                 <span className="text-sm">{error}</span>
               </div>
@@ -284,12 +284,12 @@ export function InlineEditModal({
 
           {/* Suggestion/Diff */}
           {suggestion && (
-            <div className="border-t border-[#313244]">
-              <div className="flex items-center justify-between px-4 py-2 bg-[#181825]">
+            <div className="border-t border-[var(--aethel-border-primary)]">
+              <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-tertiary)]">
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-400" />
-                  <span className="text-sm text-white">Sugestão gerada</span>
-                  <span className="text-xs text-[#6c7086]">
+                  <Check className="h-4 w-4 text-[var(--aethel-success)]" />
+                  <span className="text-sm text-[var(--aethel-text-primary)]">Sugestão gerada</span>
+                  <span className="text-xs text-[var(--aethel-text-quaternary)]">
                     {Math.round(suggestion.confidence * 100)}% confiança
                   </span>
                 </div>
@@ -298,7 +298,7 @@ export function InlineEditModal({
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowDiff(!showDiff)}
-                    className="text-[#6c7086] hover:text-white"
+                    className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
                   >
                     {showDiff ? 'Ocultar Diff' : 'Mostrar Diff'}
                   </Button>
@@ -306,8 +306,8 @@ export function InlineEditModal({
               </div>
 
               {/* Explanation */}
-              <div className="px-4 py-2 border-b border-[#313244]">
-                <p className="text-xs text-[#a6adc8]">{suggestion.explanation}</p>
+              <div className="px-4 py-2 border-b border-[var(--aethel-border-primary)]">
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">{suggestion.explanation}</p>
               </div>
 
               {/* Diff View */}
@@ -322,11 +322,11 @@ export function InlineEditModal({
               )}
 
               {/* Actions */}
-              <div className="flex items-center justify-between px-4 py-3 bg-[#181825]">
+              <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-tertiary)]">
                 <Button
                   variant="ghost"
                   onClick={() => setSuggestion(null)}
-                  className="text-[#6c7086] hover:text-white"
+                  className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Regenerar
@@ -335,17 +335,17 @@ export function InlineEditModal({
                   <Button
                     variant="outline"
                     onClick={onClose}
-                    className="border-[#45475a] text-[#cdd6f4]"
+                    className="border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)]"
                   >
                     Cancelar
                   </Button>
                   <Button
                     onClick={() => void handleApply()}
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)] text-[var(--aethel-text-primary)]"
                   >
                     <Check className="h-4 w-4 mr-2" />
                     Aplicar
-                    <kbd className="ml-2 px-1 py-0.5 text-xs bg-green-700 rounded">⌘↵</kbd>
+                    <kbd className="ml-2 px-1 py-0.5 text-xs bg-[var(--aethel-success-dark)] rounded">⌘↵</kbd>
                   </Button>
                 </div>
               </div>
@@ -381,9 +381,9 @@ function DiffView({ original, modified, language }: DiffViewProps) {
           key={idx}
           className={cn(
             'px-4 py-0.5',
-            item.type === 'removed' && 'bg-red-500/20 text-red-300',
-            item.type === 'added' && 'bg-green-500/20 text-green-300',
-            item.type === 'unchanged' && 'text-[#6c7086]'
+            item.type === 'removed' && 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error-light)]',
+            item.type === 'added' && 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]',
+            item.type === 'unchanged' && 'text-[var(--aethel-text-quaternary)]'
           )}
         >
           <span className="inline-block w-8 text-right opacity-50 mr-2">

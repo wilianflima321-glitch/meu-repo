@@ -68,12 +68,12 @@ const DECORATION_CLASSES = {
 };
 
 const COLORS = {
-  added: '#4ade80',      // green-400
-  modified: '#60a5fa',   // blue-400
-  deleted: '#f87171',    // red-400
-  addedBg: 'rgba(74, 222, 128, 0.15)',
-  modifiedBg: 'rgba(96, 165, 250, 0.15)',
-  deletedBg: 'rgba(248, 113, 113, 0.15)',
+  added: 'var(--aethel-success)',
+  modified: 'var(--aethel-primary)',
+  deleted: 'var(--aethel-error)',
+  addedBg: 'color-mix(in_srgb,var(--aethel-success)_15%,transparent)',
+  modifiedBg: 'color-mix(in_srgb,var(--aethel-primary)_15%,transparent)',
+  deletedBg: 'color-mix(in_srgb,var(--aethel-error)_15%,transparent)',
 };
 
 // ============================================================================

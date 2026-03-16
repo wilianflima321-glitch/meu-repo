@@ -421,22 +421,22 @@ export function TransitionSelector({
           alignItems: 'center',
           gap: 8,
           padding: '6px 12px',
-          background: '#25262b',
-          border: '1px solid #373a40',
+          background: 'var(--aethel-surface-tertiary)',
+          border: '1px solid var(--aethel-border-primary)',
           borderRadius: 4,
-          color: '#c1c2c5',
+          color: 'var(--aethel-text-secondary)',
           cursor: 'pointer',
           fontSize: 12
         }}
       >
         <span>{current.icon}</span>
         <span>{current.name}</span>
-        <span style={{ color: '#868e96' }}>▼</span>
+        <span style={{ color: 'var(--aethel-text-tertiary)' }}>▼</span>
       </button>
       
       {/* Duration slider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-        <span style={{ color: '#909296', fontSize: 11 }}>Duration:</span>
+        <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: 11 }}>Duration:</span>
         <input
           type="range"
           min={0.1}
@@ -446,7 +446,7 @@ export function TransitionSelector({
           onChange={e => onDurationChange(parseFloat(e.target.value))}
           style={{ flex: 1 }}
         />
-        <span style={{ color: '#c1c2c5', fontSize: 11, minWidth: 35 }}>{duration.toFixed(1)}s</span>
+        <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 11, minWidth: 35 }}>{duration.toFixed(1)}s</span>
       </div>
       
       {/* Picker dropdown */}
@@ -461,8 +461,8 @@ export function TransitionSelector({
             top: '100%',
             left: 0,
             marginTop: 4,
-            background: '#2c2e33',
-            border: '1px solid #373a40',
+            background: 'var(--aethel-surface-elevated)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: 6,
             padding: 8,
             zIndex: 1000,
@@ -474,12 +474,12 @@ export function TransitionSelector({
             {categories.map(category => (
               <div key={category} style={{ marginBottom: 8 }}>
                 <div style={{
-                  color: '#868e96',
+                  color: 'var(--aethel-text-tertiary)',
                   fontSize: 10,
                   fontWeight: 600,
                   textTransform: 'uppercase',
                   padding: '4px 8px',
-                  borderBottom: '1px solid #373a40',
+                  borderBottom: '1px solid var(--aethel-border-primary)',
                   marginBottom: 4
                 }}>
                   {category}
@@ -499,10 +499,10 @@ export function TransitionSelector({
                           alignItems: 'center',
                           gap: 4,
                           padding: '4px 8px',
-                          background: type === value ? '#339af0' : '#25262b',
-                          border: '1px solid ' + (type === value ? '#228be6' : '#373a40'),
+                          background: type === value ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
+                          border: '1px solid ' + (type === value ? 'var(--aethel-primary-dark)' : 'var(--aethel-border-primary)'),
                           borderRadius: 3,
-                          color: type === value ? '#fff' : '#c1c2c5',
+                          color: type === value ? 'var(--aethel-text-primary)' : 'var(--aethel-text-secondary)',
                           cursor: 'pointer',
                           fontSize: 11
                         }}

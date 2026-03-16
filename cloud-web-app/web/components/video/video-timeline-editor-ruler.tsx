@@ -65,8 +65,8 @@ export function TimelineRuler({
       ref={containerRef}
       style={{
         height: '32px',
-        background: '#0f172a',
-        borderBottom: '1px solid #1e293b',
+        background: 'var(--aethel-surface-primary)',
+        borderBottom: '1px solid var(--aethel-border-primary)',
         position: 'relative',
         cursor: 'pointer',
         overflow: 'hidden',
@@ -80,9 +80,9 @@ export function TimelineRuler({
           left: `${(workArea.in * pixelsPerSecond) - scrollX}px`,
           width: `${(workArea.out - workArea.in) * pixelsPerSecond}px`,
           height: '100%',
-          background: 'rgba(59, 130, 246, 0.1)',
-          borderLeft: '2px solid #3b82f6',
-          borderRight: '2px solid #3b82f6',
+          background: 'color-mix(in_srgb,var(--aethel-primary)_12%,transparent)',
+          borderLeft: '2px solid var(--aethel-primary)',
+          borderRight: '2px solid var(--aethel-primary)',
         }}
       />
       
@@ -95,7 +95,7 @@ export function TimelineRuler({
             left: `${(time * pixelsPerSecond) - scrollX}px`,
             height: time % 1 === 0 ? '100%' : '50%',
             width: '1px',
-            background: time % 5 === 0 ? '#475569' : '#374151',
+            background: time % 5 === 0 ? 'var(--aethel-border-secondary)' : 'var(--aethel-border-primary)',
             bottom: 0,
           }}
         >
@@ -105,7 +105,7 @@ export function TimelineRuler({
               top: '4px',
               left: '4px',
               fontSize: '10px',
-              color: '#94a3b8',
+              color: 'var(--aethel-text-quaternary)',
               whiteSpace: 'nowrap',
             }}>
               {formatTime(time)}
@@ -141,7 +141,7 @@ export function TimelineRuler({
           top: 0,
           bottom: 0,
           width: '2px',
-          background: '#ef4444',
+          background: 'var(--aethel-error)',
           zIndex: 10,
         }}
       >
@@ -151,7 +151,7 @@ export function TimelineRuler({
           left: '-6px',
           width: '14px',
           height: '14px',
-          background: '#ef4444',
+          background: 'var(--aethel-error)',
           clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
         }} />
       </div>

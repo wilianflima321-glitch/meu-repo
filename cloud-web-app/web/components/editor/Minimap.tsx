@@ -31,12 +31,40 @@ export const Minimap: React.FC<MinimapProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const getVar = (name: string, fallback: string) => {
+      if (typeof window === 'undefined') return fallback;
+      const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return value || fallback;
+    };
+
+    const toRgba = (color: string, alpha: number) => {
+      const trimmed = color.trim();
+      if (trimmed.startsWith('#')) {
+        const hex = trimmed.replace('#', '');
+        const normalized = hex.length === 3
+          ? hex.split('').map((c) => c + c).join('')
+          : hex;
+        const r = parseInt(normalized.slice(0, 2), 16);
+        const g = parseInt(normalized.slice(2, 4), 16);
+        const b = parseInt(normalized.slice(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      if (trimmed.startsWith('rgb')) {
+        return trimmed.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`);
+      }
+      return `rgba(255, 255, 255, ${alpha})`;
+    };
+
     const width = canvas.width;
     const height = canvas.height;
     const lineHeight = height / totalLines;
 
     // Clear canvas
-    ctx.fillStyle = '#1e1e1e';
+    const surface = getVar('--aethel-surface-tertiary', '#1e1e1e');
+    const textPrimary = getVar('--aethel-text-primary', '#ffffff');
+    const textSecondary = getVar('--aethel-text-secondary', '#d4d4d4');
+
+    ctx.fillStyle = surface;
     ctx.fillRect(0, 0, width, height);
 
     // Draw content
@@ -47,7 +75,7 @@ export const Minimap: React.FC<MinimapProps> = ({
       // Draw line background based on content
       if (line.trim()) {
         const intensity = Math.min(line.length / 80, 1);
-        ctx.fillStyle = `rgba(212, 212, 212, ${intensity * 0.3})`;
+        ctx.fillStyle = toRgba(textSecondary, intensity * 0.3);
         ctx.fillRect(0, y, width, Math.max(lineHeight, 1));
       }
     });
@@ -55,10 +83,10 @@ export const Minimap: React.FC<MinimapProps> = ({
     // Draw viewport indicator
     const viewportY = currentLine * lineHeight;
     const viewportHeight = visibleLines * lineHeight;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.strokeStyle = toRgba(textPrimary, 0.3);
     ctx.lineWidth = 1;
     ctx.strokeRect(0, viewportY, width, viewportHeight);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fillStyle = toRgba(textPrimary, 0.1);
     ctx.fillRect(0, viewportY, width, viewportHeight);
   }, [content, currentLine, visibleLines, totalLines]);
 
@@ -107,8 +135,8 @@ export const Minimap: React.FC<MinimapProps> = ({
         .minimap {
           width: 100px;
           height: 100%;
-          background: var(--editor-bg);
-          border-left: 1px solid var(--sidebar-border);
+          background: var(--aethel-surface-tertiary);
+          border-left: 1px solid var(--aethel-border-primary);
           cursor: pointer;
           user-select: none;
         }

@@ -110,7 +110,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
           }}
           className={`
             relative z-10 w-full max-w-lg max-h-[85vh] overflow-auto
-            bg-[#252526] border border-[#3c3c3c] rounded-lg shadow-2xl
+            bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-[var(--aethel-shadow-lg)]
             animate-in fade-in-0 zoom-in-95 duration-200
             ${className}
           `}
@@ -132,7 +132,7 @@ interface DialogHeaderProps {
 }
 
 export const DialogHeader: React.FC<DialogHeaderProps> = ({ children, className = '' }) => (
-  <div className={`px-6 py-4 border-b border-[#3c3c3c] ${className}`}>
+  <div className={`px-6 py-4 border-b border-[var(--aethel-border-primary)] ${className}`}>
     {children}
   </div>
 );
@@ -143,7 +143,7 @@ interface DialogTitleProps {
 }
 
 export const DialogTitle: React.FC<DialogTitleProps> = ({ children, className = '' }) => (
-  <h2 className={`text-lg font-semibold text-white ${className}`}>{children}</h2>
+  <h2 className={`text-lg font-semibold text-[var(--aethel-text-primary)] ${className}`}>{children}</h2>
 );
 
 interface DialogDescriptionProps {
@@ -170,7 +170,7 @@ interface DialogFooterProps {
 }
 
 export const DialogFooter: React.FC<DialogFooterProps> = ({ children, className = '' }) => (
-  <div className={`px-6 py-4 border-t border-[#3c3c3c] flex justify-end gap-2 ${className}`}>
+  <div className={`px-6 py-4 border-t border-[var(--aethel-border-primary)] flex justify-end gap-2 ${className}`}>
     {children}
   </div>
 );
@@ -186,7 +186,7 @@ export const DialogClose: React.FC<DialogCloseProps> = ({ children, className = 
   
   return (
     <button
-      className={`absolute top-4 right-4 p-1 rounded hover:bg-white/10 text-gray-400 hover:text-white ${className}`}
+      className={`absolute top-4 right-4 p-1 rounded hover:bg-white/10 text-gray-400 hover:text-[var(--aethel-text-primary)] ${className}`}
       onClick={() => context?.onOpenChange(false)}
       aria-label="Close"
     >
@@ -226,7 +226,7 @@ interface TabsListProps {
 
 export const TabsList: React.FC<TabsListProps> = ({ children, className = '' }) => (
   <div 
-    className={`flex gap-0 border-b border-[#3c3c3c] ${className}`}
+    className={`flex gap-0 border-b border-[var(--aethel-border-primary)] ${className}`}
     role="tablist"
   >
     {children}
@@ -254,7 +254,7 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
       className={`
         px-4 py-2 text-sm font-medium transition-colors relative
         ${isSelected 
-          ? 'text-white border-b-2 border-blue-500 -mb-px' 
+          ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary)] -mb-px' 
           : 'text-gray-400 hover:text-gray-200'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -378,7 +378,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ item, depth }) => {
       <div
         className={`
           flex items-center gap-1 px-2 py-1 cursor-pointer select-none
-          ${isSelected ? 'bg-blue-600/30 text-white' : 'text-gray-300 hover:bg-white/5'}
+          ${isSelected ? 'bg-blue-600/30 text-[var(--aethel-text-primary)]' : 'text-gray-300 hover:bg-white/5'}
           ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
@@ -494,7 +494,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, onSelect, child
       {isOpen && createPortal(
         <div
           ref={menuRef}
-          className="fixed z-50 min-w-[180px] bg-[#252526] border border-[#3c3c3c] 
+          className="fixed z-50 min-w-[180px] bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] 
                      rounded-md shadow-xl py-1 animate-in fade-in-0 zoom-in-95 duration-100"
           style={{ 
             left: Math.min(position.x, window.innerWidth - 200), 
@@ -504,7 +504,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, onSelect, child
         >
           {items.map((item, index) => (
             item.separator ? (
-              <div key={index} className="border-t border-[#3c3c3c] my-1" role="separator" />
+              <div key={index} className="border-t border-[var(--aethel-border-primary)] my-1" role="separator" />
             ) : (
               <button
                 key={item.id}
@@ -625,7 +625,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       {isVisible && createPortal(
         <div
           className={`
-            fixed z-50 px-2 py-1 text-xs text-white bg-[#1e1e1e] border border-[#3c3c3c]
+            fixed z-50 px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)]
             rounded shadow-lg pointer-events-none
             animate-in fade-in-0 duration-100
             ${className}
@@ -675,7 +675,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   };
   
   const colors = {
-    default: 'bg-blue-500',
+    default: 'bg-[var(--aethel-primary)]',
     success: 'bg-green-500',
     warning: 'bg-yellow-500',
     error: 'bg-red-500',
@@ -684,7 +684,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   return (
     <div className={`w-full ${className}`}>
       <div 
-        className={`w-full bg-[#3c3c3c] rounded-full overflow-hidden ${heights[size]}`}
+        className={`w-full bg-[var(--aethel-border-primary)] rounded-full overflow-hidden ${heights[size]}`}
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={0}
@@ -796,8 +796,8 @@ export const Select: React.FC<SelectProps> = ({
       <button
         className={`
           w-full flex items-center justify-between gap-2 px-3 py-2
-          bg-[#3c3c3c] border border-[#5c5c5c] rounded text-sm text-left
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#4c4c4c]'}
+          bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-left
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--aethel-surface-quaternary)]'}
           focus:outline-none focus:ring-1 focus:ring-blue-500
         `}
         onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -814,7 +814,7 @@ export const Select: React.FC<SelectProps> = ({
       
       {isOpen && (
         <div
-          className="absolute top-full left-0 right-0 mt-1 bg-[#252526] border border-[#3c3c3c]
+          className="absolute top-full left-0 right-0 mt-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)]
                      rounded shadow-lg z-50 py-1 max-h-60 overflow-auto"
           role="listbox"
           aria-labelledby={id}
@@ -825,7 +825,7 @@ export const Select: React.FC<SelectProps> = ({
               className={`
                 w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left
                 ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5'}
-                ${option.value === value ? 'bg-blue-600/30 text-white' : 'text-gray-300'}
+                ${option.value === value ? 'bg-blue-600/30 text-[var(--aethel-text-primary)]' : 'text-gray-300'}
               `}
               onClick={() => {
                 if (option.disabled) return;
@@ -887,7 +887,7 @@ export const Switch: React.FC<SwitchProps> = ({
         onClick={() => !disabled && onCheckedChange(!checked)}
         className={`
           ${sizes[size].track} rounded-full relative transition-colors
-          ${checked ? 'bg-blue-500' : 'bg-[#5c5c5c]'}
+          ${checked ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-border-secondary)]'}
           focus:outline-none focus:ring-2 focus:ring-blue-500/50
         `}
       >
@@ -952,12 +952,12 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         <div
           className={`
             w-4 h-4 rounded border-2 transition-colors
-            ${checked || indeterminate ? 'bg-blue-500 border-blue-500' : 'border-[#5c5c5c]'}
-            ${!disabled && !checked && !indeterminate ? 'hover:border-[#7c7c7c]' : ''}
+            ${checked || indeterminate ? 'bg-[var(--aethel-primary)] border-[var(--aethel-primary)]' : 'border-[var(--aethel-border-secondary)]'}
+            ${!disabled && !checked && !indeterminate ? 'hover:border-[var(--aethel-border-secondary)]' : ''}
           `}
         >
           {checked && (
-            <Check size={12} className="text-white" />
+            <Check size={12} className="text-[var(--aethel-text-primary)]" />
           )}
           {indeterminate && !checked && (
             <div className="absolute inset-1 bg-white rounded-sm" />

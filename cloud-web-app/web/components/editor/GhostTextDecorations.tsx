@@ -52,7 +52,7 @@ const GHOST_TEXT_DECORATION_OPTIONS: editor.IModelDecorationOptions = {
 
 const GHOST_TEXT_STYLES = `
   .ghost-text-decoration {
-    color: rgba(156, 163, 175, 0.7) !important;
+    color: color-mix(in_srgb, var(--aethel-text-tertiary) 70%, transparent) !important;
     font-style: italic !important;
     pointer-events: none;
   }
@@ -63,12 +63,12 @@ const GHOST_TEXT_STYLES = `
   
   .ghost-text-tooltip {
     position: absolute;
-    background: #1e1e2e;
-    border: 1px solid #45475a;
+    background: var(--aethel-surface-elevated);
+    border: 1px solid var(--aethel-border-primary);
     border-radius: 6px;
     padding: 4px 8px;
     font-size: 11px;
-    color: #a6adc8;
+    color: var(--aethel-text-tertiary);
     z-index: 1000;
     pointer-events: none;
     white-space: nowrap;
@@ -81,12 +81,13 @@ const GHOST_TEXT_STYLES = `
   }
   
   .ghost-text-shortcut kbd {
-    background: #313244;
-    border: 1px solid #45475a;
+    background: var(--aethel-surface-tertiary);
+    border: 1px solid var(--aethel-border-primary);
     border-radius: 3px;
     padding: 1px 4px;
     font-family: inherit;
     font-size: 10px;
+    color: var(--aethel-text-secondary);
   }
   
   @keyframes ghost-text-fade-in {
@@ -456,12 +457,12 @@ export function GhostTextDecorations({
               position: 'fixed',
               bottom: 24,
               right: 24,
-              background: '#1e1e2e',
-              border: '1px solid #45475a',
+              background: 'var(--aethel-surface-elevated)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: 6,
               padding: '4px 8px',
               fontSize: 11,
-              color: '#a6adc8',
+              color: 'var(--aethel-text-tertiary)',
               display: 'flex',
               alignItems: 'center',
               gap: 6,
@@ -472,7 +473,7 @@ export function GhostTextDecorations({
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                background: '#89b4fa',
+                background: 'var(--aethel-primary-light)',
                 animation: 'pulse 1s infinite',
               }}
             />
