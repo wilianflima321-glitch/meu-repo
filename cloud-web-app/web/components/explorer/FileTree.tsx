@@ -131,7 +131,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect, onFileOpen }) 
                 handleDirectoryToggle(node.path, node);
               }}
             >
-              {node.expanded ? '▼' : '▶'}
+              {node.expanded ? '' : ''}
             </span>
           )}
           <span className="file-icon">{icon}</span>
@@ -180,7 +180,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect, onFileOpen }) 
         }
 
         .file-node:hover {
-          background: rgba(255, 255, 255, 0.05);
+          background: color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent);
         }
 
         .file-node.selected {
@@ -298,7 +298,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
           background: var(--panel-bg);
           border: 1px solid var(--panel-border);
           border-radius: 4px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+          box-shadow: var(--aethel-shadow-md);
           z-index: 1000;
           min-width: 150px;
         }
@@ -310,11 +310,11 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
         }
 
         .menu-item:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent);
         }
 
         .menu-item.danger {
-          color: #f14c4c;
+          color: var(--aethel-error);
         }
 
         .menu-separator {
