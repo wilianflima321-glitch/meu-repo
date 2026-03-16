@@ -1,11 +1,11 @@
 /**
- * Video Timeline - Timeline PROFISSIONAL de edição de vídeo
+ * Video Timeline - Timeline PROFISSIONAL de edicao de video
  * 
  * Features: Snapping, Markers, Razor Tool, Ripple Edit, Multi-select
  * Usa Canvas para renderizar tracks e clips.
  * Integra com HTMLVideoElement para preview.
  * 
- * Nível: Adobe Premiere Pro / DaVinci Resolve
+ * Nivel: Adobe Premiere Pro / DaVinci Resolve
  */
 
 'use client';
@@ -20,16 +20,16 @@ export interface VideoClip {
   id: string;
   name: string;
   src: string;
-  startTime: number;      // Posição na timeline (segundos)
-  duration: number;       // Duração do clip (segundos)
-  inPoint: number;        // Trim início (segundos no source)
+  startTime: number;      // Posicao na timeline (segundos)
+  duration: number;       // Duracao do clip (segundos)
+  inPoint: number;        // Trim inicio (segundos no source)
   outPoint: number;       // Trim fim (segundos no source)
   trackIndex: number;
   type: 'video' | 'audio' | 'image';
-  peaks?: number[];       // Peaks (0..1) para waveform real em clips de áudio
+  peaks?: number[];       // Peaks (0..1) para waveform real em clips de audio
   color?: string;         // Cor customizada do clip
   locked?: boolean;       // Clip travado
-  disabled?: boolean;     // Clip desabilitado (não renderiza)
+  disabled?: boolean;     // Clip desabilitado (nao renderiza)
 }
 
 export interface TimelineMarker {
@@ -56,7 +56,7 @@ export type TimelineTool = 'select' | 'razor' | 'slip' | 'slide' | 'ripple' | 'r
 interface TimelineProps {
   tracks: TimelineTrack[];
   clips: VideoClip[];
-  duration: number;       // Duração total da timeline
+  duration: number;       // Duracao total da timeline
   currentTime: number;
   zoom: number;           // Pixels por segundo
   onTimeChange: (time: number) => void;
@@ -172,15 +172,15 @@ export function VideoTimeline({
     if (!ctx) return;
 
     // Clear
-    ctx.fillStyle = '#0f172a';
+    ctx.fillStyle = 'var(--aethel-surface-primary)';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Ruler
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = 'var(--aethel-surface-tertiary)';
     ctx.fillRect(0, 0, canvasWidth, RULER_HEIGHT);
 
     // Time markers
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = 'var(--aethel-text-quaternary)';
     ctx.font = '10px monospace';
     ctx.textAlign = 'center';
 
@@ -190,7 +190,7 @@ export function VideoTimeline({
       
       // Major tick
       if (t % (secondsPerMarker * 2) === 0) {
-        ctx.strokeStyle = '#475569';
+        ctx.strokeStyle = 'var(--aethel-text-tertiary)';
         ctx.beginPath();
         ctx.moveTo(x, RULER_HEIGHT - 15);
         ctx.lineTo(x, RULER_HEIGHT);
@@ -199,7 +199,7 @@ export function VideoTimeline({
         ctx.fillText(formatTime(t), x, RULER_HEIGHT - 18);
       } else {
         // Minor tick
-        ctx.strokeStyle = '#334155';
+        ctx.strokeStyle = 'var(--aethel-border-primary)';
         ctx.beginPath();
         ctx.moveTo(x, RULER_HEIGHT - 8);
         ctx.lineTo(x, RULER_HEIGHT);
@@ -212,11 +212,11 @@ export function VideoTimeline({
       const y = RULER_HEIGHT + i * TRACK_HEIGHT;
       
       // Track background
-      ctx.fillStyle = i % 2 === 0 ? '#1e293b' : '#1a2332';
+      ctx.fillStyle = i % 2 === 0 ? 'var(--aethel-surface-tertiary)' : 'var(--aethel-surface-secondary)';
       ctx.fillRect(0, y, canvasWidth, TRACK_HEIGHT);
       
       // Track separator
-      ctx.strokeStyle = '#334155';
+      ctx.strokeStyle = 'var(--aethel-border-primary)';
       ctx.beginPath();
       ctx.moveTo(0, y + TRACK_HEIGHT);
       ctx.lineTo(canvasWidth, y + TRACK_HEIGHT);
@@ -241,7 +241,7 @@ export function VideoTimeline({
       // Clip background with custom color support
       const isSelected = clip.id === selectedClipId || selectedClipIds.includes(clip.id);
       const isHovered = clip.id === hoveredClipId;
-      const baseColor = clip.color || (clip.type === 'video' ? '#3b82f6' : clip.type === 'audio' ? '#22c55e' : '#f59e0b');
+      const baseColor = clip.color || (clip.type === 'video' ? 'var(--aethel-primary)' : clip.type === 'audio' ? 'var(--aethel-success)' : 'var(--aethel-warning)');
       ctx.fillStyle = baseColor;
       
       // Rounded corners
@@ -259,7 +259,7 @@ export function VideoTimeline({
 
       // Selection border
       if (isSelected) {
-        ctx.strokeStyle = '#ffffff';
+        ctx.strokeStyle = 'var(--aethel-text-primary)';
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.lineWidth = 1;
@@ -273,14 +273,14 @@ export function VideoTimeline({
         ctx.fill();
         
         // Lock icon
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = 'var(--aethel-text-primary)';
         ctx.font = '14px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('🔒', x + width / 2, y + height / 2 + 5);
+        ctx.fillText('', x + width / 2, y + height / 2 + 5);
       }
 
       // Clip name with better styling
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = 'var(--aethel-text-primary)';
       ctx.font = '11px Inter, system-ui, sans-serif';
       ctx.textAlign = 'left';
       const textX = x + 8;
@@ -323,7 +323,7 @@ export function VideoTimeline({
 
       ctx.globalAlpha = 1;
 
-      // Waveform REAL para áudio (quando houver peaks)
+      // Waveform REAL para audio (quando houver peaks)
       if (clip.type === 'audio' && !clip.locked) {
         const centerY = y + height / 2;
         const maxAmp = height * 0.38;
@@ -369,7 +369,7 @@ export function VideoTimeline({
         ctx.fillStyle = 'rgba(255,255,255,0.5)';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('🎬', x + 20, y + 17);
+        ctx.fillText('', x + 20, y + 17);
       }
     });
 
@@ -378,7 +378,7 @@ export function VideoTimeline({
       const mx = marker.time * zoom;
       
       // Marker line
-      ctx.strokeStyle = marker.color || '#f59e0b';
+      ctx.strokeStyle = marker.color || 'var(--aethel-warning)';
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 2]);
       ctx.beginPath();
@@ -388,7 +388,7 @@ export function VideoTimeline({
       ctx.setLineDash([]);
       
       // Marker flag
-      ctx.fillStyle = marker.color || '#f59e0b';
+      ctx.fillStyle = marker.color || 'var(--aethel-warning)';
       ctx.beginPath();
       ctx.moveTo(mx - 6, 0);
       ctx.lineTo(mx + 6, 0);
@@ -399,10 +399,10 @@ export function VideoTimeline({
       ctx.fill();
       
       // Marker type icon
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = 'var(--aethel-surface-primary)';
       ctx.font = '8px sans-serif';
       ctx.textAlign = 'center';
-      const icon = marker.type === 'chapter' ? 'C' : marker.type === 'comment' ? '💬' : 'M';
+      const icon = marker.type === 'chapter' ? 'C' : marker.type === 'comment' ? '' : 'M';
       ctx.fillText(icon, mx, 10);
     }
 
@@ -415,7 +415,7 @@ export function VideoTimeline({
       
       ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
       ctx.fillRect(sx, sy, sw, sh);
-      ctx.strokeStyle = '#3b82f6';
+      ctx.strokeStyle = 'var(--aethel-primary)';
       ctx.lineWidth = 1;
       ctx.strokeRect(sx, sy, sw, sh);
     }
@@ -430,7 +430,7 @@ export function VideoTimeline({
           const clipEnd = (draggedClip.startTime + draggedClip.duration) * zoom;
           
           if (Math.abs(snapX - clipStart) < snapThreshold || Math.abs(snapX - clipEnd) < snapThreshold) {
-            ctx.strokeStyle = '#22c55e';
+            ctx.strokeStyle = 'var(--aethel-success)';
             ctx.lineWidth = 1;
             ctx.setLineDash([2, 2]);
             ctx.beginPath();
@@ -445,7 +445,7 @@ export function VideoTimeline({
 
     // Playhead
     const playheadX = currentTime * zoom;
-    ctx.strokeStyle = '#ef4444';
+    ctx.strokeStyle = 'var(--aethel-error)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(playheadX, 0);
@@ -453,7 +453,7 @@ export function VideoTimeline({
     ctx.stroke();
 
     // Playhead head (triangle)
-    ctx.fillStyle = '#ef4444';
+    ctx.fillStyle = 'var(--aethel-error)';
     ctx.beginPath();
     ctx.moveTo(playheadX - 8, 0);
     ctx.lineTo(playheadX + 8, 0);
@@ -465,7 +465,7 @@ export function VideoTimeline({
     if (tool !== 'select') {
       ctx.fillStyle = 'rgba(0,0,0,0.7)';
       ctx.fillRect(canvasWidth - 80, canvasHeight - 24, 75, 20);
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = 'var(--aethel-text-primary)';
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'right';
       const toolNames: Record<TimelineTool, string> = {
@@ -499,7 +499,7 @@ export function VideoTimeline({
           id: `marker-${Date.now()}`,
           time,
           name: `Marker ${markers.length + 1}`,
-          color: '#f59e0b',
+          color: 'var(--aethel-warning)',
           type: 'marker',
         });
         return;
@@ -628,7 +628,7 @@ export function VideoTimeline({
       mouseTime = snapToPoint(mouseTime);
 
       if (dragType === 'trim-left') {
-        // Trim esquerdo: move o início na timeline e ajusta inPoint no source
+        // Trim esquerdo: move o inicio na timeline e ajusta inPoint no source
         const maxStart = clip.startTime + Math.max(minClipDuration, clip.duration) - minClipDuration;
         const newStartTime = Math.min(Math.max(0, mouseTime), maxStart);
         const delta = newStartTime - clip.startTime;
@@ -640,7 +640,7 @@ export function VideoTimeline({
         onClipMove?.(dragClipId, newStartTime, clip.trackIndex);
         onClipTrim(dragClipId, newInPoint, newOutPoint);
       } else {
-        // Trim direito: mantém startTime e ajusta outPoint/duração
+        // Trim direito: mantem startTime e ajusta outPoint/duracao
         const minEnd = clip.startTime + minClipDuration;
         const newEndTime = Math.max(mouseTime, minEnd);
         const newDuration = Math.max(minClipDuration, newEndTime - clip.startTime);
@@ -722,7 +722,7 @@ export function VideoTimeline({
             id: `marker-${Date.now()}`,
             time: currentTime,
             name: `Marker ${markers.length + 1}`,
-            color: '#f59e0b',
+            color: 'var(--aethel-warning)',
             type: 'marker',
           });
         }
@@ -740,19 +740,19 @@ export function VideoTimeline({
         {/* Transport controls */}
         <div className="flex items-center gap-1 pr-2 border-r border-slate-600">
           <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Go to Start (Home)">
-            ⏮
+            
           </button>
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Previous Frame (←)">
-            ◀
+          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Previous Frame ()">
+            
           </button>
           <button className="p-1.5 bg-red-600 rounded text-sm hover:bg-red-500" title="Play/Pause (Space)">
-            ▶
+            
           </button>
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Next Frame (→)">
-            ▶
+          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Next Frame ()">
+            
           </button>
           <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Go to End (End)">
-            ⏭
+            
           </button>
         </div>
         
@@ -763,28 +763,28 @@ export function VideoTimeline({
             onClick={() => onToolChange?.('select')}
             title="Selection Tool (V)"
           >
-            ↖
+            
           </button>
           <button 
             className={`px-2 py-1 rounded text-xs font-medium ${tool === 'razor' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
             onClick={() => onToolChange?.('razor')}
             title="Razor Tool (C)"
           >
-            ✂
+            
           </button>
           <button 
             className={`px-2 py-1 rounded text-xs font-medium ${tool === 'ripple' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
             onClick={() => onToolChange?.('ripple')}
             title="Ripple Edit (B)"
           >
-            ⟷
+            
           </button>
           <button 
             className={`px-2 py-1 rounded text-xs font-medium ${tool === 'slip' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
             onClick={() => onToolChange?.('slip')}
             title="Slip Tool (Y)"
           >
-            ⇔
+            
           </button>
         </div>
         
@@ -794,7 +794,7 @@ export function VideoTimeline({
             className={`px-2 py-1 rounded text-xs font-medium ${snapEnabled ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'}`}
             title="Snapping (S)"
           >
-            🧲
+            
           </button>
         </div>
         
@@ -850,7 +850,7 @@ export function VideoTimeline({
                 className={`w-5 h-5 rounded text-[10px] ${track.locked ? 'bg-orange-600' : 'bg-slate-600 hover:bg-slate-500'}`}
                 title="Lock"
               >
-                🔒
+                
               </button>
               <span className="text-sm text-slate-300 truncate flex-1">{track.name}</span>
             </div>
@@ -964,7 +964,7 @@ export function VideoPreview({
         />
       ) : (
         <div className="flex items-center justify-center h-full text-slate-500">
-          Nenhum vídeo selecionado
+          Nenhum video selecionado
         </div>
       )}
       
