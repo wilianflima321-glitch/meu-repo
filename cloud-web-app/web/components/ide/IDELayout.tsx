@@ -478,37 +478,37 @@ export default function IDELayout({
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#07080c] text-slate-100 density-compact">
-      <header className="density-header flex items-center justify-between border-b border-white/10 bg-[linear-gradient(180deg,rgba(19,23,31,0.96),rgba(11,13,18,0.98))] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+    <div className="flex h-screen flex-col overflow-hidden bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] density-compact">
+      <header className="density-header flex items-center justify-between border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_96%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-indigo-400 to-sky-400 shadow-[0_10px_24px_rgba(79,70,229,0.45)]">
-              <Codicon name="sparkle" className="text-[13px] text-white" />
+          <div className="flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_4%,transparent)] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--aethel-primary)] via-[var(--aethel-primary-light)] to-[var(--aethel-info-light)] shadow-[0_10px_24px_rgba(99,102,241,0.35)]">
+              <Codicon name="sparkle" className="text-[13px] text-[var(--aethel-text-primary)]" />
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-200">Aethel Studio</div>
-              <div className="truncate text-[10px] text-slate-500">Apps · Research · Runtime orchestration</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-secondary)]">Aethel Studio</div>
+              <div className="truncate text-[10px] text-[var(--aethel-text-quaternary)]">Apps  Research  Runtime orchestration</div>
             </div>
           </div>
 
-          <nav ref={menuRef} className="relative hidden items-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] px-1 py-1 text-xs md:flex">
+          <nav ref={menuRef} className="relative hidden items-center gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-1 py-1 text-xs md:flex">
             {menuConfigs.map((menu) => (
               <div key={menu.label} className="relative">
                 <button
                   onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
                   className={`rounded-lg px-2 py-1.5 transition-colors ${
                     activeMenu === menu.label
-                      ? 'bg-slate-700/90 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
-                      : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_90%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
+                      : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   {menu.label}
                 </button>
                 {activeMenu === menu.label && (
-                  <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-white/10 bg-[#171b25]/98 py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                  <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent)] py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                     {menu.items.map((item, idx) =>
                       item.separator ? (
-                        <div key={idx} className="my-1 border-t border-white/10" />
+                        <div key={idx} className="my-1 border-t border-[var(--aethel-border-subtle)]" />
                       ) : (
                         <button
                           key={idx}
@@ -520,11 +520,11 @@ export default function IDELayout({
                           className={`flex w-full items-center justify-between px-2.5 py-1.5 text-xs ${
                             item.disabled ?? !item.action
                               ? 'cursor-not-allowed opacity-50'
-                              : 'hover:bg-slate-700/70 focus-visible:bg-slate-700/70'
+                              : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                           }`}
                         >
                           <span>{item.label}</span>
-                          {item.shortcut && <span className="text-xs text-slate-500">{item.shortcut}</span>}
+                          {item.shortcut && <span className="text-xs text-[var(--aethel-text-quaternary)]">{item.shortcut}</span>}
                         </button>
                       )
                     )}
@@ -540,26 +540,26 @@ export default function IDELayout({
             <Codicon name="pulse" className="text-[11px]" />
             Ready for apply
           </div>
-          <div className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] text-slate-400 xl:flex">
-            <span className="flex items-center gap-1 text-slate-200">
+          <div className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)] xl:flex">
+            <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
               <Codicon name="git-branch" className="text-[11px]" />
               main
             </span>
-            <span className="h-3 w-px bg-white/10" />
+            <span className="h-3 w-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]" />
             <span>Workspace local</span>
           </div>
           <button
             onClick={() => onCommandPalette?.()}
-            className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] text-slate-300 hover:bg-white/[0.08] focus-visible:bg-white/[0.08] md:flex"
+            className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_4%,transparent)] px-3 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] md:flex"
             title="Command Palette (Ctrl+Shift+P)"
           >
-            <Codicon name="sparkle" className="text-[12px] text-sky-300" />
+            <Codicon name="sparkle" className="text-[12px] text-[var(--aethel-info-light)]" />
             <span>Command Palette</span>
-            <span className="rounded-md border border-white/10 bg-black/20 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">Ctrl+Shift+P</span>
+            <span className="rounded-md border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--aethel-text-quaternary)]">Ctrl+Shift+P</span>
           </button>
           <button
             onClick={toggleLeftSidebar}
-            className={`rounded-lg p-2 hover:bg-white/[0.08] focus-visible:bg-white/[0.08] ${panels.leftSidebar ? 'text-sky-300' : 'text-slate-400'}`}
+            className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.leftSidebar ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Toggle Sidebar"
             aria-pressed={panels.leftSidebar}
           >
@@ -567,7 +567,7 @@ export default function IDELayout({
           </button>
           <button
             onClick={toggleBottomPanel}
-            className={`rounded-lg p-2 hover:bg-white/[0.08] focus-visible:bg-white/[0.08] ${panels.bottomPanel ? 'text-sky-300' : 'text-slate-400'}`}
+            className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.bottomPanel ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Toggle Panel"
             aria-pressed={panels.bottomPanel}
           >
@@ -575,7 +575,7 @@ export default function IDELayout({
           </button>
           <button
             onClick={toggleRightSidebar}
-            className={`rounded-lg p-2 hover:bg-white/[0.08] focus-visible:bg-white/[0.08] ${panels.rightSidebar ? 'text-sky-300' : 'text-slate-400'}`}
+            className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.rightSidebar ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Toggle AI Panel"
             aria-pressed={panels.rightSidebar}
           >
@@ -585,7 +585,7 @@ export default function IDELayout({
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex w-12 flex-col items-center border-r border-white/10 bg-[linear-gradient(180deg,rgba(18,22,30,0.95),rgba(11,14,19,0.98))] py-2 shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)]">
+        <div className="flex w-12 flex-col items-center border-r border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_95%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] py-2 shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)]">
           {SIDEBAR_TABS.map((tab) => (
             <button
               key={tab.id}
@@ -595,14 +595,14 @@ export default function IDELayout({
               }}
               className={`relative mb-1 flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
                 activeSidebarTab === tab.id && panels.leftSidebar
-                  ? 'bg-white/[0.1] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)]'
-                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white focus-visible:bg-white/[0.06] focus-visible:text-white'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]'
+                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] focus-visible:text-[var(--aethel-text-primary)]'
               }`}
               title={`${tab.label} (${tab.shortcut})`}
               aria-pressed={activeSidebarTab === tab.id && panels.leftSidebar}
             >
               {activeSidebarTab === tab.id && panels.leftSidebar && (
-                <span className="absolute -left-1 top-2 h-4 w-0.5 rounded-full bg-sky-400" />
+                <span className="absolute -left-1 top-2 h-4 w-0.5 rounded-full bg-[var(--aethel-info-light)]" />
               )}
               <Codicon name={tab.icon} className="text-[14px]" />
             </button>
@@ -611,15 +611,15 @@ export default function IDELayout({
 
         {panels.leftSidebar && (
           <div
-            className="flex flex-col border-r border-white/10 bg-[linear-gradient(180deg,rgba(16,19,26,0.98),rgba(12,14,20,0.98))] shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)]"
+            className="flex flex-col border-r border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)]"
             style={{ width: sidebarWidth }}
           >
-            <div className="density-header flex items-center justify-between border-b border-white/10 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            <div className="density-header flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
               <div className="flex flex-col">
                 <span>{SIDEBAR_TABS.find((t) => t.id === activeSidebarTab)?.label}</span>
-                <span className="text-[9px] font-normal tracking-[0.08em] text-slate-600">Studio surface</span>
+                <span className="text-[9px] font-normal tracking-[0.08em] text-[var(--aethel-text-muted)]">Studio surface</span>
               </div>
-              <button onClick={toggleLeftSidebar} className="rounded-lg p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-200">
+              <button onClick={toggleLeftSidebar} className="rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-secondary)]">
                 <Codicon name="chevron-left" />
               </button>
             </div>
@@ -629,7 +629,7 @@ export default function IDELayout({
 
         {panels.leftSidebar && (
           <div
-            className="w-[3px] cursor-col-resize bg-transparent transition-colors before:block before:h-full before:w-px before:bg-white/10 hover:before:bg-sky-400/45"
+            className="w-[3px] cursor-col-resize bg-transparent transition-colors before:block before:h-full before:w-px before:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] hover:before:bg-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]"
             onMouseDown={(e) => {
               setIsResizingSidebar(true)
               resizeStateRef.current.startX = e.clientX
@@ -639,32 +639,32 @@ export default function IDELayout({
         )}
 
         <div className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex-1 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.07),transparent_18%),linear-gradient(180deg,#0b0d12_0%,#090b10_100%)]">
+          <div className="flex-1 overflow-hidden bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-info)_7%,transparent),transparent_18%),linear-gradient(180deg,var(--aethel-surface-primary)_0%,var(--aethel-surface-primary)_100%)]">
             {children}
           </div>
 
           {panels.bottomPanel && (
             <div
-              className="flex flex-col border-t border-white/10 bg-[linear-gradient(180deg,rgba(16,19,26,0.98),rgba(10,12,17,0.98))]"
+              className="flex flex-col border-t border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))]"
               style={{ height: bottomPanelHeight }}
             >
               <div
-                className="h-[3px] cursor-row-resize bg-transparent transition-colors before:block before:h-px before:w-full before:bg-white/10 hover:before:bg-sky-400/45"
+                className="h-[3px] cursor-row-resize bg-transparent transition-colors before:block before:h-px before:w-full before:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] hover:before:bg-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]"
                 onMouseDown={(e) => {
                   setIsResizingBottom(true)
                   resizeStateRef.current.startY = e.clientY
                   resizeStateRef.current.startHeight = bottomPanelHeight
                 }}
               />
-              <div className="density-header flex items-center gap-0.5 border-b border-white/10 px-1.5">
+              <div className="density-header flex items-center gap-0.5 border-b border-[var(--aethel-border-subtle)] px-1.5">
                 {BOTTOM_TABS.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveBottomTab(tab.id)}
                     className={`density-row flex items-center gap-1.5 rounded-lg px-2.5 text-[11px] transition-colors ${
                       activeBottomTab === tab.id
-                        ? 'bg-white/[0.08] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.05)]'
-                        : 'text-slate-400 hover:bg-white/[0.05] hover:text-white focus-visible:bg-white/[0.05] focus-visible:text-white'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.05)]'
+                        : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] focus-visible:text-[var(--aethel-text-primary)]'
                     }`}
                     aria-pressed={activeBottomTab === tab.id}
                   >
@@ -677,11 +677,11 @@ export default function IDELayout({
 
                 <button
                   onClick={() => setBottomPanelHeight((h) => (h === 260 ? 380 : 260))}
-                  className="rounded-lg p-1 text-slate-400 hover:bg-white/[0.06]"
+                  className="rounded-lg p-1 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)]"
                 >
                   {bottomPanelHeight === 260 ? <Codicon name="fold-down" /> : <Codicon name="fold-up" />}
                 </button>
-                <button onClick={toggleBottomPanel} className="rounded-lg p-1 text-slate-400 hover:bg-white/[0.06]">
+                <button onClick={toggleBottomPanel} className="rounded-lg p-1 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)]">
                   <Codicon name="x" />
                 </button>
               </div>
@@ -691,13 +691,13 @@ export default function IDELayout({
         </div>
 
         {panels.rightSidebar && (
-          <div className="flex w-80 flex-col border-l border-white/10 bg-[linear-gradient(180deg,rgba(15,18,25,0.98),rgba(11,13,18,0.98))] shadow-[inset_1px_0_0_rgba(255,255,255,0.03)]">
-            <div className="density-header flex items-center justify-between border-b border-white/10 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+          <div className="flex w-80 flex-col border-l border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] shadow-[inset_1px_0_0_rgba(255,255,255,0.03)]">
+            <div className="density-header flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
               <div className="flex flex-col">
                 <span>AI Copilot</span>
-                <span className="text-[9px] font-normal tracking-[0.08em] text-slate-600">Plans · edits · critique</span>
+                <span className="text-[9px] font-normal tracking-[0.08em] text-[var(--aethel-text-muted)]">Plans  edits  critique</span>
               </div>
-              <button onClick={toggleRightSidebar} className="rounded-lg p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-200">
+              <button onClick={toggleRightSidebar} className="rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-secondary)]">
                 <Codicon name="chevron-right" />
               </button>
             </div>
@@ -708,20 +708,20 @@ export default function IDELayout({
         )}
       </div>
 
-      <footer className="flex h-6 items-center justify-between border-t border-white/10 bg-[linear-gradient(180deg,rgba(13,15,21,0.98),rgba(10,12,16,0.98))] px-3 text-[10px] text-slate-200">
+      <footer className="flex h-6 items-center justify-between border-t border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] px-3 text-[10px] text-[var(--aethel-text-secondary)]">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1 text-slate-300">
+          <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
             <Codicon name="git-branch" className="text-[11px]" />
             main
           </span>
-          <span className="rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] uppercase tracking-[0.12em] text-slate-400">
+          <span className="rounded-md border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_4%,transparent)] px-1.5 py-0.5 text-[9px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
             Studio
           </span>
         </div>
         <div className="flex items-center gap-3">
           {statusBar}
-          <span className="text-slate-500">UTF-8</span>
-          <span className="flex items-center gap-1 text-slate-300">
+          <span className="text-[var(--aethel-text-quaternary)]">UTF-8</span>
+          <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
             <Codicon name="comment-discussion" className="text-[11px]" />
             Ready
           </span>
@@ -753,17 +753,17 @@ function NotImplementedPanel({
 
   return (
     <div className="h-full flex items-center justify-center text-center px-6">
-      <div className="max-w-xs rounded border border-slate-800 bg-slate-950/50 px-4 py-3">
-        <div className="mb-1.5 flex items-center justify-center gap-2 text-slate-300">
+      <div className="max-w-xs rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-4 py-3">
+        <div className="mb-1.5 flex items-center justify-center gap-2 text-[var(--aethel-text-secondary)]">
           <Codicon name="warning" className="text-[13px] text-amber-300" />
           <span className="text-xs font-semibold tracking-wide">{title}</span>
         </div>
-        <p className="text-[11px] leading-5 text-slate-400">
+        <p className="text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
           {description || 'Capability is intentionally gated for this milestone.'}
         </p>
-        <p className="mt-2 text-[10px] font-mono text-slate-500">Capability gate: {capability}</p>
-        <p className="text-[10px] text-slate-500">Target milestone: {milestone}</p>
-        <p className="mt-1 text-[10px] text-slate-500">{nextAction}</p>
+        <p className="mt-2 text-[10px] font-mono text-[var(--aethel-text-quaternary)]">Capability gate: {capability}</p>
+        <p className="text-[10px] text-[var(--aethel-text-quaternary)]">Target milestone: {milestone}</p>
+        <p className="mt-1 text-[10px] text-[var(--aethel-text-quaternary)]">{nextAction}</p>
       </div>
     </div>
   )
