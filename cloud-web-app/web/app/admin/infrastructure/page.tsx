@@ -22,6 +22,7 @@ import {
   TrendingUp,
   TrendingDown
 } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 
 // =============================================================================
 // TYPES
@@ -95,20 +96,22 @@ interface InfrastructureData {
 
 function StatusBadge({ status }: { status: 'healthy' | 'degraded' | 'down' }) {
   const config = {
-    healthy: { icon: CheckCircle, color: 'text-[var(--aethel-success)]', bg: 'bg-[var(--aethel-success)]/10', border: 'border-green-500/30' },
-    degraded: { icon: AlertTriangle, color: 'text-[var(--aethel-warning)]', bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' },
-    down: { icon: XCircle, color: 'text-[var(--aethel-error)]', bg: 'bg-[var(--aethel-error)]/10', border: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' },
+    healthy: { icon: CheckCircle, label: 'saudavel', variant: 'success' as const },
+    degraded: { icon: AlertTriangle, label: 'degradado', variant: 'warning' as const },
+    down: { icon: XCircle, label: 'indisponivel', variant: 'error' as const },
   };
-  
-  const { icon: Icon, color, bg, border } = config[status];
-  
+
+  const { icon: Icon, label, variant } = config[status];
+
   return (
-    <div className={`flex items-center gap-1.5 px-2 py-1 rounded border ${bg} ${border}`}>
-      <Icon className={`w-3.5 h-3.5 ${color}`} />
-      <span className={`text-xs capitalize ${color}`}>
-        {status === 'healthy' ? 'saudável' : status === 'degraded' ? 'degradado' : 'indisponível'}
-      </span>
-    </div>
+    <Badge
+      variant={variant}
+      size="sm"
+      icon={<Icon className="w-3.5 h-3.5" />}
+      className="px-2 py-1 text-xs capitalize"
+    >
+      {label}
+    </Badge>
   );
 }
 

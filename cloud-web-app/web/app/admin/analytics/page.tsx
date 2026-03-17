@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getToken } from '@/lib/auth'
+import { Badge } from '@/components/ui/Badge'
 
 type AdminAnalyticsMetrics = {
   activeUsers: number
@@ -83,10 +84,10 @@ function formatValue(value: number | null, unit: string): string {
   return `${value}`
 }
 
-function statusBadgeClass(status: 'ok' | 'warn' | 'no_data'): string {
-  if (status === 'ok') return 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
-  if (status === 'warn') return 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
-  return 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] text-[var(--aethel-text-secondary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)]/40'
+function statusBadgeMeta(status: 'ok' | 'warn' | 'no_data') {
+  if (status === 'ok') return { variant: 'success' as const, label: 'OK' }
+  if (status === 'warn') return { variant: 'warning' as const, label: 'WARN' }
+  return { variant: 'secondary' as const, label: 'NO DATA' }
 }
 
 export default function AdminAnalytics() {
@@ -327,9 +328,9 @@ export default function AdminAnalytics() {
                   <td className='p-2 text-[var(--aethel-text-secondary)]'>{formatValue(row.data.target, row.data.unit)}</td>
                   <td className='p-2 text-[var(--aethel-text-secondary)]'>{row.data.count}</td>
                   <td className='p-2'>
-                    <span className={`rounded border px-2 py-1 text-xs ${statusBadgeClass(row.data.status)}`}>
-                      {row.data.status}
-                    </span>
+                    <Badge variant={statusBadgeMeta(row.data.status).variant} size="sm">
+                      {statusBadgeMeta(row.data.status).label}
+                    </Badge>
                   </td>
                 </tr>
               ))}

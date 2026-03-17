@@ -22,6 +22,7 @@ import {
   X,
   Brain,
 } from 'lucide-react'
+import { Badge } from '@/components/ui/Badge'
 
 interface SystemStatus {
   api: 'healthy' | 'degraded' | 'down'
@@ -127,9 +128,9 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
                   {item.title}
                 </span>
                 {item.badge && (
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] ${item.badge === 'Live' ? 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'}`}>
+                  <Badge variant={item.badge === 'Live' ? 'success' : 'secondary'} size="sm">
                     {item.badge}
-                  </span>
+                  </Badge>
                 )}
               </Link>
             )
