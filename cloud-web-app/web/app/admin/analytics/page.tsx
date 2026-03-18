@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getToken } from '@/lib/auth'
 import { Badge } from '@/components/ui/Badge'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 
 type AdminAnalyticsMetrics = {
   activeUsers: number
@@ -213,50 +214,46 @@ export default function AdminAnalytics() {
 
   return (
     <div className='mx-auto max-w-6xl p-6'>
-      <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-        <div>
-          <h1 className='text-3xl font-bold'>Analytics baseline</h1>
-          <p className='text-sm text-[var(--aethel-text-secondary)]'>Visao operacional de performance, funil e custo para janela configuravel.</p>
-          {lastUpdated && <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>}
-          {baseline?.capability && (
-            <p className='text-xs text-[var(--aethel-text-tertiary)]'>
-              capability: {baseline.capability} | status: {baseline.capabilityStatus ? 'IMPLEMENTED'}
-            </p>
-          )}
-        </div>
-        <div className='flex items-center gap-2'>
-          <label className='sr-only' htmlFor='analytics-window-days'>
-            Janela de dias
-          </label>
-          <select
-            id='analytics-window-days'
-            value={windowDays}
-            onChange={(event) => {
-              const next = Number(event.target.value)
-              if (next === 7 || next === 14 || next === 30) setWindowDays(next)
-            }}
-            className='rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)]'
-          >
-            <option value={7}>7 dias</option>
-            <option value={14}>14 dias</option>
-            <option value={30}>30 dias</option>
-          </select>
-          <button
-            type='button'
-            onClick={handleExport}
-            className='rounded border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[var(--aethel-primary)]/20 px-4 py-2 text-sm text-[var(--aethel-primary-light)] hover:bg-[var(--aethel-primary)]/30'
-          >
-            Exportar JSON
-          </button>
-          <button
-            type='button'
-            onClick={fetchMetrics}
-            className='rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'
-          >
-            Atualizar
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        className='mb-6'
+        title='Analytics baseline'
+        subtitle='Vis?o operacional de performance, funil e custo para janela configur?vel.'
+        meta={(
+          <>
+            {lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
+            {baseline?.capability ? (
+              <span className='ml-2'>capability: {baseline.capability} | status: {baseline.capabilityStatus ?? 'UNKNOWN'}</span>
+            ) : null}
+          </>
+        )}
+        actions={(
+          <div className='flex items-center gap-2'>
+            <label className='sr-only' htmlFor='analytics-window-days'>
+              Janela de dias
+            </label>
+            <select
+              id='analytics-window-days'
+              value={windowDays}
+              onChange={(event) => {
+                const next = Number(event.target.value)
+                if (next === 7 || next === 14 || next === 30) setWindowDays(next)
+              }}
+              className='rounded border border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)]'
+            >
+              <option value={7}>7 dias</option>
+              <option value={14}>14 dias</option>
+              <option value={30}>30 dias</option>
+            </select>
+            <button
+              type='button'
+              onClick={handleExport}
+              className='rounded border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[var(--aethel-primary)]/20 px-4 py-2 text-sm text-[var(--aethel-primary-light)] hover:bg-[var(--aethel-primary)]/30'
+            >
+              Exportar JSON
+            </button>
+          </div>
+        )}
+      />
 
       {error && (
         <div role='alert' aria-live='polite' className='aethel-state aethel-state-error mb-4'>

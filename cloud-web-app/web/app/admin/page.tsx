@@ -4,6 +4,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { API_BASE } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 
 type UserRow = {
   id: string;
@@ -64,19 +65,20 @@ export default function Admin() {
 
   return (
     <div className='p-6 max-w-7xl mx-auto'>
-      <div className='mb-6 flex items-center justify-between'>
-        <div>
-          <p className='text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]'>Admin Control Center</p>
-          <h1 className='text-3xl font-semibold text-[var(--aethel-text-primary)]'>Admin Enterprise Console</h1>
-          <p className='mt-1 text-[var(--aethel-text-secondary)]'>Operacao central de usuarios, billing, seguranca e integracoes.</p>
-        </div>
-        <button
-          onClick={() => mutate()}
-          className='rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
-        >
-          Recarregar
-        </button>
-      </div>
+      <AdminPageHeader
+        className='mb-6'
+        eyebrow='Admin Control Center'
+        title='Admin Enterprise Console'
+        subtitle='Operação central de usuários, billing, segurança e integrações.'
+        actions={(
+          <button
+            onClick={() => mutate()}
+            className='rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
+          >
+            Recarregar
+          </button>
+        )}
+      />
 
       <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-4'>
         <Stat title='Usuarios' value={users.length} />

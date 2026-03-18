@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Activity, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { getToken } from '@/lib/auth';
 
 type SecurityLog = {
@@ -82,19 +83,20 @@ export default function AdminSecurity() {
 
   return (
     <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Seguranca e Logs</h1>
-          <p className='text-[var(--aethel-text-secondary)]'>Visao operacional de hardening, eventos criticos e trilha de auditoria.</p>
-          {lastUpdated && <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>}
-        </div>
-        <button
-          onClick={fetchSecurity}
-          className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
-        >
-          Atualizar
-        </button>
-      </div>
+      <AdminPageHeader
+        className='mb-6'
+        title='Segurança e logs'
+        subtitle='Visão operacional de hardening, eventos críticos e trilha de auditoria.'
+        meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
+        actions={(
+          <button
+            onClick={fetchSecurity}
+            className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
+          >
+            Atualizar
+          </button>
+        )}
+      />
 
       {error && (
         <div className='mb-4 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-sm text-[var(--aethel-error)]'>
@@ -109,18 +111,18 @@ export default function AdminSecurity() {
           {
             icon: Activity,
             label: 'Eventos',
-            value: data?.stats.total ? 0,
+            value: data?.stats.total ?? 0,
           },
           {
             icon: AlertTriangle,
             label: 'Avisos',
-            value: data?.stats.warning ? 0,
+            value: data?.stats.warning ?? 0,
             tone: 'warning',
           },
           {
             icon: ShieldAlert,
             label: 'Cr?ticos',
-            value: data?.stats.critical ? 0,
+            value: data?.stats.critical ?? 0,
             tone: 'error',
           },
         ]}

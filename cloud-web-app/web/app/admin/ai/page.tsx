@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Activity, Cpu, Gauge } from 'lucide-react';
 
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 interface AiSettings {
@@ -73,31 +74,30 @@ export default function AdminAI() {
 
   return (
     <div className='p-6 max-w-6xl mx-auto'>
-      <div className='flex items-center justify-between mb-6'>
-        <div>
-          <h1 className='text-3xl font-bold'>Administração da IA Aethel</h1>
-          <p className='text-sm text-[var(--aethel-text-tertiary)]'>Controle de modelo, custos e limites por ambiente.</p>
-          {lastUpdated && (
-            <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
-        </div>
-        <div className='flex gap-2'>
-          <select
-            value={environment}
-            onChange={(e) => setEnvironment(e.target.value as typeof environment)}
-            className='border p-2 rounded text-sm'
-          >
-            <option value='staging'>Homologação</option>
-            <option value='production'>Produção</option>
-          </select>
-          <button
-            onClick={fetchSettings}
-            className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
-          >
-            Atualizar
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        className='mb-6'
+        title='Administra??o da IA Aethel'
+        subtitle='Controle de modelo, custos e limites por ambiente.'
+        meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
+        actions={(
+          <div className='flex gap-2'>
+            <select
+              value={environment}
+              onChange={(e) => setEnvironment(e.target.value as typeof environment)}
+              className='border p-2 rounded text-sm'
+            >
+              <option value='staging'>Homologa??o</option>
+              <option value='production'>Produ??o</option>
+            </select>
+            <button
+              onClick={fetchSettings}
+              className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
+            >
+              Atualizar
+            </button>
+          </div>
+        )}
+      />
 
       {error && (
         <div className='bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4'>

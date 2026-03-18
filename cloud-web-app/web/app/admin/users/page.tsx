@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle, Clock, Users as UsersIcon } from 'lucide-react';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 /**
@@ -80,20 +81,20 @@ export default function AdminUsers() {
 
   return (
     <div className='p-6 max-w-7xl mx-auto'>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className='text-3xl font-bold'>Gerenciar Usuários</h1>
-          {lastUpdated && (
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
-          )}
-        </div>
-        <button
-          onClick={fetchUsers}
-          className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
-        >
-          Atualizar
-        </button>
-      </div>
+      <AdminPageHeader
+        className='mb-6'
+        title='Usu?rios'
+        subtitle='Gerencie perfis, planos e status de ativa?o.'
+        meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
+        actions={(
+          <button
+            onClick={fetchUsers}
+            className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
+          >
+            Atualizar
+          </button>
+        )}
+      />
 
       <AdminSummaryGrid
         className="mb-6"
