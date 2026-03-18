@@ -5,6 +5,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google'
 import ClientLayout from '../components/ClientLayout'
 import { ServiceWorkerProvider } from '../components/ServiceWorkerProvider'
 import WebVitalsReporter from '../components/analytics/WebVitalsReporter'
+import CookieConsent from '../components/ui/CookieConsent'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -91,16 +92,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className="antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-indigo-600 focus:px-4 focus:py-2 focus:text-white focus:outline-none"
+        >
+          Skip to main content
+        </a>
         <ServiceWorkerProvider>
           <WebVitalsReporter />
           <div
-            id="root"
+            id="main-content"
             className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
           >
             <ClientLayout>
               {children}
             </ClientLayout>
           </div>
+          <CookieConsent />
         </ServiceWorkerProvider>
       </body>
     </html>

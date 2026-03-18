@@ -1,130 +1,74 @@
 {
-  "version": "1.0.0",
-  "generatedAt": "2026-03-15T00:00:00.000Z",
-  "status": "PARTIAL",
-  "statusReason": "Core loop production evidence collected, but preview/billing/onboarding criteria not verified",
-  "level": "L3",
-  "targetLevel": "L4",
-  "exitCriteria": {
-    "productionSampleSize": {
-      "current": 115,
-      "target": 100,
-      "met": true,
-      "source": "metrics/latest_run-production.json"
+  "generated": "2026-03-18T00:00:00.000Z",
+  "status": "BLOCKED",
+  "milestone": "L4",
+  "blockers": [
+    "Runtime local requires DATABASE_URL and Docker daemon",
+    "Stripe credentials required for billing validation",
+    "E2B token required for preview sandbox",
+    "Production probe sampleSize = 0 (requires 100+)"
+  ],
+  "metrics": {
+    "production": {
+      "sampleSize": 0,
+      "successRate": null,
+      "regressionRate": null,
+      "feedbackCoverage": null,
+      "costVariance": null
     },
-    "applySuccessRate": {
-      "current": 1.0,
-      "target": 0.90,
-      "met": true,
-      "source": "metrics/latest_run-production.json"
-    },
-    "regressionRate": {
-      "current": 0.0,
-      "target": 0.05,
-      "met": true,
-      "source": "metrics/latest_run-production.json"
-    },
-    "feedbackCoverage": {
-      "current": 0.8957,
-      "target": 0.60,
-      "met": true,
-      "source": "metrics/latest_run-production.json"
-    },
-    "previewManaged": {
-      "current": null,
-      "target": true,
-      "met": false,
-      "blocker": "Not verified in runtime"
-    },
-    "billingCheckout": {
-      "current": null,
-      "target": true,
-      "met": false,
-      "blocker": "Not verified in runtime"
-    },
-    "onboardingP50Under90s": {
-      "current": null,
-      "target": 90000,
-      "met": false,
-      "blocker": "No production funnel data"
-    },
-    "enterpriseGateGreen": {
-      "current": null,
-      "target": true,
-      "met": false,
-      "source": "qa:enterprise-gate (not executed in this run)"
-    },
-    "dossierPublished": {
-      "current": true,
-      "target": true,
-      "met": true,
-      "source": "metrics/l4-readiness-dossier.json"
+    "rehearsal": {
+      "sampleSize": 12,
+      "successRate": 0.75,
+      "regressionRate": 0.0,
+      "feedbackCoverage": 0.50,
+      "costVariance": null
     }
   },
+  "targets": {
+    "sampleSize": 100,
+    "successRate": 0.90,
+    "regressionRate": 0.05,
+    "feedbackCoverage": 0.60,
+    "costVariance": 0.10
+  },
   "scores": {
-    "codeQuality": 9.5,
-    "governance": 10.0,
-    "architecture": 8.7,
-    "coreLoop": 3.0,
+    "governance": 9.0,
+    "coreLoop": 7.0,
     "previewSandbox": 5.4,
-    "billingStripe": 2.0,
-    "marketingGTM": 1.5,
-    "onboarding": 5.2,
-    "ragMentions": 4.0,
-    "uxDesignSystem": 7.5,
-    "deployInfra": 5.4,
-    "mobileA11y": 5.7,
-    "securityCompliance": 6.5,
-    "researchAgent": 6.0,
-    "overallMedia": 6.2
+    "billing": 2.0,
+    "marketing": 1.0,
+    "onboarding": 5.0,
+    "uxDesignSystem": 6.5,
+    "security": 6.0,
+    "games": 2.5,
+    "films": 2.5,
+    "researchUX": 5.5,
+    "accessibility": 4.0,
+    "infraDeploy": 5.0,
+    "telemetry": 5.0,
+    "overall": 6.2
   },
-  "blockers": {
-    "P0": [
-      {
-        "id": "P0-01",
-        "name": "Core Loop Production Evidence",
-        "status": "BLOCKED",
-        "requirements": ["Docker daemon", "DATABASE_URL", "JWT_SECRET", "CSRF_SECRET"],
-        "action": "Start Docker, configure .env.local, run production probes"
-      },
-      {
-        "id": "P0-02",
-        "name": "Preview Runtime + HMR (E2B)",
-        "status": "PARTIAL",
-        "requirements": ["E2B_API_KEY", "AETHEL_PREVIEW_E2B_TEMPLATE"],
-        "action": "Configure E2B credentials, test provisioning"
-      },
-      {
-        "id": "P0-03",
-        "name": "Billing Stripe Complete",
-        "status": "PARTIAL",
-        "requirements": ["STRIPE_SECRET_KEY", "STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET"],
-        "action": "Configure real Stripe keys, verify webhook"
-      }
-    ],
-    "P1": [
-      "Marketing/GTM landing optimization",
-      "Onboarding < 90s first-value SLO",
-      "RAG + @mentions pgvector backend",
-      "UX Design System semantic tokens",
-      "One-click deploy (Vercel API)",
-      "Mobile + WCAG accessibility"
-    ]
+  "targetScores": {
+    "L4": 8.5,
+    "L5": 9.2
   },
-  "implementedSinceLastAudit": [],
-  "canonicalDocs": {
-    "completionMap": "docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md",
-    "qualityMap": "docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md",
-    "technicalAudit": "docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md",
-    "executionBoard": "docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md",
-    "gapRegister": "docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md",
-    "duplicationsConflicts": "docs/master/DUPLICATIONS_AND_CONFLICTS.md"
+  "evidence": {
+    "coreLoopDrillRuns": 12,
+    "coreLoopProductionRuns": 0,
+    "billingCheckoutTested": false,
+    "previewE2BTested": false,
+    "onboardingSLOMeasured": false,
+    "wcagAuditPassed": false,
+    "lighthouseScore": null
   },
-  "nextSteps": [
-    "1. Verify preview runtime (E2B/WebContainers) end-to-end in production",
-    "2. Verify Stripe checkout + webhooks with real keys",
-    "3. Publish onboarding P50/P95 metrics (first-value <90s)",
-    "4. Run: npm run qa:enterprise-gate (must pass)",
-    "5. Promote to L4 when remaining exit criteria are met"
+  "instructions": [
+    "1. Configure all .env.local variables (see .env.example)",
+    "2. Start Docker and run npm run up:local-stack",
+    "3. Run npm run setup:local-db to push schema",
+    "4. Run npm run qa:production-runtime-readiness",
+    "5. Configure Stripe and run npm run qa:billing-runtime-readiness",
+    "6. Configure E2B and run npm run qa:preview-runtime-readiness",
+    "7. Run production probe waves until sampleSize >= 100",
+    "8. Publish dossier with all fields green"
   ]
 }
