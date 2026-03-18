@@ -322,7 +322,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
         promptInjections: parsedEvents.filter((event) => event.type === 'prompt_injection').length,
       })
     } catch (err) {
-      console.error('Failed to fetch security data:', err)
+      console.error('Falha ao buscar dados de seguranca:', err)
       setError(err instanceof Error ? err.message : 'Erro desconhecido ao buscar dados de seguranca')
     } finally {
       setIsLoading(false)

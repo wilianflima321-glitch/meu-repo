@@ -39,7 +39,7 @@ export default function AdminDashboardPro() {
     { label: 'Total Users', value: '2,847', change: 12.5, status: 'up' },
     { label: 'Active Projects', value: '1,234', change: 8.3, status: 'up' },
     { label: 'API Requests (24h)', value: '2.3M', change: -2.1, status: 'down' },
-    { label: 'System Health', value: '99.8%', change: 0.2, status: 'stable' }
+    { label: 'Saude do sistema', value: '99.8%', change: 0.2, status: 'stable' }
   ]
 
   const securityEvents: SecurityEvent[] = [
