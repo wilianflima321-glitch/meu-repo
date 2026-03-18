@@ -8,8 +8,6 @@ import {
   Users, 
   CreditCard,
   AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
   RefreshCw,
   Download,
   Filter,
@@ -19,6 +17,7 @@ import {
   Bot,
   PieChart
 } from 'lucide-react';
+import { AdminMetricCard } from '@/components/admin/AdminMetricCard';
 
 // =============================================================================
 // TYPES
@@ -85,52 +84,6 @@ interface DateRange {
 // =============================================================================
 // COMPONENTS
 // =============================================================================
-
-function MetricCard({ 
-  title, 
-  value, 
-  change, 
-  icon: Icon, 
-  prefix = '',
-  suffix = '',
-  trend,
-  subtitle
-}: {
-  title: string;
-  value: number | string;
-  change?: number;
-  icon: React.ElementType;
-  prefix?: string;
-  suffix?: string;
-  trend?: 'up' | 'down' | 'neutral';
-  subtitle?: string;
-}) {
-  const isPositive = trend === 'up' || (change && change > 0);
-  const isNegative = trend === 'down' || (change && change < 0);
-  
-  return (
-    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase tracking-wider">{title}</span>
-        <Icon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">
-          {prefix}{typeof value === 'number' ? value.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : value}{suffix}
-        </span>
-        {change !== undefined && (
-          <span className={`text-xs flex items-center ${
-            isPositive ? 'text-[var(--aethel-success)]' : isNegative ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'
-          }`}>
-            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : isNegative ? <ArrowDownRight className="w-3 h-3" /> : null}
-            {Math.abs(change).toFixed(1)}%
-          </span>
-        )}
-      </div>
-      {subtitle && <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{subtitle}</p>}
-    </div>
-  );
-}
 
 function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] }) {
   const colors = ['var(--aethel-primary)', 'var(--aethel-accent)', 'var(--aethel-secondary)', 'var(--aethel-warning)', 'var(--aethel-success)', 'var(--aethel-info)'];
@@ -428,7 +381,7 @@ export default function FinanceDashboard() {
                 ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
                 : 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-tertiary)]'
             }`}
-            title={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
+            label={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
           >
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
           </button>
@@ -437,94 +390,94 @@ export default function FinanceDashboard() {
       
       {/* Critical Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MetricCard
-          title="MRR"
+        <AdminMetricCard
+          label="MRR"
           value={metrics.mrr}
-          change={metrics.mrrGrowth}
+          delta={metrics.mrrGrowth}
           icon={TrendingUp}
-          prefix="$"
+          valuePrefix="$"
           trend={metrics.mrrGrowth >= 0 ? 'up' : 'down'}
-          subtitle={`ARR: $${(metrics.arr / 1000).toFixed(0)}k`}
+          sublabel={`ARR: $${(metrics.arr / 1000).toFixed(0)}k`}
         />
-        <MetricCard
-          title="Receita diária"
+        <AdminMetricCard
+          label="Receita diária"
           value={metrics.dailyRevenue}
           icon={DollarSign}
-          prefix="$"
+          valuePrefix="$"
         />
-        <MetricCard
-          title="Lucro diário"
+        <AdminMetricCard
+          label="Lucro diário"
           value={metrics.dailyProfit}
           icon={metrics.dailyProfit >= 0 ? TrendingUp : TrendingDown}
-          prefix="$"
+          valuePrefix="$"
           trend={metrics.dailyProfit >= 0 ? 'up' : 'down'}
-          subtitle={`Margem: ${metrics.profitMargin.toFixed(1)}%`}
+          sublabel={`Margem: ${metrics.profitMargin.toFixed(1)}%`}
         />
-        <MetricCard
-          title="Queima diária"
+        <AdminMetricCard
+          label="Queima diária"
           value={metrics.burnRate}
           icon={Zap}
-          prefix="$"
-          suffix="/dia"
-          subtitle={`Fôlego: ${metrics.runway} meses`}
+          valuePrefix="$"
+          valueSuffix="/dia"
+          sublabel={`Fôlego: ${metrics.runway} meses`}
         />
       </div>
       
       {/* Cost Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricCard
-          title="Custos de IA"
+        <AdminMetricCard
+          label="Custos de IA"
           value={metrics.dailyAICost}
           icon={Bot}
-          prefix="$"
-          subtitle="Gasto de IA hoje"
+          valuePrefix="$"
+          sublabel="Gasto de IA hoje"
         />
-        <MetricCard
-          title="Infraestrutura"
+        <AdminMetricCard
+          label="Infraestrutura"
           value={metrics.dailyInfraCost}
           icon={Server}
-          prefix="$"
-          subtitle="Servidores, BD, CDN"
+          valuePrefix="$"
+          sublabel="Servidores, BD, CDN"
         />
-        <MetricCard
-          title="Assinaturas ativas"
+        <AdminMetricCard
+          label="Assinaturas ativas"
           value={metrics.activeSubscriptions}
           icon={Users}
-          subtitle={`Churn: ${metrics.churnRate.toFixed(1)}%`}
+          sublabel={`Churn: ${metrics.churnRate.toFixed(1)}%`}
         />
       </div>
       
       {/* Unit Economics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MetricCard
-          title="LTV"
+        <AdminMetricCard
+          label="LTV"
           value={metrics.ltv}
           icon={TrendingUp}
-          prefix="$"
-          subtitle="Valor do ciclo de vida"
+          valuePrefix="$"
+          sublabel="Valor do ciclo de vida"
         />
-        <MetricCard
-          title="CAC"
+        <AdminMetricCard
+          label="CAC"
           value={metrics.cac}
           icon={CreditCard}
-          prefix="$"
-          subtitle="Custo de aquisição"
+          valuePrefix="$"
+          sublabel="Custo de aquisição"
         />
-        <MetricCard
-          title="LTV:CAC"
+        <AdminMetricCard
+          label="LTV:CAC"
           value={(metrics.ltv / metrics.cac).toFixed(1)}
           icon={PieChart}
-          suffix="x"
+          valueSuffix="x"
           trend={(metrics.ltv / metrics.cac) >= 3 ? 'up' : 'down'}
-          subtitle={metrics.ltv / metrics.cac >= 3 ? 'Saudável' : 'Precisa melhorar'}
+          sublabel={metrics.ltv / metrics.cac >= 3 ? 'Saudável' : 'Precisa melhorar'}
         />
-        <MetricCard
-          title="Taxa de churn"
+        <AdminMetricCard
+          label="Taxa de churn"
           value={metrics.churnRate}
           icon={TrendingDown}
-          suffix="%"
+          valueSuffix="%"
           trend={metrics.churnRate <= 5 ? 'up' : 'down'}
-          subtitle="Mensal"
+          sublabel="Mensal"
         />
       </div>
       

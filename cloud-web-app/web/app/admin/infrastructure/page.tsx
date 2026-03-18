@@ -18,11 +18,10 @@ import {
   Globe,
   Box,
   Layers,
-  BarChart2,
-  TrendingUp,
-  TrendingDown
+  BarChart2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { AdminMetricCard } from '@/components/admin/AdminMetricCard';
 
 // =============================================================================
 // TYPES
@@ -254,45 +253,6 @@ function QueueCard({ queue }: { queue: QueueMetrics }) {
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  unit,
-  icon: Icon,
-  trend,
-  subtitle
-}: {
-  label: string;
-  value: number | string;
-  unit?: string;
-  icon: React.ElementType;
-  trend?: 'up' | 'down';
-  subtitle?: string;
-}) {
-  return (
-    <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-[var(--aethel-text-tertiary)]">{label}</span>
-        <Icon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">
-          {typeof value === 'number' ? value.toLocaleString() : value}
-        </span>
-        {unit && <span className="text-sm text-[var(--aethel-text-tertiary)]">{unit}</span>}
-        {trend && (
-          trend === 'up' ? (
-            <TrendingUp className="w-4 h-4 text-[var(--aethel-success)]" />
-          ) : (
-            <TrendingDown className="w-4 h-4 text-[var(--aethel-error)]" />
-          )
-        )}
-      </div>
-      {subtitle && <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{subtitle}</p>}
-    </div>
-  );
-}
-
 // =============================================================================
 // MAIN PAGE
 // =============================================================================
@@ -389,28 +349,28 @@ export default function InfrastructureDashboard() {
       
       {/* Key Metrics */}
       <div className="grid grid-cols-4 gap-4">
-        <MetricCard
+        <AdminMetricCard
           label="Requisições/min"
           value={data.requestsPerMinute}
           icon={Activity}
           trend={data.requestsPerMinute > 100 ? 'up' : undefined}
         />
-        <MetricCard
+        <AdminMetricCard
           label="Conexões ativas"
           value={data.activeConnections}
           icon={Wifi}
         />
-        <MetricCard
+        <AdminMetricCard
           label="Taxa de erro"
           value={data.errorRate.toFixed(2)}
-          unit="%"
+          valueSuffix="%"
           icon={AlertTriangle}
           trend={data.errorRate > 1 ? 'down' : undefined}
         />
-        <MetricCard
+        <AdminMetricCard
           label="Taxa de acerto de cache"
           value={data.cacheHitRate.toFixed(1)}
-          unit="%"
+          valueSuffix="%"
           icon={Zap}
           trend={data.cacheHitRate > 80 ? 'up' : undefined}
         />
@@ -433,21 +393,21 @@ export default function InfrastructureDashboard() {
           <ResourceGauge
             label="CPU"
             value={data.resources.cpu.usage}
-            unit="%"
+            valueSuffix="%"
             icon={Cpu}
           />
           <ResourceGauge
             label="Memória"
             value={data.resources.memory.used}
             max={data.resources.memory.total}
-            unit="GB"
+            valueSuffix="GB"
             icon={Activity}
           />
           <ResourceGauge
             label="Disco"
             value={data.resources.disk.used}
             max={data.resources.disk.total}
-            unit="GB"
+            valueSuffix="GB"
             icon={HardDrive}
           />
           <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">

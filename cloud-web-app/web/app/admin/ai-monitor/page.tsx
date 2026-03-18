@@ -16,11 +16,10 @@ import {
   Pause,
   Play,
   RefreshCw,
-  TrendingDown,
-  TrendingUp,
   Zap,
 } from 'lucide-react';
 import { getToken } from '@/lib/auth';
+import { AdminMetricCard } from '@/components/admin/AdminMetricCard';
 import type {
   AICall,
   AICallsResponse,
@@ -55,43 +54,6 @@ async function fetchWithAuth<T>(url: string): Promise<T> {
   }
 
   return payload;
-}
-
-function MetricCard({
-  icon: Icon,
-  label,
-  value,
-  subValue,
-  trend,
-  alert,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string | number;
-  subValue?: string;
-  trend?: 'up' | 'down';
-  alert?: boolean;
-}) {
-  return (
-    <div
-      className={`
-        p-4 rounded-xl border
-        ${alert ? 'bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] border-[var(--aethel-border-secondary)]'}
-      `}
-    >
-      <div className="flex items-center justify-between mb-2">
-        <Icon className={`w-5 h-5 ${alert ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-secondary)]'}`} />
-        {trend && (
-          <span className={trend === 'up' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-success)]'}>
-            {trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-          </span>
-        )}
-      </div>
-      <p className={`text-2xl font-bold ${alert ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-primary)]'}`}>{value}</p>
-      <p className="text-sm text-[var(--aethel-text-tertiary)]">{label}</p>
-      {subValue && <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{subValue}</p>}
-    </div>
-  );
 }
 
 function AICallRow({
@@ -480,11 +442,11 @@ export default function AgentMonitorPage() {
 
       {metrics && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <MetricCard icon={Brain} label="Total de chamadas (24h)" value={metrics.totalCalls.toLocaleString()} />
-          <MetricCard icon={Zap} label="Total de tokens" value={`${(metrics.totalTokens / 1000).toFixed(1)}K`} />
-          <MetricCard icon={DollarSign} label="Custo total" value={`$${metrics.totalCost.toFixed(2)}`} alert={metrics.totalCost > 50} />
-          <MetricCard icon={Clock} label="Latencia media" value={`${metrics.avgLatency}ms`} alert={metrics.avgLatency > 3000} />
-          <MetricCard icon={AlertTriangle} label="Taxa de erro" value={`${(metrics.errorRate * 100).toFixed(1)}%`} alert={metrics.errorRate > 0.05} />
+          <AdminMetricCard icon={Brain} label="Total de chamadas (24h)" value={metrics.totalCalls.toLocaleString()} />
+          <AdminMetricCard icon={Zap} label="Total de tokens" value={`${(metrics.totalTokens / 1000).toFixed(1)}K`} />
+          <AdminMetricCard icon={DollarSign} label="Custo total" value={`$${metrics.totalCost.toFixed(2)}`} alert={metrics.totalCost > 50} />
+          <AdminMetricCard icon={Clock} label="Latencia media" value={`${metrics.avgLatency}ms`} alert={metrics.avgLatency > 3000} />
+          <AdminMetricCard icon={AlertTriangle} label="Taxa de erro" value={`${(metrics.errorRate * 100).toFixed(1)}%`} alert={metrics.errorRate > 0.05} />
         </div>
       )}
 
