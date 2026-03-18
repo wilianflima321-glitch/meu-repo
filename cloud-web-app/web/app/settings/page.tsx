@@ -70,8 +70,8 @@ export default function SettingsPage() {
     () => [
       { id: 'editor' as const, label: 'Editor', description: 'Preferencias do editor e workspace' },
       { id: 'profile' as const, label: 'Perfil', description: 'Conta e informacoes pessoais' },
-      { id: 'billing' as const, label: 'Billing', description: 'Plano, assinatura e consumo' },
-      { id: 'api' as const, label: 'AI Providers', description: 'Status e setup de provider IA' },
+      { id: 'billing' as const, label: 'Faturamento', description: 'Plano, assinatura e consumo' },
+      { id: 'api' as const, label: 'Provedores IA', description: 'Status e setup de provedores IA' },
     ],
     []
   )
@@ -81,7 +81,7 @@ export default function SettingsPage() {
 
   return (
     <StudioLayout
-      title="Workspace Settings"
+      title="Configuracoes do Workspace"
       subtitle="Configuracao de editor, conta e providers IA com contratos explicitos de status."
       maxWidth="7xl"
     >
