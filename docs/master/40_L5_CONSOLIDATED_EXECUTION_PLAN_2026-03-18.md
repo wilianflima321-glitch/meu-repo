@@ -339,6 +339,7 @@
 | Risk | Probability | Impact | Mitigation |
 |---|---|---|---|
 | External API keys configuradas localmente (Stripe/E2B/OpenRouter/Upstash/PostHog/Sentry) | MED | HIGH | Validar fluxo end-to-end e preparar modo live |
+| Storage S3/R2 pendente (Access Key/Secret/Endpoint) | LOW | MED | Configurar quando uploads reais forem necessarios |
 | Docker unavailable in CI/sandbox | MED | HIGH | Neon/Supabase remote DB as fallback; Railway managed DB |
 | Stripe webhook requires public URL | MED | HIGH | Stripe CLI for local testing; Vercel/Railway for production |
 | pgvector extension not available | LOW | MED | Fallback to local semantic search (already implemented) |

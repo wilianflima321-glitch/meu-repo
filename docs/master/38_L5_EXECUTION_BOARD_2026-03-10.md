@@ -288,6 +288,8 @@ Current blockers after hardening:
   - Upstash Redis REST URL + token.
   - PostHog API key + host.
   - Sentry DSN + auth token.
+- Pendencia opcional:
+  - Storage S3/R2 ainda nao configurado (pendente criar Access Key/Secret e endpoint).
 - Bloqueios restantes nao sao de credencial, e sim de execucao/validacao:
   - Validar preview E2B real + HMR no IDE.
   - Rodar production probe wave com runtime ativo para evidencias.
