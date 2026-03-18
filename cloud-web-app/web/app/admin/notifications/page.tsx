@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Bell, CheckCircle, Mail } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type NotificationItem = {
   id: string;
@@ -80,22 +82,17 @@ export default function Notifications() {
         </button>
       </div>
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{totals.total}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Lidas</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{totals.read}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Não lidas</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{totals.unread}</p>
-        </div>
-      </div>
+            <AdminSummaryGrid
+        className="mb-6"
+        columns={3}
+        items={[
+          { icon: Bell, label: 'Total', value: totals.total },
+          { icon: CheckCircle, label: 'Lidas', value: totals.read, tone: 'success' },
+          { icon: Mail, label: 'Nao lidas', value: totals.unread, tone: 'warning' },
+        ]}
+      />
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+<div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
           placeholder='Buscar por título, mensagem ou e-mail'

@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, CheckCircle, MessageSquare } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type FeedbackItem = {
   id: string;
@@ -87,22 +89,17 @@ export default function Feedback() {
         </button>
       </div>
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Abertos</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-warning)]">{summary.open}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Resolvidos</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.resolved}</p>
-        </div>
-      </div>
+            <AdminSummaryGrid
+        className="mb-6"
+        columns={3}
+        items={[
+          { icon: MessageSquare, label: 'Total', value: summary.total },
+          { icon: AlertTriangle, label: 'Abertos', value: summary.open, tone: 'warning' },
+          { icon: CheckCircle, label: 'Resolvidos', value: summary.resolved, tone: 'success' },
+        ]}
+      />
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+<div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <input
           type="text"
           placeholder="Buscar por usuário, assunto ou comentário"

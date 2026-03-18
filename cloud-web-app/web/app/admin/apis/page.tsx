@@ -1,6 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, CheckCircle, LayoutGrid, Trash2 } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 import { getToken } from '@/lib/auth';
 
 type Integration = {
@@ -487,11 +490,35 @@ export default function APIs() {
         </div>
       ) : null}
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary-light)]'>{summary.total}</p>
-        </div>
+      <AdminSummaryGrid
+        className='mb-6'
+        columns={4}
+        items={[
+          {
+            icon: LayoutGrid,
+            label: 'Total',
+            value: summary.total,
+          },
+          {
+            icon: CheckCircle,
+            label: 'Configuradas',
+            value: summary.configured,
+            tone: 'success',
+          },
+          {
+            icon: AlertTriangle,
+            label: 'Ausentes',
+            value: summary.missing,
+            tone: 'warning',
+          },
+          {
+            icon: Trash2,
+            label: 'Cutoff candidates',
+            value: removalCandidates.length,
+            tone: 'info',
+          },
+        ]}
+      />
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Configuradas</h3>
           <p className='text-2xl font-bold text-[var(--aethel-success)]'>{summary.configured}</p>

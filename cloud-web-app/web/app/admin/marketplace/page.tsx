@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Package, ShoppingCart, Tag } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 export default function AdminMarketplace() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'ok'>('idle');
@@ -74,22 +76,17 @@ export default function AdminMarketplace() {
         </button>
       </div>
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{summary.total}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Pagos</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{summary.paid}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Gratuitos</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-text-secondary)]'>{summary.free}</p>
-        </div>
-      </div>
+            <AdminSummaryGrid
+        className="mb-6"
+        columns={3}
+        items={[
+          { icon: Package, label: 'Total', value: summary.total },
+          { icon: ShoppingCart, label: 'Pagos', value: summary.paid, tone: 'success' },
+          { icon: Tag, label: 'Gratuitos', value: summary.free, tone: 'warning' },
+        ]}
+      />
 
-      {status === 'loading' ? (
+{status === 'loading' ? (
         <div className='text-sm text-[var(--aethel-text-tertiary)]'>{message}</div>
       ) : status === 'error' ? (
         <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>

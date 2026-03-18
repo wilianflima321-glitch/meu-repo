@@ -1,6 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Activity, AlertTriangle, ShieldAlert } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type AutomationItem = {
   id: string;
@@ -84,11 +87,29 @@ export default function Automation() {
         </div>
       )}
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Eventos</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{data?.summary.total ?? 0}</p>
-        </div>
+      <AdminSummaryGrid
+        className='mb-6'
+        columns={3}
+        items={[
+          {
+            icon: Activity,
+            label: 'Eventos',
+            value: data?.summary.total ?? 0,
+          },
+          {
+            icon: AlertTriangle,
+            label: 'Avisos',
+            value: data?.summary.warning ?? 0,
+            tone: 'warning',
+          },
+          {
+            icon: ShieldAlert,
+            label: 'Cr??ticos',
+            value: data?.summary.critical ?? 0,
+            tone: 'error',
+          },
+        ]}
+      />
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Avisos</h3>
           <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{data?.summary.warning ?? 0}</p>

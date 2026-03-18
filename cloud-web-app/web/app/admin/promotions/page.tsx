@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { BadgePercent, CheckCircle, XCircle } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type Promotion = {
   id: string;
@@ -161,24 +163,17 @@ export default function PromotionsPage() {
         </button>
       </div>
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Ativas</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.active}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Inativas</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{summary.inactive}</p>
-        </div>
-      </div>
+            <AdminSummaryGrid
+        className="mb-6"
+        columns={3}
+        items={[
+          { icon: BadgePercent, label: 'Total', value: summary.total },
+          { icon: CheckCircle, label: 'Ativas', value: summary.active, tone: 'success' },
+          { icon: XCircle, label: 'Inativas', value: summary.inactive, tone: 'warning' },
+        ]}
+      />
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Criar promoção</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
             placeholder="Nome"

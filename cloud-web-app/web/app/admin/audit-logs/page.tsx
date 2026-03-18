@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, FileText, ShieldAlert } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type AuditLog = {
   id: string;
@@ -110,21 +113,29 @@ export default function AuditLogsPage() {
         </div>
       </div>
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Avisos</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-warning)]">{summary.warning}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Críticos</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-error)]">{summary.critical}</p>
-        </div>
-      </div>
-      
+      <AdminSummaryGrid
+        className="mb-6"
+        items={[
+          {
+            icon: FileText,
+            label: 'Total de eventos',
+            value: summary.total,
+          },
+          {
+            icon: AlertTriangle,
+            label: 'Avisos',
+            value: summary.warning,
+            tone: 'warning',
+          },
+          {
+            icon: ShieldAlert,
+            label: 'Cr?ticos',
+            value: summary.critical,
+            tone: 'error',
+          },
+        ]}
+      />
+
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Filtros</h2>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">

@@ -1,6 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, ShieldCheck } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type Policy = {
   id: string;
@@ -59,11 +62,23 @@ export default function Compliance() {
         </button>
       </div>
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Políticas monitoradas</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{summary.total}</p>
-        </div>
+      <AdminSummaryGrid
+        className='mb-6'
+        columns={2}
+        items={[
+          {
+            icon: ShieldCheck,
+            label: 'Pol??ticas monitoradas',
+            value: summary.total,
+          },
+          {
+            icon: AlertTriangle,
+            label: 'Incidentes cr??ticos',
+            value: summary.incidents,
+            tone: 'error',
+          },
+        ]}
+      />
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Incidentes críticos</h3>
           <p className='text-2xl font-bold text-[var(--aethel-error)]'>{summary.incidents}</p>

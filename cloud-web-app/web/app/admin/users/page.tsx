@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { CheckCircle, Clock, Users as UsersIcon } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 /**
  * Admin Users - Gerenciamento de usuários
@@ -93,20 +95,15 @@ export default function AdminUsers() {
         </button>
       </div>
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Planos ativos</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.activePlans}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Testes</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{summary.trials}</p>
-        </div>
-      </div>
+      <AdminSummaryGrid
+        className="mb-6"
+        columns={3}
+        items={[
+          { icon: UsersIcon, label: 'Total', value: summary.total },
+          { icon: CheckCircle, label: 'Planos ativos', value: summary.activePlans, tone: 'success' },
+          { icon: Clock, label: 'Testes', value: summary.trials, tone: 'warning' },
+        ]}
+      />
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <input

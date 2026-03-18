@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Clock, DollarSign, Users } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 /**
  * Admin Subscriptions - Gestão de Planos (dados reais do DB/Stripe config)
@@ -75,22 +77,17 @@ export default function AdminSubscriptions() {
         </button>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-6'>
-        <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 text-center'>
-          <h3 className='text-sm font-semibold'>Usuários totais</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{summary.totalUsers}</p>
-        </div>
-        <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 text-center'>
-          <h3 className='text-sm font-semibold'>MRR total (US$)</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-success)]'>US${summary.totalMRR.toFixed(2)}</p>
-        </div>
-        <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 text-center'>
-          <h3 className='text-sm font-semibold'>Usuários em teste</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-text-secondary)]'>{summary.trialUsers}</p>
-        </div>
-      </div>
+            <AdminSummaryGrid
+        className="mb-6"
+        columns={3}
+        items={[
+          { icon: Users, label: 'Usuarios totais', value: summary.totalUsers },
+          { icon: DollarSign, label: 'MRR total (US$)', value: summary.totalMRR.toFixed(2), valuePrefix: 'US$', tone: 'success' },
+          { icon: Clock, label: 'Usuarios em teste', value: summary.trialUsers, tone: 'warning' },
+        ]}
+      />
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+<div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
           placeholder='Buscar plano'

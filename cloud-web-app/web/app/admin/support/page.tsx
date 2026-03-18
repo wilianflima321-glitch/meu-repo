@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Activity, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type Ticket = {
   id: string;
@@ -92,26 +94,18 @@ export default function Support() {
         </button>
       </div>
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Abertos</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.open}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Pendentes</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-warning)]">{summary.pending}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Urgentes</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-error)]">{summary.urgent}</p>
-        </div>
-      </div>
+            <AdminSummaryGrid
+        className="mb-6"
+        columns={4}
+        items={[
+          { icon: Activity, label: 'Total', value: summary.total },
+          { icon: CheckCircle, label: 'Abertos', value: summary.open, tone: 'success' },
+          { icon: Clock, label: 'Pendentes', value: summary.pending, tone: 'warning' },
+          { icon: AlertTriangle, label: 'Urgentes', value: summary.urgent, tone: 'error' },
+        ]}
+      />
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+<div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <input
           type="text"
           placeholder="Buscar por e-mail ou assunto"

@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, CheckCircle, DollarSign, Clock } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 import { getToken } from '@/lib/auth';
 
 type PaymentItem = {
@@ -255,26 +257,18 @@ export default function Payments() {
         )}
       </div>
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>US${totals.total.toFixed(2)}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Aprovados</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-success)]'>US${totals.succeeded.toFixed(2)}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Pendentes</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>US${totals.pending.toFixed(2)}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Falhas</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-error)]'>US${totals.failed.toFixed(2)}</p>
-        </div>
-      </div>
+            <AdminSummaryGrid
+        className="mb-6"
+        columns={4}
+        items={[
+          { icon: DollarSign, label: 'Total', value: totals.total.toFixed(2), valuePrefix: 'US$', tone: 'info' },
+          { icon: CheckCircle, label: 'Aprovados', value: totals.succeeded.toFixed(2), valuePrefix: 'US$', tone: 'success' },
+          { icon: Clock, label: 'Pendentes', value: totals.pending.toFixed(2), valuePrefix: 'US$', tone: 'warning' },
+          { icon: AlertTriangle, label: 'Falhas', value: totals.failed.toFixed(2), valuePrefix: 'US$', tone: 'error' },
+        ]}
+      />
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+<div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
           type='text'
           placeholder='Buscar por e-mail ou ID'

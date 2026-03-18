@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Activity, Cpu, Gauge } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 interface AiSettings {
   model: string;
@@ -102,13 +105,29 @@ export default function AdminAI() {
         </div>
       )}
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Status</h3>
-          <p className={`text-2xl font-bold ${aiSettings.enabled ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-text-tertiary)]'}`}>
-            {statusLabel}
-          </p>
-        </div>
+      <AdminSummaryGrid
+        className='mb-6'
+        columns={3}
+        items={[
+          {
+            icon: Activity,
+            label: 'Status',
+            value: statusLabel,
+            tone: aiSettings.enabled ? 'success' : 'default',
+            alert: !aiSettings.enabled,
+          },
+          {
+            icon: Cpu,
+            label: 'Modelo',
+            value: aiSettings.model,
+          },
+          {
+            icon: Gauge,
+            label: 'M??x. tokens',
+            value: aiSettings.maxTokens,
+          },
+        ]}
+      />
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Modelo</h3>
           <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{aiSettings.model}</p>

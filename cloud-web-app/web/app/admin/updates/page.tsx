@@ -100,26 +100,18 @@ export default function Updates() {
         </div>
       )}
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-2 md:grid-cols-4 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Total</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{data?.summary.total ?? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Aprovadas</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{data?.summary.approved ?? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Revisão</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{data?.summary.review ?? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Bloqueadas</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-error)]'>{data?.summary.blocked ?? 0}</p>
-        </div>
-      </div>
+            <AdminSummaryGrid
+        className="mb-6"
+        columns={4}
+        items={[
+          { icon: Activity, label: 'Total', value: data?.summary.total ?? 0 },
+          { icon: CheckCircle, label: 'Aprovadas', value: data?.summary.approved ?? 0, tone: 'success' },
+          { icon: AlertTriangle, label: 'Revisao', value: data?.summary.review ?? 0, tone: 'warning' },
+          { icon: XCircle, label: 'Bloqueadas', value: data?.summary.blocked ?? 0, tone: 'error' },
+        ]}
+      />
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
+<div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
           <h2 className='text-xl font-semibold'>Histórico de Atualizações</h2>
           <div className='flex gap-2'>

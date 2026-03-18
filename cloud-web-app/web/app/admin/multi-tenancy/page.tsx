@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Building2, HardDrive, Users } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type Tenant = {
   id: string;
@@ -66,11 +69,27 @@ export default function MultiTenancyPage() {
         </button>
       </div>
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Locatários detectados</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{tenants.length}</p>
-        </div>
+      <AdminSummaryGrid
+        className="mb-6"
+        columns={3}
+        items={[
+          {
+            icon: Building2,
+            label: 'Locat??rios detectados',
+            value: tenants.length,
+          },
+          {
+            icon: Users,
+            label: 'Usu??rios totais',
+            value: summary.totalUsers,
+          },
+          {
+            icon: HardDrive,
+            label: 'Armazenamento agregado',
+            value: formatStorage(summary.totalStorage),
+          },
+        ]}
+      />
         <div className="text-center">
           <h3 className="text-sm font-semibold">Usuários totais</h3>
           <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{summary.totalUsers}</p>

@@ -1,6 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AlertTriangle, CheckCircle, Layers, Sliders } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type SettingDefinition = {
   key: string;
@@ -324,11 +327,28 @@ export default function IDESettings() {
         </div>
       )}
 
-      <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Categorias</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{categories.length}</p>
-        </div>
+      <AdminSummaryGrid
+        className='mb-6'
+        columns={3}
+        items={[
+          {
+            icon: Layers,
+            label: 'Categorias',
+            value: categories.length,
+          },
+          {
+            icon: Sliders,
+            label: 'Configura????es',
+            value: Object.keys(data?.definitions || {}).length,
+          },
+          {
+            icon: hasChanges ? AlertTriangle : CheckCircle,
+            label: 'Pend??ncias',
+            value: hasChanges ? 'Sim' : 'N??o',
+            tone: hasChanges ? 'warning' : 'success',
+          },
+        ]}
+      />
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Configurações</h3>
           <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{Object.keys(data?.definitions || {}).length}</p>

@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { Shield, Users } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type RoleSummary = { role: string | null; count: number };
 
@@ -54,11 +57,22 @@ export default function RolesPage() {
         </button>
       </div>
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Usuários totais</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.totalUsers}</p>
-        </div>
+      <AdminSummaryGrid
+        className="mb-6"
+        columns={2}
+        items={[
+          {
+            icon: Users,
+            label: 'Usu??rios totais',
+            value: summary.totalUsers,
+          },
+          {
+            icon: Shield,
+            label: 'Administradores totais',
+            value: summary.totalAdmins,
+          },
+        ]}
+      />
         <div className="text-center">
           <h3 className="text-sm font-semibold">Administradores totais</h3>
           <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.totalAdmins}</p>

@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { CheckCircle, Users, XCircle } from 'lucide-react';
+
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type Workflow = {
   id: string;
@@ -77,11 +80,29 @@ export default function AIAgentsPage() {
         </button>
       </div>
 
-      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Total</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.total}</p>
-        </div>
+      <AdminSummaryGrid
+        className="mb-6"
+        columns={3}
+        items={[
+          {
+            icon: Users,
+            label: 'Total de fluxos',
+            value: summary.total,
+          },
+          {
+            icon: CheckCircle,
+            label: 'Com projeto',
+            value: summary.withProject,
+            tone: 'success',
+          },
+          {
+            icon: XCircle,
+            label: 'Sem projeto',
+            value: summary.withoutProject,
+            tone: 'warning',
+          },
+        ]}
+      />
         <div className="text-center">
           <h3 className="text-sm font-semibold">Com projeto</h3>
           <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.withProject}</p>
