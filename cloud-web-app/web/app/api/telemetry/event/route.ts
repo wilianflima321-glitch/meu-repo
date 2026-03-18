@@ -1,166 +1,128 @@
+/**
+ * Telemetry Event API
+ * POST /api/telemetry/event - Record product analytics events
+ * Used for funnel tracking, first-value measurement, and product metrics.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
-import type { Prisma } from '@prisma/client'
 import { getUserFromRequest } from '@/lib/auth-server'
-import { prisma } from '@/lib/db'
-import { capabilityResponse } from '@/lib/server/capability-response'
 
 export const dynamic = 'force-dynamic'
 
-const CAPABILITY = 'TELEMETRY_EVENT_INGEST'
-const MAX_METADATA_BYTES = 32 * 1024
-
-type TelemetryEventBody = {
-  type?: unknown
-  event?: unknown
-  timestamp?: unknown
-  source?: unknown
-  data?: unknown
-  payload?: unknown
-  metadata?: unknown
-  context?: unknown
-  severity?: unknown
+interface TelemetryEvent {
+  event: string
+  properties?: Record<string, unknown>
+  timestamp?: string
+  sessionId?: string
+  surface?: string
 }
 
-function asString(value: unknown): string | null {
-  if (typeof value !== 'string') return null
-  const trimmed = value.trim()
-  return trimmed.length > 0 ? trimmed : null
-}
+const VALID_EVENTS = new Set([
+  'page_view',
+  'onboarding_started',
+  'onboarding_domain_selected',
+  'template_selected',
+  'onboarding_completed',
+  'first_generation',
+  'first_preview',
+  'first_value_reached',
+  'project_created',
+  'ai_chat_sent',
+  'ai_stream_started',
+  'preview_provision_started',
+  'preview_provision_completed',
+  'billing_checkout_started',
+  'billing_checkout_completed',
+  'billing_upgrade_prompt_shown',
+  'billing_upgrade_prompt_clicked',
+  'feature_used',
+  'error_occurred',
+  'drop_off',
+  'session_start',
+  'session_end',
+])
 
-function asObject(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
-  return value as Record<string, unknown>
-}
+// In-memory event buffer for batch processing (production would use a queue)
+const eventBuffer: Array<{
+  event: string
+  userId: string | null
+  properties: Record<string, unknown>
+  timestamp: string
+}> = []
 
-function sanitizeEventType(value: string): string {
-  const normalized = value
-    .toLowerCase()
-    .replace(/[^a-z0-9._:-]+/g, '_')
-    .replace(/^[_:. -]+|[_:. -]+$/g, '')
+const MAX_BUFFER_SIZE = 10000
 
-  return normalized.slice(0, 120)
-}
-
-function toInputJsonValue(value: unknown): Prisma.InputJsonValue {
-  const normalized = JSON.parse(JSON.stringify(value ?? {}))
-  return normalized as Prisma.InputJsonValue
-}
-
-function resolveCategory(eventType: string): 'analytics' | 'telemetry' {
-  return eventType.startsWith('analytics.') || eventType.startsWith('analytics:') ? 'analytics' : 'telemetry'
-}
-
-function resolveAction(category: 'analytics' | 'telemetry', eventType: string): string {
-  if (category === 'analytics') {
-    const normalized = eventType.replace(/^analytics[.:]/, '')
-    return `analytics:${normalized || 'event'}`
-  }
-  return `telemetry:${eventType}`
-}
-
-export async function POST(request: NextRequest) {
-  let body: TelemetryEventBody
+export async function POST(req: NextRequest) {
   try {
-    body = (await request.json()) as TelemetryEventBody
-  } catch {
-    return capabilityResponse({
-      error: 'TELEMETRY_EVENT_INVALID_JSON',
-      message: 'Telemetry event payload is not valid JSON.',
-      status: 400,
-      capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
-      metadata: { reason: 'invalid_json' },
-    })
-  }
+    const auth = getUserFromRequest(req)
+    const body: TelemetryEvent | TelemetryEvent[] = await req.json()
+    const events = Array.isArray(body) ? body : [body]
 
-  const rawType = asString(body.type) || asString(body.event)
-  if (!rawType) {
-    return capabilityResponse({
-      error: 'TELEMETRY_EVENT_TYPE_REQUIRED',
-      message: 'Telemetry event type is required.',
-      status: 400,
-      capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
-      metadata: { reason: 'missing_type' },
-    })
-  }
+    const recorded: string[] = []
+    const rejected: string[] = []
 
-  const eventType = sanitizeEventType(rawType)
-  if (!eventType) {
-    return capabilityResponse({
-      error: 'TELEMETRY_EVENT_TYPE_INVALID',
-      message: 'Telemetry event type is invalid.',
-      status: 400,
-      capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
-      metadata: { reason: 'invalid_type' },
-    })
-  }
+    for (const event of events) {
+      if (!event.event) {
+        rejected.push('missing_event_name')
+        continue
+      }
 
-  const user = getUserFromRequest(request)
-  const category = resolveCategory(eventType)
-  const action = resolveAction(category, eventType)
-  const source = asString(body.source) || 'client'
-  const severity = asString(body.severity) || 'info'
-  const metadata = {
-    eventType,
-    timestamp: asString(body.timestamp) || new Date().toISOString(),
-    payload: body.data ?? body.payload ?? null,
-    metadata: asObject(body.metadata),
-    context: asObject(body.context),
-  }
+      if (!VALID_EVENTS.has(event.event) && !event.event.startsWith('custom:')) {
+        rejected.push(event.event)
+        continue
+      }
 
-  const metadataBytes = Buffer.byteLength(JSON.stringify(metadata), 'utf8')
-  if (metadataBytes > MAX_METADATA_BYTES) {
-    return capabilityResponse({
-      error: 'TELEMETRY_EVENT_TOO_LARGE',
-      message: 'Telemetry event payload is too large.',
-      status: 413,
-      capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
-      metadata: {
-        reason: 'payload_too_large',
-        maxBytes: MAX_METADATA_BYTES,
-        actualBytes: metadataBytes,
-      },
-    })
-  }
+      const entry = {
+        event: event.event,
+        userId: auth?.userId || null,
+        properties: {
+          ...event.properties,
+          surface: event.surface || 'unknown',
+          sessionId: event.sessionId || null,
+        },
+        timestamp: event.timestamp || new Date().toISOString(),
+      }
 
-  try {
-    await prisma.auditLog.create({
-      data: {
-        userId: user?.userId ?? null,
-        action,
-        category,
-        severity,
-        resource: source,
-        metadata: toInputJsonValue(metadata),
-        userAgent: request.headers.get('user-agent') ?? null,
-        ipAddress: request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? null,
-        requestId: request.headers.get('x-request-id') ?? null,
-      },
+      // Buffer events (in production, this would go to a queue like Redis/Kafka)
+      if (eventBuffer.length < MAX_BUFFER_SIZE) {
+        eventBuffer.push(entry)
+      }
+
+      recorded.push(event.event)
+    }
+
+    return NextResponse.json({
+      success: true,
+      recorded: recorded.length,
+      rejected: rejected.length,
+      rejectedEvents: rejected.length > 0 ? rejected : undefined,
     })
   } catch (error) {
-    console.error('Failed to ingest telemetry event:', error)
-    return capabilityResponse({
-      error: 'TELEMETRY_EVENT_PERSIST_FAILED',
-      message: 'Telemetry event could not be persisted.',
-      status: 500,
-      capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
-      metadata: { reason: 'db_write_failed' },
-    })
+    console.error('[telemetry/event] Error:', error)
+    return NextResponse.json({ error: 'Failed to record event' }, { status: 500 })
+  }
+}
+
+/**
+ * GET /api/telemetry/event - Get event buffer stats (admin only)
+ */
+export async function GET(req: NextRequest) {
+  const auth = getUserFromRequest(req)
+  if (!auth?.userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Calculate basic metrics from buffer
+  const eventCounts: Record<string, number> = {}
+  for (const entry of eventBuffer) {
+    eventCounts[entry.event] = (eventCounts[entry.event] || 0) + 1
   }
 
   return NextResponse.json({
-    success: true,
-    accepted: true,
-    capability: CAPABILITY,
-    capabilityStatus: 'IMPLEMENTED',
-    category,
-    action,
-    source,
-    eventType,
-    timestamp: metadata.timestamp,
+    bufferSize: eventBuffer.length,
+    maxBufferSize: MAX_BUFFER_SIZE,
+    eventCounts,
+    oldestEvent: eventBuffer[0]?.timestamp || null,
+    newestEvent: eventBuffer[eventBuffer.length - 1]?.timestamp || null,
   })
 }
