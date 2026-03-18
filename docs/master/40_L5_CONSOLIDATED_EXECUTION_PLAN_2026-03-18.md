@@ -15,8 +15,8 @@
 | Code Quality / Governance | 9.5 | 9.5 | 9.5 | ACTIVE |
 | Architecture | 8.7 | 9.0 | 9.5 | PARTIAL |
 | Core Loop / L4 Evidence | 7.5 | 8.0 | 9.5 | PARTIAL (sampleSize=115, successRate=1.0, feedbackCoverage=0.89) |
-| Preview / Sandbox | 6.5 | 8.0 | 9.0 | PARTIAL (HMR bridge + WebContainers bridge implemented, needs E2B token) |
-| Billing / Stripe | 5.0 | 8.0 | 9.0 | PARTIAL (routes + UI + readiness exist, needs live Stripe keys) |
+| Preview / Sandbox | 6.5 | 8.0 | 9.0 | PARTIAL (HMR bridge + WebContainers bridge implemented, token configurado, falta validar HMR real) |
+| Billing / Stripe | 5.0 | 8.0 | 9.0 | PARTIAL (routes + UI + readiness exist, keys + prices configurados, falta fluxo end-to-end) |
 | Marketing / GTM | 5.0 | 6.0 | 8.0 | PARTIAL (landing v2 + docs pages exist) |
 | Onboarding | 7.0 | 8.0 | 9.0 | ADVANCED (wizard + demo mode + funnel analytics) |
 | RAG + @mentions | 5.5 | 7.5 | 9.5 | PARTIAL (@Codebase + @Docs + @Diff + @Error exist) |
@@ -38,13 +38,13 @@
 
 | ID | Task | Owner | Effort | Dependencies | Risk | Sprint |
 |---|---|---|---|---|---|---|
-| M-01 | Configure live `.env.local` with real credentials (DB, JWT, CSRF, Stripe, E2B, OpenRouter) | Ops | 2h | External accounts | HIGH: blocks all L4 criteria |  1 |
+| M-01 | Configure live `.env.local` with real credentials (DB, JWT, CSRF, Stripe, E2B, OpenRouter) | Ops | 2h | External accounts | DONE: env local configurado |  1 |
 | M-02 | Docker stack operational (PostgreSQL + Redis + Prisma migrations) | Ops | 4h | Docker daemon | HIGH: blocks production evidence | 1 |
 | M-03 | Production probe wave sampleSize >= 100, successRate > 0.90, feedbackCoverage >= 0.60 | Eng | 8h | M-01, M-02 | MED: already at 115 samples | 1 |
 | M-04 | Stripe checkout end-to-end (test mode): create session -> redirect -> webhook -> plan update | Eng | 8h | M-01, Stripe test keys | HIGH: billing is L4 blocker | 1 |
 | M-05 | Stripe portal + invoice page functional with real subscription data | Eng | 4h | M-04 | MED | 1 |
 | M-06 | Quota enforcement middleware active on AI endpoints (token/request limits per plan) | Eng | 6h | M-02 (DB for user plan lookup) | MED | 2 |
-| M-07 | E2B preview provisioning with real token + HMR WebSocket bridge validated | Eng | 8h | M-01, E2B account | HIGH: preview is L4 blocker | 2 |
+| M-07 | E2B preview provisioning with real token + HMR WebSocket bridge validated | Eng | 8h | M-01, E2B account | HIGH: preview is L4 blocker (token ok, falta validacao) | 2 |
 | M-08 | WebContainers fallback operational when E2B unavailable | Eng | 4h | M-07 | LOW | 2 |
 | M-09 | Onboarding wizard demo mode: signup -> domain -> template -> first AI -> first preview < 90s | UX/Eng | 6h | M-01 or demo mode | MED | 2 |
 | M-10 | WCAG 2.2 AA: fix all contrast < 4.5:1 on landing, dashboard, IDE, auth pages | UX | 4h | None | LOW: CSS-only changes | 1 |
@@ -118,7 +118,7 @@
 
 | Task | ID | Owner | Days | Status |
 |---|---|---|---|---|
-| Configure `.env.local` with real/test credentials | M-01 | Ops | 1 | READY |
+| Configure `.env.local` with real/test credentials | M-01 | Ops | 1 | DONE |
 | Docker stack + PostgreSQL + Redis + Prisma migrations | M-02 | Ops | 1 | READY |
 | Production runtime readiness passes | M-15 | Eng | 0.5 | READY |
 | WCAG contrast fixes (dark + light themes) | M-10 | UX | 1 | DONE (this sprint) |
@@ -147,7 +147,7 @@
 
 | Task | ID | Owner | Days | Status |
 |---|---|---|---|---|
-| E2B preview provisioning with real token | M-07 | Eng | 2 | BLOCKED by token |
+| E2B preview provisioning with real token | M-07 | Eng | 2 | READY (token configurado) |
 | WebContainers fallback when E2B unavailable | M-08 | Eng | 1 | READY |
 | Quota enforcement middleware on AI endpoints | M-06 | Eng | 1.5 | READY |
 | Billing runtime readiness passes | M-16 | Eng | 0.5 | READY |
@@ -338,7 +338,7 @@
 
 | Risk | Probability | Impact | Mitigation |
 |---|---|---|---|
-| External API keys unavailable (Stripe, E2B, OpenRouter) | HIGH | CRITICAL | Use test/demo modes; document as external dependency |
+| External API keys configuradas localmente (Stripe/E2B/OpenRouter/Upstash/PostHog/Sentry) | MED | HIGH | Validar fluxo end-to-end e preparar modo live |
 | Docker unavailable in CI/sandbox | MED | HIGH | Neon/Supabase remote DB as fallback; Railway managed DB |
 | Stripe webhook requires public URL | MED | HIGH | Stripe CLI for local testing; Vercel/Railway for production |
 | pgvector extension not available | LOW | MED | Fallback to local semantic search (already implemented) |

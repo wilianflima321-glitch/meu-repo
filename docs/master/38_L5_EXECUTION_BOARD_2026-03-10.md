@@ -194,11 +194,10 @@ Al�m de L4:
 | Media Geral | 6.2 | 6.8 | +0.6 |
 
 ### Blockers nao resolvidos (requerem credenciais externas):
-- Docker daemon (PostgreSQL, Redis)
-- Stripe real keys (checkout + webhook)
-- E2B API key (managed preview)
-- Vercel token (one-click deploy)
-- Tavily/Perplexity keys (live retrieval)
+- Docker daemon somente se usar Postgres/Redis local (nao requerido para Neon/Upstash).
+- Vercel token (one-click deploy).
+- Tavily/Perplexity keys (live retrieval).
+- Webhook Stripe em URL publica (necessario para fluxo live em producao).
 
 ### Proximos passos:
 1. Ativar Docker → PostgreSQL → Prisma migrations
@@ -279,3 +278,17 @@ Current blockers after hardening:
 - Latest production metrics:
   - `metrics/latest_run-production.json`: `sampleSize=115`, `apply_success_rate=1.0`, `feedback_coverage=0.8957`.
 - Remaining L4 blocker is now external: validate real checkout + webhook flow in Stripe project.
+
+## 19) Delta 2026-03-18 - Credenciais externas configuradas (local)
+
+- `.env.local` atualizado com credenciais de operacao local (sem expor valores):
+  - Stripe keys + price IDs (test mode).
+  - E2B provider + template + allowlist.
+  - OpenRouter API key.
+  - Upstash Redis REST URL + token.
+  - PostHog API key + host.
+  - Sentry DSN + auth token.
+- Bloqueios restantes nao sao de credencial, e sim de execucao/validacao:
+  - Validar preview E2B real + HMR no IDE.
+  - Rodar production probe wave com runtime ativo para evidencias.
+  - Validar checkout Stripe end-to-end no fluxo real.
