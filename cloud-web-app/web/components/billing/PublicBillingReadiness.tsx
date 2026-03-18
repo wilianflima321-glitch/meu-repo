@@ -14,7 +14,7 @@ function ReadinessBadge({
     <div className="rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2">
       <p className="text-[10px] uppercase tracking-wider text-slate-500">{label}</p>
       <p className={`mt-1 text-sm font-semibold ${ready ? 'text-emerald-300' : 'text-amber-200'}`}>
-        {ready ? 'Ready' : 'Partial'}
+        {ready ? 'Pronto' : 'Parcial'}
       </p>
     </div>
   )
@@ -46,7 +46,7 @@ export default function PublicBillingReadiness() {
   if (loading) {
     return (
       <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-slate-800 bg-slate-950/80 p-8">
-        <p className="text-sm text-slate-400">Checking live billing readiness...</p>
+        <p className="text-sm text-slate-400">Verificando prontidao de billing ao vivo...</p>
       </section>
     )
   }
@@ -54,9 +54,9 @@ export default function PublicBillingReadiness() {
   if (!readiness) {
     return (
       <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-amber-500/20 bg-amber-500/10 p-8">
-        <h2 className="text-2xl font-semibold text-white">Billing readiness unavailable</h2>
+        <h2 className="text-2xl font-semibold text-white">Prontidao de billing indisponivel</h2>
         <p className="mt-3 text-sm leading-7 text-amber-100/85">
-          Pricing remains canonical, but this environment did not return a live billing readiness payload.
+          Os planos continuam canonicos, mas este ambiente nao retornou um payload de prontidao de billing ao vivo.
         </p>
       </section>
     )
@@ -66,9 +66,9 @@ export default function PublicBillingReadiness() {
     <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-amber-500/20 bg-amber-500/10 p-8">
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Live billing readiness</h2>
+          <h2 className="text-2xl font-semibold text-white">Prontidao de billing ao vivo</h2>
           <p className="mt-3 text-sm leading-7 text-amber-100/85">
-            Pricing is already canonical. Conversion still depends on live checkout/runtime readiness in this environment.
+            Os planos ja sao canonicos. A conversao ainda depende do checkout/runtime ao vivo neste ambiente.
           </p>
           <p className="mt-3 text-xs text-amber-100/70">
             status={readiness.status} | gateway={readiness.gateway?.activeGateway || 'unknown'} | provider={readiness.provider?.label || 'unknown'}
@@ -83,7 +83,7 @@ export default function PublicBillingReadiness() {
 
       {readiness.provider ? (
         <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-300">Billing provider</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-300">Provedor de billing</p>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
               {readiness.provider.label}
@@ -106,7 +106,7 @@ export default function PublicBillingReadiness() {
               ))}
             </div>
           ) : (
-            <p className="mt-3 text-xs text-slate-400">No provider setup env is required in this runtime.</p>
+            <p className="mt-3 text-xs text-slate-400">Nenhuma variavel de ambiente adicional e necessaria neste runtime.</p>
           )}
           {readiness.stripe ? (
             <div className="mt-3 text-xs text-slate-400">
@@ -118,7 +118,7 @@ export default function PublicBillingReadiness() {
 
       {readiness.stripe?.missingEnv?.length ? (
         <div className="mt-5 rounded-2xl border border-amber-500/20 bg-black/20 p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-amber-200">Missing runtime env</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-amber-200">Variaveis de ambiente ausentes</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {readiness.stripe.missingEnv.map((envKey) => (
               <span
@@ -134,7 +134,7 @@ export default function PublicBillingReadiness() {
 
       {readiness.instructions?.length ? (
         <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-300">Next actions</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-300">Proximas acoes</p>
           <ul className="mt-3 space-y-2 text-sm text-slate-300">
             {readiness.instructions.map((instruction) => (
               <li key={instruction}>- {instruction}</li>

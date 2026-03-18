@@ -23,13 +23,13 @@ interface SurfaceResult {
 
 const SURFACE_CHECKS: SurfaceCheck[] = [
   { id: 'runtime', name: 'Runtime base', endpoint: '/api/health/live', required: true },
-  { id: 'readiness', name: 'App readiness', endpoint: '/api/health/ready', required: true },
-  { id: 'ai', name: 'AI providers', endpoint: '/api/health/ai' },
-  { id: 'database', name: 'Database', endpoint: '/api/health/db', required: true },
+  { id: 'readiness', name: 'Prontidao da aplicacao', endpoint: '/api/health/ready', required: true },
+  { id: 'ai', name: 'Provedores de IA', endpoint: '/api/health/ai' },
+  { id: 'database', name: 'Banco de dados', endpoint: '/api/health/db', required: true },
   { id: 'cache', name: 'Cache / rate limiting', endpoint: '/api/health/cache' },
-  { id: 'storage', name: 'Asset storage', endpoint: '/api/health/storage' },
-  { id: 'stripe', name: 'Stripe gateway', endpoint: '/api/health/stripe' },
-  { id: 'billing', name: 'Billing runtime', endpoint: '/api/billing/readiness' },
+  { id: 'storage', name: 'Armazenamento de assets', endpoint: '/api/health/storage' },
+  { id: 'stripe', name: 'Gateway Stripe', endpoint: '/api/health/stripe' },
+  { id: 'billing', name: 'Runtime de billing', endpoint: '/api/billing/readiness' },
 ]
 
 function stateStyles(state: SurfaceState) {
@@ -64,7 +64,7 @@ function summarizePayload(checkId: string, payload: any, ok: boolean): { state: 
   if (checkId === 'runtime') {
     return {
       state: ok ? 'healthy' : 'unhealthy',
-      detail: ok ? 'HTTP liveness route responding.' : 'Base runtime probe failed.',
+      detail: ok ? 'Rota de liveness respondendo.' : 'Probe do runtime base falhou.',
       latency,
     }
   }
@@ -74,20 +74,20 @@ function summarizePayload(checkId: string, payload: any, ok: boolean): { state: 
       state: payload?.status === 'ready' ? 'healthy' : ok ? 'partial' : 'unhealthy',
       detail:
         payload?.status === 'ready'
-          ? 'Obrigatorio runtime dependencies are available.'
-          : 'Runtime still missing one or more required dependencies.',
+          ? 'Dependencias obrigatorias do runtime estao disponiveis.'
+          : 'Runtime ainda sem uma ou mais dependencias obrigatorias.',
       latency,
     }
   }
 
   if (checkId === 'ai') {
     if (payload?.ai?.configured) {
-      const provider = payload?.ai?.provider ?? 'provider configured'
-      return { state: 'healthy', detail: `Configured via ${provider}.`, latency }
+      const provider = payload?.ai?.provider ?? 'provedor configurado'
+      return { state: 'healthy', detail: `Configurado via ${provider}.`, latency }
     }
     return {
       state: payload?.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
-      detail: payload?.ai?.message ?? 'No AI provider configured yet.',
+      detail: payload?.ai?.message ?? 'Nenhum provedor de IA configurado ainda.',
       latency,
     }
   }
@@ -97,51 +97,51 @@ function summarizePayload(checkId: string, payload: any, ok: boolean): { state: 
       const projects = payload?.database?.stats?.projects
       return {
         state: 'healthy',
-        detail: typeof projects === 'number' ? `Connected. ${projects} projects visible.` : 'Connected.',
+        detail: typeof projects === 'number' ? `Conectado. ${projects} projetos visiveis.` : 'Conectado.',
         latency,
       }
     }
-    return { state: 'unhealthy', detail: payload?.database?.error ?? 'Database connection failed.', latency }
+    return { state: 'unhealthy', detail: payload?.database?.error ?? 'Falha na conexao com o banco.', latency }
   }
 
   if (checkId === 'cache') {
-    if (payload?.cache?.configured) return { state: 'healthy', detail: 'Configured and reachable.', latency }
+    if (payload?.cache?.configured) return { state: 'healthy', detail: 'Configurado e acessivel.', latency }
     return {
       state: payload?.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
-      detail: payload?.cache?.message ?? payload?.cache?.error ?? 'Cache not configured.',
+      detail: payload?.cache?.message ?? payload?.cache?.error ?? 'Cache nao configurado.',
       latency,
     }
   }
 
   if (checkId === 'storage') {
     if (payload?.storage?.configured) {
-      return { state: 'healthy', detail: `Configured on ${payload?.storage?.type ?? 'storage'}.`, latency }
+      return { state: 'healthy', detail: `Configurado em ${payload?.storage?.type ?? 'storage'}.`, latency }
     }
     return {
       state: payload?.status === 'unknown' ? 'partial' : ok ? 'partial' : 'unhealthy',
-      detail: payload?.storage?.message ?? payload?.storage?.error ?? 'Storage not configured.',
+      detail: payload?.storage?.message ?? payload?.storage?.error ?? 'Armazenamento nao configurado.',
       latency,
     }
   }
 
   if (checkId === 'stripe') {
-    if (payload?.healthy) return { state: 'healthy', detail: 'Stripe gateway is ready for checkout.', latency }
+    if (payload?.healthy) return { state: 'healthy', detail: 'Gateway Stripe pronto para checkout.', latency }
     const priceCoverage =
       typeof payload?.configuredPriceCount === 'number' && typeof payload?.requiredPriceCount === 'number'
         ? ` prices=${payload.configuredPriceCount}/${payload.requiredPriceCount}.`
         : ''
     const missingEnv = Array.isArray(payload?.missingEnv) && payload.missingEnv.length > 0
-      ? ` Missing: ${payload.missingEnv.join(', ')}.`
+      ? ` Ausentes: ${payload.missingEnv.join(', ')}.`
       : ''
     return {
       state: ok ? 'partial' : 'unhealthy',
-      detail: `Gateway=${payload?.gateway ?? 'unknown'}, checkout=${payload?.checkoutEnabled ? 'enabled' : 'disabled'}, provider=${payload?.providerLabel ?? payload?.provider ?? 'unknown'}.${priceCoverage}${missingEnv}`.trim(),
+      detail: `Gateway=${payload?.gateway ?? 'unknown'}, checkout=${payload?.checkoutEnabled ? 'habilitado' : 'desabilitado'}, provider=${payload?.providerLabel ?? payload?.provider ?? 'unknown'}.${priceCoverage}${missingEnv}`.trim(),
       latency,
     }
   }
 
   if (checkId === 'billing') {
-    if (payload?.checkoutReady) return { state: 'healthy', detail: 'Checkout runtime is ready.', latency }
+    if (payload?.checkoutReady) return { state: 'healthy', detail: 'Runtime de checkout pronto.', latency }
     const gateway = payload?.gateway?.activeGateway ?? payload?.gateway?.gateway ?? 'unknown'
     const provider = payload?.provider?.label ?? payload?.provider?.id ?? 'unknown'
     const priceCoverage =
@@ -149,18 +149,18 @@ function summarizePayload(checkId: string, payload: any, ok: boolean): { state: 
         ? ` prices=${payload.stripe.configuredPriceCount}/${payload.stripe.requiredPriceCount}.`
         : ''
     const missingEnv = Array.isArray(payload?.stripe?.missingEnv) && payload.stripe.missingEnv.length > 0
-      ? ` Missing: ${payload.stripe.missingEnv.join(', ')}.`
+      ? ` Ausentes: ${payload.stripe.missingEnv.join(', ')}.`
       : ''
     return {
       state: payload?.status === 'partial' ? 'partial' : ok ? 'partial' : 'unhealthy',
-      detail: `Billing runtime still partial. Gateway=${gateway}, provider=${provider}.${priceCoverage}${missingEnv}`.trim(),
+      detail: `Runtime de billing ainda parcial. Gateway=${gateway}, provider=${provider}.${priceCoverage}${missingEnv}`.trim(),
       latency,
     }
   }
 
   return {
     state: ok ? 'healthy' : 'unhealthy',
-    detail: ok ? 'Operational.' : 'Endpoint failed.',
+    detail: ok ? 'Operacional.' : 'Falha no endpoint.',
     latency,
   }
 }
@@ -176,7 +176,7 @@ async function fetchSurface(check: SurfaceCheck): Promise<SurfaceResult> {
       id: check.id,
       name: check.name,
       state: 'unhealthy',
-      detail: error instanceof Error ? error.message : 'Request failed.',
+      detail: error instanceof Error ? error.message : 'Falha na requisicao.',
     }
   }
 }

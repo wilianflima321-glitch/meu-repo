@@ -135,18 +135,18 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {activeTab === 'billing' && (
-              <div className="p-4 sm:p-6">
-                <h2 className="text-lg font-semibold">Billing</h2>
-                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Plano atual, limites e historico de cobranca.</p>
-                <div className="mt-4">
-                  <Link
-                    href="/billing"
-                    className="inline-flex items-center rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
-                  >
-                    Ir para billing
-                  </Link>
-                </div>
+              {activeTab === 'billing' && (
+                <div className="p-4 sm:p-6">
+                  <h2 className="text-lg font-semibold">Faturamento</h2>
+                  <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Plano atual, limites e historico de cobranca.</p>
+                  <div className="mt-4">
+                    <Link
+                      href="/billing"
+                      className="inline-flex items-center rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
+                    >
+                      Ir para faturamento
+                    </Link>
+                  </div>
               </div>
             )}
 

@@ -61,15 +61,15 @@ const statusStyles: Record<string, string> = {
 }
 
 const statusLabels: Record<string, string> = {
-  paid: 'Paid',
-  open: 'Open',
-  draft: 'Draft',
-  uncollectible: 'Uncollectible',
-  void: 'Void',
-  active: 'Active',
-  trialing: 'Trialing',
-  canceled: 'Canceled',
-  incomplete: 'Incomplete',
+  paid: 'Pago',
+  open: 'Em aberto',
+  draft: 'Rascunho',
+  uncollectible: 'Incobravel',
+  void: 'Cancelado',
+  active: 'Ativo',
+  trialing: 'Em teste',
+  canceled: 'Cancelado',
+  incomplete: 'Incompleto',
 }
 
 function formatCurrency(amount: number, currency: string) {
@@ -102,12 +102,12 @@ function getErrorMessage(error: unknown) {
         ? String((error.data as { error?: unknown }).error ?? '')
         : ''
     if (code === 'PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE') {
-      return 'Billing runtime is still partial. Configure checkout, portal, and webhook before treating billing as live.'
+      return 'Runtime de billing ainda parcial. Configure checkout, portal e webhook antes de tratar billing como ativo.'
     }
     return error.message
   }
   if (error instanceof Error) return error.message
-  return 'Failed to load billing data.'
+  return 'Falha ao carregar dados de faturamento.'
 }
 
 function StatusPill({ status }: { status: string }) {
@@ -167,7 +167,7 @@ export default function InvoicesPage() {
         window.location.href = result.url
         return
       }
-      throw new Error('Billing portal URL was not returned.')
+      throw new Error('URL do portal de faturamento nao retornada.')
     } catch (nextError) {
       setError(getErrorMessage(nextError))
     } finally {
@@ -179,15 +179,15 @@ export default function InvoicesPage() {
   const subscriptionPeriodLabel = useMemo(() => {
     if (!billingData?.subscription) return null
     if (billingData.subscription.cancelAtPeriodEnd) {
-      return `Cancels on ${formatUnixDate(billingData.subscription.currentPeriodEnd)}`
+      return `Cancela em ${formatUnixDate(billingData.subscription.currentPeriodEnd)}`
     }
-    return `Next billing date: ${formatUnixDate(billingData.subscription.currentPeriodEnd)}`
+    return `Proxima cobranca: ${formatUnixDate(billingData.subscription.currentPeriodEnd)}`
   }, [billingData?.subscription])
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] flex items-center justify-center">
-        <div className="text-sm text-[var(--aethel-text-secondary)]">Loading billing data...</div>
+        <div className="text-sm text-[var(--aethel-text-secondary)]">Carregando dados de faturamento...</div>
       </div>
     )
   }
@@ -197,9 +197,9 @@ export default function InvoicesPage() {
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold">Invoices and Billing</h1>
+            <h1 className="text-3xl font-semibold">Faturas e faturamento</h1>
             <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-              Billing surfaces now reflect live runtime readiness. Do not assume checkout or portal are active unless readiness is green.
+              As superficies de faturamento agora refletem a prontidao do runtime. Nao assuma checkout ou portal ativos se a prontidao nao estiver verde.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -209,7 +209,7 @@ export default function InvoicesPage() {
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]"
             >
               <RefreshCcw className="h-4 w-4" />
-              Refresh
+              Atualizar
             </button>
             <button
               type="button"
@@ -217,7 +217,7 @@ export default function InvoicesPage() {
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to billing
+              Voltar ao faturamento
             </button>
           </div>
         </div>
@@ -227,7 +227,7 @@ export default function InvoicesPage() {
             <div className="flex items-start gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 text-[var(--aethel-error-light)]" />
               <div>
-                <p className="text-sm font-medium text-[var(--aethel-error-light)]">Billing data could not be loaded</p>
+                <p className="text-sm font-medium text-[var(--aethel-error-light)]">Nao foi possivel carregar dados de faturamento</p>
                 <p className="mt-1 text-sm text-[var(--aethel-error-light)]/80">{error}</p>
               </div>
             </div>
@@ -239,15 +239,15 @@ export default function InvoicesPage() {
             <div className="flex flex-wrap items-center gap-2">
               <StatusPill status={readiness.checkoutReady ? 'active' : 'incomplete'} />
               <span className="text-sm text-[var(--aethel-text-secondary)]">
-                checkout {readiness.checkoutReady ? 'ready' : 'partial'}
+                checkout {readiness.checkoutReady ? 'pronto' : 'parcial'}
               </span>
               <StatusPill status={readiness.portalReady ? 'active' : 'incomplete'} />
               <span className="text-sm text-[var(--aethel-text-secondary)]">
-                portal {readiness.portalReady ? 'ready' : 'partial'}
+                portal {readiness.portalReady ? 'pronto' : 'parcial'}
               </span>
               <StatusPill status={readiness.webhookReady ? 'active' : 'incomplete'} />
               <span className="text-sm text-[var(--aethel-text-secondary)]">
-                webhook {readiness.webhookReady ? 'ready' : 'partial'}
+                webhook {readiness.webhookReady ? 'pronto' : 'parcial'}
               </span>
             </div>
             {readiness.provider ? (
@@ -261,7 +261,7 @@ export default function InvoicesPage() {
             ) : null}
             {missingEnv.length > 0 && (
               <p className="mt-3 text-xs text-[var(--aethel-text-secondary)]">
-                Missing Stripe env: {missingEnv.join(', ')}.
+                Variaveis Stripe ausentes: {missingEnv.join(', ')}.
               </p>
             )}
           </div>
@@ -271,7 +271,7 @@ export default function InvoicesPage() {
           <section className="mb-6 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-sm text-[var(--aethel-text-secondary)]">Current plan</p>
+                <p className="text-sm text-[var(--aethel-text-secondary)]">Plano atual</p>
                 <h2 className="mt-1 text-xl font-semibold">{billingData.plan}</h2>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <StatusPill status={billingData.subscription.status} />
@@ -284,7 +284,7 @@ export default function InvoicesPage() {
                 disabled={portalLoading || readiness?.portalReady === false}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--aethel-primary-dark)] px-4 py-2 text-sm text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {portalLoading ? 'Opening...' : readiness?.portalReady === false ? 'Portal unavailable' : 'Manage subscription'}
+                {portalLoading ? 'Abrindo...' : readiness?.portalReady === false ? 'Portal indisponivel' : 'Gerenciar assinatura'}
               </button>
             </div>
           </section>
@@ -292,7 +292,7 @@ export default function InvoicesPage() {
 
         {billingData?.trial?.isActive && (
           <section className="mb-6 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-4 text-sm text-[var(--aethel-info-light)]">
-            Trial active. {billingData.trial.daysRemaining} days remaining. Trial ends on {formatIsoDate(billingData.trial.endsAt)}.
+            Trial ativo. {billingData.trial.daysRemaining} dias restantes. Termina em {formatIsoDate(billingData.trial.endsAt)}.
           </section>
         )}
 
@@ -300,8 +300,8 @@ export default function InvoicesPage() {
           <section className="mb-6 rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold">Payment methods</h2>
-                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Stripe-backed payment methods attached to this customer.</p>
+                <h2 className="text-lg font-semibold">Formas de pagamento</h2>
+                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Formas de pagamento registradas no Stripe para este cliente.</p>
               </div>
               <button
                 type="button"
@@ -309,7 +309,7 @@ export default function InvoicesPage() {
                 disabled={portalLoading || readiness?.portalReady === false}
                 className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Update in portal
+                Atualizar no portal
               </button>
             </div>
             <div className="mt-4 space-y-3">
@@ -317,10 +317,10 @@ export default function InvoicesPage() {
                 <div key={pm.id} className="flex items-center justify-between rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/70 px-4 py-3">
                   <div>
                     <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
-                      {(pm.brand || 'card').toUpperCase()} ending in {pm.last4 || '----'}
+                      {(pm.brand || 'card').toUpperCase()} termina em {pm.last4 || '----'}
                     </p>
                     <p className="text-xs text-[var(--aethel-text-secondary)]">
-                      Expires {String(pm.expMonth || '').padStart(2, '0')}/{pm.expYear || '----'}
+                      Expira {String(pm.expMonth || '').padStart(2, '0')}/{pm.expYear || '----'}
                     </p>
                   </div>
                   {pm.isDefault && <StatusPill status="active" />}
@@ -332,18 +332,18 @@ export default function InvoicesPage() {
 
         <section className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
           <div className="border-b border-[var(--aethel-border-primary)] px-6 py-4">
-            <h2 className="text-lg font-semibold">Invoice history</h2>
+            <h2 className="text-lg font-semibold">Historico de faturas</h2>
           </div>
           {billingData?.invoices && billingData.invoices.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-800">
                 <thead className="bg-[var(--aethel-surface-primary)]/60">
                   <tr className="text-left text-xs uppercase tracking-wide text-[var(--aethel-text-secondary)]">
-                    <th className="px-6 py-3">Invoice</th>
-                    <th className="px-6 py-3">Date</th>
-                    <th className="px-6 py-3">Amount</th>
+                    <th className="px-6 py-3">Fatura</th>
+                    <th className="px-6 py-3">Data</th>
+                    <th className="px-6 py-3">Valor</th>
                     <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3 text-right">Actions</th>
+                    <th className="px-6 py-3 text-right">Acoes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
@@ -357,7 +357,7 @@ export default function InvoicesPage() {
                         <div className="flex items-center justify-end gap-3 text-sm">
                           {invoice.hostedUrl && (
                             <a href={invoice.hostedUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary-light)]">
-                              View
+                              Ver
                               <ExternalLink className="h-3.5 w-3.5" />
                             </a>
                           )}
@@ -377,15 +377,15 @@ export default function InvoicesPage() {
           ) : (
             <div className="px-6 py-12 text-center">
               <FileText className="mx-auto h-10 w-10 text-[var(--aethel-text-tertiary)]" />
-              <h3 className="mt-4 text-sm font-medium text-[var(--aethel-text-primary)]">No invoices yet</h3>
-              <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Invoices will appear here after the first completed billing cycle.</p>
+              <h3 className="mt-4 text-sm font-medium text-[var(--aethel-text-primary)]">Nenhuma fatura ainda</h3>
+              <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">As faturas aparecem aqui apos o primeiro ciclo de cobranca concluido.</p>
             </div>
           )}
         </section>
 
         <div className="mt-6 text-center">
           <Link href="/billing" className="text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
-            Back to billing workspace
+            Voltar ao workspace de faturamento
           </Link>
         </div>
       </div>

@@ -44,11 +44,11 @@ export default function NexusPage() {
           <Activity size={24} className="text-[var(--aethel-text-primary)]" />
         </Link>
 
-        <nav className="flex flex-1 flex-col gap-6" aria-label="Nexus sidebar navigation">
+        <nav className="flex flex-1 flex-col gap-6" aria-label="Navegacao lateral do Nexus">
           <Link
             href="/dashboard"
             className="rounded-lg p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
-            aria-label="Studio Home"
+            aria-label="Inicio do Studio"
           >
             <Home size={22} />
           </Link>
@@ -69,14 +69,14 @@ export default function NexusPage() {
           <Link
             href="/billing"
             className="rounded-lg p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
-            aria-label="Billing"
+            aria-label="Faturamento"
           >
             <Database size={22} />
           </Link>
           <Link
             href="/settings"
             className="rounded-lg p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
-            aria-label="Settings"
+            aria-label="Ajustes"
           >
             <Cloud size={22} />
           </Link>
@@ -104,7 +104,7 @@ export default function NexusPage() {
         <header className="h-14 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-6 backdrop-blur-xl">
           <div className="flex h-full items-center justify-between">
             <div className="flex items-center gap-4">
-              <h1 className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--aethel-text-secondary)]">The Nexus</h1>
+              <h1 className="text-sm font-bold uppercase tracking-[0.2em] text-[var(--aethel-text-secondary)]">Nexus</h1>
               <div className="h-4 w-px bg-[var(--aethel-surface-tertiary)]"></div>
               <div className="flex items-center gap-2 rounded-md border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-1">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--aethel-success)] shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
@@ -128,7 +128,7 @@ export default function NexusPage() {
                     rightPanelMode === 'research' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
                   }`}
                 >
-                  Research
+                  Pesquisa
                 </button>
                 <button
                   onClick={() => setRightPanelMode('director')}
@@ -136,7 +136,7 @@ export default function NexusPage() {
                     rightPanelMode === 'director' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
                   }`}
                 >
-                  Director
+                  Direcao
                 </button>
               </div>
               <button className="rounded-lg bg-[var(--aethel-primary-dark)] px-4 py-1.5 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-900/20 transition-all hover:bg-[var(--aethel-primary)]">
@@ -157,7 +157,7 @@ export default function NexusPage() {
         <div className="flex flex-1 overflow-hidden">
           <div className="hidden w-64 flex-col border-r border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/30 lg:flex">
             <div className="border-b border-[var(--aethel-border-primary)] p-4">
-              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Project Context</h2>
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Contexto do projeto</h2>
               <div className="space-y-1">
                 <button className="flex w-full items-center gap-3 rounded-lg border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/5 px-3 py-2 text-xs text-[var(--aethel-primary-light)]">
                   <Layout size={14} /> <span>Aethel Engine V2</span>
@@ -171,7 +171,7 @@ export default function NexusPage() {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
-              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Live Assets</h2>
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Assets ao vivo</h2>
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5].map((item) => (
                   <div
@@ -183,7 +183,7 @@ export default function NexusPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[10px] font-bold transition-colors group-hover:text-[var(--aethel-primary-light)]">Asset_Prototype_0{item}.obj</p>
-                      <p className="text-[9px] uppercase text-[var(--aethel-text-tertiary)]">Optimized</p>
+                      <p className="text-[9px] uppercase text-[var(--aethel-text-tertiary)]">Otimizado</p>
                     </div>
                   </div>
                 ))}

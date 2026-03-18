@@ -65,7 +65,7 @@ export default function NotFound() {
         <div className="mx-auto mt-12 grid w-full max-w-xl gap-3 sm:grid-cols-3">
           {[
             { label: 'Status', href: '/status', icon: 'pulse' },
-            { label: 'Pricing', href: '/pricing', icon: 'credit-card' },
+            { label: 'Planos', href: '/pricing', icon: 'credit-card' },
             { label: 'Contato', href: '/contact-sales', icon: 'mail' },
           ].map((item) => (
             <Link
