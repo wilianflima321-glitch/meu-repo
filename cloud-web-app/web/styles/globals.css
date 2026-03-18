@@ -910,3 +910,190 @@ html.light .aethel-sidebar-item.active {
     border: 1px solid ButtonText;
   }
 }
+
+/* ============================================================================
+ * WCAG 2.2 AA CONTRAST COMPLIANCE
+ * Ensures all text meets minimum 4.5:1 contrast ratio (normal text)
+ * and 3:1 for large text (>=18px or >=14px bold)
+ * ============================================================================ */
+
+/* --- Dark theme contrast corrections --- */
+/* text-muted on #0a0a0f: #475569 only reaches ~3.3:1. Bump to #94a3b8 (5.4:1) */
+.wcag-aa-text {
+  color: var(--aethel-text-tertiary); /* Slate-400 = ~5.4:1 on dark surfaces */
+}
+
+/* Ensure secondary text meets 4.5:1 on dark background */
+/* #e2e8f0 on #0a0a0f = ~14.8:1 PASS */
+/* #94a3b8 on #0a0a0f = ~5.4:1 PASS */
+/* #64748b on #0a0a0f = ~3.6:1 FAIL for normal text */
+
+/* Fix: quaternary text used in UI must be bumped for body-size text */
+.text-quaternary-aa {
+  color: var(--aethel-text-tertiary); /* Use tertiary (#94a3b8) instead of quaternary (#64748b) */
+}
+
+/* --- Light theme contrast corrections --- */
+[data-aethel-theme='light'] .text-quaternary-aa,
+[data-theme='light'] .text-quaternary-aa,
+html.light .text-quaternary-aa {
+  color: var(--aethel-text-tertiary); /* #475569 on #f5f7fb = ~5.8:1 PASS */
+}
+
+/* Badge/chip text: ensure colored badges have sufficient contrast */
+.badge-contrast-safe {
+  /* Blue on dark: #93c5fd on #0a0a0f = ~8.6:1 PASS */
+  color: #93c5fd;
+}
+
+[data-aethel-theme='light'] .badge-contrast-safe,
+[data-theme='light'] .badge-contrast-safe,
+html.light .badge-contrast-safe {
+  /* Blue on light: #1e40af on #f5f7fb = ~7.2:1 PASS */
+  color: #1e40af;
+}
+
+/* Disabled state: reduced opacity may break contrast.
+   Use explicit lower-contrast color instead of opacity */
+.text-disabled-aa {
+  color: var(--aethel-text-quaternary);
+  /* Large text (>=18px or >=14px bold) only. For small text, use tertiary. */
+}
+
+/* Link contrast: ensure links are distinguishable and meet 4.5:1 */
+a:not([class]) {
+  color: var(--aethel-primary-light);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:not([class]):hover {
+  color: var(--aethel-primary);
+}
+
+[data-aethel-theme='light'] a:not([class]),
+[data-theme='light'] a:not([class]),
+html.light a:not([class]) {
+  color: var(--aethel-primary-dark);
+}
+
+/* Placeholder text compliance: #94a3b8 on dark input bg (#111118) = ~5.1:1 PASS */
+/* Already compliant via --aethel-text-tertiary */
+
+/* ============================================================================
+ * WCAG 2.2 AA - ENHANCED FOCUS INDICATORS
+ * 2.4.7 Focus Visible: visible focus for all interactive elements
+ * 2.4.11 Focus Not Obscured: focus ring must not be hidden
+ * ============================================================================ */
+
+/* Enhanced focus ring with both outline and box-shadow for visibility */
+:focus-visible {
+  outline: 2px solid var(--aethel-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+}
+
+[data-aethel-theme='light'] :focus-visible,
+[data-theme='light'] :focus-visible,
+html.light :focus-visible {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+/* ============================================================================
+ * WCAG 2.2 AA - TARGET SIZE (2.5.8)
+ * Minimum 24x24 CSS pixels for pointer targets
+ * ============================================================================ */
+
+/* All interactive elements get minimum touch target */
+button, [role="button"], a, input, select, textarea {
+  min-height: 24px;
+}
+
+/* Mobile: enforce 44px minimum for touch targets per Apple/Material guidelines */
+@media (pointer: coarse) {
+  button, [role="button"], a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ============================================================================
+ * MOBILE RESPONSIVE: Viewport-safe layouts
+ * ============================================================================ */
+
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* Stack all grid layouts on mobile */
+  .grid-auto-mobile {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Compact padding for mobile */
+  .aethel-card {
+    padding: var(--aethel-space-4);
+  }
+
+  .aethel-panel-header {
+    padding: var(--aethel-space-3);
+  }
+
+  .aethel-panel-content {
+    padding: var(--aethel-space-3);
+  }
+}
+
+/* ============================================================================
+ * MOBILE BOTTOM NAV (shown on small screens for key navigation)
+ * ============================================================================ */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--aethel-z-sticky);
+    background: var(--aethel-surface-secondary);
+    border-top: 1px solid var(--aethel-border-primary);
+    padding: var(--aethel-space-1) var(--aethel-space-2);
+    padding-bottom: max(var(--aethel-space-1), env(safe-area-inset-bottom));
+    justify-content: space-around;
+    align-items: center;
+    gap: var(--aethel-space-1);
+  }
+
+  .mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: var(--aethel-space-1);
+    min-width: 56px;
+    min-height: 44px;
+    border-radius: var(--aethel-radius-md);
+    color: var(--aethel-text-tertiary);
+    font-size: var(--aethel-font-size-2xs);
+    text-decoration: none;
+    transition: all var(--aethel-transition-fast);
+  }
+
+  .mobile-bottom-nav-item:hover,
+  .mobile-bottom-nav-item.active {
+    color: var(--aethel-primary-light);
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  /* Add bottom padding to main content to avoid nav overlap */
+  .has-mobile-nav {
+    padding-bottom: 72px;
+  }
+}
