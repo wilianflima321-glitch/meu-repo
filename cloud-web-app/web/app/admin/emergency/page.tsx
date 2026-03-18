@@ -24,7 +24,7 @@ const fetcher = async (url: string) => {
   })
   const payload = await response.json().catch(() => null)
   if (!response.ok) {
-    throw new Error(payload?.error || payload?.message || 'Falha ao carregar emergency mode')
+    throw new Error(payload?.error || payload?.message || 'Falha ao carregar modo de emergencia')
   }
   return payload
 }
@@ -69,12 +69,12 @@ export default function AdminEmergencyPage() {
       })
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || 'Falha ao ativar emergency mode')
+        throw new Error(payload?.error || payload?.message || 'Falha ao ativar modo de emergencia')
       }
       setReason('')
       await mutate()
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Erro ao ativar emergency mode')
+      setError(requestError instanceof Error ? requestError.message : 'Erro ao ativar modo de emergencia')
     } finally {
       setPending(null)
     }
@@ -91,11 +91,11 @@ export default function AdminEmergencyPage() {
       })
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || 'Falha ao desativar emergency mode')
+        throw new Error(payload?.error || payload?.message || 'Falha ao desativar modo de emergencia')
       }
       await mutate()
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Erro ao desativar emergency mode')
+      setError(requestError instanceof Error ? requestError.message : 'Erro ao desativar modo de emergencia')
     } finally {
       setPending(null)
     }
@@ -105,9 +105,9 @@ export default function AdminEmergencyPage() {
     <div className="mx-auto max-w-5xl p-6">
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Emergency Control</h1>
+          <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Controle de emergencia</h1>
           <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">
-            Opera o modo de contingência para cargas críticas sem estado fake.
+            Opera o modo de contingencia para cargas criticas sem estado fake.
           </p>
         </div>
         <button
@@ -157,9 +157,9 @@ export default function AdminEmergencyPage() {
             onChange={(event) => setLevel(event.target.value as EmergencyLevel)}
             className="mb-4 w-full rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
           >
-            <option value="warning">Warning</option>
-            <option value="critical">Critical</option>
-            <option value="shutdown">Shutdown</option>
+            <option value="warning">Aviso</option>
+            <option value="critical">Critico</option>
+            <option value="shutdown">Desligamento</option>
           </select>
 
           <label className="mb-2 block text-xs uppercase tracking-[0.08em] text-[var(--aethel-text-tertiary)]">Motivo</label>
@@ -177,7 +177,7 @@ export default function AdminEmergencyPage() {
             className="inline-flex items-center gap-2 rounded bg-[var(--aethel-warning-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-warning)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <AlertTriangle className="h-4 w-4" />
-            {pending === 'activate' ? 'Ativando...' : 'Ativar Emergency'}
+            {pending === 'activate' ? 'Ativando...' : 'Ativar emergencia'}
           </button>
         </div>
 
@@ -195,7 +195,7 @@ export default function AdminEmergencyPage() {
             className="inline-flex items-center gap-2 rounded bg-[var(--aethel-error-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <StopCircle className="h-4 w-4" />
-            {pending === 'deactivate' ? 'Desativando...' : 'Desativar Emergency'}
+            {pending === 'deactivate' ? 'Desativando...' : 'Desativar emergencia'}
           </button>
         </div>
       </section>
