@@ -2,6 +2,7 @@
 import type { FormEvent } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
+import { Code, CreditCard, LayoutDashboard, MessageSquare, Settings } from 'lucide-react'
 import {
   AethelAPIClient,
   type BillingPlan,
@@ -97,6 +98,7 @@ import OnboardingWizard from './onboarding/OnboardingWizard'
 import {
   DASHBOARD_DEFAULT_SETTINGS,
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
+  coerceActiveTab,
   type FullAccessResponse,
   type Point3,
 } from './dashboard/aethel-dashboard-core-types'
@@ -105,6 +107,7 @@ import { DashboardToast } from './dashboard/DashboardToast'
 import { useFirstValueTracking } from './dashboard/useFirstValueTracking'
 import { useDashboardMissionSeed } from './dashboard/useDashboardMissionSeed'
 import { useDashboardStoragePersistence } from './dashboard/useDashboardStoragePersistence'
+import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
 import {
   getInitialActiveTab,
   getInitialChatHistory,
@@ -937,6 +940,16 @@ export default function AethelDashboard() {
   }, [trackEvent])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const tab = params.get('tab')
+    if (!tab) return
+    const nextTab = coerceActiveTab(tab)
+    setActiveTab(nextTab)
+    window.localStorage.setItem(STORAGE_KEYS.activeTab, nextTab)
+  }, [])
+
+  useEffect(() => {
     if (!authReady || !hasToken) return
     const controller = new AbortController()
 
@@ -1084,7 +1097,7 @@ export default function AethelDashboard() {
           onSelectTab={handleTabChange}
           onCloseMobile={() => setSidebarOpen(false)}
         />
-        <main id="dashboard-main-content" className="flex-1 overflow-y-auto relative">
+        <main id="dashboard-main-content" className="flex-1 overflow-y-auto relative has-mobile-nav">
           {showOnboardingWizard ? (
             <div className="aethel-p-6">
               <OnboardingWizard
@@ -1227,6 +1240,16 @@ export default function AethelDashboard() {
           )}
         </main>
       </div>
+
+      <MobileBottomNav
+        items={[
+          { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, matchPaths: ['/dashboard'] },
+          { href: '/ide', label: 'IDE', icon: Code, matchPaths: ['/ide'] },
+          { href: '/dashboard?tab=ai-chat', label: 'Chat', icon: MessageSquare, matchPaths: [] },
+          { href: '/billing', label: 'Faturamento', icon: CreditCard, matchPaths: ['/billing'] },
+          { href: '/settings', label: 'Ajustes', icon: Settings, matchPaths: ['/settings'] },
+        ]}
+      />
 
       {showToast ? <DashboardToast message={showToast.message} type={showToast.type} /> : null}
     </div>
