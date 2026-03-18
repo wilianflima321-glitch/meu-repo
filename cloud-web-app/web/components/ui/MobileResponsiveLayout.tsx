@@ -37,11 +37,11 @@ interface MobileNavItem {
 }
 
 const DEFAULT_NAV_ITEMS: MobileNavItem[] = [
-  { href: '/dashboard', label: 'Home', icon: Home, matchPaths: ['/dashboard'] },
+  { href: '/dashboard', label: 'Inicio', icon: Home, matchPaths: ['/dashboard'] },
   { href: '/ide', label: 'IDE', icon: Code, matchPaths: ['/ide'] },
-  { href: '/dashboard?tab=chat', label: 'Chat', icon: MessageSquare, matchPaths: [] },
-  { href: '/search', label: 'Search', icon: Search, matchPaths: ['/search'] },
-  { href: '/settings', label: 'Settings', icon: Settings, matchPaths: ['/settings'] },
+  { href: '/dashboard?tab=ai-chat', label: 'Chat', icon: MessageSquare, matchPaths: [] },
+  { href: '/search', label: 'Busca', icon: Search, matchPaths: ['/search'] },
+  { href: '/settings', label: 'Ajustes', icon: Settings, matchPaths: ['/settings'] },
 ]
 
 export function MobileBottomNav({
@@ -63,7 +63,7 @@ export function MobileBottomNav({
     <nav
       className="mobile-bottom-nav"
       role="navigation"
-      aria-label="Mobile navigation"
+      aria-label="Navegacao mobile"
     >
       {items.map((item) => {
         const Icon = item.icon
@@ -170,7 +170,7 @@ export function MobileSidebarOverlay({
       className="fixed inset-0 z-[1050] flex"
       role="dialog"
       aria-modal="true"
-      aria-label={title || 'Sidebar menu'}
+      aria-label={title || 'Menu lateral'}
     >
       {/* Backdrop */}
       <div
@@ -198,7 +198,7 @@ export function MobileSidebarOverlay({
           <button
             onClick={onClose}
             className="ml-auto flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
-            aria-label="Close menu"
+            aria-label="Fechar menu"
           >
             <X size={20} />
           </button>

@@ -7,7 +7,9 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { Code, CreditCard, LayoutDashboard, MessageSquare, Settings } from 'lucide-react'
 import StudioGlobalNav from './StudioGlobalNav'
+import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
 
 interface StudioLayoutProps {
   /** Page title shown in the header */
@@ -65,12 +67,21 @@ export default function StudioLayout({
 
       <main
         id="main-content"
-        className={`mx-auto ${MAX_WIDTH_CLASSES[maxWidth] || 'max-w-7xl'} ${
+        className={`mx-auto has-mobile-nav ${MAX_WIDTH_CLASSES[maxWidth] || 'max-w-7xl'} ${
           padded ? 'px-4 py-6 sm:px-6 lg:px-8' : ''
         } ${className}`}
       >
         {children}
       </main>
+      <MobileBottomNav
+        items={[
+          { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, matchPaths: ['/dashboard'] },
+          { href: '/ide', label: 'IDE', icon: Code, matchPaths: ['/ide'] },
+          { href: '/nexus', label: 'Nexus', icon: MessageSquare, matchPaths: ['/nexus'] },
+          { href: '/billing', label: 'Faturamento', icon: CreditCard, matchPaths: ['/billing'] },
+          { href: '/settings', label: 'Ajustes', icon: Settings, matchPaths: ['/settings'] },
+        ]}
+      />
     </div>
   )
 }

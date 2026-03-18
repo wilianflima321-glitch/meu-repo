@@ -5,18 +5,18 @@ export type NavigationLink = {
 }
 
 export const PUBLIC_NAV_LINKS: NavigationLink[] = [
-  { href: '/pricing', label: 'Pricing' },
-  { href: '/docs', label: 'Docs' },
+  { href: '/pricing', label: 'Planos' },
+  { href: '/docs', label: 'Documentacao' },
   { href: '/status', label: 'Status' },
   { href: '/contact-sales', label: 'Contato' },
 ]
 
 export const STUDIO_PRIMARY_LINKS: NavigationLink[] = [
-  { href: '/dashboard', label: 'Home', exact: true },
+  { href: '/dashboard', label: 'Inicio', exact: true },
   { href: '/ide', label: 'IDE', exact: true },
   { href: '/nexus', label: 'Nexus', exact: true },
-  { href: '/billing', label: 'Billing', exact: false },
-  { href: '/settings', label: 'Settings', exact: false },
+  { href: '/billing', label: 'Faturamento', exact: false },
+  { href: '/settings', label: 'Configuracoes', exact: false },
 ]
 
 export const STUDIO_SECONDARY_LINKS: NavigationLink[] = [
