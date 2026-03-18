@@ -83,7 +83,7 @@ export default function BillingPage() {
 
   if (isLoading) {
     return (
-      <StudioLayout title="Billing" subtitle="Planos, consumo e faturamento do workspace.">
+    <StudioLayout title="Faturamento" subtitle="Planos, consumo e faturamento do workspace.">
         <div className="aethel-flex aethel-items-center aethel-justify-center px-6 py-12">
           <div className="aethel-card aethel-p-6">
             <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando planos...</p>
@@ -95,7 +95,7 @@ export default function BillingPage() {
 
   if (error) {
     return (
-      <StudioLayout title="Billing" subtitle="Planos, consumo e faturamento do workspace.">
+    <StudioLayout title="Faturamento" subtitle="Planos, consumo e faturamento do workspace.">
         <div className="aethel-flex aethel-items-center aethel-justify-center px-6 py-12">
           <div className="aethel-card aethel-p-6 max-w-md">
             <h1 className="text-xl font-bold mb-2">Falha ao carregar billing</h1>
@@ -110,7 +110,7 @@ export default function BillingPage() {
 
   return (
     <StudioLayout
-      title="Billing"
+      title="Faturamento"
       subtitle="Controle de uso, previsibilidade de custos e upgrade instantaneo."
       maxWidth="7xl"
     >
