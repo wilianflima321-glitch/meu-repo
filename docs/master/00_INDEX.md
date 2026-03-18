@@ -37,6 +37,7 @@ Status: CANONICAL ENTRYPOINT
 32. `docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md`
 33. `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`
 34. `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
+35. `docs/master/40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -72,6 +73,7 @@ Status: CANONICAL ENTRYPOINT
 | `37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md` | Definitive technical evaluation and market comparison | ACTIVE |
 | `38_L5_EXECUTION_BOARD_2026-03-10.md` | Master tracking board for L4/L5 execution | ACTIVE |
 | `39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md` | Unified Studio information architecture and navigation contract | ACTIVE |
+| `40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md` | Consolidated L5 execution plan and dependency graph | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

@@ -93,6 +93,7 @@ import { TrialBanner } from './dashboard/TrialBanner'
 import { DashboardHeader } from './dashboard/DashboardHeader'
 import { AethelDashboardSidebar } from './dashboard/AethelDashboardSidebar'
 import { DashboardMainContent } from './dashboard/DashboardMainContent'
+import OnboardingWizard from './onboarding/OnboardingWizard'
 import {
   DASHBOARD_DEFAULT_SETTINGS,
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
@@ -113,6 +114,7 @@ import {
 } from './dashboard/aethel-dashboard-initial-state'
 const DEFAULT_MODEL = 'google/gemini-3.1-flash-lite-preview'
 const FIRST_VALUE_GUIDE_DISMISSED_KEY = 'aethel.dashboard.first-value.dismissed'
+const ONBOARDING_WIZARD_DISMISSED_KEY = 'aethel.dashboard.onboarding.dismissed'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -159,6 +161,7 @@ export default function AethelDashboard() {
   const [showFirstValueGuide, setShowFirstValueGuide] = useState(() =>
     getInitialFirstValueGuideState(FIRST_VALUE_GUIDE_DISMISSED_KEY)
   )
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false)
   const chatAbortRef = useRef<AbortController | null>(null)
   const [isTrialActive] = useState(true)
   const [showTrialBanner, setShowTrialBanner] = useState(true)
@@ -606,6 +609,25 @@ export default function AethelDashboard() {
     showToastMessage(`Template "${template.name}" carregado no chat.`, 'success')
   }, [workflowTemplates, showToastMessage])
 
+  const handleDismissOnboardingWizard = useCallback((reason: 'skip' | 'complete') => {
+    setShowOnboardingWizard(false)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(ONBOARDING_WIZARD_DISMISSED_KEY, '1')
+    }
+    trackEvent('onboarding', 'wizard_dismiss', { reason })
+  }, [trackEvent])
+
+  const handleOnboardingComplete = useCallback((template: { id: string }) => {
+    handleDismissOnboardingWizard('complete')
+    if (template?.id) {
+      handleTemplateSelect(template.id)
+    }
+  }, [handleDismissOnboardingWizard, handleTemplateSelect])
+
+  const handleOnboardingSkip = useCallback(() => {
+    handleDismissOnboardingWizard('skip')
+  }, [handleDismissOnboardingWizard])
+
   const handleUseCaseSelect = useCallback((useCaseId: string) => {
     const selected = useCases.find((item) => item.id === useCaseId)
     if (!selected) return
@@ -896,6 +918,17 @@ export default function AethelDashboard() {
   })
 
   useEffect(() => {
+    if (!authReady || !hasToken) return
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const forced = params.get('onboarding') === '1'
+    const dismissed = window.localStorage.getItem(ONBOARDING_WIZARD_DISMISSED_KEY) === '1'
+    if (forced || (!dismissed && showFirstValueGuide)) {
+      setShowOnboardingWizard(true)
+    }
+  }, [authReady, hasToken, showFirstValueGuide])
+
+  useEffect(() => {
     setAuthReady(true)
     setHasToken(isAuthenticated())
     setCopilotProjectId(getProjectIdFromLocation())
@@ -1052,137 +1085,146 @@ export default function AethelDashboard() {
           onCloseMobile={() => setSidebarOpen(false)}
         />
         <main id="dashboard-main-content" className="flex-1 overflow-y-auto relative">
-          <DashboardMainContent
-            activeTab={activeTab}
-            showFirstValueGuide={showFirstValueGuide}
-            firstProjectCreated={projects.length > DEFAULT_PROJECTS.length}
-            firstValueAiSuccess={firstValueAiSuccess}
-            firstValueOpenedIde={firstValueOpenedIde}
-            firstValueSessionSummary={firstValueSessionSummary}
-            onFirstValueStartTemplate={handleTemplateSelect}
-            onFirstValueCreateProject={() => {
-              trackEvent('project', 'project_open', { source: 'first-value-guide', action: 'open-project-tab' })
-              handleTabChange('projects')
-            }}
-            onFirstValueConfigureAI={() => {
-              trackEvent('ai', 'ai_error', { source: 'first-value-guide', action: 'open-provider-setup' })
-              handleOpenProviderSettings()
-            }}
-            onFirstValueOpenAIChat={handleOpenAIChatFromGuide}
-            onFirstValueOpenIdePreview={handleOpenIdeLivePreview}
-            onFirstValueDismiss={dismissFirstValueGuide}
-            overviewProps={{
-              aiActivity,
-              projects,
-              livePreviewSuggestions,
-              authReady,
-              hasToken,
-              onRefreshWallet: handleRefreshWallet,
-              lastWalletUpdate,
-              walletLoading,
-              walletError: walletError as Error | null | undefined,
-              walletData,
-              walletTransactions,
-              formatCurrencyLabel,
-              connectivityData,
-              connectivityLoading,
-              connectivityError: connectivityError as Error | null | undefined,
-              connectivityServices,
-              formatConnectivityStatus: formatConnectivityStatusLabel,
-              miniPreviewExpanded,
-              onToggleMiniPreviewExpanded: () => setMiniPreviewExpanded((prev) => !prev),
-              onMagicWandSelect: handleMagicWandSelect,
-              onSendSuggestion: handleSendLivePreviewSuggestion,
-              isGenerating,
-            }}
-            projectsProps={{
-              projects,
-              newProjectName,
-              newProjectType,
-              onDeleteProject: handleDeleteProject,
-              onCreateProject: handleCreateProject,
-              onProjectNameChange: setNewProjectName,
-              onProjectTypeChange: setNewProjectType,
-              onProjectVersionChange: handleProjectVersionChange,
-              onApplyDirectorNote: handleApplyDirectorNote,
-            }}
-            aiChatProps={{
-              chatMode,
-              onChatModeChange: setChatMode,
-              chatHistory,
-              chatMessage,
-              onChatMessageChange: setChatMessage,
-              onSendChatMessage: handleSendChatMessage,
-              onStopStreaming: handleStopDashboardChat,
-              isStreaming,
-              activeWorkflowId,
-              copilotWorkflows,
-              copilotWorkflowsLoading,
-              connectBusy,
-              connectFromWorkflowId,
-              onCreateWorkflow: handleCreateWorkflow,
-              onSelectWorkflow: handleSelectWorkflow,
-              onRenameWorkflow: handleRenameWorkflow,
-              onArchiveWorkflow: handleArchiveWorkflow,
-              onConnectFromWorkflowChange: setConnectFromWorkflowId,
-              onCopyHistory: handleCopyHistory,
-              onImportContext: handleImportContext,
-              onMergeWorkflow: handleMergeWorkflow,
-              providerSetupGate: aiProviderGate,
-              onOpenProviderSettings: handleOpenProviderSettings,
-            }}
-            walletProps={{
-              authReady,
-              hasToken,
-              walletLoading,
-              walletError,
-              walletData,
-              walletTransactions,
-              creditsInfo: creditsData,
-              creditsUsedToday: walletStats.creditsUsedToday,
-              creditsUsedThisMonth: walletStats.creditsUsedThisMonth,
-              creditsReceivedThisMonth: walletStats.creditsReceivedThisMonth,
-              lastWalletUpdate,
-              lastPurchaseIntent,
-              lastTransferReceipt,
-              walletActionMessage,
-              walletActionError,
-              purchaseForm,
-              transferForm,
-              walletSubmitting,
-              creditEntries,
-              receivableSummary,
-              onRefreshWallet: handleRefreshWallet,
-              onPurchaseIntentSubmit: handlePurchase,
-              onTransferSubmit: handleTransfer,
-              setPurchaseForm,
-              setTransferForm,
-              formatCurrencyLabel,
-              formatStatusLabel,
-            }}
-            billingProps={{
-              plans: billingPlansForUI,
-              currentPlan: currentPlan?.id,
-              loading: !billingData && !billingError,
-              onSelectPlan: handleSubscribe,
-              onManageSubscription: handleManageSubscription,
-            }}
-            billingError={subscribeError}
-            subscribingPlan={subscribingPlan}
-            connectivityProps={{
-              connectivityLoading,
-              connectivityError,
-              connectivityData,
-              connectivityServices,
-              onRefreshConnectivity: handleRefreshConnectivity,
-              formatConnectivityStatus: formatConnectivityStatusLabel,
-            }}
-            workflowTemplates={workflowTemplates}
-            useCases={useCases}
-            onDownload={handleDownload}
-            onTemplateSelect={handleTemplateSelect}
-            onUseCaseSelect={handleUseCaseSelect}
-          />
+          {showOnboardingWizard ? (
+            <div className="aethel-p-6">
+              <OnboardingWizard
+                onComplete={handleOnboardingComplete}
+                onSkip={handleOnboardingSkip}
+              />
+            </div>
+          ) : (
+            <DashboardMainContent
+              activeTab={activeTab}
+              showFirstValueGuide={showFirstValueGuide}
+              firstProjectCreated={projects.length > DEFAULT_PROJECTS.length}
+              firstValueAiSuccess={firstValueAiSuccess}
+              firstValueOpenedIde={firstValueOpenedIde}
+              firstValueSessionSummary={firstValueSessionSummary}
+              onFirstValueStartTemplate={handleTemplateSelect}
+              onFirstValueCreateProject={() => {
+                trackEvent('project', 'project_open', { source: 'first-value-guide', action: 'open-project-tab' })
+                handleTabChange('projects')
+              }}
+              onFirstValueConfigureAI={() => {
+                trackEvent('ai', 'ai_error', { source: 'first-value-guide', action: 'open-provider-setup' })
+                handleOpenProviderSettings()
+              }}
+              onFirstValueOpenAIChat={handleOpenAIChatFromGuide}
+              onFirstValueOpenIdePreview={handleOpenIdeLivePreview}
+              onFirstValueDismiss={dismissFirstValueGuide}
+              overviewProps={{
+                aiActivity,
+                projects,
+                livePreviewSuggestions,
+                authReady,
+                hasToken,
+                onRefreshWallet: handleRefreshWallet,
+                lastWalletUpdate,
+                walletLoading,
+                walletError: walletError as Error | null | undefined,
+                walletData,
+                walletTransactions,
+                formatCurrencyLabel,
+                connectivityData,
+                connectivityLoading,
+                connectivityError: connectivityError as Error | null | undefined,
+                connectivityServices,
+                formatConnectivityStatus: formatConnectivityStatusLabel,
+                miniPreviewExpanded,
+                onToggleMiniPreviewExpanded: () => setMiniPreviewExpanded((prev) => !prev),
+                onMagicWandSelect: handleMagicWandSelect,
+                onSendSuggestion: handleSendLivePreviewSuggestion,
+                isGenerating,
+              }}
+              projectsProps={{
+                projects,
+                newProjectName,
+                newProjectType,
+                onDeleteProject: handleDeleteProject,
+                onCreateProject: handleCreateProject,
+                onProjectNameChange: setNewProjectName,
+                onProjectTypeChange: setNewProjectType,
+                onProjectVersionChange: handleProjectVersionChange,
+                onApplyDirectorNote: handleApplyDirectorNote,
+              }}
+              aiChatProps={{
+                chatMode,
+                onChatModeChange: setChatMode,
+                chatHistory,
+                chatMessage,
+                onChatMessageChange: setChatMessage,
+                onSendChatMessage: handleSendChatMessage,
+                onStopStreaming: handleStopDashboardChat,
+                isStreaming,
+                activeWorkflowId,
+                copilotWorkflows,
+                copilotWorkflowsLoading,
+                connectBusy,
+                connectFromWorkflowId,
+                onCreateWorkflow: handleCreateWorkflow,
+                onSelectWorkflow: handleSelectWorkflow,
+                onRenameWorkflow: handleRenameWorkflow,
+                onArchiveWorkflow: handleArchiveWorkflow,
+                onConnectFromWorkflowChange: setConnectFromWorkflowId,
+                onCopyHistory: handleCopyHistory,
+                onImportContext: handleImportContext,
+                onMergeWorkflow: handleMergeWorkflow,
+                providerSetupGate: aiProviderGate,
+                onOpenProviderSettings: handleOpenProviderSettings,
+              }}
+              walletProps={{
+                authReady,
+                hasToken,
+                walletLoading,
+                walletError,
+                walletData,
+                walletTransactions,
+                creditsInfo: creditsData,
+                creditsUsedToday: walletStats.creditsUsedToday,
+                creditsUsedThisMonth: walletStats.creditsUsedThisMonth,
+                creditsReceivedThisMonth: walletStats.creditsReceivedThisMonth,
+                lastWalletUpdate,
+                lastPurchaseIntent,
+                lastTransferReceipt,
+                walletActionMessage,
+                walletActionError,
+                purchaseForm,
+                transferForm,
+                walletSubmitting,
+                creditEntries,
+                receivableSummary,
+                onRefreshWallet: handleRefreshWallet,
+                onPurchaseIntentSubmit: handlePurchase,
+                onTransferSubmit: handleTransfer,
+                setPurchaseForm,
+                setTransferForm,
+                formatCurrencyLabel,
+                formatStatusLabel,
+              }}
+              billingProps={{
+                plans: billingPlansForUI,
+                currentPlan: currentPlan?.id,
+                loading: !billingData && !billingError,
+                onSelectPlan: handleSubscribe,
+                onManageSubscription: handleManageSubscription,
+              }}
+              billingError={subscribeError}
+              subscribingPlan={subscribingPlan}
+              connectivityProps={{
+                connectivityLoading,
+                connectivityError,
+                connectivityData,
+                connectivityServices,
+                onRefreshConnectivity: handleRefreshConnectivity,
+                formatConnectivityStatus: formatConnectivityStatusLabel,
+              }}
+              workflowTemplates={workflowTemplates}
+              useCases={useCases}
+              onDownload={handleDownload}
+              onTemplateSelect={handleTemplateSelect}
+              onUseCaseSelect={handleUseCaseSelect}
+            />
+          )}
         </main>
       </div>
 
