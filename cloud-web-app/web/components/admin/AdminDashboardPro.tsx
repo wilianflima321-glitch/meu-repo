@@ -115,7 +115,7 @@ export default function AdminDashboardPro() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Overview Tab */}
+        {/* Aba Visao Geral */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Metrics Grid */}
@@ -137,12 +137,12 @@ export default function AdminDashboardPro() {
               ))}
             </div>
 
-            {/* System Status */}
+            {/* Status do Sistema */}
             <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
-              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Activity size={20} className="text-[var(--aethel-primary)]" />
-                System Status
-              </h2>
+                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <Activity size={20} className="text-[var(--aethel-primary)]" />
+                  Status do sistema
+                </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'API Gateway', status: 'online' },
@@ -167,10 +167,10 @@ export default function AdminDashboardPro() {
         {activeTab === 'billing' && (
           <div className="space-y-6">
             <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
-              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <CreditCard size={20} className="text-[var(--aethel-warning)]" />
-                Billing Overview
-              </h2>
+                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <CreditCard size={20} className="text-[var(--aethel-warning)]" />
+                  Visao geral de faturamento
+                </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 bg-zinc-800/50 rounded-lg">
                   <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Monthly Revenue</p>
@@ -271,7 +271,7 @@ export default function AdminDashboardPro() {
                   className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Feature Flags</p>
-                  <p className="text-xs text-zinc-600 mt-1">Manage feature toggles</p>
+                    <p className="text-xs text-zinc-600 mt-1">Gerencie os toggles de features</p>
                 </button>
               </div>
               {runningAction && (

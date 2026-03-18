@@ -1,7 +1,7 @@
 /**
  * Admin Monitoring Dashboard
- * /admin/monitoring - Infrastructure observability
- * Displays error rates, latency, active users, and health check status.
+ * /admin/monitoring - Observabilidade de infraestrutura
+ * Exibe taxa de erros, latencia, usuarios ativos e status dos health checks.
  */
 
 'use client'
@@ -32,12 +32,18 @@ const HEALTH_ENDPOINTS = [
   { name: 'Liveness', path: '/api/health/live' },
   { name: 'Readiness', path: '/api/health/ready' },
   { name: 'Startup', path: '/api/health/startup' },
-  { name: 'Database', path: '/api/health/db' },
+  { name: 'Banco de dados', path: '/api/health/db' },
   { name: 'Cache', path: '/api/health/cache' },
-  { name: 'AI Provider', path: '/api/health/ai' },
+  { name: 'Provedor IA', path: '/api/health/ai' },
   { name: 'Stripe', path: '/api/health/stripe' },
   { name: 'Storage', path: '/api/health/storage' },
 ]
+
+const STATUS_LABELS: Record<HealthCheckResult['status'], string> = {
+  healthy: 'Operacional',
+  degraded: 'Parcial',
+  down: 'Indisponivel',
+}
 
 function StatusDot({ status }: { status: string }) {
   const color =
@@ -118,15 +124,15 @@ export default function AdminMonitoringPage() {
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Infrastructure Monitoring</h1>
+            <h1 className="text-2xl font-bold">Monitoramento de infraestrutura</h1>
             <p className="text-sm text-zinc-400 mt-1">
-              Real-time health checks and performance metrics
+              Health checks em tempo real e metricas de performance
             </p>
           </div>
           <div className="flex items-center gap-3">
             {lastRefresh && (
               <span className="text-xs text-zinc-500">
-                Last refresh: {new Date(lastRefresh).toLocaleTimeString()}
+                Ultima atualizacao: {new Date(lastRefresh).toLocaleTimeString('pt-BR')}
               </span>
             )}
             <button
@@ -134,7 +140,7 @@ export default function AdminMonitoringPage() {
               disabled={loading}
               className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium hover:bg-white/10 disabled:opacity-50 transition-colors"
             >
-              {loading ? 'Checking...' : 'Refresh'}
+              {loading ? 'Verificando...' : 'Atualizar'}
             </button>
           </div>
         </div>
@@ -145,25 +151,25 @@ export default function AdminMonitoringPage() {
             <AdminMetricCard
               title="Uptime"
               value={`${metrics.uptimePercent.toFixed(1)}%`}
-              subtitle="Health check pass rate"
+              subtitle="Taxa de aprovacao dos checks"
               trend={metrics.uptimePercent >= 99 ? 'up' : metrics.uptimePercent >= 90 ? 'neutral' : 'down'}
             />
             <AdminMetricCard
-              title="Error Rate"
+              title="Taxa de erro"
               value={`${metrics.errorRate.toFixed(1)}%`}
-              subtitle="Failed health checks"
+              subtitle="Health checks com falha"
               trend={metrics.errorRate <= 1 ? 'up' : metrics.errorRate <= 5 ? 'neutral' : 'down'}
             />
             <AdminMetricCard
-              title="P50 Latency"
+              title="Latencia P50"
               value={`${metrics.p50Latency}ms`}
-              subtitle="Median response time"
+              subtitle="Tempo de resposta mediano"
               trend={metrics.p50Latency <= 200 ? 'up' : metrics.p50Latency <= 500 ? 'neutral' : 'down'}
             />
             <AdminMetricCard
-              title="P95 Latency"
+              title="Latencia P95"
               value={`${metrics.p95Latency}ms`}
-              subtitle="95th percentile"
+              subtitle="Percentil 95"
               trend={metrics.p95Latency <= 500 ? 'up' : metrics.p95Latency <= 2000 ? 'neutral' : 'down'}
             />
           </div>
@@ -172,7 +178,7 @@ export default function AdminMonitoringPage() {
         {/* Health Checks Table */}
         <div className="rounded-xl border border-white/10 bg-white/[0.02]">
           <div className="border-b border-white/10 px-6 py-4">
-            <h2 className="text-lg font-semibold">Service Health Checks</h2>
+            <h2 className="text-lg font-semibold">Checks de saude dos servicos</h2>
           </div>
           <div className="divide-y divide-white/5">
             {metrics?.healthChecks.map((check) => (
@@ -195,14 +201,14 @@ export default function AdminMonitoringPage() {
                     }
                     size="sm"
                   >
-                    {check.status}
+                    {STATUS_LABELS[check.status]}
                   </Badge>
                 </div>
               </div>
             ))}
             {loading && !metrics && (
               <div className="px-6 py-12 text-center text-zinc-500">
-                Running health checks...
+                Executando health checks...
               </div>
             )}
           </div>
@@ -210,17 +216,17 @@ export default function AdminMonitoringPage() {
 
         {/* Alert Thresholds */}
         <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
-          <h2 className="text-lg font-semibold mb-4">Alert Thresholds</h2>
+          <h2 className="text-lg font-semibold mb-4">Limiares de alerta</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { label: 'Error Rate', threshold: '> 1%', current: metrics ? `${metrics.errorRate.toFixed(1)}%` : '...' },
-              { label: 'P95 Latency', threshold: '> 2000ms', current: metrics ? `${metrics.p95Latency}ms` : '...' },
-              { label: 'Health Check Failures', threshold: 'Any critical', current: metrics ? `${metrics.healthChecks.filter(h => h.status === 'down').length} down` : '...' },
+              { label: 'Taxa de erro', threshold: '> 1%', current: metrics ? `${metrics.errorRate.toFixed(1)}%` : '...' },
+              { label: 'Latencia P95', threshold: '> 2000ms', current: metrics ? `${metrics.p95Latency}ms` : '...' },
+              { label: 'Falhas de health check', threshold: 'Qualquer critica', current: metrics ? `${metrics.healthChecks.filter(h => h.status === 'down').length} indisponivel` : '...' },
             ].map((alert) => (
               <div key={alert.label} className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
                 <div className="text-xs text-zinc-500">{alert.label}</div>
                 <div className="mt-1 text-sm font-medium">{alert.current}</div>
-                <div className="mt-0.5 text-xs text-zinc-600">Threshold: {alert.threshold}</div>
+                <div className="mt-0.5 text-xs text-zinc-600">Limiar: {alert.threshold}</div>
               </div>
             ))}
           </div>

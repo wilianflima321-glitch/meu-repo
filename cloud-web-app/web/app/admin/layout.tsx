@@ -41,13 +41,13 @@ interface QuickStats {
 
 const navItems = [
   { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { title: 'Finance', href: '/admin/finance', icon: CreditCard, badge: 'MRR' },
-  { title: 'Users', href: '/admin/users', icon: Users },
-  { title: 'AI Monitor', href: '/admin/ai-monitor', icon: Brain, badge: 'Live' },
-  { title: 'Infrastructure', href: '/admin/infrastructure', icon: Server },
-  { title: 'Moderation', href: '/admin/moderation', icon: Shield },
-  { title: 'Analytics', href: '/admin/analytics', icon: TrendingUp },
-  { title: 'Settings', href: '/admin/ide-settings', icon: Settings },
+  { title: 'Financeiro', href: '/admin/finance', icon: CreditCard, badge: 'MRR' },
+  { title: 'Usuarios', href: '/admin/users', icon: Users },
+  { title: 'Monitor IA', href: '/admin/ai-monitor', icon: Brain, badge: 'Ao vivo' },
+  { title: 'Infraestrutura', href: '/admin/infrastructure', icon: Server },
+  { title: 'Moderacao', href: '/admin/moderation', icon: Shield },
+  { title: 'Analiticos', href: '/admin/analytics', icon: TrendingUp },
+  { title: 'Ajustes', href: '/admin/ide-settings', icon: Settings },
 ]
 
 function StatusIndicator({ status }: { status: 'healthy' | 'degraded' | 'down' }) {
@@ -104,10 +104,10 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
             />
             <div>
               <p className="text-xs font-semibold text-[var(--aethel-text-primary)]">Aethel Ops</p>
-              <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Operations</p>
+              <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Operacoes</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden" aria-label="Close sidebar">
+          <button onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden" aria-label="Fechar menu lateral">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -143,7 +143,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/15 px-3 py-2 text-xs font-semibold text-[var(--aethel-error-light)] transition-colors hover:bg-[var(--aethel-error)]/25"
           >
             <AlertTriangle className="h-3.5 w-3.5" />
-            Emergency Mode
+            Modo de emergencia
           </Link>
         </div>
       </aside>
@@ -163,7 +163,7 @@ function Header({
   return (
     <header className="flex h-12 items-center justify-between border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(16,19,26,0.96),rgba(10,12,17,0.98))] px-3 shadow-[0_12px_32px_rgba(0,0,0,0.3)]">
       <div className="flex items-center gap-3">
-        <button onClick={onMenuClick} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden" aria-label="Open sidebar">
+        <button onClick={onMenuClick} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden" aria-label="Abrir menu lateral">
           <Menu className="h-4 w-4" />
         </button>
         {systemStatus && (
@@ -180,15 +180,15 @@ function Header({
         <div className="hidden items-center gap-2 lg:flex">
           <QuickStatCard icon={Users} label="Online" value={quickStats.activeUsers} />
           <QuickStatCard icon={Activity} label="Req/min" value={quickStats.requestsPerMinute} />
-          <QuickStatCard icon={CreditCard} label="AI cost today" value={`$${quickStats.aiCostToday.toFixed(2)}`} alert={quickStats.aiCostToday > 50} />
+          <QuickStatCard icon={CreditCard} label="Custo IA hoje" value={`$${quickStats.aiCostToday.toFixed(2)}`} alert={quickStats.aiCostToday > 50} />
           {quickStats.emergencyLevel !== 'normal' && (
-            <QuickStatCard icon={AlertTriangle} label="Emergency" value={quickStats.emergencyLevel.toUpperCase()} alert />
+            <QuickStatCard icon={AlertTriangle} label="Emergencia" value={quickStats.emergencyLevel.toUpperCase()} alert />
           )}
         </div>
       )}
 
       <div className="flex items-center gap-2">
-        <button className="relative rounded-lg p-1.5 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-secondary)]" aria-label="Notifications">
+        <button className="relative rounded-lg p-1.5 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-secondary)]" aria-label="Notificacoes">
           <Bell className="h-4 w-4" />
           <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[var(--aethel-error)]" />
         </button>
@@ -218,7 +218,7 @@ export default function AdminOpsLayout({ children }: { children: React.ReactNode
         <main className="flex-1 overflow-auto">{children}</main>
         <footer className="flex h-8 items-center justify-between border-t border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(13,16,22,0.96),rgba(10,12,17,0.98))] px-3 text-[11px] text-[var(--aethel-text-tertiary)]">
           <span>Aethel Admin v2.0</span>
-          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />Last sync: {new Date().toLocaleTimeString()}</span>
+          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />Ultima sincronizacao: {new Date().toLocaleTimeString('pt-BR')}</span>
         </footer>
       </div>
     </div>

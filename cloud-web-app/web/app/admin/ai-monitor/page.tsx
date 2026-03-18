@@ -567,7 +567,7 @@ export default function AgentMonitorPage() {
               )}
               {readiness.runtimeReadiness.instructions.length > 0 && (
                 <div className="mt-3 rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-3">
-                  <p className="font-medium text-[var(--aethel-text-secondary)]">Next actions</p>
+                    <p className="font-medium text-[var(--aethel-text-secondary)]">Proximas acoes</p>
                   <ul className="mt-2 list-disc pl-4 space-y-1 text-[var(--aethel-text-secondary)]">
                     {readiness.runtimeReadiness.instructions.map((instruction) => (
                       <li key={instruction}>{instruction}</li>
