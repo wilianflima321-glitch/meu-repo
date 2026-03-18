@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { API_BASE } from '@/lib/api'
 import { UsageDashboard } from '@/components/billing/UsageDashboard'
-import StudioGlobalNav from '@/components/studio/StudioGlobalNav'
+import StudioLayout from '@/components/studio/StudioLayout'
 import { Badge } from '@/components/ui/Badge'
 import { useToast } from '@/components/ui/Toast'
 
@@ -82,21 +82,19 @@ export default function BillingPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-        <StudioGlobalNav title="Billing" subtitle="Planos, consumo e faturamento do workspace." />
+      <StudioLayout title="Billing" subtitle="Planos, consumo e faturamento do workspace.">
         <div className="aethel-flex aethel-items-center aethel-justify-center px-6 py-12">
           <div className="aethel-card aethel-p-6">
             <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando planos...</p>
           </div>
         </div>
-      </div>
+      </StudioLayout>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-        <StudioGlobalNav title="Billing" subtitle="Planos, consumo e faturamento do workspace." />
+      <StudioLayout title="Billing" subtitle="Planos, consumo e faturamento do workspace.">
         <div className="aethel-flex aethel-items-center aethel-justify-center px-6 py-12">
           <div className="aethel-card aethel-p-6 max-w-md">
             <h1 className="text-xl font-bold mb-2">Falha ao carregar billing</h1>
@@ -105,18 +103,17 @@ export default function BillingPage() {
             </p>
           </div>
         </div>
-      </div>
+      </StudioLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <StudioGlobalNav
-        title="Billing"
-        subtitle="Controle de uso, previsibilidade de custos e upgrade instantaneo."
-      />
-
-      <main className="mx-auto max-w-7xl aethel-p-6">
+    <StudioLayout
+      title="Billing"
+      subtitle="Controle de uso, previsibilidade de custos e upgrade instantaneo."
+      maxWidth="7xl"
+    >
+      <div className="aethel-p-6">
         <div className="aethel-flex aethel-items-center aethel-justify-between mb-6">
           <div>
             <h2 className="text-3xl font-bold">Planos e Consumo</h2>
@@ -230,7 +227,7 @@ export default function BillingPage() {
             Checkout seguro via Stripe | Cancelamento a qualquer momento
           </p>
         </div>
-      </main>
-    </div>
+      </div>
+    </StudioLayout>
   )
 }

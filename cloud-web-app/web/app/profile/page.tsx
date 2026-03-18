@@ -26,7 +26,7 @@ import {
 } from 'lucide-react'
 import { AethelAPIClient } from '@/lib/api'
 import { isAuthenticated, logout } from '@/lib/auth'
-import StudioGlobalNav from '@/components/studio/StudioGlobalNav'
+import StudioLayout from '@/components/studio/StudioLayout'
 
 // ============================================================================
 // Types
@@ -285,29 +285,26 @@ export default function ProfilePage() {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-        <StudioGlobalNav title="Perfil" subtitle="Conta, seguranca e preferencias do workspace." />
+      <StudioLayout title="Perfil" subtitle="Conta, seguranca e preferencias do workspace.">
         <div className="flex items-center justify-center px-6 py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--aethel-primary)]"></div>
         </div>
-      </div>
+      </StudioLayout>
     )
   }
   
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-        <StudioGlobalNav title="Perfil" subtitle="Conta, seguranca e preferencias do workspace." />
+      <StudioLayout title="Perfil" subtitle="Conta, seguranca e preferencias do workspace.">
         <div className="flex items-center justify-center px-6 py-12">
           <div className="text-[var(--aethel-text-secondary)]">{profileError || 'Perfil indisponivel.'}</div>
         </div>
-      </div>
+      </StudioLayout>
     )
   }
   
   return (
-    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <StudioGlobalNav title="Perfil" subtitle="Conta, seguranca e preferencias do workspace." />
+    <StudioLayout title="Perfil" subtitle="Conta, seguranca e preferencias do workspace.">
       {/* Header */}
       <header className="border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
         <div className="max-w-5xl mx-auto px-4 py-6">
@@ -778,6 +775,6 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-    </div>
+    </StudioLayout>
   )
 }

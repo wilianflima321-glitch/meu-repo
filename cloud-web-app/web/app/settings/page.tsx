@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import StudioGlobalNav from '@/components/studio/StudioGlobalNav'
+import StudioLayout from '@/components/studio/StudioLayout'
 
 const SettingsEditor = dynamic(() => import('../../components/SettingsEditor'), { ssr: false })
 
@@ -80,15 +80,13 @@ export default function SettingsPage() {
   const missingProviders = providerStatus?.missingProviders ?? []
 
   return (
-    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <StudioGlobalNav
-        title="Workspace Settings"
-        subtitle="Configuracao de editor, conta e providers IA com contratos explicitos de status."
-      />
-
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <nav className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
+    <StudioLayout
+      title="Workspace Settings"
+      subtitle="Configuracao de editor, conta e providers IA com contratos explicitos de status."
+      maxWidth="7xl"
+    >
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <nav className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
             <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-1">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id
@@ -111,7 +109,7 @@ export default function SettingsPage() {
             </div>
           </nav>
 
-          <section className="min-w-0 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]">
+        <section className="min-w-0 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]">
             {activeTab === 'editor' && (
               <div className="p-4 sm:p-6">
                 <h2 className="text-lg font-semibold">Editor</h2>
@@ -260,9 +258,8 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
-          </section>
-        </div>
-      </main>
-    </div>
+        </section>
+      </div>
+    </StudioLayout>
   )
 }
