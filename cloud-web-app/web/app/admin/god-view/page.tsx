@@ -271,7 +271,7 @@ function SessionCard({
               <div className="flex items-center gap-2">
                 <MousePointer className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                 <div>
-                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Página</p>
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Pagina</p>
                   <p className="text-sm text-[var(--aethel-text-primary)]">{session.currentPage || 'Desconhecida'}</p>
                 </div>
               </div>
@@ -288,7 +288,7 @@ function SessionCard({
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                   <div>
-                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Última ação</p>
+                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Ultima acao</p>
                     <p className="text-sm text-[var(--aethel-text-primary)]">{session.lastAction}</p>
                   </div>
                 </div>
@@ -300,12 +300,12 @@ function SessionCard({
               <h4 className="text-xs text-[var(--aethel-text-tertiary)] uppercase">Técnico</h4>
               
               <div>
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">ID da sessão</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">ID da sessao</p>
                 <p className="text-sm text-[var(--aethel-text-primary)] font-mono">{session.id.slice(0, 12)}...</p>
               </div>
               
               <div>
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">Endereço IP</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Endereco IP</p>
                 <p className="text-sm text-[var(--aethel-text-primary)] font-mono">{session.ipAddress || 'Desconhecido'}</p>
               </div>
               
@@ -334,7 +334,7 @@ function SessionCard({
               </div>
               
               <div className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
-                <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo da sessão</p>
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo da sessao</p>
                 <p className={`text-xl font-bold ${
                   session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-success)]'
                 }`}>
@@ -464,7 +464,7 @@ export default function GodViewPage() {
         <div>
           <h1 className="text-xl font-semibold text-[var(--aethel-text-primary)] flex items-center gap-2">
             <Eye className="w-6 h-6" />
-            Visão total
+            Visao total
             {!paused && (
               <span className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)] rounded text-xs">
                 <span className="w-2 h-2 rounded-full bg-[var(--aethel-success)] animate-pulse" />
@@ -473,7 +473,7 @@ export default function GodViewPage() {
             )}
           </h1>
           <p className="text-sm text-[var(--aethel-text-tertiary)]">
-            Visão em tempo real de todas as sessões ativas
+            Visao em tempo real de todas as sessoes ativas
           </p>
         </div>
         
@@ -483,7 +483,7 @@ export default function GodViewPage() {
             <Search className="w-4 h-4 text-[var(--aethel-text-tertiary)] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Buscar usuários, projetos..."
+              placeholder="Buscar usuarios, projetos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder-gray-500 w-64"
@@ -509,7 +509,7 @@ export default function GodViewPage() {
                 ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning)]' 
                 : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
-            title={paused ? 'Retomar atualizações ao vivo' : 'Pausar atualizações ao vivo'}
+            title={paused ? 'Retomar atualizacoes ao vivo' : 'Pausar atualizacoes ao vivo'}
           >
             {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
           </button>
@@ -533,7 +533,7 @@ export default function GodViewPage() {
         <div className="col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">
-              {filteredSessions.length} sessões ativas
+              {filteredSessions.length} sessoes ativas
             </h2>
           </div>
           
@@ -592,7 +592,7 @@ export default function GodViewPage() {
                 <span className="text-sm font-medium text-[var(--aethel-warning)]">Uso elevado de IA</span>
               </div>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                {filteredSessions.filter(s => s.aiCostIncurred > 1).length} sessão(ões) 
+                {filteredSessions.filter(s => s.aiCostIncurred > 1).length} sessao(oes) 
                 ultrapassaram $1 em custos de IA nesta sessão.
               </p>
             </div>
