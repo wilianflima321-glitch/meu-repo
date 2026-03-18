@@ -43,8 +43,8 @@ export default function Admin() {
   const cards = [
     {
       href: '/admin/users',
-      title: 'Gerenciar usuarios',
-      description: 'Editar perfis, funcoes, acesso e governanca de contas.',
+      title: 'Gerenciar usuários',
+      description: 'Editar perfis, funções, acesso e governanca de contas.',
     },
     {
       href: '/admin/payments',
@@ -58,7 +58,7 @@ export default function Admin() {
     },
     {
       href: '/admin/security',
-      title: 'Seguranca e Auditoria',
+      title: 'Segurança e Auditoria',
       description: 'Acompanhar eventos criticos e hardening operacional.',
     },
   ];
@@ -94,7 +94,7 @@ export default function Admin() {
         </div>
 
         {isLoading ? (
-          <div className='p-4 text-sm text-[var(--aethel-text-tertiary)]'>Carregando usuarios...</div>
+          <div className='p-4 text-sm text-[var(--aethel-text-tertiary)]'>Carregando usu?rios...</div>
         ) : error ? (
           <div className='p-4 text-sm text-[var(--aethel-error)]'>{error.message}</div>
         ) : users.length === 0 ? (

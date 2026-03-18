@@ -29,8 +29,8 @@ export default function AdminAI() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const environmentLabels: Record<'staging' | 'production', string> = {
-    staging: 'Homologação',
-    production: 'Produção',
+    staging: 'Homologa??o',
+    production: 'Produ??o',
   };
 
   const fetchSettings = useCallback(async () => {
@@ -76,8 +76,8 @@ export default function AdminAI() {
     <div className='p-6 max-w-6xl mx-auto'>
       <AdminPageHeader
         className='mb-6'
-        title='Administra??o da IA Aethel'
-        subtitle='Controle de modelo, custos e limites por ambiente.'
+        title='Administração da IA Aethel'
+        title='Administração da IA Aethel'
         meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
         actions={(
           <div className='flex gap-2'>
@@ -86,8 +86,8 @@ export default function AdminAI() {
               onChange={(e) => setEnvironment(e.target.value as typeof environment)}
               className='border p-2 rounded text-sm'
             >
-              <option value='staging'>Homologa??o</option>
-              <option value='production'>Produ??o</option>
+              <option value='staging'>Homologação</option>
+              <option value='production'>Produção</option>
             </select>
             <button
               onClick={fetchSettings}
@@ -123,7 +123,7 @@ export default function AdminAI() {
           },
           {
             icon: Gauge,
-            label: 'M?x. tokens',
+            label: 'Máx. tokens',
             value: aiSettings.maxTokens,
           },
         ]}

@@ -83,9 +83,18 @@ export default function AdminUsers() {
     <div className='p-6 max-w-7xl mx-auto'>
       <AdminPageHeader
         className='mb-6'
-        title='Usu?rios'
-        subtitle='Gerencie perfis, planos e status de ativa?o.'
+        title='Usuários'
+        subtitle='Gerencie perfis, planos e status de ativação.'
         meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
+        actions={(
+          <button
+            onClick={fetchUsers}
+            className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
+          >
+            Atualizar
+          </button>
+        )}
+      /> : null}
         actions={(
           <button
             onClick={fetchUsers}
