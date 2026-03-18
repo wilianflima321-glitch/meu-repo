@@ -75,7 +75,7 @@ export default function PricingPage() {
         {/* ── Hero ── */}
         <section className="mx-auto max-w-4xl px-4 pb-6 pt-16 text-center sm:px-6">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/10 px-4 py-1.5 text-[13px] font-medium text-[var(--aethel-primary-light)]">
-            Pricing transparente
+            Planos transparentes
           </div>
           <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
             Planos alinhados com uso real
@@ -157,7 +157,7 @@ export default function PricingPage() {
                     <span className="text-xs text-[var(--aethel-text-tertiary)]">/{isAnnual ? 'ano' : 'mes'}</span>
                   </div>
                   <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">
-                    US${plan.displayPrice}/{isAnnual ? 'year' : plan.interval}
+                    US${plan.displayPrice}/{isAnnual ? 'ano' : 'mes'}
                   </p>
                 </div>
 
