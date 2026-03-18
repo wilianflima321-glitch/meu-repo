@@ -53,7 +53,7 @@ export default function GamesDocsPage() {
           <ArrowLeft className="h-4 w-4" /> Back to Docs
         </Link>
 
-        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-1 text-xs font-semibold text-[var(--aethel-success)]">
           L2 Experimental
         </div>
         <h1 className="text-4xl font-bold">Games Module</h1>
@@ -62,7 +62,7 @@ export default function GamesDocsPage() {
           code-based logic generation, physics, and asset pipelines.
         </p>
 
-        <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-200">
+        <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)] p-4 text-sm text-[var(--aethel-warning-light)]">
           <strong>Current Maturity: L2 Experimental.</strong> Claims allowed: AI-assisted asset generation,
           scene preview, code-based logic generation. Advanced features are under active development.
         </div>
@@ -74,10 +74,10 @@ export default function GamesDocsPage() {
             return (
               <div key={cap.title} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <Icon className="h-5 w-5 text-emerald-400" />
+                  <Icon className="h-5 w-5 text-[var(--aethel-success)]" />
                   <h3 className="font-semibold">{cap.title}</h3>
                   <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
-                    cap.status === 'available' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                    cap.status === 'available' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
                   }`}>
                     {cap.status}
                   </span>

@@ -81,9 +81,9 @@ const TEMPLATES: Template[] = [
 ]
 
 const DIFFICULTY_COLORS = {
-  beginner: 'text-emerald-400',
-  intermediate: 'text-amber-400',
-  advanced: 'text-red-400',
+  beginner: 'text-[var(--aethel-success)]',
+  intermediate: 'text-[var(--aethel-warning)]',
+  advanced: 'text-[var(--aethel-error)]',
 }
 
 // ============================================================================

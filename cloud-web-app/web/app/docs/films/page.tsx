@@ -61,7 +61,7 @@ export default function FilmsDocsPage() {
           AI-assisted filmmaking tools. From storyboarding to shot descriptions and basic NLE capabilities.
         </p>
 
-        <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-200">
+        <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)] p-4 text-sm text-[var(--aethel-warning-light)]">
           <strong>Current Maturity: L2 Experimental.</strong> Claims allowed: Storyboarding assistance,
           shot description generation, static asset preview. Video generation and NLE are under development.
         </div>
@@ -76,8 +76,8 @@ export default function FilmsDocsPage() {
                   <Icon className="h-5 w-5 text-purple-400" />
                   <h3 className="font-semibold">{cap.title}</h3>
                   <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
-                    cap.status === 'available' ? 'bg-emerald-500/20 text-emerald-400' :
-                    cap.status === 'experimental' ? 'bg-amber-500/20 text-amber-400' :
+                    cap.status === 'available' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' :
+                    cap.status === 'experimental' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]' :
                     'bg-zinc-500/20 text-zinc-400'
                   }`}>
                     {cap.status}

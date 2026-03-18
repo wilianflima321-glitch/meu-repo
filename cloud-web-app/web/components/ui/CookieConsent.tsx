@@ -43,7 +43,7 @@ export default function CookieConsent() {
       <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <Cookie className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+            <Cookie className="mt-0.5 h-5 w-5 shrink-0 text-[var(--aethel-warning)]" />
             <div>
               <p className="text-sm text-zinc-200">
                 We use cookies to improve your experience and analyze site usage.{' '}
@@ -57,11 +57,11 @@ export default function CookieConsent() {
               {showDetails && (
                 <div className="mt-3 space-y-2 text-xs text-zinc-400">
                   <div className="flex items-center gap-2">
-                    <Shield className="h-3.5 w-3.5 text-emerald-400" />
+                    <Shield className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
                     <span><strong className="text-zinc-300">Essential:</strong> Authentication, security, preferences (always active)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Shield className="h-3.5 w-3.5 text-blue-400" />
+                    <Shield className="h-3.5 w-3.5 text-[var(--aethel-info)]" />
                     <span><strong className="text-zinc-300">Analytics:</strong> Usage patterns, performance metrics, funnel tracking</span>
                   </div>
                 </div>

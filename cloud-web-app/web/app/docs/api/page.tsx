@@ -61,10 +61,10 @@ const API_ENDPOINTS = [
 ]
 
 const METHOD_COLORS: Record<string, string> = {
-  GET: 'bg-emerald-500/20 text-emerald-400',
-  POST: 'bg-blue-500/20 text-blue-400',
-  PUT: 'bg-amber-500/20 text-amber-400',
-  DELETE: 'bg-red-500/20 text-red-400',
+  GET: 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]',
+  POST: 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]',
+  PUT: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]',
+  DELETE: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]',
 }
 
 export default function APIDocsPage() {
@@ -88,12 +88,12 @@ export default function APIDocsPage() {
             <p className="mt-1 text-xs text-zinc-400">Bearer token via Authorization header</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-            <Zap className="mb-2 h-5 w-5 text-amber-400" />
+            <Zap className="mb-2 h-5 w-5 text-[var(--aethel-warning)]" />
             <h3 className="text-sm font-semibold">Rate Limits</h3>
             <p className="mt-1 text-xs text-zinc-400">Plan-based. Check X-RateLimit-* headers.</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-            <Globe className="mb-2 h-5 w-5 text-emerald-400" />
+            <Globe className="mb-2 h-5 w-5 text-[var(--aethel-success)]" />
             <h3 className="text-sm font-semibold">Base URL</h3>
             <p className="mt-1 text-xs text-zinc-400 font-mono">https://aethel.dev/api</p>
           </div>

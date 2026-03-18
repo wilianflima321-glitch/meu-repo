@@ -19,7 +19,7 @@ function CodeBlock({ code, language = 'bash' }: { code: string; language?: strin
       <div className="flex items-center justify-between border-b border-white/5 px-4 py-2">
         <span className="text-xs font-mono text-zinc-500">{language}</span>
         <button onClick={copy} className="text-zinc-500 hover:text-zinc-300 transition-colors">
-          {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+          {copied ? <Check className="h-4 w-4 text-[var(--aethel-success)]" /> : <Copy className="h-4 w-4" />}
         </button>
       </div>
       <pre className="overflow-x-auto p-4 text-sm">
@@ -103,9 +103,9 @@ export default function GettingStartedPage() {
           Set up Aethel Engine locally in under 5 minutes. From zero to first AI-assisted project.
         </p>
 
-        <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-200">
+        <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)] p-4 text-sm text-[var(--aethel-warning-light)]">
           <strong>Prerequisites:</strong> Node.js 20+, Docker Desktop, Git.
-          For demo mode (no AI keys needed), set <code className="rounded bg-amber-500/10 px-1.5 py-0.5 font-mono text-xs">AETHEL_AI_DEMO_MODE=true</code> in your .env.local.
+          For demo mode (no AI keys needed), set <code className="rounded bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-1.5 py-0.5 font-mono text-xs">AETHEL_AI_DEMO_MODE=true</code> in your .env.local.
         </div>
 
         <div className="mt-10 space-y-12">
@@ -128,15 +128,15 @@ export default function GettingStartedPage() {
           ))}
         </div>
 
-        <div className="mt-12 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-6 text-center">
-          <Terminal className="mx-auto mb-3 h-8 w-8 text-emerald-400" />
-          <h3 className="text-lg font-semibold text-emerald-200">You&apos;re all set!</h3>
+        <div className="mt-12 rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_5%,transparent)] p-6 text-center">
+          <Terminal className="mx-auto mb-3 h-8 w-8 text-[var(--aethel-success)]" />
+          <h3 className="text-lg font-semibold text-[var(--aethel-success-light)]">You&apos;re all set!</h3>
           <p className="mt-1 text-sm text-zinc-400">
-            Open <code className="font-mono text-emerald-300">http://localhost:3000</code> and start building with Aethel Engine.
+            Open <code className="font-mono text-[var(--aethel-success-light)]">http://localhost:3000</code> and start building with Aethel Engine.
           </p>
           <Link
             href="/dashboard"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition-colors"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--aethel-success)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--aethel-success-dark)] transition-colors"
           >
             Open Studio <ArrowRight className="h-4 w-4" />
           </Link>
