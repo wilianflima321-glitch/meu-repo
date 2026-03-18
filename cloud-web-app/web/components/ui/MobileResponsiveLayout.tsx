@@ -272,7 +272,7 @@ export function ResponsivePageHeader({
     <header className="mb-6 space-y-2 sm:mb-8">
       {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav aria-label="Breadcrumb" className="mb-2">
+        <nav aria-label="Trilha de navegacao" className="mb-2">
           <ol className="flex flex-wrap items-center gap-1 text-xs text-[var(--aethel-text-tertiary)] sm:text-sm">
             {breadcrumbs.map((crumb, i) => (
               <li key={i} className="flex items-center gap-1">
@@ -375,7 +375,7 @@ export function MobileMenuButton({
       type="button"
       onClick={onClick}
       className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] md:hidden ${className}`}
-      aria-label={isOpen ? 'Close menu' : 'Open menu'}
+      aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
       aria-expanded={isOpen}
     >
       {isOpen ? <X size={20} /> : <Menu size={20} />}
