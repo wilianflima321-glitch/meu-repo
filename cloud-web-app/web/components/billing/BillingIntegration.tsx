@@ -112,7 +112,7 @@ export function BillingStatusBanner() {
         <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" aria-hidden="true" />
         <div>
           <p className="text-sm font-medium text-amber-200">
-            Billing runtime is {readiness.status}
+            Runtime de billing esta {readiness.status}
           </p>
           {readiness.blockers.length > 0 && (
             <ul className="mt-1 space-y-0.5 text-xs text-amber-300/80">
@@ -180,11 +180,11 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
           <span className="text-3xl font-bold text-[var(--aethel-text-primary)]">
             ${Math.round(price)}
           </span>
-          <span className="text-sm text-[var(--aethel-text-tertiary)]">/month</span>
+          <span className="text-sm text-[var(--aethel-text-tertiary)]">/mes</span>
         </div>
         {interval === 'year' && plan.annualPrice && (
           <p className="mt-1 text-xs text-emerald-400">
-            Save ${Math.round((plan.price * 12 - plan.annualPrice))} yearly
+            Economize ${Math.round((plan.price * 12 - plan.annualPrice))} por ano
           </p>
         )}
       </div>
@@ -193,7 +193,7 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
       <div className="mb-4 grid grid-cols-2 gap-2 text-xs">
         <div className="flex items-center gap-1.5 text-[var(--aethel-text-tertiary)]">
           <Cpu size={12} aria-hidden="true" />
-          <span>{plan.limits.projects} projects</span>
+          <span>{plan.limits.projects} projetos</span>
         </div>
         <div className="flex items-center gap-1.5 text-[var(--aethel-text-tertiary)]">
           <HardDrive size={12} aria-hidden="true" />
@@ -201,11 +201,11 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
         </div>
         <div className="flex items-center gap-1.5 text-[var(--aethel-text-tertiary)]">
           <Users size={12} aria-hidden="true" />
-          <span>{plan.limits.collaborators} collab</span>
+          <span>{plan.limits.collaborators} colaboradores</span>
         </div>
         <div className="flex items-center gap-1.5 text-[var(--aethel-text-tertiary)]">
           <MessageSquare size={12} aria-hidden="true" />
-          <span>{formatTokens(plan.limits.tokensPerMonth)}/mo</span>
+          <span>{formatTokens(plan.limits.tokensPerMonth)}/mes</span>
         </div>
       </div>
 
@@ -230,17 +230,17 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
             ? 'bg-indigo-500 text-white hover:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
             : 'border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
         }`}
-        aria-label={isCurrent ? `Current plan: ${plan.name}` : `Select ${plan.name} plan`}
+        aria-label={isCurrent ? `Plano atual: ${plan.name}` : `Selecionar plano ${plan.name}`}
       >
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : isCurrent ? (
           <>
-            <Check className="h-4 w-4" /> Current Plan
+            <Check className="h-4 w-4" /> Plano atual
           </>
         ) : (
           <>
-            Get Started <ArrowRight className="h-4 w-4" />
+            Comecar agora <ArrowRight className="h-4 w-4" />
           </>
         )}
       </button>
@@ -344,12 +344,12 @@ export function SubscriptionStatusWidget() {
     return (
       <div className="rounded-lg border border-dashed border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-center">
         <CreditCard className="mx-auto mb-2 h-8 w-8 text-[var(--aethel-text-quaternary)]" />
-        <p className="text-sm text-[var(--aethel-text-tertiary)]">No active subscription</p>
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">Sem assinatura ativa</p>
         <a
           href="/pricing"
           className="mt-2 inline-flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300"
         >
-          View plans <ArrowRight size={14} />
+          Ver planos <ArrowRight size={14} />
         </a>
       </div>
     )
@@ -360,7 +360,7 @@ export function SubscriptionStatusWidget() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-[var(--aethel-text-tertiary)]">
-            Current Plan
+            Plano atual
           </p>
           <p className="mt-0.5 text-lg font-semibold capitalize text-[var(--aethel-text-primary)]">
             {subscription.plan}
@@ -378,8 +378,8 @@ export function SubscriptionStatusWidget() {
       </div>
       {subscription.currentPeriodEnd && (
         <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">
-          {subscription.cancelAtPeriodEnd ? 'Cancels' : 'Renews'}{' '}
-          {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+          {subscription.cancelAtPeriodEnd ? 'Cancela em' : 'Renova em'}{' '}
+          {new Date(subscription.currentPeriodEnd).toLocaleDateString('pt-BR')}
         </p>
       )}
     </div>
@@ -423,7 +423,7 @@ export function UsageQuotaBar({ label, used, limit, unit = '', variant }: QuotaB
         aria-valuenow={used}
         aria-valuemin={0}
         aria-valuemax={limit}
-        aria-label={`${label}: ${Math.round(percentage)}% used`}
+        aria-label={`${label}: ${Math.round(percentage)}% usado`}
       >
         <div
           className={`h-full rounded-full transition-all duration-300 ${barColors[autoVariant]}`}

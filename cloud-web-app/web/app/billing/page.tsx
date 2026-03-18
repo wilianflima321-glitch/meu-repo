@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { API_BASE } from '@/lib/api'
 import { UsageDashboard } from '@/components/billing/UsageDashboard'
+import { BillingStatusBanner, SubscriptionStatusWidget } from '@/components/billing/BillingIntegration'
 import StudioLayout from '@/components/studio/StudioLayout'
 import { Badge } from '@/components/ui/Badge'
 import { useToast } from '@/components/ui/Toast'
@@ -135,6 +136,11 @@ export default function BillingPage() {
               USD
             </button>
           </div>
+        </div>
+
+        <div className="mb-6 space-y-4">
+          <BillingStatusBanner />
+          <SubscriptionStatusWidget />
         </div>
 
         <div className="mb-6">

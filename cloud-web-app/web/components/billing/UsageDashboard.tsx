@@ -4,8 +4,8 @@
  * Mostra ao usuário seu consumo atual de:
  * - Tokens de IA
  * - Storage
- * - Build minutes
- * - GPU hours
+ * - Minutos de build
+ * - Horas de GPU
  * 
  * @module components/billing/UsageDashboard
  */
@@ -105,7 +105,7 @@ export function UsageDashboard() {
       },
       {
         id: 'build-minutes',
-        name: 'Build Minutes',
+        name: 'Minutos de build',
         used: usage.usage.buildMinutes.used,
         limit: usage.usage.buildMinutes.limit,
         unit: 'min',
@@ -115,20 +115,20 @@ export function UsageDashboard() {
       },
       {
         id: 'gpu-hours',
-        name: 'GPU Hours',
+        name: 'Horas de GPU',
         used: usage.usage.gpuHours.used,
         limit: usage.usage.gpuHours.limit,
         unit: 'h',
         icon: <Cpu className="w-5 h-5" />,
         color: 'purple',
-        details: 'Renderização e AI inference',
+        details: 'Renderização e inferencias de IA',
       },
       {
-        id: 'api-calls',
-        name: 'API Calls',
+        id: 'api-chamadas',
+        name: 'Chamadas de API',
         used: usage.usage.apiCalls.used,
         limit: usage.usage.apiCalls.limit,
-        unit: 'calls',
+        unit: 'chamadas',
         icon: <Activity className="w-5 h-5" />,
         color: 'amber',
         details: 'Chamadas de API externas',
@@ -163,14 +163,14 @@ export function UsageDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Seu Consumo</h2>
-          <p className="text-sm text-slate-400">
-            Plano <span className="text-sky-400 font-medium">{usage.plan.name}</span> • 
+          <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Seu consumo</h2>
+          <p className="text-sm text-[var(--aethel-text-tertiary)]">
+            Plano <span className="text-[var(--aethel-info)] font-medium">{usage.plan.name}</span> • 
             Renova em {daysUntilRenewal} dias
           </p>
         </div>
-        <button className="px-4 py-2 text-sm bg-sky-500 hover:bg-sky-400 text-white rounded-lg font-medium transition-colors">
-          Upgrade
+        <button className="px-4 py-2 text-sm bg-[var(--aethel-info)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors">
+          Fazer upgrade
         </button>
       </div>
 
@@ -182,9 +182,9 @@ export function UsageDashboard() {
       </div>
 
       {/* Usage Over Time Chart */}
-      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-sky-400" />
+      <div className="bg-[var(--aethel-surface-secondary)] rounded-xl p-6 border border-[var(--aethel-border-primary)]">
+        <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-[var(--aethel-info)]" />
           Consumo dos últimos 30 dias
         </h3>
         <UsageChart history={usage.history} />
@@ -216,7 +216,7 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
   const isCritical = percentage > 95;
 
   const colorOptions = {
-    indigo: { bg: 'bg-sky-500', text: 'text-sky-400', ring: 'ring-sky-500/30' },
+    indigo: { bg: 'bg-sky-500', text: 'text-[var(--aethel-info)]', ring: 'ring-sky-500/30' },
     blue: { bg: 'bg-blue-500', text: 'text-blue-400', ring: 'ring-blue-500/30' },
     green: { bg: 'bg-green-500', text: 'text-green-400', ring: 'ring-green-500/30' },
     purple: { bg: 'bg-blue-500', text: 'text-blue-400', ring: 'ring-sky-500/30' },
@@ -233,8 +233,8 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
   };
 
   return (
-    <div className={`bg-slate-800 rounded-xl p-5 border ${
-      isCritical ? 'border-red-500/50' : isWarning ? 'border-amber-500/30' : 'border-slate-700'
+    <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-5 border ${
+      isCritical ? 'border-red-500/50' : isWarning ? 'border-amber-500/30' : 'border-[var(--aethel-border-primary)]'
     }`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -243,8 +243,8 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
             {metric.icon}
           </div>
           <div>
-            <h4 className="font-medium text-white">{metric.name}</h4>
-            <p className="text-xs text-slate-400">{metric.details}</p>
+            <h4 className="font-medium text-[var(--aethel-text-primary)]">{metric.name}</h4>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">{metric.details}</p>
           </div>
         </div>
         {isCritical && (
@@ -261,16 +261,16 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
 
       {/* Usage Numbers */}
       <div className="flex items-baseline gap-1 mb-3">
-        <span className="text-2xl font-bold text-white">
+        <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">
           {formatNumber(metric.used)}
         </span>
-        <span className="text-slate-400 text-sm">
+        <span className="text-[var(--aethel-text-tertiary)] text-sm">
           / {formatNumber(metric.limit)} {metric.unit}
         </span>
       </div>
 
       {/* Progress Bar */}
-      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+      <div className="h-2 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
         <div 
           className={`h-full rounded-full transition-all duration-500 ${
             isCritical ? 'bg-red-500' : isWarning ? 'bg-amber-500' : colorClasses.bg
@@ -282,11 +282,11 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
       {/* Percentage */}
       <div className="mt-2 flex items-center justify-between text-xs">
         <span className={`${
-          isCritical ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-slate-400'
+          isCritical ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-[var(--aethel-text-tertiary)]'
         }`}>
           {percentage.toFixed(1)}% usado
         </span>
-        <span className="text-slate-500">
+        <span className="text-[var(--aethel-text-quaternary)]">
           {formatNumber(metric.limit - metric.used)} {metric.unit} restantes
         </span>
       </div>
@@ -309,7 +309,7 @@ function UsageChart({ history }: { history: UsageData['history'] }) {
             style={{ height: `${Math.max(height, 4)}%` }}
           >
             {/* Tooltip */}
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 rounded text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[var(--aethel-surface-primary)] rounded text-xs text-[var(--aethel-text-primary)] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
               {new Date(day.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
               <br />
               {day.aiTokens.toLocaleString()} tokens
@@ -325,12 +325,12 @@ function UsageSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
       <div className="flex justify-between">
-        <div className="h-8 w-48 bg-slate-700 rounded" />
-        <div className="h-10 w-24 bg-slate-700 rounded" />
+        <div className="h-8 w-48 bg-[var(--aethel-surface-tertiary)] rounded" />
+        <div className="h-10 w-24 bg-[var(--aethel-surface-tertiary)] rounded" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-slate-800 rounded-xl p-5 h-40 border border-slate-700" />
+          <div key={i} className="bg-[var(--aethel-surface-secondary)] rounded-xl p-5 h-40 border border-[var(--aethel-border-primary)]" />
         ))}
       </div>
     </div>
@@ -341,15 +341,15 @@ function UsageError() {
   return (
     <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 text-center">
       <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-      <h3 className="text-lg font-semibold text-white mb-2">
+      <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-2">
         Erro ao carregar dados de consumo
       </h3>
-      <p className="text-slate-400 mb-4">
+      <p className="text-[var(--aethel-text-tertiary)] mb-4">
         Não foi possível carregar seus dados de consumo. Tente novamente.
       </p>
       <button 
         onClick={() => window.location.reload()}
-        className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+        className="px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-slate-600 text-[var(--aethel-text-primary)] rounded-lg transition-colors"
       >
         Recarregar
       </button>
