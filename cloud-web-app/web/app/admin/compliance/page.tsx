@@ -68,12 +68,12 @@ export default function Compliance() {
         items={[
           {
             icon: ShieldCheck,
-            label: 'Pol??ticas monitoradas',
+            label: 'Pol?ticas monitoradas',
             value: summary.total,
           },
           {
             icon: AlertTriangle,
-            label: 'Incidentes cr??ticos',
+            label: 'Incidentes cr?ticos',
             value: summary.incidents,
             tone: 'error',
           },

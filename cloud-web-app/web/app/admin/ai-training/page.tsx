@@ -144,7 +144,7 @@ export default function AITraining() {
             {jobs.map((job) => (
               <div key={job.id} className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
                 <h3 className='text-lg font-semibold'>{job.model}</h3>
-                <p className='text-sm text-[var(--aethel-text-secondary)]'>Status: {statusLabels[job.status] ?? job.status} • Custo: ${job.cost.toFixed(2)} • Eficiência: {job.efficiency.toFixed(0)}%</p>
+                <p className='text-sm text-[var(--aethel-text-secondary)]'>Status: {statusLabels[job.status] ? job.status} • Custo: ${job.cost.toFixed(2)} • Eficiência: {job.efficiency.toFixed(0)}%</p>
                 <p className='text-sm text-[var(--aethel-text-secondary)]'>Auxiliar: {job.auxAI || '—'} • Otimização: {job.optimization || '—'}</p>
                 <p className='text-sm text-[var(--aethel-text-secondary)]'>Filtros: {job.filters || '—'}</p>
               </div>

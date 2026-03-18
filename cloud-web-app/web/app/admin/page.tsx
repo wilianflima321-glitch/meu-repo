@@ -124,10 +124,10 @@ export default function Admin() {
                               : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'
                         }`}
                       >
-                        {planLabels[user.plan] ?? user.plan}
+                        {planLabels[user.plan] ? user.plan}
                       </span>
                     </td>
-                    <td className='p-2'>{user._count?.projects ?? 0}</td>
+                    <td className='p-2'>{user._count?.projects ? 0}</td>
                     <td className='p-2 text-[var(--aethel-text-tertiary)]'>{new Date(user.createdAt).toLocaleDateString()}</td>
                   </tr>
                 ))}

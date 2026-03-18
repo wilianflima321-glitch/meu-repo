@@ -140,8 +140,8 @@ export default function APIs() {
           ? (operatorData as OperatorReadinessSnapshot)
           : null;
       setOperatorReadiness(operatorSnapshot);
-      setBillingRuntime(operatorSnapshot?.checks.billingRuntime ?? null);
-      setPreviewRuntime(operatorSnapshot?.checks.previewRuntime ?? null);
+      setBillingRuntime(operatorSnapshot?.checks.billingRuntime ? null);
+      setPreviewRuntime(operatorSnapshot?.checks.previewRuntime ? null);
       setProductionRuntime(
         operatorSnapshot?.checks.productionRuntime
           ? { runtimeReadiness: operatorSnapshot.checks.productionRuntime }
@@ -367,7 +367,7 @@ export default function APIs() {
             <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
               <span className='text-[var(--aethel-text-secondary)]'>Publishable key / price coverage</span>
               <span className='text-[var(--aethel-text-secondary)]'>
-                {String(Boolean(billingRuntime.stripe?.publishableKeyConfigured))} / {billingRuntime.stripe?.configuredPriceCount ?? 0}/{billingRuntime.stripe?.requiredPriceCount ?? 0}
+                {String(Boolean(billingRuntime.stripe?.publishableKeyConfigured))} / {billingRuntime.stripe?.configuredPriceCount ? 0}/{billingRuntime.stripe?.requiredPriceCount ? 0}
               </span>
             </div>
             {billingRuntime.provider?.webhookPath ? (

@@ -110,7 +110,7 @@ export default function Payments() {
       if (!res.ok) throw new Error('Falha ao carregar pagamentos');
       const data = await res.json();
       setItems(Array.isArray(data?.items) ? data.items : []);
-      setTotals(data?.totals ?? { total: 0, succeeded: 0, pending: 0, failed: 0 });
+      setTotals(data?.totals ? { total: 0, succeeded: 0, pending: 0, failed: 0 });
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
@@ -285,7 +285,7 @@ export default function Payments() {
                 statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
-              {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
+              {status === 'all' ? 'Todos' : statusLabels[status] ? status}
             </button>
           ))}
         </div>
@@ -327,7 +327,7 @@ export default function Payments() {
                           : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                       }`}
                     >
-                      {statusLabels[item.status] ?? item.status}
+                      {statusLabels[item.status] ? item.status}
                     </span>
                   </td>
                   <td className='p-2'>{new Date(item.createdAt).toLocaleDateString()}</td>

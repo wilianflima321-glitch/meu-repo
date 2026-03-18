@@ -247,14 +247,14 @@ export default function AgentMonitorPage() {
   const metrics: AIMetrics | null = metricsData?.metrics || null;
   const calls: AICall[] = callsData?.calls || [];
   const readiness: AIReadiness | null = readinessData || null;
-  const coreLoopLatest = coreLoopMetricsData?.latest ?? null;
-  const coreLoopTrend = coreLoopMetricsData?.trend ?? null;
-  const reasonPlaybook = coreLoopMetricsData?.reasonPlaybook ?? [];
-  const ledgerIntegrity = ledgerIntegrityData ?? null;
+  const coreLoopLatest = coreLoopMetricsData?.latest ? null;
+  const coreLoopTrend = coreLoopMetricsData?.trend ? null;
+  const reasonPlaybook = coreLoopMetricsData?.reasonPlaybook ? [];
+  const ledgerIntegrity = ledgerIntegrityData ? null;
   const emergencyState = emergencyData?.data;
-  const runSummary = runsData?.metadata?.summary ?? null;
-  const runSummaryAll = runsData?.metadata?.summaryAll ?? null;
-  const runGroups = runsData?.metadata?.runGroups ?? [];
+  const runSummary = runsData?.metadata?.summary ? null;
+  const runSummaryAll = runsData?.metadata?.summaryAll ? null;
+  const runGroups = runsData?.metadata?.runGroups ? [];
 
   React.useEffect(() => {
     if (metrics || calls.length > 0) {
@@ -289,9 +289,9 @@ export default function AgentMonitorPage() {
         refreshFullAccessAudit(),
         refreshRuns(),
       ]);
-      const runs = payload?.totals?.runs ?? 0;
-      const applySuccess = payload?.totals?.applySuccess ?? 0;
-      const applyBlocked = payload?.totals?.applyBlocked ?? 0;
+      const runs = payload?.totals?.runs ? 0;
+      const applySuccess = payload?.totals?.applySuccess ? 0;
+      const applyBlocked = payload?.totals?.applyBlocked ? 0;
       setOperatorNotice({
         tone: 'success',
         text: `Drill concluido: runs=${runs}, success=${applySuccess}, blocked=${applyBlocked}.`,
@@ -334,10 +334,10 @@ export default function AgentMonitorPage() {
         refreshFullAccessAudit(),
         refreshRuns(),
       ]);
-      const runs = payload?.metadata?.runs ?? 0;
-      const applySuccess = payload?.metadata?.totals?.applySuccess ?? 0;
-      const applyBlocked = payload?.metadata?.totals?.applyBlocked ?? 0;
-      const applyFailed = payload?.metadata?.totals?.applyFailed ?? 0;
+      const runs = payload?.metadata?.runs ? 0;
+      const applySuccess = payload?.metadata?.totals?.applySuccess ? 0;
+      const applyBlocked = payload?.metadata?.totals?.applyBlocked ? 0;
+      const applyFailed = payload?.metadata?.totals?.applyFailed ? 0;
       const selectedFile = payload?.metadata?.selectedFile || 'n/a';
       setOperatorNotice({
         tone: 'success',
@@ -492,9 +492,9 @@ export default function AgentMonitorPage() {
           {(typeof readiness.metrics.reviewedApplyRuns === 'number' ||
             typeof readiness.metrics.unreviewedApplyRuns === 'number') && (
             <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">
-              reviewed={readiness.metrics.reviewedApplyRuns ?? 0} | unreviewed=
-              {readiness.metrics.unreviewedApplyRuns ?? 0} | target learn coverage=
-              {((readiness.thresholds.feedbackCoverageMin ?? 0.6) * 100).toFixed(0)}%
+              reviewed={readiness.metrics.reviewedApplyRuns ? 0} | unreviewed=
+              {readiness.metrics.unreviewedApplyRuns ? 0} | target learn coverage=
+              {((readiness.thresholds.feedbackCoverageMin ? 0.6) * 100).toFixed(0)}%
             </p>
           )}
           {readiness.runtimeReadiness && (
@@ -679,7 +679,7 @@ export default function AgentMonitorPage() {
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Core-loop Operational Metrics (7d)</h3>
             <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
-              {coreLoopMetricsData?.capabilityStatus ?? 'PARTIAL'}
+              {coreLoopMetricsData?.capabilityStatus ? 'PARTIAL'}
             </span>
           </div>
           {coreLoopMetricsData?.samplePolicy && (
@@ -916,11 +916,11 @@ export default function AgentMonitorPage() {
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Apply/Rollback Ledger (72h)</h3>
             <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
-              capability: {runsData?.capabilityStatus ?? 'PARTIAL'}
+              capability: {runsData?.capabilityStatus ? 'PARTIAL'}
             </span>
           </div>
           <div className="mb-3 flex flex-wrap gap-2 text-xs text-[var(--aethel-text-tertiary)]">
-            <span>sampleClass: {runsData?.metadata?.sampleClass ?? runSampleClass}</span>
+            <span>sampleClass: {runsData?.metadata?.sampleClass ? runSampleClass}</span>
             {runSummaryAll && (
               <span>
                 all.apply={runSummaryAll.apply} all.blocked={runSummaryAll.applyBlocked} all.rollback={runSummaryAll.rollback}

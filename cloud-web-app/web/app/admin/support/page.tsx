@@ -122,7 +122,7 @@ export default function Support() {
                 statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
-              {status === 'all' ? 'Todos' : (statusLabels[status] ?? status)}
+              {status === 'all' ? 'Todos' : (statusLabels[status] ? status)}
             </button>
           ))}
           {(['all', 'low', 'normal', 'high', 'urgent'] as const).map((priority) => (
@@ -133,7 +133,7 @@ export default function Support() {
                 priorityFilter === priority ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
-              {priority === 'all' ? 'Todas prioridades' : (priorityLabels[priority] ?? priority)}
+              {priority === 'all' ? 'Todas prioridades' : (priorityLabels[priority] ? priority)}
             </button>
           ))}
         </div>
@@ -182,7 +182,7 @@ export default function Support() {
                 <td className='p-2'>{ticket.subject}</td>
                 <td className='p-2'>
                   <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]">
-                    {statusLabels[ticket.status] ?? ticket.status}
+                    {statusLabels[ticket.status] ? ticket.status}
                   </span>
                 </td>
                 <td className='p-2'>
@@ -193,7 +193,7 @@ export default function Support() {
                       ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                       : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                   }`}>
-                    {priorityLabels[ticket.priority] ?? ticket.priority}
+                    {priorityLabels[ticket.priority] ? ticket.priority}
                   </span>
                 </td>
                 <td className='p-2'>{ticket.messageCount}</td>

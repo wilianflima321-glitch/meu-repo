@@ -262,7 +262,7 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
               <tr key={tx.id} className="border-b border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]/50">
                 <td className="px-4 py-2">
                   <span className={`capitalize ${typeColors[tx.type]}`}>
-                    {typeLabels[tx.type] ?? tx.type}
+                    {typeLabels[tx.type] ? tx.type}
                   </span>
                 </td>
                 <td className="px-4 py-2">

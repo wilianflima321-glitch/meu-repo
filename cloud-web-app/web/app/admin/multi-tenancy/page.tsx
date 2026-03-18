@@ -75,12 +75,12 @@ export default function MultiTenancyPage() {
         items={[
           {
             icon: Building2,
-            label: 'Locat??rios detectados',
+            label: 'Locat?rios detectados',
             value: tenants.length,
           },
           {
             icon: Users,
-            label: 'Usu??rios totais',
+            label: 'Usu?rios totais',
             value: summary.totalUsers,
           },
           {

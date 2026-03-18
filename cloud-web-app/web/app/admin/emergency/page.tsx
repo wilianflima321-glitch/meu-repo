@@ -136,7 +136,7 @@ export default function AdminEmergencyPage() {
             </p>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
               {state.activatedAt
-                ? `Última ativação: ${new Date(state.activatedAt).toLocaleString()} por ${state.activatedBy ?? 'sistema'}`
+                ? `Última ativação: ${new Date(state.activatedAt).toLocaleString()} por ${state.activatedBy ? 'sistema'}`
                 : 'Nenhuma ativação recente.'}
             </p>
           </div>

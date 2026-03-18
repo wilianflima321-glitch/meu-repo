@@ -25,13 +25,13 @@ export default function CostOptimization() {
       if (!res.ok) throw new Error('Falha ao carregar métricas financeiras');
       const data = await res.json();
       setMetrics({
-        dailyRevenue: data?.dailyRevenue ?? 0,
-        dailyAICost: data?.dailyAICost ?? 0,
-        dailyInfraCost: data?.dailyInfraCost ?? 0,
-        dailyProfit: data?.dailyProfit ?? 0,
-        profitMargin: data?.profitMargin ?? 0,
-        burnRate: data?.burnRate ?? 0,
-        runway: data?.runway ?? 0,
+        dailyRevenue: data?.dailyRevenue ? 0,
+        dailyAICost: data?.dailyAICost ? 0,
+        dailyInfraCost: data?.dailyInfraCost ? 0,
+        dailyProfit: data?.dailyProfit ? 0,
+        profitMargin: data?.profitMargin ? 0,
+        burnRate: data?.burnRate ? 0,
+        runway: data?.runway ? 0,
         alerts: Array.isArray(data?.alerts) ? data.alerts : [],
       });
       setError(null);
@@ -67,10 +67,10 @@ export default function CostOptimization() {
     );
   }
 
-  const dailyInfra = metrics?.dailyInfraCost ?? 0;
-  const dailyAI = metrics?.dailyAICost ?? 0;
-  const dailyRevenue = metrics?.dailyRevenue ?? 0;
-  const dailyProfit = metrics?.dailyProfit ?? 0;
+  const dailyInfra = metrics?.dailyInfraCost ? 0;
+  const dailyAI = metrics?.dailyAICost ? 0;
+  const dailyRevenue = metrics?.dailyRevenue ? 0;
+  const dailyProfit = metrics?.dailyProfit ? 0;
 
   return (
     <div className='p-6 max-w-4xl mx-auto'>
@@ -108,12 +108,12 @@ export default function CostOptimization() {
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
             <h3 className='font-semibold'>Queima diária</h3>
-            <p className='text-2xl'>${(metrics?.burnRate ?? 0).toFixed(2)}/dia</p>
+            <p className='text-2xl'>${(metrics?.burnRate ? 0).toFixed(2)}/dia</p>
             <p className='text-sm text-[var(--aethel-text-secondary)]'>Diferença custo - receita</p>
           </div>
           <div className='p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow'>
             <h3 className='font-semibold'>Fôlego</h3>
-            <p className='text-2xl'>{metrics?.runway ?? 0} meses</p>
+            <p className='text-2xl'>{metrics?.runway ? 0} meses</p>
             <p className='text-sm text-[var(--aethel-text-secondary)]'>Baseado em caixa configurado</p>
           </div>
         </div>

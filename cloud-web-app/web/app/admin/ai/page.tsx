@@ -123,7 +123,7 @@ export default function AdminAI() {
           },
           {
             icon: Gauge,
-            label: 'M??x. tokens',
+            label: 'M?x. tokens',
             value: aiSettings.maxTokens,
           },
         ]}

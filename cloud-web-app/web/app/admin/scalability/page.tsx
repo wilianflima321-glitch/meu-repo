@@ -37,18 +37,18 @@ export default function ScalabilityPage() {
       const billing = await billingRes.json();
 
       const resources = infra?.resources;
-      const cpuUsage = Number(resources?.cpu?.usage ?? 0);
-      const memoryUsage = Number(resources?.memory?.percentage ?? 0);
+      const cpuUsage = Number(resources?.cpu?.usage ? 0);
+      const memoryUsage = Number(resources?.memory?.percentage ? 0);
 
-      const networkIn = Number(resources?.network?.in ?? 0);
-      const networkOut = Number(resources?.network?.out ?? 0);
+      const networkIn = Number(resources?.network?.in ? 0);
+      const networkOut = Number(resources?.network?.out ? 0);
       const networkMbps = ((networkIn + networkOut) * 8) / 1_000_000;
 
-      const activeConnections = Number(infra?.activeConnections ?? 0);
-      const errorRate = Number(infra?.errorRate ?? 0);
+      const activeConnections = Number(infra?.activeConnections ? 0);
+      const errorRate = Number(infra?.errorRate ? 0);
 
       const latencies = Array.isArray(infra?.services)
-        ? infra.services.map((s: any) => Number(s?.latency ?? 0)).filter((v: number) => Number.isFinite(v) && v > 0)
+        ? infra.services.map((s: any) => Number(s?.latency ? 0)).filter((v: number) => Number.isFinite(v) && v > 0)
         : [];
       const responseTime = latencies.length
         ? Math.round(latencies.reduce((a: number, b: number) => a + b, 0) / latencies.length)
@@ -65,9 +65,9 @@ export default function ScalabilityPage() {
 
       setUsage({
         planName: billing?.data?.plan?.name || billing?.data?.plan?.id || '—',
-        aiTokensUsed: Number(billing?.data?.usage?.aiTokens?.used ?? 0),
-        storageUsedMb: Number(billing?.data?.usage?.storage?.used ?? 0),
-        buildMinutesUsed: Number(billing?.data?.usage?.buildMinutes?.used ?? 0),
+        aiTokensUsed: Number(billing?.data?.usage?.aiTokens?.used ? 0),
+        storageUsedMb: Number(billing?.data?.usage?.storage?.used ? 0),
+        buildMinutesUsed: Number(billing?.data?.usage?.buildMinutes?.used ? 0),
       });
 
       setError(null);

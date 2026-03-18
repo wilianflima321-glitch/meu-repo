@@ -177,7 +177,7 @@ export default function AIEnhancements() {
                     <p className='text-sm text-[var(--aethel-text-tertiary)]'>{item.description || 'Sem descrição'}</p>
                   </div>
                   <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>
-                    {statusLabels[item.status] ?? item.status}
+                    {statusLabels[item.status] ? item.status}
                   </span>
                 </div>
                 <button

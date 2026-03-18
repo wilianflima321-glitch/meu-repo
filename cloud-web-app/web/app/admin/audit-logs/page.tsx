@@ -217,7 +217,7 @@ export default function AuditLogsPage() {
                         ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}>
-                      {severityLabels[log.severity || 'info'] ?? log.severity ?? 'informação'}
+                      {severityLabels[log.severity || 'info'] ? log.severity ? 'informação'}
                     </span>
                   </td>
                   <td className="p-2">

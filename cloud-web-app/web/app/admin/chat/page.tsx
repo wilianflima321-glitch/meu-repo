@@ -117,7 +117,7 @@ export default function Chat() {
         ) : (
           messages.map((msg) => (
             <div key={msg.id} className="mb-2 p-2 rounded border">
-              <strong>{msg.sender.toUpperCase()} ({priorityLabels[msg.priority] ?? msg.priority}):</strong> {msg.text}
+              <strong>{msg.sender.toUpperCase()} ({priorityLabels[msg.priority] ? msg.priority}):</strong> {msg.text}
               <div className='text-xs text-[var(--aethel-text-tertiary)] mt-1'>{new Date(msg.createdAt).toLocaleString()}</div>
             </div>
           ))

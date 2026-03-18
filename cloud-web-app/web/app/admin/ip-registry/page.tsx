@@ -210,7 +210,7 @@ export default function AdminIpRegistryPage() {
               {licensesList.map(([ip, lic]) => (
                 <li key={ip} className="border rounded p-3">
                   <div className="font-semibold">{ip}</div>
-                  <div className="text-sm text-[var(--aethel-text-secondary)]">Status: {statusLabels[lic.status] ?? lic.status}</div>
+                  <div className="text-sm text-[var(--aethel-text-secondary)]">Status: {statusLabels[lic.status] ? lic.status}</div>
                   {lic.holder && <div className="text-sm">Titular: {lic.holder}</div>}
                   {lic.since && <div className="text-sm">Desde: {lic.since}</div>}
                   {lic.until && <div className="text-sm">Até: {lic.until}</div>}

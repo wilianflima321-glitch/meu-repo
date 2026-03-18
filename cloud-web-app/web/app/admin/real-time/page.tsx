@@ -48,10 +48,10 @@ export default function RealTimePage() {
       const audit = await auditRes.json();
 
       setMetrics({
-        usersOnline: quickStats?.stats?.activeUsers ?? 0,
-        apiRequests: quickStats?.stats?.requestsPerMinute ?? 0,
-        cpuUsage: infra?.resources?.cpu?.usage ?? 0,
-        memoryUsage: infra?.resources?.memory?.usage ?? 0,
+        usersOnline: quickStats?.stats?.activeUsers ? 0,
+        apiRequests: quickStats?.stats?.requestsPerMinute ? 0,
+        cpuUsage: infra?.resources?.cpu?.usage ? 0,
+        memoryUsage: infra?.resources?.memory?.usage ? 0,
       });
       setLogs(Array.isArray(audit?.logs) ? audit.logs : []);
       setError(null);

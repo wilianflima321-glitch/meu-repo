@@ -283,7 +283,7 @@ export default function PromotionsPage() {
                     Código: {promo.code || 'N/D'} | Desconto: {formatDiscount(promo)}
                   </p>
                   <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                    Resgates: {promo.timesRedeemed ?? 0} | Expira em:{' '}
+                    Resgates: {promo.timesRedeemed ? 0} | Expira em:{' '}
                     {promo.expiresAt ? new Date(promo.expiresAt).toLocaleDateString() : 'Sem expiração'}
                   </p>
                 </div>

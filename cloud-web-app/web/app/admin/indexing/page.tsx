@@ -21,8 +21,8 @@ export default function IndexingPage() {
       if (!res.ok) throw new Error('Falha ao carregar indexação');
       const json = await res.json();
       setFiles(json.files || []);
-      setDepthLevel(json.config?.depthLevel ?? 3);
-      setMaxFileSizeMb(json.config?.maxFileSizeMb ?? 10);
+      setDepthLevel(json.config?.depthLevel ? 3);
+      setMaxFileSizeMb(json.config?.maxFileSizeMb ? 10);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar indexação');

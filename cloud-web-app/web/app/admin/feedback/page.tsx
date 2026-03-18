@@ -116,7 +116,7 @@ export default function Feedback() {
                 statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
-              {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
+              {status === 'all' ? 'Todos' : statusLabels[status] ? status}
             </button>
           ))}
           <select
@@ -177,7 +177,7 @@ export default function Feedback() {
                 <td className='p-2'>{feedback.category}</td>
                 <td className='p-2'>
                   <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]">
-                    {statusLabels[feedback.status] ?? feedback.status}
+                    {statusLabels[feedback.status] ? feedback.status}
                   </span>
                 </td>
                 <td className='p-2'>{new Date(feedback.createdAt).toLocaleDateString()}</td>

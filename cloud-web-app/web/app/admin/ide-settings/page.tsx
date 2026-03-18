@@ -83,7 +83,7 @@ export default function IDESettings() {
       Object.entries(json.definitions || {}).forEach(([key, def]) => {
         const definition = def as { type?: string; default?: unknown };
         if (definition.type === 'array' || definition.type === 'object') {
-          initialJsonInputs[key] = JSON.stringify(json.values?.[key] ?? definition.default ?? null, null, 2);
+          initialJsonInputs[key] = JSON.stringify(json.values?.[key] ? definition.default ? null, null, 2);
         }
       });
       setJsonInputs(initialJsonInputs);
@@ -196,7 +196,7 @@ export default function IDESettings() {
     if (!data?.definitions) return;
     const nextValues = { ...values };
     filteredKeys.forEach((key) => {
-      nextValues[key] = data.definitions[key]?.default ?? null;
+      nextValues[key] = data.definitions[key]?.default ? null;
       if (data.definitions[key]?.type === 'array' || data.definitions[key]?.type === 'object') {
         setJsonInputs((prev) => ({
           ...prev,
@@ -218,7 +218,7 @@ export default function IDESettings() {
   };
 
   const renderInput = (key: string, def: SettingDefinition) => {
-    const currentValue = values[key] ?? def.default;
+    const currentValue = values[key] ? def.default;
 
     switch (def.type) {
       case 'boolean':
@@ -233,7 +233,7 @@ export default function IDESettings() {
         return (
           <input
             type='number'
-            value={currentValue ?? ''}
+            value={currentValue ? ''}
             min={def.minimum}
             max={def.maximum}
             onChange={(e) => setValues((prev) => ({ ...prev, [key]: Number(e.target.value) }))}
@@ -243,7 +243,7 @@ export default function IDESettings() {
       case 'enum':
         return (
           <select
-            value={currentValue ?? def.default}
+            value={currentValue ? def.default}
             onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
             className='border p-2 rounded text-sm w-full'
           >
@@ -259,7 +259,7 @@ export default function IDESettings() {
         return (
           <div>
             <textarea
-              value={jsonInputs[key] ?? JSON.stringify(currentValue ?? def.default ?? null, null, 2)}
+              value={jsonInputs[key] ? JSON.stringify(currentValue ? def.default ? null, null, 2)}
               onChange={(e) => {
                 const inputValue = e.target.value;
                 setJsonInputs((prev) => ({ ...prev, [key]: inputValue }));
@@ -287,7 +287,7 @@ export default function IDESettings() {
         return (
           <input
             type='text'
-            value={currentValue ?? ''}
+            value={currentValue ? ''}
             onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
             className='border p-2 rounded text-sm w-full'
           />
@@ -338,13 +338,13 @@ export default function IDESettings() {
           },
           {
             icon: Sliders,
-            label: 'Configura????es',
+            label: 'Configura??es',
             value: Object.keys(data?.definitions || {}).length,
           },
           {
             icon: hasChanges ? AlertTriangle : CheckCircle,
-            label: 'Pend??ncias',
-            value: hasChanges ? 'Sim' : 'N??o',
+            label: 'Pend?ncias',
+            value: hasChanges ? 'Sim' : 'N?o',
             tone: hasChanges ? 'warning' : 'success',
           },
         ]}

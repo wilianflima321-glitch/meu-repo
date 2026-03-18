@@ -63,7 +63,7 @@ export default function RolesPage() {
         items={[
           {
             icon: Users,
-            label: 'Usu??rios totais',
+            label: 'Usu?rios totais',
             value: summary.totalUsers,
           },
           {
@@ -94,8 +94,8 @@ export default function RolesPage() {
         ) : (
           <ul>
             {roles.map((role) => (
-              <li key={role.role ?? 'unknown'} className="p-3 border-b flex justify-between">
-                <span>{role.role ?? 'sem função'}</span>
+              <li key={role.role ? 'unknown'} className="p-3 border-b flex justify-between">
+                <span>{role.role ? 'sem função'}</span>
                 <span className="text-sm text-[var(--aethel-text-secondary)]">{role.count} usuários</span>
               </li>
             ))}
@@ -116,8 +116,8 @@ export default function RolesPage() {
         ) : (
           <ul>
             {adminRoles.map((role) => (
-              <li key={role.role ?? 'admin-unknown'} className="p-3 border-b flex justify-between">
-                <span>{role.role ?? 'sem função administrativa'}</span>
+              <li key={role.role ? 'admin-unknown'} className="p-3 border-b flex justify-between">
+                <span>{role.role ? 'sem função administrativa'}</span>
                 <span className="text-sm text-[var(--aethel-text-secondary)]">{role.count} usuários</span>
               </li>
             ))}
