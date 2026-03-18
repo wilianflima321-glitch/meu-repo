@@ -87,7 +87,7 @@ export default function Notifications() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Lidas</h3>
-          <p className='text-2xl font-bold text-green-600'>{totals.read}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{totals.read}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Não lidas</h3>

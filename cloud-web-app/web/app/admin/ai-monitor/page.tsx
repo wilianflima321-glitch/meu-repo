@@ -404,7 +404,7 @@ export default function AgentMonitorPage() {
           <button
             onClick={() => setIsPaused((prev) => !prev)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
-              isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-green-500/30 bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
+              isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
             }`}
             type="button"
           >
@@ -494,7 +494,7 @@ export default function AgentMonitorPage() {
             <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Core Loop Readiness (L4 gate)</h3>
             <span
               className={`text-xs px-2 py-1 rounded ${
-                readiness.promotionEligible ? 'bg-[var(--aethel-success)]/20 text-green-300' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+                readiness.promotionEligible ? 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
               }`}
             >
               {readiness.promotionEligible ? 'PROMOTION ELIGIBLE' : 'PARTIAL'}

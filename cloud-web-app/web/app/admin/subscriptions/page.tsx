@@ -82,7 +82,7 @@ export default function AdminSubscriptions() {
         </div>
         <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 text-center'>
           <h3 className='text-sm font-semibold'>MRR total (US$)</h3>
-          <p className='text-2xl font-bold text-green-600'>US${summary.totalMRR.toFixed(2)}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-success)]'>US${summary.totalMRR.toFixed(2)}</p>
         </div>
         <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4 text-center'>
           <h3 className='text-sm font-semibold'>Usuários em teste</h3>

@@ -125,7 +125,7 @@ export default function Chat() {
       </div>
 
       <div className='mt-4'>
-        <button onClick={exportHistory} className='px-4 py-2 bg-green-600 text-[var(--aethel-text-primary)] rounded'>Exportar Histórico</button>
+        <button onClick={exportHistory} className='px-4 py-2 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded'>Exportar Histórico</button>
       </div>
     </div>
   );

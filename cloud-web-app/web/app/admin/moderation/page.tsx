@@ -266,7 +266,7 @@ function ItemCard({
         <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--aethel-border-secondary)]">
           <button
             onClick={(e) => { e.stopPropagation(); onAction('approve'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-[var(--aethel-text-primary)] text-sm rounded"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)] text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <CheckCircle className="w-4 h-4" />
             Aprovar (A)

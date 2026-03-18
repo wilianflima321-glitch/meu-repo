@@ -262,7 +262,7 @@ export default function Payments() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Aprovados</h3>
-          <p className='text-2xl font-bold text-green-600'>US${totals.succeeded.toFixed(2)}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-success)]'>US${totals.succeeded.toFixed(2)}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Pendentes</h3>

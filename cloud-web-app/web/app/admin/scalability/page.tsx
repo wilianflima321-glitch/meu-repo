@@ -107,7 +107,7 @@ export default function ScalabilityPage() {
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Uso de memória</h3>
-          <p className="text-2xl font-bold text-green-600">{metrics.memoryUsage}%</p>
+          <p className="text-2xl font-bold text-[var(--aethel-success)]">{metrics.memoryUsage}%</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Tráfego de rede</h3>
@@ -136,7 +136,7 @@ export default function ScalabilityPage() {
           </div>
           <div className="text-center">
             <h3 className="text-lg font-semibold">Tokens de IA</h3>
-            <p className="text-2xl font-bold text-green-600">{usage.aiTokensUsed.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-[var(--aethel-success)]">{usage.aiTokensUsed.toLocaleString()}</p>
           </div>
           <div className="text-center">
             <h3 className="text-lg font-semibold">Armazenamento</h3>

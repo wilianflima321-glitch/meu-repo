@@ -248,7 +248,7 @@ export default function BiasDetectionPage() {
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Viés baixo</h3>
-            <p className="text-2xl font-bold text-green-600">{stats.lowBias}</p>
+            <p className="text-2xl font-bold text-[var(--aethel-success)]">{stats.lowBias}</p>
           </div>
           <div className="text-center">
             <h3 className="text-sm font-semibold">Pendentes</h3>

@@ -100,7 +100,7 @@ export default function AdminUsers() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Planos ativos</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.activePlans}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.activePlans}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Testes</h3>

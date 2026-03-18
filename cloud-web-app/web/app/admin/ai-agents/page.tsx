@@ -84,7 +84,7 @@ export default function AIAgentsPage() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Com projeto</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.withProject}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.withProject}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Sem projeto</h3>

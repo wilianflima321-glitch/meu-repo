@@ -98,7 +98,7 @@ export default function Feedback() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Resolvidos</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.resolved}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.resolved}</p>
         </div>
       </div>
 

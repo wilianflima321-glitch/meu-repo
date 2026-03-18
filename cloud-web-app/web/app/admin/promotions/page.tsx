@@ -168,7 +168,7 @@ export default function PromotionsPage() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Ativas</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.active}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.active}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Inativas</h3>

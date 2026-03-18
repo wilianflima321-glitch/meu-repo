@@ -105,7 +105,7 @@ export default function AdminAI() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Status</h3>
-          <p className={`text-2xl font-bold ${aiSettings.enabled ? 'text-green-600' : 'text-[var(--aethel-text-tertiary)]'}`}>
+          <p className={`text-2xl font-bold ${aiSettings.enabled ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-text-tertiary)]'}`}>
             {statusLabel}
           </p>
         </div>

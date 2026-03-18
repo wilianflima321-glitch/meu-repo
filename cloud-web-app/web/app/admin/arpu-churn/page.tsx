@@ -69,7 +69,7 @@ export default function ArpuChurnPage() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">ARPU (30d)</h3>
-          <p className="text-2xl font-bold text-green-600">${arpu.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-success)]">${arpu.toFixed(2)}</p>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Taxa de Churn</h3>

@@ -99,7 +99,7 @@ export default function Support() {
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Abertos</h3>
-          <p className="text-2xl font-bold text-green-600">{summary.open}</p>
+          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.open}</p>
         </div>
         <div className="text-center">
           <h3 className="text-sm font-semibold">Pendentes</h3>

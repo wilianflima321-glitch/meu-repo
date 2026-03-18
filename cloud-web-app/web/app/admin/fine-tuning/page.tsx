@@ -133,7 +133,7 @@ export default function FineTuningPage() {
       </div>
 
       {error && <div className="bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4">{error}</div>}
-      {message && <div className="bg-green-50 border border-green-200 text-[var(--aethel-success)] p-3 rounded mb-4">{message}</div>}
+      {message && <div className="bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] text-[var(--aethel-success)] p-3 rounded mb-4">{message}</div>}
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Envio de conjunto de dados</h2>
@@ -178,7 +178,7 @@ export default function FineTuningPage() {
             <input type="number" step="0.001" value={learningRate} onChange={(e) => setLearningRate(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
-        <button onClick={handleStartTraining} disabled={loading || !selectedDataset} className="mt-4 bg-green-600 text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">Iniciar treinamento</button>
+        <button onClick={handleStartTraining} disabled={loading || !selectedDataset} className="mt-4 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">Iniciar treinamento</button>
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">

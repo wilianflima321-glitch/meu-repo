@@ -136,7 +136,7 @@ export default function AdminIpRegistryPage() {
         </div>
       </div>
 
-      {message && <div className="bg-green-50 border border-green-200 text-[var(--aethel-success)] p-3 rounded">{message}</div>}
+      {message && <div className="bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] text-[var(--aethel-success)] p-3 rounded">{message}</div>}
 
       {!data ? <div>Nenhum dado disponível.</div> : (
         <div className="grid md:grid-cols-2 gap-6">
@@ -149,7 +149,7 @@ export default function AdminIpRegistryPage() {
                 className="border p-2 rounded text-sm flex-1"
                 placeholder="Adicionar identificador"
               />
-              <button className="px-3 py-2 bg-green-600 text-[var(--aethel-text-primary)] rounded" onClick={addAllowed}>Adicionar</button>
+              <button className="px-3 py-2 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded" onClick={addAllowed}>Adicionar</button>
             </div>
             <ul className="list-disc pl-5 space-y-1">
               {allowedList.map(ip => (

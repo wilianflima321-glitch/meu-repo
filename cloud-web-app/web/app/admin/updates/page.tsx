@@ -107,7 +107,7 @@ export default function Updates() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Aprovadas</h3>
-          <p className='text-2xl font-bold text-green-600'>{data?.summary.approved ?? 0}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{data?.summary.approved ?? 0}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Revisão</h3>

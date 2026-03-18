@@ -104,7 +104,7 @@ export default function IndexingPage() {
             <input type="number" value={maxFileSizeMb} onChange={(e) => setMaxFileSizeMb(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
-        <button onClick={updateConfig} disabled={saving} className="mt-4 bg-green-600 text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">
+        <button onClick={updateConfig} disabled={saving} className="mt-4 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">
           {saving ? 'Salvando...' : 'Atualizar configurações'}
         </button>
       </div>

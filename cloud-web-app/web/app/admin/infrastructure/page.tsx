@@ -377,7 +377,7 @@ export default function InfrastructureDashboard() {
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
               autoRefresh 
-                ? 'border-green-500/30 bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
+                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
                 : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]'
             }`}
           >

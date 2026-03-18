@@ -81,7 +81,7 @@ export default function AdminMarketplace() {
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Pagos</h3>
-          <p className='text-2xl font-bold text-green-600'>{summary.paid}</p>
+          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{summary.paid}</p>
         </div>
         <div className='text-center'>
           <h3 className='text-sm font-semibold'>Gratuitos</h3>

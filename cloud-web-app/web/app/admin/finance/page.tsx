@@ -425,7 +425,7 @@ export default function FinanceDashboard() {
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`p-2 rounded-lg border ${
               autoRefresh 
-                ? 'border-green-500/30 bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
+                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
                 : 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-tertiary)]'
             }`}
             title={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}

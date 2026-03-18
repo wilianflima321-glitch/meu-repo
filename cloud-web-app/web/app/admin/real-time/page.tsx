@@ -124,7 +124,7 @@ export default function RealTimePage() {
                 {index === 1 && (
                   <>
                     <h3 className="text-lg font-semibold">Requisições de API/min</h3>
-                    <p className="text-2xl font-bold text-green-600">{metrics.apiRequests}</p>
+                    <p className="text-2xl font-bold text-[var(--aethel-success)]">{metrics.apiRequests}</p>
                   </>
                 )}
                 {index === 2 && (
