@@ -60,7 +60,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
         .then(async (res) => {
           if (!res.ok) {
             const text = await res.text().catch(() => '');
-            throw new Error(text || `File read failed (${res.status})`);
+              throw new Error(text || `Falha ao ler arquivo (${res.status})`);
           }
           return res.json();
         })
@@ -71,7 +71,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
         .catch((err) => {
           console.warn('Could not load file:', err);
           setValue('');
-          setLoadError('File content unavailable. Verify canonical File API access for this project.');
+          setLoadError('Conteudo do arquivo indisponivel. Verifique o acesso canonico da API de arquivos para este projeto.');
         })
         .finally(() => setLoading(false));
     } else if (initialValue) {

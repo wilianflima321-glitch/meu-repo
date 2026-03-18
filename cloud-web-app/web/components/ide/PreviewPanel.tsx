@@ -474,9 +474,9 @@ export default function PreviewPanel({
           <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
             <div className="aethel-state aethel-state-empty">
               <div className="aethel-state-title mb-2">Preview not available</div>
-              <div className="text-xs">
-                Open a file in Explorer to render preview.
-              </div>
+                <div className="text-xs">
+                  Abra um arquivo no Explorer para renderizar o preview.
+                </div>
             </div>
           </div>
         )}

@@ -491,7 +491,7 @@ interface CompletionSettingsProps {
 export function CompletionSettings({ settings, onSettingsChange }: CompletionSettingsProps) {
   return (
     <div className="p-4 space-y-4">
-      <h3 className="text-sm font-semibold text-white">AI Completion Settings</h3>
+      <h3 className="text-sm font-semibold text-white">Ajustes de completacao IA</h3>
       
       {/* Enable toggle */}
       <div className="flex items-center justify-between">

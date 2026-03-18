@@ -291,7 +291,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search..."
+              placeholder="Buscar..."
               className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
             />
           </div>
@@ -703,7 +703,7 @@ export function SymbolOutlinePanel({
           type="text"
           value={filter}
           onChange={e => setFilter(e.target.value)}
-          placeholder="Filter symbols..."
+          placeholder="Filtrar simbolos..."
           className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
         />
       </div>

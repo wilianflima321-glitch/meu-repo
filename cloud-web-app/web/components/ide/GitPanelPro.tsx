@@ -171,7 +171,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
         <button
           onClick={onOpenDiff}
           className="p-1 rounded hover:bg-slate-700 text-slate-400"
-          title="View Diff"
+          title="Ver diff"
         >
           <Eye className="w-3.5 h-3.5" />
         </button>

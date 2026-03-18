@@ -374,7 +374,7 @@ export function DiffHunkPreview({
               onClick={onViewFullDiff}
               className="px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-700 rounded"
             >
-              View Diff
+              Ver diff
             </button>
           )}
           {onRevertChange && change.type !== 'added' && (

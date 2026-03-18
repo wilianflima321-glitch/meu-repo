@@ -206,15 +206,15 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
   const [menuPosition, setMenuPosition] = useState({ left: x, top: y })
   const isFolder = file.type === 'folder'
   
-  const menuItems = [
-    ...(isFolder ? [
-      { id: 'new-file', label: 'New File', icon: 'new-file' as CodiconName },
-      { id: 'new-folder', label: 'New Folder', icon: 'new-folder' as CodiconName },
-      { id: 'divider-1', divider: true },
-    ] : []),
-    { id: 'rename', label: 'Rename', icon: 'edit' as CodiconName },
-    { id: 'delete', label: 'Delete', icon: 'trash' as CodiconName, danger: true },
-  ]
+    const menuItems = [
+      ...(isFolder ? [
+        { id: 'new-file', label: 'Novo arquivo', icon: 'new-file' as CodiconName },
+        { id: 'new-folder', label: 'Nova pasta', icon: 'new-folder' as CodiconName },
+        { id: 'divider-1', divider: true },
+      ] : []),
+      { id: 'rename', label: 'Renomear', icon: 'edit' as CodiconName },
+      { id: 'delete', label: 'Excluir', icon: 'trash' as CodiconName, danger: true },
+    ]
   const actionableItems = menuItems.filter((item) => !item.divider)
 
   useEffect(() => {
@@ -492,24 +492,24 @@ export default function FileExplorerPro({
             onClick={() => setShowSearch(!showSearch)}
             aria-label="Toggle file search"
             className={`p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${showSearch ? 'text-blue-300' : 'text-slate-400'}`}
-            title="Search Files"
+            title="Buscar arquivos"
           >
             <Codicon name="search" />
           </button>
           <button
             onClick={() => onFileCreate?.('/', 'file')}
-            aria-label="Create new file"
-            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
-            title="New File"
-          >
+              aria-label="Criar novo arquivo"
+              className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
+              title="Novo arquivo"
+            >
             <Codicon name="new-file" />
           </button>
           <button
             onClick={() => onFileCreate?.('/', 'folder')}
-            aria-label="Create new folder"
-            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
-            title="New Folder"
-          >
+              aria-label="Criar nova pasta"
+              className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
+              title="Nova pasta"
+            >
             <Codicon name="new-folder" />
           </button>
           <button
@@ -537,7 +537,7 @@ export default function FileExplorerPro({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search files..."
+              placeholder="Buscar arquivos..."
               className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
               autoFocus
             />
@@ -590,22 +590,22 @@ export default function FileExplorerPro({
         {filteredFiles.length === 0 && !searchQuery && !effectiveLoading && !effectiveError && (
           <div className="h-full flex items-center justify-center px-4 text-center">
             <div className="max-w-xs">
-              <div className="text-xs font-medium text-slate-300 mb-1">Workspace is empty</div>
-              <div className="text-[11px] text-slate-500 mb-3">
-                Create a file or folder to start editing in this project.
-              </div>
+                <div className="text-xs font-medium text-slate-300 mb-1">Workspace vazio</div>
+                <div className="text-[11px] text-slate-500 mb-3">
+                  Crie um arquivo ou pasta para comecar a editar neste projeto.
+                </div>
               <div className="flex items-center justify-center gap-2">
                 <button
                   onClick={() => onFileCreate?.('/', 'file')}
                   className="px-2.5 py-1.5 rounded border border-slate-700 bg-slate-800/70 text-[11px] text-slate-200 hover:bg-slate-700/80"
                 >
-                  New File
+                  Novo arquivo
                 </button>
                 <button
                   onClick={() => onFileCreate?.('/', 'folder')}
                   className="px-2.5 py-1.5 rounded border border-slate-700 bg-slate-800/70 text-[11px] text-slate-200 hover:bg-slate-700/80"
                 >
-                  New Folder
+                  Nova pasta
                 </button>
               </div>
             </div>

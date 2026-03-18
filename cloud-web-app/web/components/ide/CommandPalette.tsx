@@ -75,17 +75,17 @@ const CATEGORY_ICONS: Record<CommandCategory, CodiconName> = {
 }
 
 const CATEGORY_LABELS: Record<CommandCategory, string> = {
-  file: 'File',
-  edit: 'Edit',
-  view: 'View',
-  go: 'Go',
-  run: 'Run',
+  file: 'Arquivo',
+  edit: 'Editar',
+  view: 'Visualizar',
+  go: 'Ir',
+  run: 'Executar',
   terminal: 'Terminal',
   git: 'Git',
-  ai: 'AI',
-  settings: 'Settings',
+  ai: 'IA',
+  settings: 'Ajustes',
   debug: 'Debug',
-  extension: 'Extensions',
+  extension: 'Extensoes',
 }
 
 const CommandPaletteContext = createContext<CommandPaletteContextType | null>(null)
@@ -113,96 +113,96 @@ function createDefaultCommands(handlers: {
   return [
     {
       id: 'file.open',
-      label: 'Open File',
-      description: 'Open a file from the workspace',
+      label: 'Abrir arquivo',
+      description: 'Abrir um arquivo do workspace',
       category: 'file',
       icon: 'folder-opened',
       shortcut: 'Ctrl+O',
       action: handlers.openFile || (() => {}),
-      keywords: ['open', 'file'],
+      keywords: ['open', 'file', 'abrir', 'arquivo'],
     },
     {
       id: 'file.save',
-      label: 'Save',
-      description: 'Save current file',
+      label: 'Salvar',
+      description: 'Salvar arquivo atual',
       category: 'file',
       shortcut: 'Ctrl+S',
       action: handlers.saveFile || (() => {}),
-      keywords: ['save'],
+      keywords: ['save', 'salvar'],
     },
     {
       id: 'file.saveAll',
-      label: 'Save All',
-      description: 'Save all changed files',
+      label: 'Salvar tudo',
+      description: 'Salvar todos os arquivos alterados',
       category: 'file',
       shortcut: 'Ctrl+Shift+S',
       action: handlers.saveAll || (() => {}),
-      keywords: ['save', 'all'],
+      keywords: ['save', 'all', 'salvar', 'tudo'],
     },
     {
       id: 'file.newFile',
-      label: 'New File',
-      description: 'Create a new file',
+      label: 'Novo arquivo',
+      description: 'Criar um novo arquivo',
       category: 'file',
       icon: 'new-file',
       shortcut: 'Ctrl+N',
       action: handlers.newFile || (() => {}),
-      keywords: ['new', 'file'],
+      keywords: ['new', 'file', 'novo', 'arquivo'],
     },
     {
       id: 'file.newFolder',
-      label: 'New Folder',
-      description: 'Create a new folder',
+      label: 'Nova pasta',
+      description: 'Criar uma nova pasta',
       category: 'file',
       icon: 'new-folder',
       action: handlers.newFolder || (() => {}),
-      keywords: ['new', 'folder'],
+      keywords: ['new', 'folder', 'nova', 'pasta'],
     },
     {
       id: 'view.toggleSidebar',
-      label: 'Toggle Sidebar',
-      description: 'Show or hide the left sidebar',
+      label: 'Alternar barra lateral',
+      description: 'Mostrar ou ocultar a barra lateral esquerda',
       category: 'view',
       shortcut: 'Ctrl+B',
       action: handlers.toggleSidebar || (() => {}),
-      keywords: ['sidebar', 'panel'],
+      keywords: ['sidebar', 'panel', 'barra', 'lateral'],
     },
     {
       id: 'view.toggleTerminal',
-      label: 'Toggle Terminal',
-      description: 'Show or hide the bottom terminal panel',
+      label: 'Alternar terminal',
+      description: 'Mostrar ou ocultar o terminal inferior',
       category: 'view',
       shortcut: 'Ctrl+J',
       action: handlers.toggleTerminal || (() => {}),
-      keywords: ['terminal', 'panel'],
+      keywords: ['terminal', 'panel', 'painel'],
     },
     {
       id: 'ai.chat',
-      label: 'Open AI Panel',
-      description: 'Open AI panel on the right side',
+      label: 'Abrir painel de IA',
+      description: 'Abrir painel de IA na direita',
       category: 'ai',
       shortcut: 'Ctrl+I',
       action: handlers.aiChat || (() => {}),
-      keywords: ['ai', 'assistant', 'chat'],
+      keywords: ['ai', 'assistant', 'chat', 'ia'],
     },
     {
       id: 'settings.open',
-      label: 'Open Settings',
-      description: 'Open IDE settings',
+      label: 'Abrir ajustes',
+      description: 'Abrir ajustes da IDE',
       category: 'settings',
       shortcut: 'Ctrl+,',
       action: handlers.openSettings || (() => {}),
-      keywords: ['settings', 'preferences'],
+      keywords: ['settings', 'preferences', 'ajustes', 'preferencias'],
     },
     {
       id: 'project.switch',
-      label: 'Switch Project Context',
-      description: 'Change active projectId for file and preview scope',
+      label: 'Trocar contexto do projeto',
+      description: 'Alterar projectId ativo para escopo de arquivos e preview',
       category: 'settings',
       shortcut: 'Ctrl+Alt+P',
       action: handlers.switchProject || (() => {}),
       when: () => typeof handlers.switchProject === 'function',
-      keywords: ['project', 'context', 'scope'],
+      keywords: ['project', 'context', 'scope', 'projeto', 'contexto'],
     },
   ]
 }
@@ -544,10 +544,10 @@ function CommandPaletteUI({
   if (!isOpen) return null
 
   const modeConfig: Record<PaletteMode, { placeholder: string; prefix: string }> = {
-    commands: { placeholder: 'Type a command...', prefix: '>' },
-    files: { placeholder: 'Search files...', prefix: '' },
-    symbols: { placeholder: 'Go to symbol...', prefix: '@' },
-    lines: { placeholder: 'Go to line...', prefix: ':' },
+    commands: { placeholder: 'Digite um comando...', prefix: '>' },
+    files: { placeholder: 'Buscar arquivos...', prefix: '' },
+    symbols: { placeholder: 'Ir para simbolo...', prefix: '@' },
+    lines: { placeholder: 'Ir para linha...', prefix: ':' },
   }
 
   const currentMode = modeConfig[mode]
@@ -559,7 +559,7 @@ function CommandPaletteUI({
         className="fixed left-1/2 top-[12%] z-50 w-[680px] max-w-[94vw] -translate-x-1/2"
         role="dialog"
         aria-modal="true"
-        aria-label="Command palette"
+        aria-label="Paleta de comandos"
       >
         <div className="overflow-hidden rounded-lg border border-slate-700/80 bg-[#0f131b] shadow-2xl">
           <div className="flex items-center gap-2 border-b border-slate-700/70 px-3 py-2.5">
@@ -574,21 +574,21 @@ function CommandPaletteUI({
               className="flex-1 bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-500"
               autoComplete="off"
               spellCheck={false}
-              aria-label="Command palette input"
+              aria-label="Entrada da paleta de comandos"
             />
             <div className="hidden items-center gap-2 text-[10px] text-slate-500 md:flex">
               <kbd className="rounded bg-slate-800 px-1.5 py-0.5">Up/Down</kbd>
-              <span>Navigate</span>
+              <span>Navegar</span>
               <kbd className="rounded bg-slate-800 px-1.5 py-0.5">Enter</kbd>
-              <span>Select</span>
+              <span>Selecionar</span>
               <kbd className="rounded bg-slate-800 px-1.5 py-0.5">Esc</kbd>
-              <span>Close</span>
+              <span>Fechar</span>
             </div>
           </div>
 
-          <div ref={listRef} className="max-h-[420px] overflow-y-auto" role="listbox" aria-label="Command palette results">
+          <div ref={listRef} className="max-h-[420px] overflow-y-auto" role="listbox" aria-label="Resultados da paleta">
             {!filteredItems.length && (
-              <div className="px-4 py-8 text-center text-xs text-slate-500">No results found</div>
+              <div className="px-4 py-8 text-center text-xs text-slate-500">Nenhum resultado encontrado</div>
             )}
 
             {filteredItems.map((item, index) => {
@@ -649,13 +649,13 @@ function CommandPaletteUI({
           <div className="flex items-center justify-between border-t border-slate-700/70 px-3 py-1.5 text-[10px] text-slate-500">
             <div className="flex items-center gap-3">
               <span>
-                <kbd className="rounded bg-slate-800 px-1 py-0.5">Ctrl+Shift+P</kbd> Commands
+                <kbd className="rounded bg-slate-800 px-1 py-0.5">Ctrl+Shift+P</kbd> Comandos
               </span>
               <span>
-                <kbd className="rounded bg-slate-800 px-1 py-0.5">Ctrl+P</kbd> Files
+                <kbd className="rounded bg-slate-800 px-1 py-0.5">Ctrl+P</kbd> Arquivos
               </span>
             </div>
-            <span>{filteredItems.length} results</span>
+            <span>{filteredItems.length} resultados</span>
           </div>
         </div>
       </div>

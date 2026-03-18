@@ -255,17 +255,17 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
 
   const handleDelete = async () => {
     const shouldDelete = await openConfirmDialog({
-      title: 'Delete item',
-      message: `Delete ${path}?`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
+      title: 'Excluir item',
+      message: `Excluir ${path}?`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
     });
     if (!shouldDelete) return;
     try {
       await explorerManager.deleteFiles([path]);
       onAction();
     } catch (error) {
-      console.error('Delete failed:', error);
+      console.error('Falha ao excluir:', error);
     }
   };
 
@@ -275,7 +275,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
       message: 'New name:',
       defaultValue: path.split('/').pop() ?? '',
       confirmText: 'Rename',
-      cancelText: 'Cancel',
+      cancelText: 'Cancelar',
     });
     if (newName) {
       explorerManager.renameFile(path, newName);
@@ -290,7 +290,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ x, y, path, onClose, 
       <div className="menu-item" onClick={handlePaste}>Paste</div>
       <div className="menu-separator" />
       <div className="menu-item" onClick={handleRename}>Rename</div>
-      <div className="menu-item danger" onClick={handleDelete}>Delete</div>
+      <div className="menu-item danger" onClick={handleDelete}>Excluir</div>
 
       <style jsx>{`
         .context-menu {

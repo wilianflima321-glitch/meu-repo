@@ -771,7 +771,7 @@ export default function AIChatPanelPro({
             </button>
             <button
               className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-              title="Settings"
+              title="Ajustes"
             >
               <Settings className="w-4 h-4" />
             </button>

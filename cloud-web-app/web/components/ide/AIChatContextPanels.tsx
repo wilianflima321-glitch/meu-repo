@@ -86,7 +86,7 @@ export function CodebaseContextPanel({
                   onClick={() => onOpenResult(result.filePath, result.startLine, result.endLine)}
                   className="rounded border border-sky-500/40 px-2 py-0.5 text-[10px] text-sky-200 transition-colors hover:bg-sky-500/10"
                 >
-                  Open
+                  Abrir
                 </button>
               </div>
             </div>
@@ -155,7 +155,7 @@ export function MentionContextPanel({
                     onClick={() => onOpenFileBlock(block)}
                     className="rounded border border-violet-500/40 px-2 py-0.5 text-[10px] text-violet-200 transition-colors hover:bg-violet-500/10"
                   >
-                    Open
+                    Abrir
                   </button>
                 ) : null}
                 <button

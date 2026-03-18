@@ -753,7 +753,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       <div className="p-3 border-t border-slate-800">
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => onSendToChat?.('Create a new feature using AI agents')}
+            onClick={() => onSendToChat?.('Criar uma nova feature usando agentes de IA')}
             className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm text-slate-300"
           >
             <MessageSquare className="w-4 h-4" />
@@ -832,13 +832,13 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
                 onClick={() => setShowAgentConfig(null)}
                 className="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm text-slate-300"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={() => setShowAgentConfig(null)}
                 className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm text-white"
               >
-                Save Changes
+                Salvar alteracoes
               </button>
             </div>
           </div>

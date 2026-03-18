@@ -20,7 +20,7 @@ export default function WorkbenchRedirect({
             href="/ide"
             className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm font-medium"
           >
-            Open Workbench
+          Abrir Workbench
           </Link>
         </div>
       </div>

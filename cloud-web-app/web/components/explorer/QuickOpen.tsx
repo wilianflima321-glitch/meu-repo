@@ -106,7 +106,7 @@ export const QuickOpen: React.FC<QuickOpenProps> = ({ isOpen, onClose, onSelect 
             ref={inputRef}
             type="text"
             className="quick-open-input"
-            placeholder="Search files by name..."
+            placeholder="Buscar arquivos pelo nome..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}

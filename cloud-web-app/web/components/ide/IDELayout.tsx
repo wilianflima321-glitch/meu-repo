@@ -81,7 +81,7 @@ interface IDELayoutProps {
 
 const SIDEBAR_TABS = [
   { id: 'explorer' as const, icon: 'files' as CodiconName, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
-  { id: 'search' as const, icon: 'search' as CodiconName, label: 'Search', shortcut: 'Ctrl+Shift+F' },
+  { id: 'search' as const, icon: 'search' as CodiconName, label: 'Busca', shortcut: 'Ctrl+Shift+F' },
   { id: 'git' as const, icon: 'source-control' as CodiconName, label: 'Source Control', shortcut: 'Ctrl+Shift+G' },
   { id: 'ai' as const, icon: 'sparkle' as CodiconName, label: 'AI', shortcut: 'Ctrl+Shift+I' },
   { id: 'extensions' as const, icon: 'extensions' as CodiconName, label: 'Extensions', shortcut: '' },
@@ -89,10 +89,10 @@ const SIDEBAR_TABS = [
 
 const BOTTOM_TABS = [
   { id: 'terminal' as const, icon: 'terminal' as CodiconName, label: 'Terminal' },
-  { id: 'output' as const, icon: 'output' as CodiconName, label: 'Output' },
-  { id: 'problems' as const, icon: 'warning' as CodiconName, label: 'Problems', badge: 0 },
-  { id: 'debug' as const, icon: 'debug' as CodiconName, label: 'Debug' },
-  { id: 'ports' as const, icon: 'plug' as CodiconName, label: 'Ports' },
+  { id: 'output' as const, icon: 'output' as CodiconName, label: 'Saida' },
+  { id: 'problems' as const, icon: 'warning' as CodiconName, label: 'Problemas', badge: 0 },
+  { id: 'debug' as const, icon: 'debug' as CodiconName, label: 'Depuracao' },
+  { id: 'ports' as const, icon: 'plug' as CodiconName, label: 'Portas' },
 ]
 
 const LOCAL_STORAGE_KEY = 'aethel.workbench.layout'
@@ -333,19 +333,19 @@ export default function IDELayout({
 
   const menuConfigs: MenuConfig[] = [
     {
-      label: 'File',
+      label: 'Arquivo',
       items: [
-        { label: 'New File', shortcut: 'Ctrl+N', action: onNewFile },
-        { label: 'New Folder', shortcut: 'Ctrl+Shift+N', action: onNewFolder },
+        { label: 'Novo arquivo', shortcut: 'Ctrl+N', action: onNewFile },
+        { label: 'Nova pasta', shortcut: 'Ctrl+Shift+N', action: onNewFolder },
         { separator: true, label: '' },
-        { label: 'Open File', shortcut: 'Ctrl+O', action: onOpenFile },
-        { label: 'Open Folder', shortcut: 'Ctrl+Shift+O', action: onOpenFolder },
-        { label: 'Switch Project Context', shortcut: 'Ctrl+Alt+P', action: onSwitchProject },
+        { label: 'Abrir arquivo', shortcut: 'Ctrl+O', action: onOpenFile },
+        { label: 'Abrir pasta', shortcut: 'Ctrl+Shift+O', action: onOpenFolder },
+        { label: 'Trocar contexto do projeto', shortcut: 'Ctrl+Alt+P', action: onSwitchProject },
         { separator: true, label: '' },
-        { label: 'Save', shortcut: 'Ctrl+S', action: onSaveFile },
-        { label: 'Save All', shortcut: 'Ctrl+Alt+S', action: onSaveAll },
+        { label: 'Salvar', shortcut: 'Ctrl+S', action: onSaveFile },
+        { label: 'Salvar tudo', shortcut: 'Ctrl+Alt+S', action: onSaveAll },
         { separator: true, label: '' },
-        { label: 'Export Project', action: onExport },
+        { label: 'Exportar projeto', action: onExport },
       ],
     },
     {
@@ -376,23 +376,23 @@ export default function IDELayout({
       ],
     },
     {
-      label: 'Run',
+      label: 'Execucao',
       items: [
-        { label: 'Run', shortcut: 'F5', action: onRunProject },
-        { label: 'Stop', shortcut: 'Shift+F5', action: onStopProject },
-        { label: 'Restart', shortcut: 'Ctrl+Shift+F5', action: onRestartProject },
+        { label: 'Executar', shortcut: 'F5', action: onRunProject },
+        { label: 'Parar', shortcut: 'Shift+F5', action: onStopProject },
+        { label: 'Reiniciar', shortcut: 'Ctrl+Shift+F5', action: onRestartProject },
         { separator: true, label: '' },
-        { label: 'Build', shortcut: 'Ctrl+Shift+B', action: onBuildProject },
-        { label: 'Debug', shortcut: 'Ctrl+Shift+D', action: onDebugProject },
+        { label: 'Compilar', shortcut: 'Ctrl+Shift+B', action: onBuildProject },
+        { label: 'Depurar', shortcut: 'Ctrl+Shift+D', action: onDebugProject },
         { separator: true, label: '' },
-        { label: 'Deploy', action: onDeployProject },
+        { label: 'Publicar', action: onDeployProject },
       ],
     },
     {
       label: 'Terminal',
       items: [
         {
-          label: 'New Terminal',
+          label: 'Novo terminal',
           shortcut: 'Ctrl+`',
           action: () => {
             setActiveBottomTab('terminal')
@@ -403,10 +403,10 @@ export default function IDELayout({
       ],
     },
     {
-      label: 'AI',
+      label: 'IA',
       items: [
-        { label: 'Open AI Panel', shortcut: 'Ctrl+I', action: () => toggleRightSidebar() },
-        { label: 'New AI Chat', action: onAIChat },
+        { label: 'Abrir painel de IA', shortcut: 'Ctrl+I', action: () => toggleRightSidebar() },
+        { label: 'Novo chat de IA', action: onAIChat },
       ],
     },
     {
@@ -419,10 +419,10 @@ export default function IDELayout({
       ],
     },
     {
-      label: 'Preferences',
+      label: 'Preferencias',
       items: [
-        { label: 'Command Palette', shortcut: 'Ctrl+Shift+P', action: onCommandPalette },
-        { label: 'Settings', shortcut: 'Ctrl+,', action: onSettings },
+        { label: 'Paleta de comandos', shortcut: 'Ctrl+Shift+P', action: onCommandPalette },
+        { label: 'Ajustes', shortcut: 'Ctrl+,', action: onSettings },
       ],
     },
   ]
@@ -430,13 +430,13 @@ export default function IDELayout({
   const renderSidebarContent = () => {
     switch (activeSidebarTab) {
       case 'explorer':
-        return fileExplorer || <NotImplementedPanel title="Explorer" capability="EXPLORER_PANEL" milestone="P0" />
+        return fileExplorer || <NotImplementedPanel title="Explorador" capability="EXPLORER_PANEL" milestone="P0" />
       case 'search':
-        return searchPanel || <NotImplementedPanel title="Search" capability="SEARCH_PANEL" milestone="P1" />
+        return searchPanel || <NotImplementedPanel title="Busca" capability="SEARCH_PANEL" milestone="P1" />
       case 'git':
-        return gitPanel || <NotImplementedPanel title="Source Control" capability="GIT_PANEL" milestone="P1" />
+        return gitPanel || <NotImplementedPanel title="Controle de codigo" capability="GIT_PANEL" milestone="P1" />
       case 'ai':
-        return aiChatPanel || <NotImplementedPanel title="AI Assistant" capability="AI_CHAT_PANEL" milestone="P0" />
+        return aiChatPanel || <NotImplementedPanel title="Assistente IA" capability="AI_CHAT_PANEL" milestone="P0" />
       case 'extensions':
         return (
           <NotImplementedPanel
@@ -456,11 +456,11 @@ export default function IDELayout({
       case 'terminal':
         return terminal || <NotImplementedPanel title="Terminal" capability="TERMINAL_PANEL" milestone="P0" />
       case 'output':
-        return outputPanel || <NotImplementedPanel title="Output" capability="OUTPUT_PANEL" milestone="P1" />
+        return outputPanel || <NotImplementedPanel title="Saida" capability="OUTPUT_PANEL" milestone="P1" />
       case 'problems':
-        return problemsPanel || <NotImplementedPanel title="Problems" capability="PROBLEMS_PANEL" milestone="P1" />
+        return problemsPanel || <NotImplementedPanel title="Problemas" capability="PROBLEMS_PANEL" milestone="P1" />
       case 'debug':
-        return debugPanel || <NotImplementedPanel title="Debug Console" capability="DEBUG_PANEL" milestone="P1" />
+        return debugPanel || <NotImplementedPanel title="Console de depuracao" capability="DEBUG_PANEL" milestone="P1" />
       case 'ports':
         return (
           portsPanel || (
@@ -551,10 +551,10 @@ export default function IDELayout({
           <button
             onClick={() => onCommandPalette?.()}
             className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_4%,transparent)] px-3 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] md:flex"
-            title="Command Palette (Ctrl+Shift+P)"
+            title="Paleta de comandos (Ctrl+Shift+P)"
           >
             <Codicon name="sparkle" className="text-[12px] text-[var(--aethel-info-light)]" />
-            <span>Command Palette</span>
+            <span>Paleta de comandos</span>
             <span className="rounded-md border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--aethel-text-quaternary)]">Ctrl+Shift+P</span>
           </button>
           <button
@@ -702,7 +702,7 @@ export default function IDELayout({
               </button>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {aiChatPanel || <NotImplementedPanel title="AI Copilot" capability="AI_CHAT_PANEL" milestone="P0" />}
+        {aiChatPanel || <NotImplementedPanel title="Copiloto IA" capability="AI_CHAT_PANEL" milestone="P0" />}
             </div>
           </div>
         )}

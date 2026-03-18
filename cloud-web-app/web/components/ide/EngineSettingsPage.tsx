@@ -304,8 +304,8 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
       { value: 'off', label: 'Off' },
       { value: 'relative', label: 'Relative' },
     ]},
-    { id: 'editor.formatOnSave', label: 'Format on Save', type: 'toggle', value: true },
-    { id: 'editor.autoSave', label: 'Auto Save', type: 'select', value: 'afterDelay', options: [
+    { id: 'editor.formatOnSave', label: 'Formatar ao salvar', type: 'toggle', value: true },
+    { id: 'editor.autoSave', label: 'Auto salvar', type: 'select', value: 'afterDelay', options: [
       { value: 'off', label: 'Off' },
       { value: 'afterDelay', label: 'After Delay' },
       { value: 'onFocusChange', label: 'On Focus Change' },
@@ -315,11 +315,11 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
     { id: 'editor.inlayHints', label: 'Inlay Hints', type: 'toggle', value: true },
   ],
   keyboard: [
-    { id: 'key.commandPalette', label: 'Command Palette', type: 'keybinding', value: '⌘K' },
+    { id: 'key.commandPalette', label: 'Paleta de comandos', type: 'keybinding', value: '⌘K' },
     { id: 'key.save', label: 'Save', type: 'keybinding', value: '⌘S' },
     { id: 'key.find', label: 'Find', type: 'keybinding', value: '⌘F' },
     { id: 'key.replace', label: 'Replace', type: 'keybinding', value: '⌘H' },
-    { id: 'key.goToFile', label: 'Go to File', type: 'keybinding', value: '⌘P' },
+    { id: 'key.goToFile', label: 'Ir para arquivo', type: 'keybinding', value: '⌘P' },
     { id: 'key.goToLine', label: 'Go to Line', type: 'keybinding', value: '⌘G' },
     { id: 'key.toggleTerminal', label: 'Toggle Terminal', type: 'keybinding', value: '⌘J' },
     { id: 'key.toggleSidebar', label: 'Toggle Sidebar', type: 'keybinding', value: '⌘B' },
@@ -470,7 +470,7 @@ export default function EngineSettingsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search settings..."
+              placeholder="Buscar ajustes..."
               className="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500"
             />
           </div>
@@ -552,7 +552,7 @@ export default function EngineSettingsPage() {
                   className="flex items-center gap-2 px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-sm"
                 >
                   <Save className="w-4 h-4" />
-                  Save Changes
+                  Salvar alteracoes
                 </button>
               </>
             )}

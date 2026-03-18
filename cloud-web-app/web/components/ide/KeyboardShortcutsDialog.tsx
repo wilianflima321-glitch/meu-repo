@@ -7,10 +7,10 @@ const SHORTCUT_CATEGORIES = [
   {
     title: 'Geral',
     shortcuts: [
-      { keys: ['Ctrl', 'Shift', 'P'], action: 'Abrir Command Palette' },
+      { keys: ['Ctrl', 'Shift', 'P'], action: 'Abrir paleta de comandos' },
       { keys: ['Ctrl', 'P'], action: 'Quick Open (Arquivo)' },
       { keys: ['Ctrl', 'Shift', 'N'], action: 'Nova janela' },
-      { keys: ['Ctrl', ','], action: 'Abrir Settings' },
+      { keys: ['Ctrl', ','], action: 'Abrir ajustes' },
       { keys: ['Ctrl', 'K', 'Ctrl', 'S'], action: 'Ver atalhos de teclado' },
     ],
   },

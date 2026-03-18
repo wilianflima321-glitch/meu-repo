@@ -158,7 +158,7 @@ const FileItem: React.FC<FileItemProps> = ({
               color: colors.subtext0,
               cursor: 'pointer',
             }}
-            title="View diff"
+            title="Ver diff"
           >
             <Eye size={14} />
           </button>
@@ -346,7 +346,7 @@ const BranchItem: React.FC<BranchItemProps> = ({ branch, onCheckout, onDelete })
               fontSize: '12px',
             }}
           >
-            Checkout
+            Trocar
           </button>
           <button
             onClick={(e) => {
@@ -430,9 +430,9 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
   const handleDiscard = useCallback(async (path: string) => {
     const shouldDiscard = await openConfirmDialog({
       title: 'Discard changes',
-      message: `Discard changes to ${path}?`,
-      confirmText: 'Discard',
-      cancelText: 'Cancel',
+        message: `Descartar alteracoes de ${path}?`,
+        confirmText: 'Descartar',
+        cancelText: 'Cancelar',
     });
     if (!shouldDiscard) return;
     await gitService.discard(path);
@@ -479,10 +479,10 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
   
   const handleDeleteBranch = useCallback(async (branchName: string) => {
     const shouldDelete = await openConfirmDialog({
-      title: 'Delete branch',
-      message: `Delete branch ${branchName}?`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
+      title: 'Excluir branch',
+      message: `Excluir branch ${branchName}?`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
     });
     if (!shouldDelete) return;
     await gitService.deleteBranch(branchName);
