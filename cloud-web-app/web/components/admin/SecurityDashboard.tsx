@@ -49,7 +49,7 @@ interface SecurityEvent {
 }
 
 interface SecurityStats {
-  totalBlocked24h: number
+  totalBloqueado24h: number
   criticalThreats: number
   activeAttacks: number
   blockedIPs: number
@@ -185,9 +185,9 @@ const StatsCard: React.FC<{
 
 const EventRow: React.FC<{
   event: SecurityEvent
-  onBlock: () => void
+  onBloquear: () => void
   onInvestigate: () => void
-}> = ({ event, onBlock, onInvestigate }) => {
+}> = ({ event, onBloquear, onInvestigate }) => {
   const levelColors: Record<ThreatLevel, string> = {
     critical: 'border-l-rose-500',
     high: 'border-l-orange-500',
@@ -246,7 +246,7 @@ const EventRow: React.FC<{
           </button>
           {!event.blocked && (
             <button
-              onClick={onBlock}
+              onClick={onBloquear}
               className="aethel-button aethel-button-ghost rounded-md p-2 text-[var(--aethel-error-light)]"
               title="Bloquear IP"
             >
@@ -266,7 +266,7 @@ const EventRow: React.FC<{
 export const SecurityDashboard: React.FC<{ className?: string }> = ({ className = '' }) => {
   const [events, setEvents] = useState<SecurityEvent[]>([])
   const [stats, setStats] = useState<SecurityStats>({
-    totalBlocked24h: 0,
+    totalBloqueado24h: 0,
     criticalThreats: 0,
     activeAttacks: 0,
     blockedIPs: 0,
@@ -314,7 +314,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
 
       setEvents(parsedEvents)
       setStats({
-        totalBlocked24h: parsedEvents.filter((event) => event.blocked).length,
+        totalBloqueado24h: parsedEvents.filter((event) => event.blocked).length,
         criticalThreats: parsedEvents.filter((event) => event.level === 'critical').length,
         activeAttacks: eventsData.activeAttacks || 0,
         blockedIPs: rateLimitsData.blockedIPs || 0,
@@ -343,7 +343,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
     return true
   })
 
-  const handleBlock = (id: string) => {
+  const handleBloquear = (id: string) => {
     setEvents((prev) => prev.map((event) => (event.id === id ? { ...event, blocked: true } : event)))
   }
 
@@ -420,7 +420,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
       <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6">
         <StatsCard
           label="Bloqueados (24h)"
-          value={stats.totalBlocked24h}
+          value={stats.totalBloqueado24h}
           icon={<ShieldCheck className="h-5 w-5 text-[var(--aethel-success-light)]" />}
           color="border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/5"
         />
@@ -514,7 +514,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
             <EventRow
               key={event.id}
               event={event}
-              onBlock={() => handleBlock(event.id)}
+              onBloquear={() => handleBloquear(event.id)}
               onInvestigate={() => console.log('Investigate:', event.id)}
             />
           ))
