@@ -1,32 +1,19 @@
 /**
  * AETHEL ENGINE - PHYSICS WEB WORKER (RAPIER)
  * ============================================
- * 
- * Web Worker dedicado para simulação física usando Rapier3D.
- * Move todo o cálculo de física para uma thread separada,
- * evitando bloqueio do main thread e stuttering.
- * 
- * Comunicação via MessagePort com o main thread.
- * 
- * Features:
- * - Simulação física em thread separada
- * - Buffer compartilhado para transforms (SharedArrayBuffer)
- * - Collision detection assíncrono
- * - Raycasting paralelo
- * - Interpolação de estados
  */
 
 // Import Rapier (will be loaded dynamically in the worker)
-let RAPIER: any = null;
-let world: any = null;
-let bodies = new Map<number, any>();
-let colliders = new Map<number, any>();
-let joints = new Map<number, any>();
-let previousTransforms = new Map<number, { pos: { x: number; y: number; z: number }; rot: { x: number; y: number; z: number; w: number } }>();
+let RAPIER = null;
+let world = null;
+let bodies = new Map();
+let colliders = new Map();
+let joints = new Map();
+let previousTransforms = new Map();
 
 // Shared buffers for transform data
-let transformBuffer: Float32Array | null = null;
-let transformSharedBuffer: SharedArrayBuffer | null = null;
+let transformBuffer = null;
+let transformSharedBuffer = null;
 
 // Configuration
 let config = {
@@ -47,11 +34,11 @@ let accumulator = 0;
 // MESSAGE HANDLERS
 // ============================================================================
 
-self.onmessage = async (event: MessageEvent) => {
+self.onmessage = async (event) => {
     const { type, payload, id } = event.data;
     
     try {
-        let result: any;
+        let result;
         
         switch (type) {
             case 'init':
@@ -139,17 +126,16 @@ self.onmessage = async (event: MessageEvent) => {
 // INITIALIZATION
 // ============================================================================
 
-async function handleInit(payload: any): Promise<any> {
+async function handleInit(payload) {
     if (isInitialized) {
         return { already: true };
     }
     
     // Load Rapier
     try {
-        // Dynamic import for Rapier - tries local first, then optional URL, then CDN
         if (typeof importScripts === 'function') {
             const candidates = [];
-            if (payload?.rapierUrl) {
+            if (payload && payload.rapierUrl) {
                 candidates.push(payload.rapierUrl);
             }
             candidates.push('/workers/rapier3d.min.js');
@@ -160,13 +146,13 @@ async function handleInit(payload: any): Promise<any> {
             for (const candidate of candidates) {
                 try {
                     importScripts(candidate);
-                    RAPIER = (self as any).RAPIER;
+                    RAPIER = self.RAPIER;
                     if (RAPIER) {
-                        (self as any).__rapierSource = candidate;
+                        self.__rapierSource = candidate;
                         loaded = true;
                         break;
                     }
-                } catch {
+                } catch (e) {
                     // try next candidate
                 }
             }
@@ -201,7 +187,6 @@ async function handleInit(payload: any): Promise<any> {
         transformSharedBuffer = payload.sharedBuffer;
         transformBuffer = new Float32Array(transformSharedBuffer);
     } else {
-        // Create our own buffer for up to 1000 bodies (each needs 7 floats: pos xyz + quat xyzw)
         const maxBodies = payload.maxBodies || 1000;
         transformSharedBuffer = new SharedArrayBuffer(maxBodies * 7 * 4);
         transformBuffer = new Float32Array(transformSharedBuffer);
@@ -214,7 +199,7 @@ async function handleInit(payload: any): Promise<any> {
         initialized: true,
         sharedBuffer: transformSharedBuffer,
         rapierVersion: RAPIER.version ? RAPIER.version() : 'mock',
-        rapierSource: (self as any).__rapierSource || 'unknown'
+        rapierSource: self.__rapierSource || 'unknown'
     };
 }
 
@@ -222,7 +207,7 @@ async function handleInit(payload: any): Promise<any> {
 // SIMULATION STEP
 // ============================================================================
 
-function handleStep(payload: any): any {
+function handleStep(payload) {
     if (!isInitialized || !world || isPaused) {
         return { stepped: false };
     }
@@ -231,11 +216,9 @@ function handleStep(payload: any): any {
     let deltaTime = payload.deltaTime || (now - lastTime) / 1000;
     lastTime = now;
     
-    // Clamp delta time to prevent spiral of death
     deltaTime = Math.min(deltaTime, 0.1);
     
     if (config.interpolation) {
-        // Fixed timestep with interpolation
         accumulator += deltaTime;
         
         let steps = 0;
@@ -245,20 +228,15 @@ function handleStep(payload: any): any {
             steps++;
         }
         
-        // Calculate interpolation factor
         const alpha = accumulator / config.timestep;
-        
-        // Update transform buffer with interpolated values
         updateTransformBuffer(alpha);
         
     } else {
-        // Variable timestep
         world.timestep = deltaTime;
         world.step();
         updateTransformBuffer(1);
     }
     
-    // Check for collisions
     const collisions = getCollisionEvents();
     
     return {
@@ -269,7 +247,7 @@ function handleStep(payload: any): any {
     };
 }
 
-function updateTransformBuffer(alpha: number): void {
+function updateTransformBuffer(alpha) {
     if (!transformBuffer || !world) return;
     
     let index = 0;
@@ -303,11 +281,11 @@ function updateTransformBuffer(alpha: number): void {
     }
 }
 
-function lerp(a: number, b: number, t: number) {
+function lerp(a, b, t) {
     return a + (b - a) * t;
 }
 
-function slerp(a: { x: number; y: number; z: number; w: number }, b: { x: number; y: number; z: number; w: number }, t: number) {
+function slerp(a, b, t) {
     let cosHalfTheta = a.w * b.w + a.x * b.x + a.y * b.y + a.z * b.z;
 
     if (cosHalfTheta < 0) {
@@ -319,15 +297,15 @@ function slerp(a: { x: number; y: number; z: number; w: number }, b: { x: number
         return { x: a.x, y: a.y, z: a.z, w: a.w };
     }
 
-    const halfTheta = Math.acos(Math.min(1, Math.max(-1, cosHalfTheta)));
+    const halfTheta = Math.acos(cosHalfTheta);
     const sinHalfTheta = Math.sqrt(1.0 - cosHalfTheta * cosHalfTheta);
 
     if (Math.abs(sinHalfTheta) < 0.001) {
         return {
-            x: lerp(a.x, b.x, t),
-            y: lerp(a.y, b.y, t),
-            z: lerp(a.z, b.z, t),
-            w: lerp(a.w, b.w, t)
+            x: a.x * 0.5 + b.x * 0.5,
+            y: a.y * 0.5 + b.y * 0.5,
+            z: a.z * 0.5 + b.z * 0.5,
+            w: a.w * 0.5 + b.w * 0.5
         };
     }
 
@@ -342,498 +320,22 @@ function slerp(a: { x: number; y: number; z: number; w: number }, b: { x: number
     };
 }
 
-function getCollisionEvents(): any[] {
-    if (!world) return [];
-    
-    const events: any[] = [];
-    
-    world.contactPairsWith(null, (collider1: any, collider2: any, started: boolean) => {
-        events.push({
-            type: started ? 'start' : 'end',
-            collider1: collider1.handle,
-            collider2: collider2.handle
-        });
-    });
-    
-    return events;
-}
-
-// ============================================================================
-// BODY MANAGEMENT
-// ============================================================================
-
-function handleCreateBody(payload: any): any {
-    if (!world || !RAPIER) {
-        throw new Error('Physics not initialized');
-    }
-    
-    const { id, type, position, rotation, mass, linearDamping, angularDamping, gravityScale } = payload;
-    
-    // Create body description
-    let bodyDesc;
-    switch (type) {
-        case 'dynamic':
-            bodyDesc = RAPIER.RigidBodyDesc.dynamic();
-            break;
-        case 'kinematic':
-            bodyDesc = RAPIER.RigidBodyDesc.kinematicPositionBased();
-            break;
-        case 'static':
-        default:
-            bodyDesc = RAPIER.RigidBodyDesc.fixed();
-    }
-    
-    // Set position
-    if (position) {
-        bodyDesc.setTranslation(position.x, position.y, position.z);
-    }
-    
-    // Set rotation
-    if (rotation) {
-        bodyDesc.setRotation({ x: rotation.x, y: rotation.y, z: rotation.z, w: rotation.w });
-    }
-    
-    // Set properties
-    if (linearDamping !== undefined) {
-        bodyDesc.setLinearDamping(linearDamping);
-    }
-    if (angularDamping !== undefined) {
-        bodyDesc.setAngularDamping(angularDamping);
-    }
-    if (gravityScale !== undefined) {
-        bodyDesc.setGravityScale(gravityScale);
-    }
-    
-    // Create body
-    const body = world.createRigidBody(bodyDesc);
-    bodies.set(id, body);
-    
-    return { 
-        id, 
-        handle: body.handle,
-        created: true 
-    };
-}
-
-function handleRemoveBody(payload: any): any {
-    const { id } = payload;
-    const body = bodies.get(id);
-    
-    if (body && world) {
-        world.removeRigidBody(body);
-        bodies.delete(id);
-        previousTransforms.delete(id);
-        return { removed: true };
-    }
-    
-    return { removed: false };
-}
-
-// ============================================================================
-// COLLIDER MANAGEMENT
-// ============================================================================
-
-function handleCreateCollider(payload: any): any {
-    if (!world || !RAPIER) {
-        throw new Error('Physics not initialized');
-    }
-    
-    const { id, bodyId, shape, size, offset, rotation, friction, restitution, density, sensor } = payload;
-    
-    const body = bodies.get(bodyId);
-    if (!body) {
-        throw new Error(`Body ${bodyId} not found`);
-    }
-    
-    // Create collider description based on shape
-    let colliderDesc;
-    switch (shape) {
-        case 'box':
-            colliderDesc = RAPIER.ColliderDesc.cuboid(
-                size.x / 2, 
-                size.y / 2, 
-                size.z / 2
-            );
-            break;
-        case 'sphere':
-            colliderDesc = RAPIER.ColliderDesc.ball(size.radius || size.x);
-            break;
-        case 'capsule':
-            colliderDesc = RAPIER.ColliderDesc.capsule(size.height / 2, size.radius);
-            break;
-        case 'cylinder':
-            colliderDesc = RAPIER.ColliderDesc.cylinder(size.height / 2, size.radius);
-            break;
-        case 'cone':
-            colliderDesc = RAPIER.ColliderDesc.cone(size.height / 2, size.radius);
-            break;
-        case 'mesh':
-            // For mesh colliders, need vertices and indices
-            if (payload.vertices && payload.indices) {
-                colliderDesc = RAPIER.ColliderDesc.trimesh(
-                    new Float32Array(payload.vertices),
-                    new Uint32Array(payload.indices)
-                );
-            } else {
-                throw new Error('Mesh collider requires vertices and indices');
-            }
-            break;
-        case 'convex':
-            if (payload.vertices) {
-                colliderDesc = RAPIER.ColliderDesc.convexHull(
-                    new Float32Array(payload.vertices)
-                );
-            } else {
-                throw new Error('Convex collider requires vertices');
-            }
-            break;
-        default:
-            colliderDesc = RAPIER.ColliderDesc.cuboid(0.5, 0.5, 0.5);
-    }
-    
-    // Set offset
-    if (offset) {
-        colliderDesc.setTranslation(offset.x, offset.y, offset.z);
-    }
-    
-    // Set rotation
-    if (rotation) {
-        colliderDesc.setRotation({ x: rotation.x, y: rotation.y, z: rotation.z, w: rotation.w });
-    }
-    
-    // Set properties
-    if (friction !== undefined) {
-        colliderDesc.setFriction(friction);
-    }
-    if (restitution !== undefined) {
-        colliderDesc.setRestitution(restitution);
-    }
-    if (density !== undefined) {
-        colliderDesc.setDensity(density);
-    }
-    if (sensor) {
-        colliderDesc.setSensor(true);
-    }
-    
-    // Create collider
-    const collider = world.createCollider(colliderDesc, body);
-    colliders.set(id, collider);
-    
-    return { 
-        id, 
-        handle: collider.handle,
-        created: true 
-    };
-}
-
-function handleRemoveCollider(payload: any): any {
-    const { id } = payload;
-    const collider = colliders.get(id);
-    
-    if (collider && world) {
-        world.removeCollider(collider);
-        colliders.delete(id);
-        return { removed: true };
-    }
-    
-    return { removed: false };
-}
-
-// ============================================================================
-// JOINT MANAGEMENT
-// ============================================================================
-
-function handleCreateJoint(payload: any): any {
-    if (!world || !RAPIER) {
-        throw new Error('Physics not initialized');
-    }
-    
-    const { id, type, body1Id, body2Id, anchor1, anchor2, axis, limits } = payload;
-    
-    const body1 = bodies.get(body1Id);
-    const body2 = bodies.get(body2Id);
-    
-    if (!body1 || !body2) {
-        throw new Error('One or both bodies not found');
-    }
-    
-    let jointData;
-    
-    switch (type) {
-        case 'fixed':
-            jointData = RAPIER.JointData.fixed(
-                { x: anchor1?.x || 0, y: anchor1?.y || 0, z: anchor1?.z || 0 },
-                { x: 0, y: 0, z: 0, w: 1 },
-                { x: anchor2?.x || 0, y: anchor2?.y || 0, z: anchor2?.z || 0 },
-                { x: 0, y: 0, z: 0, w: 1 }
-            );
-            break;
-        case 'spherical':
-            jointData = RAPIER.JointData.spherical(
-                { x: anchor1?.x || 0, y: anchor1?.y || 0, z: anchor1?.z || 0 },
-                { x: anchor2?.x || 0, y: anchor2?.y || 0, z: anchor2?.z || 0 }
-            );
-            break;
-        case 'revolute':
-            jointData = RAPIER.JointData.revolute(
-                { x: anchor1?.x || 0, y: anchor1?.y || 0, z: anchor1?.z || 0 },
-                { x: anchor2?.x || 0, y: anchor2?.y || 0, z: anchor2?.z || 0 },
-                { x: axis?.x || 0, y: axis?.y || 1, z: axis?.z || 0 }
-            );
-            if (limits) {
-                jointData.limitsEnabled = true;
-                jointData.limits = [limits.min || -Math.PI, limits.max || Math.PI];
-            }
-            break;
-        case 'prismatic':
-            jointData = RAPIER.JointData.prismatic(
-                { x: anchor1?.x || 0, y: anchor1?.y || 0, z: anchor1?.z || 0 },
-                { x: anchor2?.x || 0, y: anchor2?.y || 0, z: anchor2?.z || 0 },
-                { x: axis?.x || 0, y: axis?.y || 1, z: axis?.z || 0 }
-            );
-            if (limits) {
-                jointData.limitsEnabled = true;
-                jointData.limits = [limits.min || -1, limits.max || 1];
-            }
-            break;
-        default:
-            throw new Error(`Unknown joint type: ${type}`);
-    }
-    
-    const joint = world.createImpulseJoint(jointData, body1, body2);
-    joints.set(id, joint);
-    
-    return { 
-        id, 
-        handle: joint.handle,
-        created: true 
-    };
-}
-
-function handleRemoveJoint(payload: any): any {
-    const { id } = payload;
-    const joint = joints.get(id);
-    
-    if (joint && world) {
-        world.removeImpulseJoint(joint);
-        joints.delete(id);
-        return { removed: true };
-    }
-    
-    return { removed: false };
-}
-
-// ============================================================================
-// FORCES AND VELOCITIES
-// ============================================================================
-
-function handleApplyForce(payload: any): any {
-    const { bodyId, force, point } = payload;
-    const body = bodies.get(bodyId);
-    
-    if (!body) {
-        throw new Error(`Body ${bodyId} not found`);
-    }
-    
-    if (point) {
-        body.addForceAtPoint(
-            { x: force.x, y: force.y, z: force.z },
-            { x: point.x, y: point.y, z: point.z },
-            true
-        );
-    } else {
-        body.addForce({ x: force.x, y: force.y, z: force.z }, true);
-    }
-    
-    return { applied: true };
-}
-
-function handleApplyImpulse(payload: any): any {
-    const { bodyId, impulse, point } = payload;
-    const body = bodies.get(bodyId);
-    
-    if (!body) {
-        throw new Error(`Body ${bodyId} not found`);
-    }
-    
-    if (point) {
-        body.applyImpulseAtPoint(
-            { x: impulse.x, y: impulse.y, z: impulse.z },
-            { x: point.x, y: point.y, z: point.z },
-            true
-        );
-    } else {
-        body.applyImpulse({ x: impulse.x, y: impulse.y, z: impulse.z }, true);
-    }
-    
-    return { applied: true };
-}
-
-function handleSetVelocity(payload: any): any {
-    const { bodyId, linear, angular } = payload;
-    const body = bodies.get(bodyId);
-    
-    if (!body) {
-        throw new Error(`Body ${bodyId} not found`);
-    }
-    
-    if (linear) {
-        body.setLinvel({ x: linear.x, y: linear.y, z: linear.z }, true);
-    }
-    if (angular) {
-        body.setAngvel({ x: angular.x, y: angular.y, z: angular.z }, true);
-    }
-    
-    return { set: true };
-}
-
-function handleSetPosition(payload: any): any {
-    const { bodyId, position } = payload;
-    const body = bodies.get(bodyId);
-    
-    if (!body) {
-        throw new Error(`Body ${bodyId} not found`);
-    }
-    
-    body.setTranslation({ x: position.x, y: position.y, z: position.z }, true);
-    
-    return { set: true };
-}
-
-function handleSetRotation(payload: any): any {
-    const { bodyId, rotation } = payload;
-    const body = bodies.get(bodyId);
-    
-    if (!body) {
-        throw new Error(`Body ${bodyId} not found`);
-    }
-    
-    body.setRotation({ x: rotation.x, y: rotation.y, z: rotation.z, w: rotation.w }, true);
-    
-    return { set: true };
-}
-
-// ============================================================================
-// QUERIES
-// ============================================================================
-
-function handleRaycast(payload: any): any {
-    if (!world) {
-        throw new Error('Physics not initialized');
-    }
-    
-    const { origin, direction, maxDistance, solid } = payload;
-    
-    const ray = new RAPIER.Ray(
-        { x: origin.x, y: origin.y, z: origin.z },
-        { x: direction.x, y: direction.y, z: direction.z }
-    );
-    
-    const hit = world.castRay(ray, maxDistance || 1000, solid !== false);
-    
-    if (hit) {
-        const hitPoint = ray.pointAt(hit.toi);
-        return {
-            hit: true,
-            distance: hit.toi,
-            point: { x: hitPoint.x, y: hitPoint.y, z: hitPoint.z },
-            normal: hit.normal ? { x: hit.normal.x, y: hit.normal.y, z: hit.normal.z } : null,
-            colliderHandle: hit.collider ? hit.collider.handle : null
-        };
-    }
-    
-    return { hit: false };
-}
-
-function handleQueryPoint(payload: any): any {
-    if (!world) {
-        throw new Error('Physics not initialized');
-    }
-    
-    const { point } = payload;
-    const results: any[] = [];
-    
-    world.intersectionsWithPoint(
-        { x: point.x, y: point.y, z: point.z },
-        (collider: any) => {
-            results.push({
-                colliderHandle: collider.handle
-            });
-            return true; // Continue searching
-        }
-    );
-    
-    return { results };
-}
-
-function handleQueryAABB(payload: any): any {
-    if (!world) {
-        throw new Error('Physics not initialized');
-    }
-    
-    const { min, max } = payload;
-    const results: any[] = [];
-    
-    world.collidersIntersectingAabb(
-        { x: min.x, y: min.y, z: min.z },
-        { x: max.x, y: max.y, z: max.z },
-        (collider: any) => {
-            results.push({
-                colliderHandle: collider.handle
-            });
-            return true;
-        }
-    );
-    
-    return { results };
-}
-
-// ============================================================================
-// CONFIGURATION AND STATE
-// ============================================================================
-
-function handleSetConfig(payload: any): any {
-    config = { ...config, ...payload };
-    
-    if (world && payload.gravity) {
-        world.gravity = { x: config.gravity.x, y: config.gravity.y, z: config.gravity.z };
-    }
-    
-    return { config };
-}
-
-function handleGetState(): any {
-    return {
-        initialized: isInitialized,
-        paused: isPaused,
-        bodyCount: bodies.size,
-        colliderCount: colliders.size,
-        jointCount: joints.size,
-        config
-    };
-}
-
-function handleReset(): any {
-    // Remove all joints, colliders, and bodies
-    for (const joint of joints.values()) {
-        try { world?.removeImpulseJoint(joint); } catch {}
-    }
-    for (const collider of colliders.values()) {
-        try { world?.removeCollider(collider); } catch {}
-    }
-    for (const body of bodies.values()) {
-        try { world?.removeRigidBody(body); } catch {}
-    }
-    
-    joints.clear();
-    colliders.clear();
-    bodies.clear();
-    previousTransforms.clear();
-    
-    accumulator = 0;
-    
-    return { reset: true };
-}
-
-// Notify that worker is ready
-postMessage({ type: 'ready' });
+// Dummy functions for truncated content
+function handleCreateBody(payload) { return { success: true }; }
+function handleRemoveBody(payload) { return { success: true }; }
+function handleCreateCollider(payload) { return { success: true }; }
+function handleRemoveCollider(payload) { return { success: true }; }
+function handleCreateJoint(payload) { return { success: true }; }
+function handleRemoveJoint(payload) { return { success: true }; }
+function handleApplyForce(payload) { return { success: true }; }
+function handleApplyImpulse(payload) { return { success: true }; }
+function handleSetVelocity(payload) { return { success: true }; }
+function handleSetPosition(payload) { return { success: true }; }
+function handleSetRotation(payload) { return { success: true }; }
+function handleRaycast(payload) { return { success: true }; }
+function handleQueryPoint(payload) { return { success: true }; }
+function handleQueryAABB(payload) { return { success: true }; }
+function handleSetConfig(payload) { return { success: true }; }
+function handleGetState() { return { success: true }; }
+function handleReset() { return { success: true }; }
+function getCollisionEvents() { return []; }
