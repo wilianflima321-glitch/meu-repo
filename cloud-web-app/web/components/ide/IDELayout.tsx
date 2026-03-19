@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import Codicon, { type CodiconName } from './Codicon'
+import StudioGlobalNav from '@/components/studio/StudioGlobalNav'
 
 // ============= Types =============
 
@@ -29,6 +30,10 @@ interface MenuConfig {
 }
 
 interface IDELayoutProps {
+  showStudioNav?: boolean
+  studioTitle?: string
+  studioSubtitle?: string
+  studioRightSlot?: ReactNode
   children?: ReactNode
   fileExplorer?: ReactNode
   searchPanel?: ReactNode
@@ -80,11 +85,11 @@ interface IDELayoutProps {
 }
 
 const SIDEBAR_TABS = [
-  { id: 'explorer' as const, icon: 'files' as CodiconName, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
+  { id: 'explorer' as const, icon: 'files' as CodiconName, label: 'Arquivos', shortcut: 'Ctrl+Shift+E' },
   { id: 'search' as const, icon: 'search' as CodiconName, label: 'Busca', shortcut: 'Ctrl+Shift+F' },
-  { id: 'git' as const, icon: 'source-control' as CodiconName, label: 'Source Control', shortcut: 'Ctrl+Shift+G' },
+  { id: 'git' as const, icon: 'source-control' as CodiconName, label: 'Controle de codigo', shortcut: 'Ctrl+Shift+G' },
   { id: 'ai' as const, icon: 'sparkle' as CodiconName, label: 'AI', shortcut: 'Ctrl+Shift+I' },
-  { id: 'extensions' as const, icon: 'extensions' as CodiconName, label: 'Extensions', shortcut: '' },
+  { id: 'extensions' as const, icon: 'extensions' as CodiconName, label: 'Extensoes', shortcut: '' },
 ]
 
 const BOTTOM_TABS = [
@@ -100,6 +105,10 @@ const SIDEBAR_TAB_SET = new Set<SidebarTab>(['explorer', 'search', 'git', 'ai', 
 const BOTTOM_TAB_SET = new Set<BottomPanelTab>(['terminal', 'output', 'problems', 'debug', 'ports'])
 
 export default function IDELayout({
+  showStudioNav = false,
+  studioTitle = 'Workbench',
+  studioSubtitle = 'Editor, preview e runtime no mesmo fluxo.',
+  studioRightSlot,
   children,
   fileExplorer,
   searchPanel,
@@ -371,7 +380,7 @@ export default function IDELayout({
         { separator: true, label: '' },
         { label: 'Explorer', shortcut: 'Ctrl+Shift+E', action: () => openSidebarTab('explorer') },
         { label: 'Search', shortcut: 'Ctrl+Shift+F', action: () => openSidebarTab('search') },
-        { label: 'Source Control', shortcut: 'Ctrl+Shift+G', action: () => openSidebarTab('git') },
+        { label: 'Controle de codigo', shortcut: 'Ctrl+Shift+G', action: () => openSidebarTab('git') },
         { label: 'Refresh Preview', shortcut: 'Ctrl+Shift+V', action: onTogglePreview },
       ],
     },
@@ -440,10 +449,10 @@ export default function IDELayout({
       case 'extensions':
         return (
           <NotImplementedPanel
-            title="Extensions"
+            title="Extensoes"
             capability="EXTENSIONS_RUNTIME"
             milestone="P2"
-            description="Extension runtime is intentionally gated until P2."
+            description="Runtime de extensoes fica gated ate P2."
           />
         )
       default:
@@ -468,7 +477,7 @@ export default function IDELayout({
               title="Ports"
               capability="PORT_FORWARDING_PANEL"
               milestone="P1"
-              description="No forwarded ports are currently active."
+              description="Nenhuma porta encaminhada ativa."
             />
           )
         )
@@ -479,66 +488,73 @@ export default function IDELayout({
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] density-compact">
+      {showStudioNav && (
+        <StudioGlobalNav title={studioTitle} subtitle={studioSubtitle} rightSlot={studioRightSlot} />
+      )}
       <header className="density-header flex items-center justify-between border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_96%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_4%,transparent)] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--aethel-primary)] via-[var(--aethel-primary-light)] to-[var(--aethel-info-light)] shadow-[0_10px_24px_rgba(99,102,241,0.35)]">
-              <Codicon name="sparkle" className="text-[13px] text-[var(--aethel-text-primary)]" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-secondary)]">Aethel Studio</div>
-              <div className="truncate text-[10px] text-[var(--aethel-text-quaternary)]">Apps  Research  Runtime orchestration</div>
-            </div>
-          </div>
+          {!showStudioNav && (
+            <>
+              <div className="flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_4%,transparent)] px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--aethel-primary)] via-[var(--aethel-primary-light)] to-[var(--aethel-info-light)] shadow-[0_10px_24px_rgba(99,102,241,0.35)]">
+                  <Codicon name="sparkle" className="text-[13px] text-[var(--aethel-text-primary)]" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-secondary)]">Aethel Studio</div>
+                  <div className="truncate text-[10px] text-[var(--aethel-text-quaternary)]">Apps + Research  Runtime</div>
+                </div>
+              </div>
 
-          <nav ref={menuRef} className="relative hidden items-center gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-1 py-1 text-xs md:flex">
-            {menuConfigs.map((menu) => (
-              <div key={menu.label} className="relative">
-                <button
-                  onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
-                  className={`rounded-lg px-2 py-1.5 transition-colors ${
-                    activeMenu === menu.label
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_90%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
-                      : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
-                >
-                  {menu.label}
-                </button>
-                {activeMenu === menu.label && (
-                  <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent)] py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-                    {menu.items.map((item, idx) =>
-                      item.separator ? (
-                        <div key={idx} className="my-1 border-t border-[var(--aethel-border-subtle)]" />
-                      ) : (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            item.action?.()
-                            setActiveMenu(null)
-                          }}
-                          disabled={item.disabled ?? !item.action}
-                          className={`flex w-full items-center justify-between px-2.5 py-1.5 text-xs ${
-                            item.disabled ?? !item.action
-                              ? 'cursor-not-allowed opacity-50'
-                              : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-                          }`}
-                        >
-                          <span>{item.label}</span>
-                          {item.shortcut && <span className="text-xs text-[var(--aethel-text-quaternary)]">{item.shortcut}</span>}
-                        </button>
-                      )
+              <nav ref={menuRef} className="relative hidden items-center gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-1 py-1 text-xs md:flex">
+                {menuConfigs.map((menu) => (
+                  <div key={menu.label} className="relative">
+                    <button
+                      onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
+                      className={`rounded-lg px-2 py-1.5 transition-colors ${
+                        activeMenu === menu.label
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_90%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
+                          : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]'
+                      }`}
+                    >
+                      {menu.label}
+                    </button>
+                    {activeMenu === menu.label && (
+                      <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_98%,transparent)] py-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                        {menu.items.map((item, idx) =>
+                          item.separator ? (
+                            <div key={idx} className="my-1 border-t border-[var(--aethel-border-subtle)]" />
+                          ) : (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                item.action?.()
+                                setActiveMenu(null)
+                              }}
+                              disabled={item.disabled ?? !item.action}
+                              className={`flex w-full items-center justify-between px-2.5 py-1.5 text-xs ${
+                                item.disabled ?? !item.action
+                                  ? 'cursor-not-allowed opacity-50'
+                                  : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+                              }`}
+                            >
+                              <span>{item.label}</span>
+                              {item.shortcut && <span className="text-xs text-[var(--aethel-text-quaternary)]">{item.shortcut}</span>}
+                            </button>
+                          )
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-            ))}
-          </nav>
+                ))}
+              </nav>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
           <div className="hidden items-center gap-1 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium text-emerald-200 lg:flex">
             <Codicon name="pulse" className="text-[11px]" />
-            Ready for apply
+            Pronto para apply
           </div>
           <div className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)] xl:flex">
             <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
@@ -560,7 +576,7 @@ export default function IDELayout({
           <button
             onClick={toggleLeftSidebar}
             className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.leftSidebar ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
-            title="Toggle Sidebar"
+            title="Alternar sidebar"
             aria-pressed={panels.leftSidebar}
           >
             <Codicon name="layout-sidebar-left" />
@@ -568,7 +584,7 @@ export default function IDELayout({
           <button
             onClick={toggleBottomPanel}
             className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.bottomPanel ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
-            title="Toggle Panel"
+            title="Alternar painel"
             aria-pressed={panels.bottomPanel}
           >
             <Codicon name="layout-panel" />
@@ -576,7 +592,7 @@ export default function IDELayout({
           <button
             onClick={toggleRightSidebar}
             className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.rightSidebar ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
-            title="Toggle AI Panel"
+            title="Alternar painel de IA"
             aria-pressed={panels.rightSidebar}
           >
             <Codicon name="sparkle" />

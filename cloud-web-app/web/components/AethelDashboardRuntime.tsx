@@ -91,7 +91,8 @@ import {
   validateTransferInput,
 } from './dashboard/aethel-dashboard-billing-utils'
 import { TrialBanner } from './dashboard/TrialBanner'
-import { DashboardHeader } from './dashboard/DashboardHeader'
+import StudioGlobalNav from './studio/StudioGlobalNav'
+import StudioActionRail from './studio/StudioActionRail'
 import { AethelDashboardSidebar } from './dashboard/AethelDashboardSidebar'
 import { DashboardMainContent } from './dashboard/DashboardMainContent'
 import OnboardingWizard from './onboarding/OnboardingWizard'
@@ -1045,12 +1046,13 @@ export default function AethelDashboard() {
   }
 
   return (
-    <div className={`min-h-screen aethel-flex flex-column ${settings.theme === 'dark' ? 'bg-slate-950 text-slate-50' : 'bg-slate-100 text-slate-900'}`}>
+    <div className={`relative min-h-screen aethel-flex flex-column overflow-hidden ${settings.theme === 'dark' ? 'bg-slate-950 text-slate-50' : 'bg-slate-100 text-slate-900'}`}>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.1),transparent_28%),linear-gradient(180deg,transparent,rgba(2,6,23,0.18))]" />
       <a
         href="#dashboard-main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-3 focus:py-2 focus:text-white focus:ring-2 focus:ring-blue-500"
       >
-        Pular para o conteudo principal
+        Pular para o conteudo do dashboard
       </a>
       <div className="sr-only" role="status" aria-live="polite" />
       {isTrialActive && showTrialBanner && (
@@ -1061,24 +1063,44 @@ export default function AethelDashboard() {
         />
       )}
 
-      <DashboardHeader
-        sidebarOpen={sidebarOpen}
-        onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-        onResetDashboard={handleResetDashboard}
-        onToggleTheme={handleToggleTheme}
-        onOpenIde={handleOpenIdeFromHeader}
-        onToggleFullAccess={handleToggleFullAccess}
-        theme={settings.theme}
-        backendOnline={backendOnline}
-        aiProviderConfigured={!aiProviderGate}
-        onOpenProviderSettings={handleOpenProviderSettings}
-        fullAccessActive={Boolean(fullAccessActiveGrant)}
-        fullAccessExpiresAt={fullAccessActiveGrant?.expiresAt || null}
-        fullAccessBusy={fullAccessBusy}
-        authErrorText={authErrorText}
-        billingErrorText={billingErrorText}
+      <StudioGlobalNav
+        title="Studio Home"
+        subtitle="Operacao, IA, preview e billing no mesmo shell."
+        rightSlot={
+          <StudioActionRail
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+            onResetDashboard={handleResetDashboard}
+            onToggleTheme={handleToggleTheme}
+            theme={settings.theme}
+            backendOnline={backendOnline}
+            aiProviderConfigured={!aiProviderGate}
+            onOpenProviderSettings={handleOpenProviderSettings}
+            fullAccessActive={Boolean(fullAccessActiveGrant)}
+            fullAccessExpiresAt={fullAccessActiveGrant?.expiresAt || null}
+            fullAccessBusy={fullAccessBusy}
+            onToggleFullAccess={handleToggleFullAccess}
+            onOpenIde={handleOpenIdeFromHeader}
+          />
+        }
       />
-      <div className="aethel-flex flex-1 overflow-hidden">
+      {(authErrorText || billingErrorText) && (
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6">
+          <div className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs text-slate-200">
+            {authErrorText && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1 text-xs text-rose-200">
+                Auth: {authErrorText}
+              </span>
+            )}
+            {billingErrorText && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs text-amber-100">
+                Billing: {billingErrorText}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+      <div className="relative z-10 aethel-flex flex-1 overflow-hidden">
         {sidebarOpen && (
           <button
             type="button"
