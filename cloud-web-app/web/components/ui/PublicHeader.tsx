@@ -37,6 +37,7 @@ export default function PublicHeader() {
               alt=""
               width={32}
               height={32}
+              sizes="32px"
               className="rounded-lg transition-transform duration-200 group-hover:scale-105"
               priority
             />

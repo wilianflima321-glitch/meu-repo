@@ -85,12 +85,24 @@ const OnboardingContext = createContext<OnboardingContextType>({
   setShowWelcome: () => {},
 });
 
-export function OnboardingProvider({ children }: { children: ReactNode }) {
+export function OnboardingProvider({
+  children,
+  enabled = true,
+}: {
+  children: ReactNode;
+  enabled?: boolean;
+}) {
   const [state, setState] = useState<OnboardingState | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      setShowWelcome(false);
+      return;
+    }
+
     fetch('/api/onboarding')
       .then(res => res.json())
       .then(data => {
@@ -104,7 +116,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [enabled]);
 
   const completeStep = async (step: string) => {
     try {

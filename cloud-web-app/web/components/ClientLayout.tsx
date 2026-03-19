@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
+import { usePathname } from 'next/navigation';
 import { createCSSCustomProperties } from '../lib/design-system';
 import { I18nextProvider } from 'react-i18next'
 import i18n from '../lib/i18n'
@@ -45,10 +46,14 @@ function LoadingFallback() {
 }
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
+  const pathname = usePathname();
+
   useEffect(() => {
     // Initialize design system CSS custom properties
     createCSSCustomProperties();
   }, []);
+
+  const isStudioSurface = Boolean(pathname && /^\/(dashboard|ide|admin|billing|settings|profile|nexus|projects|workspace)(\/|$)/.test(pathname));
 
   return (
     <I18nextProvider i18n={i18n}>
@@ -60,16 +65,20 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                 <CommandRegistryProvider>
                   <DevToolsProvider>
                     <AethelProvider>
-                      <OnboardingProvider>
+                      <OnboardingProvider enabled={isStudioSurface}>
                         <DefaultCommandsRegistration />
                         <Suspense fallback={<LoadingFallback />}>
                           {children}
                           
                           {/* Componentes globais de UI */}
-                          <WelcomeModal />
-                          <OnboardingChecklist />
-                          <LowBalanceModalAuto />
-                          <AISuggestionBubbleAuto />
+                          {isStudioSurface ? (
+                            <>
+                              <WelcomeModal />
+                              <OnboardingChecklist />
+                              <LowBalanceModalAuto />
+                              <AISuggestionBubbleAuto />
+                            </>
+                          ) : null}
                         </Suspense>
                       </OnboardingProvider>
                     </AethelProvider>

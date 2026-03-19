@@ -25,8 +25,13 @@ export default function WebVitalsReporter() {
   const tracked = useRef<Set<string>>(new Set())
   const lcpValue = useRef<number | null>(null)
   const clsValue = useRef(0)
+  const isStudioSurface = Boolean(pathname && /^\/(dashboard|ide|admin|billing|settings|profile|nexus|projects|workspace)(\/|$)/.test(pathname))
 
   useEffect(() => {
+    if (!isStudioSurface) {
+      return
+    }
+
     const route = pathname || 'unknown'
     const key = (metric: SupportedMetric) => `${route}:${metric}`
 
@@ -96,7 +101,7 @@ export default function WebVitalsReporter() {
       lcpObserver?.disconnect()
       clsObserver?.disconnect()
     }
-  }, [pathname])
+  }, [pathname, isStudioSurface])
 
   return null
 }

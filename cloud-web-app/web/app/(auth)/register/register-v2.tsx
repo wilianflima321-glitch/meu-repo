@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Codicon from '@/components/ide/Codicon'
+import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import { analytics } from '@/lib/analytics'
 
 type AuthResponse = {
@@ -20,6 +21,20 @@ type AuthResponse = {
 }
 
 const DEFAULT_MISSION = 'Criar primeiro projeto web com chat e live preview'
+const REGISTER_HIGHLIGHTS = [
+  'Wizard de onboarding para escolher missao, template e provider sem navegar por telas soltas.',
+  'Studio Home com projetos, sinais de readiness, billing e conectividade em uma unica shell.',
+  'Entrada pensada para levar voce ao primeiro valor e nao apenas para abrir mais um dashboard vazio.',
+]
+
+const REGISTER_STATS = [
+  { value: '90s', label: 'alvo de first value' },
+  { value: 'Apps', label: 'dominio principal' },
+  { value: 'Multi', label: 'agent workflow' },
+]
+
+const SOCIAL_AUTH_MESSAGE =
+  'OAuth social entra quando GitHub e Google estiverem configurados no runtime real. Ate la, o acesso principal continua sendo email e senha.'
 
 export default function RegisterPageV2() {
   const router = useRouter()
@@ -106,145 +121,194 @@ export default function RegisterPageV2() {
       <div className="pointer-events-none absolute inset-0 bg-grid-zinc-700/[0.12]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.22),transparent_55%)]" />
 
-      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_85%,transparent)] p-6 shadow-2xl shadow-cyan-950/20 sm:p-8">
-        <div className="mb-6 text-center">
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <Image
-              src="/branding/aethel-icon-source.png"
-              alt="Aethel"
-              width={36}
-              height={36}
-              className="rounded-lg ring-1 ring-zinc-700/70"
-              priority
-            />
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]/90">Aethel Studio</span>
-          </div>
-          <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Criar conta no Aethel</h1>
-          <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-            Entre no Studio Home e alcance o primeiro valor com chat, plano e preview em poucos passos.
-          </p>
-        </div>
+      <div className="relative z-10 w-full max-w-6xl">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)] lg:items-stretch">
+          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-cyan-950/20 sm:p-8">
+            <div className="mb-6 flex items-center justify-between gap-3">
+              <Link href="/" className="inline-flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
+                <Codicon name="arrow-left" />
+                Voltar ao site
+              </Link>
+              <span className="rounded-full border border-indigo-400/20 bg-indigo-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-100">
+                Plano {requestedPlan}
+              </span>
+            </div>
 
-        <form id="register-form" onSubmit={handleRegister} className="space-y-5" noValidate aria-describedby={formError ? 'register-form-error' : undefined}>
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm text-[var(--aethel-text-secondary)]">
-              Nome
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              autoComplete="name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
-              placeholder="Seu nome (opcional)"
-            />
-          </div>
+            <div className="mb-6 text-left">
+              <div className="mb-4 flex items-center gap-3">
+                <Image
+                  src="/branding/aethel-icon-source.png"
+                  alt="Aethel"
+                  width={36}
+                  height={36}
+                  sizes="36px"
+                  className="rounded-lg ring-1 ring-zinc-700/70"
+                  priority
+                />
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]/90">Aethel Studio</span>
+              </div>
+              <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Criar conta no Aethel</h1>
+              <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                Entre no Studio Home e siga para o onboarding com projeto, contexto e preview no mesmo fluxo.
+              </p>
+            </div>
 
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm text-[var(--aethel-text-secondary)]">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              aria-invalid={Boolean(formError)}
-              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
-              placeholder="voce@empresa.com"
-            />
-          </div>
+            <form id="register-form" onSubmit={handleRegister} className="space-y-5" noValidate aria-describedby={formError ? 'register-form-error' : undefined}>
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm text-[var(--aethel-text-secondary)]">
+                  Nome
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  className="w-full rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
+                  placeholder="Seu nome (opcional)"
+                />
+              </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm text-[var(--aethel-text-secondary)]">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                  aria-invalid={Boolean(formError)}
+                  className="w-full rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
+                  placeholder="voce@empresa.com"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label htmlFor="password" className="text-sm text-[var(--aethel-text-secondary)]">
+                    Senha
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    required
+                    aria-invalid={Boolean(formError)}
+                    className="w-full rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
+                    placeholder="Minimo 8 caracteres"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="confirm-password" className="text-sm text-[var(--aethel-text-secondary)]">
+                    Confirmar senha
+                  </label>
+                  <input
+                    id="confirm-password"
+                    name="confirm-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    required
+                    aria-invalid={Boolean(formError)}
+                    className="w-full rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
+                    placeholder="Repita a senha"
+                  />
+                </div>
+              </div>
+
+              {formError && (
+                <div id="register-form-error" className="aethel-state aethel-state-error text-xs" role="alert" aria-live="polite">
+                  {formError}
+                </div>
+              )}
+
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                  Primeiro passo apos criar
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                  Voce segue para o dashboard com onboarding ativo e missao inicial preparada para acelerar o primeiro valor.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="aethel-button aethel-button-primary w-full justify-center rounded-xl px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? 'Criando conta...' : 'Criar conta e abrir studio'}
+              </button>
+            </form>
+
+            <div className="my-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-[var(--aethel-surface-tertiary)]" />
+              <span className="text-[11px] tracking-wide text-[var(--aethel-text-tertiary)]">OAuth</span>
+              <div className="h-px flex-1 bg-[var(--aethel-surface-tertiary)]" />
+            </div>
+
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm text-[var(--aethel-text-secondary)]">
-                Senha
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                aria-invalid={Boolean(formError)}
-                className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
-                placeholder="Minimo 8 caracteres"
-              />
+              <button
+                type="button"
+                disabled
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] opacity-70"
+                aria-label="Continuar com GitHub (indisponivel ate configurar OAuth)"
+              >
+                <Codicon name="github-inverted" />
+                Continuar com GitHub
+                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                  em breve
+                </span>
+              </button>
+              <button
+                type="button"
+                disabled
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] opacity-70"
+                aria-label="Continuar com Google (indisponivel ate configurar OAuth)"
+              >
+                <Codicon name="google" />
+                Continuar com Google
+                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                  em breve
+                </span>
+              </button>
             </div>
-            <div className="space-y-2">
-              <label htmlFor="confirm-password" className="text-sm text-[var(--aethel-text-secondary)]">
-                Confirmar senha
-              </label>
-              <input
-                id="confirm-password"
-                name="confirm-password"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                required
-                aria-invalid={Boolean(formError)}
-                className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2.5 text-sm text-[var(--aethel-text-primary)] outline-none transition focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
-                placeholder="Repita a senha"
-              />
-            </div>
-          </div>
 
-          {formError && (
-            <div id="register-form-error" className="aethel-state aethel-state-error text-xs" role="alert" aria-live="polite">
-              {formError}
-            </div>
-          )}
+            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">
+              {SOCIAL_AUTH_MESSAGE}
+            </p>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="aethel-button aethel-button-primary w-full justify-center rounded-lg px-3 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Criando conta...' : 'Criar conta'}
-          </button>
-        </form>
+            <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">
+              Ja tem conta?{' '}
+              <Link href="/login" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]">
+                Fazer login
+              </Link>
+            </p>
+          </section>
 
-        <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[var(--aethel-surface-tertiary)]" />
-          <span className="text-[11px] tracking-wide text-[var(--aethel-text-tertiary)]">OU</span>
-          <div className="h-px flex-1 bg-[var(--aethel-surface-tertiary)]" />
+          <AuthExperiencePanel
+            eyebrow="Primeiro acesso"
+            domainLabel={`Onboarding ${requestedPlan}`}
+            title="Crie a conta ja com o contexto certo para entrar no produto."
+            description="O cadastro precisa preparar o usuario para usar o studio, nao apenas empilhar campos. Por isso a experiencia aponta para missao, onboarding e fluxo operacional logo na entrada."
+            highlights={REGISTER_HIGHLIGHTS}
+            stats={REGISTER_STATS}
+            visual={{
+              src: '/screenshots/editor.png',
+              alt: 'Workbench do Aethel Studio',
+              caption: 'O primeiro acesso precisa apontar para um produto real: chat, editor, preview e proximas etapas legiveis no mesmo workbench.',
+              chips: ['Mission-first', 'Onboarding guiado', 'IDE + preview'],
+            }}
+          />
         </div>
-
-        <div className="space-y-2">
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
-            onClick={() => setFormError('Cadastro social sera habilitado quando OAuth for configurado.')}
-            aria-label="Continuar com GitHub (indisponivel ate configurar OAuth)"
-          >
-            <Codicon name="github-inverted" />
-            Continuar com GitHub
-          </button>
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
-            onClick={() => setFormError('Cadastro social sera habilitado quando OAuth for configurado.')}
-            aria-label="Continuar com Google (indisponivel ate configurar OAuth)"
-          >
-            <Codicon name="google" />
-            Continuar com Google
-          </button>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">
-          Ja tem conta?{' '}
-          <Link href="/login" className="font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]">
-            Fazer login
-          </Link>
-        </p>
       </div>
     </main>
   )

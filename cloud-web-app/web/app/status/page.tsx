@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, CheckCircle2, Clock3, ShieldCheck } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 
@@ -35,13 +36,13 @@ const SURFACE_CHECKS: SurfaceCheck[] = [
 function stateStyles(state: SurfaceState) {
   switch (state) {
     case 'healthy':
-      return 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success)]'
+      return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'
     case 'partial':
-      return 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning-light)]'
+      return 'border-amber-400/25 bg-amber-400/10 text-amber-100'
     case 'unhealthy':
-      return 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10 text-[var(--aethel-error-light)]'
+      return 'border-rose-400/25 bg-rose-400/10 text-rose-100'
     default:
-      return 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-border-secondary)_10%,transparent)] text-[var(--aethel-text-secondary)]'
+      return 'border-white/10 bg-white/[0.04] text-slate-300'
   }
 }
 
@@ -214,6 +215,12 @@ export default function StatusPage() {
     return 'unknown'
   }, [surfaces])
 
+  const counts = useMemo(() => ({
+    healthy: surfaces.filter((surface) => surface.state === 'healthy').length,
+    partial: surfaces.filter((surface) => surface.state === 'partial').length,
+    unhealthy: surfaces.filter((surface) => surface.state === 'unhealthy').length,
+  }), [surfaces])
+
   const overallTitle =
     overall === 'healthy'
       ? 'Runtime publico operacional'
@@ -233,52 +240,78 @@ export default function StatusPage() {
           : 'Atualizando checks operacionais em tempo real.'
 
   return (
-    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.08),transparent_28%),#020617] text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-[color-mix(in_srgb,var(--aethel-success-dark)_5%,transparent)] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-[var(--aethel-primary-dark)]/[0.05] blur-[160px]" />
+        <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-emerald-500/[0.06] blur-[170px]" />
+        <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-indigo-500/[0.05] blur-[160px]" />
       </div>
 
       <PublicHeader />
 
-      <main className="relative z-10 px-6 pb-16 pt-12">
-        <div className="mx-auto max-w-5xl">
-          <header className="mb-10 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info)]">
-              Status publico
+      <main className="relative z-10 px-4 pb-20 pt-14 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl space-y-10">
+          <section className="grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.55fr)] lg:items-end">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-100">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Status publico
+              </div>
+              <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
+                Status baseado em evidencia e leitura operacional de verdade.
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+                Esta pagina nao inventa uptime rolling nem incidentes que nao existem no backend. Ela organiza o que os checks publicos conseguem provar agora.
+              </p>
             </div>
-            <h1 className="text-4xl font-bold sm:text-5xl">Runtime baseado em evidencia</h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
-              Esta pagina nao inventa uptime. Ela mostra apenas o que os checks publicos conseguem provar agora.
-            </p>
-          </header>
 
-          <section className={`mb-8 rounded-2xl border p-6 ${stateStyles(overall)}`}>
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold">{overallTitle}</h2>
-                <p className="mt-2 text-sm opacity-80">{overallDescription}</p>
+            <div className={`rounded-[30px] border p-6 ${stateStyles(overall)}`}>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-80">Panorama</p>
+                  <h2 className="mt-2 text-2xl font-semibold">{overallTitle}</h2>
+                </div>
+                {overall === 'healthy' ? <CheckCircle2 className="h-6 w-6" /> : <AlertTriangle className="h-6 w-6" />}
               </div>
-              <div className="text-sm opacity-80">
+              <p className="mt-3 text-sm leading-6 opacity-85">{overallDescription}</p>
+              <p className="mt-4 text-xs opacity-75">
                 {isLoading ? 'Atualizando checks...' : `Ultima atualizacao: ${lastUpdated ? new Date(lastUpdated).toLocaleTimeString('pt-BR') : 'agora'}`}
-              </div>
+              </p>
             </div>
           </section>
 
-          <section className="grid gap-4 md:grid-cols-2">
+          <section className="grid gap-4 md:grid-cols-4">
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Checks totais</p>
+              <p className="mt-2 text-3xl font-semibold text-white">{SURFACE_CHECKS.length}</p>
+            </div>
+            <div className="rounded-[24px] border border-emerald-400/20 bg-emerald-400/10 p-5 text-emerald-100">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Operacionais</p>
+              <p className="mt-2 text-3xl font-semibold">{counts.healthy}</p>
+            </div>
+            <div className="rounded-[24px] border border-amber-400/20 bg-amber-400/10 p-5 text-amber-100">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Parciais</p>
+              <p className="mt-2 text-3xl font-semibold">{counts.partial}</p>
+            </div>
+            <div className="rounded-[24px] border border-rose-400/20 bg-rose-400/10 p-5 text-rose-100">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Bloqueados</p>
+              <p className="mt-2 text-3xl font-semibold">{counts.unhealthy}</p>
+            </div>
+          </section>
+
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {SURFACE_CHECKS.map((check) => {
               const result = surfaces.find((surface) => surface.id === check.id)
               const state = result?.state ?? 'unknown'
               return (
-                <article key={check.id} className={`rounded-2xl border p-5 ${stateStyles(state)}`}>
+                <article key={check.id} className={`rounded-[26px] border p-5 ${stateStyles(state)}`}>
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <p className="text-sm font-semibold">{check.name}</p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.18em] opacity-70">
+                      <p className="mt-1 text-[11px] uppercase tracking-[0.18em] opacity-70">
                         {check.required ? 'Obrigatorio' : 'Opcional'}
                       </p>
                     </div>
-                    <span className="rounded-full border border-current/20 px-3 py-1 text-xs font-medium">
+                    <span className="rounded-full border border-current/20 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em]">
                       {stateLabel(state)}
                     </span>
                   </div>
@@ -286,20 +319,34 @@ export default function StatusPage() {
                     {result?.detail ?? 'Aguardando resposta do endpoint.'}
                   </p>
                   {typeof result?.latency === 'number' && (
-                    <p className="mt-3 text-xs opacity-70">Latencia reportada: {result.latency}ms</p>
+                    <p className="mt-4 inline-flex items-center gap-2 text-xs opacity-75">
+                      <Clock3 className="h-3.5 w-3.5" />
+                      {result.latency}ms
+                    </p>
                   )}
                 </article>
               )
             })}
           </section>
 
-          <section className="mt-10 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-6">
-            <h2 className="text-xl font-semibold text-[var(--aethel-text-primary)]">Limites desta pagina</h2>
-            <ul className="mt-4 space-y-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-              <li>Checks publicos nao substituem evidencia de producao para L4/L5.</li>
-              <li>Historico de incidentes e uptime rolling ainda nao sao publicados aqui.</li>
-              <li>Billing pode aparecer parcial mesmo com pricing publico pronto, porque depende de runtime real do gateway.</li>
-            </ul>
+          <section className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Como ler esta pagina</p>
+              <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
+                <li>- Operacional significa que o endpoint respondeu e o payload indicou disponibilidade real.</li>
+                <li>- Parcial significa que a superficie responde, mas depende de configuracao ou credencial ainda ausente.</li>
+                <li>- Bloqueado significa falha publica ou dependencia obrigatoria indisponivel.</li>
+              </ul>
+            </div>
+
+            <div className="rounded-[28px] border border-cyan-400/20 bg-cyan-400/10 p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100">Limites atuais</p>
+              <ul className="mt-4 space-y-3 text-sm leading-6 text-cyan-50/85">
+                <li>- Ainda nao publicamos uptime rolling de 7, 30 ou 90 dias.</li>
+                <li>- Ainda nao existe historico completo de incidentes nesta pagina.</li>
+                <li>- Evidence L4 e uma trilha diferente: depende de producao real, nao so destes checks publicos.</li>
+              </ul>
+            </div>
           </section>
         </div>
       </main>

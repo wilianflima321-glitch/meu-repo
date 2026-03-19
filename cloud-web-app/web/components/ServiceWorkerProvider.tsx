@@ -11,6 +11,7 @@
 
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useServiceWorker, type UseServiceWorkerReturn } from '../hooks/useServiceWorker';
 
 // Context para expor o estado do SW para toda a aplicação
@@ -35,16 +36,25 @@ interface ServiceWorkerProviderProps {
  * Provider que gerencia o Service Worker e exibe UI de atualização/offline
  */
 export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) {
-  const sw = useServiceWorker();
+  const pathname = usePathname();
+  const isStudioSurface = Boolean(pathname && /^\/(dashboard|ide|admin|billing|settings|profile|nexus|projects|workspace)(\/|$)/.test(pathname));
+  const shouldEnableServiceWorker =
+    isStudioSurface &&
+    (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_ENABLE_SERVICE_WORKER === 'true');
+  const sw = useServiceWorker(shouldEnableServiceWorker);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   // Mostrar prompt de atualização quando disponível
   useEffect(() => {
+    if (!isStudioSurface) {
+      setShowUpdatePrompt(false);
+      return;
+    }
     if (sw.isUpdateAvailable && !dismissed) {
       setShowUpdatePrompt(true);
     }
-  }, [sw.isUpdateAvailable, dismissed]);
+  }, [sw.isUpdateAvailable, dismissed, isStudioSurface]);
 
   // Handler para atualizar
   const handleUpdate = () => {
@@ -59,6 +69,14 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
     // Permitir mostrar novamente após 1 hora
     setTimeout(() => setDismissed(false), 60 * 60 * 1000);
   };
+
+  if (!isStudioSurface) {
+    return (
+      <ServiceWorkerContext.Provider value={sw}>
+        {children}
+      </ServiceWorkerContext.Provider>
+    );
+  }
 
   return (
     <ServiceWorkerContext.Provider value={sw}>
@@ -193,7 +211,7 @@ export function InstallPrompt() {
     <div className="fixed bottom-4 left-4 z-[9999] max-w-sm">
       <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4">
         <div className="flex items-center gap-3">
-          <Image src="/branding/aethel-icon-source.png" alt="" width={40} height={40} className="w-10 h-10 rounded-lg" />
+            <Image src="/branding/aethel-icon-source.png" alt="" width={40} height={40} sizes="40px" className="w-10 h-10 rounded-lg" />
           <div className="flex-1">
             <p className="text-sm font-medium text-white">
               Instalar Aethel Engine

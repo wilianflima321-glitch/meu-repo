@@ -174,6 +174,40 @@ const PROTECTED_API_ROUTES = [
   '/api/experiments',
 ];
 
+const PUBLIC_PATH_PREFIXES = [
+  '/_next',
+  '/static',
+  '/icons',
+  '/branding',
+  '/screenshots',
+  '/login',
+  '/register',
+  '/pricing',
+  '/docs',
+  '/status',
+  '/contact-sales',
+  '/terms',
+  '/privacy',
+  '/help',
+  '/download',
+  '/marketplace',
+  '/api/auth',
+  '/api/health',
+  '/api/billing/webhook',
+];
+
+const PUBLIC_EXACT_PATHS = new Set([
+  '/',
+  '/manifest.webmanifest',
+  '/sw.js',
+  '/api/analytics/batch',
+  '/favicon.ico',
+  '/favicon.png',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/offline',
+]);
+
 // ============================================================================
 // MIDDLEWARE
 // ============================================================================
@@ -236,17 +270,12 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // 2) Public Paths (Login, Register, Public Assets)
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/static') ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/register') ||
-    pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/api/health') || // Health checks públicos
-    pathname.startsWith('/api/billing/webhook') || // Webhooks must be public
-    pathname === '/'
-  ) {
+  // 2) Public Paths (Marketing, docs, auth, assets e runtime publico)
+  const isPublicPath =
+    PUBLIC_EXACT_PATHS.has(pathname) ||
+    PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
+  if (isPublicPath) {
     return withSecurityHeaders(NextResponse.next(), req);
   }
 

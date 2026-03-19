@@ -23,7 +23,7 @@ const CONFIG = {
   staticAssets: [
     '/',
     '/offline',
-    '/manifest.json',
+    '/manifest.webmanifest',
     '/icons/favicon.ico',
     '/branding/aethel-icon-source.png',
   ],

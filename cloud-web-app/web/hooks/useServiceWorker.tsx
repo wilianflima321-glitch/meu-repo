@@ -41,7 +41,7 @@ export type UseServiceWorkerReturn = ServiceWorkerState & ServiceWorkerActions;
  * }
  * ```
  */
-export function useServiceWorker(): UseServiceWorkerReturn {
+export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
   const [state, setState] = useState<ServiceWorkerState>({
     isSupported: false,
     isRegistered: false,
@@ -55,6 +55,18 @@ export function useServiceWorker(): UseServiceWorkerReturn {
 
   // Registrar Service Worker
   useEffect(() => {
+    if (!enabled) {
+      setState((prev) => ({
+        ...prev,
+        isSupported: typeof window !== 'undefined' && 'serviceWorker' in navigator,
+        isRegistered: false,
+        isUpdateAvailable: false,
+        registration: null,
+        error: null,
+      }));
+      return;
+    }
+
     // Verificar suporte
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
       setState((prev) => ({ ...prev, isSupported: false }));
@@ -163,7 +175,7 @@ export function useServiceWorker(): UseServiceWorkerReturn {
       navigator.serviceWorker.removeEventListener('message', handleMessage);
       navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
     };
-  }, []);
+  }, [enabled]);
 
   // Forçar atualização do SW
   const update = useCallback(async () => {

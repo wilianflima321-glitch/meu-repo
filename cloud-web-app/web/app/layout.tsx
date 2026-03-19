@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Aethel Engine Team' }],
   creator: 'Aethel Engine',
   publisher: 'Aethel Engine',
-  manifest: '/manifest.json',
+  manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

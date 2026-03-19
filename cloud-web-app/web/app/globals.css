@@ -74,11 +74,12 @@
 @layer utilities {
   /* Grid Background Effect */
   .bg-grid-zinc-700 {
-    background-image: linear-gradient(white 1px, transparent 1px), linear-gradient(to right, white 1px, transparent 1px);
     background-size: 40px 40px;
     background-position: center;
     background-color: var(--bg-primary);
-    background-image: linear-gradient(var(--border-primary) 1px, transparent 1px), linear-gradient(to right, var(--border-primary) 1px, transparent 1px);
+    background-image:
+      linear-gradient(rgba(39, 39, 42, 0.14) 1px, transparent 1px),
+      linear-gradient(to right, rgba(39, 39, 42, 0.14) 1px, transparent 1px);
   }
 }
 

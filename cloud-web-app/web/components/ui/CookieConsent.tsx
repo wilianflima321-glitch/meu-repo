@@ -37,7 +37,7 @@ export default function CookieConsent() {
     <div
       className="fixed bottom-0 left-0 right-0 z-[1080] border-t border-white/10 bg-zinc-900/95 backdrop-blur-xl shadow-2xl shadow-black/40"
       role="dialog"
-      aria-label="Cookie consent"
+      aria-label="Consentimento de cookies"
       style={{ animation: 'slideUp 300ms ease-out' }}
     >
       <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
@@ -46,23 +46,23 @@ export default function CookieConsent() {
             <Cookie className="mt-0.5 h-5 w-5 shrink-0 text-[var(--aethel-warning)]" />
             <div>
               <p className="text-sm text-zinc-200">
-                We use cookies to improve your experience and analyze site usage.{' '}
+                Usamos cookies para melhorar sua experiencia, proteger a sessao e entender o uso do produto.{' '}
                 <button
                   onClick={() => setShowDetails(!showDetails)}
                   className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
                 >
-                  {showDetails ? 'Hide details' : 'Learn more'}
+                  {showDetails ? 'Ocultar detalhes' : 'Saiba mais'}
                 </button>
               </p>
               {showDetails && (
                 <div className="mt-3 space-y-2 text-xs text-zinc-400">
                   <div className="flex items-center gap-2">
                     <Shield className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
-                    <span><strong className="text-zinc-300">Essential:</strong> Authentication, security, preferences (always active)</span>
+                    <span><strong className="text-zinc-300">Essenciais:</strong> autenticacao, seguranca e preferencias basicas do studio (sempre ativos)</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Shield className="h-3.5 w-3.5 text-[var(--aethel-info)]" />
-                    <span><strong className="text-zinc-300">Analytics:</strong> Usage patterns, performance metrics, funnel tracking</span>
+                    <span><strong className="text-zinc-300">Analytics:</strong> padroes de uso, performance e etapas do onboarding</span>
                   </div>
                 </div>
               )}
@@ -73,13 +73,13 @@ export default function CookieConsent() {
               onClick={() => accept('essential')}
               className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-white/10 transition-colors"
             >
-              Essential Only
+              Apenas essenciais
             </button>
             <button
               onClick={() => accept('all')}
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors"
             >
-              Accept All
+              Aceitar todos
             </button>
           </div>
         </div>

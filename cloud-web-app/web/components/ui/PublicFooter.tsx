@@ -30,6 +30,8 @@ const FOOTER_SECTIONS = [
   },
 ]
 
+const COPYRIGHT_YEAR = 2026
+
 export default function PublicFooter() {
   return (
     <footer className="border-t border-[var(--aethel-border-subtle)] bg-gradient-to-b from-[var(--aethel-surface-primary)] via-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)]" role="contentinfo">
@@ -38,7 +40,7 @@ export default function PublicFooter() {
           {/* Brand column */}
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5">
-              <Image src="/branding/aethel-icon-source.png" alt="" width={28} height={28} className="rounded-lg" />
+              <Image src="/branding/aethel-icon-source.png" alt="" width={28} height={28} sizes="28px" className="rounded-lg" />
               <span className="text-lg font-bold text-white">Aethel Studio</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-zinc-500">
@@ -109,7 +111,7 @@ export default function PublicFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.06] pt-8 sm:flex-row">
-          <p className="text-xs text-zinc-600">&copy; {new Date().getFullYear()} Aethel Engine. Todos os direitos reservados.</p>
+          <p className="text-xs text-zinc-600">&copy; {COPYRIGHT_YEAR} Aethel Engine. Todos os direitos reservados.</p>
           <div className="flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
             <span className="text-xs text-zinc-500">Studio-grade workflow, atualizado continuamente</span>
