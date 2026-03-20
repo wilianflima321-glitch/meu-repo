@@ -1,6 +1,6 @@
 import { DirectorNotePanel } from '../ai/DirectorNotePanel'
 import { TimeMachineSlider } from '../collaboration/TimeMachineSlider'
-import { EmptyProjects } from '../ui/EmptyState'
+import { PremiumEmptyProjects } from '../ui/PremiumEmptyState'
 
 import type { Project } from './aethel-dashboard-model'
 
@@ -44,8 +44,8 @@ export function DashboardProjectsTab({
 
       {projects.length === 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr,1fr] aethel-gap-6 mb-6">
-          <div className="aethel-card aethel-p-6">
-            <EmptyProjects onCreate={onCreateProject} />
+          <div className="aethel-card aethel-p-0">
+            <PremiumEmptyProjects onCreate={onCreateProject} />
           </div>
           <div className="aethel-card aethel-p-6">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Novo projeto</p>

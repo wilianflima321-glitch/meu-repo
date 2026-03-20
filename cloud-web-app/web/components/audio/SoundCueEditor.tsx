@@ -1,3 +1,19 @@
+/**
+ * SOUND CUE NODE EDITOR - Aethel Engine
+ * 
+ * Editor visual de Sound Cues no estilo Unreal Engine.
+ * Permite criar grafos de áudio complexos com routing, efeitos e modulação.
+ * 
+ * FEATURES:
+ * - Node-based audio graph
+ * - Mixer/routing nodes
+ * - Modulation (LFO, envelope, random)
+ * - Effects (reverb, delay, filter, distortion)
+ * - 3D spatialization
+ * - Real-time preview
+ * - Attenuation visualization
+ * - Parameter binding
+ */
 
 'use client';
 
@@ -21,6 +37,9 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+// ============================================================================
+// TYPES
+// ============================================================================
 
 export type SoundNodeType =
   | 'output'
@@ -102,13 +121,16 @@ export interface SoundCueParameter {
   max?: number;
 }
 
+// ============================================================================
+// NODE DEFINITIONS
+// ============================================================================
 
 const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
   output: {
     type: 'output',
     name: 'Output',
     category: 'Core',
-    color: 'var(--aethel-error)',
+    color: '#ef4444',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
     ],
@@ -121,7 +143,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'wave_player',
     name: 'Wave Player',
     category: 'Source',
-    color: 'var(--aethel-success)',
+    color: '#22c55e',
     inputs: [
       { id: 'trigger', name: 'Trigger', type: 'trigger', direction: 'input' },
     ],
@@ -140,7 +162,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'random',
     name: 'Random',
     category: 'Source',
-    color: 'var(--aethel-success)',
+    color: '#22c55e',
     inputs: [
       { id: 'in0', name: 'In 0', type: 'audio', direction: 'input' },
       { id: 'in1', name: 'In 1', type: 'audio', direction: 'input' },
@@ -159,7 +181,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'sequence',
     name: 'Sequence',
     category: 'Source',
-    color: 'var(--aethel-success)',
+    color: '#22c55e',
     inputs: [
       { id: 'in0', name: 'In 0', type: 'audio', direction: 'input' },
       { id: 'in1', name: 'In 1', type: 'audio', direction: 'input' },
@@ -176,7 +198,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'mixer',
     name: 'Mixer',
     category: 'Routing',
-    color: 'var(--aethel-primary)',
+    color: '#3b82f6',
     inputs: [
       { id: 'in0', name: 'In 0', type: 'audio', direction: 'input' },
       { id: 'in1', name: 'In 1', type: 'audio', direction: 'input' },
@@ -197,7 +219,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'crossfade',
     name: 'Crossfade',
     category: 'Routing',
-    color: 'var(--aethel-primary)',
+    color: '#3b82f6',
     inputs: [
       { id: 'inA', name: 'Input A', type: 'audio', direction: 'input' },
       { id: 'inB', name: 'Input B', type: 'audio', direction: 'input' },
@@ -215,7 +237,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'modulator_lfo',
     name: 'LFO',
     category: 'Modulation',
-    color: 'var(--aethel-accent)',
+    color: '#8b5cf6',
     inputs: [],
     outputs: [
       { id: 'control', name: 'Control', type: 'control', direction: 'output' },
@@ -231,7 +253,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'modulator_envelope',
     name: 'Envelope',
     category: 'Modulation',
-    color: 'var(--aethel-accent)',
+    color: '#8b5cf6',
     inputs: [
       { id: 'trigger', name: 'Trigger', type: 'trigger', direction: 'input' },
     ],
@@ -249,7 +271,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'modulator_random',
     name: 'Random',
     category: 'Modulation',
-    color: 'var(--aethel-accent)',
+    color: '#8b5cf6',
     inputs: [
       { id: 'trigger', name: 'Trigger', type: 'trigger', direction: 'input' },
     ],
@@ -266,7 +288,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'effect_reverb',
     name: 'Reverb',
     category: 'Effects',
-    color: 'var(--aethel-warning)',
+    color: '#f59e0b',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
     ],
@@ -285,7 +307,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'effect_delay',
     name: 'Delay',
     category: 'Effects',
-    color: 'var(--aethel-warning)',
+    color: '#f59e0b',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
     ],
@@ -303,7 +325,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'effect_filter',
     name: 'Filter',
     category: 'Effects',
-    color: 'var(--aethel-warning)',
+    color: '#f59e0b',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
       { id: 'cutoff', name: 'Cutoff', type: 'control', direction: 'input' },
@@ -321,7 +343,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'effect_distortion',
     name: 'Distortion',
     category: 'Effects',
-    color: 'var(--aethel-warning)',
+    color: '#f59e0b',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
     ],
@@ -338,7 +360,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'effect_compressor',
     name: 'Compressor',
     category: 'Effects',
-    color: 'var(--aethel-warning)',
+    color: '#f59e0b',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
       { id: 'sidechain', name: 'Sidechain', type: 'audio', direction: 'input' },
@@ -358,7 +380,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'effect_eq',
     name: 'EQ',
     category: 'Effects',
-    color: 'var(--aethel-warning)',
+    color: '#f59e0b',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
     ],
@@ -377,7 +399,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'attenuation',
     name: 'Attenuation',
     category: '3D',
-    color: 'var(--aethel-success)',
+    color: '#10b981',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
     ],
@@ -396,7 +418,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'branch',
     name: 'Branch',
     category: 'Logic',
-    color: 'var(--aethel-secondary)',
+    color: '#ec4899',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
       { id: 'condition', name: 'Condition', type: 'control', direction: 'input' },
@@ -413,7 +435,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'looper',
     name: 'Looper',
     category: 'Logic',
-    color: 'var(--aethel-secondary)',
+    color: '#ec4899',
     inputs: [
       { id: 'audio', name: 'Audio', type: 'audio', direction: 'input' },
     ],
@@ -429,7 +451,7 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
     type: 'concatenator',
     name: 'Concatenator',
     category: 'Logic',
-    color: 'var(--aethel-secondary)',
+    color: '#ec4899',
     inputs: [
       { id: 'intro', name: 'Intro', type: 'audio', direction: 'input' },
       { id: 'loop', name: 'Loop', type: 'audio', direction: 'input' },
@@ -444,6 +466,9 @@ const nodeDefinitions: Record<SoundNodeType, SoundNodeDefinition> = {
   },
 };
 
+// ============================================================================
+// SOUND NODE COMPONENT
+// ============================================================================
 
 interface SoundNodeData extends Record<string, unknown> {
   definition: SoundNodeDefinition;
@@ -456,21 +481,21 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
   
   const getPinColor = (type: string) => {
     switch (type) {
-      case 'audio': return 'var(--aethel-success)';
-      case 'control': return 'var(--aethel-accent)';
-      case 'trigger': return 'var(--aethel-warning)';
-      default: return 'var(--aethel-text-quaternary)';
+      case 'audio': return '#22c55e';
+      case 'control': return '#8b5cf6';
+      case 'trigger': return '#f59e0b';
+      default: return '#64748b';
     }
   };
   
   return (
     <div
       style={{
-        background: selected Stop 'var(--aethel-surface-quaternary)' : 'var(--aethel-surface-tertiary)',
+        background: selected ? '#1e3a5f' : '#1e293b',
         border: `2px solid ${definition.color}`,
         borderRadius: '8px',
         minWidth: '180px',
-        color: 'var(--aethel-text-primary)',
+        color: 'white',
       }}
     >
       {/* Header */}
@@ -507,7 +532,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
                     left: -17,
                   }}
                 />
-                <span style={{ fontSize: '11px', color: 'var(--aethel-text-tertiary)' }}>{pin.name}</span>
+                <span style={{ fontSize: '11px', color: '#94a3b8' }}>{pin.name}</span>
               </div>
             ))}
           </div>
@@ -516,7 +541,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
             {definition.outputs.map((pin) => (
               <div key={pin.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
-                <span style={{ fontSize: '11px', color: 'var(--aethel-text-tertiary)' }}>{pin.name}</span>
+                <span style={{ fontSize: '11px', color: '#94a3b8' }}>{pin.name}</span>
                 <Handle
                   type="source"
                   position={Position.Right}
@@ -535,14 +560,14 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
         
         {/* Parameters */}
         {definition.parameters.length > 0 && (
-          <div style={{ borderTop: '1px solid var(--aethel-border-primary)', paddingTop: '8px', marginTop: '8px' }}>
+          <div style={{ borderTop: '1px solid #374151', paddingTop: '8px', marginTop: '8px' }}>
             {definition.parameters.slice(0, 3).map((param) => (
               <div key={param.id} style={{ marginBottom: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                  <label style={{ fontSize: '10px', color: 'var(--aethel-text-quaternary)' }}>{param.name}</label>
+                  <label style={{ fontSize: '10px', color: '#64748b' }}>{param.name}</label>
                   {param.type === 'float' && (
-                    <span style={{ fontSize: '10px', color: 'var(--aethel-text-tertiary)' }}>
-                      {((parameters[param.id] as number) x param.value as number).toFixed(2)}
+                    <span style={{ fontSize: '10px', color: '#94a3b8' }}>
+                      {((parameters[param.id] as number) ?? param.value as number).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -550,10 +575,10 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
                 {param.type === 'float' && (
                   <input
                     type="range"
-                    min={param.min x 0}
-                    max={param.max x 1}
+                    min={param.min ?? 0}
+                    max={param.max ?? 1}
                     step={(param.max! - param.min!) / 100}
-                    value={(parameters[param.id] as number) x param.value as number}
+                    value={(parameters[param.id] as number) ?? param.value as number}
                     onChange={(e) => onParameterChange(id, param.id, parseFloat(e.target.value))}
                     style={{ width: '100%', height: '4px' }}
                   />
@@ -562,26 +587,26 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
                 {param.type === 'bool' && (
                   <input
                     type="checkbox"
-                    checked={(parameters[param.id] as boolean) x param.value as boolean}
+                    checked={(parameters[param.id] as boolean) ?? param.value as boolean}
                     onChange={(e) => onParameterChange(id, param.id, e.target.checked)}
                   />
                 )}
                 
                 {param.type === 'enum' && (
                   <select
-                    value={(parameters[param.id] as string) x param.value as string}
+                    value={(parameters[param.id] as string) ?? param.value as string}
                     onChange={(e) => onParameterChange(id, param.id, e.target.value)}
                     style={{
                       width: '100%',
-                      background: 'var(--aethel-surface-primary)',
-                      border: '1px solid var(--aethel-border-primary)',
+                      background: '#0f172a',
+                      border: '1px solid #374151',
                       borderRadius: '2px',
                       padding: '2px',
-                      color: 'var(--aethel-text-primary)',
+                      color: 'white',
                       fontSize: '10px',
                     }}
                   >
-                    {param.options.map((opt) => (
+                    {param.options?.map((opt) => (
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
@@ -590,7 +615,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
             ))}
             
             {definition.parameters.length > 3 && (
-              <div style={{ fontSize: '10px', color: 'var(--aethel-text-quaternary)', textAlign: 'center' }}>
+              <div style={{ fontSize: '10px', color: '#64748b', textAlign: 'center' }}>
                 +{definition.parameters.length - 3} more params
               </div>
             )}
@@ -601,6 +626,9 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
   );
 }
 
+// ============================================================================
+// NODE CATALOG
+// ============================================================================
 
 interface NodeCatalogProps {
   onAddNode: (type: SoundNodeType) => void;
@@ -617,6 +645,7 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
       cats[def.category].push(def);
     });
     
+    // Filter by search
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       Object.keys(cats).forEach((cat) => {
@@ -632,8 +661,8 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
   }, [searchQuery]);
   
   return (
-    <div style={{ padding: '12px', background: 'var(--aethel-surface-primary)', borderRadius: '8px' }}>
-      <h3 style={{ color: 'var(--aethel-text-primary)', fontSize: '14px', marginBottom: '12px' }}>Node Catalog</h3>
+    <div style={{ padding: '12px', background: '#0f172a', borderRadius: '8px' }}>
+      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Node Catalog</h3>
       
       {/* Search */}
       <input
@@ -643,11 +672,11 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
         placeholder="Search nodes..."
         style={{
           width: '100%',
-          background: 'var(--aethel-surface-tertiary)',
-          border: '1px solid var(--aethel-border-primary)',
+          background: '#1e293b',
+          border: '1px solid #374151',
           borderRadius: '4px',
           padding: '8px',
-          color: 'var(--aethel-text-primary)',
+          color: 'white',
           fontSize: '12px',
           marginBottom: '12px',
         }}
@@ -658,7 +687,7 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
         {Object.entries(categories).map(([category, nodes]) => (
           <div key={category} style={{ marginBottom: '12px' }}>
             <h4 style={{ 
-              color: 'var(--aethel-text-quaternary)', 
+              color: '#64748b', 
               fontSize: '11px', 
               textTransform: 'uppercase',
               marginBottom: '6px',
@@ -675,11 +704,11 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    background: 'var(--aethel-surface-tertiary)',
-                    border: '1px solid var(--aethel-border-primary)',
+                    background: '#1e293b',
+                    border: '1px solid #374151',
                     borderRadius: '4px',
                     padding: '6px 10px',
-                    color: 'var(--aethel-text-primary)',
+                    color: 'white',
                     cursor: 'pointer',
                     fontSize: '12px',
                     textAlign: 'left',
@@ -702,6 +731,9 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
   );
 }
 
+// ============================================================================
+// PREVIEW PANEL
+// ============================================================================
 
 interface PreviewPanelProps {
   isPlaying: boolean;
@@ -715,36 +747,36 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
   return (
     <div style={{
       padding: '12px',
-      background: 'var(--aethel-surface-primary)',
+      background: '#0f172a',
       borderRadius: '8px',
     }}>
-      <h3 style={{ color: 'var(--aethel-text-primary)', fontSize: '14px', marginBottom: '12px' }}>Preview</h3>
+      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Preview</h3>
       
       {/* Playback controls */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
         <button
-          onClick={isPlaying Stop onStop : onPlay}
+          onClick={isPlaying ? onStop : onPlay}
           style={{
             flex: 1,
-            background: isPlaying ? 'var(--aethel-error)' : 'var(--aethel-success)',
+            background: isPlaying ? '#ef4444' : '#22c55e',
             border: 'none',
             borderRadius: '6px',
             padding: '10px',
-            color: 'var(--aethel-text-primary)',
+            color: 'white',
             cursor: 'pointer',
             fontSize: '13px',
             fontWeight: 'bold',
           }}
         >
-          {isPlaying Stop ' Stop' : ' Play'}
+          {isPlaying ? '? Stop' : '? Play'}
         </button>
       </div>
       
       {/* Volume */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Preview Volume</label>
-          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px' }}>{Math.round(volume * 100)}%</span>
+          <label style={{ color: '#94a3b8', fontSize: '12px' }}>Preview Volume</label>
+          <span style={{ color: '#64748b', fontSize: '11px' }}>{Math.round(volume * 100)}%</span>
         </div>
         <input
           type="range"
@@ -761,15 +793,15 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
       <div style={{
         marginTop: '12px',
         height: '60px',
-        background: 'var(--aethel-surface-tertiary)',
+        background: '#1e293b',
         borderRadius: '4px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'var(--aethel-text-quaternary)',
+        color: '#64748b',
         fontSize: '11px',
       }}>
-        {isPlaying Stop (
+        {isPlaying ? (
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: '40px' }}>
             {Array.from({ length: 20 }).map((_, i) => (
               <div
@@ -777,7 +809,7 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
                 style={{
                   width: '4px',
                   height: `${20 + Math.random() * 20}px`,
-                  background: 'var(--aethel-success)',
+                  background: '#22c55e',
                   borderRadius: '2px',
                   animation: 'pulse 0.5s infinite',
                 }}
@@ -792,6 +824,9 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
   );
 }
 
+// ============================================================================
+// PARAMETERS PANEL
+// ============================================================================
 
 interface ParametersPanelProps {
   parameters: SoundCueParameter[];
@@ -822,10 +857,10 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
   return (
     <div style={{
       padding: '12px',
-      background: 'var(--aethel-surface-primary)',
+      background: '#0f172a',
       borderRadius: '8px',
     }}>
-      <h3 style={{ color: 'var(--aethel-text-primary)', fontSize: '14px', marginBottom: '12px' }}>Cue Parameters</h3>
+      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Cue Parameters</h3>
       
       {/* Parameter list */}
       <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
@@ -834,24 +869,24 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
             key={param.id}
             style={{
               padding: '8px',
-              background: 'var(--aethel-surface-tertiary)',
+              background: '#1e293b',
               borderRadius: '4px',
               marginBottom: '6px',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <span style={{ color: 'var(--aethel-text-primary)', fontSize: '12px' }}>{param.name}</span>
+              <span style={{ color: 'white', fontSize: '12px' }}>{param.name}</span>
               <button
                 onClick={() => onChange(parameters.filter(p => p.id !== param.id))}
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: 'var(--aethel-error)',
+                  color: '#ef4444',
                   cursor: 'pointer',
                   fontSize: '12px',
                 }}
               >
-                
+                ×
               </button>
             </div>
             
@@ -859,17 +894,17 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
               <>
                 <input
                   type="range"
-                  min={param.min x 0}
-                  max={param.max x 1}
+                  min={param.min ?? 0}
+                  max={param.max ?? 1}
                   step={0.01}
-                  value={(runtimeValues[param.id] as number) x param.defaultValue as number}
+                  value={(runtimeValues[param.id] as number) ?? param.defaultValue as number}
                   onChange={(e) => onRuntimeValueChange(param.id, parseFloat(e.target.value))}
                   style={{ width: '100%' }}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--aethel-text-quaternary)' }}>
-                  <span>{param.min x 0}</span>
-                  <span>{((runtimeValues[param.id] as number) x param.defaultValue).toFixed(2)}</span>
-                  <span>{param.max x 1}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#64748b' }}>
+                  <span>{param.min ?? 0}</span>
+                  <span>{((runtimeValues[param.id] as number) ?? param.defaultValue).toFixed(2)}</span>
+                  <span>{param.max ?? 1}</span>
                 </div>
               </>
             )}
@@ -886,22 +921,22 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
           placeholder="Parameter name"
           style={{
             flex: 1,
-            background: 'var(--aethel-surface-tertiary)',
-            border: '1px solid var(--aethel-border-primary)',
+            background: '#1e293b',
+            border: '1px solid #374151',
             borderRadius: '4px',
             padding: '6px',
-            color: 'var(--aethel-text-primary)',
+            color: 'white',
             fontSize: '12px',
           }}
         />
         <button
           onClick={addParameter}
           style={{
-            background: 'var(--aethel-primary)',
+            background: '#3b82f6',
             border: 'none',
             borderRadius: '4px',
             padding: '6px 12px',
-            color: 'var(--aethel-text-primary)',
+            color: 'white',
             cursor: 'pointer',
             fontSize: '12px',
           }}
@@ -913,10 +948,13 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
   );
 }
 
+// ============================================================================
+// MAIN SOUND CUE EDITOR
+// ============================================================================
 
 export interface SoundCueEditorProps {
-  cueStop: SoundCue;
-  onChangeStop: (cue: SoundCue) => void;
+  cue?: SoundCue;
+  onChange?: (cue: SoundCue) => void;
 }
 
 const nodeTypes = {
@@ -924,6 +962,7 @@ const nodeTypes = {
 };
 
 export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProps) {
+  // Cue state
   const [cue, setCue] = useState<SoundCue>(initialCue || {
     id: crypto.randomUUID(),
     name: 'New Sound Cue',
@@ -939,22 +978,25 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     parameters: [],
   });
   
+  // UI state
   const [searchQuery, setSearchQuery] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewVolume, setPreviewVolume] = useState(0.7);
   const [runtimeValues, setRuntimeValues] = useState<Record<string, number | boolean>>({});
   
+  // Handle parameter changes on nodes
   const handleParameterChange = useCallback((nodeId: string, paramId: string, value: unknown) => {
     setCue((prev) => ({
       ...prev,
       nodes: prev.nodes.map((n) =>
         n.id === nodeId
-          Stop { ...n, parameters: { ...n.parameters, [paramId]: value } }
+          ? { ...n, parameters: { ...n.parameters, [paramId]: value } }
           : n
       ),
     }));
   }, []);
   
+  // Convert to React Flow format
   const initialNodes: Node<SoundNodeData>[] = useMemo(() => {
     return cue.nodes.map((node) => ({
       id: node.id,
@@ -975,7 +1017,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       sourceHandle: conn.sourcePin,
       target: conn.targetNode,
       targetHandle: conn.targetPin,
-      style: { stroke: 'var(--aethel-success)', strokeWidth: 2 },
+      style: { stroke: '#22c55e', strokeWidth: 2 },
       animated: isPlaying,
     }));
   }, [cue.connections, isPlaying]);
@@ -983,6 +1025,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   
+  // Add new node
   const addNode = useCallback((type: SoundNodeType) => {
     const newNode: SoundCueNode = {
       id: crypto.randomUUID(),
@@ -1011,6 +1054,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     ]);
   }, [setNodes, handleParameterChange]);
   
+  // Handle connections
   const onConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target) return;
     
@@ -1032,7 +1076,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
         {
           ...connection,
           id: newConnection.id,
-          style: { stroke: 'var(--aethel-success)', strokeWidth: 2 },
+          style: { stroke: '#22c55e', strokeWidth: 2 },
           animated: isPlaying,
         },
         eds
@@ -1040,8 +1084,10 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     );
   }, [setEdges, isPlaying]);
   
+  // Preview controls
   const handlePlay = useCallback(() => {
     setIsPlaying(true);
+    // Would trigger actual audio playback
     console.log('Playing sound cue:', cue);
   }, [cue]);
   
@@ -1049,16 +1095,17 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     setIsPlaying(false);
   }, []);
   
+  // Notify parent
   useEffect(() => {
-    onChangeStop.(cue);
+    onChange?.(cue);
   }, [cue, onChange]);
   
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: 'var(--aethel-surface-primary)' }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', background: '#0f172a' }}>
       {/* Left sidebar */}
       <div style={{
         width: '240px',
-        borderRight: '1px solid var(--aethel-border-primary)',
+        borderRight: '1px solid #1e293b',
         padding: '12px',
         display: 'flex',
         flexDirection: 'column',
@@ -1083,34 +1130,34 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
           nodeTypes={nodeTypes}
           fitView
           deleteKeyCode={['Backspace', 'Delete']}
-          style={{ background: 'var(--aethel-surface-primary)' }}
+          style={{ background: '#0f172a' }}
         >
           <Controls />
           <MiniMap
-            style={{ background: 'var(--aethel-surface-tertiary)' }}
-            nodeColor={(n) => nodeDefinitions[(n.data as SoundNodeData).definitionStop.type]Stop.color || 'var(--aethel-text-quaternary)'}
+            style={{ background: '#1e293b' }}
+            nodeColor={(n) => nodeDefinitions[(n.data as SoundNodeData).definition?.type]?.color || '#64748b'}
           />
-          <Background color="var(--aethel-surface-tertiary)" gap={20} />
+          <Background color="#1e293b" gap={20} />
           
           <Panel position="top-left">
             <div style={{
-              background: 'var(--aethel-surface-tertiary)',
+              background: '#1e293b',
               padding: '8px 16px',
               borderRadius: '6px',
-              color: 'var(--aethel-text-primary)',
+              color: 'white',
               fontSize: '14px',
               fontWeight: 'bold',
             }}>
-               {cue.name}
+              ?? {cue.name}
             </div>
           </Panel>
           
           <Panel position="top-right">
             <div style={{
-              background: 'var(--aethel-surface-tertiary)',
+              background: '#1e293b',
               padding: '8px 12px',
               borderRadius: '6px',
-              color: 'var(--aethel-text-tertiary)',
+              color: '#94a3b8',
               fontSize: '12px',
             }}>
               Nodes: {cue.nodes.length} | Connections: {cue.connections.length}
@@ -1122,7 +1169,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       {/* Right sidebar */}
       <div style={{
         width: '260px',
-        borderLeft: '1px solid var(--aethel-border-primary)',
+        borderLeft: '1px solid #1e293b',
         padding: '12px',
         display: 'flex',
         flexDirection: 'column',
@@ -1147,13 +1194,13 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
         {/* Attenuation preview */}
         <div style={{
           padding: '12px',
-          background: 'var(--aethel-surface-primary)',
+          background: '#0f172a',
           borderRadius: '8px',
         }}>
-          <h3 style={{ color: 'var(--aethel-text-primary)', fontSize: '14px', marginBottom: '12px' }}>3D Preview</h3>
+          <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>3D Preview</h3>
           <div style={{
             height: '120px',
-            background: 'var(--aethel-surface-tertiary)',
+            background: '#1e293b',
             borderRadius: '4px',
             display: 'flex',
             alignItems: 'center',
@@ -1165,7 +1212,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
               width: '60px',
               height: '60px',
               borderRadius: '50%',
-              background: 'radial-gradient(circle, var(--aethel-success) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, #22c55e 0%, transparent 70%)',
               opacity: 0.5,
             }} />
             <div style={{
@@ -1173,18 +1220,18 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
               width: '100px',
               height: '100px',
               borderRadius: '50%',
-              border: '1px dashed var(--aethel-success)',
+              border: '1px dashed #22c55e',
               opacity: 0.3,
             }} />
             <div style={{
               position: 'absolute',
               width: '10px',
               height: '10px',
-              background: 'var(--aethel-success)',
+              background: '#22c55e',
               borderRadius: '50%',
             }} />
           </div>
-          <div style={{ marginTop: '8px', fontSize: '10px', color: 'var(--aethel-text-quaternary)', textAlign: 'center' }}>
+          <div style={{ marginTop: '8px', fontSize: '10px', color: '#64748b', textAlign: 'center' }}>
             Attenuation sphere visualization
           </div>
         </div>

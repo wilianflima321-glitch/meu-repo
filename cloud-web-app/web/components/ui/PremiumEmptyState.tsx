@@ -180,7 +180,7 @@ export function PremiumEmptyState({
 
 // Specialized Empty States
 
-export function EmptyProjects({ onCreate }: { onCreate: () => void }) {
+export function PremiumEmptyProjects({ onCreate }: { onCreate: () => void }) {
   return (
     <GlassCard variant="elevated">
       <PremiumEmptyState
@@ -488,7 +488,7 @@ export function FirstValueGuide({ steps, currentStep }: FirstValueGuideProps) {
 
 const premiumEmptyStates = {
   PremiumEmptyState,
-  EmptyProjects,
+  PremiumEmptyProjects,
   EmptySearch,
   EmptyChat,
   EmptyWorkflows,
