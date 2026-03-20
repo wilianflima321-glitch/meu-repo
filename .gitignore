@@ -52,6 +52,7 @@ package-lock.json
 *.zip
 *.patch
 *.bundle
+build-output*.txt
 
 # Copilot/agent chat artifacts
 .zencoder/
