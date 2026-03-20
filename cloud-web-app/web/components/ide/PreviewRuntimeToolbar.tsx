@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import type { PreviewRuntimeHealthStatus, PreviewRuntimeReadinessResponse } from '@/lib/preview/runtime-manager'
 
@@ -74,18 +74,18 @@ export default function PreviewRuntimeToolbar({
   const recommendedCommands = runtimeReadiness?.recommendedCommands ?? []
   const discoveryToneClass =
     runtimeDiscoveryTone === 'success'
-      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+      ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
       : runtimeDiscoveryTone === 'warning'
-        ? 'border-amber-500/30 bg-amber-500/10 text-amber-100'
-        : 'border-zinc-700 bg-zinc-900/80 text-zinc-300'
+        ? 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
+        : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'
   const runtimeStateClass =
     runtimeHealthStatus === 'reachable'
-      ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-200'
+      ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
       : runtimeHealthStatus === 'checking'
-        ? 'border-amber-500/25 bg-amber-500/10 text-amber-200'
+        ? 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
         : runtimeHealthStatus === 'idle'
-          ? 'border-zinc-700 bg-zinc-900/80 text-zinc-400'
-          : 'border-rose-500/25 bg-rose-500/10 text-rose-200'
+          ? 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-tertiary)]'
+          : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
   const runtimeStateLabel =
     runtimeHealthStatus === 'checking'
       ? 'Checking'
@@ -98,12 +98,12 @@ export default function PreviewRuntimeToolbar({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-[280px] flex-1 flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Preview Runtime</span>
-            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${previewRuntimeUrl ? 'border-cyan-500/25 bg-cyan-500/10 text-cyan-200' : 'border-zinc-700 bg-zinc-900/80 text-zinc-300'}`}>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Preview Runtime</span>
+            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${previewRuntimeUrl ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'}`}>
               {previewRuntimeUrl ? 'Dev server externo' : 'Inline fallback'}
             </span>
-            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-slate-300">
-              Strategy · {runtimeStrategyLabel}
+            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
+              Estratégia · {runtimeStrategyLabel}
             </span>
             {previewRuntimeUrl && (
               <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${runtimeStateClass}`}>
@@ -111,15 +111,15 @@ export default function PreviewRuntimeToolbar({
               </span>
             )}
             {previewRuntimeUrl && runtimeHealthCheckedAt && (
-              <span className="text-[10px] text-slate-500">
+              <span className="text-[10px] text-[var(--aethel-text-tertiary)]">
                 checked {runtimeHealthCheckedAt.toLocaleTimeString()}
               </span>
             )}
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-slate-300">
-            <div className="font-medium text-slate-200">{runtimeStrategyHint}</div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-[var(--aethel-text-secondary)]">
+            <div className="font-medium text-[var(--aethel-text-primary)]">{runtimeStrategyHint}</div>
             {runtimeReadiness?.blockers && runtimeReadiness.blockers.length > 0 && (
-              <div className="mt-1 text-slate-500">
+              <div className="mt-1 text-[var(--aethel-text-tertiary)]">
                 Blockers: {runtimeReadiness.blockers.join(', ')}.
               </div>
             )}
@@ -130,7 +130,7 @@ export default function PreviewRuntimeToolbar({
           <button
             type="button"
             onClick={onToggleSettings}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] text-zinc-200 hover:bg-white/[0.08]"
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
           >
             {showRuntimeSettings ? 'Ocultar runtime' : 'Configurar runtime'}
           </button>
@@ -144,7 +144,7 @@ export default function PreviewRuntimeToolbar({
                   ? isDiscoveringRuntime
                   : false
             }
-            className="rounded-xl border border-sky-500/30 bg-sky-500/12 px-2.5 py-1.5 text-[11px] font-medium text-sky-200 hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {runtimePrimaryAction === 'provision' && isProvisioningRuntime
               ? 'Provisionando...'
@@ -156,7 +156,7 @@ export default function PreviewRuntimeToolbar({
             type="button"
             onClick={onDiscoverRuntime}
             disabled={isDiscoveringRuntime}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] text-zinc-200 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isDiscoveringRuntime ? 'Detectando...' : 'Auto detectar'}
           </button>
@@ -164,7 +164,7 @@ export default function PreviewRuntimeToolbar({
             type="button"
             onClick={onProvisionRuntime}
             disabled={isProvisioningRuntime || !routeProvisionSupported}
-            className="rounded-xl border border-emerald-500/30 bg-emerald-500/12 px-2.5 py-1.5 text-[11px] font-medium text-emerald-200 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponivel'}
           </button>
@@ -173,7 +173,7 @@ export default function PreviewRuntimeToolbar({
               type="button"
               onClick={onSyncRuntime}
               disabled={isSyncingRuntime}
-              className="rounded-xl border border-indigo-500/30 bg-indigo-500/12 px-2.5 py-1.5 text-[11px] font-medium text-indigo-200 hover:bg-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSyncingRuntime ? 'Sincronizando...' : 'Sync runtime'}
             </button>
@@ -182,7 +182,7 @@ export default function PreviewRuntimeToolbar({
             <button
               type="button"
               onClick={onUseFallback}
-              className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-2.5 py-1.5 text-[11px] font-medium text-rose-200 hover:bg-rose-500/20"
+              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]"
             >
               Usar fallback
             </button>
@@ -197,12 +197,12 @@ export default function PreviewRuntimeToolbar({
             value={previewRuntimeInput}
             onChange={(event) => onRuntimeInputChange(event.target.value)}
             placeholder="https://localhost:5173"
-            className="min-w-[280px] flex-1 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-[11px] text-zinc-100 placeholder:text-zinc-500"
+            className="min-w-[280px] flex-1 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-[11px] text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]"
           />
           <button
             type="button"
             onClick={onApplyRuntime}
-            className="rounded-xl border border-cyan-500/30 bg-cyan-500/12 px-2.5 py-2 text-[11px] font-medium text-cyan-200 hover:bg-cyan-500/20"
+            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
           >
             Aplicar
           </button>
@@ -210,7 +210,7 @@ export default function PreviewRuntimeToolbar({
             <button
               type="button"
               onClick={onRevalidate}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-[11px] text-zinc-200 hover:bg-white/[0.08]"
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
             >
               Revalidar
             </button>
@@ -219,7 +219,7 @@ export default function PreviewRuntimeToolbar({
             <button
               type="button"
               onClick={onOpenRuntime}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-[11px] text-zinc-200 hover:bg-white/[0.08]"
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
             >
               Abrir runtime
             </button>
@@ -231,7 +231,7 @@ export default function PreviewRuntimeToolbar({
         <div className={`mt-3 rounded-xl border px-3 py-2 text-[11px] ${discoveryToneClass}`}>{runtimeDiscoveryMessage}</div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-[var(--aethel-text-tertiary)]">
         {managedProvider && (
           <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1">
             provider:{managedProviderLabel}
@@ -249,7 +249,7 @@ export default function PreviewRuntimeToolbar({
           local:{reachableCandidates}/{totalCandidates} reachable
         </span>
         {runtimeReadiness?.preferredRuntimeUrl && (
-          <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-cyan-300">
+          <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2 py-1 text-[var(--aethel-info-light)]">
             preferred:{runtimeReadiness.preferredRuntimeUrl}
           </span>
         )}
@@ -260,7 +260,7 @@ export default function PreviewRuntimeToolbar({
           {runtimeReadiness.instructions.map((instruction) => (
             <span
               key={instruction}
-              className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-300"
+              className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]"
             >
               {instruction}
             </span>
@@ -273,7 +273,7 @@ export default function PreviewRuntimeToolbar({
           {managedSetupEnv.map((envKey) => (
             <span
               key={envKey}
-              className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-400"
+              className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-[var(--aethel-text-tertiary)]"
             >
               env:{envKey}
             </span>
@@ -286,7 +286,7 @@ export default function PreviewRuntimeToolbar({
           {recommendedCommands.map((command) => (
             <code
               key={command}
-              className="rounded-xl border border-white/10 bg-black/25 px-2.5 py-1.5 text-[11px] text-cyan-300"
+              className="rounded-xl border border-white/10 bg-black/25 px-2.5 py-1.5 text-[11px] text-[var(--aethel-info-light)]"
             >
               {command}
             </code>
@@ -295,7 +295,7 @@ export default function PreviewRuntimeToolbar({
       )}
 
       {previewRuntimeUrl && runtimeHealthStatus !== 'reachable' && (
-        <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-100">
+        <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-warning)]">
           {runtimeHealthHint}
         </div>
       )}

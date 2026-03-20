@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, FileText, ShieldAlert } from 'lucide-react';
@@ -21,9 +21,9 @@ type AuditLog = {
 };
 
 const severityLabels: Record<string, string> = {
-  info: 'Informa��o',
+  info: 'Informação',
   warning: 'Aviso',
-  critical: 'Cr�tico',
+  critical: 'Crítico',
 };
 
 export default function AuditLogsPage() {
@@ -93,7 +93,7 @@ export default function AuditLogsPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Logs de auditoria avan�ados</h1>
+          <h1 className="text-2xl font-bold">Logs de auditoria avançados</h1>
           {lastUpdated && (
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
               Atualizado em {lastUpdated.toLocaleString()}
@@ -132,7 +132,7 @@ export default function AuditLogsPage() {
           },
           {
             icon: ShieldAlert,
-            label: 'Cr�ticos',
+            label: 'Críticos',
             value: summary.critical,
             tone: 'error',
           },
@@ -151,7 +151,7 @@ export default function AuditLogsPage() {
           />
           <input
             type="text"
-            placeholder="A��o"
+            placeholder="Ação"
             value={filter.action}
             onChange={(e) => setFilter({ ...filter, action: e.target.value })}
             className="border p-2"
@@ -162,9 +162,9 @@ export default function AuditLogsPage() {
             className="border p-2"
           >
             <option value="all">Severidade</option>
-            <option value="info">Informa��o</option>
+            <option value="info">Informação</option>
             <option value="warning">Aviso</option>
-            <option value="critical">Cr�tico</option>
+            <option value="critical">Crítico</option>
           </select>
           <input
             type="date"
@@ -201,7 +201,7 @@ export default function AuditLogsPage() {
             <thead>
               <tr className="border-b text-xs text-[var(--aethel-text-tertiary)]">
                 <th className="text-left p-2">Admin</th>
-                <th className="text-left p-2">A��o</th>
+                <th className="text-left p-2">Ação</th>
                 <th className="text-left p-2">Categoria</th>
                 <th className="text-left p-2">Severidade</th>
                 <th className="text-left p-2">Alvo</th>
@@ -228,7 +228,7 @@ export default function AuditLogsPage() {
                             : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                       }`}
                     >
-                      {severityLabels[log.severity || 'info'] ?? 'Informa��o'}
+                      {severityLabels[log.severity || 'info'] ?? 'Informação'}
                     </span>
                   </td>
                   <td className="p-2">

@@ -45,7 +45,7 @@ const DOMAINS = [
     name: 'Apps',
     description: 'Web apps, APIs, dashboards, SaaS',
     icon: Code,
-    color: 'from-blue-500 to-indigo-500',
+    color: 'from-[var(--aethel-primary)] to-[var(--aethel-info)]',
     ariaDescription: 'Crie web apps, APIs, dashboards e produtos SaaS',
   },
   {
@@ -53,7 +53,7 @@ const DOMAINS = [
     name: 'Jogos',
     description: 'Jogos 2D/3D, experiencias interativas',
     icon: Gamepad2,
-    color: 'from-emerald-500 to-teal-500',
+    color: 'from-[var(--aethel-success)] to-[var(--aethel-info)]',
     ariaDescription: 'Crie jogos 2D e 3D com experiencias interativas',
   },
   {
@@ -61,7 +61,7 @@ const DOMAINS = [
     name: 'Filmes',
     description: 'Storyboards, descricoes de cenas, roteiros',
     icon: Film,
-    color: 'from-purple-500 to-pink-500',
+    color: 'from-[var(--aethel-accent)] to-[var(--aethel-error)]',
     ariaDescription: 'Gere storyboards, descricoes de cenas e roteiros',
   },
   {
@@ -69,7 +69,7 @@ const DOMAINS = [
     name: 'Pesquisa',
     description: 'Pesquisa profunda, analises, relatorios',
     icon: Search,
-    color: 'from-amber-500 to-orange-500',
+    color: 'from-[var(--aethel-warning)] to-[var(--aethel-info)]',
     ariaDescription: 'Conduza pesquisa profunda, analise e gere relatorios',
   },
 ]
@@ -189,7 +189,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
             {step > 1 && (
               <button
                 onClick={handleBack}
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/5 hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/5 hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
                 aria-label={`Voltar para a etapa ${step - 1}: ${STEP_LABELS[step - 2]}`}
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -207,10 +207,10 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                   <div
                     className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-all ${
                       s < step
-                        ? 'bg-indigo-500 text-white'
+                        ? 'bg-[var(--aethel-primary)] text-white'
                         : s === step
-                        ? 'border-2 border-indigo-500 text-indigo-400'
-                        : 'border border-zinc-700 text-zinc-600'
+                        ? 'border-2 border-[var(--aethel-primary)] text-[var(--aethel-primary-light)]'
+                        : 'border border-[var(--aethel-border-subtle)] text-[var(--aethel-text-tertiary)]'
                     }`}
                     aria-current={s === step ? 'step' : undefined}
                     aria-label={`Etapa ${s}: ${STEP_LABELS[s - 1]}${s < step ? ' (concluida)' : s === step ? ' (atual)' : ''}`}
@@ -225,7 +225,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
         </div>
         {/* Progress bar visual */}
         <div
-          className="mt-3 h-1 overflow-hidden rounded-full bg-zinc-800"
+          className="mt-3 h-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
           role="progressbar"
           aria-valuenow={step}
           aria-valuemin={1}
@@ -233,7 +233,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           aria-label={`Etapa ${step} of 3`}
         >
           <div
-            className="h-full rounded-full bg-indigo-500 transition-all duration-300"
+            className="h-full rounded-full bg-[var(--aethel-primary)] transition-all duration-300"
             style={{ width: `${((step - 1) / 2) * 100}%` }}
           />
         </div>
@@ -270,7 +270,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                   role="radio"
                   aria-checked={selectedDomain === domain.id}
                   aria-label={domain.ariaDescription}
-                  className="group relative overflow-hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-5 text-left transition-all hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-tertiary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 sm:p-6"
+                className="group relative overflow-hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-5 text-left transition-all hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-tertiary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] sm:p-6"
                 >
                   <div className={`mb-3 inline-flex rounded-xl bg-gradient-to-br ${domain.color} p-3`}>
                     <Icon className="h-6 w-6 text-white" aria-hidden="true" />
@@ -292,7 +292,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           {onSkip && (
             <button
               onClick={onSkip}
-              className="text-sm text-[var(--aethel-text-quaternary)] underline underline-offset-2 transition-colors hover:text-[var(--aethel-text-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+              className="text-sm text-[var(--aethel-text-quaternary)] underline underline-offset-2 transition-colors hover:text-[var(--aethel-text-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
             >
               Pular wizard e ir para o dashboard
             </button>
@@ -329,9 +329,9 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 role="radio"
                 aria-checked={selectedTemplate?.id === template.id}
                 aria-label={`${template.name}: ${template.description}. Nivel: ${template.difficulty}. Tempo estimado: ${template.estimatedTime}.`}
-                className={`group rounded-xl border p-4 text-left transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ${
+                className={`group rounded-xl border p-4 text-left transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] ${
                   selectedTemplate?.id === template.id
-                    ? 'border-indigo-500 bg-indigo-500/10'
+                    ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]'
                     : 'border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
                 }`}
               >
@@ -368,7 +368,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
       {step === 3 && selectedTemplate && (
         <div className="space-y-6 animate-fade-in" role="group" aria-labelledby="step3-heading">
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500" aria-hidden="true">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]" aria-hidden="true">
               <Rocket className="h-8 w-8 text-white" />
             </div>
             <h3
@@ -403,7 +403,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
               <div className="flex justify-between">
                 <dt className="text-[var(--aethel-text-tertiary)]">Agentes</dt>
                 <dd className="font-medium text-[var(--aethel-text-primary)]">
-                  <Sparkles className="mr-1 inline h-3.5 w-3.5 text-indigo-400" aria-hidden="true" />
+                  <Sparkles className="mr-1 inline h-3.5 w-3.5 text-[var(--aethel-primary-light)]" aria-hidden="true" />
                   Architect + Engineer + Critic
                 </dd>
               </div>
@@ -413,7 +413,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <button
               onClick={handleStart}
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-xl hover:shadow-indigo-500/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300 sm:w-auto sm:text-lg"
+              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] transition-all hover:shadow-xl hover:shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary-light)] sm:w-auto sm:text-lg"
               aria-label={`Comece a construir o projeto ${selectedTemplate.name}`}
             >
               Comecar agora
@@ -421,7 +421,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
             </button>
             <button
               onClick={handleBack}
-              className="text-sm text-[var(--aethel-text-quaternary)] underline underline-offset-2 transition-colors hover:text-[var(--aethel-text-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+              className="text-sm text-[var(--aethel-text-quaternary)] underline underline-offset-2 transition-colors hover:text-[var(--aethel-text-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
             >
               Escolher outro template
             </button>

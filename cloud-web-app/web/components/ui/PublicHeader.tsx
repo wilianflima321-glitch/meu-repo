@@ -43,7 +43,7 @@ export default function PublicHeader() {
             />
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold tracking-tight text-white">Aethel</span>
-              <span className="hidden rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-300 sm:inline-flex">
+              <span className="hidden rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)] sm:inline-flex">
                 Studio
               </span>
             </div>
@@ -60,7 +60,7 @@ export default function PublicHeader() {
                   className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-white/10 text-white'
-                      : 'text-zinc-400 hover:bg-white/[0.05] hover:text-white'
+                      : 'text-[var(--aethel-text-tertiary)] hover:bg-white/[0.05] hover:text-white'
                   }`}
                 >
                   {link.label}
@@ -88,7 +88,7 @@ export default function PublicHeader() {
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-white md:hidden"
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
             aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -120,7 +120,7 @@ export default function PublicHeader() {
                   className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-white/10 text-white'
-                      : 'text-zinc-400 hover:bg-white/[0.05] hover:text-white'
+                      : 'text-[var(--aethel-text-tertiary)] hover:bg-white/[0.05] hover:text-white'
                   }`}
                 >
                   {link.label}

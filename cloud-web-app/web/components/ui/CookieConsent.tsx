@@ -35,7 +35,7 @@ export default function CookieConsent() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[1080] border-t border-white/10 bg-zinc-900/95 backdrop-blur-xl shadow-2xl shadow-black/40"
+      className="fixed bottom-0 left-0 right-0 z-[1080] border-t border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)] backdrop-blur-xl shadow-2xl shadow-black/40"
       role="dialog"
       aria-label="Consentimento de cookies"
       style={{ animation: 'slideUp 300ms ease-out' }}
@@ -45,24 +45,24 @@ export default function CookieConsent() {
           <div className="flex items-start gap-3">
             <Cookie className="mt-0.5 h-5 w-5 shrink-0 text-[var(--aethel-warning)]" />
             <div>
-              <p className="text-sm text-zinc-200">
+              <p className="text-sm text-[var(--aethel-text-secondary)]">
                 Usamos cookies para melhorar sua experiencia, proteger a sessao e entender o uso do produto.{' '}
                 <button
                   onClick={() => setShowDetails(!showDetails)}
-                  className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
+                  className="text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary)] underline underline-offset-2 transition-colors"
                 >
                   {showDetails ? 'Ocultar detalhes' : 'Saiba mais'}
                 </button>
               </p>
               {showDetails && (
-                <div className="mt-3 space-y-2 text-xs text-zinc-400">
+                <div className="mt-3 space-y-2 text-xs text-[var(--aethel-text-tertiary)]">
                   <div className="flex items-center gap-2">
                     <Shield className="h-3.5 w-3.5 text-[var(--aethel-success)]" />
-                    <span><strong className="text-zinc-300">Essenciais:</strong> autenticacao, seguranca e preferencias basicas do studio (sempre ativos)</span>
+                    <span><strong className="text-[var(--aethel-text-secondary)]">Essenciais:</strong> autenticacao, seguranca e preferencias basicas do studio (sempre ativos)</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Shield className="h-3.5 w-3.5 text-[var(--aethel-info)]" />
-                    <span><strong className="text-zinc-300">Analytics:</strong> padroes de uso, performance e etapas do onboarding</span>
+                    <span><strong className="text-[var(--aethel-text-secondary)]">Analytics:</strong> padroes de uso, performance e etapas do onboarding</span>
                   </div>
                 </div>
               )}
@@ -71,13 +71,13 @@ export default function CookieConsent() {
           <div className="flex shrink-0 items-center gap-2">
             <button
               onClick={() => accept('essential')}
-              className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-white/10 transition-colors"
+              className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] transition-colors"
             >
               Apenas essenciais
             </button>
             <button
               onClick={() => accept('all')}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors"
+              className="rounded-lg bg-[var(--aethel-primary)] px-4 py-2 text-sm font-medium text-white hover:brightness-110 transition-colors"
             >
               Aceitar todos
             </button>

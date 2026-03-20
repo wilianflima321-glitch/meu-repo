@@ -1,8 +1,8 @@
-/**
+ï»¿/**
  * SOUND CUE NODE EDITOR - Aethel Engine
  * 
  * Editor visual de Sound Cues no estilo Unreal Engine.
- * Permite criar grafos de áudio complexos com routing, efeitos e modulação.
+ * Permite criar grafos de Ã¡udio complexos com routing, efeitos e modulaÃ§Ã£o.
  * 
  * FEATURES:
  * - Node-based audio graph
@@ -886,7 +886,7 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
                   fontSize: '12px',
                 }}
               >
-                ×
+                Ã—
               </button>
             </div>
             

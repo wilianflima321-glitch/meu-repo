@@ -105,17 +105,17 @@ export function BillingStatusBanner() {
 
   return (
     <div
-      className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3"
+      className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-4 py-3"
       role="alert"
     >
       <div className="flex items-start gap-3">
-        <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" aria-hidden="true" />
+        <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--aethel-warning)]" aria-hidden="true" />
         <div>
-          <p className="text-sm font-medium text-amber-200">
+          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
             Runtime de billing esta {readiness.status}
           </p>
           {readiness.blockers.length > 0 && (
-            <ul className="mt-1 space-y-0.5 text-xs text-amber-300/80">
+            <ul className="mt-1 space-y-0.5 text-xs text-[var(--aethel-text-secondary)]">
               {readiness.blockers.slice(0, 3).map((b, i) => (
                 <li key={i}>{b}</li>
               ))}
@@ -148,13 +148,13 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
     <div
       className={`relative flex flex-col rounded-xl border p-6 transition-all ${
         plan.popular
-          ? 'border-indigo-500/50 bg-indigo-500/5 shadow-lg shadow-indigo-500/10'
+          ? 'border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_8%,transparent)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
           : 'border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]'
-      } ${isCurrent ? 'ring-2 ring-emerald-500/50' : ''}`}
+      } ${isCurrent ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-success)_55%,transparent)]' : ''}`}
     >
       {/* Popular badge */}
       {plan.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-500 px-3 py-0.5 text-xs font-bold text-white">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--aethel-primary)] px-3 py-0.5 text-xs font-bold text-white">
           Popular
         </div>
       )}
@@ -163,10 +163,10 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
       <div className="mb-4 flex items-center gap-3">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-            plan.popular ? 'bg-indigo-500/20' : 'bg-[var(--aethel-surface-tertiary)]'
+            plan.popular ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]' : 'bg-[var(--aethel-surface-tertiary)]'
           }`}
         >
-          <Icon className={`h-5 w-5 ${plan.popular ? 'text-indigo-400' : 'text-[var(--aethel-text-tertiary)]'}`} />
+          <Icon className={`h-5 w-5 ${plan.popular ? 'text-[var(--aethel-primary-light)]' : 'text-[var(--aethel-text-tertiary)]'}`} />
         </div>
         <div>
           <h3 className="font-semibold text-[var(--aethel-text-primary)]">{plan.name}</h3>
@@ -183,7 +183,7 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
           <span className="text-sm text-[var(--aethel-text-tertiary)]">/mes</span>
         </div>
         {interval === 'year' && plan.annualPrice && (
-          <p className="mt-1 text-xs text-emerald-400">
+          <p className="mt-1 text-xs text-[var(--aethel-success)]">
             Economize ${Math.round((plan.price * 12 - plan.annualPrice))} por ano
           </p>
         )}
@@ -213,7 +213,7 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
       <ul className="mb-6 flex-1 space-y-2">
         {plan.features.slice(0, 6).map((feature, i) => (
           <li key={i} className="flex items-start gap-2 text-sm">
-            <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" aria-hidden="true" />
+            <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--aethel-success)]" aria-hidden="true" />
             <span className="text-[var(--aethel-text-secondary)]">{feature}</span>
           </li>
         ))}
@@ -225,9 +225,9 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
         disabled={isCurrent || loading}
         className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all ${
           isCurrent
-            ? 'cursor-default border border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+            ? 'cursor-default border border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
             : plan.popular
-            ? 'bg-indigo-500 text-white hover:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500'
+            ? 'bg-[var(--aethel-primary)] text-white hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
             : 'border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
         }`}
         aria-label={isCurrent ? `Plano atual: ${plan.name}` : `Selecionar plano ${plan.name}`}
