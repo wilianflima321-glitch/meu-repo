@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
@@ -362,7 +362,7 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-slate-300">Gradiente Raiz → Ponta</label>
+        <label className="text-sm font-medium text-slate-300">Gradiente Raiz â†’ Ponta</label>
         <button
           onClick={addStop}
           className="px-2 py-1 text-xs bg-sky-600 hover:bg-sky-500 rounded text-white transition-colors"
@@ -398,7 +398,7 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
             />
           </div>
           <div>
-            <label className="text-xs text-slate-400 block mb-1">Posição</label>
+            <label className="text-xs text-slate-400 block mb-1">PosiÃ§Ã£o</label>
             <input
               type="number"
               min={0}
@@ -447,7 +447,7 @@ function LODPreview({ lod, currentDistance }: LODPreviewProps) {
               : 'bg-red-600 text-white'
           }`}
         >
-          {currentMode === 'strands' ? 'Strands (Alta Qualidade)' : currentMode === 'cards' ? 'Cards (Média)' : 'Billboard (Baixa)'}
+          {currentMode === 'strands' ? 'Strands (Alta Qualidade)' : currentMode === 'cards' ? 'Cards (MÃ©dia)' : 'Billboard (Baixa)'}
         </span>
       </div>
       <div className="flex items-center gap-2">
@@ -592,10 +592,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
     URL.revokeObjectURL(url);
   }, [characterId, hairData]);
   const brushIcons: Record<BrushTool, string> = {
-    comb: '🪥',
-    cut: '✂️',
-    add: '➕',
-    length: '📏',
+    comb: 'ðŸª¥',
+    cut: 'âœ‚ï¸',
+    add: 'âž•',
+    length: 'ðŸ“',
   };
   return (
     <div className="w-full h-full min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex">
@@ -644,7 +644,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             Preset: <span className="text-sky-400 capitalize">{preset}</span>
           </div>
           <div className="text-slate-400">
-            Física: <span className={animatePhysics ? 'text-green-400' : 'text-red-400'}>{animatePhysics ? 'Ativa' : 'Pausada'}</span>
+            FÃ­sica: <span className={animatePhysics ? 'text-green-400' : 'text-red-400'}>{animatePhysics ? 'Ativa' : 'Pausada'}</span>
           </div>
         </div>
         {/* Viewport Overlay - Controls */}
@@ -657,7 +657,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
             }`}
           >
-            {animatePhysics ? '⏸️ Pausar Física' : '▶️ Animar Física'}
+            {animatePhysics ? 'â¸ï¸ Pausar FÃ­sica' : 'â–¶ï¸ Animar FÃ­sica'}
           </button>
         </div>
         {/* Viewport Overlay - LOD */}
@@ -670,7 +670,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
         {/* Header */}
         <div className="p-4 border-b border-slate-700">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            💇 Editor de Cabelo/Pelo
+            ðŸ’‡ Editor de Cabelo/Pelo
           </h2>
           <p className="text-sm text-slate-400 mt-1">Character: {characterId}</p>
         </div>
@@ -688,12 +688,12 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
-                {p === 'straight' && '〰️ Liso'}
-                {p === 'wavy' && '🌊 Ondulado'}
-                {p === 'curly' && '🔄 Cacheado'}
-                {p === 'afro' && '⭕ Afro'}
-                {p === 'fur' && '🐾 Pelo'}
-                {p === 'custom' && '⚙️ Custom'}
+                {p === 'straight' && 'ã€°ï¸ Liso'}
+                {p === 'wavy' && 'ðŸŒŠ Ondulado'}
+                {p === 'curly' && 'ðŸ”„ Cacheado'}
+                {p === 'afro' && 'â­• Afro'}
+                {p === 'fur' && 'ðŸ¾ Pelo'}
+                {p === 'custom' && 'âš™ï¸ Custom'}
               </button>
             ))}
           </div>
@@ -701,11 +701,11 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-700">
           {[
-            { id: 'general', label: '⚙️ Geral' },
-            { id: 'style', label: '✨ Estilo' },
-            { id: 'physics', label: '🌪️ Física' },
-            { id: 'lod', label: '📊 LOD' },
-            { id: 'brush', label: '🖌️ Brush' },
+            { id: 'general', label: 'âš™ï¸ Geral' },
+            { id: 'style', label: 'âœ¨ Estilo' },
+            { id: 'physics', label: 'ðŸŒªï¸ FÃ­sica' },
+            { id: 'lod', label: 'ðŸ“Š LOD' },
+            { id: 'brush', label: 'ðŸ–Œï¸ Brush' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -737,7 +737,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 }}
               />
               <div className="space-y-3">
-                <label className="text-sm font-medium text-slate-300 block">Regiões</label>
+                <label className="text-sm font-medium text-slate-300 block">RegiÃµes</label>
                 {regions.map((region) => (
                   <div
                     key={region.id}
@@ -801,7 +801,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   }}
                 />
                 <Slider
-                  label="Iterações"
+                  label="IteraÃ§Ãµes"
                   value={clumping.iterations}
                   min={1}
                   max={10}
@@ -812,7 +812,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   }}
                 />
                 <Slider
-                  label="Ruído"
+                  label="RuÃ­do"
                   value={clumping.noise}
                   min={0}
                   max={1}
@@ -823,7 +823,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   }}
                 />
                 <Slider
-                  label="Coesão"
+                  label="CoesÃ£o"
                   value={clumping.tightness}
                   min={0}
                   max={1}
@@ -836,7 +836,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               </div>
               {/* Curl */}
               <div className="space-y-3 pt-4 border-t border-slate-700">
-                <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">Ondulação/Cacho</h3>
+                <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">OndulaÃ§Ã£o/Cacho</h3>
                 <div>
                   <label className="text-sm text-slate-300 block mb-2">Tipo</label>
                   <div className="flex gap-2">
@@ -853,9 +853,9 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                             : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                         }`}
                       >
-                        {type === 'wave' && '〰️ Onda'}
-                        {type === 'curl' && '🔄 Cacho'}
-                        {type === 'coil' && '⭕ Espiral'}
+                        {type === 'wave' && 'ã€°ï¸ Onda'}
+                        {type === 'curl' && 'ðŸ”„ Cacho'}
+                        {type === 'coil' && 'â­• Espiral'}
                       </button>
                     ))}
                   </div>
@@ -872,7 +872,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   }}
                 />
                 <Slider
-                  label="Frequência"
+                  label="FrequÃªncia"
                   value={curl.frequency}
                   min={0}
                   max={10}
@@ -905,7 +905,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
           {activeTab === 'physics' && (
             <>
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">Simulação Física</h3>
+                <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">SimulaÃ§Ã£o FÃ­sica</h3>
                 <Slider
                   label="Gravidade"
                   value={physics.gravity}
@@ -934,7 +934,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               <div className="space-y-3 pt-4 border-t border-slate-700">
                 <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">Vento</h3>
                 <Slider
-                  label="Força do Vento"
+                  label="ForÃ§a do Vento"
                   value={physics.windStrength}
                   min={0}
                   max={1}
@@ -942,7 +942,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   onChange={(v) => setPhysics((prev) => ({ ...prev, windStrength: v }))}
                 />
                 <Slider
-                  label="Turbulência"
+                  label="TurbulÃªncia"
                   value={physics.windTurbulence}
                   min={0}
                   max={1}
@@ -971,7 +971,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 {lod.enableLOD && (
                   <>
                     <Slider
-                      label="Distância Strands"
+                      label="DistÃ¢ncia Strands"
                       value={lod.strandDistance}
                       min={1}
                       max={20}
@@ -980,7 +980,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                       onChange={(v) => setLod((prev) => ({ ...prev, strandDistance: v }))}
                     />
                     <Slider
-                      label="Distância Cards"
+                      label="DistÃ¢ncia Cards"
                       value={lod.cardDistance}
                       min={5}
                       max={50}
@@ -1000,7 +1000,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 )}
               </div>
               <div className="p-4 bg-slate-700/30 rounded-lg space-y-2 mt-4">
-                <h4 className="text-sm font-medium text-slate-200">Níveis de LOD</h4>
+                <h4 className="text-sm font-medium text-slate-200">NÃ­veis de LOD</h4>
                 <div className="flex items-center gap-2 text-xs">
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                   <span className="text-slate-300">Strands: 0 - {lod.strandDistance}m</span>
@@ -1044,7 +1044,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 </div>
               </div>
               <div className="space-y-3 pt-4 border-t border-slate-700">
-                <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">Configuração do Brush</h3>
+                <h3 className="text-sm font-semibold text-sky-400 uppercase tracking-wider">ConfiguraÃ§Ã£o do Brush</h3>
                 <Slider
                   label="Tamanho"
                   value={brush.size}
@@ -1054,7 +1054,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   onChange={(v) => setBrush((prev) => ({ ...prev, size: v }))}
                 />
                 <Slider
-                  label="Força"
+                  label="ForÃ§a"
                   value={brush.strength}
                   min={0}
                   max={1}
@@ -1071,12 +1071,12 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                       : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
                   }`}
                 >
-                  {brushActive ? '✓ Brush Ativo - Clique no Viewport' : 'Ativar Brush'}
+                  {brushActive ? 'âœ“ Brush Ativo - Clique no Viewport' : 'Ativar Brush'}
                 </button>
               </div>
-              <div className="p-4 bg-amber-900/30 border border-amber-700/50 rounded-lg mt-4">
-                <p className="text-sm text-amber-200">
-                  <strong>💡 Dica:</strong> Com o brush ativo, clique e arraste no viewport 3D para aplicar a ferramenta selecionada nos fios de cabelo.
+              <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-warning-dark)_30%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning-dark)_50%,transparent)] rounded-lg mt-4">
+                <p className="text-sm text-[var(--aethel-warning-light)]">
+                  <strong>ðŸ’¡ Dica:</strong> Com o brush ativo, clique e arraste no viewport 3D para aplicar a ferramenta selecionada nos fios de cabelo.
                 </p>
               </div>
             </>
@@ -1088,16 +1088,16 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
           <div className="flex gap-2">
             <button
               onClick={exportAsCards}
-              className="flex-1 px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
-              <span>🃏</span>
+              <span>ðŸƒ</span>
               <span>Cards</span>
             </button>
             <button
               onClick={exportAsStrands}
               className="flex-1 px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
-              <span>〰️</span>
+              <span>ã€°ï¸</span>
               <span>Strands</span>
             </button>
           </div>

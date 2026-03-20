@@ -802,7 +802,7 @@ function SettingLabel({
           )}
           {definition.deprecationMessage && (
             <span title={definition.deprecationMessage}>
-              <AlertCircle className="w-4 h-4 text-amber-400" />
+              <AlertCircle className="w-4 h-4 text-[var(--aethel-warning-light)]" />
             </span>
           )}
         </div>

@@ -321,7 +321,7 @@
 **Resolution** (IMPLEMENTED):
 1. `app/layout.tsx`: Added `<a href="#main-content" class="sr-only focus:not-sr-only ...">Skip to main content</a>` as first element in body
 2. `app/layout.tsx`: Added `id="main-content"` on the main content wrapper div
-3. `app/landing-v2.tsx`: Added secondary skip link `<a href="#landing-mission">Pular para conteudo principal</a>`
+3. `app/landing-v3.tsx`: Added secondary skip link `<a href="#landing-mission">Pular para conteudo principal</a>`
 4. `components/ui/Accessibility.tsx`: Reusable `SkipToContent` component with configurable targets
 5. Enhanced focus indicators: `:focus-visible` now has both outline AND box-shadow for maximum visibility
 

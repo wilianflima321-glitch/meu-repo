@@ -529,14 +529,14 @@ export function MentionChip({ mention, onRemove }: MentionChipProps) {
   const colors: Record<MentionType, string> = {
     file: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
     folder: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-    function: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+    function: 'bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-accent-light)_85%,transparent)] border-[color-mix(in_srgb,var(--aethel-accent)_30%,transparent)]',
     symbol: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
     selection: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
     diagnostics: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
     git: 'bg-red-500/20 text-red-300 border-red-500/30',
     terminal: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
     web: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-    docs: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    docs: 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-primary-light)_85%,transparent)] border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]',
     codebase: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
   }
   
@@ -574,7 +574,7 @@ export function SuggestionList({ suggestions, activeIndex, onSelect, onHover }: 
         <div
           key={`${suggestion.type}-${suggestion.value}-${idx}`}
           className={`flex items-center gap-3 px-3 py-2 cursor-pointer ${
-            idx === activeIndex ? 'bg-indigo-600/30' : 'hover:bg-slate-700/50'
+            idx === activeIndex ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_30%,transparent)]' : 'hover:bg-slate-700/50'
           }`}
           onClick={() => onSelect(suggestion)}
           onMouseEnter={() => onHover(idx)}

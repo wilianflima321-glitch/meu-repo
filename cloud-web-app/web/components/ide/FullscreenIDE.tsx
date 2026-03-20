@@ -695,7 +695,7 @@ function IDEContent() {
         >
           <div className="h-full flex flex-col">
             {isCompactViewport && (
-              <div className="border-b border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+              <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
                 Viewport compacto detectado. Para melhor experiencia use desktop {'>='} 1024px.
               </div>
             )}
@@ -845,7 +845,7 @@ function IDEContent() {
                       type="button"
                       onClick={handleRollbackLastAiApply}
                       disabled={rollbackBusy}
-                      className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-100 hover:bg-amber-500/20 disabled:opacity-60"
+                      className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] disabled:opacity-60"
                       title="Rollback da ultima aplicacao inline da IA"
                     >
                       {rollbackBusy ? 'Rolling back...' : 'Rollback AI'}

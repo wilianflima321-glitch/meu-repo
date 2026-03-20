@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Interactive Tour System - Tour Interativo Guiado
  * 
- * Sistema profissional de tour guiado com spotlight, tooltips e navegação.
+ * Sistema profissional de tour guiado com spotlight, tooltips e navegaÃ§Ã£o.
  * Similar ao Intercom Product Tours ou Appcues.
  * 
  * @module components/onboarding/InteractiveTour
@@ -129,7 +129,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
       
       setCurrentStepIndex(nextIndex);
     } else {
-      // Último passo - finaliza tour
+      // Ãšltimo passo - finaliza tour
       if (activeTour.onComplete) {
         activeTour.onComplete();
       }
@@ -347,7 +347,7 @@ function TourOverlay() {
         }}
       >
         {/* Header */}
-        <div className="px-5 py-4 bg-gradient-to-r from-sky-600/20 to-purple-600/20 border-b border-slate-700">
+        <div className="px-5 py-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] border-b border-slate-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-sky-400" />
@@ -426,7 +426,7 @@ function TourOverlay() {
                 </>
               ) : (
                 <>
-                  Próximo
+                  PrÃ³ximo
                   <ChevronRight className="w-4 h-4" />
                 </>
               )}
@@ -453,28 +453,28 @@ export const TOURS = {
         id: 'welcome',
         target: '',
         placement: 'center' as const,
-        title: 'Bem-vindo ao Aethel Engine! 🎮',
-        content: 'Vamos fazer um tour rápido pelas principais funcionalidades. Você pode pular a qualquer momento pressionando ESC.',
+        title: 'Bem-vindo ao Aethel Engine! ðŸŽ®',
+        content: 'Vamos fazer um tour rÃ¡pido pelas principais funcionalidades. VocÃª pode pular a qualquer momento pressionando ESC.',
       },
       {
         id: 'file-explorer',
         target: '[data-tour="file-explorer"]',
         placement: 'right' as const,
         title: 'Explorador de Arquivos',
-        content: 'Aqui você gerencia todos os arquivos do seu projeto. Clique com botão direito para criar pastas, arquivos e assets.',
+        content: 'Aqui vocÃª gerencia todos os arquivos do seu projeto. Clique com botÃ£o direito para criar pastas, arquivos e assets.',
       },
       {
         id: 'code-editor',
         target: '[data-tour="code-editor"]',
         placement: 'left' as const,
-        title: 'Editor de Código',
+        title: 'Editor de CÃ³digo',
         content: (
           <div>
             <p>Editor poderoso com autocomplete e IA integrada.</p>
             <ul className="mt-2 text-xs space-y-1 text-slate-400">
-              <li>• <kbd className="px-1 bg-slate-700 rounded">Cmd+K</kbd> - Edição com IA</li>
-              <li>• <kbd className="px-1 bg-slate-700 rounded">Cmd+P</kbd> - Busca rápida</li>
-              <li>• <kbd className="px-1 bg-slate-700 rounded">Cmd+Shift+P</kbd> - Comandos</li>
+              <li>â€¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+K</kbd> - EdiÃ§Ã£o com IA</li>
+              <li>â€¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+P</kbd> - Busca rÃ¡pida</li>
+              <li>â€¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+Shift+P</kbd> - Comandos</li>
             </ul>
           </div>
         ),
@@ -484,7 +484,7 @@ export const TOURS = {
         target: '[data-tour="terminal"]',
         placement: 'top' as const,
         title: 'Terminal Integrado',
-        content: 'Terminal completo com acesso ao sistema. Execute comandos, gerencie dependências e faça builds.',
+        content: 'Terminal completo com acesso ao sistema. Execute comandos, gerencie dependÃªncias e faÃ§a builds.',
       },
       {
         id: 'viewport',
@@ -498,21 +498,21 @@ export const TOURS = {
         target: '[data-tour="ai-assistant"]',
         placement: 'left' as const,
         title: 'Assistente de IA',
-        content: 'Seu parceiro de desenvolvimento. Peça para criar código, assets, ou explicar conceitos. A IA pode até executar ações automaticamente!',
+        content: 'Seu parceiro de desenvolvimento. PeÃ§a para criar cÃ³digo, assets, ou explicar conceitos. A IA pode atÃ© executar aÃ§Ãµes automaticamente!',
       },
       {
         id: 'play-button',
         target: '[data-tour="play-button"]',
         placement: 'bottom' as const,
         title: 'Testar seu Jogo',
-        content: 'Clique em Play para testar seu jogo instantaneamente no navegador. Hot reload mantém suas alterações em tempo real.',
+        content: 'Clique em Play para testar seu jogo instantaneamente no navegador. Hot reload mantÃ©m suas alteraÃ§Ãµes em tempo real.',
       },
       {
         id: 'tour-complete',
         target: '',
         placement: 'center' as const,
-        title: 'Pronto para criar! 🚀',
-        content: 'Você conhece o básico. Explore, experimente e divirta-se criando! Se precisar de ajuda, a IA está sempre disponível.',
+        title: 'Pronto para criar! ðŸš€',
+        content: 'VocÃª conhece o bÃ¡sico. Explore, experimente e divirta-se criando! Se precisar de ajuda, a IA estÃ¡ sempre disponÃ­vel.',
       },
     ],
   },
@@ -526,29 +526,29 @@ export const TOURS = {
         id: 'intro',
         target: '',
         placement: 'center' as const,
-        title: 'Visual Scripting (Blueprints) 🔧',
-        content: 'Crie lógica de jogo sem escrever código! Conecte nós visualmente para programar comportamentos.',
+        title: 'Visual Scripting (Blueprints) ðŸ”§',
+        content: 'Crie lÃ³gica de jogo sem escrever cÃ³digo! Conecte nÃ³s visualmente para programar comportamentos.',
       },
       {
         id: 'node-palette',
         target: '[data-tour="node-palette"]',
         placement: 'right' as const,
-        title: 'Paleta de Nós',
-        content: 'Arraste nós daqui para o canvas. Temos eventos, condições, ações, matemática e muito mais.',
+        title: 'Paleta de NÃ³s',
+        content: 'Arraste nÃ³s daqui para o canvas. Temos eventos, condiÃ§Ãµes, aÃ§Ãµes, matemÃ¡tica e muito mais.',
       },
       {
         id: 'canvas',
         target: '[data-tour="vs-canvas"]',
         placement: 'left' as const,
-        title: 'Canvas de Edição',
-        content: 'Conecte os nós arrastando das portas. Linhas brancas são fluxo de execução, coloridas são dados.',
+        title: 'Canvas de EdiÃ§Ã£o',
+        content: 'Conecte os nÃ³s arrastando das portas. Linhas brancas sÃ£o fluxo de execuÃ§Ã£o, coloridas sÃ£o dados.',
       },
       {
         id: 'variables',
         target: '[data-tour="vs-variables"]',
         placement: 'right' as const,
-        title: 'Variáveis',
-        content: 'Crie variáveis para armazenar valores. Arraste-as para o canvas para usar.',
+        title: 'VariÃ¡veis',
+        content: 'Crie variÃ¡veis para armazenar valores. Arraste-as para o canvas para usar.',
       },
     ],
   },

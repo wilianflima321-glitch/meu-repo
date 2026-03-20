@@ -198,7 +198,7 @@ export function WelcomeModal() {
     {
       title: 'Bem-vindo ao Aethel Engine',
       description: 'Studio focado em Apps e Research com governanca rigorosa. Games e Films seguem em roadmap.',
-      icon: <Sparkles className="w-12 h-12 text-indigo-400" />,
+      icon: <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)]" />,
     },
     {
       title: 'Crie seu primeiro projeto',
@@ -213,7 +213,7 @@ export function WelcomeModal() {
     {
       title: 'Colabore com sua equipe',
       description: 'Convide colegas, revise mudancas e mantenha rastreabilidade nas entregas.',
-      icon: <Users className="w-12 h-12 text-amber-400" />,
+      icon: <Users className="w-12 h-12 text-[var(--aethel-warning-light)]" />,
     },
   ];
 
@@ -235,7 +235,7 @@ export function WelcomeModal() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
       <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
         {/* Header */}
-        <div className="relative h-40 bg-gradient-to-br from-indigo-600/90 via-sky-600/80 to-indigo-500/80 flex items-center justify-center">
+        <div className="relative h-40 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary-dark)_90%,transparent)] via-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-primary)_80%,transparent)] flex items-center justify-center">
           {currentWelcomeStep.icon}
           <button
             onClick={skipOnboarding}
@@ -420,7 +420,7 @@ export function OnboardingChecklist() {
       {isOpen ? (
         <div className="w-80 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-indigo-600/20 to-sky-600/20 border-b border-white/10">
+          <div className="p-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] border-b border-white/10">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-white">Primeiros passos</h3>
               <button
@@ -433,7 +433,7 @@ export function OnboardingChecklist() {
             {/* Progress bar */}
             <div className="h-2 bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-sky-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -467,7 +467,7 @@ export function OnboardingChecklist() {
                       health.overall === 'healthy'
                         ? 'text-emerald-400'
                         : health.overall === 'degraded'
-                        ? 'text-amber-400'
+                        ? 'text-[var(--aethel-warning-light)]'
                         : 'text-rose-400'
                     }>
                       {healthLabel(health.overall)}
@@ -490,7 +490,7 @@ export function OnboardingChecklist() {
                         .slice(0, 6)
                         .map(dep => (
                           <div key={dep.name} className="text-xs text-neutral-400">
-                            <span className={dep.status === 'unhealthy' ? 'text-rose-400' : 'text-amber-400'}>
+                            <span className={dep.status === 'unhealthy' ? 'text-rose-400' : 'text-[var(--aethel-warning-light)]'}>
                               {dep.name}
                             </span>
                             {dep.installCommand && (
@@ -583,7 +583,7 @@ export function AchievementToast({ achievement, onClose }: { achievement: Achiev
 
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-      <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-lg shadow-2xl">
+      <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-600/20 to-[color-mix(in_srgb,var(--aethel-warning-dark)_20%,transparent)] border border-yellow-500/30 rounded-lg shadow-2xl">
         <Award className="w-8 h-8 text-yellow-400" />
         <div>
           <div className="text-xs text-yellow-400 font-medium">Conquista desbloqueada</div>

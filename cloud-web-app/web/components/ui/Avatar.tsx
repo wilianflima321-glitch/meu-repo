@@ -58,7 +58,7 @@ const statusColors: Record<string, string> = {
   online: 'bg-emerald-500',
   offline: 'bg-slate-500',
   busy: 'bg-red-500',
-  away: 'bg-amber-500',
+  away: 'bg-[var(--aethel-warning)]',
 }
 
 function getInitials(name: string): string {
@@ -77,7 +77,7 @@ function getColorFromName(name: string): string {
     'bg-cyan-600',
     'bg-rose-600',
     'bg-orange-600',
-    'bg-amber-600',
+    'bg-[var(--aethel-warning-dark)]',
     'bg-emerald-600',
     'bg-teal-600',
     'bg-cyan-600',

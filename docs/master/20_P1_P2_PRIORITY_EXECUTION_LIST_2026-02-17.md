@@ -235,13 +235,13 @@ This backlog is limited to P1/P2 hardening on the current product scope:
 - readiness payloads now expose feedback diagnostics to support promotion decisions.
 6. `P0-N` Onboarding first-value flow:
 - deterministic first project path with clear progress and first successful outcome.
- - status 2026-02-28: `PARTIAL` (`components/AethelDashboardRuntime.tsx` now shows first-value action rail with direct path for project creation, provider setup, and IDE live preview handoff; `app/landing-v2.tsx` now seeds mission via `/dashboard?mission=`).
+ - status 2026-02-28: `PARTIAL` (`components/AethelDashboardRuntime.tsx` now shows first-value action rail with direct path for project creation, provider setup, and IDE live preview handoff; `app/landing-v3.tsx` now seeds mission via `/dashboard?mission=`).
  - status 2026-03-01: `ADVANCED` (`app/(auth)/register/register-v2.tsx` now routes new users to `/dashboard?onboarding=1&source=register&mission=...`; `app/(auth)/login/login-v2.tsx` now routes to deterministic dashboard/next target with transactional states; `components/AethelDashboardRuntime.tsx` now consumes onboarding/source query context and starts first-value guide without dead-end entry).
 7. `P0-O` Responsive entry surface hardening:
 - `/dashboard` and landing must meet defined mobile/tablet acceptance.
  - status 2026-02-28: `PARTIAL` (`components/dashboard/AethelDashboardSidebar.tsx` + `components/AethelDashboardRuntime.tsx` now include mobile close behavior and backdrop handling).
  - status 2026-03-01: `PARTIAL` (`components/dashboard/DashboardHeader.tsx` now has mobile-safe density (`text`, action visibility, compact `IDE` CTA), and `AethelDashboard` routes header IDE open through canonical context handoff without fake desktop CTA).
- - status 2026-03-01-b: `ADVANCED` (`app/landing-v2.tsx` now includes mobile-first mission shortcuts + skip-link landmark flow; `app/dashboard/page.tsx` now has deterministic loading state; `components/AethelDashboardRuntime.tsx` replaces blank auth bootstrap with explicit loading state and responsive toast placement; `AethelDashboardSidebar` now includes mobile close control and bounded drawer width for tablet/phone).
+ - status 2026-03-01-b: `ADVANCED` (`app/landing-v3.tsx` now includes mobile-first mission shortcuts + skip-link landmark flow; `app/dashboard/page.tsx` now has deterministic loading state; `components/AethelDashboardRuntime.tsx` replaces blank auth bootstrap with explicit loading state and responsive toast placement; `AethelDashboardSidebar` now includes mobile close control and bounded drawer width for tablet/phone).
 8. `P0-P` Complete dashboard monolith decomposition:
 - extract remaining heavy tab blocks and finalize stable prop contracts.
  - status 2026-03-01: `ADVANCED` (`AethelDashboardRuntime.tsx` at ~1191 lines; first-value rail extracted to `components/dashboard/FirstValueGuide.tsx`; chat request/fallback logic unified via `lib/ai-chat-advanced-client.ts`; dashboard shell remains below >=1200 hotspot cutoff).

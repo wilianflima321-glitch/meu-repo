@@ -261,7 +261,7 @@ CI workflows:
 4. `components/dashboard/DashboardHeader.tsx` now routes IDE action through real callback (`onOpenIde`) and removed ambiguous "Desktop" CTA text.
 
 ## 29. Delta 2026-03-01 (responsive entry hardening)
-1. `app/landing-v2.tsx` now includes skip-link + `main` landmark and mobile mission shortcuts to reduce first-action friction.
+1. `app/landing-v3.tsx` now includes skip-link + `main` landmark and mobile mission shortcuts to reduce first-action friction.
 2. `app/dashboard/page.tsx` now shows deterministic loading state while dynamic dashboard shell hydrates.
 3. `components/AethelDashboardRuntime.tsx` now exposes explicit auth bootstrap loading state (no blank frame), plus skip-link to main dashboard content.
 4. Dashboard toast placement now adapts to small viewports (`left/right` bounded) with `aria-live` status feedback.
@@ -284,7 +284,7 @@ CI workflows:
 3. `components/AethelDashboardRuntime.tsx` no longer imports React Flow runtime helpers or global React Flow stylesheet directly.
 
 ## 33. Delta 2026-03-04 (onboarding friction + provider preflight hardening)
-1. `app/landing-v2.tsx` now always forwards Studio entry with explicit onboarding context (`onboarding=1`, `source=landing-*`) for deterministic first-value activation.
+1. `app/landing-v3.tsx` now always forwards Studio entry with explicit onboarding context (`onboarding=1`, `source=landing-*`) for deterministic first-value activation.
 2. `components/dashboard/FirstValueGuide.tsx` now exposes completion progress bar (`0..100%`) and remaining-time hint to reduce ambiguity.
 3. `components/AethelDashboardRuntime.tsx` now tracks first-value milestones individually (`first-project`, `first-ai-success`, `first-ide-open`) before final completion metric.
 4. `components/ide/AIChatPanelContainer.tsx` and `components/AethelDashboardRuntime.tsx` now run provider preflight (`/api/ai/provider-status`) to show setup gate before first failed prompt.

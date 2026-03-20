@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
@@ -343,7 +343,7 @@ export default function DocsPage() {
             </Link>
             <Link
               href="/docs/community"
-              className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-gradient-to-br from-amber-600/20 to-orange-600/10 p-6 text-[var(--aethel-text-primary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]"
+              className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-6 text-[var(--aethel-text-primary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]"
             >
               <h3 className="text-lg font-semibold">Comunidade</h3>
               <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-primary)]">

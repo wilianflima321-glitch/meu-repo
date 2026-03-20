@@ -251,14 +251,14 @@ export default function StatusBar({
           {errors > 0 ? (
             <AlertCircle className="w-3.5 h-3.5 text-red-300" />
           ) : warnings > 0 ? (
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-300" />
+            <AlertTriangle className="w-3.5 h-3.5 text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]" />
           ) : (
             <CheckCircle className="w-3.5 h-3.5 text-green-300" />
           )}
           <span>
             {errors > 0 && <span className="text-red-300">{errors}</span>}
             {errors > 0 && warnings > 0 && <span className="mx-1 opacity-50">·</span>}
-            {warnings > 0 && <span className="text-amber-300">{warnings}</span>}
+            {warnings > 0 && <span className="text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">{warnings}</span>}
             {errors === 0 && warnings === 0 && 'No problems'}
           </span>
         </StatusBarButton>
@@ -282,7 +282,7 @@ export default function StatusBar({
         
         {/* AI Status */}
         <StatusBarButton onClick={onToggleAI} title="AI Copilot">
-          <Sparkles className={`w-3.5 h-3.5 ${aiEnabled ? 'text-amber-300' : 'text-slate-400'}`} />
+          <Sparkles className={`w-3.5 h-3.5 ${aiEnabled ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-slate-400'}`} />
           <span className={aiEnabled ? '' : 'opacity-50'}>
             {aiEnabled ? aiModel : 'AI Off'}
           </span>
@@ -346,8 +346,8 @@ export default function StatusBar({
         
         {fps !== undefined && (
           <StatusBarButton title="FPS">
-            <Timer className={`w-3.5 h-3.5 ${fps < 30 ? 'text-red-300' : fps < 50 ? 'text-amber-300' : 'text-green-300'}`} />
-            <span className={fps < 30 ? 'text-red-300' : fps < 50 ? 'text-amber-300' : 'text-green-300'}>
+            <Timer className={`w-3.5 h-3.5 ${fps < 30 ? 'text-red-300' : fps < 50 ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-green-300'}`} />
+            <span className={fps < 30 ? 'text-red-300' : fps < 50 ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-green-300'}>
               {fps} FPS
             </span>
           </StatusBarButton>
@@ -370,7 +370,7 @@ export default function StatusBar({
           {isSynced ? (
             <Cloud className="w-3.5 h-3.5 text-green-300" />
           ) : (
-            <CloudOff className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+            <CloudOff className="w-3.5 h-3.5 text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] animate-pulse" />
           )}
         </StatusBarButton>
         
@@ -463,7 +463,7 @@ export function MiniStatusBar({
     <div className="h-5 flex items-center justify-between px-2 bg-slate-800 text-slate-400 text-[10px] border-t border-slate-700">
       <div className="flex items-center gap-2">
         {isDirty && (
-          <Circle className="w-2 h-2 fill-amber-400 text-amber-400" />
+          <Circle className="w-2 h-2 fill-[var(--aethel-warning-light)] text-[var(--aethel-warning-light)]" />
         )}
         {isReadOnly && (
           <Lock className="w-3 h-3" />
@@ -504,7 +504,7 @@ export function FloatingStatus({
   const icons = {
     info: <Info className="w-4 h-4 text-blue-400" />,
     success: <CheckCircle className="w-4 h-4 text-green-400" />,
-    warning: <AlertTriangle className="w-4 h-4 text-amber-400" />,
+    warning: <AlertTriangle className="w-4 h-4 text-[var(--aethel-warning-light)]" />,
     error: <AlertCircle className="w-4 h-4 text-red-400" />,
     loading: <RefreshCw className="w-4 h-4 text-sky-400 animate-spin" />,
   }
@@ -512,7 +512,7 @@ export function FloatingStatus({
   const colors = {
     info: 'border-blue-500/50 bg-blue-500/10',
     success: 'border-green-500/50 bg-green-500/10',
-    warning: 'border-amber-500/50 bg-amber-500/10',
+    warning: 'border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
     error: 'border-red-500/50 bg-red-500/10',
     loading: 'border-sky-500/50 bg-sky-500/10',
   }

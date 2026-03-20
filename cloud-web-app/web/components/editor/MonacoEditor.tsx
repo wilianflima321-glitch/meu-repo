@@ -111,7 +111,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
           Carregando arquivo...
         </div>
       ) : loadError ? (
-        <div className="flex h-full items-center justify-center px-6 text-center text-xs text-amber-300">
+        <div className="flex h-full items-center justify-center px-6 text-center text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
           {loadError}
         </div>
       ) : (

@@ -19,7 +19,7 @@ const AGENTS: Agent[] = [
   { id: 'architect', name: 'Aethel Architect', role: 'System Design & Vision', icon: Layers, color: 'text-blue-400' },
   { id: 'designer', name: 'UI/UX Designer', role: 'Aesthetic & Usability', icon: Wand2, color: 'text-cyan-400' },
   { id: 'engineer', name: 'Lead Engineer', role: 'Performance & Implementation', icon: Terminal, color: 'text-emerald-400' },
-  { id: 'qa', name: 'QA Analyst', role: 'Quality & Testing', icon: Bug, color: 'text-amber-400' }
+  { id: 'qa', name: 'QA Analyst', role: 'Quality & Testing', icon: Bug, color: 'text-[var(--aethel-warning-light)]' }
 ]
 
 export default function NexusChatMultimodal() {

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getTerminalManager } from '@/lib/terminal/terminal-manager';
@@ -105,7 +105,7 @@ export default function Terminal() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="flex flex-col h-full bg-gradient-to-br from-slate-900 via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-slate-900">
       {/* Tasks Panel */}
       {tasks.length > 0 && (
         <div className="bg-slate-800/50 backdrop-blur-sm p-4 border-b border-slate-700">

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 
@@ -69,7 +69,7 @@ export default function OutputPanel() {
               onClick={() => setActiveChannel(channel)}
               className={`px-4 py-2 text-sm transition-colors border-b-2 ${
                 activeChannel === channel
-                  ? 'border-purple-500 text-white bg-slate-800'
+                  ? 'border-[var(--aethel-primary)] text-white bg-slate-800'
                   : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
@@ -91,7 +91,7 @@ export default function OutputPanel() {
             className="p-1 hover:bg-slate-800 rounded transition-colors"
             title="Clear Output"
           >
-            🗑️
+            ðŸ—‘ï¸
           </button>
         </div>
       </div>

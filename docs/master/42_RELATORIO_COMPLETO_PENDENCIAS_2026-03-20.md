@@ -60,7 +60,7 @@
 **O que falta:** consolidar Studio layout em todas as telas, padronizar Empty/Skeleton/Toast e remover redundâncias.
 
 ### P1.4 — Landing canônica (v3)
-**Status:** `landing-v2.tsx` removida, `app/page.tsx` aponta para v3.  
+**Status:** `landing-v3.tsx` removida, `app/page.tsx` aponta para v3.  
 **O que falta:** completar hero video, social proof e pricing com CTA real.
 
 ---

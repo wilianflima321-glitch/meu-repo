@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import Editor, { OnMount, loader, Monaco } from '@monaco-editor/react';
@@ -832,7 +832,7 @@ export function MonacoEditorPro({
         loading={
           <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-quaternary)]">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[var(--aethel-primary)] border-t-transparent rounded-full animate-spin" />
               Carregando Editor...
             </div>
           </div>

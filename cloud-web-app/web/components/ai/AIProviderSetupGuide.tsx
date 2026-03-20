@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AI_PROVIDER_ENV_LABELS } from '@/lib/ai-provider-config'
@@ -61,24 +61,24 @@ export default function AIProviderSetupGuide({
   const resolvedSettingsHref = status?.setupUrl || settingsHref
 
   return (
-    <div className={`rounded-lg border border-amber-500/30 bg-amber-500/10 ${compact ? 'p-3' : 'p-4'}`}>
+    <div className={`rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[var(--aethel-warning)]/10 ${compact ? 'p-3' : 'p-4'}`}>
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-amber-200`}>AI provider nao configurado</p>
-          <p className={`${compact ? 'text-xs' : 'text-sm'} mt-1 text-amber-100/90`}>
+          <p className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-[var(--aethel-warning-light)]`}>AI provider nao configurado</p>
+          <p className={`${compact ? 'text-xs' : 'text-sm'} mt-1 text-[var(--aethel-warning-light)]/90`}>
             {message ?? 'Configure ao menos um provider para liberar chat, complete e inline edit.'}
           </p>
-          <p className="mt-1 text-[11px] text-amber-200/80">
+          <p className="mt-1 text-[11px] text-[var(--aethel-warning-light)]/80">
             capability: {capability ?? status?.capability ?? 'AI_PROVIDER_CONFIG'}
             {capabilityStatus ? ` | capabilityStatus: ${capabilityStatus}` : ''}
           </p>
         </div>
-        <span className="inline-flex w-fit rounded border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[11px] text-amber-100">
+        <span className="inline-flex w-fit rounded border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-warning-light)]">
           status: {statusLabel}
         </span>
       </div>
 
-      <ol className="mt-3 list-decimal space-y-1 pl-4 text-[12px] text-amber-100/90">
+      <ol className="mt-3 list-decimal space-y-1 pl-4 text-[12px] text-[var(--aethel-warning-light)]/90">
         <li>Defina a chave do provider no ambiente seguro (server).</li>
         <li>Reinicie o runtime para aplicar as variaveis.</li>
         <li>Valide o status e reteste o chat.</li>
@@ -111,7 +111,7 @@ export default function AIProviderSetupGuide({
       {status?.missingProviders && status.missingProviders.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
           {status.missingProviders.map((provider) => (
-            <span key={provider} className="rounded border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[11px] text-amber-100">
+            <span key={provider} className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-warning-light)]">
               {provider}
             </span>
           ))}
@@ -137,7 +137,7 @@ export default function AIProviderSetupGuide({
             }
             window.location.assign(resolvedSettingsHref)
           }}
-          className="rounded border border-amber-300/40 bg-amber-500/20 px-3 py-1 text-[11px] font-medium text-amber-100 hover:bg-amber-500/30"
+          className="rounded border border-[color-mix(in_srgb,var(--aethel-warning-light)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-warning-light)] hover:bg-[var(--aethel-warning)]/30"
         >
           Abrir configuracao
         </button>

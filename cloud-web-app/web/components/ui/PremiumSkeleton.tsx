@@ -174,7 +174,7 @@ export function ChartSkeleton() {
         {Array.from({ length: 8 }).map((_, i) => (
           <motion.div
             key={i}
-            className="flex-1 bg-gradient-to-t from-indigo-500/20 to-cyan-500/20 rounded-t"
+            className="flex-1 bg-gradient-to-t from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] rounded-t"
             style={{ height: `${20 + Math.random() * 60}%` }}
             animate={gentlePulse.animate}
           />

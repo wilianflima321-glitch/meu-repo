@@ -67,7 +67,7 @@ interface GitPanelProps {
 function getStatusIcon(status: GitFile['status']) {
   switch (status) {
     case 'modified':
-      return { icon: FileDiff, color: 'text-amber-400', label: 'M' }
+      return { icon: FileDiff, color: 'text-[var(--aethel-warning-light)]', label: 'M' }
     case 'added':
       return { icon: FilePlus, color: 'text-emerald-400', label: 'A' }
     case 'deleted':
@@ -468,7 +468,7 @@ export default function GitPanelPro({
             <span className="text-xs text-emerald-400">↑{ahead}</span>
           )}
           {behind > 0 && (
-            <span className="text-xs text-amber-400">↓{behind}</span>
+            <span className="text-xs text-[var(--aethel-warning-light)]">↓{behind}</span>
           )}
         </button>
         <div className="flex items-center gap-1">

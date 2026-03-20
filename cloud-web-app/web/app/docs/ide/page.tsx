@@ -78,7 +78,7 @@ export default function IDEDocsPage() {
             return (
               <div key={feature.title} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <Icon className="h-5 w-5 text-indigo-400" />
+                  <Icon className="h-5 w-5 text-[var(--aethel-primary-light)]" />
                   <h3 className="font-semibold">{feature.title}</h3>
                   {feature.shortcut && (
                     <kbd className="ml-auto rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400">
@@ -123,7 +123,7 @@ export default function IDEDocsPage() {
               { mention: '@git:log', desc: 'Include relevant commit history' },
             ].map((item) => (
               <div key={item.mention} className="flex items-center gap-3 rounded-lg bg-white/[0.02] px-3 py-2">
-                <code className="text-sm font-mono font-semibold text-indigo-400">{item.mention}</code>
+                <code className="text-sm font-mono font-semibold text-[var(--aethel-primary-light)]">{item.mention}</code>
                 <span className="text-sm text-zinc-400">{item.desc}</span>
               </div>
             ))}

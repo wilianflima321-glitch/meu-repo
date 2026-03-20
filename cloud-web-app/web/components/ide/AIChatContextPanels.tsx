@@ -43,7 +43,7 @@ export function CodebaseContextPanel({
         </div>
         <div className="flex flex-col items-end gap-2">
           {preview.blockers && preview.blockers.length > 0 && (
-            <div className="text-[10px] text-amber-300">
+            <div className="text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
               {preview.blockers[0]}
             </div>
           )}

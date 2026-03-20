@@ -1,8 +1,8 @@
-/**
- * AISuggestionBubble - Bolhas de Sugestão Proativa da IA
+﻿/**
+ * AISuggestionBubble - Bolhas de SugestÃ£o Proativa da IA
  * 
- * Sugestões contextuais não-intrusivas da IA.
- * Aparece próximo ao elemento relevante.
+ * SugestÃµes contextuais nÃ£o-intrusivas da IA.
+ * Aparece prÃ³ximo ao elemento relevante.
  * Pode ser dispensada ou aplicada rapidamente.
  * 
  * @see AI_SELF_REFLECTION_SYSTEM.md
@@ -42,11 +42,11 @@ import {
 // ============================================================================
 
 export type SuggestionType = 
-  | 'code'        // Sugestão de código
-  | 'design'      // Sugestão de design/visual
-  | 'performance' // Sugestão de performance
-  | 'ux'          // Sugestão de UX
-  | 'error'       // Correção de erro
+  | 'code'        // SugestÃ£o de cÃ³digo
+  | 'design'      // SugestÃ£o de design/visual
+  | 'performance' // SugestÃ£o de performance
+  | 'ux'          // SugestÃ£o de UX
+  | 'error'       // CorreÃ§Ã£o de erro
   | 'tip';        // Dica geral
 
 export type SuggestionPosition = 
@@ -104,7 +104,7 @@ const TYPE_CONFIG: Record<SuggestionType, {
     color: 'text-sky-400',
     bgColor: 'bg-sky-500/10',
     borderColor: 'border-sky-500/30',
-    label: 'Código',
+    label: 'CÃ³digo',
   },
   design: {
     icon: Palette,
@@ -115,9 +115,9 @@ const TYPE_CONFIG: Record<SuggestionType, {
   },
   performance: {
     icon: Zap,
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-500/10',
-    borderColor: 'border-amber-500/30',
+    color: 'text-[var(--aethel-warning-light)]',
+    bgColor: 'bg-[var(--aethel-warning)]/10',
+    borderColor: 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]',
     label: 'Performance',
   },
   ux: {
@@ -495,7 +495,7 @@ export function AISuggestionBubble({
                              hover:bg-zinc-700 text-sm text-zinc-300 transition-colors"
                   >
                     <ThumbsUp className="w-3.5 h-3.5" />
-                    Útil
+                    Ãštil
                   </button>
                   <button
                     onClick={() => handleFeedback(false)}
@@ -503,7 +503,7 @@ export function AISuggestionBubble({
                              hover:bg-zinc-700 text-sm text-zinc-300 transition-colors"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
-                    Não útil
+                    NÃ£o Ãºtil
                   </button>
                   <div className="my-1 border-t border-zinc-700" />
                   <button
@@ -512,7 +512,7 @@ export function AISuggestionBubble({
                              hover:bg-zinc-700 text-sm text-zinc-400 transition-colors"
                   >
                     <VolumeX className="w-3.5 h-3.5" />
-                    Não mostrar novamente
+                    NÃ£o mostrar novamente
                   </button>
                 </motion.div>
               )}
@@ -599,15 +599,15 @@ export function SuggestionManager({
 // ============================================================================
 
 /**
- * AISuggestionBubbleAuto - Versão auto-gerenciada
- * Busca sugestões da API automaticamente e gerencia exibição
+ * AISuggestionBubbleAuto - VersÃ£o auto-gerenciada
+ * Busca sugestÃµes da API automaticamente e gerencia exibiÃ§Ã£o
  */
 export function AISuggestionBubbleAuto() {
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [enabled, setEnabled] = useState(true);
   const pollIntervalRef = useRef<NodeJS.Timeout>();
 
-  // Buscar sugestões da API
+  // Buscar sugestÃµes da API
   useEffect(() => {
     if (!enabled) return;
 
@@ -646,7 +646,7 @@ export function AISuggestionBubbleAuto() {
 
   const handleApply = useCallback(async (suggestion: AISuggestion) => {
     try {
-      // Em produção, chamar API para aplicar
+      // Em produÃ§Ã£o, chamar API para aplicar
       console.log('Applying suggestion:', suggestion.id);
       setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
     } catch (e) {
@@ -672,7 +672,7 @@ export function AISuggestionBubbleAuto() {
     }).catch(() => {});
   }, []);
 
-  // Não mostrar nada se desabilitado ou sem sugestões
+  // NÃ£o mostrar nada se desabilitado ou sem sugestÃµes
   if (!enabled || suggestions.length === 0) {
     return null;
   }

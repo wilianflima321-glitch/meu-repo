@@ -189,7 +189,7 @@ const AGENT_TEMPLATES: Omit<Agent, 'id' | 'taskHistory' | 'metrics'>[] = [
 function getStatusColor(status: AgentStatus): string {
   switch (status) {
     case 'running': return 'text-emerald-400'
-    case 'paused': return 'text-amber-400'
+    case 'paused': return 'text-[var(--aethel-warning-light)]'
     case 'completed': return 'text-blue-400'
     case 'failed': return 'text-red-400'
     case 'waiting': return 'text-cyan-400'
@@ -220,7 +220,7 @@ function getAgentColorClasses(color: string): { bg: string; border: string; text
     emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400' },
     cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400' },
     red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400' },
-    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400' },
+    amber: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]', text: 'text-[var(--aethel-warning-light)]' },
   }
   return colors[color] || colors.blue
 }
@@ -275,7 +275,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); onPause() }}
-                className="p-1.5 rounded bg-amber-600 hover:bg-amber-500 text-white"
+                className="p-1.5 rounded bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] text-white"
                 title="Pause Agent"
               >
                 <Pause className="w-3 h-3" />
@@ -388,7 +388,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
                 <div className="text-xs text-slate-400">Success Rate</div>
               </div>
               <div className="p-2 bg-slate-800/50 rounded text-center">
-                <div className="text-lg font-semibold text-amber-400">{formatDuration(agent.metrics.avgDuration)}</div>
+                <div className="text-lg font-semibold text-[var(--aethel-warning-light)]">{formatDuration(agent.metrics.avgDuration)}</div>
                 <div className="text-xs text-slate-400">Avg Duration</div>
               </div>
               <div className="p-2 bg-slate-800/50 rounded text-center">

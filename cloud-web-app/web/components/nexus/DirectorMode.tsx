@@ -57,7 +57,7 @@ export default function DirectorMode() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                    shot.visualQuality === 'aaa' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                    shot.visualQuality === 'aaa' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' :
                     shot.visualQuality === 'high' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-zinc-800 text-zinc-500'
                   }`}>
                     {shot.visualQuality}

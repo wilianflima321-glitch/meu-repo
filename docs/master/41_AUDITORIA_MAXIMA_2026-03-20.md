@@ -27,7 +27,7 @@ Evidências coletadas diretamente do repo (sem estimativas):
 - `metrics/latest_run-production.json`: `sampleSize=115`, `apply_success_rate=1.0`, `feedback_coverage=0.8957` (timestamp: 2026-03-14).
 - `metrics/l4-readiness-dossier.json`: status `PARTIAL` com blockers externos (Stripe/E2B/DB).
 - `cloud-web-app/web/components/AethelDashboardRuntime.tsx`: wrapper reduzido; lógica movida para `useAethelDashboardRuntime.tsx` (~1112 linhas, abaixo do gate 1200).
-- `cloud-web-app/web/app/landing-v3.tsx`: landing canônica ativa; não há `landing-v2.tsx` no app.
+- `cloud-web-app/web/app/landing-v3.tsx`: landing canônica ativa; não há `landing-v3.tsx` no app.
 - `docs/master/9_BACKEND_SYSTEM_SPEC.md`: descreve Next.js/Prisma/PostgreSQL sem mojibake detectado.
 - `docs/master/AI_SYSTEM_SPEC.md`: atualizado para refletir o runtime real (Next.js API + Advanced AI Provider).
 

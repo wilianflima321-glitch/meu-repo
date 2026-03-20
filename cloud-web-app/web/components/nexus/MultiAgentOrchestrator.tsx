@@ -231,7 +231,7 @@ export default function MultiAgentOrchestrator() {
       </div>
 
       {streamError && (
-        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
+        <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-3 text-sm text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]">
           <div className="mb-1 flex items-center gap-2 font-semibold">
             <AlertCircle size={14} />
             Capability or runtime gate
@@ -241,13 +241,13 @@ export default function MultiAgentOrchestrator() {
       )}
 
       {runtimeMode === 'heuristic' && (
-        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-100">
+        <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-3 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
           <div className="mb-1 flex items-center gap-2 font-semibold">
             <AlertCircle size={14} />
             Heuristic mode (PARTIAL capability)
           </div>
           <p>{runtimeDisclaimer || 'Outputs are advisory and still require deterministic validation before apply.'}</p>
-          {coordinationHint && <p className="mt-1 text-amber-200/90">{coordinationHint}</p>}
+          {coordinationHint && <p className="mt-1 text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]/90">{coordinationHint}</p>}
         </div>
       )}
 

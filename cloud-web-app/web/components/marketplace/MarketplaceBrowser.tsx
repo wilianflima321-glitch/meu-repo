@@ -347,7 +347,7 @@ function AssetCard({
                 {/* Badges */}
                 <div className="absolute top-2 left-2 flex gap-1">
                     {asset.isFeatured && (
-                        <Badge variant="default" className="bg-amber-500">
+                        <Badge variant="default" className="bg-[var(--aethel-warning)]">
                             <Crown className="w-3 h-3 mr-1" /> Destaque
                         </Badge>
                     )}

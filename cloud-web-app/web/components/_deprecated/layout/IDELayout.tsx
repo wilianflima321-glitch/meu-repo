@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 /**
  * IDE Layout - Unified Professional IDE Shell
@@ -380,7 +380,7 @@ export default function IDELayout({
                               )}
                               {problems.errors > 0 && problems.warnings > 0 && ' '}
                               {problems.warnings > 0 && (
-                                <span className="text-amber-400">{problems.warnings}</span>
+                                <span className="text-[var(--aethel-warning-light)]">{problems.warnings}</span>
                               )}
                             </span>
                           )}
@@ -464,7 +464,7 @@ function TitleBar({ onMaximize, isMaximized }: TitleBarProps) {
     <div className="h-8 flex items-center justify-between bg-slate-900 border-b border-slate-800 px-2 select-none">
       {/* Left - Menu */}
       <div className="flex items-center gap-2">
-        <div className="w-4 h-4 rounded-sm bg-gradient-to-br from-sky-500 to-purple-600" />
+        <div className="w-4 h-4 rounded-sm bg-gradient-to-br from-[var(--aethel-info)] to-[var(--aethel-accent-dark)]" />
         <span className="text-sm font-medium text-slate-300">Aethel Engine</span>
       </div>
       
@@ -658,7 +658,7 @@ function StatusBar({
             <CheckCircle className="w-3.5 h-3.5" />
           )}
           {problems.errors} <span className="opacity-75">errors</span>
-          <span className="mx-1">•</span>
+          <span className="mx-1">â€¢</span>
           {problems.warnings} <span className="opacity-75">warnings</span>
         </button>
       </div>
@@ -815,9 +815,9 @@ function ExplorerTree() {
                 <ChevronRight className="w-4 h-4 text-slate-500 flex-shrink-0" />
               )}
               {isExpanded ? (
-                <FolderOpen className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <FolderOpen className="w-4 h-4 text-[var(--aethel-warning-light)] flex-shrink-0" />
               ) : (
-                <Folder className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <Folder className="w-4 h-4 text-[var(--aethel-warning-light)] flex-shrink-0" />
               )}
             </>
           ) : (
@@ -856,7 +856,7 @@ function EditorPlaceholder() {
   return (
     <div className="flex-1 flex items-center justify-center bg-slate-900">
       <div className="text-center">
-        <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-sky-500 to-purple-600 flex items-center justify-center">
+        <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[var(--aethel-info)] to-[var(--aethel-accent-dark)] flex items-center justify-center">
           <Code className="w-12 h-12 text-white" />
         </div>
         <h2 className="text-xl font-semibold text-white mb-2">Aethel IDE</h2>
@@ -879,7 +879,7 @@ function TerminalPlaceholder() {
         <span className="text-slate-600">:</span>
         <span className="text-blue-400">~/project</span>
         <span className="text-slate-600">$</span>
-        <span className="ml-2 animate-pulse">▊</span>
+        <span className="ml-2 animate-pulse">â–Š</span>
       </div>
     </div>
   )

@@ -413,7 +413,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           onClick={toggle}
-          className="fixed bottom-4 right-4 z-50 p-3 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-500 transition-colors"
+          className="fixed bottom-4 right-4 z-50 p-3 rounded-full bg-[var(--aethel-primary-dark)] text-white shadow-lg hover:bg-[var(--aethel-primary)] transition-colors"
           title="Open DevTools (Ctrl+Shift+D)"
         >
           <Bug className="w-5 h-5" />
@@ -435,7 +435,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
             {/* Header */}
             <div className="flex items-center justify-between px-3 h-12 border-b border-slate-700 bg-slate-800/50">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-indigo-400">
+                <div className="flex items-center gap-2 text-[var(--aethel-primary-light)]">
                   <Bug className="w-4 h-4" />
                   <span className="text-sm font-semibold">Aethel DevTools</span>
                 </div>
@@ -448,7 +448,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-colors ${
                           activeTab === tab.id
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-[var(--aethel-primary-dark)] text-white'
                             : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
                         }`}
                       >
@@ -456,7 +456,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                         <span>{tab.label}</span>
                         {tab.count > 0 && (
                           <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                            activeTab === tab.id ? 'bg-indigo-500' : 'bg-slate-600'
+                            activeTab === tab.id ? 'bg-[var(--aethel-primary)]' : 'bg-slate-600'
                           }`}>
                             {tab.count > 99 ? '99+' : tab.count}
                           </span>
@@ -478,7 +478,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Search..."
-                        className="w-40 pl-7 pr-2 py-1 text-xs bg-slate-800 border border-slate-600 rounded-md text-slate-200 placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+                        className="w-40 pl-7 pr-2 py-1 text-xs bg-slate-800 border border-slate-600 rounded-md text-slate-200 placeholder-slate-500 focus:border-[var(--aethel-primary)] focus:outline-none"
                       />
                     </div>
                     
@@ -641,7 +641,7 @@ function ActionsTab({ actions, searchQuery }: { actions: ActionLog[]; searchQuer
               ) : (
                 <ChevronRight className="w-4 h-4 text-slate-400" />
               )}
-              <span className="text-sm text-indigo-400 font-mono">{action.type}</span>
+              <span className="text-sm text-[var(--aethel-primary-light)] font-mono">{action.type}</span>
               <span className="text-xs text-slate-500">{action.source}</span>
               <span className="text-xs text-slate-500 ml-auto">
                 {new Date(action.timestamp).toLocaleTimeString()}
@@ -706,7 +706,7 @@ function PerformanceTab({ metrics, searchQuery }: { metrics: PerformanceMetric[]
               {items.slice(0, 5).map(metric => (
                 <div key={metric.id} className="flex items-baseline justify-between">
                   <span className="text-xs text-slate-300">{metric.name}</span>
-                  <span className="text-sm font-mono text-indigo-400">
+                  <span className="text-sm font-mono text-[var(--aethel-primary-light)]">
                     {metric.value.toFixed(1)} {metric.unit}
                   </span>
                 </div>
@@ -765,7 +765,7 @@ function NetworkTab({ requests, searchQuery }: { requests: NetworkRequest[]; sea
               onClick={() => setExpandedId(expandedId === req.id ? null : req.id)}
               className="border-t border-slate-700/50 hover:bg-slate-800/50 cursor-pointer"
             >
-              <td className="px-3 py-2 font-mono text-indigo-400">{req.method}</td>
+              <td className="px-3 py-2 font-mono text-[var(--aethel-primary-light)]">{req.method}</td>
               <td className="px-3 py-2 text-slate-300 max-w-xs truncate">{req.url}</td>
               <td className={`px-3 py-2 font-mono ${getStatusColor(req.status)}`}>
                 {req.status || 'pending'}
@@ -795,7 +795,7 @@ function ConsoleTab({ entries, searchQuery }: { entries: ConsoleEntry[]; searchQ
     info: 'text-blue-400',
     warn: 'text-yellow-400',
     error: 'text-red-400',
-    debug: 'text-purple-400'
+    debug: 'text-[var(--aethel-accent-light)]'
   };
   
   const levelBgs: Record<string, string> = {
@@ -803,7 +803,7 @@ function ConsoleTab({ entries, searchQuery }: { entries: ConsoleEntry[]; searchQ
     info: 'bg-blue-500/10',
     warn: 'bg-yellow-500/10',
     error: 'bg-red-500/10',
-    debug: 'bg-purple-500/10'
+    debug: 'bg-[color-mix(in_srgb,var(--aethel-accent)_10%,transparent)]'
   };
   
   if (filtered.length === 0) {

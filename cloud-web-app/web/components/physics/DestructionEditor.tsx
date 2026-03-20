@@ -505,7 +505,7 @@ function DestructionLevels({ levels, currentLevel, health, maxHealth }: Destruct
             </div>
             <div className="flex-1 h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-red-600 to-orange-500 transition-all"
+                className="h-full bg-gradient-to-r from-red-600 to-[var(--aethel-warning-dark)] transition-all"
                 style={{ width: `${percent * 100}%` }}
               />
             </div>

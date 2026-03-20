@@ -636,7 +636,7 @@ function CommandPaletteUI({
                       <div className="truncate text-xs text-slate-100">{highlightMatches(item.name, item.nameMatch.indices)}</div>
                       <div className="truncate text-[11px] text-slate-500">{item.path}</div>
                     </div>
-                    {item.modified && <span className="text-xs text-amber-400">M</span>}
+                    {item.modified && <span className="text-xs text-[var(--aethel-warning-light)]">M</span>}
                     {item.gitStatus && <span className="text-xs text-slate-500">{item.gitStatus}</span>}
                   </button>
                 )

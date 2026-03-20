@@ -516,7 +516,7 @@ function SearchResultFile({
               e.stopPropagation();
               onReplaceAll();
             }}
-            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded text-xs text-amber-400"
+            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded text-xs text-[var(--aethel-warning-light)]"
             title="Replace all in file"
           >
             <Replace className="w-3.5 h-3.5" />
@@ -539,7 +539,7 @@ function SearchResultFile({
               <span className="text-sm text-slate-400 truncate flex-1">
                 {/* Preview with highlight */}
                 {match.preview.slice(0, match.previewHighlight.start)}
-                <span className="bg-amber-500/30 text-amber-200">
+                <span className="bg-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]">
                   {match.preview.slice(
                     match.previewHighlight.start,
                     match.previewHighlight.end
@@ -725,7 +725,7 @@ export function GlobalSearchPanel({
               <button
                 onClick={replaceAll}
                 disabled={state.totalMatches === 0}
-                className="px-2 py-1 text-xs bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded transition-colors"
+                className="px-2 py-1 text-xs bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] disabled:bg-slate-700 disabled:text-slate-500 text-white rounded transition-colors"
                 title="Replace All"
               >
                 Replace All

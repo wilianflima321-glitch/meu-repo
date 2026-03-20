@@ -238,9 +238,9 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
       border: 'border-red-500/30',
     },
     warning: {
-      bg: 'bg-amber-500/10',
-      icon: 'text-amber-400',
-      border: 'border-amber-500/30',
+      bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
+      icon: 'text-[var(--aethel-warning-light)]',
+      border: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
     },
     info: {
       bg: 'bg-blue-500/10',

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Clock3, ShieldCheck } from 'lucide-react'
@@ -38,7 +38,7 @@ function stateStyles(state: SurfaceState) {
     case 'healthy':
       return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-200'
     case 'partial':
-      return 'border-amber-400/25 bg-amber-400/10 text-amber-100'
+      return 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
     case 'unhealthy':
       return 'border-rose-400/25 bg-rose-400/10 text-rose-100'
     default:
@@ -243,7 +243,7 @@ export default function StatusPage() {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.08),transparent_28%),#020617] text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-emerald-500/[0.06] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-indigo-500/[0.05] blur-[160px]" />
+        <div className="absolute bottom-0 right-1/4 h-[520px] w-[520px] rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_5%,transparent)] blur-[160px]" />
       </div>
 
       <PublicHeader />
@@ -288,7 +288,7 @@ export default function StatusPage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Operacionais</p>
               <p className="mt-2 text-3xl font-semibold">{counts.healthy}</p>
             </div>
-            <div className="rounded-[24px] border border-amber-400/20 bg-amber-400/10 p-5 text-amber-100">
+            <div className="rounded-[24px] border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] p-5 text-[var(--aethel-warning-light)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Parciais</p>
               <p className="mt-2 text-3xl font-semibold">{counts.partial}</p>
             </div>

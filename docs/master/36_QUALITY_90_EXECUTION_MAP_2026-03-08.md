@@ -14,7 +14,7 @@ This document is stricter than roadmap language:
 ## 2) Reality correction map
 ### 2.1 What is already beyond "absent"
 The following areas must no longer be described as `zero` or `missing entirely`:
-1. Landing exists and is active at `/` via `app/page.tsx` -> `app/landing-v2.tsx`.
+1. Landing exists and is active at `/` via `app/page.tsx` -> `app/landing-v3.tsx`.
 2. Billing exists as a route/UI surface set, but runtime remains `PARTIAL` until Stripe config is live.
 3. Mention parsing/resolution exists, but product-grade `@Codebase/@Docs/@Diff/@Error` UX is still `PARTIAL`.
 4. RAG/vector infrastructure exists in local/in-memory form, but production-grade persistent indexing and operator UX are still `PARTIAL`.

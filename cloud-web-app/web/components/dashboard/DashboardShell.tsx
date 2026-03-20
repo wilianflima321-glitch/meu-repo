@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import type { ComponentProps } from 'react'
 import { Code, CreditCard, LayoutDashboard, MessageSquare, Settings } from 'lucide-react'
@@ -136,7 +136,7 @@ export function DashboardShell({
               </span>
             )}
             {billingErrorText && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs text-amber-100">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-1 text-xs text-[var(--aethel-warning-light)]">
                 Billing: {billingErrorText}
               </span>
             )}

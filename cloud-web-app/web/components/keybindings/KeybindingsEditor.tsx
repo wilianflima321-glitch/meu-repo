@@ -453,7 +453,7 @@ export default function KeybindingsEditor({
           <Keyboard className="w-5 h-5 text-sky-400" />
           <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
           {hasChanges && (
-            <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded">
+            <span className="px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] text-xs rounded">
               Unsaved changes
             </span>
           )}
@@ -529,8 +529,8 @@ export default function KeybindingsEditor({
       
       {/* Conflicts Warning */}
       {Object.keys(conflicts).length > 0 && (
-        <div className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/30">
-          <div className="flex items-center gap-2 text-amber-400 text-sm">
+        <div className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]">
+          <div className="flex items-center gap-2 text-[var(--aethel-warning-light)] text-sm">
             <AlertTriangle className="w-4 h-4" />
             <span>
               {Object.keys(conflicts).length} keybinding conflict(s) detected
@@ -633,7 +633,7 @@ function KeybindingRow({
   return (
     <div
       className={`grid grid-cols-[1fr_200px_120px_80px] gap-4 px-4 py-2 border-b border-slate-800 hover:bg-slate-800/30 items-center ${
-        hasConflict ? 'bg-amber-500/5' : ''
+        hasConflict ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)]' : ''
       }`}
     >
       {/* Command */}
@@ -654,7 +654,7 @@ function KeybindingRow({
           <div className="flex items-center gap-2 group">
             {keybinding.keybinding ? (
               <kbd className={`px-2 py-1 bg-slate-700 rounded text-xs ${
-                hasConflict ? 'text-amber-400 border border-amber-500/50' : 'text-slate-300'
+                hasConflict ? 'text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]' : 'text-slate-300'
               }`}>
                 {keybinding.keybinding}
               </kbd>
@@ -682,7 +682,7 @@ function KeybindingRow({
             </div>
             
             {hasConflict && (
-              <span title="Keybinding conflict"><AlertTriangle className="w-4 h-4 text-amber-400" /></span>
+              <span title="Keybinding conflict"><AlertTriangle className="w-4 h-4 text-[var(--aethel-warning-light)]" /></span>
             )}
           </div>
         )}

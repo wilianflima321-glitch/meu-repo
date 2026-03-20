@@ -123,7 +123,7 @@ interface GitPanelProps {
 // ============= Status Icons =============
 
 const STATUS_ICONS: Record<FileStatus, React.ReactNode> = {
-  modified: <Edit3 className="w-4 h-4 text-amber-400" />,
+  modified: <Edit3 className="w-4 h-4 text-[var(--aethel-warning-light)]" />,
   added: <FilePlus className="w-4 h-4 text-green-400" />,
   deleted: <FileMinus className="w-4 h-4 text-red-400" />,
   renamed: <FileText className="w-4 h-4 text-blue-400" />,
@@ -384,7 +384,7 @@ export default function GitPanel({
             </span>
           )}
           {currentBranchInfo?.behind !== undefined && currentBranchInfo.behind > 0 && (
-            <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded">
+            <span className="px-1.5 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] text-xs rounded">
               ↓{currentBranchInfo.behind}
             </span>
           )}
@@ -742,7 +742,7 @@ function FileSection({
               <span
                 className={`w-4 h-4 flex items-center justify-center text-[10px] font-bold rounded ${
                   file.status === 'modified'
-                    ? 'bg-amber-500/20 text-amber-400'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
                     : file.status === 'added'
                     ? 'bg-green-500/20 text-green-400'
                     : file.status === 'deleted'
@@ -815,7 +815,7 @@ function BranchesTab({
               <span className="text-xs text-green-400">↑{branch.ahead}</span>
             )}
             {branch.behind !== undefined && branch.behind > 0 && (
-              <span className="text-xs text-amber-400">↓{branch.behind}</span>
+              <span className="text-xs text-[var(--aethel-warning-light)]">↓{branch.behind}</span>
             )}
             {!branch.isCurrent && (
               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">

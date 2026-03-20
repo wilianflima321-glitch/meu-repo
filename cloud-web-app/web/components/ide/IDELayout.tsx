@@ -771,7 +771,7 @@ function NotImplementedPanel({
     <div className="h-full flex items-center justify-center text-center px-6">
       <div className="max-w-xs rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-4 py-3">
         <div className="mb-1.5 flex items-center justify-center gap-2 text-[var(--aethel-text-secondary)]">
-          <Codicon name="warning" className="text-[13px] text-amber-300" />
+          <Codicon name="warning" className="text-[13px] text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]" />
           <span className="text-xs font-semibold tracking-wide">{title}</span>
         </div>
         <p className="text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">

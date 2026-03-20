@@ -129,7 +129,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 2. `components/AethelDashboardRuntime.tsx` tracks provider-gate state from chat API failures and surfaces guided recovery instead of dead-end error-only flow.
 
 ### 7.8 Landing -> Studio first-value handoff (P0-N partial)
-1. `app/landing-v2.tsx` now routes Magic Box submissions to `/dashboard?mission=...` instead of dropping users directly into `/ide`.
+1. `app/landing-v3.tsx` now routes Magic Box submissions to `/dashboard?mission=...` instead of dropping users directly into `/ide`.
 2. `components/AethelDashboardRuntime.tsx` now consumes `mission` query context and seeds Studio Home chat flow (`ai-chat`) deterministically.
 3. First-value rail now exposes progress checkpoints (first project, first AI response, IDE preview opened) to reduce onboarding ambiguity.
 
@@ -172,7 +172,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 3. This keeps `/dashboard` onboarding behavior intact while reducing monolith surface and improving maintainability.
 
 ### 7.13 Landing responsive hardening (delta 2026-03-01)
-1. `app/landing-v2.tsx` now has mobile-safe spacing and typography adjustments for the Magic Box entry surface.
+1. `app/landing-v3.tsx` now has mobile-safe spacing and typography adjustments for the Magic Box entry surface.
 2. Shortcut actions (`/dashboard`, `/login`, `/docs`) now use responsive stacked layout on small viewports with separator suppression.
 3. Landing shortcuts now emit explicit analytics events for funnel attribution (`source=landing-shortcuts`).
 
@@ -403,7 +403,7 @@ Required: unified empty/loading/error/success language and behavior across dashb
 3. UX contract remains explicit: each lazy module shows deterministic `aethel-state-loading` feedback during fetch.
 
 ### 7.46 Responsive entry + accessibility pass (delta 2026-03-01)
-1. `app/landing-v2.tsx` now provides a skip-link + `main` landmark and mobile-first quick mission chips to reduce first-action friction on phone/tablet.
+1. `app/landing-v3.tsx` now provides a skip-link + `main` landmark and mobile-first quick mission chips to reduce first-action friction on phone/tablet.
 2. `app/dashboard/page.tsx` now includes deterministic loading feedback during dynamic shell bootstrap (no blank entry frame).
 3. `components/AethelDashboardRuntime.tsx` now replaces blank auth bootstrap (`return null`) with explicit loading state and adds skip-link to main content.
 4. Dashboard toast placement is now mobile-safe (`left/right` bounded on small viewports) with `aria-live` feedback.

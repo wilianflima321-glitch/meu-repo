@@ -1,7 +1,7 @@
-/**
+﻿/**
  * CONTROL RIG EDITOR - Aethel Engine
  * 
- * Editor profissional de Control Rig para animação procedural e IK/FK.
+ * Editor profissional de Control Rig para animaÃ§Ã£o procedural e IK/FK.
  * Sistema inspirado em Unreal Control Rig e Maya HumanIK.
  * 
  * FEATURES:
@@ -617,7 +617,7 @@ function IKChainPanel({ chain, onUpdate, onDelete }: IKChainPanelProps) {
       </div>
       
       <div className="text-[10px] text-slate-400 mb-2">
-        {chain.startBone} → {chain.endBone}
+        {chain.startBone} â†’ {chain.endBone}
       </div>
       
       <Slider
@@ -675,7 +675,7 @@ function ConstraintPanel({ constraint, onUpdate, onDelete }: ConstraintPanelProp
       </div>
       
       <div className="text-[10px] text-slate-400 mb-2">
-        {constraint.sourceBone} → {constraint.targetBone}
+        {constraint.sourceBone} â†’ {constraint.targetBone}
       </div>
       
       <Slider
@@ -973,7 +973,7 @@ export default function ControlRigEditor({
           {/* Body Zones */}
           <CollapsibleSection 
             title="Body Zones" 
-            icon={<User className="w-4 h-4 text-amber-400" />}
+            icon={<User className="w-4 h-4 text-[var(--aethel-warning-light)]" />}
             defaultOpen={false}
           >
             <div className="grid grid-cols-3 gap-1">

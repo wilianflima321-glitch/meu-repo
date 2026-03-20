@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useMemo } from 'react';
 
@@ -70,7 +70,7 @@ const colorClasses: Record<MentionChipColor, { bg: string; text: string; border:
   violet: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20' },
   blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
   green: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
-  amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
+  amber: { bg: 'bg-[var(--aethel-warning)]/10', text: 'text-[var(--aethel-warning-light)]', border: 'border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)]' },
   red: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
   slate: { bg: 'bg-slate-500/10', text: 'text-slate-400', border: 'border-slate-500/20' },
 };
@@ -155,7 +155,7 @@ export function MentionPreviewPanel({
           className="text-slate-500 hover:text-slate-300 text-xs"
           aria-label="Close preview"
         >
-          ✕
+          âœ•
         </button>
       </div>
       {chip.content && (

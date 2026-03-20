@@ -1,4 +1,4 @@
-import '../styles/globals.css'
+﻿import '../styles/globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
@@ -94,7 +94,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-indigo-600 focus:px-4 focus:py-2 focus:text-white focus:outline-none"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-[var(--aethel-primary-dark)] focus:px-4 focus:py-2 focus:text-white focus:outline-none"
         >
           Skip to main content
         </a>

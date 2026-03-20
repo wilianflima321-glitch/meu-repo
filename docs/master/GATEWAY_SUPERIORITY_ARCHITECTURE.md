@@ -20,7 +20,7 @@ Para superar as abordagens tradicionais de landing pages e onboarding, o Gateway
 
 ## 3. Componentes Arquiteturais Chave
 
-### 3.1. Landing Page Dinâmica (`app/page.tsx` & `landing-v2.tsx`)
+### 3.1. Landing Page Dinâmica (`app/page.tsx` & `landing-v3.tsx`)
 
 -   **Base:** Utiliza Next.js 14 com React e TypeScript para uma experiência de usuário rápida e otimizada para SEO.
 -   **Design System Unificado:** Aplica o `globals.css` e o `tailwind.config.ts` atualizados para garantir a estética "Deep Space Dark" e a consistência visual.
@@ -61,7 +61,7 @@ Este é o coração da experiência "Instant On" do Gateway.
 
 ## 6. Próximos Passos Técnicos
 
-1.  **Refinar `landing-v2.tsx`:** Implementar a lógica de integração do Magic Box com a API de interpretação de prompt da IA.
+1.  **Refinar `landing-v3.tsx`:** Implementar a lógica de integração do Magic Box com a API de interpretação de prompt da IA.
 2.  **Desenvolver API de Interpretação de Prompt:** Criar o endpoint de backend que traduz o prompt do Magic Box em um plano de projeto estruturado.
 3.  **Integrar Provisionamento de Workspace:** Conectar a API de interpretação de prompt com o sistema de provisionamento de workspaces do Forge/Nexus.
 

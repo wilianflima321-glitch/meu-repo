@@ -322,7 +322,7 @@ export function PeekWidget({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 bg-slate-800 border-b border-slate-700">
         <div className="flex items-center gap-2">
-          <FileCode className="w-4 h-4 text-indigo-400" />
+          <FileCode className="w-4 h-4 text-[var(--aethel-primary-light)]" />
           <span className="text-sm font-medium text-white">{config.title}</span>
           {config.definitions.length > 1 && (
             <span className="text-xs text-slate-400">
@@ -357,7 +357,7 @@ export function PeekWidget({
                 onClick={() => setSelectedIndex(index)}
                 className={`w-full px-3 py-2 text-left text-sm transition-colors ${
                   index === selectedIndex
-                    ? 'bg-indigo-600/20 text-white'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)] text-white'
                     : 'hover:bg-slate-800 text-slate-300'
                 }`}
               >
@@ -378,7 +378,7 @@ export function PeekWidget({
           <div className="sticky top-0 flex items-center gap-2 px-3 py-1.5 bg-slate-850 border-b border-slate-700 text-xs">
             <span className="text-slate-400">{getRelativePath(selectedDefinition.uri)}</span>
             <span className="text-slate-600">:</span>
-            <span className="text-indigo-400">{selectedDefinition.range.startLine}</span>
+            <span className="text-[var(--aethel-primary-light)]">{selectedDefinition.range.startLine}</span>
           </div>
 
           {/* Code preview */}
@@ -392,10 +392,10 @@ export function PeekWidget({
                 return (
                   <div
                     key={i}
-                    className={`flex ${isTargetLine ? 'bg-indigo-600/20' : ''}`}
+                    className={`flex ${isTargetLine ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)]' : ''}`}
                   >
                     <span className={`w-10 pr-2 text-right select-none ${
-                      isTargetLine ? 'text-indigo-400' : 'text-slate-600'
+                      isTargetLine ? 'text-[var(--aethel-primary-light)]' : 'text-slate-600'
                     }`}>
                       {lineNumber}
                     </span>
@@ -504,7 +504,7 @@ export function ReferencesPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
-          <Search className="w-4 h-4 text-indigo-400" />
+          <Search className="w-4 h-4 text-[var(--aethel-primary-light)]" />
           <span className="text-sm font-medium text-white">
             {totalRefs} reference{totalRefs !== 1 ? 's' : ''}
           </span>
@@ -527,7 +527,7 @@ export function ReferencesPanel({
           value={filter}
           onChange={e => setFilter(e.target.value)}
           placeholder="Filter references..."
-          className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]"
         />
       </div>
 
@@ -543,7 +543,7 @@ export function ReferencesPanel({
               <button
                 onClick={() => toggleFile(uri)}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-800/50 transition-colors ${
-                  isCurrentFile ? 'bg-indigo-600/10' : ''
+                  isCurrentFile ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_10%,transparent)]' : ''
                 }`}
               >
                 {isExpanded ? (
@@ -672,7 +672,7 @@ export function GoToLineDialog({
               onChange={e => setValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Line:Column (e.g., 42 or 42:10)"
-              className="w-full px-3 py-2 bg-slate-800 text-white placeholder-slate-500 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-slate-800 text-white placeholder-slate-500 rounded-lg outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]"
             />
             <div className="mt-2 text-xs text-slate-500">
               Press <kbd className="px-1 bg-slate-700 rounded">Enter</kbd> to go,{' '}

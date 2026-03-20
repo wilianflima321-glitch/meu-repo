@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -128,14 +128,14 @@ export default function GitPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--aethel-primary)]"></div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="git-panel h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+      <div className="git-panel h-full bg-gradient-to-br from-slate-900 via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-slate-900 p-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">

@@ -129,7 +129,7 @@ export default function RegisterPageV2() {
                 <Codicon name="arrow-left" />
                 Voltar ao site
               </Link>
-              <span className="rounded-full border border-indigo-400/20 bg-indigo-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-100">
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-primary-light)]">
                 Plano {requestedPlan}
               </span>
             </div>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getGitClient, GitConflict } from '@/lib/git/git-client';
@@ -150,7 +150,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--aethel-primary)]"></div>
       </div>
     );
   }
@@ -166,7 +166,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
   const diffLines = getDiffLines();
 
   return (
-    <div className="h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className="h-full bg-gradient-to-br from-slate-900 via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-slate-900 p-6">
       {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-white mb-2">Resolve Merge Conflict</h2>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Sparkles } from 'lucide-react'
@@ -29,19 +29,19 @@ export function LoadingScreen({
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] animate-pulse delay-500" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] rounded-full blur-[100px] animate-pulse delay-500" />
       </div>
 
       <div className="relative flex flex-col items-center">
         {/* Logo */}
         {showLogo && (
           <div className="mb-10 flex flex-col items-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-500 via-purple-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-sky-500/30 mb-4 animate-bounce-slow">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--aethel-info)] via-[var(--aethel-accent)] to-[var(--aethel-primary)] flex items-center justify-center shadow-2xl shadow-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] mb-4 animate-bounce-slow">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-3xl font-bold">
-              <span className="bg-gradient-to-r from-sky-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[var(--aethel-info-light)] via-[var(--aethel-accent-light)] to-[var(--aethel-primary-light)] bg-clip-text text-transparent">
                 Aethel
               </span>
             </h1>
@@ -54,21 +54,21 @@ export function LoadingScreen({
           <div className="absolute inset-0 rounded-full border-4 border-slate-800" />
           
           {/* Spinning gradient ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-sky-500 border-r-purple-500 animate-spin" />
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--aethel-info)] border-r-[var(--aethel-accent)] animate-spin" />
           
           {/* Inner glow */}
-          <div className="absolute inset-4 rounded-full bg-gradient-to-br from-sky-500/20 to-purple-500/20 blur-sm" />
+          <div className="absolute inset-4 rounded-full bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] blur-sm" />
           
           {/* Center dot */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-4 h-4 rounded-full bg-gradient-to-r from-sky-500 to-purple-500 animate-pulse" />
+            <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[var(--aethel-info)] to-[var(--aethel-accent)] animate-pulse" />
           </div>
         </div>
 
         {/* Progress Bar */}
         <div className="w-64 h-1.5 bg-slate-800 rounded-full overflow-hidden mb-4">
           <div
-            className="h-full bg-gradient-to-r from-sky-500 via-purple-500 to-cyan-500 rounded-full transition-all duration-300 ease-out"
+            className="h-full bg-gradient-to-r from-[var(--aethel-info)] via-[var(--aethel-accent)] to-[var(--aethel-primary)] rounded-full transition-all duration-300 ease-out"
             style={{ width: `${Math.min(progress, 100)}%` }}
           />
         </div>
@@ -79,7 +79,7 @@ export function LoadingScreen({
 
       {/* Version */}
       <div className="absolute bottom-6 text-xs text-slate-600">
-        v1.0.0 • Enterprise Edition
+        v1.0.0 â€¢ Enterprise Edition
       </div>
     </div>
   )
@@ -88,7 +88,7 @@ export function LoadingScreen({
 /* ============================================
    Page Loader (for route transitions)
 ============================================ */
-export function PageLoader({ text = 'Carregando página...' }: { text?: string }) {
+export function PageLoader({ text = 'Carregando pÃ¡gina...' }: { text?: string }) {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">
       <div className="relative w-16 h-16 mb-4">

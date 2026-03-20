@@ -612,7 +612,7 @@ function ExtensionCard({
         <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
           <span>{extension.publisherDisplayName}</span>
           <span className="flex items-center gap-1">
-            <Star className="w-3 h-3 text-amber-400" />
+            <Star className="w-3 h-3 text-[var(--aethel-warning-light)]" />
             {extension.rating.toFixed(1)}
           </span>
           <span className="flex items-center gap-1">
@@ -726,7 +726,7 @@ function ExtensionDetails({
         
         {/* Stats */}
         <div className="flex items-center gap-4 mt-4 text-sm">
-          <span className="flex items-center gap-1 text-amber-400">
+          <span className="flex items-center gap-1 text-[var(--aethel-warning-light)]">
             <Star className="w-4 h-4" />
             {extension.rating.toFixed(1)} ({extension.ratingCount.toLocaleString()})
           </span>

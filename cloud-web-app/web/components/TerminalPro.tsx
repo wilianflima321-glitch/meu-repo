@@ -61,7 +61,7 @@ const COMMON_COMMANDS = [
 const QUICK_TASKS = [
   { label: 'Install', command: 'npm install', color: 'text-emerald-400' },
   { label: 'Dev', command: 'npm run dev', color: 'text-blue-400' },
-  { label: 'Build', command: 'npm run build', color: 'text-amber-400' },
+  { label: 'Build', command: 'npm run build', color: 'text-[var(--aethel-warning-light)]' },
   { label: 'Test', command: 'npm run test', color: 'text-blue-400' },
 ]
 

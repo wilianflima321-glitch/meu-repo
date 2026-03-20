@@ -221,14 +221,14 @@ function DiffLineComponent({ line, showLineNumbers, highlightSyntax }: DiffLineP
     unchanged: 'bg-transparent',
     added: 'bg-emerald-500/10',
     removed: 'bg-red-500/10',
-    modified: 'bg-amber-500/10',
+    modified: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
   }[line.type]
   
   const textColor = {
     unchanged: 'text-slate-300',
     added: 'text-emerald-300',
     removed: 'text-red-300',
-    modified: 'text-amber-300',
+    modified: 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]',
   }[line.type]
   
   const marker = {
@@ -497,7 +497,7 @@ export default function DiffViewer({
             <span className="text-slate-500">|</span>
             <span className="text-slate-400">{stats.hunks} hunks</span>
             {stats.pending > 0 && (
-              <span className="text-amber-400">{stats.pending} pending</span>
+              <span className="text-[var(--aethel-warning-light)]">{stats.pending} pending</span>
             )}
           </div>
         </div>

@@ -1,9 +1,9 @@
-/**
- * LowBalanceModal - Modal Não-Intrusivo de Saldo Baixo
+﻿/**
+ * LowBalanceModal - Modal NÃ£o-Intrusivo de Saldo Baixo
  * 
- * Aparece quando o saldo do usuário está crítico.
- * Design não-bloqueante com opção de "depois".
- * Animações suaves e não-agressivas.
+ * Aparece quando o saldo do usuÃ¡rio estÃ¡ crÃ­tico.
+ * Design nÃ£o-bloqueante com opÃ§Ã£o de "depois".
+ * AnimaÃ§Ãµes suaves e nÃ£o-agressivas.
  * 
  * @see ROADMAP_MONETIZACAO_XP_FINAL.md
  * 
@@ -72,19 +72,19 @@ const DEFAULT_PACKAGES: CreditPackage[] = [
 
 const BALANCE_MESSAGES: Record<BalanceLevel, { title: string; subtitle: string; color: string; icon: React.ReactNode }> = {
   low: {
-    title: 'Créditos acabando',
-    subtitle: 'Recarregue para continuar criando sem interrupções',
-    color: 'text-amber-400',
+    title: 'CrÃ©ditos acabando',
+    subtitle: 'Recarregue para continuar criando sem interrupÃ§Ãµes',
+    color: 'text-[var(--aethel-warning-light)]',
     icon: <Clock className="w-6 h-6" />,
   },
   critical: {
     title: 'Saldo muito baixo',
-    subtitle: 'Restam poucos créditos para operações de IA',
+    subtitle: 'Restam poucos crÃ©ditos para operaÃ§Ãµes de IA',
     color: 'text-orange-400',
     icon: <AlertTriangle className="w-6 h-6" />,
   },
   empty: {
-    title: 'Créditos esgotados',
+    title: 'CrÃ©ditos esgotados',
     subtitle: 'Recarregue para continuar usando recursos de IA',
     color: 'text-red-400',
     icon: <Coins className="w-6 h-6" />,
@@ -133,14 +133,14 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
             <span className="text-2xl font-bold text-white">
               {pkg.credits.toLocaleString()}
             </span>
-            <span className="text-sm text-zinc-400">créditos</span>
+            <span className="text-sm text-zinc-400">crÃ©ditos</span>
           </div>
           
           {pkg.bonus && (
             <div className="flex items-center gap-1 mt-1 text-emerald-400">
               <Gift className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">
-                +{pkg.bonus.toLocaleString()} bônus
+                +{pkg.bonus.toLocaleString()} bÃ´nus
               </span>
             </div>
           )}
@@ -177,7 +177,7 @@ function UsageEstimate({ minutes }: { minutes: number }) {
   if (minutes <= 0) {
     return (
       <p className="text-xs text-red-400">
-        Você não tem créditos para operações de IA
+        VocÃª nÃ£o tem crÃ©ditos para operaÃ§Ãµes de IA
       </p>
     );
   }
@@ -278,7 +278,7 @@ export function LowBalanceModal({
                   relative w-14 h-14 rounded-2xl flex items-center justify-center
                   ${balanceLevel === 'empty' ? 'bg-red-500/20' 
                     : balanceLevel === 'critical' ? 'bg-orange-500/20' 
-                    : 'bg-amber-500/20'}
+                    : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'}
                 `}>
                   <motion.div
                     animate={{ 
@@ -299,7 +299,7 @@ export function LowBalanceModal({
                     className={`absolute inset-0 rounded-2xl ${
                       balanceLevel === 'empty' ? 'bg-red-500/20'
                         : balanceLevel === 'critical' ? 'bg-orange-500/20'
-                        : 'bg-amber-500/20'
+                        : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'
                     }`}
                     animate={{ 
                       scale: [1, 1.3],
@@ -331,7 +331,7 @@ export function LowBalanceModal({
                     <span className="text-lg font-bold text-white">
                       {currentBalance.toLocaleString()}
                     </span>
-                    <span className="text-sm text-zinc-500">créditos</span>
+                    <span className="text-sm text-zinc-500">crÃ©ditos</span>
                   </div>
                 </div>
                 <UsageEstimate minutes={estimatedUsage} />
@@ -341,7 +341,7 @@ export function LowBalanceModal({
             {/* Package selection */}
             <div className="p-6">
               <p className="text-sm font-medium text-zinc-300 mb-3">
-                Escolha um pacote de créditos
+                Escolha um pacote de crÃ©ditos
               </p>
               
               <div className="grid grid-cols-2 gap-3">
@@ -363,11 +363,11 @@ export function LowBalanceModal({
                 </div>
                 <div className="flex items-center gap-1">
                   <Zap className="w-3.5 h-3.5" />
-                  Ativação instantânea
+                  AtivaÃ§Ã£o instantÃ¢nea
                 </div>
                 <div className="flex items-center gap-1">
                   <Star className="w-3.5 h-3.5" />
-                  Sem expiração
+                  Sem expiraÃ§Ã£o
                 </div>
               </div>
             </div>
@@ -423,10 +423,10 @@ export function LowBalanceModal({
                   <TrendingUp className="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-violet-300">
-                      Você usa muitos créditos?
+                      VocÃª usa muitos crÃ©ditos?
                     </p>
                     <p className="text-xs text-violet-400/70 mt-1">
-                      Considere o plano Pro para créditos ilimitados por $49/mês
+                      Considere o plano Pro para crÃ©ditos ilimitados por $49/mÃªs
                     </p>
                     <button className="flex items-center gap-1 mt-2 text-xs font-medium 
                                      text-violet-400 hover:text-violet-300 transition-colors">
@@ -449,9 +449,9 @@ export function LowBalanceModal({
 // ============================================================================
 
 /**
- * LowBalanceModalAuto - Versão auto-gerenciada
- * Monitora o saldo automaticamente e exibe o modal quando necessário.
- * Use este componente no ClientLayout para funcionalidade automática.
+ * LowBalanceModalAuto - VersÃ£o auto-gerenciada
+ * Monitora o saldo automaticamente e exibe o modal quando necessÃ¡rio.
+ * Use este componente no ClientLayout para funcionalidade automÃ¡tica.
  */
 export function LowBalanceModalAuto() {
   const [isOpen, setIsOpen] = useState(false);
@@ -470,12 +470,12 @@ export function LowBalanceModalAuto() {
           const balance = data.balance || 0;
           setCurrentBalance(balance);
 
-          // Determinar nível de alerta
+          // Determinar nÃ­vel de alerta
           let level: BalanceLevel = 'low';
           if (balance <= 0) level = 'empty';
           else if (balance < 50) level = 'critical';
           else if (balance < 200) level = 'low';
-          else return; // Saldo ok, não mostrar modal
+          else return; // Saldo ok, nÃ£o mostrar modal
 
           setBalanceLevel(level);
 
@@ -491,7 +491,7 @@ export function LowBalanceModalAuto() {
           }
         }
       } catch (e) {
-        // Silently fail - não interromper UX
+        // Silently fail - nÃ£o interromper UX
       }
     };
 
@@ -527,7 +527,7 @@ export function LowBalanceModalAuto() {
       onRemindLater={handleRemindLater}
       balanceLevel={balanceLevel}
       currentBalance={currentBalance}
-      estimatedUsage={Math.floor(currentBalance / 2)} // ~2 créditos/min estimado
+      estimatedUsage={Math.floor(currentBalance / 2)} // ~2 crÃ©ditos/min estimado
     />
   );
 }

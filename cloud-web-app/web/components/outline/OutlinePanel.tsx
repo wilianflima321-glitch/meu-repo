@@ -105,7 +105,7 @@ const getSymbolIcon = (kind: SymbolKind) => {
     case 'package':
       return <Package {...iconProps} className="text-blue-400" />;
     case 'class':
-      return <Box {...iconProps} className="text-amber-400" />;
+      return <Box {...iconProps} className="text-[var(--aethel-warning-light)]" />;
     case 'method':
     case 'function':
     case 'constructor':

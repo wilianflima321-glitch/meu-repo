@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AETHEL ENGINE - Pixel Streaming React Component
  * 
  * Full-featured React component for cloud GPU streaming.
@@ -226,7 +226,7 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                     </>
                 ) : (
                     <>
-                        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/30">
+                        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]">
                             <Play className="w-10 h-10 text-white ml-1" />
                         </div>
                         <div className="text-white font-medium text-lg">Cloud Rendering</div>

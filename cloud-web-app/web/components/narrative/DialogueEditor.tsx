@@ -1,7 +1,7 @@
-/**
+﻿/**
  * DIALOGUE EDITOR - Aethel Engine
  * 
- * Editor visual baseado em nós para criação de diálogos ramificados.
+ * Editor visual baseado em nÃ³s para criaÃ§Ã£o de diÃ¡logos ramificados.
  * Sistema profissional inspirado em Ink, Yarn Spinner e Articy:Draft.
  * 
  * FEATURES:
@@ -206,11 +206,11 @@ function ChoiceNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   const choices = data.choices || [];
   
   return (
-    <div className={`w-64 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-amber-500 border-amber-500' : 'border-slate-600'}`}>
-      <Handle type="target" position={Position.Top} className="!bg-amber-400" />
+    <div className={`w-64 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]' : 'border-slate-600'}`}>
+      <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-warning-light)]" />
       
       <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
-        <GitBranch className="w-4 h-4 text-amber-400" />
+        <GitBranch className="w-4 h-4 text-[var(--aethel-warning-light)]" />
         <span className="font-medium text-sm text-white">{data.label}</span>
       </div>
       
@@ -218,15 +218,15 @@ function ChoiceNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
         {choices.map((choice, i) => (
           <div 
             key={choice.id} 
-            className="relative bg-amber-900/30 rounded p-2 pr-4 text-xs text-amber-200"
+            className="relative bg-[color-mix(in_srgb,var(--aethel-warning-dark)_30%,transparent)] rounded p-2 pr-4 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]"
           >
-            <span className="text-amber-400 mr-1">{i + 1}.</span>
+            <span className="text-[var(--aethel-warning-light)] mr-1">{i + 1}.</span>
             {choice.text}
             <Handle
               type="source"
               position={Position.Right}
               id={choice.id}
-              className="!bg-amber-400 !right-0"
+              className="!bg-[var(--aethel-warning-light)] !right-0"
               style={{ top: `${(i + 1) * 36}px` }}
             />
           </div>
@@ -248,7 +248,7 @@ function ConditionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   const condition = conditions[0];
   
   return (
-    <div className={`w-56 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-sky-500 border-purple-500' : 'border-slate-600'}`}>
+    <div className={`w-56 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-[var(--aethel-info)] border-[var(--aethel-primary)]' : 'border-slate-600'}`}>
       <Handle type="target" position={Position.Top} className="!bg-blue-400" />
       
       <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
@@ -573,7 +573,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           {data.nodeType === 'dialogue' && <MessageSquare className="w-5 h-5 text-blue-400" />}
-          {data.nodeType === 'choice' && <GitBranch className="w-5 h-5 text-amber-400" />}
+          {data.nodeType === 'choice' && <GitBranch className="w-5 h-5 text-[var(--aethel-warning-light)]" />}
           {data.nodeType === 'condition' && <Code className="w-5 h-5 text-blue-400" />}
           {data.nodeType === 'action' && <Zap className="w-5 h-5 text-cyan-400" />}
           <span className="font-medium capitalize">{data.nodeType}</span>
@@ -632,7 +632,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
             <label className="text-xs text-slate-400">Choices</label>
             <button
               onClick={addChoice}
-              className="flex items-center gap-1 px-2 py-1 bg-amber-600/30 hover:bg-amber-600/50 rounded text-xs"
+              className="flex items-center gap-1 px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-warning-dark)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning-dark)_50%,transparent)] rounded text-xs"
             >
               <Plus className="w-3 h-3" />
               Add Choice
@@ -642,7 +642,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
           {(data.choices || []).map((choice, i) => (
             <div key={choice.id} className="bg-slate-800/50 rounded p-2 mb-2">
               <div className="flex gap-2">
-                <span className="text-amber-400 text-sm">{i + 1}.</span>
+                <span className="text-[var(--aethel-warning-light)] text-sm">{i + 1}.</span>
                 <input
                   value={choice.text}
                   onChange={(e) => {
@@ -807,7 +807,7 @@ function PreviewPanel({
             onClick={onNext}
             className="w-full py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm"
           >
-            Continue →
+            Continue â†’
           </button>
         </div>
       )}
@@ -818,7 +818,7 @@ function PreviewPanel({
             <button
               key={choice.id}
               onClick={() => onChoose(choice.id)}
-              className="w-full p-3 bg-amber-900/30 hover:bg-amber-900/50 rounded text-left text-sm"
+              className="w-full p-3 bg-[color-mix(in_srgb,var(--aethel-warning-dark)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning-dark)_50%,transparent)] rounded text-left text-sm"
             >
               {choice.text}
             </button>
@@ -1010,7 +1010,7 @@ export default function DialogueEditor({
             </button>
             <button
               onClick={() => addNode('choice')}
-              className="flex items-center gap-1 px-3 py-2 bg-amber-600 hover:bg-amber-500 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] rounded text-sm"
             >
               <GitBranch className="w-4 h-4" />
               Choice

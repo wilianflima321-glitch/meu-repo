@@ -105,7 +105,7 @@ export default function Settings() {
           </h2>
           <div className="aethel-flex aethel-items-center aethel-gap-3">
             {hasUnsavedChanges && (
-              <span className="text-sm text-amber-400 bg-amber-500/20 px-2 py-1 rounded">
+              <span className="text-sm text-[var(--aethel-warning-light)] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] px-2 py-1 rounded">
                 Unsaved changes
               </span>
             )}

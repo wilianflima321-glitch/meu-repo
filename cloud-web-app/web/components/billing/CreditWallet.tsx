@@ -1,10 +1,10 @@
-/**
- * CreditWallet - UI Completa de Carteira de Créditos
+﻿/**
+ * CreditWallet - UI Completa de Carteira de créditos
  * 
- * Painel que mostra saldo, histórico e opções de recarga.
+ * Painel que mostra saldo, histÃ³rico e opÃ§Ãµes de recarga.
  * Integra com /api/wallet/* endpoints.
  * 
- * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - Seção 4
+ * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - SeÃ§Ã£o 4
  */
 
 'use client';
@@ -71,7 +71,7 @@ interface CreditWalletProps {
 }
 
 // ============================================================================
-// PACOTES DE CRÉDITOS
+// PACOTES DE CRÃ‰DITOS
 // ============================================================================
 
 const CREDIT_PACKAGES: CreditPackage[] = [
@@ -123,15 +123,15 @@ interface StatCardProps {
 function StatCard({ icon, label, value, subValue, trend, color = 'default' }: StatCardProps) {
   const colorClasses = {
     default: 'bg-zinc-800 border-zinc-700',
-    warning: 'bg-amber-500/10 border-amber-500/30',
+    warning: 'bg-[var(--aethel-warning)]/10 border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]',
     success: 'bg-green-500/10 border-green-500/30',
     danger: 'bg-red-500/10 border-red-500/30',
   };
 
   const iconColors = {
     default: 'text-zinc-400',
-    warning: 'text-amber-400',
-    success: 'text-green-400',
+    warning: 'text-[var(--aethel-warning-light)]',
+    success: 'text-[var(--aethel-success-light)]',
     danger: 'text-red-400',
   };
 
@@ -140,7 +140,7 @@ function StatCard({ icon, label, value, subValue, trend, color = 'default' }: St
       <div className="flex items-center justify-between mb-2">
         <span className={iconColors[color]}>{icon}</span>
         {trend && (
-          <span className={trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-zinc-500'}>
+          <span className={trend === 'up' ? 'text-[var(--aethel-success-light)]' : trend === 'down' ? 'text-red-400' : 'text-zinc-500'}>
             {trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
           </span>
         )}
@@ -164,16 +164,16 @@ function TransactionItem({ transaction }: TransactionItemProps) {
   const isPositive = transaction.type === 'purchase' || transaction.type === 'bonus' || transaction.type === 'refund';
   
   const typeIcons = {
-    usage: <Zap className="w-4 h-4 text-blue-400" />,
-    purchase: <CreditCard className="w-4 h-4 text-green-400" />,
-    bonus: <Gift className="w-4 h-4 text-blue-400" />,
-    refund: <RefreshCw className="w-4 h-4 text-amber-400" />,
-    subscription: <Crown className="w-4 h-4 text-amber-400" />,
+    usage: <Zap className="w-4 h-4 text-[var(--aethel-info-light)]" />,
+    purchase: <CreditCard className="w-4 h-4 text-[var(--aethel-success-light)]" />,
+    bonus: <Gift className="w-4 h-4 text-[var(--aethel-info-light)]" />,
+    refund: <RefreshCw className="w-4 h-4 text-[var(--aethel-warning-light)]" />,
+    subscription: <Crown className="w-4 h-4 text-[var(--aethel-warning-light)]" />,
   };
 
   const statusColors = {
-    completed: 'text-green-400',
-    pending: 'text-amber-400',
+    completed: 'text-[var(--aethel-success-light)]',
+    pending: 'text-[var(--aethel-warning-light)]',
     failed: 'text-red-400',
   };
 
@@ -189,7 +189,7 @@ function TransactionItem({ transaction }: TransactionItemProps) {
             <span>{new Date(transaction.timestamp).toLocaleDateString()}</span>
             {transaction.operation && (
               <>
-                <span>•</span>
+                <span>â€¢</span>
                 <span>{transaction.operation}</span>
               </>
             )}
@@ -197,11 +197,11 @@ function TransactionItem({ transaction }: TransactionItemProps) {
         </div>
       </div>
       <div className="text-right">
-        <p className={`font-medium ${isPositive ? 'text-green-400' : 'text-zinc-300'}`}>
+        <p className={`font-medium ${isPositive ? 'text-[var(--aethel-success-light)]' : 'text-zinc-300'}`}>
           {isPositive ? '+' : '-'}{Math.abs(transaction.amount)}
         </p>
         <p className={`text-xs ${statusColors[transaction.status]}`}>
-          {transaction.status === 'completed' ? 'Concluído' : transaction.status === 'pending' ? 'Pendente' : 'Falhou'}
+          {transaction.status === 'completed' ? 'ConcluÃ­do' : transaction.status === 'pending' ? 'Pendente' : 'Falhou'}
         </p>
       </div>
     </div>
@@ -226,9 +226,9 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
       className={`
         relative p-4 rounded-xl border text-left transition-all hover:scale-[1.02]
         ${pkg.popular 
-          ? 'bg-blue-500/10 border-purple-500/50 ring-1 ring-sky-500/30' 
+          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' 
           : pkg.bestValue 
-          ? 'bg-green-500/10 border-green-500/50 ring-1 ring-green-500/30'
+          ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
           : 'bg-zinc-800 border-zinc-700 hover:border-zinc-600'
         }
       `}
@@ -237,9 +237,9 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
       {(pkg.popular || pkg.bestValue) && (
         <span className={`
           absolute -top-2 left-4 px-2 py-0.5 text-xs font-medium rounded-full
-          ${pkg.popular ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'}
+          ${pkg.popular ? 'bg-[var(--aethel-info)] text-white' : 'bg-[var(--aethel-success)] text-white'}
         `}>
-          {pkg.popular ? '⭐ Popular' : '💎 Best Value'}
+          {pkg.popular ? 'Popular' : 'Melhor valor'}
         </span>
       )}
 
@@ -251,11 +251,11 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
             <span className="text-sm font-normal text-zinc-400 ml-1">créditos</span>
           </p>
         </div>
-        <Coins className={`w-8 h-8 ${pkg.popular ? 'text-blue-400' : pkg.bestValue ? 'text-green-400' : 'text-amber-400'}`} />
+        <Coins className={`w-8 h-8 ${pkg.popular ? 'text-[var(--aethel-info-light)]' : pkg.bestValue ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-warning-light)]'}`} />
       </div>
 
       {pkg.bonus > 0 && (
-        <div className="flex items-center gap-1 text-sm text-green-400 mb-3">
+        <div className="flex items-center gap-1 text-sm text-[var(--aethel-success-light)] mb-3">
           <Gift className="w-4 h-4" />
           +{pkg.bonus} bônus
         </div>
@@ -371,18 +371,18 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-zinc-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-            <Wallet className="w-5 h-5 text-amber-400" />
+          <div className="w-10 h-10 rounded-xl bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] flex items-center justify-center">
+            <Wallet className="w-5 h-5 text-[var(--aethel-warning-light)]" />
           </div>
           <div>
-            <h2 className="font-semibold text-white">Carteira de Créditos</h2>
+            <h2 className="font-semibold text-white">Carteira de créditos</h2>
             <p className="text-xs text-zinc-500">Plano {wallet?.plan}</p>
           </div>
         </div>
         
         {/* Low balance warning */}
         {isLowBalance && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/20 rounded-lg text-amber-400 text-sm">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] rounded-lg text-[var(--aethel-warning-light)] text-sm">
             <AlertCircle className="w-4 h-4" />
             Saldo baixo
           </div>
@@ -393,7 +393,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       <div className="flex border-b border-zinc-800">
         {[
           { id: 'overview', label: 'Resumo', icon: <Coins className="w-4 h-4" /> },
-          { id: 'history', label: 'Histórico', icon: <Clock className="w-4 h-4" /> },
+          { id: 'history', label: 'HistÃ³rico', icon: <Clock className="w-4 h-4" /> },
           { id: 'purchase', label: 'Comprar', icon: <CreditCard className="w-4 h-4" /> },
         ].map((tab) => (
           <button
@@ -402,7 +402,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             className={`
               flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors
               ${activeTab === tab.id
-                ? 'text-white border-b-2 border-purple-500'
+                ? 'text-white border-b-2 border-[var(--aethel-primary)]'
                 : 'text-zinc-500 hover:text-zinc-300'
               }
             `}
@@ -422,7 +422,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <div className="grid grid-cols-3 gap-4">
               <StatCard
                 icon={<Coins className="w-5 h-5" />}
-                label="Disponível"
+                label="DisponÃ­vel"
                 value={wallet.available.toLocaleString()}
                 subValue={wallet.reserved > 0 ? `${wallet.reserved} reservados` : undefined}
                 color={isLowBalance ? 'warning' : 'default'}
@@ -437,7 +437,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
               />
               <StatCard
                 icon={<Gift className="w-5 h-5" />}
-                label="Bônus"
+                label="bônus"
                 value={wallet.bonusCredits.toLocaleString()}
                 color="success"
               />
@@ -452,7 +452,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
               <div className="h-2 bg-zinc-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
-                    usagePercent > 90 ? 'bg-red-500' : usagePercent > 70 ? 'bg-amber-500' : 'bg-green-500'
+                    usagePercent > 90 ? 'bg-red-500' : usagePercent > 70 ? 'bg-[var(--aethel-warning)]' : 'bg-green-500'
                   }`}
                   style={{ width: `${Math.min(usagePercent, 100)}%` }}
                 />
@@ -469,14 +469,14 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
                 className="flex items-center justify-center gap-2 p-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-medium transition-colors"
               >
                 <Sparkles className="w-5 h-5" />
-                Comprar Créditos
+                Comprar créditos
               </button>
               {onUpgrade && (
                 <button
                   onClick={onUpgrade}
                   className="flex items-center justify-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-white font-medium transition-colors"
                 >
-                  <Crown className="w-5 h-5 text-amber-400" />
+                  <Crown className="w-5 h-5 text-[var(--aethel-warning-light)]" />
                   Upgrade de Plano
                 </button>
               )}
@@ -490,7 +490,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             {transactions.length === 0 ? (
               <div className="text-center py-8 text-zinc-500">
                 <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>Nenhuma transação ainda</p>
+                <p>Nenhuma transaÃ§Ã£o ainda</p>
               </div>
             ) : (
               <div className="space-y-1">
@@ -526,9 +526,9 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
                 <div className="text-sm text-zinc-400">
                   <p className="font-medium text-zinc-300 mb-1">Sobre os créditos</p>
                   <ul className="space-y-1 text-xs">
-                    <li>• Créditos não expiram enquanto a conta estiver ativa</li>
-                    <li>• Chat simples: 1 crédito / Squad Task: ~20 créditos</li>
-                    <li>• Bônus são adicionados automaticamente na compra</li>
+                    <li>â€¢ créditos nÃ£o expiram enquanto a conta estiver ativa</li>
+                    <li>â€¢ Chat simples: 1 crÃ©dito / Squad Task: ~20 créditos</li>
+                    <li>â€¢ bônus sÃ£o adicionados automaticamente na compra</li>
                   </ul>
                 </div>
               </div>

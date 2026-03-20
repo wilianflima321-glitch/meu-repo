@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
@@ -70,7 +70,7 @@ export default function ContactSalesPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.10),transparent_30%),#020617] text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-indigo-500/[0.08] blur-[160px]" />
+        <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_8%,transparent)] blur-[160px]" />
         <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-sky-500/[0.06] blur-[150px]" />
       </div>
 
@@ -80,7 +80,7 @@ export default function ContactSalesPage() {
         <div className="mx-auto max-w-7xl space-y-10">
           <section className="grid gap-8 lg:grid-cols-[minmax(0,0.94fr)_minmax(340px,0.72fr)] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-400/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-100">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">
                 Enterprise conversation
               </div>
               <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
@@ -118,9 +118,9 @@ export default function ContactSalesPage() {
                   priority
                 />
               </div>
-              <div className="mt-5 rounded-[24px] border border-amber-400/20 bg-amber-400/10 p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-100">Estado atual</p>
-                <p className="mt-3 text-sm leading-6 text-amber-50/85">
+              <div className="mt-5 rounded-[24px] border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-warning-light)]">Estado atual</p>
+                <p className="mt-3 text-sm leading-6 text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
                   A base tecnica e forte, mas billing runtime, preview sandbox default e evidencia L4 continua dependente de ativacao externa.
                 </p>
               </div>
@@ -149,7 +149,7 @@ export default function ContactSalesPage() {
                       type="text"
                       value={formData.name}
                       onChange={(event) => setFormData({ ...formData, name: event.target.value })}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-indigo-400/35 focus:outline-none focus:ring-2 focus:ring-indigo-400/15"
+                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
                       placeholder="Seu nome"
                     />
                   </div>
@@ -159,7 +159,7 @@ export default function ContactSalesPage() {
                       type="email"
                       value={formData.email}
                       onChange={(event) => setFormData({ ...formData, email: event.target.value })}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-indigo-400/35 focus:outline-none focus:ring-2 focus:ring-indigo-400/15"
+                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
                       placeholder="voce@empresa.com"
                     />
                   </div>
@@ -171,7 +171,7 @@ export default function ContactSalesPage() {
                     type="text"
                     value={formData.company}
                     onChange={(event) => setFormData({ ...formData, company: event.target.value })}
-                    className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-indigo-400/35 focus:outline-none focus:ring-2 focus:ring-indigo-400/15"
+                    className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
                     placeholder="Nome da empresa"
                   />
                 </div>
@@ -183,7 +183,7 @@ export default function ContactSalesPage() {
                       type="text"
                       value={formData.role}
                       onChange={(event) => setFormData({ ...formData, role: event.target.value })}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-indigo-400/35 focus:outline-none focus:ring-2 focus:ring-indigo-400/15"
+                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
                       placeholder="Seu cargo"
                     />
                   </div>
@@ -192,7 +192,7 @@ export default function ContactSalesPage() {
                     <select
                       value={formData.teamSize}
                       onChange={(event) => setFormData({ ...formData, teamSize: event.target.value })}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white focus:border-indigo-400/35 focus:outline-none focus:ring-2 focus:ring-indigo-400/15"
+                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
                     >
                       <option value="" className="bg-slate-950">Selecione</option>
                       <option value="1-10" className="bg-slate-950">1-10</option>
@@ -210,7 +210,7 @@ export default function ContactSalesPage() {
                     rows={5}
                     value={formData.message}
                     onChange={(event) => setFormData({ ...formData, message: event.target.value })}
-                    className="w-full resize-none rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-white placeholder:text-slate-500 focus:border-indigo-400/35 focus:outline-none focus:ring-2 focus:ring-indigo-400/15"
+                    className="w-full resize-none rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
                     placeholder="Ex: necessidades de compliance, preview sandbox, billing enterprise, SSO, audit trail."
                   />
                 </div>

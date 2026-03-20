@@ -175,7 +175,7 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
         <div key={`${variable.name}-${idx}`}>
           <div
             className={`flex items-center gap-1 px-3 py-0.5 hover:bg-slate-700/50 cursor-pointer ${
-              variable.changed ? 'bg-amber-500/10' : ''
+              variable.changed ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]' : ''
             }`}
             style={{ paddingLeft: `${depth * 16 + 12}px` }}
             onClick={() => variable.expandable && toggleExpanded(variable.name)}
@@ -191,7 +191,7 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
               <span className="w-3" />
             )}
             
-            <span className={`${variable.changed ? 'text-amber-300' : 'text-sky-300'}`}>
+            <span className={`${variable.changed ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-sky-300'}`}>
               {variable.name}
             </span>
             <span className="text-slate-500">:</span>
@@ -223,7 +223,7 @@ function getTypeColor(type: string): string {
     case 'boolean': return 'text-blue-300'
     case 'null':
     case 'undefined': return 'text-slate-500'
-    case 'function': return 'text-amber-300'
+    case 'function': return 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]'
     case 'object':
     case 'array': return 'text-cyan-300'
     default: return 'text-slate-300'
@@ -327,7 +327,7 @@ function CallStack({ frames, selectedFrameId, onSelectFrame }: CallStackProps) {
                 : 'hover:bg-slate-700/50'
             }`}
           >
-            <FunctionSquare className="w-3 h-3 text-amber-400 flex-shrink-0" />
+            <FunctionSquare className="w-3 h-3 text-[var(--aethel-warning-light)] flex-shrink-0" />
             <span className="text-white truncate">{frame.name}</span>
             <span className="ml-auto text-slate-500 text-[10px]">
               {frame.filePath.split('/').pop()}:{frame.line}
@@ -443,7 +443,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
   const getMessageIcon = (type: ConsoleMessage['type']) => {
     switch (type) {
       case 'error': return <XCircle className="w-3 h-3 text-red-400" />
-      case 'warn': return <AlertCircle className="w-3 h-3 text-amber-400" />
+      case 'warn': return <AlertCircle className="w-3 h-3 text-[var(--aethel-warning-light)]" />
       case 'info': return <Info className="w-3 h-3 text-blue-400" />
       case 'debug': return <Code className="w-3 h-3 text-slate-400" />
       default: return <ChevronRight className="w-3 h-3 text-slate-500" />
@@ -453,7 +453,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
   const getMessageColor = (type: ConsoleMessage['type']) => {
     switch (type) {
       case 'error': return 'text-red-300 bg-red-500/10'
-      case 'warn': return 'text-amber-300 bg-amber-500/10'
+      case 'warn': return 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]'
       case 'info': return 'text-blue-300'
       default: return 'text-slate-300'
     }
@@ -650,7 +650,7 @@ export default function DebugPanel({
         ) : (
           <button
             onClick={onPause}
-            className="p-1.5 bg-amber-600 hover:bg-amber-500 rounded text-white"
+            className="p-1.5 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] rounded text-white"
             title="Pause (F6)"
           >
             <Pause className="w-4 h-4" />
@@ -712,7 +712,7 @@ export default function DebugPanel({
           {demoSession.name}
         </span>
         <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
-          isPaused ? 'bg-amber-500/20 text-amber-400' :
+          isPaused ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]' :
           isRunning ? 'bg-emerald-500/20 text-emerald-400' :
           'bg-slate-700 text-slate-400'
         }`}>

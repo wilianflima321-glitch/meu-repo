@@ -112,10 +112,10 @@ export default function GettingStartedPage() {
           {STEPS.map((step, i) => (
             <div key={step.number} className="relative">
               {i < STEPS.length - 1 && (
-                <div className="absolute left-5 top-12 h-[calc(100%+1rem)] w-px bg-gradient-to-b from-indigo-500/40 to-transparent" />
+                <div className="absolute left-5 top-12 h-[calc(100%+1rem)] w-px bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] to-transparent" />
               )}
               <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-sm font-bold text-white">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--aethel-primary-dark)] to-[var(--aethel-accent-dark)] text-sm font-bold text-white">
                   {step.number}
                 </div>
                 <div className="flex-1">

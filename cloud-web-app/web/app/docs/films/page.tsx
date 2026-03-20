@@ -53,7 +53,7 @@ export default function FilmsDocsPage() {
           <ArrowLeft className="h-4 w-4" /> Back to Docs
         </Link>
 
-        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-400">
+        <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-accent)_12%,transparent)] px-3 py-1 text-xs font-semibold text-[var(--aethel-accent-light)]">
           L2 Experimental
         </div>
         <h1 className="text-4xl font-bold">Films Module</h1>
@@ -73,7 +73,7 @@ export default function FilmsDocsPage() {
             return (
               <div key={cap.title} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <Icon className="h-5 w-5 text-purple-400" />
+                  <Icon className="h-5 w-5 text-[var(--aethel-accent-light)]" />
                   <h3 className="font-semibold">{cap.title}</h3>
                   <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
                     cap.status === 'available' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' :

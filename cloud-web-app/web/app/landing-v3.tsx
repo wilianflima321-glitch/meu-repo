@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -128,7 +128,7 @@ function ScreenshotCard({
         </div>
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]" />
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function LandingPageV3() {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_24%),#020617] text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-cyan-500/[0.08] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[540px] w-[540px] rounded-full bg-indigo-500/[0.08] blur-[170px]" />
+        <div className="absolute bottom-0 right-1/4 h-[540px] w-[540px] rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_8%,transparent)] blur-[170px]" />
       </div>
 
       <PublicHeader />
@@ -203,7 +203,7 @@ export default function LandingPageV3() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300">Apps como dominio principal</span>
                 <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-200">Readiness visivel</span>
-                <span className="rounded-full border border-indigo-400/20 bg-indigo-400/10 px-3 py-1.5 text-xs text-indigo-100">Rollback deterministico</span>
+                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-primary-light)]">Rollback deterministico</span>
               </div>
 
               <form onSubmit={handleSubmit} className="mt-8 max-w-2xl">
@@ -429,7 +429,7 @@ export default function LandingPageV3() {
           <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.8fr)] lg:items-center">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-100">Fluxo de produto</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">Fluxo de produto</p>
                 <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
                   Fluxo unico, do onboarding ao estado operacional.
                 </h2>

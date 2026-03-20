@@ -1,7 +1,7 @@
-/**
- * Glassmorphism UI Components - Nível Studio L5
+﻿/**
+ * Glassmorphism UI Components - NÃ­vel Studio L5
  * 
- * Componentes com efeitos de vidro, glows dinâmicos e transições de elite
+ * Componentes com efeitos de vidro, glows dinÃ¢micos e transiÃ§Ãµes de elite
  * Inspirado em: Vercel, Linear, Cursor, Figma
  */
 
@@ -11,7 +11,7 @@ import React, { ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 /**
- * Padrões de animação de elite
+ * PadrÃµes de animaÃ§Ã£o de elite
  */
 export const eliteAnimations = {
   containerVariants: {
@@ -105,7 +105,7 @@ export function GlassCard({
     >
       {/* Glow effect background */}
       {glow && (
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] via-transparent to-[color-mix(in_srgb,var(--aethel-accent)_10%,transparent)] opacity-0 hover:opacity-100 transition-opacity duration-300" />
       )}
       
       <div className="relative z-10">{children}</div>
@@ -265,7 +265,7 @@ export function PulseGlow({
     blue: 'shadow-[0_0_60px_rgba(59,130,246,0.4)]',
     green: 'shadow-[0_0_60px_rgba(34,197,94,0.4)]',
     red: 'shadow-[0_0_60px_rgba(239,68,68,0.4)]',
-    purple: 'shadow-[0_0_60px_rgba(168,85,247,0.4)]',
+    purple: 'shadow-[0_0_60px_color-mix(in_srgb,var(--aethel-accent)_40%,transparent)]',
     cyan: 'shadow-[0_0_60px_rgba(34,211,238,0.4)]',
   }
 
@@ -310,7 +310,7 @@ export function AnimatedGradientBg({
           backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
         }}
         transition={{ duration: 15, repeat: Infinity }}
-        className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 bg-[length:200%_200%]"
+        className="absolute inset-0 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] via-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-secondary)_20%,transparent)] bg-[length:200%_200%]"
       />
       <div className="relative z-10">{children}</div>
     </div>
@@ -481,7 +481,7 @@ export function AnimatedProgressBar({
     blue: 'from-blue-400 to-blue-600',
     green: 'from-green-400 to-green-600',
     red: 'from-red-400 to-red-600',
-    purple: 'from-purple-400 to-purple-600',
+    purple: 'from-[var(--aethel-accent-light)] to-[var(--aethel-accent-dark)]',
   }
 
   return (
@@ -519,7 +519,7 @@ export function FloatingActionButton({
     blue: 'from-blue-500 to-blue-600 hover:shadow-blue-500/50',
     green: 'from-green-500 to-green-600 hover:shadow-green-500/50',
     red: 'from-red-500 to-red-600 hover:shadow-red-500/50',
-    purple: 'from-purple-500 to-purple-600 hover:shadow-purple-500/50',
+    purple: 'from-[var(--aethel-accent)] to-[var(--aethel-accent-dark)] hover:shadow-[0_0_24px_color-mix(in_srgb,var(--aethel-accent)_50%,transparent)]',
   }
 
   return (

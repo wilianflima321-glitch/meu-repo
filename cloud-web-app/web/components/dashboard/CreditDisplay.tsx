@@ -76,7 +76,7 @@ export function CreditDisplay({ collapsed }: CreditDisplayProps) {
       </div>
       
       <div className="space-y-1">
-        <Progress value={percent} className="h-1.5 bg-[var(--aethel-surface-tertiary)]" indicatorClassName="bg-gradient-to-r from-amber-500 to-sky-600" />
+        <Progress value={percent} className="h-1.5 bg-[var(--aethel-surface-tertiary)]" indicatorClassName="bg-gradient-to-r from-[var(--aethel-warning)] to-sky-600" />
         <div className="flex justify-between text-[10px] text-[var(--aethel-text-tertiary)]">
           <span>{percent.toFixed(0)}% Utilizado</span>
           <span className="text-[var(--aethel-warning)]/80 hover:text-[var(--aethel-warning)] cursor-pointer transition-colors">Comprar Mais</span>

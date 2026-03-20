@@ -30,7 +30,7 @@ export default function AuthExperiencePanel({
     <aside className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,14,24,0.96),rgba(8,11,19,0.92))] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.45)] sm:p-8">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[-10%] top-[-12%] h-56 w-56 rounded-full bg-sky-500/15 blur-3xl" />
-        <div className="absolute bottom-[-18%] right-[-8%] h-56 w-56 rounded-full bg-indigo-500/18 blur-3xl" />
+        <div className="absolute bottom-[-18%] right-[-8%] h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] blur-3xl" />
       </div>
 
       <div className="relative z-10">

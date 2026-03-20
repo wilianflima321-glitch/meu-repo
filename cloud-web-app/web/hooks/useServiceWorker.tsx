@@ -252,14 +252,14 @@ export function UpdatePrompt() {
   if (!isUpdateAvailable) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-indigo-600 text-white p-4 rounded-lg shadow-lg flex items-center gap-4">
+    <div className="fixed bottom-4 right-4 z-50 bg-[var(--aethel-primary-dark)] text-white p-4 rounded-lg shadow-lg flex items-center gap-4">
       <div>
         <p className="font-medium">Nova versão disponível!</p>
         <p className="text-sm opacity-90">Clique para atualizar</p>
       </div>
       <button
         onClick={skipWaiting}
-        className="px-4 py-2 bg-white text-indigo-600 rounded font-medium hover:bg-indigo-50 transition-colors"
+        className="px-4 py-2 bg-white text-[var(--aethel-primary-dark)] rounded font-medium hover:bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] transition-colors"
       >
         Atualizar
       </button>

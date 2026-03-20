@@ -347,7 +347,7 @@ export function SubscriptionStatusWidget() {
         <p className="text-sm text-[var(--aethel-text-tertiary)]">Sem assinatura ativa</p>
         <a
           href="/pricing"
-          className="mt-2 inline-flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300"
+          className="mt-2 inline-flex items-center gap-1 text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary)]"
         >
           Ver planos <ArrowRight size={14} />
         </a>
@@ -369,8 +369,8 @@ export function SubscriptionStatusWidget() {
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
             subscription.status === 'active'
-              ? 'bg-emerald-500/10 text-emerald-400'
-              : 'bg-amber-500/10 text-amber-400'
+              ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
+              : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
           }`}
         >
           {subscription.status}
@@ -404,9 +404,9 @@ export function UsageQuotaBar({ label, used, limit, unit = '', variant }: QuotaB
     variant || (percentage >= 90 ? 'danger' : percentage >= 75 ? 'warning' : 'default')
 
   const barColors = {
-    default: 'bg-indigo-500',
-    warning: 'bg-amber-500',
-    danger: 'bg-red-500',
+    default: 'bg-[var(--aethel-primary)]',
+    warning: 'bg-[var(--aethel-warning)]',
+    danger: 'bg-[var(--aethel-error)]',
   }
 
   return (

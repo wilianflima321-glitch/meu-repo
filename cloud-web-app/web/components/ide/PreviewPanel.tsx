@@ -336,7 +336,7 @@ export default function PreviewPanel({
             </span>
           )}
           {!canUseDevRuntime && showIframeRuntime && (
-            <span className="text-[10px] text-amber-300 normal-case px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+            <span className="text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] normal-case px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]">
               runtime:inline-fallback
             </span>
           )}
@@ -349,7 +349,7 @@ export default function PreviewPanel({
             </span>
           )}
           {isStale && (
-            <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] normal-case">
+            <span className="ml-2 px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] text-[10px] normal-case">
               Preview out of date
             </span>
           )}

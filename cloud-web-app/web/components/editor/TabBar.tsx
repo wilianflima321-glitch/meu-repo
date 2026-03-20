@@ -631,7 +631,7 @@ function Tab({
         <span className="max-w-32 truncate text-[13px] font-medium">
           {tab.title}
           {tab.isDirty && (
-            <span className="ml-1 text-amber-300">*</span>
+            <span className="ml-1 text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">*</span>
           )}
         </span>
       )}
@@ -653,7 +653,7 @@ function Tab({
           `}
         >
           {tab.isDirty ? (
-            <div className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+            <div className="h-2.5 w-2.5 rounded-full bg-[var(--aethel-warning-light)]" />
           ) : (
             <X className="w-3 h-3" />
           )}
@@ -786,7 +786,7 @@ export function TabBar({ className }: { className?: string }) {
                   >
                     <Icon className="w-4 h-4" />
                     <span className="truncate">{tab.title}</span>
-                    {tab.isDirty && <span className="text-amber-400">*</span>}
+                    {tab.isDirty && <span className="text-[var(--aethel-warning-light)]">*</span>}
                   </button>
                 );
               })}

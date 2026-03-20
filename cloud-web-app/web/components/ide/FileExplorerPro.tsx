@@ -165,7 +165,7 @@ function FileTreeNode({
         
         {/* Modified indicator */}
         {node.modified && (
-          <span className="w-2 h-2 bg-amber-400 rounded-full" title="Modified" />
+          <span className="w-2 h-2 bg-[var(--aethel-warning-light)] rounded-full" title="Modified" />
         )}
       </button>
 

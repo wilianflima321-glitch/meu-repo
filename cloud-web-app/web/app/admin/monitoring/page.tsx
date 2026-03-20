@@ -48,9 +48,9 @@ const STATUS_LABELS: Record<HealthCheckResult['status'], string> = {
 
 function StatusDot({ status }: { status: string }) {
   const color =
-    status === 'healthy' ? 'bg-emerald-400' :
-    status === 'degraded' ? 'bg-amber-400' :
-    'bg-red-400'
+    status === 'healthy' ? 'bg-[var(--aethel-success)]' :
+    status === 'degraded' ? 'bg-[var(--aethel-warning)]' :
+    'bg-[var(--aethel-error)]'
   return <span className={`inline-block h-2.5 w-2.5 rounded-full ${color}`} />
 }
 

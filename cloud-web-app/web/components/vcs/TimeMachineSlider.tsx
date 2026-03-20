@@ -148,7 +148,7 @@ function FileIcon({ type }: { type: FileChange['type'] }) {
     case 'deleted':
       return <FileMinus className="w-3.5 h-3.5 text-red-400" />;
     case 'modified':
-      return <FileEdit className="w-3.5 h-3.5 text-amber-400" />;
+      return <FileEdit className="w-3.5 h-3.5 text-[var(--aethel-warning-light)]" />;
     case 'renamed':
       return <FileCode className="w-3.5 h-3.5 text-sky-400" />;
     default:
@@ -247,7 +247,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
           </span>
         )}
         {commit.changes.modified > 0 && (
-          <span className="flex items-center gap-1 text-amber-400">
+          <span className="flex items-center gap-1 text-[var(--aethel-warning-light)]">
             <FileEdit className="w-3 h-3" />
             {commit.changes.modified}
           </span>
@@ -260,8 +260,8 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
         )}
 
         {commit.tags && commit.tags.length > 0 && (
-          <span className="ml-auto px-1.5 py-0.5 bg-amber-500/20 
-                         rounded text-amber-300 text-[10px]">
+          <span className="ml-auto px-1.5 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] 
+                         rounded text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] text-[10px]">
             {commit.tags[0]}
           </span>
         )}

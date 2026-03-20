@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 /**
  * Aethel Engine - Advanced Debug Components
@@ -292,7 +292,7 @@ export function BreakpointsPanel({
   const getBreakpointColor = (bp: Breakpoint) => {
     if (!bp.enabled) return 'text-slate-500';
     if (!bp.verified) return 'text-slate-400';
-    if (bp.type === 'logpoint') return 'text-amber-400';
+    if (bp.type === 'logpoint') return 'text-[var(--aethel-warning-light)]';
     return 'text-red-500';
   };
 
@@ -343,7 +343,7 @@ export function BreakpointsPanel({
               ) : (
                 <ChevronRight className="w-4 h-4" />
               )}
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <AlertTriangle className="w-4 h-4 text-[var(--aethel-warning-light)]" />
               <span>Exceptions</span>
             </button>
 
@@ -410,12 +410,12 @@ export function BreakpointsPanel({
                       Line {bp.line}
                     </span>
                     {bp.condition && (
-                      <span className="text-xs text-amber-400 truncate">
+                      <span className="text-xs text-[var(--aethel-warning-light)] truncate">
                         {bp.condition}
                       </span>
                     )}
                     {bp.logMessage && (
-                      <span className="text-xs text-amber-400 truncate">
+                      <span className="text-xs text-[var(--aethel-warning-light)] truncate">
                         {`"${bp.logMessage}"`}
                       </span>
                     )}
@@ -426,7 +426,7 @@ export function BreakpointsPanel({
                     )}
                     {bp.hitCount !== undefined && bp.hitCount > 0 && (
                       <span className="text-xs text-sky-400">
-                        ×{bp.hitCount}
+                        Ã—{bp.hitCount}
                       </span>
                     )}
                   </button>
@@ -575,7 +575,7 @@ export function WatchPanel({
                 <>
                   <span className={`text-sm font-mono truncate ${
                     expr.type === 'string' ? 'text-emerald-400' :
-                    expr.type === 'number' ? 'text-amber-400' :
+                    expr.type === 'number' ? 'text-[var(--aethel-warning-light)]' :
                     expr.type === 'boolean' ? 'text-blue-400' :
                     'text-slate-300'
                   }`}>
@@ -721,7 +721,7 @@ export function CallStackPanel({
   const getFrameHint = (frame: StackFrame) => {
     switch (frame.presentationHint) {
       case 'label':
-        return 'text-amber-400';
+        return 'text-[var(--aethel-warning-light)]';
       case 'subtle':
         return 'text-slate-500 italic';
       default:
@@ -733,7 +733,7 @@ export function CallStackPanel({
     <div className="h-full flex flex-col bg-slate-900">
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-800">
-        <Hash className="w-4 h-4 text-amber-400" />
+        <Hash className="w-4 h-4 text-[var(--aethel-warning-light)]" />
         <span className="text-sm font-medium text-white">Call Stack</span>
       </div>
 
@@ -757,8 +757,8 @@ export function CallStackPanel({
                 ) : (
                   <ChevronRight className="w-4 h-4 text-slate-400" />
                 )}
-                <span className={thread.stopped ? 'text-amber-400' : 'text-slate-400'}>
-                  {thread.stopped ? '⏸' : '▶'}
+                <span className={thread.stopped ? 'text-[var(--aethel-warning-light)]' : 'text-slate-400'}>
+                  {thread.stopped ? 'â¸' : 'â–¶'}
                 </span>
                 <span className="text-white">{thread.name}</span>
                 {thread.stoppedReason && (
@@ -828,7 +828,7 @@ function StackFrameItem({
   const getFrameHint = () => {
     switch (frame.presentationHint) {
       case 'label':
-        return 'text-amber-400';
+        return 'text-[var(--aethel-warning-light)]';
       case 'subtle':
         return 'text-slate-500 italic';
       default:

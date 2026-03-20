@@ -44,7 +44,7 @@ const DOMAIN_TEMPLATES = [
     name: 'Research Workflow',
     description: 'Pesquisa com citacoes, plano e codigo',
     stack: ['Nexus Research', 'Citations', 'Code Gen'],
-    color: 'from-amber-500 to-orange-500',
+    color: 'from-[var(--aethel-warning)] to-[var(--aethel-warning-dark)]',
     mission: 'Pesquisar topico, gerar plano e implementar solucao',
   },
   {
@@ -226,7 +226,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                     } ${isDisabled ? 'cursor-not-allowed opacity-60' : ''}`}
                   >
                     {isDisabled && (
-                      <span className="absolute right-3 top-3 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300">
+                      <span className="absolute right-3 top-3 rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] font-semibold text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
                         Em roadmap
                       </span>
                     )}
@@ -321,8 +321,8 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
             </div>
 
             {/* Info box */}
-            <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] p-4">
-              <p className="flex items-start gap-2 text-xs text-amber-300/80">
+            <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[var(--aethel-warning)]/[0.05] p-4">
+              <p className="flex items-start gap-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]">
                 <Codicon name="info" />
                 <span>
                   Voce pode configurar a API key depois em Settings {'>'} AI Provider. O wizard nao armazena keys.

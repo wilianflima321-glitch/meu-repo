@@ -83,7 +83,7 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
       {/* Indicador de Offline */}
       {sw.isSupported && !sw.isOnline && (
         <div 
-          className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-amber-500 to-orange-500 text-black text-center py-2 px-4 text-sm font-medium shadow-lg"
+          className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-[var(--aethel-warning)] to-[var(--aethel-warning-dark)] text-black text-center py-2 px-4 text-sm font-medium shadow-lg"
           role="alert"
           aria-live="polite"
         >

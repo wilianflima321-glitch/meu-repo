@@ -59,9 +59,9 @@ const toastStyles: Record<ToastType, { bg: string; icon: string; border: string;
   },
   warning: {
     bg: 'bg-slate-900/95',
-    icon: 'text-amber-400',
-    border: 'border-amber-500/30',
-    progress: 'bg-amber-500',
+    icon: 'text-[var(--aethel-warning-light)]',
+    border: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
+    progress: 'bg-[var(--aethel-warning)]',
   },
   info: {
     bg: 'bg-slate-900/95',

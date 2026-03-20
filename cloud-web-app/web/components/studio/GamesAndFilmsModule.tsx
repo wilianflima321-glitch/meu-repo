@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Games & Films Module - Alpha Honest
  * 
- * Módulo de criação e gerenciamento de Games e Films
- * Status: Alpha (Funcional, Configurações Básicas)
- * Padrão: L5 Design, Real Integration
+ * MÃ³dulo de criaÃ§Ã£o e gerenciamento de Games e Films
+ * Status: Alpha (Funcional, ConfiguraÃ§Ãµes BÃ¡sicas)
+ * PadrÃ£o: L5 Design, Real Integration
  */
 
 'use client'
@@ -237,7 +237,7 @@ function GamesGrid({
       >
         <Gamepad2 size={48} className="mx-auto mb-4 text-white/40" />
         <p className="text-white/60">Nenhum jogo criado ainda</p>
-        <p className="text-sm text-white/40 mt-1">Clique em "Novo Projeto" para começar</p>
+        <p className="text-sm text-white/40 mt-1">Clique em "Novo Projeto" para comeÃ§ar</p>
       </motion.div>
     )
   }
@@ -276,7 +276,7 @@ function FilmsGrid({
       >
         <Film size={48} className="mx-auto mb-4 text-white/40" />
         <p className="text-white/60">Nenhum filme criado ainda</p>
-        <p className="text-sm text-white/40 mt-1">Clique em "Novo Projeto" para começar</p>
+        <p className="text-sm text-white/40 mt-1">Clique em "Novo Projeto" para comeÃ§ar</p>
       </motion.div>
     )
   }
@@ -310,7 +310,7 @@ function GameCard({
   return (
     <GlassCard hover glow animated className="p-4 space-y-4">
       {/* Thumbnail */}
-      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] flex items-center justify-center">
         <Gamepad2 size={48} className="text-white/40" />
       </div>
 
@@ -364,7 +364,7 @@ function FilmCard({
   return (
     <GlassCard hover glow animated className="p-4 space-y-4">
       {/* Thumbnail */}
-      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+      <div className="w-full h-32 rounded-lg bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-secondary)_20%,transparent)] flex items-center justify-center">
         <Film size={48} className="text-white/40" />
       </div>
 
@@ -387,7 +387,7 @@ function FilmCard({
         <button
           onClick={() => onPublish(film)}
           disabled={film.status === 'published'}
-          className="flex-1 px-3 py-1.5 rounded-lg bg-purple-500/20 text-purple-300 text-xs font-medium hover:bg-purple-500/30 disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
+          className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[var(--aethel-accent-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-accent)_30%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
         >
           <Play size={14} />
           Publicar
@@ -404,7 +404,7 @@ function FilmCard({
 }
 
 /**
- * Dialog de Criação
+ * Dialog de CriaÃ§Ã£o
  */
 function CreateProjectDialog({
   open,

@@ -43,7 +43,7 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true">
       <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
-        <div className="flex h-40 items-center justify-center bg-gradient-to-br from-indigo-600/90 via-sky-600/80 to-indigo-500/80">
+        <div className="flex h-40 items-center justify-center bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary-dark)_90%,transparent)] via-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-primary)_80%,transparent)]">
           <Sparkles className="h-12 w-12 text-white" />
           <button
             type="button"
@@ -63,7 +63,7 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
             {STEPS.map((_, index) => (
               <span
                 key={index}
-                className={`h-2 w-2 rounded-full ${index === step ? 'bg-sky-400' : 'bg-white/20'}`}
+                className={`h-2 w-2 rounded-full ${index === step ? 'bg-[var(--aethel-info-light)]' : 'bg-white/20'}`}
               />
             ))}
           </div>

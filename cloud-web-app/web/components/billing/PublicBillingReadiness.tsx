@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { AethelAPIClient, type BillingReadiness } from '@/lib/api'
@@ -13,7 +13,7 @@ function ReadinessBadge({
   return (
     <div className="rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2">
       <p className="text-[10px] uppercase tracking-wider text-slate-500">{label}</p>
-      <p className={`mt-1 text-sm font-semibold ${ready ? 'text-emerald-300' : 'text-amber-200'}`}>
+      <p className={`mt-1 text-sm font-semibold ${ready ? 'text-emerald-300' : 'text-[var(--aethel-warning-light)]'}`}>
         {ready ? 'Pronto' : 'Parcial'}
       </p>
     </div>
@@ -53,9 +53,9 @@ export default function PublicBillingReadiness() {
 
   if (!readiness) {
     return (
-      <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-amber-500/20 bg-amber-500/10 p-8">
+      <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[var(--aethel-warning)]/10 p-8">
         <h2 className="text-2xl font-semibold text-white">Prontidao de billing indisponivel</h2>
-        <p className="mt-3 text-sm leading-7 text-amber-100/85">
+        <p className="mt-3 text-sm leading-7 text-[var(--aethel-warning-light)]/85">
           Os planos continuam canonicos, mas este ambiente nao retornou um payload de prontidao de billing ao vivo.
         </p>
       </section>
@@ -63,14 +63,14 @@ export default function PublicBillingReadiness() {
   }
 
   return (
-    <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-amber-500/20 bg-amber-500/10 p-8">
+    <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[var(--aethel-warning)]/10 p-8">
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-white">Prontidao de billing ao vivo</h2>
-          <p className="mt-3 text-sm leading-7 text-amber-100/85">
+          <p className="mt-3 text-sm leading-7 text-[var(--aethel-warning-light)]/85">
             Os planos ja sao canonicos. A conversao ainda depende do checkout/runtime ao vivo neste ambiente.
           </p>
-          <p className="mt-3 text-xs text-amber-100/70">
+          <p className="mt-3 text-xs text-[var(--aethel-warning-light)]/70">
             status={readiness.status} | gateway={readiness.gateway?.activeGateway || 'unknown'} | provider={readiness.provider?.label || 'unknown'}
           </p>
         </div>
@@ -117,13 +117,13 @@ export default function PublicBillingReadiness() {
       ) : null}
 
       {readiness.stripe?.missingEnv?.length ? (
-        <div className="mt-5 rounded-2xl border border-amber-500/20 bg-black/20 p-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-amber-200">Variaveis de ambiente ausentes</p>
+        <div className="mt-5 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-black/20 p-4">
+          <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-warning-light)]">Variaveis de ambiente ausentes</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {readiness.stripe.missingEnv.map((envKey) => (
               <span
                 key={envKey}
-                className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-100"
+                className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[var(--aethel-warning)]/10 px-2.5 py-1 text-[11px] text-[var(--aethel-warning-light)]"
               >
                 {envKey}
               </span>

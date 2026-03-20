@@ -1,15 +1,15 @@
-/**
- * SquadChat - AI Squad com Visualização de Steps
+﻿/**
+ * SquadChat - AI Squad com VisualizaÃ§Ã£o de Steps
  * 
  * Interface de chat que tangibiliza o trabalho dos agentes de IA.
  * Mostra visualmente o processo de cada agente:
  * - Arquiteto (Roxo): Planejamento
- * - Engenheiro (Azul): Construção
- * - QA (Verde): Validação
+ * - Engenheiro (Azul): ConstruÃ§Ã£o
+ * - QA (Verde): ValidaÃ§Ã£o
  * 
- * Isso justifica o preço do plano Studio e o tempo de espera.
+ * Isso justifica o preÃ§o do plano Studio e o tempo de espera.
  * 
- * @see DETALHAMENTO_UX_STRATEGY_2026.md - Seção 4
+ * @see DETALHAMENTO_UX_STRATEGY_2026.md - SeÃ§Ã£o 4
  */
 
 'use client';
@@ -97,7 +97,7 @@ interface SquadChatProps {
 }
 
 // ============================================================================
-// AGENTES CONFIGURAÇÃO
+// AGENTES CONFIGURAÃ‡ÃƒO
 // ============================================================================
 
 const AGENTS: Record<AgentRole, AgentConfig> = {
@@ -108,7 +108,7 @@ const AGENTS: Record<AgentRole, AgentConfig> = {
     icon: <Brain className="w-5 h-5" />,
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/20',
-    description: 'Planeja a estrutura e arquitetura da solução',
+    description: 'Planeja a estrutura e arquitetura da soluÃ§Ã£o',
   },
   engineer: {
     id: 'engineer',
@@ -117,7 +117,7 @@ const AGENTS: Record<AgentRole, AgentConfig> = {
     icon: <Code2 className="w-5 h-5" />,
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/20',
-    description: 'Implementa o código e cria os arquivos',
+    description: 'Implementa o cÃ³digo e cria os arquivos',
   },
   qa: {
     id: 'qa',
@@ -133,8 +133,8 @@ const AGENTS: Record<AgentRole, AgentConfig> = {
     name: 'Orquestrador',
     title: 'AI Orchestrator',
     icon: <Sparkles className="w-5 h-5" />,
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-500/20',
+    color: 'text-[var(--aethel-warning-light)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]',
     description: 'Coordena o trabalho dos agentes',
   },
 };
@@ -233,7 +233,7 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
             {step.code && (
               <div className="mt-3 relative">
                 <div className="flex items-center justify-between bg-zinc-900 rounded-t-lg px-3 py-1.5 border border-b-0 border-zinc-700">
-                  <span className="text-xs text-zinc-500">código</span>
+                  <span className="text-xs text-zinc-500">cÃ³digo</span>
                   <button
                     onClick={handleCopy}
                     className="text-xs text-zinc-500 hover:text-white flex items-center gap-1"
@@ -305,7 +305,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
               </span>
               <span className="flex items-center gap-1">
                 <Coins className="w-3 h-3" />
-                {task.creditsUsed} créditos
+                {task.creditsUsed} crÃ©ditos
               </span>
               {task.files && task.files.length > 0 && (
                 <span className="flex items-center gap-1">
@@ -354,7 +354,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
             <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
               <div className="flex items-center gap-2 text-green-400 mb-2">
                 <Check className="w-5 h-5" />
-                <span className="font-medium">Tarefa Concluída</span>
+                <span className="font-medium">Tarefa ConcluÃ­da</span>
               </div>
               <p className="text-sm text-zinc-300">{task.result}</p>
               
@@ -379,7 +379,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg text-sm font-medium transition-colors"
                 >
                   <Play className="w-4 h-4" />
-                  Aplicar Mudanças
+                  Aplicar MudanÃ§as
                 </button>
                 <button
                   onClick={onReject}
@@ -491,7 +491,7 @@ export function SquadChat({ projectId, onFileChange, onApplyDiff, className }: S
       setMessages([{
         id: 'welcome',
         role: 'system',
-        content: '🤖 **Squad AI ativo**\n\nSou sua equipe de IA completa: Arquiteto, Engenheiro e QA trabalhando juntos. Descreva o que precisa e eu planejo, implemento e valido automaticamente.',
+        content: 'ðŸ¤– **Squad AI ativo**\n\nSou sua equipe de IA completa: Arquiteto, Engenheiro e QA trabalhando juntos. Descreva o que precisa e eu planejo, implemento e valido automaticamente.',
         timestamp: new Date(),
       }]);
     }
@@ -515,7 +515,7 @@ export function SquadChat({ projectId, onFileChange, onApplyDiff, className }: S
       agentId: 'architect',
       phase: 'complete',
       message: 'Analisando estrutura do projeto...',
-      detail: 'Verificando dependências existentes e padrões de código utilizados.',
+      detail: 'Verificando dependÃªncias existentes e padrÃµes de cÃ³digo utilizados.',
       timestamp: new Date(),
       duration: 1500,
     });
@@ -526,10 +526,10 @@ export function SquadChat({ projectId, onFileChange, onApplyDiff, className }: S
       id: `step-2`,
       agentId: 'architect',
       phase: 'complete',
-      message: 'Criando blueprint da solução',
-      detail: `Plano de implementação:\n1. Criar estrutura de dados\n2. Implementar lógica core\n3. Criar interface visual\n4. Conectar eventos`,
+      message: 'Criando blueprint da soluÃ§Ã£o',
+      detail: `Plano de implementaÃ§Ã£o:\n1. Criar estrutura de dados\n2. Implementar lÃ³gica core\n3. Criar interface visual\n4. Conectar eventos`,
       code: `// Blueprint
-interface ${prompt.includes('inventário') ? 'InventorySystem' : 'GameSystem'} {
+interface ${prompt.includes('inventÃ¡rio') ? 'InventorySystem' : 'GameSystem'} {
   initialize(): void;
   update(delta: number): void;
   render(): void;
@@ -589,8 +589,8 @@ export function SystemPanel() {
       id: `step-5`,
       agentId: 'qa',
       phase: 'complete',
-      message: 'Rodando testes unitários...',
-      detail: '✅ 5/5 testes passaram\n✅ Sem vazamento de memória\n✅ Performance OK (< 1ms/frame)',
+      message: 'Rodando testes unitÃ¡rios...',
+      detail: 'âœ… 5/5 testes passaram\nâœ… Sem vazamento de memÃ³ria\nâœ… Performance OK (< 1ms/frame)',
       timestamp: new Date(),
       duration: 1500,
     });
@@ -601,8 +601,8 @@ export function SystemPanel() {
       id: `step-6`,
       agentId: 'qa',
       phase: 'complete',
-      message: 'Verificando segurança e boas práticas',
-      detail: '✅ Sem vulnerabilidades conhecidas\n✅ Código TypeScript válido\n✅ Imports organizados',
+      message: 'Verificando seguranÃ§a e boas prÃ¡ticas',
+      detail: 'âœ… Sem vulnerabilidades conhecidas\nâœ… CÃ³digo TypeScript vÃ¡lido\nâœ… Imports organizados',
       timestamp: new Date(),
       duration: 1000,
     });
@@ -610,7 +610,7 @@ export function SystemPanel() {
 
     task.status = 'complete';
     task.endTime = new Date();
-    task.result = 'Sistema implementado com sucesso! Os arquivos foram criados e estão prontos para teste.';
+    task.result = 'Sistema implementado com sucesso! Os arquivos foram criados e estÃ£o prontos para teste.';
     task.files = ['src/systems/GameSystem.ts', 'src/ui/SystemPanel.tsx', 'src/types/index.ts'];
 
     return task;
@@ -623,7 +623,7 @@ export function SystemPanel() {
       setMessages(prev => [...prev, {
         id: `system-${Date.now()}`,
         role: 'system',
-        content: '⚠️ Créditos insuficientes. Você precisa de pelo menos 20 créditos para executar uma tarefa do Squad. Recarregue sua carteira para continuar.',
+        content: 'âš ï¸ CrÃ©ditos insuficientes. VocÃª precisa de pelo menos 20 crÃ©ditos para executar uma tarefa do Squad. Recarregue sua carteira para continuar.',
         timestamp: new Date(),
       }]);
       return;
@@ -653,7 +653,7 @@ export function SystemPanel() {
       setMessages(prev => [...prev, {
         id: `error-${Date.now()}`,
         role: 'system',
-        content: '❌ Erro ao processar tarefa. Tente novamente.',
+        content: 'âŒ Erro ao processar tarefa. Tente novamente.',
         timestamp: new Date(),
       }]);
     } finally {
@@ -686,13 +686,13 @@ export function SystemPanel() {
           </div>
           <div>
             <h3 className="font-semibold text-white">AI Squad</h3>
-            <p className="text-xs text-zinc-500">Arquiteto • Engenheiro • QA</p>
+            <p className="text-xs text-zinc-500">Arquiteto â€¢ Engenheiro â€¢ QA</p>
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 rounded-lg">
-          <Coins className="w-4 h-4 text-amber-400" />
+          <Coins className="w-4 h-4 text-[var(--aethel-warning-light)]" />
           <span className="text-sm font-medium text-white">{credits}</span>
-          <span className="text-xs text-zinc-500">créditos</span>
+          <span className="text-xs text-zinc-500">crÃ©ditos</span>
         </div>
       </div>
 
@@ -748,8 +748,8 @@ export function SystemPanel() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder="Descreva o que precisa... Ex: Crie um sistema de inventário RPG"
-            className="flex-1 resize-none bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 min-h-[48px] max-h-[120px]"
+            placeholder="Descreva o que precisa... Ex: Crie um sistema de inventÃ¡rio RPG"
+            className="flex-1 resize-none bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[var(--aethel-primary)] min-h-[48px] max-h-[120px]"
             rows={1}
             disabled={isProcessing}
           />
@@ -772,7 +772,7 @@ export function SystemPanel() {
           </button>
         </div>
         <p className="text-xs text-zinc-500 mt-2 text-center">
-          ~20 créditos por tarefa • Shift+Enter para nova linha
+          ~20 crÃ©ditos por tarefa â€¢ Shift+Enter para nova linha
         </p>
       </div>
     </div>

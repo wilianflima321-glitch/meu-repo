@@ -936,7 +936,7 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-white">{setting.label}</span>
           {isModified && (
-            <span className="px-1.5 py-0.5 text-[10px] bg-amber-500/20 text-amber-400 rounded">
+            <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] rounded">
               Modified
             </span>
           )}

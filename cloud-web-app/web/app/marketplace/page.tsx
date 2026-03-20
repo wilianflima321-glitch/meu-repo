@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import PublicHeader from '@/components/ui/PublicHeader'
@@ -158,7 +158,7 @@ export default function MarketplacePage() {
   return (
     <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-purple-600/[0.06] blur-[170px]" />
+        <div className="absolute left-1/3 top-0 h-[600px] w-[600px] rounded-full bg-[color-mix(in_srgb,var(--aethel-accent)_6%,transparent)] blur-[170px]" />
         <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-primary-dark)]/[0.05] blur-[160px]" />
       </div>
 
@@ -166,7 +166,7 @@ export default function MarketplacePage() {
 
       <main className="relative z-10">
         <section className="mx-auto max-w-6xl px-6 pt-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/10 px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-purple-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-accent)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-accent)_12%,transparent)] px-4 py-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-accent-light)]">
             Marketplace
           </div>
           <h1 className="mt-5 text-4xl font-bold sm:text-5xl">Marketplace de extensoes</h1>
@@ -190,7 +190,7 @@ export default function MarketplacePage() {
                   placeholder="Buscar extensoes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-purple-500/60"
+                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-accent)_60%,transparent)]"
                 />
               </div>
 
@@ -198,7 +198,7 @@ export default function MarketplacePage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] focus:outline-none focus:border-purple-500/60"
+                  className="h-12 w-full rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-4 text-[var(--aethel-text-primary)] focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-accent)_60%,transparent)]"
                 >
                   <option value="downloads">Mais baixadas</option>
                   <option value="rating">Melhor avaliadas</option>
@@ -214,7 +214,7 @@ export default function MarketplacePage() {
                   onClick={() => setSelectedCategory(category)}
                   className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
                     selectedCategory === category
-                      ? 'bg-purple-500/20 text-purple-200 border border-purple-500/30'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[var(--aethel-accent-light)] border border-[color-mix(in_srgb,var(--aethel-accent)_35%,transparent)]'
                       : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >

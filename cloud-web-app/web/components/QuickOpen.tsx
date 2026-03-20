@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -254,7 +254,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
         <div className="overflow-y-auto max-h-[450px]">
           {loading ? (
             <div className="p-8 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--aethel-primary)]"></div>
               <p className="text-slate-400 mt-2">Loading files...</p>
             </div>
           ) : errorMessage ? (

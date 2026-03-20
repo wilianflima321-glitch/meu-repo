@@ -46,18 +46,18 @@ export default function StudioActionRail({
           <span
             className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
               backendOnline
-                ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
-                : 'border-rose-400/30 bg-rose-400/10 text-rose-200'
+                ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+                : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
             }`}
           >
-            <span className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+            <span className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'}`} />
             Backend {backendOnline ? 'online' : 'offline'}
           </span>
           <span
             className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
               aiProviderConfigured
-                ? 'border-sky-400/30 bg-sky-400/10 text-sky-200'
-                : 'border-amber-400/30 bg-amber-400/10 text-amber-100'
+                ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
             }`}
           >
             IA {aiProviderConfigured ? 'configurada' : 'pendente'}
@@ -65,7 +65,7 @@ export default function StudioActionRail({
           <span
             className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
               fullAccessActive
-                ? 'border-indigo-400/30 bg-indigo-400/12 text-indigo-100'
+                ? 'border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] text-[var(--aethel-primary-light)]'
                 : 'border-white/10 bg-white/[0.04] text-slate-300'
             }`}
           >
@@ -88,7 +88,7 @@ export default function StudioActionRail({
         <button
           type="button"
           onClick={onOpenProviderSettings}
-          className="hidden rounded-xl border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs font-medium text-amber-100 transition hover:bg-amber-400/20 lg:inline-flex"
+          className="hidden rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-warning-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] lg:inline-flex"
         >
           Configurar IA
         </button>
@@ -101,7 +101,7 @@ export default function StudioActionRail({
           disabled={fullAccessBusy}
           className={`hidden rounded-xl border px-3 py-2 text-xs font-medium transition disabled:opacity-60 lg:inline-flex ${
             fullAccessActive
-              ? 'border-indigo-400/30 bg-indigo-400/10 text-indigo-100 hover:bg-indigo-400/20'
+              ? 'border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
               : 'border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/20'
           }`}
         >

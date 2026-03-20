@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 /**
  * Aethel Engine - Breadcrumbs Navigation
@@ -135,15 +135,15 @@ const SYMBOL_ICONS: Record<SymbolKind, LucideIcon> = {
 
 const SYMBOL_COLORS: Record<SymbolKind, string> = {
   file: 'text-slate-400',
-  module: 'text-amber-400',
-  namespace: 'text-amber-400',
-  package: 'text-amber-400',
-  class: 'text-amber-500',
+  module: 'text-[var(--aethel-warning-light)]',
+  namespace: 'text-[var(--aethel-warning-light)]',
+  package: 'text-[var(--aethel-warning-light)]',
+  class: 'text-[var(--aethel-warning)]',
   method: 'text-blue-400',
   property: 'text-sky-400',
   field: 'text-sky-400',
   constructor: 'text-blue-400',
-  enum: 'text-amber-400',
+  enum: 'text-[var(--aethel-warning-light)]',
   interface: 'text-sky-400',
   function: 'text-blue-400',
   variable: 'text-sky-300',
@@ -151,13 +151,13 @@ const SYMBOL_COLORS: Record<SymbolKind, string> = {
   string: 'text-emerald-400',
   number: 'text-emerald-400',
   boolean: 'text-blue-400',
-  array: 'text-amber-400',
-  object: 'text-amber-400',
+  array: 'text-[var(--aethel-warning-light)]',
+  object: 'text-[var(--aethel-warning-light)]',
   key: 'text-sky-400',
   null: 'text-slate-500',
   enumMember: 'text-blue-400',
-  struct: 'text-amber-500',
-  event: 'text-amber-400',
+  struct: 'text-[var(--aethel-warning)]',
+  event: 'text-[var(--aethel-warning-light)]',
   operator: 'text-slate-400',
   typeParameter: 'text-emerald-400',
 };
@@ -343,7 +343,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                       }`}
                     >
                       <Icon className={`w-4 h-4 flex-shrink-0 ${
-                        segment.type === 'folder' ? 'text-amber-400' : 'text-sky-400'
+                        segment.type === 'folder' ? 'text-[var(--aethel-warning-light)]' : 'text-sky-400'
                       }`} />
                       <span className="text-white truncate">{segment.label}</span>
                     </button>
@@ -514,7 +514,7 @@ export default function Breadcrumbs({
                 <Dropdown
                   trigger={
                     <span className="flex items-center gap-1.5 text-slate-300 hover:text-white">
-                      <Icon className="w-4 h-4 text-amber-400" />
+                      <Icon className="w-4 h-4 text-[var(--aethel-warning-light)]" />
                       {segment.label}
                     </span>
                   }
@@ -532,7 +532,7 @@ export default function Breadcrumbs({
                 }`}
               >
                 <Icon className={`w-4 h-4 ${
-                  segment.type === 'folder' ? 'text-amber-400' : 'text-sky-400'
+                  segment.type === 'folder' ? 'text-[var(--aethel-warning-light)]' : 'text-sky-400'
                 }`} />
                 {segment.label}
               </button>

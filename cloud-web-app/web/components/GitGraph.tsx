@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getGitClient, GitCommit } from '@/lib/git/git-client';
@@ -139,13 +139,13 @@ export default function GitGraph() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--aethel-primary)]"></div>
       </div>
     );
   }
 
   return (
-    <div className="h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="h-full bg-gradient-to-br from-slate-900 via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-slate-900">
       <div className="flex h-full">
         {/* Graph Canvas */}
         <div className="flex-1 overflow-auto p-4">
@@ -179,7 +179,7 @@ export default function GitGraph() {
                       {node.commit.message.split('\n')[0]}
                     </div>
                     <div className="text-xs text-slate-500">
-                      {node.commit.author} • {formatDate(node.commit.date)}
+                      {node.commit.author} â€¢ {formatDate(node.commit.date)}
                     </div>
                   </button>
                 </div>
@@ -196,7 +196,7 @@ export default function GitGraph() {
                 onClick={() => setSelectedCommit(null)}
                 className="text-slate-400 hover:text-white mb-4"
               >
-                ← Back
+                â† Back
               </button>
               <h3 className="text-xl font-bold text-white mb-2">Commit Details</h3>
             </div>
