@@ -2,7 +2,6 @@
 import type { FormEvent } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
-import { Code, CreditCard, LayoutDashboard, MessageSquare, Settings } from 'lucide-react'
 import {
   AethelAPIClient,
   type BillingPlan,
@@ -90,12 +89,7 @@ import {
   validatePurchaseInput,
   validateTransferInput,
 } from './dashboard/aethel-dashboard-billing-utils'
-import { TrialBanner } from './dashboard/TrialBanner'
-import StudioGlobalNav from './studio/StudioGlobalNav'
-import StudioActionRail from './studio/StudioActionRail'
-import { AethelDashboardSidebar } from './dashboard/AethelDashboardSidebar'
-import { DashboardMainContent } from './dashboard/DashboardMainContent'
-import OnboardingWizard from './onboarding/OnboardingWizard'
+import { DashboardShell } from './dashboard/DashboardShell'
 import {
   DASHBOARD_DEFAULT_SETTINGS,
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
@@ -104,11 +98,14 @@ import {
   type Point3,
 } from './dashboard/aethel-dashboard-core-types'
 import { DashboardLoadingScreen } from './dashboard/DashboardLoadingScreen'
-import { DashboardToast } from './dashboard/DashboardToast'
 import { useFirstValueTracking } from './dashboard/useFirstValueTracking'
 import { useDashboardMissionSeed } from './dashboard/useDashboardMissionSeed'
 import { useDashboardStoragePersistence } from './dashboard/useDashboardStoragePersistence'
-import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
+import {
+  DEFAULT_MODEL,
+  FIRST_VALUE_GUIDE_DISMISSED_KEY,
+  ONBOARDING_WIZARD_DISMISSED_KEY,
+} from './dashboard/aethel-dashboard-constants'
 import {
   getInitialActiveTab,
   getInitialChatHistory,
@@ -116,9 +113,6 @@ import {
   getInitialSessionHistory,
   getInitialSettings,
 } from './dashboard/aethel-dashboard-initial-state'
-const DEFAULT_MODEL = 'google/gemini-3.1-flash-lite-preview'
-const FIRST_VALUE_GUIDE_DISMISSED_KEY = 'aethel.dashboard.first-value.dismissed'
-const ONBOARDING_WIZARD_DISMISSED_KEY = 'aethel.dashboard.onboarding.dismissed'
 
 export default function AethelDashboard() {
   const { mutate } = useSWRConfig()
@@ -1045,235 +1039,149 @@ export default function AethelDashboard() {
     return <DashboardLoadingScreen theme={settings.theme} />
   }
 
+  const dashboardMainProps = {
+    activeTab, showFirstValueGuide, firstProjectCreated: projects.length > DEFAULT_PROJECTS.length, firstValueAiSuccess, firstValueOpenedIde, firstValueSessionSummary, onFirstValueStartTemplate: handleTemplateSelect,
+    onFirstValueCreateProject: () => {
+      trackEvent('project', 'project_open', { source: 'first-value-guide', action: 'open-project-tab' })
+      handleTabChange('projects')
+    },
+    onFirstValueConfigureAI: () => {
+      trackEvent('ai', 'ai_error', { source: 'first-value-guide', action: 'open-provider-setup' })
+      handleOpenProviderSettings()
+    },
+    onFirstValueOpenAIChat: handleOpenAIChatFromGuide,
+    onFirstValueOpenIdePreview: handleOpenIdeLivePreview,
+    onFirstValueDismiss: dismissFirstValueGuide,
+    overviewProps: {
+      aiActivity,
+      projects,
+      livePreviewSuggestions,
+      authReady,
+      hasToken,
+      onRefreshWallet: handleRefreshWallet,
+      lastWalletUpdate,
+      walletLoading,
+      walletError: walletError as Error | null | undefined,
+      walletData,
+      walletTransactions,
+      formatCurrencyLabel,
+      connectivityData,
+      connectivityLoading,
+      connectivityError: connectivityError as Error | null | undefined,
+      connectivityServices,
+      formatConnectivityStatus: formatConnectivityStatusLabel,
+      miniPreviewExpanded,
+      onToggleMiniPreviewExpanded: () => setMiniPreviewExpanded((prev) => !prev),
+      onMagicWandSelect: handleMagicWandSelect,
+      onSendSuggestion: handleSendLivePreviewSuggestion,
+      isGenerating,
+    },
+    projectsProps: {
+      projects, newProjectName, newProjectType,
+      onDeleteProject: handleDeleteProject,
+      onCreateProject: handleCreateProject,
+      onProjectNameChange: setNewProjectName,
+      onProjectTypeChange: setNewProjectType,
+      onProjectVersionChange: handleProjectVersionChange,
+      onApplyDirectorNote: handleApplyDirectorNote,
+    },
+    aiChatProps: {
+      chatMode, onChatModeChange: setChatMode, chatHistory, chatMessage, onChatMessageChange: setChatMessage,
+      onSendChatMessage: handleSendChatMessage,
+      onStopStreaming: handleStopDashboardChat,
+      isStreaming,
+      activeWorkflowId,
+      copilotWorkflows,
+      copilotWorkflowsLoading,
+      connectBusy,
+      connectFromWorkflowId,
+      onCreateWorkflow: handleCreateWorkflow,
+      onSelectWorkflow: handleSelectWorkflow,
+      onRenameWorkflow: handleRenameWorkflow,
+      onArchiveWorkflow: handleArchiveWorkflow,
+      onConnectFromWorkflowChange: setConnectFromWorkflowId,
+      onCopyHistory: handleCopyHistory,
+      onImportContext: handleImportContext,
+      onMergeWorkflow: handleMergeWorkflow,
+      providerSetupGate: aiProviderGate,
+      onOpenProviderSettings: handleOpenProviderSettings,
+    },
+    walletProps: {
+      authReady, hasToken, walletLoading, walletError, walletData, walletTransactions,
+      creditsInfo: creditsData,
+      creditsUsedToday: walletStats.creditsUsedToday,
+      creditsUsedThisMonth: walletStats.creditsUsedThisMonth,
+      creditsReceivedThisMonth: walletStats.creditsReceivedThisMonth,
+      lastWalletUpdate,
+      lastPurchaseIntent,
+      lastTransferReceipt,
+      walletActionMessage,
+      walletActionError,
+      purchaseForm,
+      transferForm,
+      walletSubmitting,
+      creditEntries,
+      receivableSummary,
+      onRefreshWallet: handleRefreshWallet,
+      onPurchaseIntentSubmit: handlePurchase,
+      onTransferSubmit: handleTransfer,
+      setPurchaseForm,
+      setTransferForm,
+      formatCurrencyLabel,
+      formatStatusLabel,
+    },
+    billingProps: {
+      plans: billingPlansForUI, currentPlan: currentPlan?.id, loading: !billingData && !billingError,
+      onSelectPlan: handleSubscribe,
+      onManageSubscription: handleManageSubscription,
+    },
+    billingError: subscribeError,
+    subscribingPlan,
+    connectivityProps: {
+      connectivityLoading, connectivityError, connectivityData, connectivityServices,
+      onRefreshConnectivity: handleRefreshConnectivity,
+      formatConnectivityStatus: formatConnectivityStatusLabel,
+    },
+    workflowTemplates,
+    useCases,
+    onDownload: handleDownload,
+    onTemplateSelect: handleTemplateSelect,
+    onUseCaseSelect: handleUseCaseSelect,
+  }
+
   return (
-    <div className={`relative min-h-screen aethel-flex flex-column overflow-hidden ${settings.theme === 'dark' ? 'bg-slate-950 text-slate-50' : 'bg-slate-100 text-slate-900'}`}>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.1),transparent_28%),linear-gradient(180deg,transparent,rgba(2,6,23,0.18))]" />
-      <a
-        href="#dashboard-main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-3 focus:py-2 focus:text-white focus:ring-2 focus:ring-blue-500"
-      >
-        Pular para o conteudo do dashboard
-      </a>
-      <div className="sr-only" role="status" aria-live="polite" />
-      {isTrialActive && showTrialBanner && (
-        <TrialBanner
-          trialDaysLeft={trialDaysLeft}
-          onDismiss={() => setShowTrialBanner(false)}
-          onUpgrade={() => handleTabChange('billing')}
-        />
-      )}
-
-      <StudioGlobalNav
-        title="Studio Home"
-        subtitle="Operacao, IA, preview e billing no mesmo shell."
-        rightSlot={
-          <StudioActionRail
-            sidebarOpen={sidebarOpen}
-            onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-            onResetDashboard={handleResetDashboard}
-            onToggleTheme={handleToggleTheme}
-            theme={settings.theme}
-            backendOnline={backendOnline}
-            aiProviderConfigured={!aiProviderGate}
-            onOpenProviderSettings={handleOpenProviderSettings}
-            fullAccessActive={Boolean(fullAccessActiveGrant)}
-            fullAccessExpiresAt={fullAccessActiveGrant?.expiresAt || null}
-            fullAccessBusy={fullAccessBusy}
-            onToggleFullAccess={handleToggleFullAccess}
-            onOpenIde={handleOpenIdeFromHeader}
-          />
-        }
-      />
-      {(authErrorText || billingErrorText) && (
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6">
-          <div className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-xs text-slate-200">
-            {authErrorText && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1 text-xs text-rose-200">
-                Auth: {authErrorText}
-              </span>
-            )}
-            {billingErrorText && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs text-amber-100">
-                Billing: {billingErrorText}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-      <div className="relative z-10 aethel-flex flex-1 overflow-hidden">
-        {sidebarOpen && (
-          <button
-            type="button"
-            aria-label="Fechar menu lateral"
-            className="fixed inset-0 z-40 bg-slate-950/70 md:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        <AethelDashboardSidebar
-          sidebarOpen={sidebarOpen}
-          activeTab={activeTab}
-          sessionFilter={sessionFilter}
-          onCreateNewSession={handleCreateNewSession}
-          onSelectSessionFilter={setSessionFilter}
-          onSelectTab={handleTabChange}
-          onCloseMobile={() => setSidebarOpen(false)}
-        />
-        <main id="dashboard-main-content" className="flex-1 overflow-y-auto relative has-mobile-nav">
-          {showOnboardingWizard ? (
-            <div className="aethel-p-6">
-              <OnboardingWizard
-                onComplete={handleOnboardingComplete}
-                onSkip={handleOnboardingSkip}
-              />
-            </div>
-          ) : (
-            <DashboardMainContent
-              activeTab={activeTab}
-              showFirstValueGuide={showFirstValueGuide}
-              firstProjectCreated={projects.length > DEFAULT_PROJECTS.length}
-              firstValueAiSuccess={firstValueAiSuccess}
-              firstValueOpenedIde={firstValueOpenedIde}
-              firstValueSessionSummary={firstValueSessionSummary}
-              onFirstValueStartTemplate={handleTemplateSelect}
-              onFirstValueCreateProject={() => {
-                trackEvent('project', 'project_open', { source: 'first-value-guide', action: 'open-project-tab' })
-                handleTabChange('projects')
-              }}
-              onFirstValueConfigureAI={() => {
-                trackEvent('ai', 'ai_error', { source: 'first-value-guide', action: 'open-provider-setup' })
-                handleOpenProviderSettings()
-              }}
-              onFirstValueOpenAIChat={handleOpenAIChatFromGuide}
-              onFirstValueOpenIdePreview={handleOpenIdeLivePreview}
-              onFirstValueDismiss={dismissFirstValueGuide}
-              overviewProps={{
-                aiActivity,
-                projects,
-                livePreviewSuggestions,
-                authReady,
-                hasToken,
-                onRefreshWallet: handleRefreshWallet,
-                lastWalletUpdate,
-                walletLoading,
-                walletError: walletError as Error | null | undefined,
-                walletData,
-                walletTransactions,
-                formatCurrencyLabel,
-                connectivityData,
-                connectivityLoading,
-                connectivityError: connectivityError as Error | null | undefined,
-                connectivityServices,
-                formatConnectivityStatus: formatConnectivityStatusLabel,
-                miniPreviewExpanded,
-                onToggleMiniPreviewExpanded: () => setMiniPreviewExpanded((prev) => !prev),
-                onMagicWandSelect: handleMagicWandSelect,
-                onSendSuggestion: handleSendLivePreviewSuggestion,
-                isGenerating,
-              }}
-              projectsProps={{
-                projects,
-                newProjectName,
-                newProjectType,
-                onDeleteProject: handleDeleteProject,
-                onCreateProject: handleCreateProject,
-                onProjectNameChange: setNewProjectName,
-                onProjectTypeChange: setNewProjectType,
-                onProjectVersionChange: handleProjectVersionChange,
-                onApplyDirectorNote: handleApplyDirectorNote,
-              }}
-              aiChatProps={{
-                chatMode,
-                onChatModeChange: setChatMode,
-                chatHistory,
-                chatMessage,
-                onChatMessageChange: setChatMessage,
-                onSendChatMessage: handleSendChatMessage,
-                onStopStreaming: handleStopDashboardChat,
-                isStreaming,
-                activeWorkflowId,
-                copilotWorkflows,
-                copilotWorkflowsLoading,
-                connectBusy,
-                connectFromWorkflowId,
-                onCreateWorkflow: handleCreateWorkflow,
-                onSelectWorkflow: handleSelectWorkflow,
-                onRenameWorkflow: handleRenameWorkflow,
-                onArchiveWorkflow: handleArchiveWorkflow,
-                onConnectFromWorkflowChange: setConnectFromWorkflowId,
-                onCopyHistory: handleCopyHistory,
-                onImportContext: handleImportContext,
-                onMergeWorkflow: handleMergeWorkflow,
-                providerSetupGate: aiProviderGate,
-                onOpenProviderSettings: handleOpenProviderSettings,
-              }}
-              walletProps={{
-                authReady,
-                hasToken,
-                walletLoading,
-                walletError,
-                walletData,
-                walletTransactions,
-                creditsInfo: creditsData,
-                creditsUsedToday: walletStats.creditsUsedToday,
-                creditsUsedThisMonth: walletStats.creditsUsedThisMonth,
-                creditsReceivedThisMonth: walletStats.creditsReceivedThisMonth,
-                lastWalletUpdate,
-                lastPurchaseIntent,
-                lastTransferReceipt,
-                walletActionMessage,
-                walletActionError,
-                purchaseForm,
-                transferForm,
-                walletSubmitting,
-                creditEntries,
-                receivableSummary,
-                onRefreshWallet: handleRefreshWallet,
-                onPurchaseIntentSubmit: handlePurchase,
-                onTransferSubmit: handleTransfer,
-                setPurchaseForm,
-                setTransferForm,
-                formatCurrencyLabel,
-                formatStatusLabel,
-              }}
-              billingProps={{
-                plans: billingPlansForUI,
-                currentPlan: currentPlan?.id,
-                loading: !billingData && !billingError,
-                onSelectPlan: handleSubscribe,
-                onManageSubscription: handleManageSubscription,
-              }}
-              billingError={subscribeError}
-              subscribingPlan={subscribingPlan}
-              connectivityProps={{
-                connectivityLoading,
-                connectivityError,
-                connectivityData,
-                connectivityServices,
-                onRefreshConnectivity: handleRefreshConnectivity,
-                formatConnectivityStatus: formatConnectivityStatusLabel,
-              }}
-              workflowTemplates={workflowTemplates}
-              useCases={useCases}
-              onDownload={handleDownload}
-              onTemplateSelect={handleTemplateSelect}
-              onUseCaseSelect={handleUseCaseSelect}
-            />
-          )}
-        </main>
-      </div>
-
-      <MobileBottomNav
-        items={[
-          { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, matchPaths: ['/dashboard'] },
-          { href: '/ide', label: 'IDE', icon: Code, matchPaths: ['/ide'] },
-          { href: '/dashboard?tab=ai-chat', label: 'Chat', icon: MessageSquare, matchPaths: [] },
-          { href: '/billing', label: 'Faturamento', icon: CreditCard, matchPaths: ['/billing'] },
-          { href: '/settings', label: 'Ajustes', icon: Settings, matchPaths: ['/settings'] },
-        ]}
-      />
-
-      {showToast ? <DashboardToast message={showToast.message} type={showToast.type} /> : null}
-    </div>
+    <DashboardShell
+      theme={settings.theme}
+      isTrialActive={isTrialActive}
+      showTrialBanner={showTrialBanner}
+      trialDaysLeft={trialDaysLeft}
+      onDismissTrialBanner={() => setShowTrialBanner(false)}
+      onUpgradeTrial={() => handleTabChange('billing')}
+      authErrorText={authErrorText}
+      billingErrorText={billingErrorText}
+      sidebarOpen={sidebarOpen}
+      activeTab={activeTab}
+      sessionFilter={sessionFilter}
+      onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+      onCloseSidebar={() => setSidebarOpen(false)}
+      onResetDashboard={handleResetDashboard}
+      onToggleTheme={handleToggleTheme}
+      backendOnline={backendOnline}
+      aiProviderConfigured={!aiProviderGate}
+      onOpenProviderSettings={handleOpenProviderSettings}
+      fullAccessActive={Boolean(fullAccessActiveGrant)}
+      fullAccessExpiresAt={fullAccessActiveGrant?.expiresAt || null}
+      fullAccessBusy={fullAccessBusy}
+      onToggleFullAccess={handleToggleFullAccess}
+      onOpenIde={handleOpenIdeFromHeader}
+      onCreateNewSession={handleCreateNewSession}
+      onSelectSessionFilter={setSessionFilter}
+      onSelectTab={handleTabChange}
+      showOnboardingWizard={showOnboardingWizard}
+      onOnboardingComplete={handleOnboardingComplete}
+      onOnboardingSkip={handleOnboardingSkip}
+      dashboardMainProps={dashboardMainProps}
+      toast={showToast}
+    />
   )
 }

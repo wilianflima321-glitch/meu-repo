@@ -88,6 +88,8 @@ export interface StudioState {
   } | null
 }
 
+type DeployHistoryEntry = StudioState['deploy']['deployHistory'][number]
+
 /**
  * Tipos de ações
  */
@@ -210,38 +212,42 @@ function studioReducer(state: StudioState, action: StudioAction): StudioState {
       }
 
     case 'DEPLOY_SUCCESS':
+      const successHistory: DeployHistoryEntry[] = [
+        {
+          version: state.deploy.currentVersion || 'unknown',
+          status: 'success',
+          timestamp: action.payload.timestamp,
+          url: action.payload.url,
+        },
+        ...state.deploy.deployHistory,
+      ]
+      const successHistoryTrimmed = successHistory.slice(0, 10)
       return {
         ...state,
         deploy: {
           ...state.deploy,
           isDeploying: false,
           lastDeployedAt: action.payload.timestamp,
-          deployHistory: [
-            {
-              version: state.deploy.currentVersion || 'unknown',
-              status: 'success',
-              timestamp: action.payload.timestamp,
-              url: action.payload.url,
-            },
-            ...state.deploy.deployHistory,
-          ].slice(0, 10), // Manter últimos 10
+          deployHistory: successHistoryTrimmed, // Manter últimos 10
         },
       }
 
     case 'DEPLOY_ERROR':
+      const errorHistory: DeployHistoryEntry[] = [
+        {
+          version: state.deploy.currentVersion || 'unknown',
+          status: 'failed',
+          timestamp: new Date().toISOString(),
+        },
+        ...state.deploy.deployHistory,
+      ]
+      const errorHistoryTrimmed = errorHistory.slice(0, 10)
       return {
         ...state,
         deploy: {
           ...state.deploy,
           isDeploying: false,
-          deployHistory: [
-            {
-              version: state.deploy.currentVersion || 'unknown',
-              status: 'failed',
-              timestamp: new Date().toISOString(),
-            },
-            ...state.deploy.deployHistory,
-          ].slice(0, 10),
+          deployHistory: errorHistoryTrimmed,
         },
         error: {
           message: action.payload.error,

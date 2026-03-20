@@ -26,7 +26,7 @@ Veredito: Fundacao tecnica solida com governanca de documentacao exemplar, mas r
 Evidencias coletadas diretamente do repo (sem estimativas):
 - `metrics/latest_run-production.json`: `sampleSize=115`, `apply_success_rate=1.0`, `feedback_coverage=0.8957` (timestamp: 2026-03-14).
 - `metrics/l4-readiness-dossier.json`: status `PARTIAL` com blockers externos (Stripe/E2B/DB).
-- `cloud-web-app/web/components/AethelDashboardRuntime.tsx`: 1279 linhas (acima do gate 1200).
+- `cloud-web-app/web/components/AethelDashboardRuntime.tsx`: 1187 linhas (abaixo do gate 1200).
 - `cloud-web-app/web/app/landing-v2.tsx` e `landing-v3.tsx` coexistem.
 - `docs/master/9_BACKEND_SYSTEM_SPEC.md`: ja descreve Next.js/Prisma/PostgreSQL, mas com mojibake (encoding).
 - `docs/master/AI_SYSTEM_SPEC.md`: ainda referencia componentes backend em Python (Prompt Engine/Router) e precisa alinhar com runtime real.

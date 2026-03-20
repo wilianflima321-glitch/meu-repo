@@ -42,8 +42,6 @@ export const ELITE_SWR_CONFIG: SWRConfiguration = {
   errorRetryCount: 3,
   errorRetryInterval: 1000, // 1s inicial, depois backoff
 
-  // Timeout
-  dedupingInterval: 2000,
   compare: (a, b) => {
     // Comparação customizada para evitar re-renders desnecessários
     return JSON.stringify(a) === JSON.stringify(b)
@@ -198,7 +196,7 @@ export const optimisticUpdatePattern = {
   create: async (
     key: string,
     newItem: any,
-    mutate: (data?: any) => Promise<any>,
+    mutate: (data?: any, shouldRevalidate?: boolean) => Promise<any>,
     createFn: (item: any) => Promise<any>
   ) => {
     // Atualizar cache otimisticamente
@@ -234,7 +232,7 @@ export const optimisticUpdatePattern = {
     key: string,
     id: string,
     updates: any,
-    mutate: (data?: any) => Promise<any>,
+    mutate: (data?: any, shouldRevalidate?: boolean) => Promise<any>,
     updateFn: (id: string, updates: any) => Promise<any>
   ) => {
     // Atualizar cache otimisticamente
@@ -274,7 +272,7 @@ export const optimisticUpdatePattern = {
   delete: async (
     key: string,
     id: string,
-    mutate: (data?: any) => Promise<any>,
+    mutate: (data?: any, shouldRevalidate?: boolean) => Promise<any>,
     deleteFn: (id: string) => Promise<any>
   ) => {
     // Atualizar cache otimisticamente

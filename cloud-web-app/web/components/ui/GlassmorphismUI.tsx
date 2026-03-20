@@ -92,7 +92,9 @@ export function GlassCard({
 }) {
   return (
     <motion.div
-      {...(animated ? eliteAnimations.itemVariants : {})}
+      variants={animated ? eliteAnimations.itemVariants : undefined}
+      initial={animated ? 'hidden' : undefined}
+      animate={animated ? 'visible' : undefined}
       className={`
         relative rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl
         transition-all duration-300
