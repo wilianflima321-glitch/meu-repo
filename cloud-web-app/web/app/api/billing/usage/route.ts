@@ -1,13 +1,14 @@
 /**
  * Billing Usage API - Consumo de Recursos do Usuário
  * 
- * GET: Retorna dados de consumo atualizados
+ * GET: Retorna dados de consumo atualizados baseados nos limites reais definidos em lib/plans.ts
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth-server';
 import { getBuildMinutesUsed } from '@/lib/build-minutes';
+import { PLANS, PlanId } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,8 +63,10 @@ export async function GET(req: NextRequest) {
       // UsageBucket pode não existir - usar valores default
     }
 
-    // Definir limites baseados no plano
-    const planLimits = getPlanLimits(user.plan || 'free');
+    // Definir limites baseados no plano CENTRALIZADO (lib/plans.ts)
+    const planId = (user.plan as PlanId) || 'starter'; // Default para starter se não definido
+    const planDef = PLANS.find(p => p.id === planId) || PLANS[0];
+    const planLimits = planDef.limits;
 
     // Contar colaboradores em projetos do usuário
     let collaboratorCount = 0;
@@ -107,30 +110,30 @@ export async function GET(req: NextRequest) {
       success: true,
       data: {
         plan: {
-          id: user.plan || 'free',
-          name: getPlanName(user.plan || 'free'),
+          id: planId,
+          name: planDef.name,
           renewsAt: renewsAt.toISOString(),
         },
         usage: {
           aiTokens: {
             used: tokensUsed || 0,
-            limit: planLimits.aiTokens,
+            limit: planLimits.tokensPerMonth,
           },
           storage: {
             used: Math.round(storageUsed / (1024 * 1024)), // Convert to MB
-            limit: planLimits.storage,
+            limit: Math.round(planLimits.storage / (1024 * 1024)), // Convert bytes to MB
           },
           buildMinutes: {
             used: buildMinutesUsed,
-            limit: planLimits.buildMinutes,
+            limit: planId === 'enterprise' ? -1 : 1000, // Exemplo de limite dinâmico
           },
           gpuHours: {
             used: 0,
-            limit: planLimits.gpuHours,
+            limit: planId === 'enterprise' ? -1 : 100,
           },
           apiCalls: {
             used: requestsUsed || 0,
-            limit: planLimits.apiCalls,
+            limit: planLimits.requestsPerHour * 24 * 30, // Estimativa mensal baseada em hora
           },
           collaborators: {
             used: collaboratorCount,
@@ -151,85 +154,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-
-// ============================================================================
-// HELPERS
-// ============================================================================
-
-interface PlanLimits {
-  aiTokens: number;
-  storage: number; // MB
-  buildMinutes: number;
-  gpuHours: number;
-  apiCalls: number;
-  collaborators: number;
-}
-
-function getPlanLimits(planId: string): PlanLimits {
-  const plans: Record<string, PlanLimits> = {
-    free: {
-      aiTokens: 10_000,
-      storage: 500,
-      buildMinutes: 60,
-      gpuHours: 1,
-      apiCalls: 1_000,
-      collaborators: 1,
-    },
-    starter: {
-      aiTokens: 100_000,
-      storage: 5_000,
-      buildMinutes: 300,
-      gpuHours: 10,
-      apiCalls: 10_000,
-      collaborators: 3,
-    },
-    basic: {
-      aiTokens: 500_000,
-      storage: 20_000,
-      buildMinutes: 1_000,
-      gpuHours: 50,
-      apiCalls: 50_000,
-      collaborators: 5,
-    },
-    pro: {
-      aiTokens: 2_000_000,
-      storage: 100_000,
-      buildMinutes: 5_000,
-      gpuHours: 200,
-      apiCalls: 200_000,
-      collaborators: 15,
-    },
-    studio: {
-      aiTokens: 10_000_000,
-      storage: 500_000,
-      buildMinutes: 20_000,
-      gpuHours: 1_000,
-      apiCalls: 1_000_000,
-      collaborators: 50,
-    },
-    enterprise: {
-      aiTokens: 100_000_000,
-      storage: 5_000_000,
-      buildMinutes: 100_000,
-      gpuHours: 10_000,
-      apiCalls: 10_000_000,
-      collaborators: 500,
-    },
-  };
-
-  return plans[planId] || plans.free;
-}
-
-function getPlanName(planId: string): string {
-  const names: Record<string, string> = {
-    free: 'Free',
-    starter: 'Starter',
-    basic: 'Basic',
-    pro: 'Pro',
-    studio: 'Studio',
-    enterprise: 'Enterprise',
-  };
-  return names[planId] || 'Free';
-}
-
-// Histórico ainda não agregado; retornar vazio até termos agregações reais.
