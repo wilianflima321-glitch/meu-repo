@@ -20,7 +20,16 @@ Owner: Auditoria Tecnica Principal
 | Seguranca/Compliance | 5.5 | 7.0 | 9.0 |
 | Games/Films | 2.5 | — | 7.0 |
 
-Veredito: Fundacao tecnica solida com governanca de documentacao exemplar, mas receita = zero, evidencia de producao = zero, e concorrentes ja estao em fase de execucao agressiva.
+Veredito: Fundacao tecnica solida com governanca de documentacao exemplar, mas receita = zero e L4 ainda PARTIAL por blockers externos (Stripe/E2B/DB/Onboarding SLO).
+
+## 1.1 Verificacao Local (2026-03-20)
+Evidencias coletadas diretamente do repo (sem estimativas):
+- `metrics/latest_run-production.json`: `sampleSize=115`, `apply_success_rate=1.0`, `feedback_coverage=0.8957` (timestamp: 2026-03-14).
+- `metrics/l4-readiness-dossier.json`: status `PARTIAL` com blockers externos (Stripe/E2B/DB).
+- `cloud-web-app/web/components/AethelDashboardRuntime.tsx`: 1279 linhas (acima do gate 1200).
+- `cloud-web-app/web/app/landing-v2.tsx` e `landing-v3.tsx` coexistem.
+- `docs/master/9_BACKEND_SYSTEM_SPEC.md`: ja descreve Next.js/Prisma/PostgreSQL, mas com mojibake (encoding).
+- `docs/master/AI_SYSTEM_SPEC.md`: ainda referencia componentes backend em Python (Prompt Engine/Router) e precisa alinhar com runtime real.
 
 ## 2) Estrutura Geral do Projeto
 Monorepo com 3 camadas publicas:
@@ -43,12 +52,12 @@ Stack esperada (referencia, precisa confirmar no package.json):
 
 ## 3) Criticas Estruturais (Inconsistencias)
 ### 3.1 Backend Spec vs Codigo Real
-- Doc: `docs/master/9_BACKEND_SYSTEM_SPEC.md` descreve FastAPI/MongoDB/K8s/Celery.
+- Doc: `docs/master/9_BACKEND_SYSTEM_SPEC.md` ja reflete Next.js/Prisma/PostgreSQL, mas ainda tem mojibake e itens aspiracionais nao delimitados.
 - Codigo real: Next.js + Prisma + PostgreSQL.
 
-Impacto: onboarding tecnico confuso. Requer alinhamento imediato.
+Impacto: risco de confusao por encoding e itens aspiracionais nao marcados.
 
-**Acao**: atualizar a spec ou marcar como aspiracional e referenciar a arquitetura atual.
+**Acao**: corrigir encoding e separar com clareza o que e estado atual vs roadmap.
 
 ### 3.2 Modelos de IA Desatualizados (Spec)
 - `docs/master/AI_SYSTEM_SPEC.md` usa gpt-4o / claude-3-5-sonnet.
@@ -57,13 +66,14 @@ Impacto: onboarding tecnico confuso. Requer alinhamento imediato.
 **Acao**: atualizar roteamento e especificacao com modelos atuais e politica de fallback.
 
 ## 4) Limitacoes Criticas (P0)
-1. Zero evidencia de producao real (sampleSize=0).  
-2. Billing PARTIAL (checkout e webhook sem E2E).  
-3. Preview runtime fragmentado (4 implementacoes concorrentes).  
-4. Docker indisponivel em CI/sandbox.  
-5. Marketing/GTM inexistente.
+1. Billing PARTIAL (checkout e webhook sem E2E).  
+2. Preview runtime fragmentado (4 implementacoes concorrentes).  
+3. E2B token ausente para preview managed + HMR.  
+4. Stripe keys/webhook real pendentes.  
+5. Onboarding SLO <90s ainda sem evidencia.  
+6. Marketing/GTM inexistente.
 
-**Regra**: Sem evidencia real em `metrics/latest_run-production.json`, nenhuma promocao L4/L5 e valida.
+**Nota**: core-loop production sampleSize >= 100 ja foi atingido (ver secao 1.1).
 
 ## 5) Limitacoes Altas (P1)
 - RAG sem pgvector persistente
