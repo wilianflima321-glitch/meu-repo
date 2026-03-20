@@ -127,19 +127,21 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
   const handleDomainSelect = useCallback((domain: Domain) => {
     setSelectedDomain(domain)
     setStep(2)
-    analytics?.track?.('onboarding', 'onboarding_domain_selected', { metadata: { domain } })
+    analytics?.track?.('project', 'project_open', { metadata: { domain, source: 'onboarding-domain' } })
   }, [])
 
   const handleTemplateSelect = useCallback((template: Template) => {
     setSelectedTemplate(template)
     setStep(3)
-    analytics?.track?.('onboarding', 'template_selected', { metadata: { templateId: template.id, domain: template.domain } })
+    analytics?.track?.('project', 'project_open', {
+      metadata: { templateId: template.id, domain: template.domain, source: 'onboarding-template' },
+    })
   }, [])
 
   const handleStart = useCallback(() => {
     if (selectedTemplate) {
       const durationMs = Date.now() - startTimestamp
-      analytics?.track?.('onboarding', 'onboarding_completed', {
+      analytics?.track?.('project', 'project_create', {
         metadata: {
           templateId: selectedTemplate.id,
           domain: selectedTemplate.domain,

@@ -103,15 +103,6 @@ export default function AIAgentsPage() {
           },
         ]}
       />
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Com projeto</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-success)]">{summary.withProject}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Sem projeto</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{summary.withoutProject}</p>
-        </div>
-      </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <input

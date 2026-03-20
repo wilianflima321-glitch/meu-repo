@@ -10,7 +10,7 @@
  * - Slope and height filtering
  * - Instanced rendering (GPU instancing)
  * - LOD system
- * - Vento animation
+ * - Wind animation
  * - Collision generation
  * - Exportar para runtime
  */
@@ -40,8 +40,8 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
-  Camadas,
-  Vento,
+  Layers,
+  Wind,
   Mountain,
   Droplets,
   Plus,
@@ -97,7 +97,7 @@ export interface FoliageType {
   hasCollision: boolean;
   collisionType: 'box' | 'sphere' | 'mesh';
   
-  // Vento
+  // Wind
   windEnabled: boolean;
   windStrength: number;
   windFrequencia: number;
@@ -525,7 +525,7 @@ function FoliageInstances3D({ instancias, types, windTime }: FoliageInstances3DP
               color = palette.fallback;
           }
           
-          // Vento offset
+          // Wind offset
           const windOffset = foliageType.windEnabled
             ? Math.sin(windTime * foliageType.windFrequencia + inst.position.x) * foliageType.windStrength * 0.1
             : 0;
@@ -722,7 +722,7 @@ export default function FoliagePintarer({
   // State
   const [foliageTypes] = useState<FoliageType[]>(DEFAULT_FOLIAGE_TYPES);
   const [selectedTypes, setSelecionaredTypes] = useState<string[]>(['grass_tall']);
-  const [layers, setCamadas] = useState<FoliageCamada[]>([
+  const [layers, setLayers] = useState<FoliageCamada[]>([
     { id: 'default', name: 'Camada padrao', visible: true, locked: false, types: [], instancias: [] },
   ]);
   const [activeCamadaId, setActiveCamadaId] = useState('default');
@@ -737,7 +737,7 @@ export default function FoliagePintarer({
   
   // Simulation
   const [isSimulating, setIsSimulating] = useState(false);
-  const [windTime, setVentoTime] = useState(0);
+  const [windTime, setWindTime] = useState(0);
   const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
   
   // Get active layer
@@ -795,14 +795,14 @@ export default function FoliagePintarer({
         });
       }
       
-      setCamadas((prev) => prev.map((l) => 
+      setLayers((prev) => prev.map((l) => 
         l.id === activeCamadaId 
           ? { ...l, instancias: [...l.instancias, ...newInstances] }
           : l
       ));
     } else if (brushSettings.tool === 'erase') {
       // Remove instancias within radius
-      setCamadas((prev) => prev.map((l) => 
+      setLayers((prev) => prev.map((l) => 
         l.id === activeCamadaId 
           ? {
               ...l,
@@ -834,25 +834,25 @@ export default function FoliagePintarer({
       types: [],
       instancias: [],
     };
-    setCamadas((prev) => [...prev, newCamada]);
+    setLayers((prev) => [...prev, newCamada]);
     setActiveCamadaId(newCamada.id);
   }, [layers.length]);
   
   // Delete layer
   const deleteCamada = useCallback((layerId: string) => {
     if (layers.length <= 1) return;
-    setCamadas((prev) => prev.filter((l) => l.id !== layerId));
+    setLayers((prev) => prev.filter((l) => l.id !== layerId));
     if (activeCamadaId === layerId) {
       setActiveCamadaId(layers[0].id);
     }
   }, [layers, activeCamadaId]);
   
-  // Vento animation
+  // Wind animation
   useEffect(() => {
     if (!isSimulating) return;
     
     const interval = setInterval(() => {
-      setVentoTime((t) => t + 0.05);
+      setWindTime((t) => t + 0.05);
     }, 16);
     
     return () => clearInterval(interval);
@@ -860,7 +860,7 @@ export default function FoliagePintarer({
   
   // Clear all
   const clearAll = useCallback(() => {
-    setCamadas((prev) => prev.map((l) => ({ ...l, instancias: [] })));
+    setLayers((prev) => prev.map((l) => ({ ...l, instancias: [] })));
   }, []);
   
   return (
@@ -886,10 +886,10 @@ export default function FoliagePintarer({
           ))}
         </div>
         
-        {/* Camadas */}
+        {/* Layers */}
         <div className="border-t border-[var(--aethel-border-primary)] p-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-[var(--aethel-text-tertiary)]">Camadas</span>
+            <span className="text-xs text-[var(--aethel-text-tertiary)]">Layers</span>
             <button
               onClick={addCamada}
               className="p-1 rounded bg-[var(--aethel-success)]/30 hover:bg-[var(--aethel-success)]/50"
@@ -905,12 +905,12 @@ export default function FoliagePintarer({
                 isSelecionared={activeCamadaId === layer.id}
                 onSelecionar={() => setActiveCamadaId(layer.id)}
                 onToggleVisibility={() => {
-                  setCamadas((prev) => prev.map((l) => 
+                  setLayers((prev) => prev.map((l) => 
                     l.id === layer.id ? { ...l, visible: !l.visible } : l
                   ));
                 }}
                 onToggleLock={() => {
-                  setCamadas((prev) => prev.map((l) => 
+                  setLayers((prev) => prev.map((l) => 
                     l.id === layer.id ? { ...l, locked: !l.locked } : l
                   ));
                 }}
@@ -982,9 +982,9 @@ export default function FoliagePintarer({
           <button
             onClick={() => setIsSimulating(!isSimulating)}
             className={`p-2 rounded ${isSimulating ? 'bg-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)]'}`}
-            title={isSimulating ? 'Stop Vento' : 'Simulate Vento'}
+            title={isSimulating ? 'Stop Wind' : 'Simulate Wind'}
           >
-            <Vento className="w-4 h-4" />
+            <Wind className="w-4 h-4" />
           </button>
           
           <button
@@ -1142,8 +1142,8 @@ export default function FoliagePintarer({
           </CollapsibleSection>
           
           <CollapsibleSection 
-            title="Vento" 
-            icon={<Vento className="w-4 h-4 text-[var(--aethel-primary)]" />}
+            title="Wind" 
+            icon={<Wind className="w-4 h-4 text-[var(--aethel-primary)]" />}
             defaultOpen={false}
           >
             <Slider

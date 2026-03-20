@@ -111,31 +111,22 @@ export default function AdminSecurity() {
           {
             icon: Activity,
             label: 'Eventos',
-            value: data?.stats.total ?? 0,
+            value: data?.stats.total || 0,
           },
           {
             icon: AlertTriangle,
             label: 'Avisos',
-            value: data?.stats.warning ?? 0,
+            value: data?.stats.warning || 0,
             tone: 'warning',
           },
           {
             icon: ShieldAlert,
             label: 'Cr?ticos',
-            value: data?.stats.critical ?? 0,
+            value: data?.stats.critical || 0,
             tone: 'error',
           },
         ]}
       />
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Avisos</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{data?.stats.warning ? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Criticos</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-error)]'>{data?.stats.critical ? 0}</p>
-        </div>
-      </div>
 
       <div className='mb-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <h2 className='text-xl font-semibold mb-4'>Configuracoes de Seguranca</h2>
@@ -218,7 +209,7 @@ export default function AdminSecurity() {
                             : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                       }`}
                     >
-                      {severityLabels[log.severity || 'info'] ? log.severity ? 'informacao'}
+                      {severityLabels[log.severity || 'info'] || log.severity || 'informacao'}
                     </span>
                   </td>
                   <td className='p-3'>{new Date(log.createdAt).toLocaleString()}</td>

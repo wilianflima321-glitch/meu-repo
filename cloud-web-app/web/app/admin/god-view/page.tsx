@@ -532,15 +532,15 @@ export default function GodViewPage() {
         {/* Sessions List */}
         <div className="col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)]">
-              {filteredSessions.length} sessoes ativas
+            <h2 className="text-sm font-medium text-[var(--aethel-text-primary)]">
+              Sessoes ativas ({filteredSessions.length})
             </h2>
           </div>
           
           {filteredSessions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg">
-              <Users className="w-12 h-12 text-[var(--aethel-text-quaternary)] mb-4" />
-              <p className="text-[var(--aethel-text-tertiary)]">Nenhuma sessão ativa</p>
+            <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
+              <Eye className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>Nenhuma sessao ativa no momento</p>
             </div>
           ) : (
             <div className="space-y-3">

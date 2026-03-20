@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import LandingPageV2 from './landing-v2'
+import LandingPageV3 from './landing-v3'
 
 export const metadata: Metadata = {
   title: 'Aethel Engine | Multi-agent software studio',
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  return <LandingPageV2 />
+  return <LandingPageV3 />
 }

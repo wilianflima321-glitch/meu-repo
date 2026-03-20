@@ -73,11 +73,6 @@ export default function RolesPage() {
           },
         ]}
       />
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Administradores totais</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-primary)]">{summary.totalAdmins}</p>
-        </div>
-      </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Distribuição de funções</h2>
@@ -94,8 +89,8 @@ export default function RolesPage() {
         ) : (
           <ul>
             {roles.map((role) => (
-              <li key={role.role ? 'unknown'} className="p-3 border-b flex justify-between">
-                <span>{role.role ? 'sem função'}</span>
+              <li key={role.role || 'unknown'} className="p-3 border-b flex justify-between">
+                <span>{role.role || 'sem função'}</span>
                 <span className="text-sm text-[var(--aethel-text-secondary)]">{role.count} usuários</span>
               </li>
             ))}
@@ -116,8 +111,8 @@ export default function RolesPage() {
         ) : (
           <ul>
             {adminRoles.map((role) => (
-              <li key={role.role ? 'admin-unknown'} className="p-3 border-b flex justify-between">
-                <span>{role.role ? 'sem função administrativa'}</span>
+              <li key={role.role || 'admin-unknown'} className="p-3 border-b flex justify-between">
+                <span>{role.role || 'sem função administrativa'}</span>
                 <span className="text-sm text-[var(--aethel-text-secondary)]">{role.count} usuários</span>
               </li>
             ))}

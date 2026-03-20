@@ -496,7 +496,20 @@ export function KeyframeEditor({
     ctx.closePath()
     ctx.fill()
     
-  }, [tracks, currentTime, duration, pixelsPerSecond, selectedKeyframes, hoveredKeyframe, drawKeyframe, drawEasingCurve])
+  }, [
+    tracks,
+    currentTime,
+    duration,
+    pixelsPerSecond,
+    selectedKeyframes,
+    hoveredKeyframe,
+    drawKeyframe,
+    drawEasingCurve,
+    headerWidth,
+    palette,
+    propertyHeight,
+    trackHeight,
+  ])
   
   // Hit test for keyframe
   const hitTestKeyframe = useCallback((clientX: number, clientY: number): {
@@ -535,7 +548,7 @@ export function KeyframeEditor({
     }
     
     return null
-  }, [tracks, pixelsPerSecond])
+  }, [tracks, pixelsPerSecond, headerWidth, keyframeSize, propertyHeight, trackHeight])
   
   // Mouse handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -874,7 +887,7 @@ export function KeyframeControls({
         }}
         title="Previous keyframe"
       >
-        <
+        &lt;
       </button>
       <button
         onClick={() => {

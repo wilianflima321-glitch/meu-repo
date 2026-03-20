@@ -186,9 +186,9 @@ export default function FeatureFlagsAdmin() {
                 <tr key={flag.id} className='border-t'>
                   <td className='p-2'>{flag.key}</td>
                   <td className='p-2'>{flag.name}</td>
-                  <td className='p-2'>{typeLabels[flag.type] ? flag.type}</td>
+                  <td className='p-2'>{typeLabels[flag.type] ?? flag.type}</td>
                   <td className='p-2'>
-                    {flag.type === 'percentage' ? `${flag.percentage ? 0}%` : '—'}
+                    {flag.type === 'percentage' ? `${flag.percentage || 0}%` : '—'}
                   </td>
                   <td className='p-2'>
                     <span className='text-xs px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'>

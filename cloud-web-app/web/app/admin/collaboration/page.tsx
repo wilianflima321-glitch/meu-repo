@@ -248,17 +248,17 @@ export default function CollaborationAdminPage() {
       {
         label: 'Teste de concorrencia',
         value: readiness.evidence.syntheticConcurrency,
-        stale: readiness.evidence.stale?.syntheticConcurrency ? false,
+        stale: readiness.evidence.stale?.syntheticConcurrency || false,
       },
       {
         label: 'Replay de reconexao',
         value: readiness.evidence.reconnectReplay,
-        stale: readiness.evidence.stale?.reconnectReplay ? false,
+        stale: readiness.evidence.stale?.reconnectReplay || false,
       },
       {
         label: 'Replay de conflito',
         value: readiness.evidence.conflictReplay,
-        stale: readiness.evidence.stale?.conflictReplay ? false,
+        stale: readiness.evidence.stale?.conflictReplay || false,
       },
     ]
   }, [readiness])
@@ -487,7 +487,7 @@ export default function CollaborationAdminPage() {
                   <span className="rounded border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] px-1.5 py-0.5 text-[var(--aethel-success-light)]">ATTACHED</span>
                   {readiness.evidence.stale?.stressProof ? (
                     <span className="ml-2 rounded border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] px-1.5 py-0.5 text-[var(--aethel-error)]">
-                      STALE ({readiness.evidence.maxAgeDays ? 30}d)
+                      STALE ({readiness.evidence.maxAgeDays || 30}d)
                     </span>
                   ) : null}
                   {readiness.evidence.stressProofUrl ? (

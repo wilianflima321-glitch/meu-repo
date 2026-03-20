@@ -1,13 +1,13 @@
 # Interface Critical Sweep
 
-- Generated at: `2026-03-12T02:53:46.436Z`
+- Generated at: `2026-03-18T21:29:07.560Z`
 - Scope: `app/`, `components/`
-- Files scanned: `721`
+- Files scanned: `743`
 
 ## Summary
 
-- `legacy-accent-tokens` (high): 0
-- `admin-light-theme-tokens` (high): 0
+- `legacy-accent-tokens` (high): 66
+- `admin-light-theme-tokens` (high): 6
 - `admin-status-light-tokens` (high): 0
 - `blocking-browser-dialogs` (medium): 0
 - `not-implemented-ui` (info): 0
@@ -19,17 +19,35 @@
 
 - Metric ID: `legacy-accent-tokens`
 - Severity: `high`
-- Total matches: `0`
+- Total matches: `66`
 
-- No matches
+| File | Matches |
+| --- | ---: |
+| `components/onboarding/OnboardingWizard.tsx` | 20 |
+| `components/billing/BillingIntegration.tsx` | 12 |
+| `app/marketplace/page.tsx` | 5 |
+| `components/Onboarding.tsx` | 5 |
+| `components/ide/PreviewRuntimeToolbar.tsx` | 4 |
+| `components/ui/CookieConsent.tsx` | 4 |
+| `app/docs/films/page.tsx` | 3 |
+| `components/ui/PublicHeader.tsx` | 3 |
+| `app/docs/getting-started/page.tsx` | 2 |
+| `app/docs/ide/page.tsx` | 2 |
+| `components/onboarding/WelcomeWizard.tsx` | 2 |
+| `app/docs/api/page.tsx` | 1 |
+| `app/layout.tsx` | 1 |
+| `components/studio/StudioLayout.tsx` | 1 |
+| `components/ui/PremiumSkeleton.tsx` | 1 |
 
 ## Admin light-theme tokens (bg-white/text-gray/border-gray)
 
 - Metric ID: `admin-light-theme-tokens`
 - Severity: `high`
-- Total matches: `0`
+- Total matches: `6`
 
-- No matches
+| File | Matches |
+| --- | ---: |
+| `app/admin/monitoring/page.tsx` | 6 |
 
 ## Admin light status tokens (100-level bg/text + light borders)
 

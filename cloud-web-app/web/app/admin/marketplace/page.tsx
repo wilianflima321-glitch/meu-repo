@@ -134,10 +134,10 @@ export default function AdminMarketplace() {
             <tbody>
               {filteredItems.map((item: any) => (
                 <tr key={String(item.id)} className='border-t'>
-                  <td className='p-3'>{String(item.title ? '')}</td>
-                  <td className='p-3'>{String(item.category ? '')}</td>
+                  <td className='p-3'>{String(item.title ?? '')}</td>
+                  <td className='p-3'>{String(item.category ?? '')}</td>
                   <td className='p-3'>{item.price > 0 ? `$${item.price.toFixed(2)}` : 'Grátis'}</td>
-                  <td className='p-3'>{String(item.downloads ? 0)}</td>
+                  <td className='p-3'>{String(item.downloads || 0)}</td>
                   <td className='p-3'>{Number(item.rating || 0).toFixed(1)}</td>
                   <td className='p-3'>{new Date(item.createdAt).toLocaleDateString()}</td>
                 </tr>

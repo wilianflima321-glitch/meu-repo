@@ -59,51 +59,68 @@ export function DashboardOverviewTab({
   onSendSuggestion,
   isGenerating,
 }: DashboardOverviewTabProps) {
+  const overviewSignals = [
+    {
+      label: 'Atividade IA',
+      value: aiActivity,
+      accent: 'text-[var(--aethel-info-light)]',
+      description: 'Arquitetura, execucao e revisao em tempo real.',
+    },
+    {
+      label: 'Projetos ativos',
+      value: String(projects.filter((project) => project.status === 'active').length),
+      accent: 'text-[var(--aethel-success-light)]',
+      description: 'Fluxos em andamento e iteracoes recentes.',
+    },
+    {
+      label: 'Sugestoes prontas',
+      value: String(livePreviewSuggestions.length),
+      accent: 'text-[var(--aethel-primary-light)]',
+      description: 'Acoes prontas para testar no preview.',
+    },
+  ]
+
   return (
-    <div className="aethel-p-6 space-y-6">
-      <div className="aethel-card">
-        <div className="aethel-flex aethel-justify-between aethel-items-center">
+    <div className="space-y-6">
+      <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(17,24,39,0.9)_45%,rgba(14,165,233,0.08)_100%)] shadow-[0_30px_90px_rgba(2,6,23,0.45)]">
+        <div className="grid gap-6 px-6 py-7 lg:grid-cols-[1.3fr_0.7fr] lg:px-8">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Studio Home</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Visao geral do ambiente</h2>
-            <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">
-              Sinais de atividade, conectividade e preview em uma unica tela.
+            <p className="text-xs uppercase tracking-[0.24em] text-[var(--aethel-text-tertiary)]">Studio Home</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">
+              Visao operacional do ambiente
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
+              Uma leitura unica de atividade, carteira, conectividade e preview para reduzir troca de contexto e deixar o studio mais claro para quem entra e para quem opera todos os dias.
             </p>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
+                Sessao segura
+              </span>
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-1 text-xs text-[var(--aethel-success-light)]">
+                Runtime pronto
+              </span>
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1 text-xs text-[var(--aethel-info-light)]">
+                Fluxo guiado
+              </span>
+            </div>
           </div>
-          <div className="hidden md:flex items-center gap-2">
-            <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
-              Sessao segura
-            </span>
-            <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-1 text-xs text-[var(--aethel-success-light)]">
-              Runtime pronto
-            </span>
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+            {overviewSignals.map((signal) => (
+              <div
+                key={signal.label}
+                className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-4 py-4"
+              >
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">{signal.label}</div>
+                <div className={`mt-2 text-2xl font-semibold ${signal.accent}`}>{signal.value}</div>
+                <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{signal.description}</div>
+              </div>
+            ))}
           </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 aethel-gap-6">
-        <div className="aethel-card aethel-p-6">
-          <div className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Atividade IA</div>
-          <p className="mt-3 text-3xl font-semibold text-[var(--aethel-info)]">{aiActivity}</p>
-          <p className="mt-2 text-xs text-[var(--aethel-text-secondary)]">Planos, execucoes e revisoes no studio.</p>
-        </div>
-        <div className="aethel-card aethel-p-6">
-          <div className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Projetos ativos</div>
-          <p className="mt-3 text-3xl font-semibold text-[var(--aethel-success)]">
-            {projects.filter((project) => project.status === 'active').length}
-          </p>
-          <p className="mt-2 text-xs text-[var(--aethel-text-secondary)]">Fluxos em andamento e builds recentes.</p>
-        </div>
-        <div className="aethel-card aethel-p-6">
-          <div className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Preview ao vivo</div>
-          <p className="mt-3 text-3xl font-semibold text-[var(--aethel-info)]">
-            {livePreviewSuggestions.length} sugestoes
-          </p>
-          <p className="mt-2 text-xs text-[var(--aethel-text-secondary)]">Ideias prontas para testar agora.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 aethel-gap-6">
-        <div className="aethel-card aethel-p-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.42))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">
           <div className="aethel-flex aethel-items-center aethel-justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Carteira</p>
@@ -183,7 +200,7 @@ export function DashboardOverviewTab({
           </div>
         </div>
 
-        <div className="aethel-card aethel-p-6">
+        <div className="overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(8,47,73,0.34),rgba(15,23,42,0.56))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">
           <div className="aethel-flex aethel-justify-between aethel-items-center">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Infra</p>
@@ -256,7 +273,7 @@ export function DashboardOverviewTab({
         </div>
       </div>
 
-      <div className="aethel-card aethel-p-6">
+      <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.76),rgba(7,10,18,0.94))] p-6 shadow-[0_24px_80px_rgba(2,6,23,0.36)]">
         <div className="aethel-flex aethel-items-center aethel-justify-between mb-4">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Preview</p>

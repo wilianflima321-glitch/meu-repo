@@ -37,6 +37,20 @@ export interface WebContainerBridgeAPI {
   dispose: () => void
 }
 
+type WebContainerModule = {
+  WebContainer: {
+    boot: () => Promise<any>
+  }
+}
+
+const loadWebContainerModule = async (): Promise<WebContainerModule> => {
+  const importer = new Function('specifier', 'return import(specifier)') as (
+    specifier: string
+  ) => Promise<WebContainerModule>
+
+  return importer('@webcontainer/api')
+}
+
 /**
  * Creates a WebContainers bridge for browser-side preview.
  * This is a fallback when E2B sandbox is unavailable.
@@ -64,8 +78,8 @@ export function createWebContainerBridge(
     try {
       setState('booting')
 
-      // Dynamic import to avoid SSR issues
-      const { WebContainer } = await import('@webcontainer/api')
+      // Keep WebContainers optional so builds do not fail when the package is absent.
+      const { WebContainer } = await loadWebContainerModule()
       webcontainerInstance = await WebContainer.boot()
 
       webcontainerInstance.on('server-ready', (port: number, url: string) => {

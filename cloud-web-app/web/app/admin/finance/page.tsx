@@ -262,7 +262,7 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
               <tr key={tx.id} className="border-b border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]/50">
                 <td className="px-4 py-2">
                   <span className={`capitalize ${typeColors[tx.type]}`}>
-                    {typeLabels[tx.type] ? tx.type}
+                    {typeLabels[tx.type] ?? tx.type}
                   </span>
                 </td>
                 <td className="px-4 py-2">
@@ -381,7 +381,7 @@ export default function FinanceDashboard() {
                 ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
                 : 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-tertiary)]'
             }`}
-            label={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
+            aria-label={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
           >
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
           </button>
@@ -397,7 +397,7 @@ export default function FinanceDashboard() {
           icon={TrendingUp}
           valuePrefix="$"
           trend={metrics.mrrGrowth >= 0 ? 'up' : 'down'}
-          sublabel={`ARR: $${(metrics.arr / 1000).toFixed(0)}k`}
+          subValue={`ARR: $${(metrics.arr / 1000).toFixed(0)}k`}
         />
         <AdminMetricCard
           label="Receita diária"
@@ -411,7 +411,7 @@ export default function FinanceDashboard() {
           icon={metrics.dailyProfit >= 0 ? TrendingUp : TrendingDown}
           valuePrefix="$"
           trend={metrics.dailyProfit >= 0 ? 'up' : 'down'}
-          sublabel={`Margem: ${metrics.profitMargin.toFixed(1)}%`}
+          subValue={`Margem: ${metrics.profitMargin.toFixed(1)}%`}
         />
         <AdminMetricCard
           label="Queima diária"
@@ -419,7 +419,7 @@ export default function FinanceDashboard() {
           icon={Zap}
           valuePrefix="$"
           valueSuffix="/dia"
-          sublabel={`Fôlego: ${metrics.runway} meses`}
+          subValue={`Fôlego: ${metrics.runway} meses`}
         />
       </div>
       
@@ -430,20 +430,20 @@ export default function FinanceDashboard() {
           value={metrics.dailyAICost}
           icon={Bot}
           valuePrefix="$"
-          sublabel="Gasto de IA hoje"
+          subValue="Gasto de IA hoje"
         />
         <AdminMetricCard
           label="Infraestrutura"
           value={metrics.dailyInfraCost}
           icon={Server}
           valuePrefix="$"
-          sublabel="Servidores, BD, CDN"
+          subValue="Servidores, BD, CDN"
         />
         <AdminMetricCard
           label="Assinaturas ativas"
           value={metrics.activeSubscriptions}
           icon={Users}
-          sublabel={`Churn: ${metrics.churnRate.toFixed(1)}%`}
+          subValue={`Churn: ${metrics.churnRate.toFixed(1)}%`}
         />
       </div>
       
@@ -454,14 +454,14 @@ export default function FinanceDashboard() {
           value={metrics.ltv}
           icon={TrendingUp}
           valuePrefix="$"
-          sublabel="Valor do ciclo de vida"
+          subValue="Valor do ciclo de vida"
         />
         <AdminMetricCard
           label="CAC"
           value={metrics.cac}
           icon={CreditCard}
           valuePrefix="$"
-          sublabel="Custo de aquisição"
+          subValue="Custo de aquisição"
         />
         <AdminMetricCard
           label="LTV:CAC"
@@ -469,7 +469,7 @@ export default function FinanceDashboard() {
           icon={PieChart}
           valueSuffix="x"
           trend={(metrics.ltv / metrics.cac) >= 3 ? 'up' : 'down'}
-          sublabel={metrics.ltv / metrics.cac >= 3 ? 'Saudável' : 'Precisa melhorar'}
+          subValue={metrics.ltv / metrics.cac >= 3 ? 'Saudável' : 'Precisa melhorar'}
         />
         <AdminMetricCard
           label="Taxa de churn"
@@ -477,7 +477,7 @@ export default function FinanceDashboard() {
           icon={TrendingDown}
           valueSuffix="%"
           trend={metrics.churnRate <= 5 ? 'up' : 'down'}
-          sublabel="Mensal"
+          subValue="Mensal"
         />
       </div>
       

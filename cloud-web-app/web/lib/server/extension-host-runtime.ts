@@ -219,6 +219,8 @@ export interface ExtensionHostMessage {
   payload: any;
 }
 
+const nativeRequire = eval('require') as NodeRequire;
+
 // ============================================================================
 // Extension API (Sandbox)
 // ============================================================================
@@ -951,24 +953,12 @@ export class ExtensionHostRuntime extends EventEmitter {
   
   private createRequire(basePath: string): (id: string) => any {
     return (id: string) => {
-      // Handle built-in modules
-      if (['path', 'fs', 'os', 'crypto', 'util', 'events', 'stream', 'buffer'].includes(id)) {
-        return require(id);
-      }
-      
       // Handle relative paths
       if (id.startsWith('.')) {
-        return require(path.join(basePath, id));
+        return nativeRequire(path.join(basePath, id));
       }
-      
-      // Handle node_modules
-      const nodeModulesPath = path.join(basePath, 'node_modules', id);
-      if (fs.existsSync(nodeModulesPath)) {
-        return require(nodeModulesPath);
-      }
-      
-      // Fallback to global require
-      return require(id);
+
+      return nativeRequire(id);
     };
   }
   

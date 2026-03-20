@@ -55,7 +55,8 @@ const DOMAIN_TEMPLATES = [
     description: 'Jogo com sprites, fisica e leaderboard',
     stack: ['Canvas', 'Rapier', 'Sprites'],
     color: 'from-cyan-500 to-sky-500',
-    mission: 'Criar jogo 2D com sprites, fisica e pontuacao',\n    availability: 'experimental',
+    mission: 'Criar jogo 2D com sprites, fisica e pontuacao',
+    availability: 'experimental',
   },
   {
     id: 'film-storyboard',
@@ -65,7 +66,8 @@ const DOMAIN_TEMPLATES = [
     description: 'Director de cenas com AI e timeline',
     stack: ['Scenes', 'Timeline', 'AI Gen'],
     color: 'from-blue-500 to-cyan-500',
-    mission: 'Criar storyboard com cenas, diretor AI e timeline',\n    availability: 'experimental',
+    mission: 'Criar storyboard com cenas, diretor AI e timeline',
+    availability: 'experimental',
   },
 ]
 
@@ -323,7 +325,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               <p className="flex items-start gap-2 text-xs text-amber-300/80">
                 <Codicon name="info" />
                 <span>
-                  Voce pode configurar a API key depois em Settings > AI Provider. O wizard nao armazena keys.
+                  Voce pode configurar a API key depois em Settings {'>'} AI Provider. O wizard nao armazena keys.
                 </span>
               </p>
             </div>

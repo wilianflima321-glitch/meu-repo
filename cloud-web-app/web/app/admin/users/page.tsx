@@ -42,12 +42,12 @@ export default function AdminUsers() {
       const nextUsers = Array.isArray(data?.users) ? data.users : [];
       setUsers(nextUsers.map((user: any) => ({
         id: user.id,
-        name: user.name ? null,
+        name: user.name || null,
         email: user.email,
-        plan: user.plan ? null,
+        plan: user.plan || null,
         createdAt: user.createdAt,
-        projects: user._count?.projects ? 0,
-        sessions: user._count?.sessions ? 0,
+        projects: user._count?.projects || 0,
+        sessions: user._count?.sessions || 0,
       })));
       setLastUpdated(new Date());
       setError(null);
@@ -94,15 +94,6 @@ export default function AdminUsers() {
             Atualizar
           </button>
         )}
-      /> : null}
-        actions={(
-          <button
-            onClick={fetchUsers}
-            className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
-          >
-            Atualizar
-          </button>
-        )}
       />
 
       <AdminSummaryGrid
@@ -132,7 +123,7 @@ export default function AdminUsers() {
                 planFilter === plan ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
               }`}
             >
-              {plan === 'all' ? 'Todos' : (planLabels[plan] ? plan)}
+              {plan === 'all' ? 'Todos' : (planLabels[plan] || plan)}
             </button>
           ))}
         </div>
@@ -177,7 +168,7 @@ export default function AdminUsers() {
                     </button>
                   </div>
                 </td>
-                <td className='p-3'>{planLabels[user.plan || 'starter'] ? (user.plan || 'starter')}</td>
+                <td className='p-3'>{planLabels[user.plan || 'starter'] || (user.plan || 'starter')}</td>
                 <td className='p-3'>{user.projects}</td>
                 <td className='p-3'>{user.sessions}</td>
                 <td className='p-3'>{new Date(user.createdAt).toLocaleDateString()}</td>

@@ -64,7 +64,7 @@ export default function BillingCheckoutPage() {
     };
 
     run();
-  }, [planId, router]);
+  }, [interval, planId, router]);
 
   if (status === 'error') {
     return (

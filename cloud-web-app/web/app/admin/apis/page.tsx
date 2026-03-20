@@ -140,8 +140,8 @@ export default function APIs() {
           ? (operatorData as OperatorReadinessSnapshot)
           : null;
       setOperatorReadiness(operatorSnapshot);
-      setBillingRuntime(operatorSnapshot?.checks.billingRuntime ? null);
-      setPreviewRuntime(operatorSnapshot?.checks.previewRuntime ? null);
+      setBillingRuntime(operatorSnapshot?.checks.billingRuntime || null);
+      setPreviewRuntime(operatorSnapshot?.checks.previewRuntime || null);
       setProductionRuntime(
         operatorSnapshot?.checks.productionRuntime
           ? { runtimeReadiness: operatorSnapshot.checks.productionRuntime }
@@ -367,7 +367,7 @@ export default function APIs() {
             <div className='flex items-center justify-between rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 px-3 py-2'>
               <span className='text-[var(--aethel-text-secondary)]'>Publishable key / price coverage</span>
               <span className='text-[var(--aethel-text-secondary)]'>
-                {String(Boolean(billingRuntime.stripe?.publishableKeyConfigured))} / {billingRuntime.stripe?.configuredPriceCount ? 0}/{billingRuntime.stripe?.requiredPriceCount ? 0}
+                {String(Boolean(billingRuntime.stripe?.publishableKeyConfigured))} / {billingRuntime.stripe?.configuredPriceCount || 0}/{billingRuntime.stripe?.requiredPriceCount || 0}
               </span>
             </div>
             {billingRuntime.provider?.webhookPath ? (
@@ -519,19 +519,6 @@ export default function APIs() {
           },
         ]}
       />
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Configuradas</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{summary.configured}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Ausentes</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{summary.missing}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Cutoff candidates</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-success)]'>{removalCandidates.length}</p>
-        </div>
-      </div>
 
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
         <input
@@ -580,7 +567,7 @@ export default function APIs() {
                 </div>
               </td>
             </tr>
-          ) : filteredIntegrations.length === 0 ? null : (
+          ) : filteredIntegrations.length !== 0 ? (
             filteredIntegrations.map((integration) => (
               <tr key={integration.id} className='border-t border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]'>
                 <td className='p-2'>{integration.name}</td>
@@ -599,6 +586,12 @@ export default function APIs() {
                 <td className='p-2 text-xs text-[var(--aethel-text-tertiary)]'>{integration.envKey}</td>
               </tr>
             ))
+          ) : (
+            <tr>
+              <td className='p-2 text-center text-[var(--aethel-text-tertiary)]' colSpan={4}>
+                Nenhuma integração encontrada
+              </td>
+            </tr>
           )}
         </tbody>
       </table>

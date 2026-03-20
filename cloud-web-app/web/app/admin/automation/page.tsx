@@ -94,31 +94,22 @@ export default function Automation() {
           {
             icon: Activity,
             label: 'Eventos',
-            value: data?.summary.total ? 0,
+            value: data?.summary.total || 0,
           },
           {
             icon: AlertTriangle,
             label: 'Avisos',
-            value: data?.summary.warning ? 0,
+            value: data?.summary.warning || 0,
             tone: 'warning',
           },
           {
             icon: ShieldAlert,
             label: 'Cr?ticos',
-            value: data?.summary.critical ? 0,
+            value: data?.summary.critical || 0,
             tone: 'error',
           },
         ]}
       />
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Avisos</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-warning)]'>{data?.summary.warning ? 0}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Críticos</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-error)]'>{data?.summary.critical ? 0}</p>
-        </div>
-      </div>
 
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
@@ -174,7 +165,7 @@ export default function Automation() {
                         ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                     }`}>
-                      {severityLabels[item.severity || 'info'] ? item.severity ? 'informação'}
+                      {severityLabels[item.severity || 'info'] || item.severity || 'informação'}
                     </span>
                   </td>
                   <td className='p-2'>{item.resource || '—'}</td>

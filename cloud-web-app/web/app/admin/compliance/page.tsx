@@ -79,11 +79,6 @@ export default function Compliance() {
           },
         ]}
       />
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Incidentes críticos</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-error)]'>{summary.incidents}</p>
-        </div>
-      </div>
 
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow overflow-hidden'>
         <table className='w-full table-auto'>

@@ -7,6 +7,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { Activity, AlertTriangle, Clock, Shield } from 'lucide-react'
 import { getToken } from '@/lib/auth'
 import { Badge } from '@/components/ui/Badge'
 import { AdminMetricCard } from '@/components/admin/AdminMetricCard'
@@ -149,28 +150,35 @@ export default function AdminMonitoringPage() {
         {metrics && (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <AdminMetricCard
-              title="Uptime"
+              icon={Shield}
+              label="Uptime"
               value={`${metrics.uptimePercent.toFixed(1)}%`}
-              subtitle="Taxa de aprovacao dos checks"
-              trend={metrics.uptimePercent >= 99 ? 'up' : metrics.uptimePercent >= 90 ? 'neutral' : 'down'}
+              subValue="Taxa de aprovacao dos checks"
+              trend={metrics.uptimePercent >= 99 ? 'up' : metrics.uptimePercent < 90 ? 'down' : undefined}
             />
             <AdminMetricCard
-              title="Taxa de erro"
+              icon={AlertTriangle}
+              label="Taxa de erro"
               value={`${metrics.errorRate.toFixed(1)}%`}
-              subtitle="Health checks com falha"
-              trend={metrics.errorRate <= 1 ? 'up' : metrics.errorRate <= 5 ? 'neutral' : 'down'}
+              subValue="Health checks com falha"
+              trend={metrics.errorRate <= 1 ? 'up' : metrics.errorRate > 5 ? 'down' : undefined}
+              trendTone="negative"
             />
             <AdminMetricCard
-              title="Latencia P50"
+              icon={Activity}
+              label="Latencia P50"
               value={`${metrics.p50Latency}ms`}
-              subtitle="Tempo de resposta mediano"
-              trend={metrics.p50Latency <= 200 ? 'up' : metrics.p50Latency <= 500 ? 'neutral' : 'down'}
+              subValue="Tempo de resposta mediano"
+              trend={metrics.p50Latency <= 200 ? 'up' : metrics.p50Latency > 500 ? 'down' : undefined}
+              trendTone="negative"
             />
             <AdminMetricCard
-              title="Latencia P95"
+              icon={Clock}
+              label="Latencia P95"
               value={`${metrics.p95Latency}ms`}
-              subtitle="Percentil 95"
-              trend={metrics.p95Latency <= 500 ? 'up' : metrics.p95Latency <= 2000 ? 'neutral' : 'down'}
+              subValue="Percentil 95"
+              trend={metrics.p95Latency <= 500 ? 'up' : metrics.p95Latency > 2000 ? 'down' : undefined}
+              trendTone="negative"
             />
           </div>
         )}

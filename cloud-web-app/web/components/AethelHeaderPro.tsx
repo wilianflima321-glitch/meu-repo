@@ -139,6 +139,7 @@ export default function AethelHeader() {
                 alt="Aethel"
                 width={32}
                 height={32}
+                sizes="32px"
                 className="h-8 w-8 rounded-xl border border-white/10 bg-white/[0.04] p-1 shadow-[0_12px_30px_rgba(56,189,248,0.25)] transition-shadow group-hover:shadow-[0_12px_34px_rgba(99,102,241,0.35)]"
                 priority
               />

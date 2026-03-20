@@ -173,7 +173,8 @@ export default function PromotionsPage() {
         ]}
       />
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
             placeholder="Nome"
@@ -283,7 +284,7 @@ export default function PromotionsPage() {
                     Código: {promo.code || 'N/D'} | Desconto: {formatDiscount(promo)}
                   </p>
                   <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                    Resgates: {promo.timesRedeemed ? 0} | Expira em:{' '}
+                    Resgates: {promo.timesRedeemed || 0} | Expira em:{' '}
                     {promo.expiresAt ? new Date(promo.expiresAt).toLocaleDateString() : 'Sem expiração'}
                   </p>
                 </div>

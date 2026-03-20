@@ -80,6 +80,16 @@ function isBinaryFile(filePath: string): boolean {
   return BINARY_EXTENSIONS.has(ext)
 }
 
+type E2BModule = typeof import('e2b')
+
+async function loadE2BModule(): Promise<E2BModule> {
+  const importer = new Function('specifier', 'return import(specifier)') as (
+    specifier: string
+  ) => Promise<E2BModule>
+
+  return importer('e2b')
+}
+
 export async function POST(request: NextRequest) {
   try {
     const auth = requireAuth(request)
@@ -164,7 +174,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const e2bModule = await import('e2b')
+    const e2bModule = await loadE2BModule()
     const Sandbox = (e2bModule as { default?: any; Sandbox?: any }).default || (e2bModule as { Sandbox?: any }).Sandbox
     if (!Sandbox) {
       return capabilityResponse({

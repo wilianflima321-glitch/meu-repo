@@ -20,6 +20,12 @@ type AuditLog = {
   createdAt: string;
 };
 
+const severityLabels: Record<string, string> = {
+  info: 'Informa��o',
+  warning: 'Aviso',
+  critical: 'Cr�tico',
+};
+
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,12 +39,6 @@ export default function AuditLogsPage() {
     dateTo: '',
   });
 
-  const severityLabels: Record<string, string> = {
-    info: 'informação',
-    warning: 'aviso',
-    critical: 'crítico',
-  };
-
   const fetchLogs = useCallback(async () => {
     try {
       setLoading(true);
@@ -50,10 +50,11 @@ export default function AuditLogsPage() {
       if (filter.dateFrom) params.set('startDate', filter.dateFrom);
       if (filter.dateTo) params.set('endDate', filter.dateTo);
 
-      const res = await fetch(`/api/admin/audit?${params.toString()}`);
+      const res = await fetch(`/api/admin/audit-logs?${params.toString()}`);
       if (!res.ok) throw new Error('Falha ao carregar logs');
       const data = await res.json();
-      setLogs(Array.isArray(data?.logs) ? data.logs : []);
+      const records = Array.isArray(data?.logs) ? data.logs : [];
+      setLogs(records);
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
@@ -92,9 +93,11 @@ export default function AuditLogsPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Logs de auditoria avançados</h1>
+          <h1 className="text-2xl font-bold">Logs de auditoria avan�ados</h1>
           {lastUpdated && (
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">
+              Atualizado em {lastUpdated.toLocaleString()}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -129,7 +132,7 @@ export default function AuditLogsPage() {
           },
           {
             icon: ShieldAlert,
-            label: 'Cr?ticos',
+            label: 'Cr�ticos',
             value: summary.critical,
             tone: 'error',
           },
@@ -148,7 +151,7 @@ export default function AuditLogsPage() {
           />
           <input
             type="text"
-            placeholder="Ação"
+            placeholder="A��o"
             value={filter.action}
             onChange={(e) => setFilter({ ...filter, action: e.target.value })}
             className="border p-2"
@@ -159,9 +162,9 @@ export default function AuditLogsPage() {
             className="border p-2"
           >
             <option value="all">Severidade</option>
-            <option value="info">Informação</option>
+            <option value="info">Informa��o</option>
             <option value="warning">Aviso</option>
-            <option value="critical">Crítico</option>
+            <option value="critical">Cr�tico</option>
           </select>
           <input
             type="date"
@@ -183,7 +186,10 @@ export default function AuditLogsPage() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-10 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] rounded animate-pulse" />
+              <div
+                key={index}
+                className="h-10 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] rounded animate-pulse"
+              />
             ))}
           </div>
         ) : error ? (
@@ -195,7 +201,7 @@ export default function AuditLogsPage() {
             <thead>
               <tr className="border-b text-xs text-[var(--aethel-text-tertiary)]">
                 <th className="text-left p-2">Admin</th>
-                <th className="text-left p-2">Ação</th>
+                <th className="text-left p-2">A��o</th>
                 <th className="text-left p-2">Categoria</th>
                 <th className="text-left p-2">Severidade</th>
                 <th className="text-left p-2">Alvo</th>
@@ -205,26 +211,31 @@ export default function AuditLogsPage() {
             </thead>
             <tbody>
               {logs.map((log) => (
-                <tr key={log.id} className="border-b hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-sm">
-                  <td className="p-2">{log.adminEmail || log.userId || '—'}</td>
-                  <td className="p-2">{log.action || '—'}</td>
-                  <td className="p-2">{log.category || '—'}</td>
+                <tr
+                  key={log.id}
+                  className="border-b hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-sm"
+                >
+                  <td className="p-2">{log.adminEmail || log.userId || '-'}</td>
+                  <td className="p-2">{log.action || '-'}</td>
+                  <td className="p-2">{log.category || '-'}</td>
                   <td className="p-2">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      log.severity === 'critical'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
-                        : log.severity === 'warning'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                    }`}>
-                      {severityLabels[log.severity || 'info'] ? log.severity ? 'informação'}
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        log.severity === 'critical'
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+                          : log.severity === 'warning'
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+                            : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+                      }`}
+                    >
+                      {severityLabels[log.severity || 'info'] ?? 'Informa��o'}
                     </span>
                   </td>
                   <td className="p-2">
-                    {log.targetType ? `${log.targetType}:${log.targetId?.slice(0, 8) || ''}` : '—'}
+                    {log.targetType ? `${log.targetType}:${log.targetId?.slice(0, 8) || ''}` : '-'}
                   </td>
                   <td className="p-2">{new Date(log.createdAt).toLocaleString()}</td>
-                  <td className="p-2">{log.ipAddress || '—'}</td>
+                  <td className="p-2">{log.ipAddress || '-'}</td>
                 </tr>
               ))}
             </tbody>

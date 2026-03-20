@@ -79,7 +79,7 @@ export function DashboardMainContent({
   onUseCaseSelect,
 }: DashboardMainContentProps) {
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
       {showFirstValueGuide && (
         <FirstValueGuide
           firstProjectCreated={firstProjectCreated}
@@ -104,7 +104,7 @@ export function DashboardMainContent({
       {activeTab === 'wallet' && <DashboardWalletTab {...walletProps} />}
 
       {activeTab === 'billing' && (
-        <div className="aethel-p-6">
+        <div className="space-y-4">
           <BillingTab {...billingProps} />
           {billingError && (
             <div className="aethel-state aethel-state-error mt-4 text-xs" role="alert" aria-live="polite">

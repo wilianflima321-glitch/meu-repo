@@ -134,11 +134,11 @@ export default function AdminAnalytics() {
       const baselinePayload = await readJson<PerformanceBaselineResponse>(baselineRes)
 
       setMetrics({
-        activeUsers: quickStats?.stats?.activeUsers ? 0,
-        dailyRevenue: finance?.dailyRevenue ? 0,
-        aiTokens: ai?.metrics?.totalTokens ? 0,
-        requestsPerMinute: quickStats?.stats?.requestsPerMinute ? 0,
-        aiCostToday: quickStats?.stats?.aiCostToday ? 0,
+        activeUsers: quickStats?.stats?.activeUsers || 0,
+        dailyRevenue: finance?.dailyRevenue || 0,
+        aiTokens: ai?.metrics?.totalTokens || 0,
+        requestsPerMinute: quickStats?.stats?.requestsPerMinute || 0,
+        aiCostToday: quickStats?.stats?.aiCostToday || 0,
       })
       setBaseline(baselinePayload)
       setLastUpdated(new Date())
@@ -199,15 +199,15 @@ export default function AdminAnalytics() {
   }, [baseline, metrics])
 
   const firstValueCompletionRate = useMemo(() => {
-    const completed = baseline?.funnel?.firstValueCompleted ? 0
-    const signups = baseline?.funnel?.signups ? 0
+    const completed = baseline?.funnel?.firstValueCompleted || 0
+    const signups = baseline?.funnel?.signups || 0
     if (signups <= 0) return null
     return (completed / signups) * 100
   }, [baseline?.funnel?.firstValueCompleted, baseline?.funnel?.signups])
 
   const firstValueFromProjectRate = useMemo(() => {
-    const completed = baseline?.funnel?.firstValueCompleted ? 0
-    const created = baseline?.funnel?.firstValueProjectCreated ? 0
+    const completed = baseline?.funnel?.firstValueCompleted || 0
+    const created = baseline?.funnel?.firstValueProjectCreated || 0
     if (created <= 0) return null
     return (completed / created) * 100
   }, [baseline?.funnel?.firstValueCompleted, baseline?.funnel?.firstValueProjectCreated])
@@ -269,17 +269,17 @@ export default function AdminAnalytics() {
       <div className='mb-6 grid grid-cols-1 gap-4 md:grid-cols-3' aria-busy={loading}>
         <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
           <h3 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Usuários ativos (1h)</h3>
-          <p className='mt-2 text-2xl font-semibold'>{loading ? '--' : metrics?.activeUsers ? 0}</p>
-          <p className='text-xs text-[var(--aethel-text-tertiary)]'>Req/min: {loading ? '--' : metrics?.requestsPerMinute ? 0}</p>
+          <p className='mt-2 text-2xl font-semibold'>{loading ? '--' : metrics?.activeUsers || 0}</p>
+          <p className='text-xs text-[var(--aethel-text-tertiary)]'>Req/min: {loading ? '--' : metrics?.requestsPerMinute || 0}</p>
         </div>
         <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
           <h3 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Receita diária</h3>
-          <p className='mt-2 text-2xl font-semibold'>${loading ? '--' : (metrics?.dailyRevenue ? 0).toFixed(2)}</p>
-          <p className='text-xs text-[var(--aethel-text-tertiary)]'>AI cost today: ${loading ? '--' : (metrics?.aiCostToday ? 0).toFixed(2)}</p>
+          <p className='mt-2 text-2xl font-semibold'>${loading ? '--' : (metrics?.dailyRevenue || 0).toFixed(2)}</p>
+          <p className='text-xs text-[var(--aethel-text-tertiary)]'>AI cost today: ${loading ? '--' : (metrics?.aiCostToday || 0).toFixed(2)}</p>
         </div>
         <div className='rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4'>
           <h3 className='text-sm font-semibold text-[var(--aethel-text-secondary)]'>Tokens IA (24h)</h3>
-          <p className='mt-2 text-2xl font-semibold'>{loading ? '--' : (metrics?.aiTokens ? 0).toLocaleString()}</p>
+          <p className='mt-2 text-2xl font-semibold'>{loading ? '--' : (metrics?.aiTokens || 0).toLocaleString()}</p>
           <p className='text-xs text-[var(--aethel-text-tertiary)]'>Fonte: /api/admin/ai/metrics</p>
         </div>
       </div>
@@ -361,49 +361,49 @@ export default function AdminAnalytics() {
         <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7'>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Landing views</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.landingViews ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.landingViews || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Signups</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.signups ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.signups || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Logins</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.logins ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.logins || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Dashboard views</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.dashboardViews ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.dashboardViews || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Project creates</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.projectCreates ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.projectCreates || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>AI chats</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.aiChats ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.aiChats || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>IDE opens</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.ideOpens ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.ideOpens || 0}</p>
           </div>
         </div>
         <div className='mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value: project</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueProjectCreated ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueProjectCreated || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value: AI success</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueAiSuccess ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueAiSuccess || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value: IDE open</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueIdeOpen ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueIdeOpen || 0}</p>
           </div>
           <div className='rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3'>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>First value completed</p>
-            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueCompleted ? 0}</p>
+            <p className='mt-1 text-xl font-semibold'>{baseline?.funnel?.firstValueCompleted || 0}</p>
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>
               signup conversion: {firstValueCompletionRate === null ? '--' : `${firstValueCompletionRate.toFixed(1)}%`}
             </p>

@@ -7,7 +7,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Pausar,
+  Pause,
   Play,
   Trash2,
   RefreshCw,
@@ -61,7 +61,7 @@ const STATUS_CONFIG: Record<JobStatus, { color: string; icon: React.ElementType;
   running: { color: 'bg-[var(--aethel-info)]/15 text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]', icon: Activity, label: 'Executando' },
   completed: { color: 'bg-[var(--aethel-success)]/15 text-[var(--aethel-success-light)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]', icon: CheckCircle2, label: 'Concluido' },
   failed: { color: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border-rose-500/30', icon: XCircle, label: 'Falhou' },
-  paused: { color: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/30', icon: Pausar, label: 'Pausado' },
+  paused: { color: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/30', icon: Pause, label: 'Pausado' },
 }
 
 const TYPE_CONFIG: Record<JobType, { color: string; label: string }> = {
@@ -114,8 +114,8 @@ const JobRow: React.FC<{
   onToggle: () => void
   onRetry: () => void
   onCancelar: () => void
-  onPausar: () => void
-}> = ({ job, isExpanded, onToggle, onRetry, onCancelar, onPausar }) => {
+  onPause: () => void
+}> = ({ job, isExpanded, onToggle, onRetry, onCancelar, onPause }) => {
   return (
     <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
       <div
@@ -158,19 +158,19 @@ const JobRow: React.FC<{
             <button
               onClick={(event) => {
                 event.stopPropagation()
-                onPausar()
+                onPause()
               }}
               className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-warning-light)]"
-              title="Pausar"
+              title="Pause"
             >
-              <Pausar className="h-4 w-4" />
+              <Pause className="h-4 w-4" />
             </button>
           )}
           {job.status === 'paused' && (
             <button
               onClick={(event) => {
                 event.stopPropagation()
-                onPausar()
+                onPause()
               }}
               className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-success-light)]"
               title="Retomar"
@@ -337,7 +337,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
     }
   }
 
-  const handlePausar = async (id: string) => {
+  const handlePause = async (id: string) => {
     const job = jobs.find((item) => item.id === id)
     const action = job?.status === 'paused' ? 'resume' : 'pause'
     try {
@@ -473,7 +473,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
               onToggle={() => toggleExpanded(job.id)}
               onRetry={() => handleRetry(job.id)}
               onCancelar={() => handleCancelar(job.id)}
-              onPausar={() => handlePausar(job.id)}
+              onPause={() => handlePause(job.id)}
             />
           ))
         )}

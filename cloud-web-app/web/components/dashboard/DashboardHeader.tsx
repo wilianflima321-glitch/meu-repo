@@ -40,99 +40,124 @@ export function DashboardHeader({
     : null
 
   return (
-    <header className="aethel-card aethel-m-4 aethel-rounded-xl aethel-shadow-lg">
-      <div className="aethel-flex aethel-items-center aethel-justify-between aethel-gap-4">
-        <div className="aethel-flex aethel-items-center aethel-gap-4">
+    <header className="sticky top-0 z-30 border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(8,12,20,0.96),rgba(11,13,18,0.92))] backdrop-blur-xl">
+      <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-4">
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="md:hidden aethel-button aethel-button-ghost aethel-p-2"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] md:hidden"
             aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             aria-expanded={sidebarOpen}
             aria-controls="dashboard-sidebar"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <div className="aethel-flex aethel-items-center aethel-gap-3">
+
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(18,25,38,0.9),rgba(12,17,28,0.72))] px-3 py-2 shadow-[0_20px_50px_rgba(2,6,23,0.42)]">
             <Image
               src="/branding/aethel-icon-source.png"
               alt="Aethel"
-              width={36}
-              height={36}
-              className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-1 shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
+              width={40}
+              height={40}
+              className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.3),rgba(14,165,233,0.1)_60%,transparent)] p-1.5 shadow-[0_12px_30px_rgba(56,189,248,0.25)]"
             />
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Studio Home</p>
-              <h1 className="text-xl sm:text-2xl font-semibold text-[var(--aethel-text-primary)]">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--aethel-text-tertiary)]">Studio Home</p>
+                <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200">
+                  Apps control plane
+                </span>
+              </div>
+              <h1 className="truncate text-xl font-semibold text-[var(--aethel-text-primary)] sm:text-2xl">
                 Aethel Studio
               </h1>
+              <p className="hidden text-xs text-[var(--aethel-text-secondary)] sm:block">
+                Operacao, IA, preview, billing e governanca em uma superficie unica.
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="aethel-flex aethel-items-center aethel-gap-2 md:aethel-gap-4">
-          <button type="button" onClick={onResetDashboard} className="hidden md:inline-flex aethel-button aethel-button-ghost text-xs">
-            Redefinir painel
-          </button>
-          <button
-            type="button"
-            onClick={onToggleTheme}
-            className="aethel-button aethel-button-ghost aethel-p-2"
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            )}
-          </button>
-
+        <div className="hidden items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-3 py-2 xl:flex">
           <div
-            className={`hidden sm:flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
               backendOnline
                 ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
                 : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]'
             }`}
           >
             <div
-              className={`h-2 w-2 rounded-full ${
-                backendOnline ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'
-              }`}
+              className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'}`}
             />
             Backend {backendOnline ? 'online' : 'offline'}
           </div>
 
-          {authErrorText && (
-            <span className="hidden lg:inline text-xs text-[var(--aethel-error)]" title={authErrorText}>
-              Auth providers indisponiveis
-            </span>
-          )}
-          {billingErrorText && (
-            <span className="hidden lg:inline text-xs text-[var(--aethel-warning-light)]" title={billingErrorText}>
-              Planos indisponiveis
-            </span>
-          )}
+          <div
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
+              aiProviderConfigured
+                ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+            }`}
+          >
+            IA {aiProviderConfigured ? 'configurada' : 'pendente'}
+          </div>
+
+          <div
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
+              fullAccessActive
+                ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+                : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-secondary)]'
+            }`}
+          >
+            {fullAccessActive ? `Full Access${fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}` : 'Guardrails ativos'}
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2 md:gap-3">
+          <button
+            type="button"
+            onClick={onResetDashboard}
+            className="hidden rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] lg:inline-flex"
+          >
+            Redefinir painel
+          </button>
+
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+
           {!aiProviderConfigured && (
             <button
               type="button"
               onClick={onOpenProviderSettings}
-              className="hidden lg:inline-flex rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-1 text-xs text-[var(--aethel-warning-light)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]"
+              className="hidden rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-warning-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] lg:inline-flex"
               title="Configure ao menos um provider para liberar o chat de IA"
             >
               Configurar IA
             </button>
           )}
+
           <button
             type="button"
             onClick={onToggleFullAccess}
             disabled={fullAccessBusy}
-            className={`hidden lg:inline-flex rounded-full border px-3 py-1 text-xs disabled:opacity-60 ${
+            className={`hidden rounded-xl border px-3 py-2 text-xs font-medium transition disabled:opacity-60 lg:inline-flex ${
               fullAccessActive
                 ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]'
                 : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
@@ -143,19 +168,15 @@ export function DashboardHeader({
                 : 'Habilitar acesso total temporario auditado.'
             }
           >
-            {fullAccessBusy
-              ? 'Aguarde...'
-              : fullAccessActive
-                ? `Full Access ON${fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}`
-                : 'Full Access'}
+            {fullAccessBusy ? 'Aguarde...' : fullAccessActive ? 'Revogar Full Access' : 'Habilitar Full Access'}
           </button>
 
           <button
             type="button"
             onClick={onOpenIde}
-            className="aethel-button aethel-button-primary shadow-md hover:aethel-shadow-lg aethel-transition"
+            className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_16px_40px_rgba(56,189,248,0.24)] transition hover:brightness-110"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             <span className="hidden sm:inline">Abrir IDE</span>
@@ -163,6 +184,21 @@ export function DashboardHeader({
           </button>
         </div>
       </div>
+
+      {(authErrorText || billingErrorText) && (
+        <div className="mx-auto flex w-full max-w-[1600px] flex-wrap gap-3 px-4 pb-3 sm:px-6 lg:px-8">
+          {authErrorText && (
+            <span className="inline-flex rounded-full border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-1 text-xs text-[var(--aethel-error)]">
+              Auth: {authErrorText}
+            </span>
+          )}
+          {billingErrorText && (
+            <span className="inline-flex rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-1 text-xs text-[var(--aethel-warning-light)]">
+              Billing: {billingErrorText}
+            </span>
+          )}
+        </div>
+      )}
     </header>
   )
 }

@@ -41,7 +41,7 @@ export default function Notifications() {
       if (!res.ok) throw new Error('Falha ao carregar notificações');
       const data = await res.json();
       setItems(Array.isArray(data?.items) ? data.items : []);
-      setTotals(data?.totals ? { total: 0, read: 0, unread: 0 });
+      setTotals(data?.totals ?? { total: 0, read: 0, unread: 0 });
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {

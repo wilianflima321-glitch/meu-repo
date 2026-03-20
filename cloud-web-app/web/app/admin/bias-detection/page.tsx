@@ -150,10 +150,10 @@ export default function BiasDetectionPage() {
       (biasFilter === 'none'
         ? item.autoScore === null || item.autoScore === undefined
         : biasFilter === 'high'
-        ? (item.autoScore ? 0) >= 0.7
+        ? (item.autoScore || 0) >= 0.7
         : biasFilter === 'medium'
-        ? (item.autoScore ? 0) >= 0.4 && (item.autoScore ? 0) < 0.7
-        : (item.autoScore ? 0) < 0.4);
+        ? (item.autoScore || 0) >= 0.4 && (item.autoScore || 0) < 0.7
+        : (item.autoScore || 0) < 0.4);
     return matchesSearch && matchesStatus && matchesBias;
   });
 
@@ -325,7 +325,7 @@ export default function BiasDetectionPage() {
                         ? 'N/D'
                         : `${(item.autoScore * 100).toFixed(1)}%`}
                     </span>
-                    <span>Status: {statusLabels[item.status] ? item.status}</span>
+                    <span>Status: {statusLabels[item.status] ?? item.status}</span>
                     <span>{new Date(item.createdAt).toLocaleString()}</span>
                   </div>
                   <span className={`px-2 py-1 rounded text-xs font-semibold ${getBiasColor(item.autoScore)}`}>

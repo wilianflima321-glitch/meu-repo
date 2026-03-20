@@ -90,15 +90,6 @@ export default function MultiTenancyPage() {
           },
         ]}
       />
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Usuários totais</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{summary.totalUsers}</p>
-        </div>
-        <div className="text-center">
-          <h3 className="text-sm font-semibold">Armazenamento agregado</h3>
-          <p className="text-2xl font-bold text-[var(--aethel-text-secondary)]">{formatStorage(summary.totalStorage)}</p>
-        </div>
-      </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Locatários existentes</h2>

@@ -77,7 +77,6 @@ export default function AdminAI() {
       <AdminPageHeader
         className='mb-6'
         title='Administração da IA Aethel'
-        title='Administração da IA Aethel'
         meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
         actions={(
           <div className='flex gap-2'>
@@ -128,15 +127,6 @@ export default function AdminAI() {
           },
         ]}
       />
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Modelo</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{aiSettings.model}</p>
-        </div>
-        <div className='text-center'>
-          <h3 className='text-sm font-semibold'>Máx. tokens</h3>
-          <p className='text-2xl font-bold text-[var(--aethel-primary)]'>{aiSettings.maxTokens}</p>
-        </div>
-      </div>
 
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-6 rounded-lg shadow'>
         <div className='mb-4 flex items-center justify-between'>

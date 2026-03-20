@@ -5,7 +5,7 @@
  * Integra com WebSocket server para notificações em tempo real.
  */
 
-import chokidar, { FSWatcher, WatchOptions } from 'chokidar';
+import type { FSWatcher, WatchOptions } from 'chokidar';
 import { EventEmitter } from 'events';
 import * as path from 'path';
 import * as fs from 'fs/promises';
@@ -100,6 +100,21 @@ const DEFAULT_IGNORE_PATTERNS = [
   '**/DerivedDataCache/**', // Unreal
 ];
 
+type ChokidarModule = typeof import('chokidar');
+
+let chokidarModulePromise: Promise<ChokidarModule> | null = null;
+
+async function loadChokidar(): Promise<ChokidarModule> {
+  if (!chokidarModulePromise) {
+    const importer = new Function('specifier', 'return import(specifier)') as (
+      specifier: string
+    ) => Promise<ChokidarModule>;
+    chokidarModulePromise = importer('chokidar');
+  }
+
+  return chokidarModulePromise;
+}
+
 // ============================================================================
 // File Watcher Manager
 // ============================================================================
@@ -169,7 +184,11 @@ export class FileWatcherManager extends EventEmitter {
     };
     
     // Create watcher
-    const watcher = chokidar.watch(validPaths, watcherOptions);
+    const chokidar = await loadChokidar();
+    const watch = (
+      chokidar as ChokidarModule & { default?: { watch?: (paths: string[], options?: WatchOptions) => FSWatcher } }
+    ).default?.watch ?? chokidar.watch;
+    const watcher = watch(validPaths, watcherOptions);
     
     const workspace: WatchedWorkspace = {
       id: workspaceId,

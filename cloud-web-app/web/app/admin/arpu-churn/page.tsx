@@ -20,9 +20,9 @@ export default function ArpuChurnPage() {
       if (!res.ok) throw new Error('Falha ao carregar métricas financeiras');
       const data = await res.json();
       setMetrics({
-        mrr: data?.mrr ? 0,
-        activeSubscriptions: data?.activeSubscriptions ? 0,
-        churnRate: data?.churnRate ? 0,
+        mrr: data?.mrr || 0,
+        activeSubscriptions: data?.activeSubscriptions || 0,
+        churnRate: data?.churnRate || 0,
       });
       setError(null);
     } catch (err) {
@@ -57,9 +57,9 @@ export default function ArpuChurnPage() {
     );
   }
 
-  const activeSubs = metrics?.activeSubscriptions ? 0;
-  const arpu = activeSubs > 0 ? (metrics?.mrr ? 0) / activeSubs : 0;
-  const churnRate = metrics?.churnRate ? 0;
+  const activeSubs = metrics?.activeSubscriptions || 0;
+  const arpu = activeSubs > 0 ? (metrics?.mrr || 0) / activeSubs : 0;
+  const churnRate = metrics?.churnRate || 0;
   const retentionRate = Math.max(0, 100 - churnRate);
 
   return (

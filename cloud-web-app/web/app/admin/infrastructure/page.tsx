@@ -393,21 +393,21 @@ export default function InfrastructureDashboard() {
           <ResourceGauge
             label="CPU"
             value={data.resources.cpu.usage}
-            valueSuffix="%"
+            unit="%"
             icon={Cpu}
           />
           <ResourceGauge
             label="Memória"
             value={data.resources.memory.used}
             max={data.resources.memory.total}
-            valueSuffix="GB"
+            unit="GB"
             icon={Activity}
           />
           <ResourceGauge
             label="Disco"
             value={data.resources.disk.used}
             max={data.resources.disk.total}
-            valueSuffix="GB"
+            unit="GB"
             icon={HardDrive}
           />
           <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">

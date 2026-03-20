@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { Activity, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { AdminSummaryGrid } from '@/components/admin/AdminSummaryGrid';
 
 type UpdateItem = {
   id: string;
@@ -104,10 +106,10 @@ export default function Updates() {
         className="mb-6"
         columns={4}
         items={[
-          { icon: Activity, label: 'Total', value: data?.summary.total ? 0 },
-          { icon: CheckCircle, label: 'Aprovadas', value: data?.summary.approved ? 0, tone: 'success' },
-          { icon: AlertTriangle, label: 'Revisao', value: data?.summary.review ? 0, tone: 'warning' },
-          { icon: XCircle, label: 'Bloqueadas', value: data?.summary.blocked ? 0, tone: 'error' },
+          { icon: Activity, label: 'Total', value: data?.summary.total || 0 },
+          { icon: CheckCircle, label: 'Aprovadas', value: data?.summary.approved || 0, tone: 'success' },
+          { icon: AlertTriangle, label: 'Revisao', value: data?.summary.review || 0, tone: 'warning' },
+          { icon: XCircle, label: 'Bloqueadas', value: data?.summary.blocked || 0, tone: 'error' },
         ]}
       />
 
@@ -167,7 +169,7 @@ export default function Updates() {
                         ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
                     }`}>
-                      {statusLabels[item.status] ? item.status}
+                      {statusLabels[item.status] ?? item.status}
                     </span>
                   </td>
                   <td className='p-2'>{new Date(item.createdAt).toLocaleString()}</td>

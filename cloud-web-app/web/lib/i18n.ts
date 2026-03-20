@@ -27,13 +27,15 @@ if (!i18n.isInitialized) {
     lng: 'en-US',
     fallbackLng: 'en-US',
     interpolation: { escapeValue: false },
-    supportedLngs: supportedLanguages.map(l => l.code),
+    supportedLngs: ['en', 'en-US', 'pt', 'pt-BR', 'es', 'es-ES'],
+    nonExplicitSupportedLngs: true,
+    load: 'currentOnly',
     ns: ['translation'],
     defaultNS: 'translation',
     // Enable nested keys (e.g., 'common.save')
     keySeparator: '.',
     // Debug mode in development
-    debug: process.env.NODE_ENV === 'development',
+    debug: process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_I18N_DEBUG === 'true',
   });
 }
 
