@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
+import { GlassCard, GradientButton, GlowBadge } from '@/components/ui/premium'
 import { analytics } from '@/lib/analytics'
 
 const QUICK_MISSIONS = [
@@ -71,6 +72,40 @@ const HONESTY_NOTES = [
   'Apps + Research sao o foco principal do produto hoje.',
   'Games e Films continuam em estado experimental.',
   'Billing e preview real dependem de runtime e credenciais ativas.',
+]
+
+const PRICING_TEASER = [
+  {
+    title: 'Free',
+    price: '$0',
+    desc: 'Explorar o studio e experimentar o fluxo.',
+    features: ['1 projeto ativo', 'Limites de IA diarios', 'Preview limitado'],
+    cta: 'Comecar gratis',
+    variant: 'secondary' as const,
+  },
+  {
+    title: 'Pro',
+    price: '$49',
+    desc: 'Para devs e squads que precisam de velocidade.',
+    features: ['Preview gerenciado', 'RAG + mentions', 'Deploy one-click'],
+    cta: 'Assinar Pro',
+    variant: 'primary' as const,
+    highlight: true,
+  },
+  {
+    title: 'Enterprise',
+    price: 'Custom',
+    desc: 'Governanca, compliance e suporte dedicado.',
+    features: ['SSO/SAML', 'SLA + Audit Logs', 'Limites customizados'],
+    cta: 'Falar com vendas',
+    variant: 'ghost' as const,
+  },
+]
+
+const SOCIAL_PROOF = [
+  { label: 'Beta privado em andamento', detail: 'Roadmap aberto com evidencias' },
+  { label: 'Sistema anti-fake-success', detail: 'Readiness visivel antes do deploy' },
+  { label: 'Studio unico', detail: 'Research, codigo e preview no mesmo shell' },
 ]
 
 function ScreenshotCard({
@@ -252,6 +287,52 @@ export default function LandingPageV3() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <GlassCard variant="elevated" className="p-6 sm:p-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <GlowBadge color="info">Demo guiada</GlowBadge>
+                  <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja o fluxo completo em 90s</h2>
+                </div>
+                <span className="text-xs text-[var(--aethel-text-tertiary)]">Em producao</span>
+              </div>
+              <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
+                Estamos preparando um walkthrough completo com onboarding, editor e preview. Enquanto isso, use o studio
+                para validar o fluxo real e nos ajudar a fechar o L4.
+              </p>
+              <div className="mt-6 aspect-video w-full rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(2,6,23,0.92))] shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
+                <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-sm text-slate-400">
+                  <Eye className="h-8 w-8 text-cyan-300" />
+                  <span>Video demo em producao</span>
+                  <span className="text-xs text-slate-500">Use a experiencia real do studio enquanto finalizamos a demo.</span>
+                </div>
+              </div>
+            </GlassCard>
+
+            <div className="space-y-4">
+              <h3 className="text-sm uppercase tracking-[0.32em] text-[var(--aethel-text-tertiary)]">Prova social</h3>
+              <div className="space-y-3">
+                {SOCIAL_PROOF.map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4"
+                  >
+                    <CheckCircle2 className="mt-1 h-4 w-4 text-emerald-300" />
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.label}</p>
+                      <p className="text-xs text-slate-400">{item.detail}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500">
+                Sem promessas infladas: toda prova social aqui reflete o estado atual do produto ou do beta fechado.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="border-y border-white/[0.06] bg-slate-950/45">
           <div className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
             {[
@@ -265,6 +346,55 @@ export default function LandingPageV3() {
                 <p className="mt-1 text-sm text-slate-400">{item.label}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-[var(--aethel-text-tertiary)]">Planos</p>
+                <h2 className="mt-3 text-3xl font-semibold text-white">Pricing transparente para cada fase</h2>
+                <p className="mt-2 text-sm text-slate-400">O billing real entra assim que Stripe estiver validado.</p>
+              </div>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs text-white hover:bg-white/[0.1]"
+              >
+                Ver todos os planos
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              {PRICING_TEASER.map((plan) => (
+                <GlassCard
+                  key={plan.title}
+                  variant={plan.highlight ? 'glow' : 'default'}
+                  className="flex flex-col gap-4 p-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-white">{plan.title}</h3>
+                    {plan.highlight && <GlowBadge color="primary">Mais usado</GlowBadge>}
+                  </div>
+                  <div>
+                    <p className="text-3xl font-semibold text-white">{plan.price}</p>
+                    <p className="text-xs text-slate-400">{plan.desc}</p>
+                  </div>
+                  <ul className="space-y-2 text-xs text-slate-300">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <GradientButton variant={plan.variant} onClick={() => router.push('/pricing')}>
+                    {plan.cta}
+                  </GradientButton>
+                </GlassCard>
+              ))}
+            </div>
           </div>
         </section>
 
