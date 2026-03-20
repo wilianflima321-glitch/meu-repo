@@ -1,43 +1,43 @@
-# 41_AUDITORIA_MAXIMA_2026-03-20
+﻿# 41_AUDITORIA_MAXIMA_2026-03-20
 Date: 2026-03-20
 Status: DRAFT (NEEDS_VERIFICATION)
-Owner: Auditoria Tecnica Principal
+Owner: Auditoria Técnica Principal
 
 > IMPORTANT: Este documento foi consolidado a partir de uma auditoria fornecida pelo operador.  
-> Nenhum claim externo deve ser tratado como fato sem verificacao por evidencias em runtime/arquivo.  
-> Todo item marcado como **EXTERNAL_BENCHMARK_ASSUMPTION** exige validacao independente.
+> Nenhum claim externo deve ser tratado como fato sem verificação por evidências em runtime/arquivo.  
+> Todo item marcado como **EXTERNAL_BENCHMARK_ASSUMPTION** exige validação independente.
 
 ## 1) Visao Executiva (Snapshot)
-| Dimensao | Score Atual | Meta L4 | Meta L5 |
+| Dimensão | Score Atual | Meta L4 | Meta L5 |
 |---|---:|---:|---:|
 | Overall (weighted) | 6.2 / 10 | 8.0 | 9.2 |
-| Engenharia/Codigo | 7.5 | 8.5 | 9.0 |
+| Engenharia/Código | 7.5 | 8.5 | 9.0 |
 | Core Loop Evidence | 3.0 | 8.0 | 9.5 |
 | Billing/Monetizacao | 2.0 | 8.0 | 9.0 |
 | Marketing/GTM | 1.0 | 6.0 | 8.5 |
 | UX/Design System | 6.5 | 8.0 | 9.0 |
 | Onboarding | 5.0 | 7.5 | 9.0 |
 | Seguranca/Compliance | 5.5 | 7.0 | 9.0 |
-| Games/Films | 2.5 | � | 7.0 |
+| Games/Films | 2.5 | — | 7.0 |
 
-Veredito: Fundacao tecnica solida com governanca de documentacao exemplar, mas receita = zero e L4 ainda PARTIAL por blockers externos (Stripe/E2B/DB/Onboarding SLO).
+Veredito: Fundação técnica sólida com Governança de documentação exemplar, mas receita = zero e L4 ainda PARTIAL por blockers externos (Stripe/E2B/DB/Onboarding SLO).
 
 ## 1.1 Verificacao Local (2026-03-20)
-Evidencias coletadas diretamente do repo (sem estimativas):
+Evidências coletadas diretamente do repo (sem estimativas):
 - `metrics/latest_run-production.json`: `sampleSize=115`, `apply_success_rate=1.0`, `feedback_coverage=0.8957` (timestamp: 2026-03-14).
 - `metrics/l4-readiness-dossier.json`: status `PARTIAL` com blockers externos (Stripe/E2B/DB).
-- `cloud-web-app/web/components/AethelDashboardRuntime.tsx`: 1187 linhas (abaixo do gate 1200).
-- `cloud-web-app/web/app/landing-v2.tsx` e `landing-v3.tsx` coexistem.
-- `docs/master/9_BACKEND_SYSTEM_SPEC.md`: ja descreve Next.js/Prisma/PostgreSQL, mas com mojibake (encoding).
-- `docs/master/AI_SYSTEM_SPEC.md`: ainda referencia componentes backend em Python (Prompt Engine/Router) e precisa alinhar com runtime real.
+- `cloud-web-app/web/components/AethelDashboardRuntime.tsx`: wrapper reduzido; lógica movida para `useAethelDashboardRuntime.tsx` (~1112 linhas, abaixo do gate 1200).
+- `cloud-web-app/web/app/landing-v3.tsx`: landing canônica ativa; não há `landing-v2.tsx` no app.
+- `docs/master/9_BACKEND_SYSTEM_SPEC.md`: descreve Next.js/Prisma/PostgreSQL sem mojibake detectado.
+- `docs/master/AI_SYSTEM_SPEC.md`: atualizado para refletir o runtime real (Next.js API + Advanced AI Provider).
 
 ## 2) Estrutura Geral do Projeto
-Monorepo com 3 camadas publicas:
-- Gateway (/): onboarding e conversao publica
-- Studio (/dashboard, /nexus): colaboracao e preview
+Monorepo com 3 camadas públicas:
+- Gateway (/): onboarding e conversão pública
+- Studio (/dashboard, /nexus): colaboração e preview
 - Forge (/ide): IDE com Monaco Editor
 
-Stack esperada (referencia, precisa confirmar no package.json):
+Stack esperada (referência, precisa confirmar no package.json):
 - Next.js + React + TypeScript
 - Prisma + PostgreSQL
 - Redis (Upstash)
@@ -51,9 +51,9 @@ Stack esperada (referencia, precisa confirmar no package.json):
 - Sentry / Resend / i18next
 
 ## 3) Criticas Estruturais (Inconsistencias)
-### 3.1 Backend Spec vs Codigo Real
+### 3.1 Backend Spec vs Código Real
 - Doc: `docs/master/9_BACKEND_SYSTEM_SPEC.md` ja reflete Next.js/Prisma/PostgreSQL, mas ainda tem mojibake e itens aspiracionais nao delimitados.
-- Codigo real: Next.js + Prisma + PostgreSQL.
+- Código real: Next.js + Prisma + PostgreSQL.
 
 Impacto: risco de confusao por encoding e itens aspiracionais nao marcados.
 
@@ -82,7 +82,7 @@ Impacto: risco de confusao por encoding e itens aspiracionais nao marcados.
 - SSO/SAML nao testado
 - Colaboracao sem stress test
 
-## 6) Limitacoes Medias (P2)
+## 6) Limitacoes Médias (P2)
 - WCAG AA light theme sem validacao
 - AethelDashboardRuntime.tsx com 1191 linhas (gate 1200)
 - /api/ai/stream vs /api/ai/chat divergentes
@@ -95,7 +95,7 @@ Tudo abaixo deve ser tratado como **EXTERNAL_BENCHMARK_ASSUMPTION**.
 - ARR/valuation informados devem ser validados com fontes externas antes de usar em decisao.
 
 ## 8) Auditoria de Documentacao
-- Governanca boa, mas:
+- Governança boa, mas:
   - Numeracao com gaps
   - Docs fora do padrao NN_...
   - 3.5k docs arquivados
@@ -122,7 +122,7 @@ Tudo abaixo deve ser tratado como **EXTERNAL_BENCHMARK_ASSUMPTION**.
 - Integracoes com ferramentas (Linear/Notion/Slack/Figma)
 
 ## 11) Lista Completa de Acao (Resumida)
-### Imediato (1-15 dias)
+### IMédiato (1-15 dias)
 - Beta fechado com 20-30 usuarios
 - E2B + HMR real
 - Deploy com URL publica (Vercel/Railway)
@@ -161,7 +161,7 @@ Tudo abaixo deve ser tratado como **EXTERNAL_BENCHMARK_ASSUMPTION**.
 - Plugin marketplace
 
 ## 12) Pontos Fortes
-- Governanca tecnica excepcional
+- Governança tecnica excepcional
 - QA gates existentes
 - Stack moderna
 - Cultura anti fake-success

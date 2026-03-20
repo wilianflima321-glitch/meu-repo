@@ -1,4 +1,4 @@
-# 13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13
+﻿# 13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13
 
 ## Escopo e evidencias
 Fontes canonicas usadas:
@@ -14,7 +14,7 @@ Superficies auditadas nesta rodada:
 - `cloud-web-app/web/components/assets/ContentBrowserConnected.tsx`
 - `cloud-web-app/web/components/**` (top offenders de acento legado)
 
-## Snapshot critico atualizado (2026-02-14)
+## Snapshot Crítico atualizado (2026-02-14)
 Metricas oficiais:
 - `legacy-accent-tokens`: **0** (antes 610)
 - `admin-light-theme-tokens`: **0** (mantido)
@@ -43,7 +43,7 @@ Validacao tecnica incremental (2026-02-16):
 - `typecheck`: PASS
 - `qa:interface-gate`: PASS com `not-implemented-ui=5`
 - `qa:route-contracts`: PASS
-- `build`: FAIL por `spawn EPERM` (restricao de ambiente, nao erro funcional confirmado de codigo)
+- `build`: FAIL por `spawn EPERM` (restricao de ambiente, nao erro funcional confirmado de Código)
 
 Integracoes fechadas nesta rodada:
 1. Workspace recent handoff conectado ao `/ide`.
@@ -114,7 +114,7 @@ Executado em `cloud-web-app/web`:
 - `npm run qa:enterprise-gate` -> PASS
 - `npm run lint` -> PASS com warnings (debt nao bloqueante)
 
-## Limitacoes e qualidades (agente critico)
+## Limitacoes e qualidades (agente Crítico)
 Qualidades confirmadas:
 1. Workbench permanece shell principal sem abrir segundo app.
 2. UX de acoes destrutivas ficou enterprise (dialogs nao bloqueantes).
@@ -134,7 +134,7 @@ Limitacoes atuais reais:
 4. `MANTER`: erro explicito para capacidade nao pronta.
 5. `NAO FAZER`: promessas de paridade desktop total Unreal/Premiere.
 
-## Backlog critico remanescente (P0/P1)
+## Backlog Crítico remanescente (P0/P1)
 P0:
 1. Preservar `legacy-accent-tokens = 0` sem regressao.
 2. Preservar `admin-light-theme-tokens = 0` e `blocking-browser-dialogs = 0`.
@@ -145,7 +145,7 @@ P1:
 3. Atualizar inventario de rotas/public docs para refletir que UI nao consome mais `/api/workspace/*`.
 4. Reduzir `react-hooks/exhaustive-deps` em ondas: `37 -> <=20`, sem fallback cosmetico e sem desabilitar regra global.
 
-## Gate de merge do agente critico
+## Gate de merge do agente Crítico
 Aprovar mudancas somente se:
 1. Nao introduzirem duplicidade de superficie para mesma capacidade.
 2. Preservarem erro explicito para capacidades indisponiveis.
@@ -155,7 +155,7 @@ Aprovar mudancas somente se:
 
 ---
 
-## Delta critico adicional (2026-02-15) - varredura de profundidade
+## Delta Crítico adicional (2026-02-15) - varredura de profundidade
 Evidencias executadas nesta rodada (workspace `cloud-web-app/web`):
 - `cmd /c npm run lint` -> PASS com **37 warnings** (`react-hooks/exhaustive-deps` only)
 - `cmd /c npm run qa:interface-gate` -> PASS
@@ -206,19 +206,19 @@ Evidencias executadas nesta rodada (workspace `cloud-web-app/web`):
 
 ---
 
-## Delta critico executado (2026-02-15, fechamento desta rodada)
+## Delta Crítico executado (2026-02-15, fechamento desta rodada)
 1. Lacunas P0 fechadas nesta execucao:
 - contrato L1 alinhado (`suggestion` primario + fallback `text`);
 - `/ide` passou a consumir `entry` e `projectId`;
 - chamadas de arquivos no shell passaram a enviar `projectId`;
-- preview do Workbench ganhou cobertura real para texto, codigo, imagem, audio e video;
-- endpoint canonicamente autenticado para media preview: `/api/files/raw`.
+- preview do Workbench ganhou cobertura real para texto, Código, imagem, audio e video;
+- endpoint canonicamente autenticado para Média preview: `/api/files/raw`.
 
 2. Debt tecnico de hooks reduzido:
 - `npm run lint` agora retorna **12 warnings** (antes 37), todos em `react-hooks/exhaustive-deps`.
 - reducao feita sem desabilitar regra global.
 
-3. Gates apos hardening:
+3. Gates após hardening:
 - `qa:interface-gate` PASS com `not-implemented-ui=10`;
 - `qa:route-contracts` PASS;
 - `qa:canonical-components` PASS;
@@ -233,12 +233,12 @@ Evidencias executadas nesta rodada (workspace `cloud-web-app/web`):
 
 ---
 
-## Delta critico executado (2026-02-15, hardening complementar)
+## Delta Crítico executado (2026-02-15, hardening complementar)
 1. Debt de hooks residual foi fechado:
 - `npm run lint` agora retorna **0 warnings**.
 - correcoes aplicadas nas superficies criticas de terminal, provider e hooks de render/GAS.
 
-2. Gates apos fechamento:
+2. Gates após fechamento:
 - `qa:interface-gate` PASS;
 - `qa:route-contracts` PASS;
 - `qa:canonical-components` PASS;
@@ -247,12 +247,12 @@ Evidencias executadas nesta rodada (workspace `cloud-web-app/web`):
 - `build` segue com bloqueio local por `spawn EPERM`.
 
 3. Limitacao real remanescente desta rodada:
-- nao ha debt de lint bloqueante no codigo;
+- nao ha debt de lint bloqueante no Código;
 - permanece somente restricao ambiental para `next build` local.
 
 ---
 
-## Delta critico final (2026-02-15, gate enterprise fechado)
+## Delta Crítico final (2026-02-15, gate enterprise fechado)
 1. `npm run qa:enterprise-gate` foi executado com sucesso completo.
 2. Qualidade tecnica final desta onda:
 - lint: **0 warnings**
@@ -261,7 +261,7 @@ Evidencias executadas nesta rodada (workspace `cloud-web-app/web`):
 
 ---
 
-## Delta critico de coerencia (2026-02-28)
+## Delta Crítico de coerencia (2026-02-28)
 Evidencias desta rodada:
 1. `npm run qa:repo-connectivity` -> PASS (scanner estrutural de caminhos/scripts/docs/segredos).
 2. `cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md` (ultimo sweep):
@@ -276,7 +276,7 @@ Evidencias desta rodada:
 - billing gateway nao suportado (`PAYMENT_GATEWAY_NOT_IMPLEMENTED`)
 
 Critica objetiva atual:
-1. O maior risco residual nao e visual; e manutencao estrutural e governanca de escopo.
+1. O maior risco residual nao e visual; e manutencao estrutural e Governança de escopo.
 2. O monolito `components/AethelDashboardRuntime.tsx` ainda e grande e continua como principal hotspot tecnico.
 3. O volume de markdown fora de `docs/master` segue alto e aumenta risco de decisao por fonte historica.
 4. Claims de L4/L5 e colaboracao avancada continuam proibidos sem evidencia operacional reproduzivel.
@@ -296,7 +296,7 @@ Decisoes de qualidade mantidas:
 - L4/L5 e colaboracao avancada seguem dependentes de evidencia operacional dedicada.
 
 
-## Delta critico consolidado (2026-02-15, auditoria 6 dimensoes)
+## Delta Crítico consolidado (2026-02-15, auditoria 6 dimensoes)
 
 ### 1) Produto and UX
 Findings:
@@ -314,18 +314,18 @@ Findings:
 3. Remaining UX gap is not visual debt but functional gating where capability is not fully delivered.
 
 
-## Delta critico adicional (2026-02-16, P0 usabilidade e confiabilidade)
+## Delta Crítico adicional (2026-02-16, P0 usabilidade e confiabilidade)
 1. Contexto de projeto no shell:
 - comando canonico `Switch Project Context` adicionado ao Command Palette e menu File;
 - troca de projeto agora limpa estado local de abas/buffers e recarrega arvore no `projectId` alvo;
-- URL do `/ide` passa a refletir o `projectId` ativo apos troca.
+- URL do `/ide` passa a refletir o `projectId` ativo após troca.
 
 2. Confiabilidade de CI:
-- `ui-audit` e `visual-regression-compare` agora validam readiness apos fallback estatico;
-- pipeline falha de forma explicita quando nenhuma superficie sobe, com tail de logs para diagnostico imediato.
+- `ui-audit` e `visual-regression-compare` agora validam readiness após fallback estatico;
+- pipeline falha de forma explicita quando nenhuma superficie sobe, com tail de logs para diagnostico iMédiato.
 
 3. Deprecacao observavel:
-- rotas `410 DEPRECATED_ROUTE` passaram a emitir headers de ciclo (`x-aethel-deprecated-since`, `x-aethel-removal-cycle-target`, `x-aethel-deprecation-policy`) para governanca operacional.
+- rotas `410 DEPRECATED_ROUTE` passaram a emitir headers de ciclo (`x-aethel-deprecated-since`, `x-aethel-removal-cycle-target`, `x-aethel-deprecation-policy`) para Governança operacional.
 4. Admin actionability:
 - `admin/apis` passou a exibir readiness de cutoff por rota (`candidateForRemoval`, `silenceDays`) e candidatos consolidados por ciclo.
 5. UX de IA P0 sem CTA enganosa:
@@ -400,7 +400,7 @@ Regras travadas de claim:
 
 ## Matriz factual Colaboracao e DX readiness (2026-02-15)
 
-| Dimensao | Status atual | Lacuna real | Criterio minimo para promover status |
+| Dimensão | Status atual | Lacuna real | Criterio minimo para promover status |
 |---|---|---|---|
 | Multiusuario realtime | PARTIAL | Sem prova de estabilidade enterprise em carga | Testes concorrentes + SLO publicados |
 | Locks e conflitos | PARTIAL | Politica de conflito/autoridade ainda nao fechada no canone executivo | Definir lock strategy + testes de merge/conflito |
@@ -410,11 +410,11 @@ Regras travadas de claim:
 
 SLO proposto para promover "real-time ready":
 1. P95 latencia de sync colaborativo <= 250ms em carga alvo definida.
-2. Reconexao automatica <= 5s apos queda curta de rede.
+2. Reconexao automatica <= 5s após queda curta de rede.
 3. Zero perda silenciosa de edicao em cenarios de conflito reproduziveis.
 
 
-## Delta critico de implementacao (2026-02-15, O1/O3 fechado)
+## Delta Crítico de implementacao (2026-02-15, O1/O3 fechado)
 
 Implementado:
 1. Comunicacao de erro IA no Workbench refinada para reduzir ambiguidade operacional.
@@ -431,7 +431,7 @@ Leitura critica:
 2. Residual de produto segue funcional (gates declarados), nao regressao tecnica.
 
 
-## Delta critico CI (2026-02-15)
+## Delta Crítico CI (2026-02-15)
 
 Quality risk addressed:
 1. Workflow drift vs real app topology (root vs `cloud-web-app/web`) was reduced by explicit dual-install and startup fallback strategy.
@@ -442,7 +442,7 @@ Residual limitation:
 
 2. Workflow install path now tolerates missing root lockfile, reducing false CI breakage.
 
-## Delta critico maximo (2026-02-16, pos gate enterprise)
+## Delta Crítico maximo (2026-02-16, pos gate enterprise)
 
 Validacao executada:
 1. `cmd /c npm run qa:enterprise-gate` -> PASS
@@ -468,7 +468,7 @@ Criticas objetivas de maior impacto residual:
 4. **Deriva documental interna**:
 - secoes antigas em `10/13/14` ainda carregam baselines historicos (ex.: `not-implemented-ui=10`) junto do estado atual (`5`), exigindo leitura cuidadosa.
 
-Backlog critico imediato (P0 sem mudar escopo):
+Backlog Crítico iMédiato (P0 sem mudar escopo):
 1. Tratar alerta `revalidateTag` (origem e mitigacao) e registrar em contrato.
 2. Formalizar checklist de ambiente minimo (Upstash/Docker/runtime) para eliminar warning operacional recorrente.
 3. Manter limpeza documental: toda nova delta deve sobrescrever baseline numerica mais antiga em `10/13/14`.
@@ -477,7 +477,7 @@ Backlog P1 (travado por evidencia):
 1. Colaboracao avancada com SLO e carga real.
 2. Gate de claim L4/L5 com provas operacionais reproduziveis.
 
-## Delta critico adicional (2026-02-16, anti-fake-success IA/media)
+## Delta Crítico adicional (2026-02-16, anti-fake-success IA/Média)
 
 Mudancas executadas:
 1. `app/api/ai/thinking/[sessionId]/route.ts`
@@ -492,12 +492,12 @@ Leitura critica:
 2. Mantem experiencia funcional, mas sem reportar maturidade inexistente.
 3. Proximo passo obrigatorio e migrar preview/simulacao para runtime persistente e validado.
 
-## Delta critico adicional II (2026-02-16, contratos de capacidade + preview safety)
+## Delta Crítico adicional II (2026-02-16, contratos de capacidade + preview safety)
 
 Mudancas executadas:
 1. Contrato unificado de capability response criado:
 - `cloud-web-app/web/lib/server/capability-response.ts`
-2. Rotas AI de provider-gate migradas para contrato unico (`NOT_IMPLEMENTED`, `501`, metadata/headers):
+2. Rotas AI de provider-gate migradas para contrato único (`NOT_IMPLEMENTED`, `501`, metadata/headers):
 - `app/api/ai/chat/route.ts`
 - `app/api/ai/complete/route.ts`
 - `app/api/ai/action/route.ts`
@@ -513,7 +513,7 @@ Critica objetiva:
 2. Evita que falhas de runtime parecam "silenciosas" no preview.
 3. Mantem escopo P0/P1 sem inflar claims de maturidade.
 
-## Delta critico adicional III (2026-02-16, anti-alucinacao deterministica)
+## Delta Crítico adicional III (2026-02-16, anti-alucinacao deterministica)
 
 Mudancas executadas:
 1. Novo validador deterministico para mudancas de IA:
@@ -524,7 +524,7 @@ Mudancas executadas:
 - `components/editor/InlineEditModal.tsx`
 3. Pipeline de ghost text migrou para endpoint canonico com quota/auth/rate contract:
 - `lib/ai/ghost-text.ts` -> `/api/ai/inline-completion`
-4. Validacao de asset evoluida para classes game/media/model com avisos `PARTIAL` explicitos:
+4. Validacao de asset evoluida para classes game/Média/model com avisos `PARTIAL` explicitos:
 - `lib/server/asset-processor.ts`
 - `app/api/assets/upload/route.ts`
 
@@ -627,27 +627,27 @@ Implemented:
 Critical reading:
 1. This closes a practical UX gap in P1-01 (flow clarity) without changing product scope.
 
-## Delta 2026-02-17 VIII - Preview media error signaling
+## Delta 2026-02-17 VIII - Preview Média error signaling
 Implemented:
-1. `PreviewPanel` now shows explicit media failure state for image/audio/video runtime errors.
+1. `PreviewPanel` now shows explicit Média failure state for image/audio/video runtime errors.
 
 Critical reading:
 1. Reduces false perception of "empty preview" by showing exact failure class (`PARTIAL` capability runtime).
 
-## Snapshot incremental (2026-02-27) - conectividade e governan�a
+## Snapshot incremental (2026-02-27) - conectividade e governança
 Fatos novos desta varredura:
-1. A fonte can�nica foi consolidada em `docs/master` com `00_INDEX.md`.
+1. A fonte canônica foi consolidada em `docs/master` com `00_INDEX.md`.
 2. Risco estrutural P0 confirmado fora da camada de UX:
 - scripts de raiz com paths inexistentes;
-- `tsconfig` com refer�ncia ausente;
-- subm�dulo �rf�o em `.gitmodules`;
+- `tsconfig` com referência ausente;
+- submódulo órfão em `.gitmodules`;
 - `.venv` versionado em `cloud-web-app/web`.
-3. Press�o de manuten��o confirmada por arquivos monol�ticos de grande porte.
+3. Pressão de manutenção confirmada por arquivos monolíticos de grande porte.
 
-Leitura cr�tica:
-1. A plataforma mant�m contratos visuais/route gates importantes, mas ainda carrega risco operacional de reposit�rio.
-2. O pr�ximo ganho real de qualidade � reduzir d�vida estrutural e n�o criar novas superf�cies.
-3. Claims de maturidade devem permanecer bloqueados enquanto conectividade/base de build n�o estiver limpa.
+Leitura crítica:
+1. A plataforma mantém contratos visuais/route gates importantes, mas ainda carrega risco operacional de repositório.
+2. O próximo ganho real de qualidade é reduzir dívida estrutural e não criar novas superfícies.
+3. Claims de maturidade devem permanecer bloqueados enquanto conectividade/base de build não estiver limpa.
 
 ## Delta 2026-03-03 IX - hard gate inventory and warning profile
 1. Explicit API `NOT_IMPLEMENTED` inventory moved to `0` in active scope after billing runtime-gate normalization (`PAYMENT_GATEWAY_RUNTIME_UNAVAILABLE`, `503`, `PARTIAL`).

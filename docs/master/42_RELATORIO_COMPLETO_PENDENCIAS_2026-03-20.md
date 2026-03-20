@@ -1,109 +1,109 @@
-# 42_RELATORIO_COMPLETO_PENDENCIAS_2026-03-20.md
+ï»¿# 42_RELATORIO_COMPLETO_PENDENCIAS_2026-03-20.md
 
-**Documento:** Relatório Completo de Pendências e Críticas (baseado em evidências do repositório)  
+**Documento:** RelatÃ³rio Completo de PendÃªncias e CrÃ­ticas (baseado em evidÃªncias do repositÃ³rio)  
 **Data:** 2026-03-20  
-**Status:** Atualizado conforme métricas reais e código em `main`
+**Status:** Atualizado conforme mÃ©tricas reais e cÃ³digo em `main`
 
 ---
 
-## 1) Resumo Executivo (com evidência)
+## 1) Resumo Executivo (com evidÃªncia)
 
 - **L4 Evidence:** `metrics/latest_run-production.json` mostra **sampleSize=115**, **successRate=1.0** e **feedbackCoverage=0.8957** (gerado em 2026-03-14).  
-- **Dossier L4:** `metrics/l4-readiness-dossier.json` está **PARTIAL** com bloqueadores externos (Stripe/E2B/DB).  
-- **Gates de Código:** `npm run typecheck` passou localmente após os últimos ajustes.  
-- **Dashboard shell:** `AethelDashboardRuntime.tsx` foi decomposto e está **1187 linhas** (gate <=1200).  
+- **Dossier L4:** `metrics/l4-readiness-dossier.json` estÃ¡ **PARTIAL** com bloqueadores externos (Stripe/E2B/DB).  
+- **Gates de CÃ³digo:** `npm run typecheck` passou localmente apÃ³s os Ãºltimos ajustes.  
+- **Dashboard shell:** `useAethelDashboardRuntime.tsx` foi decomposto e estÃ¡ **1112 linhas** (gate <=1200).  
 
-**Conclusão factual:** O core loop **atingiu evidência de produção**, mas a promoção L4 continua **bloqueada** por credenciais externas e validações operacionais (Stripe + E2B + DB + medições de onboarding).
+**ConclusÃ£o factual:** O core loop **atingiu evidÃªncia de produÃ§Ã£o**, mas a promoÃ§Ã£o L4 continua **bloqueada** por credenciais externas e validaÃ§Ãµes operacionais (Stripe + E2B + DB + mediÃ§Ãµes de onboarding).
 
 ---
 
 ## 2) Bloqueadores Reais (P0)
 
-### P0.1 — Billing Stripe real (bloqueio L4)
-**Evidência:** `metrics/l4-readiness-dossier.json` ? `billingCheckoutWebhook.met=false`.  
+### P0.1 â€” Billing Stripe real (bloqueio L4)
+**EvidÃªncia:** `metrics/l4-readiness-dossier.json` ? `billingCheckoutWebhook.met=false`.  
 **O que falta:** chaves reais + webhook validado + checkout E2E.  
 **Arquivos envolvidos:**
 - `cloud-web-app/web/app/api/billing/*`
 - `cloud-web-app/web/components/billing/BillingIntegration.tsx`
 
-**Ação pendente:** configurar envs Stripe e rodar `qa:billing-runtime-readiness`.
+**AÃ§Ã£o pendente:** configurar envs Stripe e rodar `qa:billing-runtime-readiness`.
 
-### P0.2 — E2B Preview Managed + HMR
-**Evidência:** `metrics/l4-readiness-dossier.json` ? `previewManagedHMR.met=false`.  
+### P0.2 â€” E2B Preview Managed + HMR
+**EvidÃªncia:** `metrics/l4-readiness-dossier.json` ? `previewManagedHMR.met=false`.  
 **O que falta:** `AETHEL_PREVIEW_PROVISION_TOKEN` real e teste E2B.  
 **Arquivos envolvidos:**
 - `cloud-web-app/web/app/api/preview/runtime-provision/route.ts`
 - `cloud-web-app/web/lib/preview/hmr-bridge.ts`
 - `cloud-web-app/web/lib/preview/webcontainers-bridge.ts`
 
-### P0.3 — DB/runtime estável (Docker/Neon)
-**Evidência:** Dossier L4 exige DB real com readiness.  
+### P0.3 â€” DB/runtime estÃ¡vel (Docker/Neon)
+**EvidÃªncia:** Dossier L4 exige DB real com readiness.  
 **O que falta:** runtime com DB conectado e `qa:production-runtime-readiness` verde.  
 
 ---
 
-## 3) Pendências Altas (P1)
+## 3) PendÃªncias Altas (P1)
 
-### P1.1 — Onboarding SLO (<90s) com medição
-**Evidência:** `metrics/l4-readiness-dossier.json` ? `onboardingP50Under90s.met=false`.  
+### P1.1 â€” Onboarding SLO (<90s) com mediÃ§Ã£o
+**EvidÃªncia:** `metrics/l4-readiness-dossier.json` ? `onboardingP50Under90s.met=false`.  
 **O que falta:** medir P50/P95 e registrar eventos.  
 **Arquivos:**
 - `cloud-web-app/web/components/onboarding/OnboardingWizard.tsx`
 - `cloud-web-app/web/lib/analytics/*`
 
-### P1.2 — RAG + @mentions (pgvector)
-**Status:** implementação **não confirmada** em produção.  
-**O que falta:** storage vetorial persistente e índice.  
+### P1.2 â€” RAG + @mentions (pgvector)
+**Status:** implementaÃ§Ã£o **nÃ£o confirmada** em produÃ§Ã£o.  
+**O que falta:** storage vetorial persistente e Ã­ndice.  
 
-### P1.3 — UX / Design System / Studio coeso
-**Status:** melhorado, mas ainda existem superfícies heterogêneas.  
-**O que falta:** consolidar Studio layout em todas as telas, padronizar Empty/Skeleton/Toast e remover redundâncias.
+### P1.3 â€” UX / Design System / Studio coeso
+**Status:** melhorado, mas ainda existem superfÃ­cies heterogÃªneas.  
+**O que falta:** consolidar Studio layout em todas as telas, padronizar Empty/Skeleton/Toast e remover redundÃ¢ncias.
 
-### P1.4 — Landing canônica (v3)
+### P1.4 â€” Landing canÃ´nica (v3)
 **Status:** `landing-v2.tsx` removida, `app/page.tsx` aponta para v3.  
 **O que falta:** completar hero video, social proof e pricing com CTA real.
 
 ---
 
-## 4) Pendências Médias (P2)
+## 4) PendÃªncias MÃ©dias (P2)
 
-### P2.1 — Segurança enterprise
-**Evidência:** Dossier mostra GDPR endpoints presentes, mas falta SSO/SAML real + vault em produção.  
+### P2.1 â€” SeguranÃ§a enterprise
+**EvidÃªncia:** Dossier mostra GDPR endpoints presentes, mas falta SSO/SAML real + vault em produÃ§Ã£o.  
 **O que falta:** SSO configurado + rate limiting enterprise + vault ativo.
 
-### P2.2 — Research premium
-**Status:** melhorias descritas em docs, mas sem evidência de live retrieval + export pdf verificado.  
+### P2.2 â€” Research premium
+**Status:** melhorias descritas em docs, mas sem evidÃªncia de live retrieval + export pdf verificado.  
 
 ---
 
-## 5) Pendências Baixas (P3)
+## 5) PendÃªncias Baixas (P3)
 
 ### Games L2 ? L3 e Films L2 ? L3
-**Status:** bloqueado até Apps L4 completo.  
+**Status:** bloqueado atÃ© Apps L4 completo.  
 **O que falta:** APIs externas e pipeline real.
 
 ---
 
-## 6) Estado Atual das Documentações Críticas
+## 6) Estado Atual das DocumentaÃ§Ãµes CrÃ­ticas
 
 ### Alinhado
 - `docs/master/9_BACKEND_SYSTEM_SPEC.md` atualizado para Next.js/Prisma/Postgres.  
 - `docs/master/AI_SYSTEM_SPEC.md` atualizado com modelos reais do router.  
 
-### Ainda necessário
-- Padronizar legacy docs para nomenclatura canônica.  
-- Consolidar documentação pública de usuário final (guia do IDE, games, films).
+### Ainda necessÃ¡rio
+- Padronizar legacy docs para nomenclatura canÃ´nica.  
+- Consolidar documentaÃ§Ã£o pÃºblica de usuÃ¡rio final (guia do IDE, games, films).
 
 ---
 
 ## 7) TypeScript / QA
 
 - `npm run typecheck` passou localmente.  
-- Ainda faltam testes E2E, visual regression e Lighthouse CI documentados no plano, mas **não há evidência de execução ainda**.
+- Ainda faltam testes E2E, visual regression e Lighthouse CI documentados no plano, mas **nÃ£o hÃ¡ evidÃªncia de execuÃ§Ã£o ainda**.
 
 ---
 
-## 8) Lista de Pendências Objetivas (checklist executável)
+## 8) Lista de PendÃªncias Objetivas (checklist executÃ¡vel)
 
 **P0**
 - [ ] Stripe: chaves + webhook + checkout real  
@@ -112,7 +112,7 @@
 
 **P1**
 - [ ] Onboarding: medir P50/P95 e SLO real  
-- [ ] RAG: pgvector + indexação  
+- [ ] RAG: pgvector + indexaÃ§Ã£o  
 - [ ] Landing: hero video + social proof + pricing com CTA real  
 
 **P2**
@@ -120,15 +120,15 @@
 - [ ] Research: live retrieval + export PDF  
 
 **P3**
-- [ ] Games/Films L3 (após L4 completo)  
+- [ ] Games/Films L3 (apÃ³s L4 completo)  
 
 ---
 
-## 9) Arquivos-chave (para revisão técnica)
+## 9) Arquivos-chave (para revisÃ£o tÃ©cnica)
 
 - `metrics/latest_run-production.json`
 - `metrics/l4-readiness-dossier.json`
-- `cloud-web-app/web/components/AethelDashboardRuntime.tsx`
+- `cloud-web-app/web/components/useAethelDashboardRuntime.tsx`
 - `cloud-web-app/web/components/dashboard/DashboardShell.tsx`
 - `cloud-web-app/web/app/page.tsx`
 - `cloud-web-app/web/app/landing-v3.tsx`
@@ -137,4 +137,4 @@
 
 ---
 
-**Fim do relatório.**
+**Fim do relatÃ³rio.**

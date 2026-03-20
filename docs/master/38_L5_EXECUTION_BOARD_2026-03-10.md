@@ -1,23 +1,23 @@
-# 38_L5_EXECUTION_BOARD_2026-03-10
+﻿# 38_L5_EXECUTION_BOARD_2026-03-10
 Status: ACTIVE MASTER TRACKING BOARD
 Date: 2026-03-10
 Owner: Platform + Product + UX + Growth
 
 ## 1) Objetivo
-Centralizar todas as frentes, bloqueios e criterios de saida para levar o Aethel de L3 -> L4 -> L5 sem inflar claims.
+Centralizar todas as frentes, bloqueios e critérios de saída para levar o Aethel de L3 -> L4 -> L5 sem inflar claims.
 
-Este documento e o checkpoint unico para:
+Este documento é o checkpoint único para:
 - P0/P1/P2/P3 prioritizados,
-- evidencias requeridas para promocao L4/L5,
-- credenciais e preflights necessarios,
-- ordem canonica de execucao.
+- evidências requeridas para promoção L4/L5,
+- credenciais e preflights necessários,
+- ordem canônica de execução.
 
 ## 2) Score Dashboard (factual)
-| Dimensao | Score Atual | Meta L4 | Meta L5 | Issue | Status |
+| Dimensão | Score Atual | Meta L4 | Meta L5 | Issue | Status |
 |---|---:|---:|---:|---|---|
-| Codigo / Qualidade | 9.5 | 9.5 | 9.5 | � | ACTIVE |
-| Governanca | 10.0 | 10.0 | 10.0 | � | ACTIVE |
-| Arquitetura | 8.7 | 9.0 | 9.5 | � | PARTIAL |
+| Código / Qualidade | 9.5 | 9.5 | 9.5 | — | ACTIVE |
+| Governança | 10.0 | 10.0 | 10.0 | — | ACTIVE |
+| Arquitetura | 8.7 | 9.0 | 9.5 | — | PARTIAL |
 | Core Loop / L4 | 3.0 | 8.0 | 9.5 | P0-01 | BLOCKED |
 | Preview / Sandbox | 5.4 | 8.0 | 9.0 | P0-02 | PARTIAL |
 | Billing / Stripe | 2.0 | 8.0 | 9.0 | P0-03 | PARTIAL |
@@ -29,15 +29,15 @@ Este documento e o checkpoint unico para:
 | Mobile + A11y | 5.7 | 8.0 | 9.0 | P1-06 | PARTIAL |
 | Security / Compliance | 6.5 | 7.5 | 9.0 | P2-01 | PARTIAL |
 | Research Agent | 6.0 | 7.5 | 9.0 | P2-02 | PARTIAL |
-| Films | 4.2 | � | 7.0 | P3-01 | FROZEN |
-| Games | 3.5 | � | 7.0 | P3-02 | FROZEN |
-| Media Geral | 6.2 | 8.0 | 9.2 | � | BLOCKED |
+| Films | 4.2 | — | 7.0 | P3-01 | FROZEN |
+| Games | 3.5 | — | 7.0 | P3-02 | FROZEN |
+| Média Geral | 6.2 | 8.0 | 9.2 | — | BLOCKED |
 
-## 3) P0 � Bloqueadores Criticos (fazer primeiro)
+## 3) P0 — Bloqueadores Críticos (fazer primeiro)
 ### P0-01 Core Loop Production Evidence
 - Objetivo: `sampleSize >= 100`, `successRate > 0.90`, `feedbackCoverage >= 0.60`.
-- Evidencia: `metrics/latest_run-production.json` + `/api/admin/ai/readiness`.
-- Preflight necessario:
+- Evidência: `metrics/latest_run-production.json` + `/api/admin/ai/readiness`.
+- Preflight necessário:
   - Docker ativo
   - `.env.local` real
   - `DATABASE_URL` funcional
@@ -63,7 +63,7 @@ Este documento e o checkpoint unico para:
   - `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
   - `STRIPE_PRICE_*` (starter/basic/pro/studio/enterprise)
 
-## 4) P1 � Alta Prioridade (iniciar apos P0)
+## 4) P1 — Alta Prioridade (iniciar após P0)
 ### P1-01 Marketing / GTM
 - Landing hero + video demo
 - Pricing com comparativo e CTAs
@@ -95,7 +95,7 @@ Este documento e o checkpoint unico para:
 - Nexus Chat fullscreen mobile
 - Axe CI + contrastes light/dark
 
-## 5) P2 � Media Prioridade
+## 5) P2 — Média Prioridade
 ### P2-01 Security + Compliance
 - Vault criptografia em repouso
 - SSO/SAML/OIDC
@@ -108,14 +108,14 @@ Este documento e o checkpoint unico para:
 - Export MD/PDF
 - Loop research -> code -> deploy visivel
 
-## 6) P3 � Congelado ate Apps L4
+## 6) P3 — Congelado ate Apps L4
 ### P3-01 Films L2 -> L3
 - Kling/Runway, continuidade, NLE basico, export
 
 ### P3-02 Games L2 -> L3
 - Meshy, Rapier, XState, export
 
-## 7) Criterios de Saida L4
+## 7) critérios de saída L4
 Obrigatorios:
 1. `production.sampleSize >= 100`
 2. `apply.successRate > 0.90`
@@ -123,12 +123,12 @@ Obrigatorios:
 4. `learn.feedbackCoverage >= 0.60`
 5. Preview managed + HMR funcional
 6. Billing checkout + webhook real
-7. Onboarding P50 < 90s (evidencia)
+7. Onboarding P50 < 90s (Evidência)
 8. `qa:enterprise-gate` verde
 9. Dossier publicado
 
-## 8) Criterios de Saida L5
-Al�m de L4:
+## 8) critérios de saída L5
+Al—m de L4:
 1. Side-effects approval-gated
 2. Credentials isoladas (vault)
 3. Browser/runtime automation em sandbox
@@ -138,7 +138,7 @@ Al�m de L4:
 7. SOC2 Type I iniciado
 8. Evidence continua (nao pontual)
 
-## 9) Ordem Canonica de Execucao
+## 9) Ordem canônica de execução
 1. P0: Core evidence + Preview + Billing
 2. P1: Onboarding + RAG + UX + Deploy + Mobile/A11y
 3. L4 Exit + Marketing
@@ -148,22 +148,22 @@ Al�m de L4:
 ## 10) Notas de Alinhamento (2026-03-10)
 - Preview E2B agora suporta provisionamento direto, sync completo e sync por arquivo.
 - CLI de probe agora suporta `--runs 50` para atingir sample size com menos waves.
-- Readiness continua bloqueando promocao sem runtime real.
+- Readiness continua bloqueando promoção sem runtime real.
 
 ## 11) Regras Imutaveis
 1. Sem fake-success.
-2. Sem claim L4/L5 sem evidencia.
+2. Sem claim L4/L5 sem Evidência.
 3. Games/Films congelados ate Apps L4.
 4. Demo sempre rotulado como demo.
 5. Usar labels: ABSENT/PARTIAL/BLOCKED/ACTIVE.
 
-## 12) Delta 2026-03-11 — Implementation Sprint
+## 12) Delta 2026-03-11 â€” Implementation Sprint
 
 ### Novos artefatos implementados (code-ready):
 
 | Artefato | Path | Status |
 |---|---|---|
-| CanonicalPreviewSurface lifecycle | `components/preview/CanonicalPreviewSurface.tsx` | ACTIVE |
+| canônicalPreviewSurface lifecycle | `components/preview/canônicalPreviewSurface.tsx` | ACTIVE |
 | Security Vault (AES-256-GCM) | `lib/security/vault.ts` | ACTIVE |
 | Rate Limiter (sliding window) | `lib/security/rate-limiter.ts` | ACTIVE |
 | SSO/OIDC/SAML Provider | `lib/security/sso-provider.ts` | PARTIAL (needs credentials) |
@@ -183,7 +183,7 @@ Al�m de L4:
 | .env.local template | `cloud-web-app/web/.env.local` | ACTIVE |
 
 ### Score updates (post-sprint):
-| Dimensao | Pre-Sprint | Pos-Sprint | Delta |
+| Dimensão | Pre-Sprint | Pos-Sprint | Delta |
 |---|---:|---:|---:|
 | Seguranca/Compliance | 6.5 | 7.5 | +1.0 |
 | Deploy + Infra | 5.4 | 6.5 | +1.1 |
@@ -191,18 +191,18 @@ Al�m de L4:
 | Research Agent | 6.0 | 7.0 | +1.0 |
 | UX / Design System | 7.5 | 8.0 | +0.5 |
 | Onboarding | 5.2 | 6.0 | +0.8 |
-| Media Geral | 6.2 | 6.8 | +0.6 |
+| Média Geral | 6.2 | 6.8 | +0.6 |
 
 ### Blockers nao resolvidos (requerem credenciais externas):
 - Docker daemon somente se usar Postgres/Redis local (nao requerido para Neon/Upstash).
 - Vercel token (one-click deploy).
 - Tavily/Perplexity keys (live retrieval).
-- Webhook Stripe em URL publica (necessario para fluxo live em producao).
+- Webhook Stripe em URL publica (necessário para fluxo live em producao).
 
 ### Proximos passos:
-1. Ativar Docker → PostgreSQL → Prisma migrations
-2. Configurar Stripe real → testar checkout flow
-3. Configurar E2B → testar provisionamento
+1. Ativar Docker â†’ PostgreSQL â†’ Prisma migrations
+2. Configurar Stripe real â†’ testar checkout flow
+3. Configurar E2B â†’ testar provisionamento
 4. Rodar `npm run qa:core-loop-production-probe -- --runs 100`
 5. Verificar exitCriteria em `metrics/l4-readiness-dossier.json`
 
@@ -290,7 +290,7 @@ Current blockers after hardening:
   - Sentry DSN + auth token.
 - Pendencia opcional:
   - Storage S3/R2 ainda nao configurado (pendente criar Access Key/Secret e endpoint).
-- Bloqueios restantes nao sao de credencial, e sim de execucao/validacao:
+- Bloqueios restantes nao sao de credencial, e sim de execução/validacao:
   - Validar preview E2B real + HMR no IDE.
-  - Rodar production probe wave com runtime ativo para evidencias.
+  - Rodar production probe wave com runtime ativo para evidências.
   - Validar checkout Stripe end-to-end no fluxo real.
