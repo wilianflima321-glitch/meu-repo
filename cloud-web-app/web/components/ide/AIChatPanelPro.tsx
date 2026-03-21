@@ -80,6 +80,13 @@ const QUICK_MENTIONS = [
   { label: '@git:diff', value: '@git:diff ' },
   { label: '@diagnostics', value: '@diagnostics ' },
 ]
+
+const formatCost = (value?: number) => {
+  if (value === undefined || Number.isNaN(value)) return null
+  if (value >= 10) return `$${value.toFixed(0)}`
+  if (value >= 1) return `$${value.toFixed(2)}`
+  return `$${value.toFixed(4)}`
+}
 function useVoiceRecording() {
   const [isRecording, setIsRecording] = useState(false)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
@@ -358,6 +365,7 @@ export default function AIChatPanelPro({
   const [showModelSelector, setShowModelSelector] = useState(false)
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [showHistorySidebar, setShowHistorySidebar] = useState(showHistory)
+  const [agentCount, setAgentCount] = useState(1)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -558,14 +566,19 @@ export default function AIChatPanelPro({
   }, [])
   const handleSend = useCallback((e?: FormEvent) => {
     e?.preventDefault()
-    if (!input.trim() || isLoading) return
-    onSendMessage?.(input, {
+    const normalizedInput = input.trim()
+    if (!normalizedInput || isLoading) return
+    const hasAgentTag = /@agents:[123]/i.test(normalizedInput)
+    const messageWithAgents = agentCount > 1 && !hasAgentTag
+      ? `@agents:${agentCount} ${normalizedInput}`
+      : normalizedInput
+    onSendMessage?.(messageWithAgents, {
       attachments: allowAttachments && attachments.length > 0 ? attachments : undefined,
     })
     mentionState.replaceText('')
     setAttachments([])
     clearRecording()
-  }, [input, isLoading, attachments, onSendMessage, clearRecording, allowAttachments, mentionState])
+  }, [agentCount, input, isLoading, attachments, onSendMessage, clearRecording, allowAttachments, mentionState])
   const handleComposerKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     mentionState.handleKeyDown(e)
     if (e.defaultPrevented) return
@@ -656,6 +669,9 @@ export default function AIChatPanelPro({
     }
   }
   const selectedModel = models.find(m => m.id === currentModel) || models[0]
+  const inputCostLabel = formatCost(selectedModel?.inputCost)
+  const outputCostLabel = formatCost(selectedModel?.outputCost)
+  const modelTierLabel = selectedModel?.tier?.toUpperCase() ?? 'BUDGET'
   const visibleCodebaseContextPreview = codebaseContextPreview ?? localCodebaseContextPreview
   return (
     <div className={`h-full flex ${className}`}>
@@ -691,53 +707,94 @@ export default function AIChatPanelPro({
               </button>
             )}
             {/* Model Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setShowModelSelector(!showModelSelector)}
-                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-800 text-sm"
-              >
-                <Sparkles className="w-4 h-4 text-blue-400" />
-                <span>{selectedModel.name}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              </button>
-              {showModelSelector && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
-                  <div className="absolute left-0 top-full mt-1 z-50 min-w-72 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
-                    {models.map(model => (
-                      <button
-                        key={model.id}
-                        onClick={() => {
-                          onModelChange?.(model.id)
-                          setShowModelSelector(false)
-                        }}
-                        className={`
-                          w-full flex items-start gap-3 px-3 py-2 text-left
-                          ${model.id === currentModel ? 'bg-blue-500/20' : 'hover:bg-slate-700'}
-                        `}
-                      >
-                        <Sparkles className={`w-4 h-4 mt-0.5 ${model.id === currentModel ? 'text-blue-400' : 'text-slate-500'}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-medium text-white">{model.name}</span>
-                            <span className="text-xs text-slate-500">{model.provider}</span>
-                            {model.supportsVision && (
-                              <span className="px-1.5 py-0.5 text-[10px] bg-cyan-500/20 text-cyan-400 rounded">Vision</span>
-                            )}
-                            {model.supportsVoice && (
-                              <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded">Voice</span>
-                            )}
-                          </div>
-                          {model.description && (
-                            <span className="text-xs text-slate-400">{model.description}</span>
-                          )}
-                        </div>
-                        {model.id === currentModel && <Check className="w-4 h-4 text-blue-400" />}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowModelSelector(!showModelSelector)}
+                    className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-800 text-sm"
+                  >
+                    <Sparkles className="w-4 h-4 text-blue-400" />
+                    <span>{selectedModel.name}</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                  {showModelSelector && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
+                      <div className="absolute left-0 top-full mt-1 z-50 min-w-72 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
+                        {models.map(model => (
+                          <button
+                            key={model.id}
+                            onClick={() => {
+                              onModelChange?.(model.id)
+                              setShowModelSelector(false)
+                            }}
+                            className={`
+                              w-full flex items-start gap-3 px-3 py-2 text-left
+                              ${model.id === currentModel ? 'bg-blue-500/20' : 'hover:bg-slate-700'}
+                            `}
+                          >
+                            <Sparkles className={`w-4 h-4 mt-0.5 ${model.id === currentModel ? 'text-blue-400' : 'text-slate-500'}`} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-medium text-white">{model.name}</span>
+                                <span className="text-xs text-slate-500">{model.provider}</span>
+                                {model.tier && (
+                                  <span className="px-1.5 py-0.5 text-[10px] uppercase tracking-wide bg-slate-700 text-slate-300 rounded">
+                                    {model.tier}
+                                  </span>
+                                )}
+                                {model.supportsVision && (
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-cyan-500/20 text-cyan-400 rounded">Vision</span>
+                                )}
+                                {model.supportsVoice && (
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded">Voice</span>
+                                )}
+                              </div>
+                              {model.description && (
+                                <span className="text-xs text-slate-400">{model.description}</span>
+                              )}
+                              {model.inputCost !== undefined && model.outputCost !== undefined && (
+                                <span className="text-[11px] text-slate-500">
+                                  {formatCost(model.inputCost)}/{formatCost(model.outputCost)} per 1M
+                                </span>
+                              )}
+                            </div>
+                            {model.id === currentModel && <Check className="w-4 h-4 text-blue-400" />}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 uppercase tracking-wide">
+                    {modelTierLabel}
+                  </span>
+                  {inputCostLabel && outputCostLabel && (
+                    <span>{inputCostLabel}/{outputCostLabel} per 1M</span>
+                  )}
+                  {agentCount > 1 && (
+                    <span className="text-slate-500">x{agentCount} agents</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-[11px] text-slate-500">Agents</span>
+                {[1, 2, 3].map((count) => (
+                  <button
+                    key={count}
+                    onClick={() => setAgentCount(count)}
+                    className={`px-2 py-0.5 text-[11px] rounded border ${
+                      agentCount === count
+                        ? 'border-blue-400 text-blue-300 bg-blue-500/10'
+                        : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                    }`}
+                  >
+                    {count}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           {/* Actions */}

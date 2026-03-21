@@ -1,4 +1,9 @@
-import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS } from '@/lib/ai/openrouter-models'
+import {
+  OPENROUTER_BEST_MODELS_SORTED,
+  OPENROUTER_BUDGET_MODELS_SORTED,
+  OPENROUTER_FREE_MODELS_SORTED,
+  type OpenRouterModel,
+} from '@/lib/ai/openrouter-models'
 
 export interface SpeechRecognitionAlternative {
   transcript: string
@@ -96,6 +101,9 @@ export interface ModelOption {
   maxTokens?: number
   supportsVision?: boolean
   supportsVoice?: boolean
+  inputCost?: number
+  outputCost?: number
+  tier?: 'free' | 'budget' | 'best'
 }
 
 export interface CodebaseContextPreviewItem {
@@ -159,16 +167,21 @@ export interface AIChatPanelProps {
   codebaseContextPreview?: CodebaseContextPreview
 }
 
-const toModelOption = (tier: 'Best' | 'Budget') => (model: typeof OPENROUTER_BEST_MODELS[number]) => ({
+const toModelOption = (tierLabel: 'Free' | 'Budget' | 'Best') => (model: OpenRouterModel) => ({
   id: model.id,
   name: model.name,
   provider: 'OpenRouter',
-  description: `${tier} · ${model.description}`,
+  description: `${tierLabel} - ${model.description}`,
   maxTokens: model.contextWindow,
   supportsVision: model.supportsVision,
+  supportsVoice: false,
+  inputCost: model.inputCost,
+  outputCost: model.outputCost,
+  tier: model.tier,
 })
 
 export const DEFAULT_MODELS: ModelOption[] = [
-  ...OPENROUTER_BEST_MODELS.map(toModelOption('Best')),
-  ...OPENROUTER_BUDGET_MODELS.map(toModelOption('Budget')),
+  ...OPENROUTER_FREE_MODELS_SORTED.map(toModelOption('Free')),
+  ...OPENROUTER_BUDGET_MODELS_SORTED.map(toModelOption('Budget')),
+  ...OPENROUTER_BEST_MODELS_SORTED.map(toModelOption('Best')),
 ]

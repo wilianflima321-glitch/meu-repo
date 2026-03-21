@@ -461,17 +461,17 @@ export const OPENROUTER_FREE_MODELS_SORTED = [...OPENROUTER_FREE_MODELS]
 
 export const OPENROUTER_BEST_OPTIONS = OPENROUTER_BEST_MODELS_SORTED.map((model) => ({
   value: model.id,
-  label: `${model.name} · ${formatCost(model.inputCost)}/${formatCost(model.outputCost)} per 1M (Best)`,
+  label: `${model.name} - ${formatCost(model.inputCost)}/${formatCost(model.outputCost)} per 1M (Best)`,
 }))
 
 export const OPENROUTER_FREE_OPTIONS = OPENROUTER_FREE_MODELS_SORTED.map((model) => ({
   value: model.id,
-  label: `${model.name} · Free`,
+  label: `${model.name} - Free`,
 }))
 
 export const OPENROUTER_BUDGET_OPTIONS = OPENROUTER_BUDGET_MODELS_SORTED.map((model) => ({
   value: model.id,
-  label: `${model.name} · ${formatCost(model.inputCost)}/${formatCost(model.outputCost)} per 1M (Budget)`,
+  label: `${model.name} - ${formatCost(model.inputCost)}/${formatCost(model.outputCost)} per 1M (Budget)`,
 }))
 
 export const OPENROUTER_MODEL_OPTIONS = [

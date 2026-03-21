@@ -18,7 +18,7 @@ import {
   requestAdvancedChat,
 } from '@/lib/ai-chat-advanced-client'
 import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
-import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS } from '@/lib/ai/openrouter-models'
+import { DEFAULT_MODELS } from '@/components/ide/AIChatPanelPro.types'
 
 type ChatMessage = {
   id: string
@@ -36,20 +36,8 @@ type ProviderGateState = {
   setupUrl?: string
 }
 
-const toModelOption = (tier: 'Best' | 'Budget') => (model: typeof OPENROUTER_BEST_MODELS[number]) => ({
-  id: model.id,
-  name: model.name,
-  provider: 'OpenRouter',
-  description: `${tier} · ${model.description}`,
-  maxTokens: model.contextWindow,
-  supportsVision: model.supportsVision,
-  supportsVoice: false,
-})
+const MODELS = DEFAULT_MODELS
 
-const MODELS = [
-  ...OPENROUTER_BEST_MODELS.map(toModelOption('Best')),
-  ...OPENROUTER_BUDGET_MODELS.map(toModelOption('Budget')),
-]
 
 function extractContent(raw: string): string {
   try {
