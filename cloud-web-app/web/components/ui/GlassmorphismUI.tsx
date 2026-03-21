@@ -1,7 +1,7 @@
 ﻿/**
- * Glassmorphism UI Components - NÃ­vel Studio L5
+ * Glassmorphism UI Components - Nível Studio L5
  * 
- * Componentes com efeitos de vidro, glows dinÃ¢micos e transiÃ§Ãµes de elite
+ * Componentes com efeitos de vidro, glows dinâmicos e transições de elite
  * Inspirado em: Vercel, Linear, Cursor, Figma
  */
 
@@ -11,7 +11,7 @@ import React, { ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 /**
- * PadrÃµes de animaÃ§Ã£o de elite
+ * Padrões de animação de elite
  */
 export const eliteAnimations = {
   containerVariants: {

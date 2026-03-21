@@ -1,9 +1,9 @@
 ﻿/**
  * Games & Films Module - Alpha Honest
  * 
- * MÃ³dulo de criaÃ§Ã£o e gerenciamento de Games e Films
- * Status: Alpha (Funcional, ConfiguraÃ§Ãµes BÃ¡sicas)
- * PadrÃ£o: L5 Design, Real Integration
+ * Módulo de criação e gerenciamento de Games e Films
+ * Status: Alpha (Funcional, Configurações Básicas)
+ * Padrão: L5 Design, Real Integration
  */
 
 'use client'
@@ -237,7 +237,7 @@ function GamesGrid({
       >
         <Gamepad2 size={48} className="mx-auto mb-4 text-white/40" />
         <p className="text-white/60">Nenhum jogo criado ainda</p>
-        <p className="text-sm text-white/40 mt-1">Clique em "Novo Projeto" para comeÃ§ar</p>
+        <p className="text-sm text-white/40 mt-1">Clique em &quot;Novo Projeto&quot; para começar</p>
       </motion.div>
     )
   }
@@ -276,7 +276,7 @@ function FilmsGrid({
       >
         <Film size={48} className="mx-auto mb-4 text-white/40" />
         <p className="text-white/60">Nenhum filme criado ainda</p>
-        <p className="text-sm text-white/40 mt-1">Clique em "Novo Projeto" para comeÃ§ar</p>
+        <p className="text-sm text-white/40 mt-1">Clique em &quot;Novo Projeto&quot; para começar</p>
       </motion.div>
     )
   }
@@ -404,7 +404,7 @@ function FilmCard({
 }
 
 /**
- * Dialog de CriaÃ§Ã£o
+ * Dialog de Criação
  */
 function CreateProjectDialog({
   open,

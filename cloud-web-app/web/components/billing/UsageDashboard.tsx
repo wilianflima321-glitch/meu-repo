@@ -1,7 +1,7 @@
 ﻿/**
- * Usage Dashboard - VisualizaÃ§Ã£o de Consumo de Recursos
+ * Usage Dashboard - Visualização de Consumo de Recursos
  * 
- * Mostra ao usuÃ¡rio seu consumo atual de:
+ * Mostra ao usuário seu consumo atual de:
  * - Tokens de IA
  * - Storage
  * - Minutos de build
@@ -91,7 +91,7 @@ export function UsageDashboard() {
         unit: 'tokens',
         icon: <Sparkles className="w-5 h-5" />,
         color: 'indigo',
-        details: 'Usado em chat, geraÃ§Ã£o de cÃ³digo e assets',
+        details: 'Usado em chat, geração de código e assets',
       },
       {
         id: 'storage',
@@ -111,7 +111,7 @@ export function UsageDashboard() {
         unit: 'min',
         icon: <Clock className="w-5 h-5" />,
         color: 'green',
-        details: 'CompilaÃ§Ã£o e deploy',
+        details: 'Compilação e deploy',
       },
       {
         id: 'gpu-hours',
@@ -121,7 +121,7 @@ export function UsageDashboard() {
         unit: 'h',
         icon: <Cpu className="w-5 h-5" />,
         color: 'purple',
-        details: 'RenderizaÃ§Ã£o e inferencias de IA',
+        details: 'Renderização e inferencias de IA',
       },
       {
         id: 'api-chamadas',
@@ -185,7 +185,7 @@ export function UsageDashboard() {
       <div className="bg-[var(--aethel-surface-secondary)] rounded-xl p-6 border border-[var(--aethel-border-primary)]">
         <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-[var(--aethel-info)]" />
-          Consumo dos Ãºltimos 30 dias
+          Consumo dos últimos 30 dias
         </h3>
         <UsageChart history={usage.history} />
       </div>
@@ -195,9 +195,9 @@ export function UsageDashboard() {
         <div className="bg-[var(--aethel-warning)]/10 border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] rounded-lg p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-[var(--aethel-warning-light)] flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-[var(--aethel-warning-light)] font-medium">AtenÃ§Ã£o ao consumo</p>
+            <p className="text-[var(--aethel-warning-light)] font-medium">Atenção ao consumo</p>
             <p className="text-sm text-[var(--aethel-warning-light)]/70">
-              Alguns recursos estÃ£o prÃ³ximos do limite. Considere fazer upgrade para evitar interrupÃ§Ãµes.
+              Alguns recursos estão próximos do limite. Considere fazer upgrade para evitar interrupções.
             </p>
           </div>
         </div>
@@ -249,7 +249,7 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
         </div>
         {isCritical && (
           <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full font-medium">
-            CrÃ­tico
+            Crítico
           </span>
         )}
         {isWarning && !isCritical && (
@@ -295,7 +295,7 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
 }
 
 function UsageChart({ history }: { history: UsageData['history'] }) {
-  // GrÃ¡fico simplificado - em produÃ§Ã£o usar Recharts ou Victory
+  // Gráfico simplificado - em produção usar Recharts ou Victory
   const maxTokens = Math.max(...history.map(h => h.aiTokens), 1);
   
   return (
@@ -345,7 +345,7 @@ function UsageError() {
         Erro ao carregar dados de consumo
       </h3>
       <p className="text-[var(--aethel-text-tertiary)] mb-4">
-        NÃ£o foi possÃ­vel carregar seus dados de consumo. Tente novamente.
+        Não foi possível carregar seus dados de consumo. Tente novamente.
       </p>
       <button 
         onClick={() => window.location.reload()}

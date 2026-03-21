@@ -99,6 +99,10 @@
 ## 7) TypeScript / QA
 
 - `npm run typecheck` passou localmente.  
+- `npm run lint` (next lint): **0 warnings/errors** (corrigido em 2026-03-21).
+- `npm run qa:mojibake`: **0 findings** (174 -> 0, corrigido em 2026-03-21).
+- Todos os QA gates passam: interface-gate, canonical-components, route-contracts (41), no-fake-success (313 files), wcag-critical (8), dashboard-shell, mojibake, canonical-doc-alignment, repo-connectivity.
+- Build: compiled + 218 static pages (confirmado em build_out_latest.txt).
 - Ainda faltam testes E2E, visual regression e Lighthouse CI documentados no plano, mas **não há evidência de execução ainda**.
 
 ---

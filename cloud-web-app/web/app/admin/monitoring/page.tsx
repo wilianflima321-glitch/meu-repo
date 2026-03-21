@@ -223,7 +223,7 @@ export default function AdminMonitoringPage() {
         </div>
 
         {/* Alert Thresholds */}
-        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+        <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-6">
           <h2 className="text-lg font-semibold mb-4">Limiares de alerta</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
@@ -231,7 +231,7 @@ export default function AdminMonitoringPage() {
               { label: 'Latencia P95', threshold: '> 2000ms', current: metrics ? `${metrics.p95Latency}ms` : '...' },
               { label: 'Falhas de health check', threshold: 'Qualquer critica', current: metrics ? `${metrics.healthChecks.filter(h => h.status === 'down').length} indisponivel` : '...' },
             ].map((alert) => (
-              <div key={alert.label} className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
+              <div key={alert.label} className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-3">
                 <div className="text-xs text-zinc-500">{alert.label}</div>
                 <div className="mt-1 text-sm font-medium">{alert.current}</div>
                 <div className="mt-0.5 text-xs text-zinc-600">Limiar: {alert.threshold}</div>

@@ -1,7 +1,7 @@
 ﻿/**
  * AIThinkingPanel - Painel Visual de "Cadeia de Pensamento" da IA
  * 
- * Mostra em tempo real os passos de raciocÃ­nio da IA.
+ * Mostra em tempo real os passos de raciocínio da IA.
  * Inspirado em "Chain of Thought" prompting visibility.
  * Usa WebSocket para streaming de tokens.
  * 
@@ -48,14 +48,14 @@ import {
 // ============================================================================
 
 export type ThinkingStepType = 
-  | 'thinking'      // RaciocÃ­nio geral
-  | 'analyzing'     // Analisando cÃ³digo/contexto
-  | 'searching'     // Buscando referÃªncias
-  | 'planning'      // Planejando soluÃ§Ã£o
-  | 'generating'    // Gerando cÃ³digo/asset
+  | 'thinking'      // Raciocínio geral
+  | 'analyzing'     // Analisando código/contexto
+  | 'searching'     // Buscando referências
+  | 'planning'      // Planejando solução
+  | 'generating'    // Gerando código/asset
   | 'validating'    // Validando resultado
   | 'refining'      // Refinando output
-  | 'complete'      // Etapa concluÃ­da
+  | 'complete'      // Etapa concluída
   | 'error';        // Erro na etapa
 
 export interface ThinkingStep {
@@ -344,7 +344,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
             
             {step.duration && (
               <p className="text-xs text-zinc-500 mt-0.5">
-                ConcluÃ­do em {(step.duration / 1000).toFixed(1)}s
+                Concluído em {(step.duration / 1000).toFixed(1)}s
               </p>
             )}
           </div>
@@ -416,7 +416,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
                       {step.metadata.confidence && (
                         <span className="flex items-center gap-1">
                           <Sparkles className="w-3 h-3" />
-                          {Math.round(step.metadata.confidence * 100)}% confianÃ§a
+                          {Math.round(step.metadata.confidence * 100)}% confiança
                         </span>
                       )}
                     </div>
@@ -509,7 +509,7 @@ export function AIThinkingPanel({
             </h3>
             <p className="text-xs text-zinc-500">
               {session.status === 'complete' 
-                ? `ConcluÃ­do em ${((session.endTime || Date.now()) - session.startTime) / 1000}s`
+                ? `Concluído em ${((session.endTime || Date.now()) - session.startTime) / 1000}s`
                 : `${completedSteps}/${totalSteps} etapas`
               }
             </p>

@@ -1,7 +1,7 @@
 ﻿/**
  * DIALOGUE EDITOR - Aethel Engine
  * 
- * Editor visual baseado em nÃ³s para criaÃ§Ã£o de diÃ¡logos ramificados.
+ * Editor visual baseado em nós para criação de diálogos ramificados.
  * Sistema profissional inspirado em Ink, Yarn Spinner e Articy:Draft.
  * 
  * FEATURES:

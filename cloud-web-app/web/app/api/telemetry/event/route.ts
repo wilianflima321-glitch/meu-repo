@@ -9,6 +9,9 @@ import { getUserFromRequest } from '@/lib/auth-server'
 
 export const dynamic = 'force-dynamic'
 
+const CAPABILITY = 'TELEMETRY_EVENT_INGEST'
+const MAX_EVENT_BYTES = 16 * 1024
+
 interface TelemetryEvent {
   event: string
   properties?: Record<string, unknown>
@@ -52,6 +55,10 @@ const eventBuffer: Array<{
 
 const MAX_BUFFER_SIZE = 10000
 
+function estimateEventSize(event: TelemetryEvent) {
+  return Buffer.byteLength(JSON.stringify(event), 'utf8')
+}
+
 export async function POST(req: NextRequest) {
   try {
     const auth = getUserFromRequest(req)
@@ -63,8 +70,26 @@ export async function POST(req: NextRequest) {
 
     for (const event of events) {
       if (!event.event) {
-        rejected.push('missing_event_name')
-        continue
+        return NextResponse.json(
+          {
+            error: 'TELEMETRY_EVENT_TYPE_REQUIRED',
+            capability: CAPABILITY,
+            capabilityStatus: 'IMPLEMENTED',
+          },
+          { status: 400 },
+        )
+      }
+
+      if (estimateEventSize(event) > MAX_EVENT_BYTES) {
+        return NextResponse.json(
+          {
+            error: 'TELEMETRY_EVENT_TOO_LARGE',
+            capability: CAPABILITY,
+            capabilityStatus: 'IMPLEMENTED',
+            maxBytes: MAX_EVENT_BYTES,
+          },
+          { status: 413 },
+        )
       }
 
       if (!VALID_EVENTS.has(event.event) && !event.event.startsWith('custom:')) {
@@ -83,9 +108,20 @@ export async function POST(req: NextRequest) {
         timestamp: event.timestamp || new Date().toISOString(),
       }
 
-      // Buffer events (in production, this would go to a queue like Redis/Kafka)
-      if (eventBuffer.length < MAX_BUFFER_SIZE) {
-        eventBuffer.push(entry)
+      try {
+        if (eventBuffer.length < MAX_BUFFER_SIZE) {
+          eventBuffer.push(entry)
+        }
+      } catch (error) {
+        console.error('[telemetry/event] Persist failed:', error)
+        return NextResponse.json(
+          {
+            error: 'TELEMETRY_EVENT_PERSIST_FAILED',
+            capability: CAPABILITY,
+            capabilityStatus: 'IMPLEMENTED',
+          },
+          { status: 500 },
+        )
       }
 
       recorded.push(event.event)
@@ -93,13 +129,22 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      capability: CAPABILITY,
+      capabilityStatus: 'IMPLEMENTED',
       recorded: recorded.length,
       rejected: rejected.length,
       rejectedEvents: rejected.length > 0 ? rejected : undefined,
     })
   } catch (error) {
     console.error('[telemetry/event] Error:', error)
-    return NextResponse.json({ error: 'Failed to record event' }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'TELEMETRY_EVENT_PERSIST_FAILED',
+        capability: CAPABILITY,
+        capabilityStatus: 'IMPLEMENTED',
+      },
+      { status: 500 },
+    )
   }
 }
 
