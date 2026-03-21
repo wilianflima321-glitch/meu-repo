@@ -1,7 +1,7 @@
 ﻿# AI_SYSTEM_SPEC (CANONICAL)
 
 **Data:** 2026-03-20
-**Versão:** 2.1
+**Versão:** 2.2
 **Status:** Contrato de Execução
 
 ---
@@ -49,24 +49,55 @@ O sistema de IA é parte core do Aethel Engine e opera em múltiplas camadas:
 
 A lista de modelos é definida no `MODEL_INFO` e em `getAvailableModels()` do provider. Abaixo está o estado **extraído do código** (pode mudar conforme commit):
 
-### OpenAI
+### OpenRouter (Primário)
+
+**Tier Best (15)**
+- `openai/gpt-5.4-pro`
+- `openai/gpt-5.4`
+- `openai/gpt-5-pro`
+- `openai/gpt-5`
+- `openai/gpt-5-codex`
+- `openai/gpt-5.3-codex`
+- `openai/o3`
+- `anthropic/claude-opus-4.6`
+- `anthropic/claude-sonnet-4.6`
+- `anthropic/claude-opus-4.5`
+- `anthropic/claude-sonnet-4.5`
+- `anthropic/claude-3.7-sonnet`
+- `google/gemini-2.5-pro`
+- `google/gemini-3.1-pro-preview`
+- `openai/gpt-4.1`
+
+**Tier Budget (15)**
+- `openai/gpt-5.4-mini`
+- `openai/gpt-5.4-nano`
+- `openai/gpt-5-mini`
+- `openai/gpt-5-nano`
+- `openai/gpt-4.1-mini`
+- `openai/gpt-4.1-nano`
+- `openai/o3-mini`
+- `openai/o4-mini`
+- `openai/o4-mini-high`
+- `google/gemini-2.5-flash`
+- `google/gemini-2.5-flash-lite`
+- `google/gemini-3.1-flash-lite-preview`
+- `anthropic/claude-3.5-haiku`
+- `openai/gpt-5.1-codex`
+- `openai/gpt-5.2-codex`
+
+### OpenAI (fallback direto)
 - `gpt-4o`
 - `gpt-4o-mini`
 - `gpt-4-turbo`
 - `o1-preview`
 - `o1-mini`
 
-### OpenRouter
-- `google/gemini-3.1-flash-lite-preview`
-- `openai/gpt-4o-mini`
-- `anthropic/claude-3.5-haiku`
-
-### Anthropic
+### Anthropic (fallback direto)
 - `claude-3-5-sonnet-20241022`
 - `claude-3-5-haiku-20241022`
 - `claude-3-opus-20240229`
 
-### Google Gemini
+### Google Gemini (fallback direto)
 - `gemini-1.5-pro`
 - `gemini-1.5-flash`
 - `gemini-2.0-flash-exp`
@@ -85,7 +116,7 @@ O roteamento é baseado em:
 - disponibilidade do provedor
 
 O modelo default atual está em:
-`cloud-web-app/web/components/dashboard/aethel-dashboard-constants.ts`.
+`cloud-web-app/web/components/dashboard/aethel-dashboard-constants.ts` (usa `google/gemini-2.5-flash-lite`).
 
 ---
 

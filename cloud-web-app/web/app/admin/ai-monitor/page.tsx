@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { getToken } from '@/lib/auth';
 import { AdminMetricCard } from '@/components/admin/AdminMetricCard';
+import { OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models';
 import type {
   AICall,
   AICallsResponse,
@@ -73,12 +74,27 @@ function AICallRow({
     timeout: 'text-[var(--aethel-warning)]',
   } as const;
 
-  const modelColors: Record<string, string> = {
-    'gpt-4o': 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success)]',
-    'gpt-4o-mini': 'bg-[var(--aethel-primary)]/20 text-[var(--aethel-primary-light)]',
-    'gpt-4-turbo': 'bg-[var(--aethel-primary)]/20 text-[var(--aethel-primary-light)]',
-    'claude-3-5-sonnet': 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]',
-    'claude-3-5-haiku': 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]',
+  const getModelBadgeClass = (modelId: string) => {
+    const value = modelId || '';
+    if (value.includes('gpt-5.4-pro') || value.includes('gpt-5-pro')) {
+      return 'bg-[var(--aethel-warning)]/20 text-[var(--aethel-warning)]';
+    }
+    if (value.includes('gpt-5.4') || value.includes('gpt-5')) {
+      return 'bg-[var(--aethel-primary)]/20 text-[var(--aethel-primary-light)]';
+    }
+    if (value.includes('codex')) {
+      return 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]';
+    }
+    if (value.includes('claude')) {
+      return 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]';
+    }
+    if (value.includes('gemini')) {
+      return 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)] text-[var(--aethel-primary-light)]';
+    }
+    if (value.includes('o3') || value.includes('o4')) {
+      return 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]';
+    }
+    return 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]';
   };
 
   return (
@@ -94,7 +110,7 @@ function AICallRow({
 
         <span className="text-xs text-[var(--aethel-text-tertiary)] w-20">{new Date(call.timestamp).toLocaleTimeString()}</span>
 
-        <span className={`text-xs px-2 py-0.5 rounded ${modelColors[call.model] || 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'}`}>
+        <span className={`text-xs px-2 py-0.5 rounded ${getModelBadgeClass(call.model)}`}>
           {call.model}
         </span>
 
@@ -1014,10 +1030,11 @@ export default function AgentMonitorPage() {
           className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)]"
         >
           <option value="all">Todos os modelos</option>
-          <option value="gpt-4o">GPT-4o</option>
-          <option value="gpt-4o-mini">GPT-4o Mini</option>
-          <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
-          <option value="claude-3-5-haiku">Claude 3.5 Haiku</option>
+          {OPENROUTER_MODEL_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
 
         <select

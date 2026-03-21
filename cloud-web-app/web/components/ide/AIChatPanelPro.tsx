@@ -52,6 +52,7 @@ import {
   type SpeechRecognitionInstance,
   type ToolCall,
 } from './AIChatPanelPro.types'
+import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models'
 import { CodebaseContextPanel, MentionContextPanel } from './AIChatContextPanels'
 import {
   AttachmentPreview,
@@ -158,7 +159,7 @@ const DEMO_MESSAGES: Message[] = [
     role: 'assistant',
     content: 'Hello! I\'m your AI assistant. I can help you with:\n\n- **Code explanation** - Understand complex code\n- **Bug detection** - Find issues in your code\n- **Optimization** - Improve performance\n- **Code generation** - Write new code\n\nHow can I help you today?',
     timestamp: new Date(Date.now() - 60000),
-    model: 'gpt-4o',
+      model: DEFAULT_OPENROUTER_MODEL_ID,
   },
 ]
 interface MessageBubbleProps {
@@ -333,7 +334,7 @@ export default function AIChatPanelPro({
   onRegenerateResponse,
   onRateResponse,
   onClearChat,
-  currentModel = 'gpt-4o',
+  currentModel = DEFAULT_OPENROUTER_MODEL_ID,
   models = DEFAULT_MODELS,
   onModelChange,
   isLoading = false,

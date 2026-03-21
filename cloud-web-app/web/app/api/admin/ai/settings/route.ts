@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models';
 
 // =============================================================================
 // AI SETTINGS ADMIN API
@@ -17,7 +18,7 @@ type AiSettingsPayload = {
 type UpdatePayload = Partial<AiSettingsPayload> & { environment?: 'staging' | 'production' };
 
 const DEFAULTS: AiSettingsPayload = {
-  model: 'gpt-4',
+  model: DEFAULT_OPENROUTER_MODEL_ID,
   creditCost: 0.01,
   maxTokens: 1000,
   policy: 'Bloquear conteúdo prejudicial',

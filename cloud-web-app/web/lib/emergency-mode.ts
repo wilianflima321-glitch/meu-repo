@@ -12,6 +12,7 @@
 
 import { prisma } from './db';
 import { EventEmitter } from 'events';
+import { EMERGENCY_FALLBACK_MODEL_ID, OPENROUTER_MODELS } from './ai/openrouter-models';
 
 // ============================================================================
 // TIPOS
@@ -72,14 +73,29 @@ export interface ModelConfig {
 // CONFIGURAÇÃO DE MODELOS
 // ============================================================================
 
+const OPENROUTER_MODEL_CONFIGS = Object.fromEntries(
+  OPENROUTER_MODELS.map((model) => [
+    model.id,
+    {
+      name: model.name,
+      provider: 'openrouter' as const,
+      inputCostPer1M: model.inputCost,
+      outputCostPer1M: model.outputCost,
+      isEmergencyAllowed: model.tier === 'budget',
+    },
+  ])
+);
+
 export const MODEL_CONFIGS: Record<string, ModelConfig> = {
-  // OpenAI - Caros
+  ...OPENROUTER_MODEL_CONFIGS,
+
+  // OpenAI (direct)
   'gpt-4o': {
     name: 'GPT-4o',
     provider: 'openai',
     inputCostPer1M: 5.0,
     outputCostPer1M: 15.0,
-    isEmergencyAllowed: false, // Bloqueado em emergência
+    isEmergencyAllowed: false,
   },
   'gpt-4-turbo': {
     name: 'GPT-4 Turbo',
@@ -88,8 +104,6 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 30.0,
     isEmergencyAllowed: false,
   },
-  
-  // OpenAI - Baratos (permitidos em emergência)
   'gpt-4o-mini': {
     name: 'GPT-4o Mini',
     provider: 'openai',
@@ -105,30 +119,7 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     isEmergencyAllowed: true,
   },
 
-  // OpenRouter - baratos/roteados
-  'google/gemini-3.1-flash-lite-preview': {
-    name: 'Gemini 3.1 Flash Lite (OpenRouter)',
-    provider: 'openrouter',
-    inputCostPer1M: 0.10,
-    outputCostPer1M: 0.40,
-    isEmergencyAllowed: true,
-  },
-  'openai/gpt-4o-mini': {
-    name: 'GPT-4o Mini (OpenRouter)',
-    provider: 'openrouter',
-    inputCostPer1M: 0.15,
-    outputCostPer1M: 0.60,
-    isEmergencyAllowed: true,
-  },
-  'anthropic/claude-3.5-haiku': {
-    name: 'Claude 3.5 Haiku (OpenRouter)',
-    provider: 'openrouter',
-    inputCostPer1M: 0.80,
-    outputCostPer1M: 4.0,
-    isEmergencyAllowed: true,
-  },
-  
-  // Anthropic
+  // Anthropic (direct)
   'claude-3-5-sonnet-20241022': {
     name: 'Claude 3.5 Sonnet',
     provider: 'anthropic',
@@ -143,8 +134,8 @@ export const MODEL_CONFIGS: Record<string, ModelConfig> = {
     outputCostPer1M: 4.0,
     isEmergencyAllowed: true,
   },
-  
-  // Google
+
+  // Google (direct)
   'gemini-1.5-pro': {
     name: 'Gemini 1.5 Pro',
     provider: 'google',
@@ -193,7 +184,7 @@ class EmergencyController extends EventEmitter {
         criticalThreshold: 90,
         autoDowngradeOnWarning: true,
         autoShutdownOnCritical: false,
-        fallbackModel: 'gpt-4o-mini',
+        fallbackModel: EMERGENCY_FALLBACK_MODEL_ID,
         alertEmails: (process.env.ALERT_EMAILS || '').split(',').filter(Boolean),
         webhookUrl: process.env.ALERT_WEBHOOK_URL || null,
       },

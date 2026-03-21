@@ -1,3 +1,5 @@
+import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS } from './ai/openrouter-models';
+
 export type PlanId = 'starter' | 'basic' | 'pro' | 'studio' | 'enterprise';
 
 export type PlanLimits = {
@@ -32,6 +34,18 @@ export type PlanDefinition = {
 	extras?: Record<string, unknown>;
 };
 
+const BUDGET_MODEL_IDS = OPENROUTER_BUDGET_MODELS.map((model) => model.id);
+const BEST_MODEL_IDS = OPENROUTER_BEST_MODELS.map((model) => model.id);
+const STARTER_ALLOWED_MODELS = [
+	'google/gemini-2.5-flash-lite',
+	'google/gemini-3.1-flash-lite-preview',
+	'openai/gpt-5-nano',
+	'openai/gpt-5.4-nano',
+	'anthropic/claude-3.5-haiku',
+];
+const PRO_ALLOWED_MODELS = Array.from(new Set([...BUDGET_MODEL_IDS, ...BEST_MODEL_IDS.filter((model) => model !== 'openai/gpt-5.4-pro')]));
+const STUDIO_ALLOWED_MODELS = Array.from(new Set([...BUDGET_MODEL_IDS, ...BEST_MODEL_IDS]));
+
 export const PLANS: PlanDefinition[] = [
 	{
 		id: 'starter',
@@ -47,7 +61,7 @@ export const PLANS: PlanDefinition[] = [
 			'500K tokens IA/mês',
 			'3 projetos',
 			'500 MB storage',
-			'Gemini Flash + DeepSeek',
+			'Modelos budget (GPT-5 Nano + Gemini Flash Lite)',
 			'17 sistemas AAA inclusos',
 			'LivePreview 3D',
 			'Suporte comunidade',
@@ -64,7 +78,7 @@ export const PLANS: PlanDefinition[] = [
 			historyDays: 7,
 			chatHistoryCopyMaxMessages: 2000,
 		},
-		allowedModels: ['google/gemini-3.1-flash-lite-preview', 'gemini-1.5-flash', 'deepseek-v3'],
+		allowedModels: STARTER_ALLOWED_MODELS,
 		allowedDomains: ['code'],
 		allowedAgents: ['coder', 'universal'],
 	},
@@ -82,7 +96,7 @@ export const PLANS: PlanDefinition[] = [
 			'2M tokens IA/mês',
 			'10 projetos',
 			'2 GB storage',
-			'4 modelos de IA',
+			'15 modelos budget',
 			'Todos os agents básicos',
 			'Domínio Research',
 			'Histórico 30 dias',
@@ -100,7 +114,7 @@ export const PLANS: PlanDefinition[] = [
 			historyDays: 30,
 			chatHistoryCopyMaxMessages: 5000,
 		},
-		allowedModels: ['google/gemini-3.1-flash-lite-preview', 'openai/gpt-4o-mini', 'anthropic/claude-3.5-haiku', 'gemini-1.5-flash', 'deepseek-v3', 'gpt-4o-mini', 'claude-3-haiku'],
+		allowedModels: BUDGET_MODEL_IDS,
 		allowedDomains: ['code', 'research'],
 		allowedAgents: ['coder', 'universal', 'architect', 'researcher'],
 	},
@@ -119,7 +133,7 @@ export const PLANS: PlanDefinition[] = [
 			'8M tokens IA/mês',
 			'Projetos ilimitados',
 			'10 GB storage',
-			'Modelos premium (GPT-4o, Claude)',
+			'Modelos premium (GPT-5.4, Claude 4.6)',
 			'Todos os agents',
 			'Todos os domínios',
 			'API access',
@@ -138,7 +152,7 @@ export const PLANS: PlanDefinition[] = [
 			historyDays: 90,
 			chatHistoryCopyMaxMessages: 20000,
 		},
-		allowedModels: ['all-ultra', 'all-balanced'],
+		allowedModels: PRO_ALLOWED_MODELS,
 		allowedDomains: ['code', 'research', 'trading', 'creative'],
 		allowedAgents: ['all-standard'],
 		extras: {
@@ -179,7 +193,7 @@ export const PLANS: PlanDefinition[] = [
 			historyDays: 180,
 			chatHistoryCopyMaxMessages: 50000,
 		},
-		allowedModels: ['all'],
+		allowedModels: STUDIO_ALLOWED_MODELS,
 		allowedDomains: ['all'],
 		allowedAgents: ['all', 'custom'],
 		extras: {

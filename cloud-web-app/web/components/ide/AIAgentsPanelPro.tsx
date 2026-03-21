@@ -42,6 +42,7 @@ import {
   Info,
   X,
 } from 'lucide-react'
+import { OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models'
 
 // ============= Types =============
 
@@ -788,11 +789,11 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
               <div>
                 <label className="block text-xs text-slate-400 mb-1">Model</label>
                 <select className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white">
-                  <option>GPT-4o (recommended)</option>
-                  <option>GPT-4o mini</option>
-                  <option>Claude Sonnet 4</option>
-                  <option>Gemini 2.0 Flash</option>
-                  <option>DeepSeek R1</option>
+                  {OPENROUTER_MODEL_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               

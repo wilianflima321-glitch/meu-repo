@@ -4,6 +4,7 @@ import { AethelAPIClient, APIError } from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
 import type { ChatMessage, ChatThreadSummary, CopilotWorkflowSummary } from '@/lib/api';
 import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
+import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models';
 
 const STORAGE_KEYS_BASE = {
   activeThreadId: 'chat::activeThreadId',
@@ -38,7 +39,7 @@ const ChatComponent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
-  const [selectedModel, setSelectedModel] = useState('openrouter:google/gemini-3.1-flash-lite-preview');
+  const [selectedModel, setSelectedModel] = useState(`openrouter:${DEFAULT_OPENROUTER_MODEL_ID}`);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -688,12 +689,11 @@ const ChatComponent: React.FC = () => {
             disabled={isLoading || isStreaming}
             title="Modelo"
           >
-            <option value="openrouter:google/gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (OpenRouter)</option>
-            <option value="openrouter:openai/gpt-4o-mini">GPT-4o Mini (OpenRouter)</option>
-            <option value="openrouter:anthropic/claude-3.5-haiku">Claude 3.5 Haiku (OpenRouter)</option>
-            <option value="openai:gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
-            <option value="openai:gpt-4o">GPT-4o (OpenAI)</option>
-            <option value="ollama:llama3">Llama 3 (Local)</option>
+            {OPENROUTER_MODEL_OPTIONS.map((option) => (
+              <option key={option.value} value={`openrouter:${option.value}`}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

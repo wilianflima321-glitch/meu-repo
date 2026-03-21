@@ -17,6 +17,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
+import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models'
 import {
   Code,
   Terminal,
@@ -81,7 +82,7 @@ const DEFAULT_SETTINGS: Record<string, any> = {
 
   'ai.enabled': true,
   'ai.provider': 'openai',
-  'ai.model': 'google/gemini-3.1-flash-lite-preview',
+  'ai.model': DEFAULT_OPENROUTER_MODEL_ID,
   'ai.inlineCompletion': true,
   'ai.completionDelay': 300,
   'ai.maxTokens': 2048,
@@ -428,19 +429,9 @@ const SETTING_ITEMS: SettingItem[] = [
     label: 'AI Model',
     description: 'Select the AI model to use',
     type: 'select',
-    value: 'google/gemini-3.1-flash-lite-preview',
-    defaultValue: 'google/gemini-3.1-flash-lite-preview',
-    options: [
-      { label: 'Gemini 3.1 Flash Lite (OpenRouter)', value: 'google/gemini-3.1-flash-lite-preview' },
-      { label: 'GPT-4o Mini (OpenRouter)', value: 'openai/gpt-4o-mini' },
-      { label: 'Claude 3.5 Haiku (OpenRouter)', value: 'anthropic/claude-3.5-haiku' },
-      { label: 'GPT-4o', value: 'gpt-4o' },
-      { label: 'GPT-4o Mini', value: 'gpt-4o-mini' },
-      { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
-      { label: 'Claude 3 Opus', value: 'claude-3-opus-20240229' },
-      { label: 'Gemini 2.0 Flash', value: 'gemini-2.0-flash-exp' },
-      { label: 'DeepSeek V3', value: 'deepseek-chat' },
-    ],
+    value: DEFAULT_OPENROUTER_MODEL_ID,
+    defaultValue: DEFAULT_OPENROUTER_MODEL_ID,
+    options: OPENROUTER_MODEL_OPTIONS.map((option) => ({ label: option.label, value: option.value })),
     category: 'ai',
     subcategory: 'general',
   },

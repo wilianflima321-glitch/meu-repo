@@ -41,6 +41,7 @@ import {
   AlertCircle,
   type LucideIcon,
 } from 'lucide-react';
+import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models';
 export type SettingType =
   | 'string'
   | 'number'
@@ -394,19 +395,10 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
   {
     key: 'aethel.ai.model',
     type: 'enum',
-    default: 'google/gemini-3.1-flash-lite-preview',
+    default: DEFAULT_OPENROUTER_MODEL_ID,
     description: 'The AI model to use for code completion.',
     category: ['Aethel Engine', 'AI'],
-    enum: [
-      'google/gemini-3.1-flash-lite-preview',
-      'openai/gpt-4o-mini',
-      'anthropic/claude-3.5-haiku',
-      'gpt-4o',
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'claude-3-sonnet',
-      'local-llm',
-    ],
+    enum: OPENROUTER_MODEL_OPTIONS.map((option) => option.value),
   },
   {
     key: 'aethel.ai.temperature',

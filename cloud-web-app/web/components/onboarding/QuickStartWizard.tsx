@@ -83,14 +83,14 @@ const PROVIDER_PRESETS = [
   {
     id: 'openai',
     name: 'OpenAI',
-    description: 'GPT-4o, GPT-4, o1 e modelos mais recentes',
+    description: 'GPT-5.x, GPT-4.1, o3/o4 e variantes recentes',
     envKey: 'OPENAI_API_KEY',
     recommended: false,
   },
   {
     id: 'anthropic',
     name: 'Anthropic',
-    description: 'Claude 3.5, Claude 4 e Haiku',
+    description: 'Claude 4.6/4.5, Claude 3.7 e Haiku',
     envKey: 'ANTHROPIC_API_KEY',
     recommended: false,
   },

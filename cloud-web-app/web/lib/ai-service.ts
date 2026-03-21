@@ -14,6 +14,7 @@ import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { emergencyController, MODEL_CONFIGS } from './emergency-mode';
+import { DEFAULT_OPENROUTER_MODEL_ID, EMERGENCY_FALLBACK_MODEL_ID, OPENROUTER_MODELS } from './ai/openrouter-models';
 
 // ============================================================================
 // TIPOS
@@ -80,17 +81,22 @@ function parseModelSelection(
 // PRICING POR MILHÃO DE TOKENS (Dezembro 2024)
 // ============================================================================
 
+const OPENROUTER_PRICING = Object.fromEntries(
+  OPENROUTER_MODELS.map((model) => [
+    model.id,
+    { input: model.inputCost, output: model.outputCost },
+  ])
+);
+
 const PRICING: Record<string, { input: number; output: number }> = {
+  ...OPENROUTER_PRICING,
   'gpt-4o': { input: 2.50, output: 10.00 },
   'gpt-4o-mini': { input: 0.15, output: 0.60 },
   'gpt-3.5-turbo': { input: 0.50, output: 1.50 },
-  'openai/gpt-4o-mini': { input: 0.15, output: 0.60 },
   'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00 },
   'claude-3-5-haiku-20241022': { input: 0.80, output: 4.00 },
-  'anthropic/claude-3.5-haiku': { input: 0.80, output: 4.00 },
   'gemini-1.5-pro': { input: 1.25, output: 5.00 },
   'gemini-1.5-flash': { input: 0.075, output: 0.30 },
-  'google/gemini-3.1-flash-lite-preview': { input: 0.10, output: 0.40 },
 };
 
 // ============================================================================
@@ -197,7 +203,7 @@ class AIService {
       
       if (!emergencyCheck.allowed) {
         // Tentar com modelo mais barato
-        const cheapModel = this.openrouter ? 'google/gemini-3.1-flash-lite-preview' : 'gpt-4o-mini';
+        const cheapModel = this.openrouter ? EMERGENCY_FALLBACK_MODEL_ID : 'gpt-4o-mini';
         const fallbackCheck = emergencyController.canMakeRequest(cheapModel, options.maxTokens || 2048);
         
         if (!fallbackCheck.allowed) {
@@ -285,7 +291,7 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
   private getDefaultModel(provider: LLMProvider): string {
     switch (provider) {
       case 'openai': return 'gpt-4o-mini';
-      case 'openrouter': return 'google/gemini-3.1-flash-lite-preview';
+      case 'openrouter': return DEFAULT_OPENROUTER_MODEL_ID;
       case 'anthropic': return 'claude-3-5-haiku-20241022';
       case 'google': return 'gemini-1.5-flash';
       default: return 'gpt-4o-mini';
@@ -354,7 +360,7 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       throw new Error('OpenRouter n??o configurado');
     }
 
-    const model = options.model || 'google/gemini-3.1-flash-lite-preview';
+    const model = options.model || DEFAULT_OPENROUTER_MODEL_ID;
 
     const response = await this.openrouter.chat.completions.create({
       model,

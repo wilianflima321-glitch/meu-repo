@@ -18,6 +18,7 @@ import {
   requestAdvancedChat,
 } from '@/lib/ai-chat-advanced-client'
 import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
+import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS } from '@/lib/ai/openrouter-models'
 
 type ChatMessage = {
   id: string
@@ -35,61 +36,19 @@ type ProviderGateState = {
   setupUrl?: string
 }
 
+const toModelOption = (tier: 'Best' | 'Budget') => (model: typeof OPENROUTER_BEST_MODELS[number]) => ({
+  id: model.id,
+  name: model.name,
+  provider: 'OpenRouter',
+  description: `${tier} · ${model.description}`,
+  maxTokens: model.contextWindow,
+  supportsVision: model.supportsVision,
+  supportsVoice: false,
+})
+
 const MODELS = [
-  {
-    id: 'google/gemini-3.1-flash-lite-preview',
-    name: 'Gemini 3.1 Flash Lite',
-    provider: 'OpenRouter',
-    description: 'Low-cost routed model for first-value and broad usage',
-    maxTokens: 1000000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
-  {
-    id: 'openai/gpt-4o-mini',
-    name: 'GPT-4o Mini (Routed)',
-    provider: 'OpenRouter',
-    description: 'OpenAI-compatible routed option with centralized provider control',
-    maxTokens: 128000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
-  {
-    id: 'anthropic/claude-3.5-haiku',
-    name: 'Claude 3.5 Haiku (Routed)',
-    provider: 'OpenRouter',
-    description: 'Anthropic-quality low-cost routed option',
-    maxTokens: 200000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
-  {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o Mini',
-    provider: 'OpenAI',
-    description: 'Fast, cost-efficient model for P0',
-    maxTokens: 128000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
-  {
-    id: 'claude-3-5-haiku-20241022',
-    name: 'Claude 3.5 Haiku',
-    provider: 'Anthropic',
-    description: 'Fast critic/reviewer profile',
-    maxTokens: 200000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
-  {
-    id: 'gemini-1.5-flash',
-    name: 'Gemini 1.5 Flash',
-    provider: 'Google',
-    description: 'Large context for broad analysis',
-    maxTokens: 1000000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
+  ...OPENROUTER_BEST_MODELS.map(toModelOption('Best')),
+  ...OPENROUTER_BUDGET_MODELS.map(toModelOption('Budget')),
 ]
 
 function extractContent(raw: string): string {
