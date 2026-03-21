@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { useState } from 'react'
 
 import type { ActiveTab, SessionFilter } from './aethel-dashboard-model'
 
@@ -116,6 +117,18 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
+const SECONDARY_TABS = new Set<ActiveTab>([
+  'agent-canvas',
+  'content-creation',
+  'unreal',
+  'templates',
+  'use-cases',
+  'download',
+  'wallet',
+  'connectivity',
+  'admin',
+])
+
 function buildFilterClass(isActive: boolean) {
   const base =
     'flex items-center justify-center clickable rounded-full px-3 py-1.5 text-xs leading-4 border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-secondary)] transition'
@@ -133,6 +146,12 @@ export function AethelDashboardSidebar({
   onSelectTab,
   onCloseMobile,
 }: AethelDashboardSidebarProps) {
+  const [expandedGroups, setExpandedGroups] = useState<Record<NavGroup, boolean>>({
+    core: true,
+    build: false,
+    system: false,
+  })
+
   const selectTab = (tab: ActiveTab) => {
     onSelectTab(tab)
     if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
@@ -228,13 +247,33 @@ export function AethelDashboardSidebar({
           <div className="space-y-4">
             {NAV_GROUPS.map((group) => {
               const items = NAV_ITEMS.filter((item) => item.group === group.id)
+              const primaryItems = items.filter((item) => !SECONDARY_TABS.has(item.tab))
+              const secondaryItems = items.filter((item) => SECONDARY_TABS.has(item.tab))
+              const isExpanded = expandedGroups[group.id]
+
               return (
                 <section key={group.id} className="space-y-2">
-                  <div className="px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                    {group.label}
+                  <div className="flex items-center justify-between px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                    <span>{group.label}</span>
+                    {secondaryItems.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedGroups((prev) => ({
+                            ...prev,
+                            [group.id]: !prev[group.id],
+                          }))
+                        }
+                        className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)] transition hover:text-[var(--aethel-text-secondary)]"
+                        aria-expanded={isExpanded}
+                        aria-controls={`sidebar-group-${group.id}`}
+                      >
+                        {isExpanded ? 'Menos' : 'Mais'}
+                      </button>
+                    ) : null}
                   </div>
-                  <div className="space-y-1">
-                    {items.map((item) => (
+                  <div id={`sidebar-group-${group.id}`} className="space-y-1">
+                    {primaryItems.map((item) => (
                       <button
                         key={item.tab}
                         type="button"
@@ -249,6 +288,28 @@ export function AethelDashboardSidebar({
                         {item.label}
                       </button>
                     ))}
+
+                    {secondaryItems.length > 0 && isExpanded ? (
+                      <div className="mt-1 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] p-2">
+                        {secondaryItems.map((item) => (
+                          <button
+                            key={item.tab}
+                            type="button"
+                            onClick={() => selectTab(item.tab)}
+                            className={`aethel-sidebar-item w-full ${activeTab === item.tab ? 'active' : ''}`}
+                            aria-current={activeTab === item.tab ? 'page' : undefined}
+                          >
+                            <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPrimary} />
+                              {item.iconSecondary ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconSecondary} />
+                              ) : null}
+                            </svg>
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </section>
               )
