@@ -29,6 +29,7 @@ Status: CANONICAL ENTRYPOINT
 24. `docs/master/9_BACKEND_SYSTEM_SPEC.md`
 25. `docs/master/AI_SYSTEM_SPEC.md`
 26. `docs/master/LIMITATIONS.md`
+27. `docs/master/41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
 27. `docs/master/WORKBENCH_SPEC.md`
 28. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
 29. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
@@ -90,6 +91,7 @@ Status: CANONICAL ENTRYPOINT
 | `EXECUTION_PLAN.md` | Execution reference | PARTIALLY SUPERSEDED BY `10` |
 | `8_ADMIN_SYSTEM_SPEC.md` | Admin scope | ACTIVE |
 | `9_BACKEND_SYSTEM_SPEC.md` | Backend scope | ACTIVE |
+| `41_DOCS_NAMING_NORMALIZATION_2026-03-21.md` | Legacy naming normalization plan | PARTIAL |
 
 ## Current Factual Snapshot (2026-03-08)
 - Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):

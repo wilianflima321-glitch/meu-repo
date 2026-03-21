@@ -1,7 +1,7 @@
 ﻿# AI_SYSTEM_SPEC (CANONICAL)
 
-**Data:** 2026-03-20
-**Versão:** 2.2
+**Data:** 2026-03-21
+**Versão:** 2.3
 **Status:** Contrato de Execução
 
 ---
@@ -50,6 +50,9 @@ O sistema de IA é parte core do Aethel Engine e opera em múltiplas camadas:
 A lista de modelos é definida no `MODEL_INFO` e em `getAvailableModels()` do provider. Abaixo está o estado **extraído do código** (pode mudar conforme commit):
 
 ### OpenRouter (Primário)
+
+**Tier Free (1)**
+- `openrouter/free`
 
 **Tier Best (15)**
 - `openai/gpt-5.4-pro`
@@ -102,7 +105,8 @@ A lista de modelos é definida no `MODEL_INFO` e em `getAvailableModels()` do pr
 - `gemini-1.5-flash`
 - `gemini-2.0-flash-exp`
 
-**Observação:** a seleção efetiva depende das chaves configuradas em `.env.local`.
+**Observação:** a seleção efetiva depende das chaves configuradas em `.env.local`. O UI exibe custos aproximados por 1M de tokens
+e aplica multiplicador quando o usuário ativa multi-agent.
 
 ---
 
@@ -117,6 +121,7 @@ O roteamento é baseado em:
 
 O modelo default atual está em:
 `cloud-web-app/web/components/dashboard/aethel-dashboard-constants.ts` (usa `google/gemini-2.5-flash-lite`).
+Quando o usuário seleciona modelos Free/Budget/Best, o selector exibe tier e custo estimado.
 
 ---
 
