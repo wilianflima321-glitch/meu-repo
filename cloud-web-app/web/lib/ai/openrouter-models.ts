@@ -1,4 +1,4 @@
-export type OpenRouterTier = 'best' | 'budget'
+export type OpenRouterTier = 'best' | 'budget' | 'free'
 
 export interface OpenRouterModel {
   id: string
@@ -212,6 +212,22 @@ export const OPENROUTER_BEST_MODELS: OpenRouterModel[] = [
   },
 ]
 
+export const OPENROUTER_FREE_MODELS: OpenRouterModel[] = [
+  {
+    id: 'openrouter/free',
+    name: 'OpenRouter Free Router',
+    tier: 'free',
+    description: 'Routes to a free model at random based on required capabilities',
+    contextWindow: 200000,
+    maxOutput: 0,
+    inputCost: 0.0,
+    outputCost: 0.0,
+    supportsVision: true,
+    supportsTools: true,
+    supportsJson: true,
+  },
+]
+
 export const OPENROUTER_BUDGET_MODELS: OpenRouterModel[] = [
   {
     id: 'openai/gpt-5.4-mini',
@@ -410,8 +426,25 @@ export const OPENROUTER_BUDGET_MODELS: OpenRouterModel[] = [
   },
 ]
 
+const sortByTotalCostDesc = (a: OpenRouterModel, b: OpenRouterModel) =>
+  (b.inputCost + b.outputCost) - (a.inputCost + a.outputCost)
+
+const sortByTotalCostAsc = (a: OpenRouterModel, b: OpenRouterModel) =>
+  (a.inputCost + a.outputCost) - (b.inputCost + b.outputCost)
+
+const formatCost = (value: number) => {
+  if (value >= 10) {
+    return `$${value.toFixed(0)}`
+  }
+  if (value >= 1) {
+    return `$${value.toFixed(2)}`
+  }
+  return `$${value.toFixed(4)}`
+}
+
 export const OPENROUTER_MODELS: OpenRouterModel[] = [
   ...OPENROUTER_BEST_MODELS,
+  ...OPENROUTER_FREE_MODELS,
   ...OPENROUTER_BUDGET_MODELS,
 ]
 
@@ -422,17 +455,27 @@ export const OPENROUTER_MODEL_MAP = Object.fromEntries(
 export const DEFAULT_OPENROUTER_MODEL_ID = 'google/gemini-2.5-flash-lite'
 export const EMERGENCY_FALLBACK_MODEL_ID = 'google/gemini-2.5-flash-lite'
 
-export const OPENROUTER_BEST_OPTIONS = OPENROUTER_BEST_MODELS.map((model) => ({
+export const OPENROUTER_BEST_MODELS_SORTED = [...OPENROUTER_BEST_MODELS].sort(sortByTotalCostDesc)
+export const OPENROUTER_BUDGET_MODELS_SORTED = [...OPENROUTER_BUDGET_MODELS].sort(sortByTotalCostAsc)
+export const OPENROUTER_FREE_MODELS_SORTED = [...OPENROUTER_FREE_MODELS]
+
+export const OPENROUTER_BEST_OPTIONS = OPENROUTER_BEST_MODELS_SORTED.map((model) => ({
   value: model.id,
-  label: `${model.name} (Best)`,
+  label: `${model.name} · ${formatCost(model.inputCost)}/${formatCost(model.outputCost)} per 1M (Best)`,
 }))
 
-export const OPENROUTER_BUDGET_OPTIONS = OPENROUTER_BUDGET_MODELS.map((model) => ({
+export const OPENROUTER_FREE_OPTIONS = OPENROUTER_FREE_MODELS_SORTED.map((model) => ({
   value: model.id,
-  label: `${model.name} (Budget)`,
+  label: `${model.name} · Free`,
+}))
+
+export const OPENROUTER_BUDGET_OPTIONS = OPENROUTER_BUDGET_MODELS_SORTED.map((model) => ({
+  value: model.id,
+  label: `${model.name} · ${formatCost(model.inputCost)}/${formatCost(model.outputCost)} per 1M (Budget)`,
 }))
 
 export const OPENROUTER_MODEL_OPTIONS = [
-  ...OPENROUTER_BEST_OPTIONS,
+  ...OPENROUTER_FREE_OPTIONS,
   ...OPENROUTER_BUDGET_OPTIONS,
+  ...OPENROUTER_BEST_OPTIONS,
 ]

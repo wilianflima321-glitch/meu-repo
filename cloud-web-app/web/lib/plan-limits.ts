@@ -6,7 +6,7 @@
  */
 
 import { prisma } from './db';
-import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS } from './ai/openrouter-models';
+import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS, OPENROUTER_FREE_MODELS } from './ai/openrouter-models';
 
 // ============================================================================
 // DEFINIÇÃO DE LIMITES POR PLANO
@@ -24,10 +24,12 @@ export interface PlanLimits {
   features: string[];      // Features habilitadas
 }
 
-const BUDGET_MODEL_IDS = OPENROUTER_BUDGET_MODELS.map((model) => model.id);
+const FREE_MODEL_IDS = OPENROUTER_FREE_MODELS.map((model) => model.id);
+const BUDGET_MODEL_IDS = [...FREE_MODEL_IDS, ...OPENROUTER_BUDGET_MODELS.map((model) => model.id)];
 const BEST_MODEL_IDS = OPENROUTER_BEST_MODELS.map((model) => model.id);
 
 const STARTER_TRIAL_MODELS = [
+  ...FREE_MODEL_IDS,
   'google/gemini-2.5-flash-lite',
   'google/gemini-3.1-flash-lite-preview',
   'openai/gpt-5-nano',
