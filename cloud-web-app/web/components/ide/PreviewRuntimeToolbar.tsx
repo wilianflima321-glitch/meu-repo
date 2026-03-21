@@ -152,39 +152,13 @@ export default function PreviewRuntimeToolbar({
                 ? 'Detectando...'
                 : runtimePrimaryActionLabel}
           </button>
-          <button
-            type="button"
-            onClick={onDiscoverRuntime}
-            disabled={isDiscoveringRuntime}
-            className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isDiscoveringRuntime ? 'Detectando...' : 'Auto detectar'}
-          </button>
-          <button
-            type="button"
-            onClick={onProvisionRuntime}
-            disabled={isProvisioningRuntime || !routeProvisionSupported}
-            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponivel'}
-          </button>
-          {canSyncRuntime && (
-            <button
-              type="button"
-              onClick={onSyncRuntime}
-              disabled={isSyncingRuntime}
-              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isSyncingRuntime ? 'Sincronizando...' : 'Sync runtime'}
-            </button>
-          )}
           {previewRuntimeUrl && (
             <button
               type="button"
-              onClick={onUseFallback}
-              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]"
+              onClick={onOpenRuntime}
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
             >
-              Usar fallback
+              Abrir preview
             </button>
           )}
         </div>
@@ -206,6 +180,32 @@ export default function PreviewRuntimeToolbar({
           >
             Aplicar
           </button>
+          <button
+            type="button"
+            onClick={onDiscoverRuntime}
+            disabled={isDiscoveringRuntime}
+            className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isDiscoveringRuntime ? 'Detectando...' : 'Auto detectar'}
+          </button>
+          <button
+            type="button"
+            onClick={onProvisionRuntime}
+            disabled={isProvisioningRuntime || !routeProvisionSupported}
+            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponivel'}
+          </button>
+          {canSyncRuntime && (
+            <button
+              type="button"
+              onClick={onSyncRuntime}
+              disabled={isSyncingRuntime}
+              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isSyncingRuntime ? 'Sincronizando...' : 'Sync runtime'}
+            </button>
+          )}
           {previewRuntimeUrl && (
             <button
               type="button"
@@ -222,6 +222,15 @@ export default function PreviewRuntimeToolbar({
               className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
             >
               Abrir runtime
+            </button>
+          )}
+          {previewRuntimeUrl && (
+            <button
+              type="button"
+              onClick={onUseFallback}
+              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]"
+            >
+              Usar fallback
             </button>
           )}
         </div>
