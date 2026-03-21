@@ -214,23 +214,28 @@ export function AethelDashboardSidebar({
         </div>
 
         <div className="px-4 pb-4">
-          <div className="flex gap-1">
-            <button type="button" onClick={() => onSelectSessionFilter('all')} className={buildFilterClass(sessionFilter === 'all')}>
-              Todas
-            </button>
-            <button type="button" onClick={() => onSelectSessionFilter('favorites')} className={buildFilterClass(sessionFilter === 'favorites')}>
-              <svg className="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-              Favoritas
-            </button>
-            <button type="button" onClick={() => onSelectSessionFilter('scheduled')} className={buildFilterClass(sessionFilter === 'scheduled')}>
-              <svg className="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Agendadas
-            </button>
-          </div>
+          <details className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-2">
+            <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+              Filtros de sessao
+            </summary>
+            <div className="mt-2 flex gap-1">
+              <button type="button" onClick={() => onSelectSessionFilter('all')} className={buildFilterClass(sessionFilter === 'all')}>
+                Todas
+              </button>
+              <button type="button" onClick={() => onSelectSessionFilter('favorites')} className={buildFilterClass(sessionFilter === 'favorites')}>
+                <svg className="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                Favoritas
+              </button>
+              <button type="button" onClick={() => onSelectSessionFilter('scheduled')} className={buildFilterClass(sessionFilter === 'scheduled')}>
+                <svg className="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Agendadas
+              </button>
+            </div>
+          </details>
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 pb-4">

@@ -9,7 +9,6 @@ import {
   Activity,
   ArrowRight,
   CheckCircle2,
-  Eye,
   GitFork,
   Layers,
   Search,
@@ -240,17 +239,15 @@ export default function LandingPageV3() {
                 </div>
               </form>
 
-              <div className="mt-4 flex flex-wrap gap-2.5">
-                {QUICK_MISSIONS.map((mission) => (
-                  <button
-                    key={mission}
-                    type="button"
-                    onClick={() => setInputValue(mission)}
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs leading-5 text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
-                  >
-                    {mission}
-                  </button>
-                ))}
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                <span>Sugestao:</span>
+                <button
+                  type="button"
+                  onClick={() => setInputValue(placeholder)}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+                >
+                  {placeholder}
+                </button>
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -313,12 +310,13 @@ export default function LandingPageV3() {
                 Estamos preparando um walkthrough completo com onboarding, editor e preview. Enquanto isso, use o studio
                 para validar o fluxo real e nos ajudar a fechar o L4.
               </p>
-              <div className="mt-6 aspect-video w-full rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(2,6,23,0.92))] shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
-                <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-sm text-slate-400">
-                  <Eye className="h-8 w-8 text-cyan-300" />
-                  <span>Video demo em producao</span>
-                  <span className="text-xs text-slate-500">Use a experiencia real do studio enquanto finalizamos a demo.</span>
-                </div>
+              <div className="mt-6">
+                <ScreenshotCard
+                  src="/screenshots/editor.png"
+                  alt="Fluxo real do studio no editor"
+                  title="Research -> Code -> Preview"
+                  subtitle="fluxo real do studio, sem demo fake"
+                />
               </div>
             </GlassCard>
 
