@@ -38,39 +38,37 @@ export default function StudioActionRail({
   const fullAccessExpiryLabel = fullAccessExpiresAt
     ? new Date(fullAccessExpiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : null
+  const operationalTone =
+    backendOnline && aiProviderConfigured
+      ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+      : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+  const operationalLabel = backendOnline
+    ? aiProviderConfigured
+      ? 'Operacao OK'
+      : 'IA pendente'
+    : 'Backend offline'
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
       {typeof backendOnline === 'boolean' && typeof aiProviderConfigured === 'boolean' && (
         <div className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] text-slate-300 xl:flex">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-              backendOnline
-                ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
-                : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
-            }`}
-          >
-            <span className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'}`} />
-            Backend {backendOnline ? 'online' : 'offline'}
+          <span className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${operationalTone}`}>
+            <span
+              className={`h-2 w-2 rounded-full ${
+                backendOnline && aiProviderConfigured ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-warning)]'
+              }`}
+            />
+            {operationalLabel}
           </span>
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-              aiProviderConfigured
-                ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
-            }`}
-          >
-            IA {aiProviderConfigured ? 'configurada' : 'pendente'}
-          </span>
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-              fullAccessActive
-                ? 'border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'border-white/10 bg-white/[0.04] text-slate-300'
-            }`}
-          >
-            {fullAccessActive ? `Full Access${fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}` : 'Guardrails ativos'}
-          </span>
+          {fullAccessActive ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-0.5 text-[10px] font-medium text-[var(--aethel-primary-light)]">
+              Full Access{fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-slate-300">
+              Guardrails ativos
+            </span>
+          )}
         </div>
       )}
 
