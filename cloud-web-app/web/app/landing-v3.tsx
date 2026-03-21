@@ -449,7 +449,7 @@ export default function LandingPageV3() {
           </div>
         </section>
 
-        <section className="border-y border-white/[0.06] bg-slate-950/35">
+        <section className="bg-slate-950/35">
           <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.8fr)] lg:items-center">
               <div>
