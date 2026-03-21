@@ -285,7 +285,7 @@ export default function DocsPage() {
 
           {!filteredSections.length ? (
             <div className="mt-8 rounded-[24px] border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] p-8 text-center">
-              <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Nenhum resultado para "{query}".</p>
+              <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Nenhum resultado para &quot;{query}&quot;.</p>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Tente termos como API, IDE, Games, Films ou support.</p>
             </div>
           ) : null}

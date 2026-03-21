@@ -1,10 +1,10 @@
 ﻿/**
  * CreditWallet - UI Completa de Carteira de créditos
  * 
- * Painel que mostra saldo, histÃ³rico e opÃ§Ãµes de recarga.
+ * Painel que mostra saldo, histórico e opções de recarga.
  * Integra com /api/wallet/* endpoints.
  * 
- * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - SeÃ§Ã£o 4
+ * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - Seção 4
  */
 
 'use client';
@@ -71,7 +71,7 @@ interface CreditWalletProps {
 }
 
 // ============================================================================
-// PACOTES DE CRÃ‰DITOS
+// PACOTES DE CRÁ‰DITOS
 // ============================================================================
 
 const CREDIT_PACKAGES: CreditPackage[] = [
@@ -201,7 +201,7 @@ function TransactionItem({ transaction }: TransactionItemProps) {
           {isPositive ? '+' : '-'}{Math.abs(transaction.amount)}
         </p>
         <p className={`text-xs ${statusColors[transaction.status]}`}>
-          {transaction.status === 'completed' ? 'ConcluÃ­do' : transaction.status === 'pending' ? 'Pendente' : 'Falhou'}
+          {transaction.status === 'completed' ? 'Concluído' : transaction.status === 'pending' ? 'Pendente' : 'Falhou'}
         </p>
       </div>
     </div>
@@ -393,7 +393,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       <div className="flex border-b border-zinc-800">
         {[
           { id: 'overview', label: 'Resumo', icon: <Coins className="w-4 h-4" /> },
-          { id: 'history', label: 'HistÃ³rico', icon: <Clock className="w-4 h-4" /> },
+          { id: 'history', label: 'Histórico', icon: <Clock className="w-4 h-4" /> },
           { id: 'purchase', label: 'Comprar', icon: <CreditCard className="w-4 h-4" /> },
         ].map((tab) => (
           <button
@@ -422,7 +422,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <div className="grid grid-cols-3 gap-4">
               <StatCard
                 icon={<Coins className="w-5 h-5" />}
-                label="DisponÃ­vel"
+                label="Disponível"
                 value={wallet.available.toLocaleString()}
                 subValue={wallet.reserved > 0 ? `${wallet.reserved} reservados` : undefined}
                 color={isLowBalance ? 'warning' : 'default'}
@@ -490,7 +490,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             {transactions.length === 0 ? (
               <div className="text-center py-8 text-zinc-500">
                 <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>Nenhuma transaÃ§Ã£o ainda</p>
+                <p>Nenhuma transação ainda</p>
               </div>
             ) : (
               <div className="space-y-1">
@@ -526,9 +526,9 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
                 <div className="text-sm text-zinc-400">
                   <p className="font-medium text-zinc-300 mb-1">Sobre os créditos</p>
                   <ul className="space-y-1 text-xs">
-                    <li>â€¢ créditos nÃ£o expiram enquanto a conta estiver ativa</li>
-                    <li>â€¢ Chat simples: 1 crÃ©dito / Squad Task: ~20 créditos</li>
-                    <li>â€¢ bônus sÃ£o adicionados automaticamente na compra</li>
+                    <li>â€¢ créditos não expiram enquanto a conta estiver ativa</li>
+                    <li>â€¢ Chat simples: 1 crédito / Squad Task: ~20 créditos</li>
+                    <li>â€¢ bônus são adicionados automaticamente na compra</li>
                   </ul>
                 </div>
               </div>

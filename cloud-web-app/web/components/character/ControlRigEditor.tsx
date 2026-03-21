@@ -1,7 +1,7 @@
 ﻿/**
  * CONTROL RIG EDITOR - Aethel Engine
  * 
- * Editor profissional de Control Rig para animaÃ§Ã£o procedural e IK/FK.
+ * Editor profissional de Control Rig para animação procedural e IK/FK.
  * Sistema inspirado em Unreal Control Rig e Maya HumanIK.
  * 
  * FEATURES:
