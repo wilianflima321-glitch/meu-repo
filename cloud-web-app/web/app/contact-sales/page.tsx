@@ -66,6 +66,10 @@ export default function ContactSalesPage() {
 
   const mailtoUrl = useMemo(() => buildMailtoUrl(formData), [formData])
   const requiredReady = formData.name.trim() && formData.email.trim() && formData.company.trim()
+  const fieldBase =
+    'h-12 w-full rounded-2xl border border-white/[0.08] bg-slate-950/60 px-4 text-white placeholder:text-slate-500 focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/20'
+  const textAreaBase =
+    'w-full resize-none rounded-2xl border border-white/[0.08] bg-slate-950/60 px-4 py-3 text-white placeholder:text-slate-500 focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/20'
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.10),transparent_30%),#020617] text-[var(--aethel-text-primary)]">
@@ -128,7 +132,7 @@ export default function ContactSalesPage() {
           </section>
 
           <section className="grid gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(300px,0.52fr)]">
-            <div className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.90))] p-6 sm:p-8">
+            <div className="rounded-[30px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(2,6,23,0.92))] p-6 sm:p-8">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Abrir email para vendas</p>
@@ -149,7 +153,7 @@ export default function ContactSalesPage() {
                       type="text"
                       value={formData.name}
                       onChange={(event) => setFormData({ ...formData, name: event.target.value })}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
+                      className={fieldBase}
                       placeholder="Seu nome"
                     />
                   </div>
@@ -159,7 +163,7 @@ export default function ContactSalesPage() {
                       type="email"
                       value={formData.email}
                       onChange={(event) => setFormData({ ...formData, email: event.target.value })}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
+                      className={fieldBase}
                       placeholder="voce@empresa.com"
                     />
                   </div>
@@ -171,7 +175,7 @@ export default function ContactSalesPage() {
                     type="text"
                     value={formData.company}
                     onChange={(event) => setFormData({ ...formData, company: event.target.value })}
-                    className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
+                    className={fieldBase}
                     placeholder="Nome da empresa"
                   />
                 </div>
@@ -183,7 +187,7 @@ export default function ContactSalesPage() {
                       type="text"
                       value={formData.role}
                       onChange={(event) => setFormData({ ...formData, role: event.target.value })}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
+                      className={fieldBase}
                       placeholder="Seu cargo"
                     />
                   </div>
@@ -192,7 +196,7 @@ export default function ContactSalesPage() {
                     <select
                       value={formData.teamSize}
                       onChange={(event) => setFormData({ ...formData, teamSize: event.target.value })}
-                      className="h-12 w-full rounded-2xl border border-white/10 bg-slate-950/50 px-4 text-white focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
+                      className={fieldBase}
                     >
                       <option value="" className="bg-slate-950">Selecione</option>
                       <option value="1-10" className="bg-slate-950">1-10</option>
@@ -210,7 +214,7 @@ export default function ContactSalesPage() {
                     rows={5}
                     value={formData.message}
                     onChange={(event) => setFormData({ ...formData, message: event.target.value })}
-                    className="w-full resize-none rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3 text-white placeholder:text-slate-500 focus:border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]"
+                    className={textAreaBase}
                     placeholder="Ex: necessidades de compliance, preview sandbox, billing enterprise, SSO, audit trail."
                   />
                 </div>

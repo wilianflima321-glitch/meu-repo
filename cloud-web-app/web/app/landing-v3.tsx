@@ -103,9 +103,21 @@ const PRICING_TEASER = [
 ]
 
 const SOCIAL_PROOF = [
-  { label: 'Beta privado em andamento', detail: 'Roadmap aberto com evidencias' },
-  { label: 'Sistema anti-fake-success', detail: 'Readiness visivel antes do deploy' },
-  { label: 'Studio unico', detail: 'Research, codigo e preview no mesmo shell' },
+  {
+    icon: Activity,
+    label: 'Beta privado em andamento',
+    detail: 'Roadmap aberto com evidencias operacionais.',
+  },
+  {
+    icon: Shield,
+    label: 'Sistema anti-fake-success',
+    detail: 'Readiness explicito antes do deploy.',
+  },
+  {
+    icon: Layers,
+    label: 'Studio unico',
+    detail: 'Research, codigo e preview no mesmo shell.',
+  },
 ]
 
 function ScreenshotCard({
@@ -289,7 +301,7 @@ export default function LandingPageV3() {
 
         <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <GlassCard variant="elevated" className="p-6 sm:p-8">
+            <GlassCard variant="elevated" border={false} className="p-6 sm:p-8">
               <div className="flex items-center justify-between">
                 <div>
                   <GlowBadge color="info">Demo guiada</GlowBadge>
@@ -310,42 +322,54 @@ export default function LandingPageV3() {
               </div>
             </GlassCard>
 
-            <div className="space-y-4">
-              <h3 className="text-sm uppercase tracking-[0.32em] text-[var(--aethel-text-tertiary)]">Prova social</h3>
-              <div className="space-y-3">
-                {SOCIAL_PROOF.map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4"
-                  >
-                    <CheckCircle2 className="mt-1 h-4 w-4 text-emerald-300" />
-                    <div>
-                      <p className="text-sm font-semibold text-white">{item.label}</p>
-                      <p className="text-xs text-slate-400">{item.detail}</p>
-                    </div>
-                  </div>
-                ))}
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.32em] text-[var(--aethel-text-tertiary)]">Prova social</p>
+                  <p className="mt-2 text-sm text-slate-400">
+                    Sem promessas infladas: toda prova social reflete o estado atual do produto ou do beta fechado.
+                  </p>
+                </div>
+                <GlowBadge color="emerald">Beta fechado</GlowBadge>
               </div>
-              <p className="text-xs text-slate-500">
-                Sem promessas infladas: toda prova social aqui reflete o estado atual do produto ou do beta fechado.
-              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {SOCIAL_PROOF.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <div
+                      key={item.label}
+                      className="flex flex-col gap-3 rounded-2xl border border-white/8 bg-slate-950/40 px-4 py-4"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-cyan-200">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{item.label}</p>
+                        <p className="text-xs text-slate-400">{item.detail}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="border-y border-white/[0.06] bg-slate-950/45">
-          <div className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
-            {[
-              { value: '11', label: 'quality gates' },
-              { value: '53+', label: 'docs canonicos' },
-              { value: '0', label: 'fake success aceito' },
-              { value: '174kB', label: 'dashboard bundle' },
-            ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-5 text-center">
-                <p className="text-3xl font-semibold text-white">{item.value}</p>
-                <p className="mt-1 text-sm text-slate-400">{item.label}</p>
-              </div>
-            ))}
+        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.9),rgba(2,6,23,0.92))] p-6 sm:p-8">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { value: '11', label: 'quality gates' },
+                { value: '53+', label: 'docs canonicos' },
+                { value: '0', label: 'fake success aceito' },
+                { value: '174kB', label: 'dashboard bundle' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl bg-white/[0.03] px-5 py-5 text-center">
+                  <p className="text-3xl font-semibold text-white">{item.value}</p>
+                  <p className="mt-1 text-sm text-slate-400">{item.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
