@@ -15,7 +15,7 @@ const FOOTER_SECTIONS = [
     title: 'Empresa',
     links: [
       { label: 'Contato', href: '/contact-sales' },
-      { label: 'Status', href: '/status' },
+      { label: 'Health', href: '/health' },
       { label: 'Termos', href: '/terms' },
       { label: 'Privacidade', href: '/privacy' },
     ],
@@ -43,14 +43,14 @@ export default function PublicFooter() {
               <Image src="/branding/aethel-icon-source.png" alt="" width={28} height={28} sizes="28px" className="rounded-lg" />
               <span className="text-lg font-bold text-white">Aethel Studio</span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-6 text-zinc-500">
-              Studio operacional multi-agent com contratos de capability explicitos e politica anti-fake-success.
+            <p className="mt-4 max-w-xs text-sm leading-6 text-zinc-400">
+              Studio multi-agent para times que querem sair da ideia e chegar em software pronto para validar com mais rapidez e controle.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              {['Apps', 'Research', 'Deploy', 'Governanca'].map((item) => (
+              {['Apps', 'Research', 'Preview', 'Governanca'].map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500"
+                  className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-300"
                 >
                   {item}
                 </span>
@@ -61,7 +61,7 @@ export default function PublicFooter() {
                 href="https://github.com/aethel-engine"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.05] text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.05] text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
                 aria-label="GitHub"
               >
                 <svg className="h-4.5 w-4.5" fill="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@ export default function PublicFooter() {
                 href="https://twitter.com/aethelengine"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.05] text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.05] text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
                 aria-label="Twitter"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@ export default function PublicFooter() {
                 href="https://discord.gg/aethel"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.05] text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.05] text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
                 aria-label="Discord"
               >
                 <svg className="h-4.5 w-4.5" fill="currentColor" viewBox="0 0 24 24">
@@ -96,11 +96,11 @@ export default function PublicFooter() {
           {/* Link columns */}
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">{section.title}</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{section.title}</h3>
               <ul className="mt-4 space-y-3">
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-zinc-400 transition-colors hover:text-white">
+                    <Link href={link.href} className="text-sm text-zinc-300 transition-colors hover:text-white">
                       {link.label}
                     </Link>
                   </li>
@@ -111,10 +111,10 @@ export default function PublicFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.06] pt-8 sm:flex-row">
-          <p className="text-xs text-zinc-600">&copy; {COPYRIGHT_YEAR} Aethel Engine. Todos os direitos reservados.</p>
+          <p className="text-xs text-zinc-400">&copy; {COPYRIGHT_YEAR} Aethel Engine. Todos os direitos reservados.</p>
           <div className="flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-xs text-zinc-500">Studio-grade workflow, atualizado continuamente</span>
+            <span className="text-xs text-zinc-400">Studio-grade workflow, atualizado continuamente</span>
           </div>
         </div>
       </div>
