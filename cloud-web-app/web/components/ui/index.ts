@@ -35,7 +35,6 @@ export {
   ListSkeleton,
   StatsSkeleton,
   ProgressStepper,
-  Toast,
   StatusBadge,
   Kbd,
 } from './UXPrimitives'
@@ -44,11 +43,40 @@ export {
 export { EmptyProjects, EmptyChat } from './EmptyState'
 export { SkeletonCard } from './Skeleton'
 
-// Toast System
-export { ToastProvider, useToast } from './Toast'
-
 // Motion
 export * from './motion'
+
+// New Design System (2026)
+export {
+  tokens,
+  gradients,
+  presets,
+  GlassPanel,
+  GlowBadge,
+  AethelButton,
+  AethelInput,
+  StatusIndicator,
+  Divider,
+  Tooltip,
+} from './primitives'
+
+// Toast System (New - unified)
+export {
+  ToastProvider,
+  useToast,
+  useToastActions,
+} from './toast-system'
+export type { ToastType, Toast } from './toast-system'
+
+// Mobile Gestures
+export {
+  MobileGestureProvider,
+  SwipeablePanel,
+  PullToRefresh,
+  BottomSheet,
+  MobileNavBar,
+  MobileFAB,
+} from './mobile-gestures'
 
 // Premium
 export * from './premium'

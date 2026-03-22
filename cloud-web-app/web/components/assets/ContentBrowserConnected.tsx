@@ -19,7 +19,7 @@ import Image from 'next/image';
 import ContentBrowser, { Asset, AssetFolder, AssetType } from './ContentBrowser';
 import useProjectAssets, { uploadLargeAsset, Asset as HookAsset, AssetFolder as HookFolder } from '@/hooks/useProjectAssets';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useToast } from '@/components/ui';
+import { useToastActions } from '@/components/ui';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
@@ -343,7 +343,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
   onAssetSelect,
   onAssetDragStart,
 }) => {
-  const toast = useToast();
+  const { error: toastError } = useToastActions();
   const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -451,9 +451,9 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
     try {
       await deleteAsset(asset.id);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete asset');
+      toastError(err instanceof Error ? err.message : 'Failed to delete asset');
     }
-  }, [deleteAsset, toast]);
+  }, [deleteAsset, toastError]);
 
   // ============================================================================
   // RENAME HANDLER
@@ -463,9 +463,9 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
     try {
       await renameAsset(asset.id, newName);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to rename asset');
+      toastError(err instanceof Error ? err.message : 'Failed to rename asset');
     }
-  }, [renameAsset, toast]);
+  }, [renameAsset, toastError]);
 
   // ============================================================================
   // EXPORT HANDLER
@@ -493,9 +493,9 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
       anchor.click();
       anchor.remove();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to export asset');
+      toastError(err instanceof Error ? err.message : 'Failed to export asset');
     }
-  }, [toast]);
+  }, [toastError]);
 
   // ============================================================================
   // CREATE FOLDER HANDLER
@@ -505,9 +505,9 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
     try {
       await createFolder(parentPath, name);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to create folder');
+      toastError(err instanceof Error ? err.message : 'Failed to create folder');
     }
-  }, [createFolder, toast]);
+  }, [createFolder, toastError]);
 
   // ============================================================================
   // DUPLICATE HANDLER
@@ -526,9 +526,9 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
 
       refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to duplicate asset');
+      toastError(err instanceof Error ? err.message : 'Failed to duplicate asset');
     }
-  }, [refresh, toast]);
+  }, [refresh, toastError]);
 
   // ============================================================================
   // LOADING STATE

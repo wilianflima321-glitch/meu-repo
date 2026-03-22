@@ -6,6 +6,7 @@ import ClientLayout from '../components/ClientLayout'
 import { ServiceWorkerProvider } from '../components/ServiceWorkerProvider'
 import WebVitalsReporter from '../components/analytics/WebVitalsReporter'
 import CookieConsent from '../components/ui/CookieConsent'
+import { ToastProvider } from '../components/ui/toast-system'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -99,16 +100,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to main content
         </a>
         <ServiceWorkerProvider>
-          <WebVitalsReporter />
-          <div
-            id="main-content"
-            className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
-          >
-            <ClientLayout>
-              {children}
-            </ClientLayout>
-          </div>
-          <CookieConsent />
+          <ToastProvider>
+            <WebVitalsReporter />
+            <div
+              id="main-content"
+              className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
+            >
+              <ClientLayout>
+                {children}
+              </ClientLayout>
+            </div>
+            <CookieConsent />
+          </ToastProvider>
         </ServiceWorkerProvider>
       </body>
     </html>
