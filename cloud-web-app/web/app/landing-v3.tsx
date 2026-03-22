@@ -67,10 +67,10 @@ const WORKFLOW = [
   },
 ]
 
-const HONESTY_NOTES = [
-  'Apps + Research sao o foco principal do produto hoje.',
-  'Games e Films continuam em estado experimental.',
-  'Billing e preview real dependem de runtime e credenciais ativas.',
+const TRUST_NOTES = [
+  'Workspace unico para discovery, implementacao e validacao.',
+  'Papeis multi-agent com trilha operacional explicita.',
+  'Governanca, rollback e readiness visiveis no mesmo fluxo.',
 ]
 
 const PRICING_TEASER = [
@@ -102,21 +102,9 @@ const PRICING_TEASER = [
 ]
 
 const SOCIAL_PROOF = [
-  {
-    icon: Activity,
-    label: 'Beta privado em andamento',
-    detail: 'Roadmap aberto com evidencias operacionais.',
-  },
-  {
-    icon: Shield,
-    label: 'Sistema anti-fake-success',
-    detail: 'Readiness explicito antes do deploy.',
-  },
-  {
-    icon: Layers,
-    label: 'Studio unico',
-    detail: 'Research, codigo e preview no mesmo shell.',
-  },
+  { label: 'Workflows orientados a entrega', detail: 'Da missao inicial ao ambiente pronto para validar' },
+  { label: 'Governanca operacional embutida', detail: 'Status, rollback e readiness no mesmo studio' },
+  { label: 'Experiencia unificada', detail: 'Research, codigo e preview conectados em um unico fluxo' },
 ]
 
 function ScreenshotCard({
@@ -212,9 +200,9 @@ export default function LandingPageV3() {
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300">Apps como dominio principal</span>
-                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-200">Readiness visivel</span>
-                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-primary-light)]">Rollback deterministico</span>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300">Entregue mais rapido com contexto unico</span>
+                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-200">Preview e validacao no mesmo fluxo</span>
+                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-primary-light)]">Governanca pronta para equipes</span>
               </div>
 
               <form onSubmit={handleSubmit} className="mt-8 max-w-2xl">
@@ -275,9 +263,9 @@ export default function LandingPageV3() {
               />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[26px] border border-white/10 bg-white/[0.04] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Estado atual</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Por que equipes escolhem o studio</p>
                   <ul className="mt-4 space-y-3">
-                    {HONESTY_NOTES.map((item) => (
+                    {TRUST_NOTES.map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
                         <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
                         <span>{item}</span>
@@ -288,7 +276,7 @@ export default function LandingPageV3() {
                 <div className="rounded-[26px] border border-cyan-400/20 bg-cyan-400/10 p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100">Fluxo unico</p>
                   <p className="mt-4 text-sm leading-6 text-cyan-50/90">
-                    Dashboard, editor, preview e status precisam parecer um unico produto. A landing agora aponta para isso com prova visual do studio.
+                    Dashboard, editor, preview e status funcionam como um unico studio para reduzir troca de contexto e acelerar entrega.
                   </p>
                 </div>
               </div>
@@ -301,73 +289,61 @@ export default function LandingPageV3() {
             <GlassCard variant="elevated" border={false} className="p-6 sm:p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <GlowBadge color="info">Demo guiada</GlowBadge>
-                  <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja o fluxo completo em 90s</h2>
+                  <GlowBadge color="info">Tour visual</GlowBadge>
+                  <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja como o studio organiza o trabalho</h2>
                 </div>
-                <span className="text-xs text-[var(--aethel-text-tertiary)]">Em producao</span>
+                <span className="text-xs text-[var(--aethel-text-secondary)]">Screenshot real</span>
               </div>
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
-                Estamos preparando um walkthrough completo com onboarding, editor e preview. Enquanto isso, use o studio
-                para validar o fluxo real e nos ajudar a fechar o L4.
+                Uma visao do studio em operacao: missao, contexto, execucao e validacao reunidos no mesmo ambiente.
               </p>
-              <div className="mt-6">
-                <ScreenshotCard
+              <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
+                <Image
                   src="/screenshots/editor.png"
-                  alt="Fluxo real do studio no editor"
-                  title="Research -> Code -> Preview"
-                  subtitle="fluxo real do studio, sem demo fake"
+                  alt="Aethel Studio com editor, contexto e preview integrados"
+                  width={1600}
+                  height={960}
+                  className="h-auto w-full object-cover"
                 />
               </div>
             </GlassCard>
 
-            <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.32em] text-[var(--aethel-text-tertiary)]">Prova social</p>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Sem promessas infladas: toda prova social reflete o estado atual do produto ou do beta fechado.
-                  </p>
-                </div>
-                <GlowBadge color="emerald">Beta fechado</GlowBadge>
-              </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                {SOCIAL_PROOF.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <div
-                      key={item.label}
-                      className="flex flex-col gap-3 rounded-2xl border border-white/8 bg-slate-950/40 px-4 py-4"
-                    >
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-cyan-200">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">{item.label}</p>
-                        <p className="text-xs text-slate-400">{item.detail}</p>
-                      </div>
+            <div className="space-y-4">
+              <h3 className="text-sm uppercase tracking-[0.32em] text-[var(--aethel-text-secondary)]">Por que o produto passa credibilidade</h3>
+              <div className="space-y-3">
+                {SOCIAL_PROOF.map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4"
+                  >
+                    <CheckCircle2 className="mt-1 h-4 w-4 text-emerald-300" />
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.label}</p>
+                      <p className="text-xs text-slate-400">{item.detail}</p>
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
               </div>
+              <p className="text-xs text-slate-400">
+                A proposta de valor aqui prioriza clareza de produto, fluxo real e operacao visivel para equipes modernas.
+              </p>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.9),rgba(2,6,23,0.92))] p-6 sm:p-8">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { value: '11', label: 'quality gates' },
-                { value: '53+', label: 'docs canonicos' },
-                { value: '0', label: 'fake success aceito' },
-                { value: '174kB', label: 'dashboard bundle' },
-              ].map((item) => (
-                <div key={item.label} className="rounded-2xl bg-white/[0.03] px-5 py-5 text-center">
-                  <p className="text-3xl font-semibold text-white">{item.value}</p>
-                  <p className="mt-1 text-sm text-slate-400">{item.label}</p>
-                </div>
-              ))}
-            </div>
+<section className="border-y border-white/[0.06] bg-slate-950/45">
+          <div className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
+            {[
+              { value: '1', label: 'studio unificado' },
+              { value: '3', label: 'papeis multi-agent' },
+              { value: '1 fluxo', label: 'research ate validacao' },
+              { value: '24h', label: 'tempo alvo de resposta comercial' },
+            ].map((item) => (
+              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-5 text-center">
+                <p className="text-3xl font-semibold text-white">{item.value}</p>
+                <p className="mt-1 text-sm text-slate-400">{item.label}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -377,7 +353,7 @@ export default function LandingPageV3() {
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-[var(--aethel-text-tertiary)]">Planos</p>
                 <h2 className="mt-3 text-3xl font-semibold text-white">Pricing transparente para cada fase</h2>
-                <p className="mt-2 text-sm text-slate-400">O billing real entra assim que Stripe estiver validado.</p>
+                <p className="mt-2 text-sm text-slate-400">Escolha um plano para explorar, escalar o time ou abrir conversa enterprise.</p>
               </div>
               <Link
                 href="/pricing"
