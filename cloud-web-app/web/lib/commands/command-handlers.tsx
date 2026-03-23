@@ -882,7 +882,16 @@ export function useRealCommandHandlers() {
   const openAIChat = useCallback(() => {
     logAction('ai:chat', undefined, 'CommandHandler');
     log('info', 'Abrindo AI Chat...', undefined, 'ai');
-    router.push('/chat');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('aethel.layout.openAI'));
+      const path = window.location?.pathname ?? '';
+      const isIdeSurface = path.startsWith('/ide');
+      if (!isIdeSurface) {
+        router.push('/chat');
+      }
+    } else {
+      router.push('/chat');
+    }
     commandEventBus.emit('ai:chat');
   }, [logAction, log, router]);
 

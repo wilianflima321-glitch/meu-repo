@@ -12,7 +12,7 @@ import CanonicalPreviewSurface from "@/components/preview/CanonicalPreviewSurfac
 import PreviewRuntimeToolbar from "@/components/ide/PreviewRuntimeToolbar";
 import TabBar, { TabProvider } from "@/components/editor/TabBar";
 import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
-import CommandPaletteProvider from "@/components/ide/CommandPalette";
+import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
 import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
 import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
 import { analytics } from "@/lib/analytics";
@@ -159,6 +159,9 @@ function IDEContent() {
   const runtimeSyncTimerRef = useRef<number | null>(null)
   const lastRuntimeSyncAtRef = useRef<number>(0)
 
+  const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([])
+  const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false)
+
   const {
     previewRuntimeUrl,
     previewRuntimeInput,
@@ -209,6 +212,41 @@ function IDEContent() {
     }, 1500)
   }, [previewSandboxId, isSyncingRuntime, syncRuntime])
 
+  const openCommandPalette = useCallback((mode: 'commands' | 'files' = 'commands') => {
+    window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode } }))
+  }, [])
+
+  const handleOpenSettings = useCallback(() => {
+    const params = new URLSearchParams(window.location.search)
+    const currentProjectId = params.get('projectId')
+    const next = currentProjectId ? `/settings?projectId=${encodeURIComponent(currentProjectId)}` : '/settings'
+    window.location.assign(next)
+  }, [])
+
+  const handleEditorUndo = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'undo', null)
+  }, [])
+
+  const handleEditorRedo = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'redo', null)
+  }, [])
+
+  const handleEditorFind = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'actions.find', null)
+  }, [])
+
+  const handleEditorReplace = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'editor.action.startFindReplaceAction', null)
+  }, [])
+
+  const handleAIInline = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'aethel.inlineEdit', null)
+  }, [])
+
+  const handleAIPanel = useCallback(() => {
+    emitLayoutEvent('aethel.layout.openAI')
+  }, [emitLayoutEvent])
+
   useEffect(() => {
     return () => {
       if (runtimeSyncTimerRef.current) {
@@ -249,6 +287,121 @@ function IDEContent() {
     if (typeof window === 'undefined') return
     setHasToken(Boolean(window.localStorage.getItem('token')))
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!projectId) return
+    let cancelled = false
+
+    const flattenTree = (nodes: Array<{ name: string; path: string; type: 'file' | 'directory'; children?: any[] }>): FileItem[] => {
+      const out: FileItem[] = []
+      const walk = (list: any[]) => {
+        for (const node of list) {
+          if (!node || typeof node.path !== 'string' || typeof node.name !== 'string') continue
+          const nodeType = node.type === 'directory' ? 'folder' : 'file'
+          out.push({
+            path: node.path,
+            name: node.name,
+            type: nodeType,
+          })
+          if (Array.isArray(node.children) && node.children.length) {
+            walk(node.children)
+          }
+        }
+      }
+      walk(nodes)
+      return out
+    }
+
+    const load = async () => {
+      try {
+        const res = await fetch('/api/files/tree', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-project-id': projectId,
+          },
+          body: JSON.stringify({ path: '/', maxDepth: 6, projectId }),
+        })
+        if (!res.ok) {
+          if (!cancelled) {
+            setWorkspaceFiles([])
+            setWorkspaceFilesLoaded(true)
+          }
+          return
+        }
+        const data = (await res.json().catch(() => null)) as any
+        const rawTree = Array.isArray(data?.children)
+          ? data.children
+          : Array.isArray(data?.tree)
+            ? data.tree
+            : []
+        const flattened = flattenTree(rawTree)
+        if (!cancelled) {
+          setWorkspaceFiles(flattened)
+          setWorkspaceFilesLoaded(true)
+        }
+      } catch {
+        if (!cancelled) {
+          setWorkspaceFiles([])
+          setWorkspaceFilesLoaded(true)
+        }
+      }
+    }
+
+    void load()
+
+    return () => {
+      cancelled = true
+    }
+  }, [projectId])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onCommand = (event: Event) => {
+      const detail = (event as CustomEvent<{ command?: string }>).detail
+      const command = detail?.command
+      if (!command) return
+
+      switch (command) {
+        case 'workbench.action.quickOpen':
+          openCommandPalette('files')
+          return
+        case 'workbench.action.showCommands':
+          openCommandPalette('commands')
+          return
+        case 'workbench.action.toggleSidebarVisibility':
+          emitLayoutEvent('aethel.layout.toggleSidebar')
+          return
+        case 'workbench.action.terminal.toggleTerminal':
+          emitLayoutEvent('aethel.layout.toggleTerminal')
+          return
+        case 'undo':
+          handleEditorUndo()
+          return
+        case 'redo':
+          handleEditorRedo()
+          return
+        case 'actions.find':
+          handleEditorFind()
+          return
+        case 'editor.action.startFindReplaceAction':
+          handleEditorReplace()
+          return
+        case 'aethel.ai.inlineChat':
+          handleAIInline()
+          return
+        case 'aethel.ai.openChat':
+          handleAIPanel()
+          return
+        default:
+          return
+      }
+    }
+
+    window.addEventListener('aethel:command', onCommand as EventListener)
+    return () => window.removeEventListener('aethel:command', onCommand as EventListener)
+  }, [emitLayoutEvent, handleAIInline, handleAIPanel, handleEditorFind, handleEditorRedo, handleEditorReplace, handleEditorUndo, openCommandPalette])
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -371,6 +524,11 @@ function IDEContent() {
     },
     [projectId, previewEnabled, previewSandboxId, scheduleRuntimeSync, syncRuntimeFile]
   );
+
+  const handleSaveActiveFile = useCallback(() => {
+    if (!activeFile) return
+    void writeFile(activeFile.path, activeFile.content)
+  }, [activeFile, writeFile])
 
   useEffect(() => {
     if (!fileParam) return;
@@ -692,9 +850,17 @@ function IDEContent() {
   return (
     <CommandPaletteProvider
       onOpenFile={handlePaletteOpenFile}
+      onOpenFileDialog={() => openCommandPalette('files')}
+      onSaveFile={handleSaveActiveFile}
+      onUndo={handleEditorUndo}
+      onRedo={handleEditorRedo}
+      onFind={handleEditorFind}
+      onReplace={handleEditorReplace}
+      onOpenSettings={handleOpenSettings}
       onToggleSidebar={() => emitLayoutEvent("aethel.layout.toggleSidebar")}
       onToggleTerminal={() => emitLayoutEvent("aethel.layout.toggleTerminal")}
-      onAIChat={() => emitLayoutEvent("aethel.layout.openAI")}
+      onAIChat={handleAIPanel}
+      files={workspaceFilesLoaded ? workspaceFiles : []}
     >
       <TabProvider>
         {useModernShell ? (
@@ -702,10 +868,22 @@ function IDEContent() {
             projectName={`Project ${projectId}`}
             activeFileName={activeFile?.path}
             panelState={modernPanelState}
+            onToggleSidebar={() => {
+              setModernPanelState((prev) => ({
+                ...prev,
+                sidebar: {
+                  ...prev.sidebar,
+                  open: !prev.sidebar.open,
+                },
+              }))
+            }}
             onTogglePanel={(panel) => {
               if (panel === 'preview') {
                 setPreviewEnabled((prev) => !prev)
                 return
+              }
+              if (panel === 'chat') {
+                handleAIPanel()
               }
               setModernPanelState((prev) => ({
                 ...prev,
@@ -859,6 +1037,7 @@ function IDEContent() {
             showStudioNav
             studioTitle="Workbench"
             studioSubtitle="Editor, preview e runtime no mesmo fluxo."
+            onCommandPalette={() => openCommandPalette('commands')}
             studioRightSlot={
               <Link
                 href="/dashboard"
@@ -1075,3 +1254,4 @@ export default function FullscreenIDE() {
     </Suspense>
   );
 }
+

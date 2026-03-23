@@ -105,6 +105,10 @@ function createDefaultCommands(handlers: {
   newFile?: () => void
   newFolder?: () => void
   switchProject?: () => void
+  undo?: () => void
+  redo?: () => void
+  find?: () => void
+  replace?: () => void
   toggleSidebar?: () => void
   toggleTerminal?: () => void
   aiChat?: () => void
@@ -137,6 +141,7 @@ function createDefaultCommands(handlers: {
       category: 'file',
       shortcut: 'Ctrl+Shift+S',
       action: handlers.saveAll || (() => {}),
+      when: () => typeof handlers.saveAll === 'function',
       keywords: ['save', 'all', 'salvar', 'tudo'],
     },
     {
@@ -157,6 +162,46 @@ function createDefaultCommands(handlers: {
       icon: 'new-folder',
       action: handlers.newFolder || (() => {}),
       keywords: ['new', 'folder', 'nova', 'pasta'],
+    },
+    {
+      id: 'edit.undo',
+      label: 'Desfazer',
+      description: 'Desfazer a última ação',
+      category: 'edit',
+      shortcut: 'Ctrl+Z',
+      action: handlers.undo || (() => {}),
+      when: () => typeof handlers.undo === 'function',
+      keywords: ['undo', 'desfazer'],
+    },
+    {
+      id: 'edit.redo',
+      label: 'Refazer',
+      description: 'Refazer a ação desfeita',
+      category: 'edit',
+      shortcut: 'Ctrl+Y',
+      action: handlers.redo || (() => {}),
+      when: () => typeof handlers.redo === 'function',
+      keywords: ['redo', 'refazer'],
+    },
+    {
+      id: 'edit.find',
+      label: 'Buscar',
+      description: 'Buscar no arquivo',
+      category: 'edit',
+      shortcut: 'Ctrl+F',
+      action: handlers.find || (() => {}),
+      when: () => typeof handlers.find === 'function',
+      keywords: ['find', 'search', 'buscar'],
+    },
+    {
+      id: 'edit.replace',
+      label: 'Substituir',
+      description: 'Buscar e substituir',
+      category: 'edit',
+      shortcut: 'Ctrl+H',
+      action: handlers.replace || (() => {}),
+      when: () => typeof handlers.replace === 'function',
+      keywords: ['replace', 'substituir'],
     },
     {
       id: 'view.toggleSidebar',
@@ -261,6 +306,10 @@ export function CommandPaletteProvider({
   onOpenFileDialog,
   onSaveFile,
   onSaveAll,
+  onUndo,
+  onRedo,
+  onFind,
+  onReplace,
   onNewFile,
   onNewFolder,
   onSwitchProject,
@@ -275,6 +324,10 @@ export function CommandPaletteProvider({
   onOpenFileDialog?: () => void
   onSaveFile?: () => void
   onSaveAll?: () => void
+  onUndo?: () => void
+  onRedo?: () => void
+  onFind?: () => void
+  onReplace?: () => void
   onNewFile?: () => void
   onNewFolder?: () => void
   onSwitchProject?: () => void
@@ -291,6 +344,10 @@ export function CommandPaletteProvider({
       openFile: onOpenFileDialog,
       saveFile: onSaveFile,
       saveAll: onSaveAll,
+      undo: onUndo,
+      redo: onRedo,
+      find: onFind,
+      replace: onReplace,
       newFile: onNewFile,
       newFolder: onNewFolder,
       switchProject: onSwitchProject,
@@ -307,6 +364,10 @@ export function CommandPaletteProvider({
         openFile: onOpenFileDialog,
         saveFile: onSaveFile,
         saveAll: onSaveAll,
+        undo: onUndo,
+        redo: onRedo,
+        find: onFind,
+        replace: onReplace,
         newFile: onNewFile,
         newFolder: onNewFolder,
         switchProject: onSwitchProject,
@@ -320,6 +381,10 @@ export function CommandPaletteProvider({
     onOpenFileDialog,
     onSaveFile,
     onSaveAll,
+    onUndo,
+    onRedo,
+    onFind,
+    onReplace,
     onNewFile,
     onNewFolder,
     onSwitchProject,
@@ -674,3 +739,4 @@ export function useRegisterCommand(command: CommandItem, deps: unknown[] = []) {
 }
 
 export default CommandPaletteProvider
+
