@@ -363,6 +363,7 @@ export default function AIChatPanelPro({
   codebaseContextPreview,
 }: AIChatPanelProps) {
   const [showModelSelector, setShowModelSelector] = useState(false)
+  const [showAdvancedControls, setShowAdvancedControls] = useState(false)
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [showHistorySidebar, setShowHistorySidebar] = useState(showHistory)
   const [agentCount, setAgentCount] = useState(1)
@@ -767,59 +768,69 @@ export default function AIChatPanelPro({
                     </>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 uppercase tracking-wide">
-                    {modelTierLabel}
-                  </span>
-                  {inputCostLabel && outputCostLabel && (
-                    <span>{inputCostLabel}/{outputCostLabel} per 1M</span>
-                  )}
-                  {agentCount > 1 && (
-                    <span className="text-slate-500">x{agentCount} agents</span>
-                  )}
+                {showAdvancedControls ? (
+                  <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                    <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 uppercase tracking-wide">
+                      {modelTierLabel}
+                    </span>
+                    {inputCostLabel && outputCostLabel && (
+                      <span>{inputCostLabel}/{outputCostLabel} per 1M</span>
+                    )}
+                    {agentCount > 1 && (
+                      <span className="text-slate-500">x{agentCount} agents</span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-[11px] text-slate-500 mt-0.5">Modo basico</div>
+                )}
+              </div>
+              {showAdvancedControls && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[11px] text-slate-500">Agents</span>
+                  {[1, 2, 3].map((count) => (
+                    <button
+                      key={count}
+                      onClick={() => setAgentCount(count)}
+                      className={`px-2 py-0.5 text-[11px] rounded border ${
+                        agentCount === count
+                          ? 'border-blue-400 text-blue-300 bg-blue-500/10'
+                          : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                      }`}
+                    >
+                      {count}
+                    </button>
+                  ))}
                 </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-[11px] text-slate-500">Agents</span>
-                {[1, 2, 3].map((count) => (
-                  <button
-                    key={count}
-                    onClick={() => setAgentCount(count)}
-                    className={`px-2 py-0.5 text-[11px] rounded border ${
-                      agentCount === count
-                        ? 'border-blue-400 text-blue-300 bg-blue-500/10'
-                        : 'border-slate-700 text-slate-400 hover:border-slate-500'
-                    }`}
-                  >
-                    {count}
-                  </button>
-                ))}
-              </div>
+              )}
             </div>
           </div>
           {/* Actions */}
           <div className="flex items-center gap-1">
-            {/* Live Mode Toggle */}
-            {selectedModel.supportsVoice && onToggleLiveMode && (
-              <button
-                onClick={onToggleLiveMode}
-                className={`p-1.5 rounded ${isLiveMode ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
-                title={isLiveMode ? 'Exit Live Mode' : 'Enter Live Mode (Gemini Live style)'}
-              >
-                <Radio className="w-4 h-4" />
-              </button>
+            {showAdvancedControls && (
+              <>
+                {/* Live Mode Toggle */}
+                {selectedModel.supportsVoice && onToggleLiveMode && (
+                  <button
+                    onClick={onToggleLiveMode}
+                    className={`p-1.5 rounded ${isLiveMode ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+                    title={isLiveMode ? 'Exit Live Mode' : 'Enter Live Mode (Gemini Live style)'}
+                  >
+                    <Radio className="w-4 h-4" />
+                  </button>
+                )}
+                {/* TTS Toggle */}
+                <button
+                  onClick={isSpeaking ? stopSpeaking : () => {
+                    const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
+                    if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
+                  }}
+                  className={`p-1.5 rounded ${isSpeaking ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+                  title={isSpeaking ? 'Stop speaking' : 'Read last response'}
+                >
+                  {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+              </>
             )}
-            {/* TTS Toggle */}
-            <button
-              onClick={isSpeaking ? stopSpeaking : () => {
-                const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
-                if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
-              }}
-              className={`p-1.5 rounded ${isSpeaking ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
-              title={isSpeaking ? 'Stop speaking' : 'Read last response'}
-            >
-              {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
             <button
               onClick={onClearChat}
               className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
@@ -828,8 +839,10 @@ export default function AIChatPanelPro({
               <Trash2 className="w-4 h-4" />
             </button>
             <button
-              className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-              title="Ajustes"
+              onClick={() => setShowAdvancedControls((prev) => !prev)}
+              className={`p-1.5 rounded ${showAdvancedControls ? 'bg-slate-800 text-slate-200' : 'hover:bg-slate-800 text-slate-400'}`}
+              title={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
+              aria-pressed={showAdvancedControls}
             >
               <Settings className="w-4 h-4" />
             </button>
@@ -852,18 +865,28 @@ export default function AIChatPanelPro({
                   This model supports Live Mode for real-time voice chat
                 </p>
               )}
-              <div className="flex flex-wrap gap-2 justify-center">
-                {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
-                  <button
-                    key={label}
-                    onClick={() => handleQuickPrompt(prompt)}
-                    className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-300"
-                  >
-                    <Icon className="w-4 h-4" />
-                    {label}
-                  </button>
-                ))}
-              </div>
+              {showAdvancedControls ? (
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
+                    <button
+                      key={label}
+                      onClick={() => handleQuickPrompt(prompt)}
+                      className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-300"
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedControls(true)}
+                  className="text-xs text-slate-400 hover:text-slate-200"
+                >
+                  Mostrar atalhos avancados
+                </button>
+              )}
             </div>
         )}
         {messages.map(message => (
@@ -905,20 +928,22 @@ export default function AIChatPanelPro({
         <div ref={messagesEndRef} />
       </div>
       {/* Quick prompts bar */}
-      <div className="px-3 py-2 border-t border-slate-800">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
-            <button
-              key={label}
-              onClick={() => handleQuickPrompt(prompt)}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-full text-xs text-slate-300 whitespace-nowrap"
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
+      {showAdvancedControls && (
+        <div className="px-3 py-2 border-t border-slate-800">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
+              <button
+                key={label}
+                onClick={() => handleQuickPrompt(prompt)}
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-full text-xs text-slate-300 whitespace-nowrap"
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
         {/* Input area */}
       <form onSubmit={handleSend} className="p-3 border-t border-slate-800">
         {mentionState.parsed.mentions.length > 0 && (
@@ -1025,18 +1050,20 @@ export default function AIChatPanelPro({
             </button>
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {QUICK_MENTIONS.map((mention) => (
-            <button
-              key={mention.label}
-              type="button"
-              onClick={() => insertQuickMention(mention.value)}
-              className="rounded-full border border-slate-700 bg-slate-800/70 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-sky-500/50 hover:text-white"
-            >
-              {mention.label}
-            </button>
-          ))}
-        </div>
+        {showAdvancedControls && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {QUICK_MENTIONS.map((mention) => (
+              <button
+                key={mention.label}
+                type="button"
+                onClick={() => insertQuickMention(mention.value)}
+                className="rounded-full border border-slate-700 bg-slate-800/70 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-sky-500/50 hover:text-white"
+              >
+                {mention.label}
+              </button>
+            ))}
+          </div>
+        )}
         <CodebaseContextPanel
           input={input}
           preview={visibleCodebaseContextPreview}
