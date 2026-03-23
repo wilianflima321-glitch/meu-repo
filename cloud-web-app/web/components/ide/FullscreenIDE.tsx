@@ -239,6 +239,10 @@ function IDEContent() {
     editorRef.current?.trigger('aethel', 'editor.action.startFindReplaceAction', null)
   }, [])
 
+  const emitLayoutEvent = useCallback((eventName: string) => {
+    window.dispatchEvent(new Event(eventName))
+  }, [])
+
   const handleAIInline = useCallback(() => {
     editorRef.current?.trigger('aethel', 'aethel.inlineEdit', null)
   }, [])
@@ -696,10 +700,6 @@ function IDEContent() {
   const handlePaletteOpenFile = useCallback((path: string) => {
     void readFile(path);
   }, [readFile]);
-
-  const emitLayoutEvent = useCallback((eventName: string) => {
-    window.dispatchEvent(new Event(eventName));
-  }, []);
 
   const handleRunRecommendedPreviewAction = useCallback(() => {
     if (runtimePrimaryAction === 'provision') {
