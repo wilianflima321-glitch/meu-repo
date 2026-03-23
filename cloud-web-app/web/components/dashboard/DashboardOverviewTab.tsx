@@ -93,14 +93,8 @@ export function DashboardOverviewTab({
               Uma leitura unica de atividade, carteira, conectividade e preview para reduzir troca de contexto e deixar o studio mais claro para quem entra e para quem opera todos os dias.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
-                Sessao segura
-              </span>
               <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] px-3 py-1 text-xs text-[var(--aethel-success-light)]">
-                Runtime pronto
-              </span>
-              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1 text-xs text-[var(--aethel-info-light)]">
-                Fluxo guiado
+                Studio pronto para operar
               </span>
             </div>
           </div>
@@ -119,7 +113,7 @@ export function DashboardOverviewTab({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr]">
         <div className="overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.42))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">
           <div className="aethel-flex aethel-items-center aethel-justify-between">
             <div>
@@ -164,37 +158,45 @@ export function DashboardOverviewTab({
                 <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
                   {walletTransactions.length} transacoes registradas
                 </p>
-                <ul className="mt-4 space-y-3">
-                  {walletTransactions.slice(-3).reverse().map((entry) => (
-                    <li key={entry.id} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
-                      <div className="aethel-flex aethel-justify-between aethel-items-center">
-                        <span className="text-sm font-medium">
-                          {entry.reference || entry.entry_type.toUpperCase()}
-                        </span>
-                        <span
-                          className={`text-sm font-semibold ${
-                            entry.entry_type === 'credit' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'
-                          }`}
-                        >
-                          {entry.entry_type === 'credit' ? '+' : '-'}
-                          {entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
-                        </span>
-                      </div>
-                      <div className="aethel-flex aethel-justify-between aethel-items-center mt-1">
-                        <span className="text-xs text-[var(--aethel-text-secondary)]">
-                          Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'}{' '}
-                          {formatCurrencyLabel(entry.currency)}
-                        </span>
-                        <span className="text-xs text-[var(--aethel-text-tertiary)]">
-                          {new Date(entry.created_at).toLocaleString()}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                  {walletTransactions.length === 0 && (
-                    <li className="aethel-state aethel-state-empty text-sm">Nenhuma transacao registrada.</li>
-                  )}
-                </ul>
+                <details className="mt-4" open={walletTransactions.length === 0}>
+                  <summary className="cursor-pointer text-xs font-medium text-[var(--aethel-text-secondary)]">
+                    Ver ultimas transacoes
+                  </summary>
+                  <ul className="mt-3 space-y-3">
+                    {walletTransactions.slice(-3).reverse().map((entry) => (
+                      <li
+                        key={entry.id}
+                        className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3"
+                      >
+                        <div className="aethel-flex aethel-justify-between aethel-items-center">
+                          <span className="text-sm font-medium">
+                            {entry.reference || entry.entry_type.toUpperCase()}
+                          </span>
+                          <span
+                            className={`text-sm font-semibold ${
+                              entry.entry_type === 'credit' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'
+                            }`}
+                          >
+                            {entry.entry_type === 'credit' ? '+' : '-'}
+                            {entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
+                          </span>
+                        </div>
+                        <div className="aethel-flex aethel-justify-between aethel-items-center mt-1">
+                          <span className="text-xs text-[var(--aethel-text-secondary)]">
+                            Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'}{' '}
+                            {formatCurrencyLabel(entry.currency)}
+                          </span>
+                          <span className="text-xs text-[var(--aethel-text-tertiary)]">
+                            {new Date(entry.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                    {walletTransactions.length === 0 && (
+                      <li className="aethel-state aethel-state-empty text-sm">Nenhuma transacao registrada.</li>
+                    )}
+                  </ul>
+                </details>
               </>
             )}
           </div>
@@ -229,45 +231,61 @@ export function DashboardOverviewTab({
               <div className="aethel-state aethel-state-empty text-sm">Nenhum servico configurado.</div>
             )}
             {!connectivityLoading && !connectivityError && connectivityServices.length > 0 && (
-              <div className="space-y-3">
-                {connectivityServices.map((service) => (
-                  <div key={service.name} className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
-                    <div className="aethel-flex aethel-justify-between aethel-items-center">
-                      <span className="text-sm font-medium capitalize">
-                        {service.name.replace(/_/g, ' ')}
-                      </span>
-                      <span
-                        className={`text-xs rounded-full px-2.5 py-1 ${
-                          service.status === 'healthy'
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
-                            : service.status === 'degraded'
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-                            : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-                        }`}
+              <>
+                <p className="text-xs text-[var(--aethel-text-secondary)]">
+                  {connectivityServices.length} servicos monitorados.
+                </p>
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-xs font-medium text-[var(--aethel-text-secondary)]">
+                    Ver detalhes da conectividade
+                  </summary>
+                  <div className="mt-3 space-y-3">
+                    {connectivityServices.map((service) => (
+                      <div
+                        key={service.name}
+                        className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3"
                       >
-                        {formatConnectivityStatus(service.status).toUpperCase()}
-                      </span>
-                    </div>
-                    <ul className="mt-2 space-y-1">
-                      {service.endpoints.slice(0, 3).map((endpoint) => (
-                        <li key={`${service.name}-${endpoint.url}`} className="aethel-flex aethel-justify-between text-xs">
-                          <span className={endpoint.healthy ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'}>
-                            {endpoint.url}
+                        <div className="aethel-flex aethel-justify-between aethel-items-center">
+                          <span className="text-sm font-medium capitalize">
+                            {service.name.replace(/_/g, ' ')}
                           </span>
-                          <span className="text-[var(--aethel-text-secondary)]">
-                            {endpoint.latency_ms !== null ? `${endpoint.latency_ms.toFixed(0)}ms` : '-'}
+                          <span
+                            className={`text-xs rounded-full px-2.5 py-1 ${
+                              service.status === 'healthy'
+                                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
+                                : service.status === 'degraded'
+                                ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+                                : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
+                            }`}
+                          >
+                            {formatConnectivityStatus(service.status).toUpperCase()}
                           </span>
-                        </li>
-                      ))}
-                      {service.endpoints.length > 3 && (
-                        <li className="text-xs text-[var(--aethel-text-tertiary)]">
-                          +{service.endpoints.length - 3} endpoints adicionais
-                        </li>
-                      )}
-                    </ul>
+                        </div>
+                        <ul className="mt-2 space-y-1">
+                          {service.endpoints.slice(0, 3).map((endpoint) => (
+                            <li
+                              key={`${service.name}-${endpoint.url}`}
+                              className="aethel-flex aethel-justify-between text-xs"
+                            >
+                              <span className={endpoint.healthy ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'}>
+                                {endpoint.url}
+                              </span>
+                              <span className="text-[var(--aethel-text-secondary)]">
+                                {endpoint.latency_ms !== null ? `${endpoint.latency_ms.toFixed(0)}ms` : '-'}
+                              </span>
+                            </li>
+                          ))}
+                          {service.endpoints.length > 3 && (
+                            <li className="text-xs text-[var(--aethel-text-tertiary)]">
+                              +{service.endpoints.length - 3} endpoints adicionais
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </details>
+              </>
             )}
           </div>
         </div>
@@ -294,3 +312,4 @@ export function DashboardOverviewTab({
     </div>
   )
 }
+
