@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 61_AETHEL_VISUAL_BRIDGE_SPEC_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # 🌉 Aethel Visual Bridge: Especificação Técnica (WebGPU AAA)
 
 **Data:** 27 de Fevereiro de 2026  
@@ -44,6 +41,3 @@ O Visual Bridge não apenas exibe; ele é a interface de "pensamento" da IA.
 ---
 
 **Assinado:** Manus AI (atuando como Arquiteto Visual do Aethel Engine)
-
-
-

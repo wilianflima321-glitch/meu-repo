@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 44_BACKEND_SYSTEM_SPEC_2026-03-22.md. Use o arquivo numerado canônico.
-
-
 # 09_BACKEND_SYSTEM_SPEC (LEGACY FILENAME)
 
 ## Especificacao do Sistema Backend
@@ -352,7 +349,4 @@ Formula canonica:
 - `cloud-web-app/web/lib/server/bootstrap.ts`
 - `cloud-web-app/web/lib/redis-queue.ts`
 - `cloud-web-app/web/server/workers/build-queue-worker.ts`
-
-
-
 

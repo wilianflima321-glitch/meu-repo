@@ -1,21 +1,24 @@
-ï»¿# AI_SYSTEM_SPEC (CANONICAL)
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 45_AI_SYSTEM_SPEC_2026-03-22.md. Use o arquivo numerado canônico.
+
+
+# AI_SYSTEM_SPEC (CANONICAL)
 
 **Data:** 2026-03-21
-**VersÃ£o:** 2.3
-**Status:** Contrato de ExecuÃ§Ã£o
+**Versão:** 2.3
+**Status:** Contrato de Execução
 
 ---
 
-## 1. VisÃ£o Geral
-O sistema de IA Ã© parte core do Aethel Engine e opera em mÃºltiplas camadas:
+## 1. Visão Geral
+O sistema de IA é parte core do Aethel Engine e opera em múltiplas camadas:
 
-- **L1**: Inline (autocomplete, sugestÃµes)
+- **L1**: Inline (autocomplete, sugestões)
 - **L2**: Chat (assistente conversacional)
 - **L3**: Actions (comandos estruturados de refactor/fix/test)
-- **L4**: Agent (execuÃ§Ã£o supervisionada com apply/rollback)
-- **L5**: Multi-agent (orquestraÃ§Ã£o paralela com contratos explÃ­citos)
+- **L4**: Agent (execução supervisionada com apply/rollback)
+- **L5**: Multi-agent (orquestração paralela com contratos explícitos)
 
-**Regra canÃ´nica**: Sem fake-success. Quando o runtime nÃ£o estiver configurado, o sistema deve retornar estado `PARTIAL` ou `BLOCKED`.
+**Regra canônica**: Sem fake-success. Quando o runtime não estiver configurado, o sistema deve retornar estado `PARTIAL` ou `BLOCKED`.
 
 ---
 
@@ -23,33 +26,33 @@ O sistema de IA Ã© parte core do Aethel Engine e opera em mÃºltiplas camadas:
 
 ```
 [Workbench UI]
-   â”œâ”€ Chat / Inline / Agent / Actions
-   â””â”€ Contexto (arquivos, seleÃ§Ã£o, histÃ³rico, erros)
-        â†“
+   +- Chat / Inline / Agent / Actions
+   +- Contexto (arquivos, seleção, histórico, erros)
+        ?
 [Next.js API Routes]
-   â”œâ”€ /api/ai/chat
-   â”œâ”€ /api/ai/stream
-   â”œâ”€ /api/ai/agent
-   â”œâ”€ /api/ai/action
-   â”œâ”€ /api/ai/context/*
-   â””â”€ /api/ai/core-loop/feedback
-        â†“
+   +- /api/ai/chat
+   +- /api/ai/stream
+   +- /api/ai/agent
+   +- /api/ai/action
+   +- /api/ai/context/*
+   +- /api/ai/core-loop/feedback
+        ?
 [Advanced AI Provider]
-   â”œâ”€ OpenAI
-   â”œâ”€ OpenRouter
-   â”œâ”€ Anthropic
-   â””â”€ Google Gemini
+   +- OpenAI
+   +- OpenRouter
+   +- Anthropic
+   +- Google Gemini
 ```
 
 **Fonte de verdade do runtime**: `cloud-web-app/web/lib/ai/advanced-ai-provider.ts`.
 
 ---
 
-## 3. Provedores e Modelos Suportados (conforme cÃ³digo)
+## 3. Provedores e Modelos Suportados (conforme código)
 
-A lista de modelos Ã© definida no `MODEL_INFO` e em `getAvailableModels()` do provider. Abaixo estÃ¡ o estado **extraÃ­do do cÃ³digo** (pode mudar conforme commit):
+A lista de modelos é definida no `MODEL_INFO` e em `getAvailableModels()` do provider. Abaixo está o estado **extraído do código** (pode mudar conforme commit):
 
-### OpenRouter (PrimÃ¡rio)
+### OpenRouter (Primário)
 
 **Tier Free (1)**
 - `openrouter/free`
@@ -105,49 +108,52 @@ A lista de modelos Ã© definida no `MODEL_INFO` e em `getAvailableModels()` do pr
 - `gemini-1.5-flash`
 - `gemini-2.0-flash-exp`
 
-**ObservaÃ§Ã£o:** a seleÃ§Ã£o efetiva depende das chaves configuradas em `.env.local`. O UI exibe custos aproximados por 1M de tokens
-e aplica multiplicador quando o usuÃ¡rio ativa multi-agent.
+**Observação:** a seleção efetiva depende das chaves configuradas em `.env.local`. O UI exibe custos aproximados por 1M de tokens
+e aplica multiplicador quando o usuário ativa multi-agent.
 
 ---
 
 ## 4. Roteamento de Modelos
 
-O roteamento Ã© baseado em:
+O roteamento é baseado em:
 - tipo de tarefa (inline/chat/agent)
 - custo estimado
-- latÃªncia esperada
-- plano do usuÃ¡rio
+- latência esperada
+- plano do usuário
 - disponibilidade do provedor
 
-O modelo default atual estÃ¡ em:
+O modelo default atual está em:
 `cloud-web-app/web/components/dashboard/aethel-dashboard-constants.ts` (usa `google/gemini-2.5-flash-lite`).
-Quando o usuÃ¡rio seleciona modelos Free/Budget/Best, o selector exibe tier e custo estimado.
+Quando o usuário seleciona modelos Free/Budget/Best, o selector exibe tier e custo estimado.
 
 ---
 
 ## 5. Contexto e RAG
 
-O sistema suporta contexto local (arquivos, seleÃ§Ã£o, histÃ³rico) e prepara a base para RAG semÃ¢ntico. O suporte a vector DB Ã© planejado e nÃ£o deve ser marcado como `COMPLETE` sem runtime real.
+O sistema suporta contexto local (arquivos, seleção, histórico) e prepara a base para RAG semântico. O suporte a vector DB é planejado e não deve ser marcado como `COMPLETE` sem runtime real.
 
 ---
 
-## 6. Observabilidade e EvidÃªncia
+## 6. Observabilidade e Evidência
 
 - `POST /api/ai/core-loop/feedback` registra resultados (LEARN)
-- mÃ©tricas publicadas em `metrics/latest_run-production.json`
-- dossiÃª L4 em `metrics/l4-readiness-dossier.json`
+- métricas publicadas em `metrics/latest_run-production.json`
+- dossiê L4 em `metrics/l4-readiness-dossier.json`
 
 ---
 
-## 7. SeguranÃ§a e Guardrails
+## 7. Segurança e Guardrails
 
 - Sem fake-success
-- Check de provider antes de execuÃ§Ã£o
+- Check de provider antes de execução
 - Rate limit por rota (quando configurado)
-- Logs auditÃ¡veis no admin
+- Logs auditáveis no admin
 
 ---
 
-## 8. Notas de AtualizaÃ§Ã£o
+## 8. Notas de Atualização
 
-Este documento Ã© canÃ´nico. Se houver divergÃªncia com outros specs antigos, este tem precedÃªncia.
+Este documento é canônico. Se houver divergência com outros specs antigos, este tem precedência.
+
+
+

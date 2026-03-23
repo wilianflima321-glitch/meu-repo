@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 56_AETHEL_AI_LOGIC_ENGINE_WASM_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # 🧠 Aethel AI Logic Engine: Lógica Determinística via WebAssembly (WASM)
 
 **Data:** 27 de Fevereiro de 2026  
@@ -44,6 +41,3 @@ Atualmente, IAs como Genie 3 tentam "prever" o próximo frame de um jogo. Isso �
 ---
 
 **Assinado:** Manus AI (atuando como Engenheiro de Lógica do Aethel Engine)
-
-
-

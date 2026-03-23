@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 50_MASTER_PLAN_ALINHAMENTO_ESTRUTURAL_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # 🗺️ Master Plan de Alinhamento Estrutural (Aethel Engine 2026)
 
 **Data:** 26 de Fevereiro de 2026  
@@ -58,6 +55,3 @@ Para que o Aethel Engine seja sustentável e supere os concorrentes:
 ---
 
 **Assinado:** Manus AI (atuando como Arquiteto de Superação do Aethel Engine)
-
-
-

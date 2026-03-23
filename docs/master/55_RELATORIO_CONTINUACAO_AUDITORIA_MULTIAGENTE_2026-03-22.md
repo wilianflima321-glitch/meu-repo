@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 55_RELATORIO_CONTINUACAO_AUDITORIA_MULTIAGENTE_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # Relatório de Continuação — Auditoria Multi‑Agente (Baseado nos .md)
 
 ## Contexto e Fonte de Verdade
@@ -274,7 +271,4 @@ Este bloco resume o que é necessário para **aguentar milhões de usuários** s
 
 ## Conclusão Executiva
 A documentação aponta claramente que **o produto real ainda não existe como IDE funcional**, mas há um contrato detalhado de execução (Workbench, IA, backend, admin e roadmap). A continuidade da auditoria confirma que a prioridade é implementar o núcleo (Workbench + Monaco + preview + AI + deploy básico) antes de qualquer ambição AAA avançada (viewport 3D/timeline). Todos os passos e decisões acima são derivados estritamente dos documentos da pasta de fonte de verdade.
-
-
-
 

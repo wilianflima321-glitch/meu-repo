@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 51_DUPLICATIONS_AND_CONFLICTS_2026-03-22.md. Use o arquivo numerado canônico.
-
-
 # DUPLICATIONS_AND_CONFLICTS
 Status: ACTIVE (REFRESHED)
 Date: 2026-03-10
@@ -204,6 +201,3 @@ Keep one factual map of duplication/conflict risk that still affects delivery sp
 2. No hidden fallback that looks like real provider success.
 3. No new product shell outside `/dashboard` + `/ide`.
 4. No policy changes outside canonical docs.
-
-
-

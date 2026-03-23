@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 47_COMPETITIVE_GAP_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # COMPETITIVE_GAP.md
 ## Análise Competitiva Detalhada - Sem Marketing
 **Data:** Janeiro 2026  
@@ -493,7 +490,4 @@ Análise honesta de onde estamos vs concorrentes, identificando gaps reais e opo
 
 - `WORKBENCH_SPEC.md` - Especificação técnica do Workbench
 - `AI_SYSTEM_SPEC.md` - Especificação do sistema de AI
-
-
-
 

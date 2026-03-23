@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 49_EXECUTION_PLAN_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # EXECUTION_PLAN.md
 ## Plano de Execução - Roadmap P0/P1/P2/P3
 **Data:** Janeiro 2026  
@@ -711,7 +708,4 @@ Este documento é um **contrato de execução**. Ao prosseguir, a equipe concord
 - `COMPETITIVE_GAP.md`
 - `WORKBENCH_SPEC.md`
 - `AI_SYSTEM_SPEC.md`
-
-
-
 

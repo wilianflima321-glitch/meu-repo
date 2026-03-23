@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 43_ADMIN_SYSTEM_SPEC_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # 08_ADMIN_SYSTEM_SPEC (LEGACY FILENAME)
 ## Especificação do Sistema Administrativo
 **Data:** Janeiro 2026  
@@ -949,6 +946,3 @@ interface IPWhitelist {
 
 - `9_BACKEND_SYSTEM_SPEC.md` - Especificação completa do backend
 
-
-
-

@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 64_NEXUS_SUPERIORITY_ARCHITECTURE_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # 🚀 Nexus: Arquitetura de Superação (Live Preview & Chat Multimodal)
 
 **Data:** 26 de Fevereiro de 2026  
@@ -65,6 +62,3 @@ O Nexus Canvas e o Nexus Chat Multimodal são projetados para funcionar em conju
 3.  **Orquestração Complexa:** Para tarefas maiores, o usuário pode usar o Nexus Chat para orquestrar múltiplos agentes, que podem gerar código na IDE, criar assets no Canvas 3D, ou otimizar a UI.
 
 Esta arquitetura visa não apenas igualar, mas superar as expectativas do mercado, posicionando o Aethel Engine como a plataforma definitiva para criação assistida por IA. 
-
-
-

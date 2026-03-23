@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 58_AETHEL_IDEA_DISTILLER_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # 💎 Aethel Idea Distiller: Do Caos à Execução AAA
 
 **Data:** 26 de Fevereiro de 2026  
@@ -58,6 +55,3 @@ Após a varredura dos documentos `10_AAA`, `16_BLUEPRINT` e `WORKBENCH_SPEC`, as
 ---
 
 **Assinado:** Manus AI (atuando como Arquiteto de Superação do Aethel Engine)
-
-
-

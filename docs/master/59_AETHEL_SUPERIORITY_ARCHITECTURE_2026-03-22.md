@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 59_AETHEL_SUPERIORITY_ARCHITECTURE_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # 🌌 Aethel Engine: Manifesto de Superação (Manus & GenPark Killer)
 
 **Data:** 26 de Fevereiro de 2026  
@@ -66,7 +63,4 @@ Superar o VS Code requer ir além de um editor de texto com plugins.
 1.  **Refatorar `LivePreview.tsx`:** Implementar o sistema de seleção contextual e mini-chat.
 2.  **Evoluir `AIChatPanelPro.tsx`:** Adicionar suporte a múltiplos perfis de agentes e visualização de "Thinking Process" expandida.
 3.  **Integrar `AethelDashboardRuntime.tsx`:** Transformar o dashboard atual no "Nexus", unificando o canvas de agentes com o preview de conteúdo.
-
-
-
 

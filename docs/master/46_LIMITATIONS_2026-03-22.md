@@ -1,6 +1,3 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 46_LIMITATIONS_2026-03-22.md. Use o arquivo numerado can�nico.
-
-
 # LIMITATIONS.md
 ## Limitações Técnicas, de Produto e de Negócio
 **Data:** Janeiro 2026  
@@ -258,6 +255,3 @@ The 2026-02-13 implementation pass focuses on:
 - explicit deprecation contracts
 
 Desktop-level Unreal/Premiere parity limitations remain unchanged.
-
-
-

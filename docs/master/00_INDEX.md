@@ -1,4 +1,4 @@
-ï»¿# 00_INDEX
+# 00_INDEX
 Date: 2026-03-20
 Status: CANONICAL ENTRYPOINT
 
@@ -25,12 +25,12 @@ Status: CANONICAL ENTRYPOINT
 20. `docs/master/15_AI_LIMITATIONS_SUBSYSTEMS_EXECUTION_2026-02-16.md`
 21. `docs/master/16_AI_GAMES_FILMS_APPS_SUBSYSTEM_BLUEPRINT_2026-02-16.md`
 22. `docs/master/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
-23. `docs/master/8_ADMIN_SYSTEM_SPEC.md`
-24. `docs/master/9_BACKEND_SYSTEM_SPEC.md`
-25. `docs/master/AI_SYSTEM_SPEC.md`
-26. `docs/master/LIMITATIONS.md`
+23. `docs/master/43_ADMIN_SYSTEM_SPEC_2026-03-22.md`
+24. `docs/master/44_BACKEND_SYSTEM_SPEC_2026-03-22.md`
+25. `docs/master/45_AI_SYSTEM_SPEC_2026-03-22.md`
+26. `docs/master/46_LIMITATIONS_2026-03-22.md`
 27. `docs/master/41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
-27. `docs/master/WORKBENCH_SPEC.md`
+27. `docs/master/48_WORKBENCH_SPEC_2026-03-22.md`
 28. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
 29. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
 30. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
@@ -77,21 +77,21 @@ Status: CANONICAL ENTRYPOINT
 | `38_L5_EXECUTION_BOARD_2026-03-10.md` | Master tracking board for L4/L5 execution | ACTIVE |
 | `39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md` | Unified Studio information architecture and navigation contract | ACTIVE |
 | `40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md` | Consolidated L5 execution plan and dependency graph | ACTIVE |
-| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificaÃ§Ã£o) | ACTIVE (DRAFT) |
+| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificação) | ACTIVE (DRAFT) |
 
 ## Core Specs
 | Doc | Scope | Status |
 |---|---|---|
-| `FULL_AUDIT.md` | Base audit | HISTORICAL BASELINE |
-| `DUPLICATIONS_AND_CONFLICTS.md` | Duplication/conflict execution map | ACTIVE (REFRESHED 2026-03-07) |
-| `LIMITATIONS.md` | Non-negotiable technical limits | ACTIVE |
-| `COMPETITIVE_GAP.md` | Competitive decomposition | MIXED FACTS+ASSUMPTIONS |
-| `WORKBENCH_SPEC.md` | Workbench contract | ACTIVE |
-| `AI_SYSTEM_SPEC.md` | AI system contract | ACTIVE |
-| `EXECUTION_PLAN.md` | Execution reference | PARTIALLY SUPERSEDED BY `10` |
-| `8_ADMIN_SYSTEM_SPEC.md` | Admin scope | ACTIVE |
-| `9_BACKEND_SYSTEM_SPEC.md` | Backend scope | ACTIVE |
-| `41_DOCS_NAMING_NORMALIZATION_2026-03-21.md` | Legacy naming normalization plan | PARTIAL |
+| `52_FULL_AUDIT_2026-03-22.md` | Base audit | HISTORICAL BASELINE |
+| `51_DUPLICATIONS_AND_CONFLICTS_2026-03-22.md` | Duplication/conflict execution map | ACTIVE (REFRESHED 2026-03-07) |
+| `46_LIMITATIONS_2026-03-22.md` | Non-negotiable technical limits | ACTIVE |
+| `47_COMPETITIVE_GAP_2026-03-22.md` | Competitive decomposition | MIXED FACTS+ASSUMPTIONS |
+| `48_WORKBENCH_SPEC_2026-03-22.md` | Workbench contract | ACTIVE |
+| `45_AI_SYSTEM_SPEC_2026-03-22.md` | AI system contract | ACTIVE |
+| `49_EXECUTION_PLAN_2026-03-22.md` | Execution reference | PARTIALLY SUPERSEDED BY `10` |
+| `43_ADMIN_SYSTEM_SPEC_2026-03-22.md` | Admin scope | ACTIVE |
+| `44_BACKEND_SYSTEM_SPEC_2026-03-22.md` | Backend scope | ACTIVE |
+| `41_DOCS_NAMING_NORMALIZATION_2026-03-21.md` | Legacy naming normalization plan | ACTIVE |
 
 ## Current Factual Snapshot (2026-03-08)
 - Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):
@@ -138,7 +138,7 @@ Status: CANONICAL ENTRYPOINT
   - production evidence probe tooling added (`npm run qa:core-loop-production-probe`) to generate authenticated production-sample apply probes in sandbox mode,
   - admin production probe API + control added (`/api/admin/ai/core-loop-production-probe`, `/admin/ai-monitor` action `Run Production Probe`).
 - Delta 2026-03-07:
-  - `DUPLICATIONS_AND_CONFLICTS.md` was fully refreshed and moved back to active state with canonical conflict IDs and closure checklist,
+  - `51_DUPLICATIONS_AND_CONFLICTS_2026-03-22.md` was fully refreshed and moved back to active state with canonical conflict IDs and closure checklist,
   - IDE chat now has explicit local demo fallback for provider-missing first-value flow (`DEMO LOCAL` + daily usage cap + telemetry),
   - dashboard shell initialization logic extracted to dedicated helper module (`components/dashboard/aethel-dashboard-initial-state.ts`) to reduce shell churn risk and preserve gate margin.
 - Delta 2026-03-08:
@@ -198,3 +198,5 @@ Status: CANONICAL ENTRYPOINT
 - Always start from this file.
 - Do not use `docs/archive/` as source of truth.
 - Do not claim completion without file-level evidence.
+
+
