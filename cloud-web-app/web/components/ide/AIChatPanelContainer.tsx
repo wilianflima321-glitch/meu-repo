@@ -38,6 +38,36 @@ type ProviderGateState = {
 
 const MODELS = DEFAULT_MODELS
 
+const IDE_CHAT_INTENTS = [
+  {
+    id: 'implement',
+    label: 'Implementar no editor',
+    description: 'Traduzir a missao atual em passos e alteracoes concretas.',
+    buildPrompt: (mission?: string | null) =>
+      mission
+        ? `${mission}\n\nConverta isso em um plano de implementacao no editor, com arquivos, passos e risco principal.`
+        : 'Converta a tarefa atual em um plano de implementacao no editor, com arquivos, passos e risco principal.',
+  },
+  {
+    id: 'review',
+    label: 'Criticar e revisar',
+    description: 'Fazer review do que ja existe e apontar a proxima melhoria.',
+    buildPrompt: (mission?: string | null) =>
+      mission
+        ? `${mission}\n\nRevise o estado atual, critique as lacunas e proponha a proxima melhoria com maior impacto.`
+        : 'Revise o estado atual, critique as lacunas e proponha a proxima melhoria com maior impacto.',
+  },
+  {
+    id: 'runtime',
+    label: 'Preparar preview/runtime',
+    description: 'Sair com checklist de validacao para preview, runtime e handoff.',
+    buildPrompt: (mission?: string | null) =>
+      mission
+        ? `${mission}\n\nPrepare um checklist de runtime, preview e validacao final para esta missao.`
+        : 'Prepare um checklist de runtime, preview e validacao final para a tarefa atual.',
+  },
+] as const
+
 
 function extractContent(raw: string): string {
   try {
@@ -148,6 +178,8 @@ export default function AIChatPanelContainer() {
   const [isLoading, setIsLoading] = useState(false)
   const requestAbortRef = useRef<AbortController | null>(null)
   const [projectId, setProjectId] = useState<string | undefined>(undefined)
+  const [mission, setMission] = useState<string | null>(null)
+  const [source, setSource] = useState<string | null>(null)
   const [providerGate, setProviderGate] = useState<ProviderGateState | null>(null)
   const [providerStatus, setProviderStatus] = useState<AiProviderStatusResponse | null>(null)
 
@@ -155,6 +187,13 @@ export default function AIChatPanelContainer() {
 
   useEffect(() => {
     setProjectId(getProjectIdFromLocation())
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const missionParam = params.get('mission')
+      const sourceParam = params.get('source')
+      setMission(missionParam && missionParam.trim() ? missionParam.trim() : null)
+      setSource(sourceParam && sourceParam.trim() ? sourceParam.trim() : null)
+    }
   }, [])
 
   useEffect(() => {
@@ -512,6 +551,41 @@ export default function AIChatPanelContainer() {
 
   return (
     <div className="flex h-full flex-col">
+      {(mission || source || projectId) && (
+        <div className="mx-3 mt-3 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(79,70,229,0.12),rgba(14,165,233,0.08),rgba(15,23,42,0.78))] p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-100">
+              Sessao de trabalho
+            </span>
+            {source ? (
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-zinc-300">
+                origem {source}
+              </span>
+            ) : null}
+            {projectId ? (
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-zinc-300">
+                projeto {projectId}
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-2 text-sm font-medium text-white">
+            {mission || 'Continue a partir do contexto do studio sem perder o handoff atual.'}
+          </div>
+          <div className="mt-3 grid gap-2">
+            {IDE_CHAT_INTENTS.map((intent) => (
+              <button
+                key={intent.id}
+                type="button"
+                onClick={() => void handleSendMessage(intent.buildPrompt(mission))}
+                className="rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-left transition hover:border-white/20 hover:bg-white/[0.05]"
+              >
+                <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{intent.label}</p>
+                <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{intent.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {providerGate && (
         <div className="mx-3 mt-3 space-y-2">
           <AIProviderSetupGuide

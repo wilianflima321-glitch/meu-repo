@@ -24,6 +24,7 @@ import { OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models';
 import type {
   AICall,
   AICallsResponse,
+  L4ReadinessDossierResponse,
   AIMetrics,
   AIMetricsResponse,
   AIReadiness,
@@ -240,6 +241,13 @@ export default function AgentMonitorPage() {
       refreshInterval: isPaused ? 0 : 15000,
     }
   );
+  const { data: dossierData, mutate: refreshDossier } = useSWR<L4ReadinessDossierResponse>(
+    '/api/admin/ai/l4-readiness-dossier',
+    fetchWithAuth,
+    {
+      refreshInterval: isPaused ? 0 : 20000,
+    }
+  );
 
   const { data: callsData, mutate: refreshCalls } = useSWR<AICallsResponse>(
     `/api/admin/ai/calls?limit=50&model=${modelFilter}&status=${statusFilter}`,
@@ -267,10 +275,53 @@ export default function AgentMonitorPage() {
   const coreLoopTrend = coreLoopMetricsData?.trend || null;
   const reasonPlaybook = coreLoopMetricsData?.reasonPlaybook || [];
   const ledgerIntegrity = ledgerIntegrityData || null;
+  const dossier = dossierData || null;
   const emergencyState = emergencyData?.data;
   const runSummary = runsData?.metadata?.summary || null;
   const runSummaryAll = runsData?.metadata?.summaryAll || null;
   const runGroups = runsData?.metadata?.runGroups || [];
+  const unmetDossierCriteria = dossier?.exitCriteria
+    ? Object.entries(dossier.exitCriteria).filter(([, criterion]) => criterion && criterion.met === false)
+    : [];
+  const operatorBlockers = Array.from(
+    new Set([
+      ...(readiness?.blockers || []),
+      ...(promotionData?.blockers || []),
+      ...(dossier?.blockers || []),
+    ])
+  );
+  const strategicGaps = [
+    coreLoopLatest?.metrics.workspaceCoverage === 0
+      ? 'Workspace coverage continua zerado: a prova atual ainda depende demais de sandbox.'
+      : null,
+    (coreLoopLatest?.metrics.rollbackSuccessCount || 0) === 0
+      ? 'Rollback ainda sem evidencia suficiente para sustentar narrativa forte de recuperacao.'
+      : null,
+    readiness?.runtimeReadiness && !readiness.runtimeReadiness.probeReady
+      ? 'Production runtime preflight segue bloqueado por ambiente ou credenciais.'
+      : null,
+    operatorBlockers.length > 0
+      ? `Existem ${operatorBlockers.length} blockers ativos impedindo promotion completa do core loop.`
+      : null,
+  ].filter(Boolean) as string[];
+  const headerTone =
+    emergencyState && emergencyState.level !== 'normal'
+      ? 'emergency'
+      : operatorBlockers.length > 0 || strategicGaps.length > 0
+        ? 'partial'
+        : 'healthy';
+  const headerTitle =
+    headerTone === 'healthy'
+      ? 'Core loop monitorado com sinais fortes'
+      : headerTone === 'emergency'
+        ? 'Monitor em estado de emergencia operacional'
+        : 'Monitor ainda com lacunas para narrativa L4 forte';
+  const headerDescription =
+    headerTone === 'healthy'
+      ? 'A superficie esta organizada para operar, revisar custo, readiness e evidencia de producao com mais clareza.'
+      : headerTone === 'emergency'
+        ? 'Antes de qualquer refinamento, precisamos estabilizar o modo de emergencia e preservar governanca operacional.'
+        : 'A base esta viva, mas preview, rollback, workspace coverage e runtime preflight ainda impedem um discurso de confiabilidade completa.';
 
   React.useEffect(() => {
     if (metrics || calls.length > 0) {
@@ -302,6 +353,7 @@ export default function AgentMonitorPage() {
         refreshReadiness(),
         refreshCoreLoopMetrics(),
         refreshLedgerIntegrity(),
+        refreshDossier(),
         refreshFullAccessAudit(),
         refreshRuns(),
       ]);
@@ -321,7 +373,7 @@ export default function AgentMonitorPage() {
     } finally {
       setIsRunningDrill(false);
     }
-  }, [refreshCalls, refreshPromotion, refreshReadiness, refreshCoreLoopMetrics, refreshLedgerIntegrity, refreshFullAccessAudit, refreshRuns]);
+  }, [refreshCalls, refreshPromotion, refreshReadiness, refreshCoreLoopMetrics, refreshLedgerIntegrity, refreshDossier, refreshFullAccessAudit, refreshRuns]);
 
   const runProductionProbe = React.useCallback(async () => {
     try {
@@ -347,6 +399,7 @@ export default function AgentMonitorPage() {
         refreshReadiness(),
         refreshCoreLoopMetrics(),
         refreshLedgerIntegrity(),
+        refreshDossier(),
         refreshFullAccessAudit(),
         refreshRuns(),
       ]);
@@ -368,55 +421,89 @@ export default function AgentMonitorPage() {
     } finally {
       setIsRunningProductionProbe(false);
     }
-  }, [refreshCalls, refreshPromotion, refreshReadiness, refreshCoreLoopMetrics, refreshLedgerIntegrity, refreshFullAccessAudit, refreshRuns]);
+  }, [refreshCalls, refreshPromotion, refreshReadiness, refreshCoreLoopMetrics, refreshLedgerIntegrity, refreshDossier, refreshFullAccessAudit, refreshRuns]);
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Monitor de Agentes de IA</h1>
-          <p className="text-sm text-[var(--aethel-text-tertiary)]">Telemetria operacional em tempo real</p>
-          {lastUpdated && <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>}
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+        <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent))] p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
+                Monitor de agentes de IA
+              </p>
+              <h1 className="mt-3 text-2xl font-semibold text-[var(--aethel-text-primary)]">{headerTitle}</h1>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                {headerDescription}
+              </p>
+              {lastUpdated && (
+                <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">
+                  Atualizado em {lastUpdated.toLocaleString()}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setIsPaused((prev) => !prev)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
+                  isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
+                }`}
+                type="button"
+              >
+                {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                {isPaused ? 'Retomar' : 'Pausar stream'}
+              </button>
+              <button
+                onClick={() => void refreshCalls()}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]"
+                type="button"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Atualizar
+              </button>
+              <button
+                onClick={() => void runCoreLoopDrill()}
+                disabled={isRunningDrill}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] text-[var(--aethel-info-light)] disabled:opacity-60"
+                type="button"
+              >
+                <Zap className="w-4 h-4" />
+                {isRunningDrill ? 'Rodando drill...' : 'Run Drill'}
+              </button>
+              <button
+                onClick={() => void runProductionProbe()}
+                disabled={isRunningProductionProbe}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] text-[var(--aethel-success)] disabled:opacity-60"
+                type="button"
+              >
+                <Zap className="w-4 h-4" />
+                {isRunningProductionProbe ? 'Rodando probe...' : 'Run Production Probe'}
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsPaused((prev) => !prev)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
-              isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
-            }`}
-            type="button"
-          >
-            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-            {isPaused ? 'Retomar' : 'Pausar stream'}
-          </button>
-          <button
-            onClick={() => void refreshCalls()}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]"
-            type="button"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Atualizar
-          </button>
-          <button
-            onClick={() => void runCoreLoopDrill()}
-            disabled={isRunningDrill}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] text-[var(--aethel-info-light)] disabled:opacity-60"
-            type="button"
-          >
-            <Zap className="w-4 h-4" />
-            {isRunningDrill ? 'Rodando drill...' : 'Run Drill'}
-          </button>
-          <button
-            onClick={() => void runProductionProbe()}
-            disabled={isRunningProductionProbe}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] text-[var(--aethel-success)] disabled:opacity-60"
-            type="button"
-          >
-            <Zap className="w-4 h-4" />
-            {isRunningProductionProbe ? 'Rodando probe...' : 'Run Production Probe'}
-          </button>
+
+        <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
+            Proxima melhor acao
+          </p>
+          <div className="mt-4 space-y-3">
+            {(strategicGaps.length > 0
+              ? strategicGaps
+              : ['Sem gap critico novo nesta leitura; priorize validacao E2E de preview, billing e onboarding real.']
+            )
+              .slice(0, 4)
+              .map((item) => (
+                <div
+                  key={item}
+                  className="rounded-xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] px-4 py-3 text-sm leading-6 text-[var(--aethel-text-secondary)]"
+                >
+                  {item}
+                </div>
+              ))}
+          </div>
         </div>
-      </div>
+      </section>
 
       {operatorNotice && (
         <div
@@ -429,6 +516,43 @@ export default function AgentMonitorPage() {
           {operatorNotice.text}
         </div>
       )}
+
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <AdminMetricCard
+          icon={Brain}
+          label="Promotion blockers"
+          value={`${operatorBlockers.length}`}
+          subValue="Blockers agregados de readiness + dossier"
+          trend={operatorBlockers.length === 0 ? 'up' : 'down'}
+        />
+        <AdminMetricCard
+          icon={Zap}
+          label="Sample size"
+          value={`${coreLoopLatest?.metrics.sampleSize ?? 0}`}
+          subValue="Runs do ultimo recorte operacional"
+          trend={(coreLoopLatest?.metrics.sampleSize ?? 0) >= 100 ? 'up' : 'down'}
+        />
+        <AdminMetricCard
+          icon={AlertTriangle}
+          label="Workspace coverage"
+          value={
+            typeof coreLoopLatest?.metrics.workspaceCoverage === 'number'
+              ? `${(coreLoopLatest.metrics.workspaceCoverage * 100).toFixed(1)}%`
+              : 'n/a'
+          }
+          subValue="Prova fora de sandbox"
+          trend={(coreLoopLatest?.metrics.workspaceCoverage ?? 0) > 0 ? 'up' : 'down'}
+          trendTone="negative"
+        />
+        <AdminMetricCard
+          icon={RefreshCw}
+          label="Rollback evidence"
+          value={`${coreLoopLatest?.metrics.rollbackSuccessCount ?? 0}`}
+          subValue="Rollbacks confirmados no recorte atual"
+          trend={(coreLoopLatest?.metrics.rollbackSuccessCount ?? 0) > 0 ? 'up' : 'down'}
+          trendTone="negative"
+        />
+      </section>
 
       {emergencyState && emergencyState.level !== 'normal' && (
         <div
@@ -686,6 +810,87 @@ export default function AgentMonitorPage() {
                 <li key={blocker}>{blocker}</li>
               ))}
             </ul>
+          )}
+        </div>
+      )}
+
+      {dossier && (
+        <div className="bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">L4 readiness dossier</h3>
+              <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
+                Estado consolidado para evitar narrativa otimista demais no admin.
+              </p>
+            </div>
+            <span
+              className={`rounded px-2 py-1 text-xs ${
+                dossier.status === 'COMPLETE' || dossier.status === 'ACTIVE'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
+                  : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
+              }`}
+            >
+              {dossier.status}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 text-xs">
+            <div className="rounded p-3 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)]">
+              <p className="text-[var(--aethel-text-tertiary)]">Production sample</p>
+              <p className="font-semibold text-[var(--aethel-text-primary)]">{dossier.metrics?.production?.sampleSize ?? 0}</p>
+            </div>
+            <div className="rounded p-3 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)]">
+              <p className="text-[var(--aethel-text-tertiary)]">Success rate</p>
+              <p className="font-semibold text-[var(--aethel-text-primary)]">
+                {typeof dossier.metrics?.production?.successRate === 'number'
+                  ? `${(dossier.metrics.production.successRate * 100).toFixed(1)}%`
+                  : 'n/a'}
+              </p>
+            </div>
+            <div className="rounded p-3 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)]">
+              <p className="text-[var(--aethel-text-tertiary)]">Feedback coverage</p>
+              <p className="font-semibold text-[var(--aethel-text-primary)]">
+                {typeof dossier.metrics?.production?.feedbackCoverage === 'number'
+                  ? `${(dossier.metrics.production.feedbackCoverage * 100).toFixed(1)}%`
+                  : 'n/a'}
+              </p>
+            </div>
+            <div className="rounded p-3 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)]">
+              <p className="text-[var(--aethel-text-tertiary)]">Overall score</p>
+              <p className="font-semibold text-[var(--aethel-text-primary)]">
+                {typeof dossier.scores?.overall === 'number' ? dossier.scores.overall.toFixed(1) : 'n/a'}
+              </p>
+            </div>
+          </div>
+
+          {unmetDossierCriteria.length > 0 && (
+            <div className="mt-3 rounded border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] p-3">
+              <p className="mb-2 text-xs font-medium text-[var(--aethel-warning-light)]">Criteria still not met</p>
+              <div className="space-y-2 text-xs text-[var(--aethel-text-secondary)]">
+                {unmetDossierCriteria.slice(0, 6).map(([key, criterion]) => (
+                  <div key={key} className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-3 py-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-medium text-[var(--aethel-text-primary)]">{key}</span>
+                      <span>target={String(criterion.target)} | actual={String(criterion.actual)}</span>
+                    </div>
+                    {criterion.note && <p className="mt-1 text-[var(--aethel-text-tertiary)]">{criterion.note}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {dossier.blockers?.length > 0 && (
+            <div className="mt-3 grid gap-2">
+              {dossier.blockers.map((blocker) => (
+                <div
+                  key={blocker}
+                  className="rounded border border-[color-mix(in_srgb,var(--aethel-error)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]"
+                >
+                  {blocker}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

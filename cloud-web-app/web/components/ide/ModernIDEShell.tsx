@@ -53,7 +53,7 @@ export type { PanelState };
 
 export function ModernIDEShell({
   children,
-  projectName = 'Untitled Project',
+  projectName = 'Projeto sem nome',
   activeFileName,
   onToggleSidebar,
   sidebarOpen = true,
@@ -201,7 +201,7 @@ export function ModernIDEShell({
                     }}
                   >
                     <MessageSquare size={14} />
-                    AI Assistant
+                    Copiloto
                   </span>
                   <button
                     onClick={() => togglePanel('chat')}
@@ -423,13 +423,13 @@ function IDEHeader({
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'] }}>
           <PanelToggle
             icon={<FolderTree size={16} />}
-            label="Files"
+            label="Arquivos"
             active={panelState.sidebar.open}
             onClick={() => onTogglePanel('sidebar')}
           />
           <PanelToggle
             icon={<MessageSquare size={16} />}
-            label="AI Chat"
+            label="Copiloto"
             active={panelState.chat.open}
             onClick={() => onTogglePanel('chat')}
           />
@@ -460,7 +460,7 @@ function IDEHeader({
           }}
         >
           <Play size={14} />
-          Run
+          Executar
         </button>
         <button
           style={{
@@ -535,9 +535,9 @@ function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
   };
 
   const items = [
-    { id: 'sidebar', icon: <FolderTree size={20} />, label: 'Files' },
+    { id: 'sidebar', icon: <FolderTree size={20} />, label: 'Arquivos' },
     { id: 'editor', icon: <Code2 size={20} />, label: 'Editor' },
-    { id: 'chat', icon: <MessageSquare size={20} />, label: 'AI' },
+    { id: 'chat', icon: <MessageSquare size={20} />, label: 'Copiloto' },
     { id: 'preview', icon: <Play size={20} />, label: 'Preview' },
   ] as const;
 

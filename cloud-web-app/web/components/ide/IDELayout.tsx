@@ -34,6 +34,7 @@ interface IDELayoutProps {
   studioTitle?: string
   studioSubtitle?: string
   studioRightSlot?: ReactNode
+  workbenchBanner?: ReactNode
   children?: ReactNode
   fileExplorer?: ReactNode
   searchPanel?: ReactNode
@@ -109,6 +110,7 @@ export default function IDELayout({
   studioTitle = 'Workbench',
   studioSubtitle = 'Editor, preview e runtime no mesmo fluxo.',
   studioRightSlot,
+  workbenchBanner,
   children,
   fileExplorer,
   searchPanel,
@@ -491,6 +493,7 @@ export default function IDELayout({
       {showStudioNav && (
         <StudioGlobalNav title={studioTitle} subtitle={studioSubtitle} rightSlot={studioRightSlot} />
       )}
+      {workbenchBanner}
       <header className="density-header flex items-center justify-between border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_96%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl">
         <div className="flex min-w-0 items-center gap-3">
           {!showStudioNav && (

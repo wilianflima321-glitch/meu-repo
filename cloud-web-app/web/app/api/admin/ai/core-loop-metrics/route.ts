@@ -25,6 +25,8 @@ const THRESHOLDS: CoreLoopThresholds = {
   regressionRateMax: 0.05,
   sandboxCoverage: 0.5,
   feedbackCoverageMin: 0.6,
+  workspaceCoverageMin: 0.05,
+  requireRollbackEvidence: true,
 }
 
 export const GET = withAdminAuth(async () => {

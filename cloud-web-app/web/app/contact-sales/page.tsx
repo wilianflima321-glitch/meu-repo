@@ -31,6 +31,12 @@ const DEAL_STEPS = [
   'Voltamos por email com direcionamento, plano recomendado e agenda quando necessario.',
 ]
 
+const SALES_SIGNALS = [
+  'SSO, SAML, rollout e trilha de auditoria entram melhor na conversa enterprise.',
+  'Apps + Research continuam sendo a frente comercial mais madura do produto.',
+  'Preview, readiness e governanca devem ser tratados no mesmo rollout, nao em trilhas separadas.',
+]
+
 export default function ContactSalesPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -304,6 +310,17 @@ export default function ContactSalesPage() {
 
             <aside className="space-y-5">
               <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Sinais para a conversa</p>
+                <div className="mt-4 space-y-3">
+                  {SALES_SIGNALS.map((item) => (
+                    <div key={item} className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3">
+                      <p className="text-sm leading-6 text-slate-300">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">O que acontece depois</p>
                 <div className="mt-4 space-y-3">
                   {DEAL_STEPS.map((item, index) => (
@@ -322,6 +339,20 @@ export default function ContactSalesPage() {
                 <p className="mt-3 text-sm leading-6 text-cyan-50/85">
                   Ideal para times que querem discutir seguranca, governanca, rollout controlado e o melhor caminho para adocao em ambiente real.
                 </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center justify-center rounded-xl border border-cyan-100/15 bg-white/10 px-3 py-2 text-xs font-semibold text-cyan-50 transition hover:bg-white/15"
+                  >
+                    Revisar planos
+                  </Link>
+                  <Link
+                    href="/status"
+                    className="inline-flex items-center justify-center rounded-xl border border-cyan-100/15 bg-transparent px-3 py-2 text-xs font-semibold text-cyan-50 transition hover:bg-white/10"
+                  >
+                    Ver status
+                  </Link>
+                </div>
               </div>
             </aside>
           </section>

@@ -390,9 +390,9 @@ export function usePreviewRuntimeManager({
 
   const runtimeStrategyLabel =
     runtimeReadiness?.strategy === 'managed'
-      ? 'managed'
+      ? 'sandbox gerenciado'
       : runtimeReadiness?.strategy === 'local'
-        ? 'local'
+        ? 'servidor local'
         : 'inline'
 
   const runtimeStrategyHint =
@@ -413,10 +413,10 @@ export function usePreviewRuntimeManager({
 
   const runtimePrimaryActionLabel =
     runtimePrimaryAction === 'provision'
-      ? 'Provisionar recomendado'
+      ? 'Provisionar sandbox'
       : runtimePrimaryAction === 'discover'
-        ? 'Detectar recomendado'
-        : 'Usar inline'
+        ? 'Detectar servidor local'
+        : 'Usar preview inline'
 
   const handleUseInlineFallback = useCallback(() => {
     setPreviewRuntimeInput('')

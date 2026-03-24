@@ -10,6 +10,7 @@ export default function PublicHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+  const isStudioSurface = pathname.startsWith('/dashboard') || pathname.startsWith('/ide') || pathname.startsWith('/nexus')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -31,23 +32,29 @@ export default function PublicHeader() {
         }`}
       >
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navegacao principal">
-          <Link href="/" className="group flex items-center gap-2.5" aria-label="Aethel Engine - Pagina inicial">
-            <Image
-              src="/branding/aethel-icon-source.png"
-              alt=""
-              width={32}
-              height={32}
-              sizes="32px"
-              className="rounded-lg transition-transform duration-200 group-hover:scale-105"
-              priority
-            />
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold tracking-tight text-white">Aethel</span>
-              <span className="hidden rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)] sm:inline-flex">
-                Studio
-              </span>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="group flex items-center gap-2.5" aria-label="Aethel Engine - Pagina inicial">
+              <Image
+                src="/branding/aethel-icon-source.png"
+                alt=""
+                width={32}
+                height={32}
+                sizes="32px"
+                className="rounded-lg transition-transform duration-200 group-hover:scale-105"
+                priority
+              />
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold tracking-tight text-white">Aethel</span>
+                <span className="hidden rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)] sm:inline-flex">
+                  Studio
+                </span>
+              </div>
+            </Link>
+            <div className="hidden xl:flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-300">
+              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              {isStudioSurface ? 'Surface ativa' : 'Apps + Research'}
             </div>
-          </Link>
+          </div>
 
           {/* Desktop nav */}
           <div className="hidden items-center gap-1 md:flex">
@@ -70,6 +77,12 @@ export default function PublicHeader() {
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
+            <Link
+              href="/contact-sales"
+              className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+            >
+              Falar com vendas
+            </Link>
             <Link
               href="/login"
               className="aethel-button aethel-button-ghost rounded-lg px-3.5 py-2 text-sm font-medium"
@@ -128,6 +141,12 @@ export default function PublicHeader() {
               )
             })}
             <div className="my-3 h-px bg-white/[0.06]" />
+            <Link
+              href="/contact-sales"
+              className="block rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/[0.05] hover:text-white"
+            >
+              Falar com vendas
+            </Link>
             <Link
               href="/login"
               className="aethel-button aethel-button-ghost block rounded-lg px-4 py-3 text-sm font-medium"

@@ -41,6 +41,30 @@ const FAQ_ITEMS = [
   },
 ]
 
+const DECISION_PATH = [
+  {
+    title: 'Entrar rapido',
+    desc: 'Starter e Basic para validar contexto, onboarding, AI chat e rotina inicial sem travar a avaliacao.',
+  },
+  {
+    title: 'Operar de verdade',
+    desc: 'Pro para quem precisa throughput, modelos melhores e uma experiencia mais proxima do uso continuo.',
+  },
+  {
+    title: 'Escalar com time',
+    desc: 'Studio e Enterprise para seats, governanca, rollout e integracao com requisitos mais altos.',
+  },
+]
+
+const COMPARISON_ROWS = [
+  { label: 'Projetos', getValue: (plan: (typeof PLANS)[number]) => formatLimit(plan.limits.projects) },
+  { label: 'Tokens por mes', getValue: (plan: (typeof PLANS)[number]) => formatLimit(plan.limits.tokensPerMonth) },
+  { label: 'Storage', getValue: (plan: (typeof PLANS)[number]) => formatStorage(plan.limits.storage) },
+  { label: 'Colaboradores', getValue: (plan: (typeof PLANS)[number]) => formatLimit(plan.limits.collaborators) },
+  { label: 'Historico', getValue: (plan: (typeof PLANS)[number]) => `${formatLimit(plan.limits.historyDays)} dias` },
+  { label: 'Concorrencia', getValue: (plan: (typeof PLANS)[number]) => formatLimit(plan.limits.concurrent) },
+]
+
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
   const [openFaq, setOpenFaq] = useState<number | null>(null)
@@ -161,6 +185,21 @@ export default function PricingPage() {
         </section>
 
         <section className="mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 grid gap-4 lg:grid-cols-3">
+            {DECISION_PATH.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-[24px] border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-5"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                  Caminho de decisao
+                </p>
+                <h2 className="mt-3 text-lg font-semibold text-[var(--aethel-text-primary)]">{item.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {corePlans.map((plan) => (
               <article
@@ -291,6 +330,45 @@ export default function PricingPage() {
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Pro e Studio</p>
               <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Onde o produto precisa parecer realmente premium: colaboracao, throughput, historico e operacao sustentada.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.86),rgba(2,6,23,0.86))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
+            <div className="border-b border-white/10 px-6 py-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
+                Comparativo rapido
+              </p>
+              <h2 className="mt-2 text-2xl font-bold text-[var(--aethel-text-primary)]">
+                O que muda entre os planos mais usados
+              </h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left">
+                <thead>
+                  <tr className="border-b border-white/10 text-[11px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                    <th className="px-6 py-4 font-semibold">Capacidade</th>
+                    {corePlans.map((plan) => (
+                      <th key={plan.id} className="px-6 py-4 font-semibold text-[var(--aethel-text-primary)]">
+                        {plan.name}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPARISON_ROWS.map((row) => (
+                    <tr key={row.label} className="border-b border-white/5">
+                      <td className="px-6 py-4 text-sm font-medium text-[var(--aethel-text-primary)]">{row.label}</td>
+                      {corePlans.map((plan) => (
+                        <td key={`${row.label}-${plan.id}`} className="px-6 py-4 text-sm text-[var(--aethel-text-secondary)]">
+                          {row.getValue(plan)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </section>

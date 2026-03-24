@@ -10,6 +10,7 @@ import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
 import CanonicalPreviewSurface from "@/components/preview/CanonicalPreviewSurface";
 import PreviewRuntimeToolbar from "@/components/ide/PreviewRuntimeToolbar";
+import WorkbenchMissionBar from "@/components/ide/WorkbenchMissionBar";
 import TabBar, { TabProvider } from "@/components/editor/TabBar";
 import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
 import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
@@ -117,7 +118,9 @@ function IDEContent() {
   const fileParam = searchParams.get("file");
   const projectIdParam = searchParams.get("projectId");
   const entryParam = searchParams.get("entry");
+  const missionParam = searchParams.get("mission");
   const previewUrlParam = searchParams.get("previewUrl");
+  const sourceParam = searchParams.get("source");
   const shellParam = searchParams.get('shell');
   const useModernShell = shellParam === 'modern';
 
@@ -161,6 +164,17 @@ function IDEContent() {
 
   const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([])
   const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false)
+
+  const runtimeStateLabel = useMemo(() => {
+    if (runtimeHealth.status === 'reachable') {
+      return typeof runtimeHealth.latencyMs === 'number'
+        ? `pronto ${runtimeHealth.latencyMs}ms`
+        : 'pronto'
+    }
+    if (runtimeHealth.status === 'checking') return 'validando'
+    if (runtimeHealth.status === 'idle') return 'inline'
+    return runtimeHealth.reason || runtimeHealth.status
+  }, [runtimeHealth.latencyMs, runtimeHealth.reason, runtimeHealth.status])
 
   const {
     previewRuntimeUrl,
@@ -215,6 +229,14 @@ function IDEContent() {
   const openCommandPalette = useCallback((mode: 'commands' | 'files' = 'commands') => {
     window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode } }))
   }, [])
+
+  const handleBackToDashboard = useCallback(() => {
+    const params = new URLSearchParams()
+    if (projectId && projectId !== 'default') params.set('projectId', projectId)
+    if (missionParam) params.set('mission', missionParam)
+    if (sourceParam) params.set('source', sourceParam)
+    window.location.assign(params.toString() ? `/dashboard?${params.toString()}` : '/dashboard')
+  }, [missionParam, projectId, sourceParam])
 
   const handleOpenSettings = useCallback(() => {
     const params = new URLSearchParams(window.location.search)
@@ -1038,9 +1060,23 @@ function IDEContent() {
             studioTitle="Workbench"
             studioSubtitle="Editor, preview e runtime no mesmo fluxo."
             onCommandPalette={() => openCommandPalette('commands')}
+            workbenchBanner={
+              <WorkbenchMissionBar
+                mission={missionParam}
+                source={sourceParam || entryParam}
+                projectId={projectId}
+                previewEnabled={previewEnabled}
+                runtimeStrategyLabel={runtimeStrategyLabel}
+                runtimeStateLabel={runtimeStateLabel}
+                onOpenAiPanel={handleAIPanel}
+                onTogglePreview={() => setPreviewEnabled((prev) => !prev)}
+                onOpenCommandPalette={() => openCommandPalette('commands')}
+                onBackToDashboard={handleBackToDashboard}
+              />
+            }
             studioRightSlot={
               <Link
-                href="/dashboard"
+                href={projectId && projectId !== 'default' ? `/dashboard?projectId=${encodeURIComponent(projectId)}` : "/dashboard"}
                 className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-white/20 hover:text-white"
               >
                 Voltar ao dashboard

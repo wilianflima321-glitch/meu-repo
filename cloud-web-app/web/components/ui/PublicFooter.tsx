@@ -36,6 +36,35 @@ export default function PublicFooter() {
   return (
     <footer className="bg-gradient-to-b from-[var(--aethel-surface-primary)] via-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)]" role="contentinfo">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mb-12 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02),rgba(14,165,233,0.06))] px-6 py-6 shadow-[0_24px_70px_rgba(2,6,23,0.24)] lg:px-8">
+          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Studio-grade platform</p>
+              <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">
+                Do briefing ao preview no mesmo sistema de trabalho.
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-300">
+                O foco atual do Aethel e fechar um fluxo claro para Apps + Research, com IA, preview, readiness e operacao sem fake success.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                { label: 'Fluxo', value: 'Studio unico' },
+                { label: 'Preview', value: 'Runtime + fallback' },
+                { label: 'Governanca', value: 'Readiness visivel' },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-4"
+                >
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-zinc-500">{item.label}</div>
+                  <div className="mt-2 text-sm font-semibold text-white">{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           {/* Brand column */}
           <div>
@@ -110,11 +139,16 @@ export default function PublicFooter() {
           ))}
         </div>
 
-<div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.06] pt-8 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.06] pt-8 sm:flex-row">
           <p className="text-xs text-zinc-400">&copy; {COPYRIGHT_YEAR} Aethel Engine. Todos os direitos reservados.</p>
-          <div className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-xs text-zinc-400">Studio-grade workflow, atualizado continuamente</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="text-xs text-zinc-400">Studio-grade workflow, atualizado continuamente</span>
+            </div>
+            <Link href="/status" className="text-xs text-zinc-400 transition-colors hover:text-white">
+              Ver status operacional
+            </Link>
           </div>
         </div>
       </div>

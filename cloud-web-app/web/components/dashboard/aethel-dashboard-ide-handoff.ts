@@ -24,12 +24,16 @@ type ResolveIdeHandoffParamsInput = {
   entry: string
   projectId: string | null
   previewRuntimeStorageKey: string
+  source?: string | null
+  mission?: string | null
 }
 
 export async function resolveIdeHandoffParams(input: ResolveIdeHandoffParamsInput): Promise<IdeHandoffResolution> {
   const params = new URLSearchParams()
   params.set('entry', input.entry)
   if (input.projectId) params.set('projectId', input.projectId)
+  if (input.source) params.set('source', input.source)
+  if (input.mission) params.set('mission', input.mission)
   let provisionFailed = false
 
   if (typeof window === 'undefined') {

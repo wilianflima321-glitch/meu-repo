@@ -221,6 +221,60 @@ export default function StatusPage() {
     unhealthy: surfaces.filter((surface) => surface.state === 'unhealthy').length,
   }), [surfaces])
 
+  const blockingSurfaces = useMemo(
+    () => surfaces.filter((surface) => surface.state === 'unhealthy'),
+    [surfaces]
+  )
+
+  const partialSurfaces = useMemo(
+    () => surfaces.filter((surface) => surface.state === 'partial'),
+    [surfaces]
+  )
+
+  const operationalTruths = useMemo(
+    () => [
+      'Sem uptime rolling artificial ou incidentes inventados.',
+      'Status publico mede apenas o que os endpoints conseguem provar agora.',
+      'Evidencia L4 continua separada: exige producao real, nao apenas health checks.',
+    ],
+    []
+  )
+
+  const nextActions = useMemo(() => {
+    if (blockingSurfaces.some((surface) => surface.id === 'database')) {
+      return [
+        'Restabelecer conectividade com o banco de dados.',
+        'Revalidar readiness e runtime publico apos a conexao voltar.',
+      ]
+    }
+
+    if (blockingSurfaces.some((surface) => surface.id === 'runtime' || surface.id === 'readiness')) {
+      return [
+        'Recuperar liveness/readiness do app antes de promover qualquer narrativa publica.',
+        'Executar novo ciclo de checks para confirmar estabilidade do runtime.',
+      ]
+    }
+
+    if (partialSurfaces.some((surface) => surface.id === 'stripe' || surface.id === 'billing')) {
+      return [
+        'Completar checkout + webhook para transformar billing em capacidade vendavel.',
+        'Validar os planos e price IDs com o runtime de billing real.',
+      ]
+    }
+
+    if (partialSurfaces.some((surface) => surface.id === 'storage' || surface.id === 'cache' || surface.id === 'ai')) {
+      return [
+        'Fechar credenciais/configuracoes das dependencias opcionais ainda parciais.',
+        'Executar um novo check publico para confirmar o ganho de cobertura operacional.',
+      ]
+    }
+
+    return [
+      'Manter os checks publicos respondendo e ampliar evidencias de producao real.',
+      'Usar o admin de monitoramento para fechar os blockers de L4 que ainda nao aparecem aqui.',
+    ]
+  }, [blockingSurfaces, partialSurfaces])
+
   const overallTitle =
     overall === 'healthy'
       ? 'Runtime publico operacional'
@@ -346,6 +400,84 @@ export default function StatusPage() {
                 <li>- Ainda nao existe historico completo de incidentes nesta pagina.</li>
                 <li>- Evidence L4 e uma trilha diferente: depende de producao real, nao so destes checks publicos.</li>
               </ul>
+            </div>
+          </section>
+
+          <section className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Verdade operacional</p>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                {operationalTruths.map((truth) => (
+                  <div key={truth} className="rounded-[22px] border border-white/10 bg-black/10 p-4 text-sm leading-6 text-slate-300">
+                    {truth}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Proxima melhor acao</p>
+              <div className="mt-4 space-y-3">
+                {nextActions.map((action) => (
+                  <div key={action} className="rounded-[22px] border border-white/10 bg-black/10 px-4 py-3 text-sm leading-6 text-slate-200">
+                    {action}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-[28px] border border-rose-400/20 bg-rose-400/[0.06] p-6">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-100">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                Bloqueios publicos
+              </div>
+              <div className="mt-4 space-y-3">
+                {blockingSurfaces.length > 0 ? (
+                  blockingSurfaces.map((surface) => (
+                    <div key={surface.id} className="rounded-[22px] border border-rose-400/20 bg-black/10 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-white">{surface.name}</p>
+                        <span className="rounded-full border border-rose-300/20 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-rose-100">
+                          {stateLabel(surface.state)}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-rose-50/80">{surface.detail}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-[22px] border border-emerald-400/20 bg-black/10 p-4 text-sm leading-6 text-emerald-50/85">
+                    Nenhum bloqueio publico ativo nos checks obrigatorios desta pagina.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_8%,transparent)] p-6">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-warning-light)]">
+                <Clock3 className="h-3.5 w-3.5" />
+                Ainda parcial
+              </div>
+              <div className="mt-4 space-y-3">
+                {partialSurfaces.length > 0 ? (
+                  partialSurfaces.map((surface) => (
+                    <div key={surface.id} className="rounded-[22px] border border-white/10 bg-black/10 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-white">{surface.name}</p>
+                        <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--aethel-warning-light)]">
+                          {stateLabel(surface.state)}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-slate-300">{surface.detail}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-[22px] border border-emerald-400/20 bg-black/10 p-4 text-sm leading-6 text-emerald-50/85">
+                    Nenhuma superficie opcional esta marcada como parcial neste momento.
+                  </div>
+                )}
+              </div>
             </div>
           </section>
         </div>

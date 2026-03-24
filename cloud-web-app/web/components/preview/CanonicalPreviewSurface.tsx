@@ -33,14 +33,22 @@ export interface PreviewRuntimeInfo {
 }
 
 const LIFECYCLE_LABELS: Record<PreviewLifecycleState, string> = {
-  idle: 'Waiting for preview',
-  provisioning: 'Starting sandbox...',
-  warming: 'Warming up runtime...',
-  syncing: 'Syncing project files...',
-  healthy: 'Preview running',
-  degraded: 'Preview degraded',
-  failed: 'Preview failed',
+  idle: 'Aguardando preview',
+  provisioning: 'Provisionando sandbox',
+  warming: 'Aquecendo runtime',
+  syncing: 'Sincronizando arquivos',
+  healthy: 'Preview operacional',
+  degraded: 'Preview degradado',
+  failed: 'Preview com falha',
   offline: 'Preview offline',
+};
+
+const STRATEGY_LABELS: Record<PreviewStrategy, string> = {
+  e2b: 'sandbox gerenciado',
+  webcontainer: 'webcontainer',
+  iframe: 'runtime externo',
+  inline: 'inline',
+  none: 'sem runtime',
 };
 
 const LIFECYCLE_COLORS: Record<PreviewLifecycleState, string> = {
@@ -79,7 +87,12 @@ function PreviewSkeleton() {
     <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm">Loading preview...</p>
+        <div className="text-center">
+          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Preparando preview</p>
+          <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
+            Conectando runtime, arquivos e superficie visual.
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -89,15 +102,22 @@ function LifecycleIndicator({
   state,
   latencyMs,
   hmrConnected,
+  strategy,
 }: {
   state: PreviewLifecycleState;
   latencyMs: number | null;
   hmrConnected: boolean;
+  strategy?: PreviewStrategy;
 }) {
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur-sm border-b border-[var(--aethel-border-secondary)]/50 text-xs">
       <div className={`w-2 h-2 rounded-full ${LIFECYCLE_COLORS[state]}`} />
       <span className="text-[var(--aethel-text-secondary)]">{LIFECYCLE_LABELS[state]}</span>
+      {strategy && (
+        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+          {STRATEGY_LABELS[strategy]}
+        </span>
+      )}
       {latencyMs !== null && state === 'healthy' && (
         <span className="text-[var(--aethel-text-tertiary)]">{latencyMs}ms</span>
       )}
@@ -118,10 +138,12 @@ function PreviewFailedState({
   error,
   onRetry,
   onFallback,
+  strategy,
 }: {
   error: string | null;
   onRetry: () => void;
   onFallback?: () => void;
+  strategy?: PreviewStrategy;
 }) {
   return (
     <div className="flex flex-col items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] gap-4 p-6">
@@ -131,22 +153,29 @@ function PreviewFailedState({
         </svg>
       </div>
       <div className="text-center">
-        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-1">Preview Failed</h3>
-        <p className="text-xs text-[var(--aethel-text-tertiary)] max-w-xs">{error || 'Could not connect to preview runtime'}</p>
+        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-1">Preview indisponivel</h3>
+        <p className="text-xs text-[var(--aethel-text-tertiary)] max-w-xs">
+          {error || 'Nao foi possivel conectar o preview ao runtime atual.'}
+        </p>
+        {strategy && (
+          <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+            estrategia {STRATEGY_LABELS[strategy]}
+          </p>
+        )}
       </div>
       <div className="flex gap-2">
         <button
           onClick={onRetry}
           className="px-3 py-1.5 text-xs bg-violet-600 hover:bg-violet-500 text-[var(--aethel-text-primary)] rounded-md transition-colors"
         >
-          Retry
+          Tentar novamente
         </button>
         {onFallback && (
           <button
             onClick={onFallback}
             className="px-3 py-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] text-[var(--aethel-text-secondary)] rounded-md transition-colors"
           >
-            Use Inline Preview
+            Usar preview inline
           </button>
         )}
       </div>
@@ -419,12 +448,13 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
     return (
       <div className="flex flex-col h-full">
         {showLifecycleBar && (
-          <LifecycleIndicator state="failed" latencyMs={null} hmrConnected={false} />
+          <LifecycleIndicator state="failed" latencyMs={null} hmrConnected={false} strategy={runtime.strategy} />
         )}
         <PreviewFailedState
           error={runtime.error ?? runtimeUnavailableReason ?? null}
           onRetry={provision}
           onFallback={switchToInline}
+          strategy={runtime.strategy}
         />
       </div>
     );
@@ -434,7 +464,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
     return (
       <div className="flex flex-col h-full">
         {showLifecycleBar && (
-          <LifecycleIndicator state={effectiveState} latencyMs={null} hmrConnected={false} />
+          <LifecycleIndicator state={effectiveState} latencyMs={null} hmrConnected={false} strategy={runtime.strategy} />
         )}
         <PreviewSkeleton />
       </div>
@@ -448,6 +478,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           state={effectiveState}
           latencyMs={runtime.latencyMs}
           hmrConnected={runtime.hmrConnected}
+          strategy={runtime.strategy}
         />
       )}
       <div className="flex-1 relative">
@@ -465,7 +496,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
         />
         {isStale && (
           <div className="absolute top-1 right-1 px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)] text-[10px] rounded-full">
-            Stale
+            Atualizacao pendente
           </div>
         )}
       </div>

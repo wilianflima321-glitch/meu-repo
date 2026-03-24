@@ -1,14 +1,10 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import {
   AethelAPIClient,
   type BillingPlan,
-  type ChatMessage,
-  type CopilotWorkflowSummary,
   type ConnectivityResponse,
-  type PurchaseIntentResponse,
-  type TransferResponse,
   type WalletSummary,
 } from '@/lib/api'
 import { analytics } from '@/lib/analytics'
@@ -19,14 +15,7 @@ import {
 import { isAuthenticated } from '@/lib/auth'
 import { useAssetDownload } from '@/hooks/useAethelGateway'
 import {
-  type ActiveTab,
-  type DashboardSettings,
-  type Project,
-  type SessionFilter,
-  type ToastState,
   type ToastType,
-  type UseCase,
-  type WorkflowTemplate,
   STORAGE_KEYS,
 } from './dashboard/aethel-dashboard-model'
 import {
@@ -35,8 +24,6 @@ import {
   CREDITS_KEY,
   CURRENT_PLAN_KEY,
   DEFAULT_PROJECTS,
-  DEFAULT_USE_CASES,
-  DEFAULT_WORKFLOW_TEMPLATES,
   HEALTH_KEY,
   WALLET_KEY,
   formatConnectivityStatus as formatConnectivityStatusLabel,
@@ -54,77 +41,110 @@ import {
   PREVIEW_RUNTIME_URL_STORAGE_KEY,
   coerceActiveTab,
   type FullAccessResponse,
-  type Point3,
 } from './dashboard/aethel-dashboard-core-types'
 import { useFirstValueTracking } from './dashboard/useFirstValueTracking'
 import { useDashboardMissionSeed } from './dashboard/useDashboardMissionSeed'
 import { useDashboardStoragePersistence } from './dashboard/useDashboardStoragePersistence'
-import {
-  FIRST_VALUE_GUIDE_DISMISSED_KEY,
-  ONBOARDING_WIZARD_DISMISSED_KEY,
-} from './dashboard/aethel-dashboard-constants'
-import {
-  getInitialActiveTab,
-  getInitialChatHistory,
-  getInitialFirstValueGuideState,
-  getInitialSessionHistory,
-  getInitialSettings,
-} from './dashboard/aethel-dashboard-initial-state'
+import { useDashboardEntryIntent } from './dashboard/useDashboardEntryIntent'
+import { useDashboardUiState } from './dashboard/useDashboardUiState'
+import { ONBOARDING_WIZARD_DISMISSED_KEY } from './dashboard/aethel-dashboard-constants'
 import { useDashboardActions } from './dashboard/useDashboardActions'
 import { useDashboardDerivedState } from './dashboard/useDashboardDerivedState'
 
 export function useAethelDashboardRuntime() {
   const { mutate } = useSWRConfig()
-
-  const [workflowTemplates] = useState<WorkflowTemplate[]>(DEFAULT_WORKFLOW_TEMPLATES)
-  const [useCases] = useState<UseCase[]>(DEFAULT_USE_CASES)
-  const [showToast, setShowToast] = useState<ToastState | null>(null)
-  const [sessionHistory, setSessionHistory] = useState(getInitialSessionHistory)
-  const [sessionFilter, setSessionFilter] = useState<SessionFilter>('all')
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<ActiveTab>(getInitialActiveTab)
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>(getInitialChatHistory)
-  const [activeChatThreadId, setActiveChatThreadId] = useState<string | null>(null)
-  const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null)
-  const [copilotProjectId, setCopilotProjectId] = useState<string | null>(null)
-  const [copilotWorkflows, setCopilotWorkflows] = useState<CopilotWorkflowSummary[]>([])
-  const [copilotWorkflowsLoading, setCopilotWorkflowsLoading] = useState(false)
-  const [connectFromWorkflowId, setConnectFromWorkflowId] = useState('')
-  const [connectBusy, setConnectBusy] = useState(false)
-  const [chatMessage, setChatMessage] = useState('')
-  const [livePreviewSuggestions, setLivePreviewSuggestions] = useState<string[]>([])
-  const [selectedPreviewPoint, setSelectedPreviewPoint] = useState<Point3 | null>(null)
-  const [settings, setSettings] = useState<DashboardSettings>(getInitialSettings)
-  const [projects, setProjects] = useState<Project[]>(DEFAULT_PROJECTS)
-  const [newProjectName, setNewProjectName] = useState('')
-  const [newProjectType, setNewProjectType] = useState<Project['type']>('code')
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isStreaming, setIsStreaming] = useState(false)
-  const [miniPreviewExpanded, setMiniPreviewExpanded] = useState(true)
-  const [chatMode, setChatMode] = useState<'chat' | 'agent' | 'canvas'>('chat')
-  const [walletActionMessage, setWalletActionMessage] = useState<string | null>(null)
-  const [walletActionError, setWalletActionError] = useState<string | null>(null)
-  const [walletSubmitting, setWalletSubmitting] = useState(false)
-  const [purchaseForm, setPurchaseForm] = useState({ amount: '', currency: 'credits', reference: '' })
-  const [transferForm, setTransferForm] = useState({ targetUserId: '', amount: '', currency: 'credits', reference: '' })
-  const [lastPurchaseIntent, setLastPurchaseIntent] = useState<PurchaseIntentResponse | null>(null)
-  const [lastTransferReceipt, setLastTransferReceipt] = useState<TransferResponse | null>(null)
-  const [subscribeError, setSubscribeError] = useState<string | null>(null)
-  const [subscribingPlan, setSubscribingPlan] = useState<string | null>(null)
-  const [aiProviderGate, setAiProviderGate] = useState<{ message: string; capabilityStatus?: string; setupUrl?: string } | null>(null)
-  const [firstValueAiSuccess, setFirstValueAiSuccess] = useState(false)
-  const [firstValueOpenedIde, setFirstValueOpenedIde] = useState(false)
-  const [fullAccessBusy, setFullAccessBusy] = useState(false)
-  const [showFirstValueGuide, setShowFirstValueGuide] = useState(() =>
-    getInitialFirstValueGuideState(FIRST_VALUE_GUIDE_DISMISSED_KEY)
-  )
-  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false)
-  const chatAbortRef = useRef<AbortController | null>(null)
-  const [isTrialActive] = useState(true)
-  const [showTrialBanner, setShowTrialBanner] = useState(true)
-  const trialDaysLeft = 14
-  const [hasToken, setHasToken] = useState(false)
-  const [authReady, setAuthReady] = useState(false)
+  const { mission: entryMission, source: entrySource, dismissEntryIntent } = useDashboardEntryIntent()
+  const {
+    workflowTemplates,
+    useCases,
+    showToast,
+    setShowToast,
+    sessionHistory,
+    setSessionHistory,
+    sessionFilter,
+    setSessionFilter,
+    sidebarOpen,
+    setSidebarOpen,
+    activeTab,
+    setActiveTab,
+    chatHistory,
+    setChatHistory,
+    activeChatThreadId,
+    setActiveChatThreadId,
+    activeWorkflowId,
+    setActiveWorkflowId,
+    copilotProjectId,
+    setCopilotProjectId,
+    copilotWorkflows,
+    setCopilotWorkflows,
+    copilotWorkflowsLoading,
+    setCopilotWorkflowsLoading,
+    connectFromWorkflowId,
+    setConnectFromWorkflowId,
+    connectBusy,
+    setConnectBusy,
+    chatMessage,
+    setChatMessage,
+    livePreviewSuggestions,
+    setLivePreviewSuggestions,
+    selectedPreviewPoint,
+    setSelectedPreviewPoint,
+    settings,
+    setSettings,
+    projects,
+    setProjects,
+    newProjectName,
+    setNewProjectName,
+    newProjectType,
+    setNewProjectType,
+    isGenerating,
+    setIsGenerating,
+    isStreaming,
+    setIsStreaming,
+    miniPreviewExpanded,
+    setMiniPreviewExpanded,
+    chatMode,
+    setChatMode,
+    walletActionMessage,
+    setWalletActionMessage,
+    walletActionError,
+    setWalletActionError,
+    walletSubmitting,
+    setWalletSubmitting,
+    purchaseForm,
+    setPurchaseForm,
+    transferForm,
+    setTransferForm,
+    lastPurchaseIntent,
+    setLastPurchaseIntent,
+    lastTransferReceipt,
+    setLastTransferReceipt,
+    subscribeError,
+    setSubscribeError,
+    subscribingPlan,
+    setSubscribingPlan,
+    aiProviderGate,
+    setAiProviderGate,
+    firstValueAiSuccess,
+    setFirstValueAiSuccess,
+    firstValueOpenedIde,
+    setFirstValueOpenedIde,
+    fullAccessBusy,
+    setFullAccessBusy,
+    showFirstValueGuide,
+    setShowFirstValueGuide,
+    showOnboardingWizard,
+    setShowOnboardingWizard,
+    chatAbortRef,
+    isTrialActive,
+    showTrialBanner,
+    setShowTrialBanner,
+    trialDaysLeft,
+    hasToken,
+    setHasToken,
+    authReady,
+    setAuthReady,
+  } = useDashboardUiState()
 
   const { startDownload } = useAssetDownload()
 
@@ -223,7 +243,7 @@ export function useAethelDashboardRuntime() {
     if (typeof window !== 'undefined') {
       window.setTimeout(() => setShowToast(null), 3000)
     }
-  }, [])
+  }, [setShowToast])
 
   const persistCopilotScope = useCallback((workflowId: string | null, threadId: string | null) => {
     if (typeof window === 'undefined') return
@@ -242,13 +262,15 @@ export function useAethelDashboardRuntime() {
       entry,
       projectId: copilotProjectId,
       previewRuntimeStorageKey: PREVIEW_RUNTIME_URL_STORAGE_KEY,
+      source,
+      mission: entryMission,
     }).then(({ params, runtimeUrl, discoveryStatus }) => {
       if (discoveryStatus !== 'stored') {
         trackEvent('engine', 'render_time', { source: 'dashboard-handoff-runtime-discovery', status: discoveryStatus, runtimeUrl })
       }
       window.location.assign(`/ide?${params.toString()}`)
     })
-  }, [copilotProjectId, trackEvent])
+  }, [copilotProjectId, entryMission, trackEvent])
   const {
     handleTabChange,
     handleOpenProviderSettings,
@@ -378,7 +400,7 @@ export function useAethelDashboardRuntime() {
     if (forced || (!dismissed && showFirstValueGuide)) {
       setShowOnboardingWizard(true)
     }
-  }, [authReady, hasToken, showFirstValueGuide])
+  }, [authReady, hasToken, setShowOnboardingWizard, showFirstValueGuide])
 
   useEffect(() => {
     setAuthReady(true)
@@ -386,7 +408,7 @@ export function useAethelDashboardRuntime() {
     setCopilotProjectId(getProjectIdFromLocation())
     trackEvent('engine', 'editor_open', { surface: 'dashboard' })
     analytics?.trackPageLoad?.('dashboard')
-  }, [trackEvent])
+  }, [setAuthReady, setCopilotProjectId, setHasToken, trackEvent])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -396,7 +418,7 @@ export function useAethelDashboardRuntime() {
     const nextTab = coerceActiveTab(tab)
     setActiveTab(nextTab)
     window.localStorage.setItem(STORAGE_KEYS.activeTab, nextTab)
-  }, [])
+  }, [setActiveTab])
 
   useEffect(() => {
     if (!authReady || !hasToken) return
@@ -424,7 +446,7 @@ export function useAethelDashboardRuntime() {
     })()
 
     return () => controller.abort()
-  }, [authReady, hasToken, trackEvent])
+  }, [authReady, hasToken, setAiProviderGate, trackEvent])
 
   useEffect(() => {
     if (typeof document === 'undefined') return
@@ -447,7 +469,7 @@ export function useAethelDashboardRuntime() {
     if (storedThread) {
       setActiveChatThreadId(storedThread)
     }
-  }, [hasToken, copilotProjectId])
+  }, [hasToken, copilotProjectId, setActiveChatThreadId, setActiveWorkflowId])
 
   useEffect(() => {
     if (!hasToken) {
@@ -475,7 +497,7 @@ export function useAethelDashboardRuntime() {
         showToastMessage('Falha ao carregar workflows do Copilot.', 'error')
       }
     })()
-  }, [hasToken, copilotProjectId, activeWorkflowId, persistCopilotScope, showToastMessage])
+  }, [activeWorkflowId, copilotProjectId, hasToken, persistCopilotScope, setActiveChatThreadId, setActiveWorkflowId, setCopilotWorkflows, showToastMessage])
 
   useEffect(() => {
     if (!activeChatThreadId) return
@@ -487,7 +509,7 @@ export function useAethelDashboardRuntime() {
         setChatHistory([])
       }
     })()
-  }, [activeChatThreadId])
+  }, [activeChatThreadId, setChatHistory])
 
   const dashboardMainProps = {
     activeTab, showFirstValueGuide, firstProjectCreated: projects.length > DEFAULT_PROJECTS.length, firstValueAiSuccess, firstValueOpenedIde, firstValueSessionSummary, onFirstValueStartTemplate: handleTemplateSelect,
@@ -508,6 +530,13 @@ export function useAethelDashboardRuntime() {
       livePreviewSuggestions,
       authReady,
       hasToken,
+      backendOnline,
+      aiProviderConfigured: !aiProviderGate,
+      currentPlanName: currentPlan?.name || currentPlan?.id || null,
+      onOpenProjects: () => handleTabChange('projects'),
+      onOpenAiChat: handleOpenAIChatFromGuide,
+      onOpenIde: handleOpenIdeFromHeader,
+      onOpenBilling: () => handleTabChange('billing'),
       onRefreshWallet: handleRefreshWallet,
       lastWalletUpdate,
       walletLoading,
@@ -527,16 +556,18 @@ export function useAethelDashboardRuntime() {
       isGenerating,
     },
     projectsProps: {
-      projects, newProjectName, newProjectType,
+      projects, newProjectName, newProjectType, entryMission,
       onDeleteProject: handleDeleteProject,
       onCreateProject: handleCreateProject,
       onProjectNameChange: setNewProjectName,
       onProjectTypeChange: setNewProjectType,
       onProjectVersionChange: handleProjectVersionChange,
       onApplyDirectorNote: handleApplyDirectorNote,
+      onOpenAiChat: () => handleTabChange('ai-chat'),
+      onOpenIde: handleOpenIdeFromHeader,
     },
     aiChatProps: {
-      chatMode, onChatModeChange: setChatMode, chatHistory, chatMessage, onChatMessageChange: setChatMessage,
+      chatMode, onChatModeChange: setChatMode, entryMission, chatHistory, chatMessage, onChatMessageChange: setChatMessage,
       onSendChatMessage: handleSendChatMessage,
       onStopStreaming: handleStopDashboardChat,
       isStreaming,
@@ -555,6 +586,8 @@ export function useAethelDashboardRuntime() {
       onMergeWorkflow: handleMergeWorkflow,
       providerSetupGate: aiProviderGate,
       onOpenProviderSettings: handleOpenProviderSettings,
+      onOpenProjects: () => handleTabChange('projects'),
+      onOpenIde: handleOpenIdeFromHeader,
     },
     walletProps: {
       authReady, hasToken, walletLoading, walletError, walletData, walletTransactions,
@@ -626,6 +659,10 @@ export function useAethelDashboardRuntime() {
     onCreateNewSession: handleCreateNewSession,
     onSelectSessionFilter: setSessionFilter,
     onSelectTab: handleTabChange,
+    entryMission,
+    entrySource,
+    onResumeEntryMission: () => handleTabChange('ai-chat'),
+    onDismissEntryIntent: dismissEntryIntent,
     showOnboardingWizard,
     onOnboardingComplete: handleOnboardingComplete,
     onOnboardingSkip: handleOnboardingSkip,
