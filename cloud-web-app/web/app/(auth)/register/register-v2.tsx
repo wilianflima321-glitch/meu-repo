@@ -22,15 +22,15 @@ type AuthResponse = {
 
 const DEFAULT_MISSION = 'Criar primeiro projeto web com chat e live preview'
 const REGISTER_HIGHLIGHTS = [
-  'Wizard de onboarding para escolher missao, template e provider sem navegar por telas soltas.',
-  'Studio Home com projetos, sinais de readiness, billing e conectividade em uma unica shell.',
-  'Entrada pensada para levar voce ao primeiro valor e nao apenas para abrir mais um dashboard vazio.',
+  'Wizard de onboarding para escolher missao e template sem navegar por telas soltas.',
+  'Studio Home com projetos, readiness e billing em uma unica shell.',
+  'Entrada pensada para levar voce ao primeiro valor, nao a um dashboard vazio.',
 ]
 
 const REGISTER_STATS = [
   { value: '90s', label: 'alvo de first value' },
   { value: 'Apps', label: 'dominio principal' },
-  { value: 'Multi', label: 'agent workflow' },
+  { value: 'Multi', label: 'workflow guiado' },
 ]
 
 const SOCIAL_AUTH_MESSAGE =
@@ -149,7 +149,7 @@ export default function RegisterPageV2() {
               </div>
               <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Criar conta no Aethel</h1>
               <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Entre no Studio Home e siga para o onboarding com projeto, contexto e preview no mesmo fluxo.
+                Entre no Studio Home e siga para onboarding, projeto e preview no mesmo fluxo.
               </p>
             </div>
 
@@ -233,10 +233,10 @@ export default function RegisterPageV2() {
 
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                  Primeiro passo apos criar
+                  Primeiro passo
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                  Voce segue para o dashboard com onboarding ativo e missao inicial preparada para acelerar o primeiro valor.
+                  Voce segue para o dashboard com onboarding ativo e missao inicial preparada.
                 </p>
               </div>
 
@@ -298,13 +298,13 @@ export default function RegisterPageV2() {
             eyebrow="Primeiro acesso"
             domainLabel={`Onboarding ${requestedPlan}`}
             title="Crie a conta ja com o contexto certo para entrar no produto."
-            description="O cadastro precisa preparar o usuario para usar o studio, nao apenas empilhar campos. Por isso a experiencia aponta para missao, onboarding e fluxo operacional logo na entrada."
+            description="O cadastro precisa preparar o usuario para usar o studio, nao apenas empilhar campos."
             highlights={REGISTER_HIGHLIGHTS}
             stats={REGISTER_STATS}
             visual={{
               src: '/screenshots/editor.png',
               alt: 'Workbench do Aethel Studio',
-              caption: 'O primeiro acesso precisa apontar para um produto real: chat, editor, preview e proximas etapas legiveis no mesmo workbench.',
+              caption: 'O primeiro acesso precisa apontar para chat, editor e preview no mesmo workbench.',
               chips: ['Mission-first', 'Onboarding guiado', 'IDE + preview'],
             }}
           />

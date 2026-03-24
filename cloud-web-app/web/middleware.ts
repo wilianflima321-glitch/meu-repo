@@ -29,10 +29,10 @@ const getCSP = () => {
     "default-src 'self'",
     // Scripts: self + inline for Next.js hydration + eval for dev hot reload
     `script-src 'self' ${isDev ? "'unsafe-eval'" : ""} 'unsafe-inline' https://cdn.jsdelivr.net`,
-    // Styles: self + inline for styled-components/emotion
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    // Styles: self + inline for styled-components/emotion + jsdelivr compatibility for legacy/vendor assets
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
     // Fonts
-    "font-src 'self' https://fonts.gstatic.com data:",
+    "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:",
     // Images: self + data URIs + blob for canvas + external
     "img-src 'self' data: blob: https:",
     // Connect: APIs, WebSocket, external services

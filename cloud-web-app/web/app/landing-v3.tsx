@@ -102,9 +102,9 @@ const PRICING_TEASER = [
 ]
 
 const SOCIAL_PROOF = [
-  { label: 'Workflows orientados a entrega', detail: 'Da missao inicial ao ambiente pronto para validar' },
-  { label: 'Governanca operacional embutida', detail: 'Status, rollback e readiness no mesmo studio' },
-  { label: 'Experiencia unificada', detail: 'Research, codigo e preview conectados em um unico fluxo' },
+  { label: 'Fluxo orientado a entrega', detail: 'Da missao ao ambiente validavel' },
+  { label: 'Governanca embutida', detail: 'Status e readiness no mesmo studio' },
+  { label: 'Experiencia unificada', detail: 'Research, codigo e preview no mesmo fluxo' },
 ]
 
 function ScreenshotCard({
@@ -112,11 +112,13 @@ function ScreenshotCard({
   alt,
   title,
   subtitle,
+  priority = false,
 }: {
   src: string
   alt: string
   title: string
   subtitle: string
+  priority?: boolean
 }) {
   return (
     <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.92))] shadow-[0_24px_90px_rgba(2,6,23,0.42)]">
@@ -131,7 +133,7 @@ function ScreenshotCard({
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
         </div>
       </div>
-      <Image src={src} alt={alt} width={1600} height={960} className="h-auto w-full object-cover" />
+      <Image src={src} alt={alt} width={1600} height={960} className="h-auto w-full object-cover" priority={priority} />
     </div>
   )
 }
@@ -260,6 +262,7 @@ export default function LandingPageV3() {
                 alt="Dashboard do Aethel"
                 title="Studio Home"
                 subtitle="projetos, onboarding, billing e sinais de readiness"
+                priority
               />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[26px] border border-white/10 bg-white/[0.04] p-5">
@@ -290,12 +293,12 @@ export default function LandingPageV3() {
               <div className="flex items-center justify-between">
                 <div>
                   <GlowBadge color="info">Tour visual</GlowBadge>
-                  <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja como o studio organiza o trabalho</h2>
+                  <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja o studio em uma tela</h2>
                 </div>
                 <span className="text-xs text-[var(--aethel-text-secondary)]">Screenshot real</span>
               </div>
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
-                Uma visao do studio em operacao: missao, contexto, execucao e validacao reunidos no mesmo ambiente.
+                Missao, contexto, execucao e validacao reunidos no mesmo ambiente.
               </p>
               <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
                 <Image
@@ -304,12 +307,13 @@ export default function LandingPageV3() {
                   width={1600}
                   height={960}
                   className="h-auto w-full object-cover"
+                  priority
                 />
               </div>
             </GlassCard>
 
             <div className="space-y-4">
-              <h3 className="text-sm uppercase tracking-[0.32em] text-[var(--aethel-text-secondary)]">Por que o produto passa credibilidade</h3>
+            <h3 className="text-sm uppercase tracking-[0.32em] text-[var(--aethel-text-secondary)]">Sinais de maturidade</h3>
               <div className="space-y-3">
                 {SOCIAL_PROOF.map((item) => (
                   <div
@@ -324,9 +328,7 @@ export default function LandingPageV3() {
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-slate-400">
-                A proposta de valor aqui prioriza clareza de produto, fluxo real e operacao visivel para equipes modernas.
-              </p>
+              <p className="text-xs text-slate-400">Menos tela solta, mais caminho claro para entrar, iterar e validar.</p>
             </div>
           </div>
         </section>
@@ -334,10 +336,10 @@ export default function LandingPageV3() {
 <section className="border-y border-white/[0.06] bg-slate-950/45">
           <div className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
             {[
-              { value: '1', label: 'studio unificado' },
-              { value: '3', label: 'papeis multi-agent' },
+              { value: '1 studio', label: 'entrada unica' },
+              { value: '3 papeis', label: 'architect, engineer, critic' },
               { value: '1 fluxo', label: 'research ate validacao' },
-              { value: '24h', label: 'tempo alvo de resposta comercial' },
+              { value: '0 fake', label: 'sem promessas infladas' },
             ].map((item) => (
               <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-5 text-center">
                 <p className="text-3xl font-semibold text-white">{item.value}</p>
@@ -398,13 +400,11 @@ export default function LandingPageV3() {
 
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="mb-10 max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200">Diferenciais</p>
-            <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              O produto precisa parecer um studio, nao um conjunto de telas soltas.
-            </h2>
-            <p className="mt-4 text-base leading-7 text-slate-400">
-              Esses blocos sao os que mais importam para perceber valor real na experiencia: contexto, seguranca de operacao e prova visual do workflow.
-            </p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200">Diferenciais</p>
+                <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
+              Tudo precisa parecer um studio, nao um conjunto de telas soltas.
+                </h2>
+            <p className="mt-4 text-base leading-7 text-slate-400">Contexto, seguranca operacional e prova visual do fluxo precisam aparecer sem excesso de explicacao.</p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -432,7 +432,7 @@ export default function LandingPageV3() {
                   Fluxo unico, do onboarding ao estado operacional.
                 </h2>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-                  A plataforma precisa eliminar a sensacao de troca de produto entre marketing, dashboard e IDE. O caminho ideal e unico: entrar, iniciar, iterar e validar no mesmo ambiente.
+                  Entrar, iniciar, iterar e validar no mesmo ambiente. Esse e o padrao que a experiencia inteira precisa seguir.
                 </p>
               </div>
               <ScreenshotCard
@@ -461,7 +461,7 @@ export default function LandingPageV3() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Proximo passo</p>
               <h2 className="mt-3 text-3xl font-semibold text-white">Entre pelo studio e siga com o fluxo real do produto.</h2>
               <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-                Se quiser avaliar compra, veja pricing com o estado atual do billing. Se quiser testar o produto, abra o studio direto e siga pelo onboarding.
+                Para avaliar compra, veja pricing. Para testar o produto, abra o studio e siga pelo onboarding.
               </p>
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">

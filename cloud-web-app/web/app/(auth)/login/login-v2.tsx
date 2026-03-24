@@ -22,15 +22,15 @@ type AuthResponse = {
 
 const DEFAULT_REDIRECT = '/dashboard'
 const LOGIN_HIGHLIGHTS = [
-  'Studio Home com projetos, onboarding, billing e sinais de readiness na mesma superficie.',
-  'IDE com chat, preview e loops operacionais conectados ao contexto do projeto.',
-  'Governanca explicita: o produto mostra o que esta pronto, parcial ou bloqueado.',
+  'Studio Home com projetos, onboarding e billing na mesma superficie.',
+  'IDE com chat, preview e contexto do projeto conectados.',
+  'Readiness explicita para mostrar o que esta pronto ou parcial.',
 ]
 
 const LOGIN_STATS = [
-  { value: 'Apps', label: 'foco principal' },
-  { value: 'L4', label: 'target operacional' },
-  { value: '11', label: 'quality gates' },
+  { value: 'Apps', label: 'foco atual' },
+  { value: 'IDE', label: 'workbench continuo' },
+  { value: 'L4', label: 'readiness visivel' },
 ]
 
 export default function LoginPageV2() {
@@ -141,7 +141,7 @@ export default function LoginPageV2() {
               </div>
               <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Entrar no Studio</h1>
               <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Retome seu projeto, continue no IDE e mantenha preview, billing e operacao no mesmo fluxo.
+                Retome seu projeto e siga no mesmo fluxo entre dashboard, IDE e preview.
               </p>
             </div>
 
@@ -235,13 +235,11 @@ export default function LoginPageV2() {
               </button>
             </div>
 
-            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">
-              Login social aparece aqui assim que Google e GitHub OAuth forem ligados no runtime. Enquanto isso, a entrada oficial continua por email e senha.
-            </p>
+            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">OAuth entra assim que Google e GitHub forem ligados. Por enquanto, o acesso oficial continua por email e senha.</p>
 
             <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                Redirecionamento
+                Proximo passo
               </p>
               <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
                 Depois do login, voce segue para <span className="font-medium text-[var(--aethel-text-primary)]">{nextTarget}</span>.
@@ -260,13 +258,13 @@ export default function LoginPageV2() {
             eyebrow="Acesso operacional"
             domainLabel="Apps + research"
             title="Entre para continuar no mesmo fluxo de produto."
-            description="Aethel nao separa descoberta, execucao e validacao em ferramentas desconectadas. O login devolve voce ao fluxo real do studio."
+            description="O login devolve voce ao fluxo real do studio em vez de abrir uma area isolada."
             highlights={LOGIN_HIGHLIGHTS}
             stats={LOGIN_STATS}
             visual={{
               src: '/screenshots/dashboard.png',
               alt: 'Dashboard do Aethel Studio',
-              caption: 'A superficie principal ja entrega contexto de projeto, sinais de readiness, proximas acoes e entrada para o workbench.',
+              caption: 'A superficie principal ja entrega contexto, sinais de readiness e entrada para o workbench.',
               chips: ['Dashboard shell', 'Billing readiness', 'Onboarding guiado'],
             }}
           />

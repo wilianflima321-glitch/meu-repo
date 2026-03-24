@@ -135,6 +135,11 @@ function ToastItem({
 
   const duration = toast.duration || 5000;
 
+  const handleDismiss = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => onRemove(toast.id), 300);
+  }, [onRemove, toast.id]);
+
   useEffect(() => {
     if (duration === Infinity) return;
 
@@ -151,12 +156,7 @@ function ToastItem({
     }, 50);
 
     return () => clearInterval(interval);
-  }, [duration]);
-
-  const handleDismiss = () => {
-    setIsExiting(true);
-    setTimeout(() => onRemove(toast.id), 300);
-  };
+  }, [duration, handleDismiss]);
 
   const typeStyles = {
     success: {

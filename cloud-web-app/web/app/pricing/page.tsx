@@ -44,15 +44,15 @@ const FAQ_ITEMS = [
 const DECISION_PATH = [
   {
     title: 'Entrar rapido',
-    desc: 'Starter e Basic para validar contexto, onboarding, AI chat e rotina inicial sem travar a avaliacao.',
+    desc: 'Starter e Basic para validar onboarding, contexto e rotina inicial.',
   },
   {
     title: 'Operar de verdade',
-    desc: 'Pro para quem precisa throughput, modelos melhores e uma experiencia mais proxima do uso continuo.',
+    desc: 'Pro para throughput maior, melhores modelos e uso continuo.',
   },
   {
     title: 'Escalar com time',
-    desc: 'Studio e Enterprise para seats, governanca, rollout e integracao com requisitos mais altos.',
+    desc: 'Studio e Enterprise para seats, governanca e rollout do time.',
   },
 ]
 
@@ -105,7 +105,7 @@ export default function PricingPage() {
                 Pricing alinhado ao uso real do studio
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--aethel-text-secondary)]">
-                O foco comercial do produto hoje e Apps + Research. Os planos foram organizados para refletir volume, contexto e colaboracao sem esconder limites em letras pequenas.
+                O foco comercial hoje e Apps + Research. Os planos refletem volume, contexto e colaboracao sem esconder limites.
               </p>
 
               <div className="mt-8 flex flex-wrap justify-start gap-3">
@@ -166,13 +166,14 @@ export default function PricingPage() {
                   fill
                   sizes="(min-width: 1024px) 40vw, 100vw"
                   className="object-cover object-top"
+                  priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
               </div>
 
               <div className="space-y-4 px-5 py-5">
                 <p className="text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                  A proposta comercial nao termina em uma grade de preco. O studio precisa entregar onboarding, projeto, contexto, billing e proximas acoes na mesma shell.
+                  O plano certo depende do ritmo do time e do quanto do fluxo principal voce quer usar desde o primeiro dia.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Studio home</span>

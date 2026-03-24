@@ -637,7 +637,7 @@ export function MobileFAB({
   );
 }
 
-export default {
+const mobileGestures = {
   MobileGestureProvider,
   SwipeablePanel,
   PullToRefresh,
@@ -645,3 +645,5 @@ export default {
   MobileNavBar,
   MobileFAB,
 };
+
+export default mobileGestures;

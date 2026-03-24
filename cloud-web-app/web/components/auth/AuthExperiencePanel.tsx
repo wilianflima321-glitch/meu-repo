@@ -1,6 +1,5 @@
-'use client'
-
 import Image from 'next/image'
+import { CheckCircle2 } from 'lucide-react'
 
 type AuthExperiencePanelProps = {
   eyebrow: string
@@ -56,7 +55,7 @@ export default function AuthExperiencePanel({
         <h2 className="mt-5 max-w-xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
           {title}
         </h2>
-        <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+        <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
           {description}
         </p>
 
@@ -76,12 +75,12 @@ export default function AuthExperiencePanel({
           <div className="mt-8 overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.04] shadow-[0_24px_60px_rgba(15,23,42,0.45)]">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Fluxo real</p>
-                <p className="mt-1 text-sm text-white">Studio shell com prova visual do produto</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Studio real</p>
+                <p className="mt-1 text-sm text-white">A mesma shell que o usuario encontra ao entrar</p>
               </div>
               <div className="flex items-center gap-2 text-[11px] text-emerald-200">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Superficie viva
+                Interface ativa
               </div>
             </div>
 
@@ -116,14 +115,12 @@ export default function AuthExperiencePanel({
 
         <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-            O que voce encontra ao entrar
+            O que aparece primeiro
           </p>
           <div className="mt-4 space-y-3">
-            {highlights.map((item, index) => (
+            {highlights.map((item) => (
               <div key={item} className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-emerald-400/20 bg-emerald-400/10 text-[11px] font-semibold text-emerald-200">
-                  {index + 1}
-                </div>
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
                 <p className="text-sm leading-6 text-slate-300">{item}</p>
               </div>
             ))}
