@@ -1,4 +1,4 @@
-# 00_INDEX
+ï»¿# 00_INDEX
 Date: 2026-03-20
 Status: CANONICAL ENTRYPOINT
 
@@ -30,17 +30,19 @@ Status: CANONICAL ENTRYPOINT
 25. `docs/master/45_AI_SYSTEM_SPEC_2026-03-22.md`
 26. `docs/master/46_LIMITATIONS_2026-03-22.md`
 27. `docs/master/41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
-27. `docs/master/48_WORKBENCH_SPEC_2026-03-22.md`
-28. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
-29. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
-30. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
-31. `docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md`
-32. `docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md`
-33. `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`
-34. `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
-35. `docs/master/40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md`
-36. `docs/master/41_AUDITORIA_MAXIMA_2026-03-20.md`
-37. `docs/master/42_RELATORIO_COMPLETO_PENDENCIAS_2026-03-20.md`
+28. `docs/master/48_WORKBENCH_SPEC_2026-03-22.md`
+29. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
+30. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
+31. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
+32. `docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md`
+33. `docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md`
+34. `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`
+35. `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
+36. `docs/master/40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md`
+37. `docs/master/41_AUDITORIA_MAXIMA_2026-03-20.md`
+38. `docs/master/42_RELATORIO_COMPLETO_PENDENCIAS_2026-03-20.md`
+39. `docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md`
+40. `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -77,7 +79,9 @@ Status: CANONICAL ENTRYPOINT
 | `38_L5_EXECUTION_BOARD_2026-03-10.md` | Master tracking board for L4/L5 execution | ACTIVE |
 | `39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md` | Unified Studio information architecture and navigation contract | ACTIVE |
 | `40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md` | Consolidated L5 execution plan and dependency graph | ACTIVE |
-| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificação) | ACTIVE (DRAFT) |
+| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificaÃ§Ã£o) | ACTIVE (DRAFT) |
+| `65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for navigation, layers, screens and handoffs | ACTIVE |
+| `66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for multi-agent UX, status, cost, confidence, approvals, memory and context | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -198,5 +202,6 @@ Status: CANONICAL ENTRYPOINT
 - Always start from this file.
 - Do not use `docs/archive/` as source of truth.
 - Do not claim completion without file-level evidence.
+
 
 
