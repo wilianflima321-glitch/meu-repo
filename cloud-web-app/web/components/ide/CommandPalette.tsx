@@ -1,4 +1,4 @@
-'use client'
+ï»¿'use client'
 
 import {
   createContext,
@@ -166,7 +166,7 @@ function createDefaultCommands(handlers: {
     {
       id: 'edit.undo',
       label: 'Desfazer',
-      description: 'Desfazer a última ação',
+      description: 'Desfazer a ultima acao',
       category: 'edit',
       shortcut: 'Ctrl+Z',
       action: handlers.undo || (() => {}),
@@ -176,7 +176,7 @@ function createDefaultCommands(handlers: {
     {
       id: 'edit.redo',
       label: 'Refazer',
-      description: 'Refazer a ação desfeita',
+      description: 'Refazer a acao desfeita',
       category: 'edit',
       shortcut: 'Ctrl+Y',
       action: handlers.redo || (() => {}),
@@ -739,4 +739,5 @@ export function useRegisterCommand(command: CommandItem, deps: unknown[] = []) {
 }
 
 export default CommandPaletteProvider
+
 
