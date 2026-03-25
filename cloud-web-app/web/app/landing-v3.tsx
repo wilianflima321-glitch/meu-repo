@@ -5,16 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import {
-  Activity,
-  ArrowRight,
-  CheckCircle2,
-  GitFork,
-  Layers,
-  Search,
-  Shield,
-  Sparkles,
-} from 'lucide-react'
+import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import { GlassCard, GradientButton, GlowBadge } from '@/components/ui/premium'
@@ -24,29 +15,6 @@ const QUICK_MISSIONS = [
   'Criar dashboard SaaS com auth, billing e deploy',
   'Planejar e implementar um app fullstack com Prisma',
   'Abrir o studio e seguir com onboarding guiado',
-]
-
-const VALUE_POINTS = [
-  {
-    icon: Layers,
-    title: 'Multi-agent com papeis reais',
-    description: 'Architect, Engineer e Critic operam com responsabilidades explicitas, nao como um chat monolitico.',
-  },
-  {
-    icon: Shield,
-    title: 'Politica anti-fake-success',
-    description: 'Quando preview, billing ou outro runtime estiver parcial, o produto mostra isso em vez de simular sucesso.',
-  },
-  {
-    icon: Search,
-    title: 'Research -> Plan -> Code',
-    description: 'Pesquisa, planejamento, implementacao e validacao ficam no mesmo fluxo operacional.',
-  },
-  {
-    icon: GitFork,
-    title: 'Rollback e auditoria',
-    description: 'Apply, rollback e readiness seguem o mesmo contrato e deixam trilha operacional visivel.',
-  },
 ]
 
 const WORKFLOW = [
@@ -101,9 +69,9 @@ const PRICING_TEASER = [
   },
 ]
 
-const SOCIAL_PROOF = [
+const PROOF_STRIP = [
   { label: 'Fluxo orientado a entrega', detail: 'Da missao ao ambiente validavel' },
-  { label: 'Governanca embutida', detail: 'Status e readiness no mesmo studio' },
+  { label: 'Governanca visivel', detail: 'Status e readiness no mesmo studio' },
   { label: 'Experiencia unificada', detail: 'Research, codigo e preview no mesmo fluxo' },
 ]
 
@@ -288,65 +256,36 @@ export default function LandingPageV3() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <GlassCard variant="elevated" border={false} className="p-6 sm:p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <GlowBadge color="info">Tour visual</GlowBadge>
-                  <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja o studio em uma tela</h2>
-                </div>
-                <span className="text-xs text-[var(--aethel-text-secondary)]">Screenshot real</span>
+          <GlassCard variant="elevated" border={false} className="p-6 sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <GlowBadge color="info">Studio real</GlowBadge>
+                <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja o fluxo inteiro em uma tela</h2>
+                <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
+                  Missao, contexto, execucao e validacao no mesmo ambiente operacional.
+                </p>
               </div>
-              <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">
-                Missao, contexto, execucao e validacao reunidos no mesmo ambiente.
-              </p>
-              <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
-                <Image
-                  src="/screenshots/editor.png"
-                  alt="Aethel Studio com editor, contexto e preview integrados"
-                  width={1600}
-                  height={960}
-                  className="h-auto w-full object-cover"
-                  priority
-                />
-              </div>
-            </GlassCard>
-
-            <div className="space-y-4">
-            <h3 className="text-sm uppercase tracking-[0.32em] text-[var(--aethel-text-secondary)]">Sinais de maturidade</h3>
-              <div className="space-y-3">
-                {SOCIAL_PROOF.map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4"
-                  >
-                    <CheckCircle2 className="mt-1 h-4 w-4 text-emerald-300" />
-                    <div>
-                      <p className="text-sm font-semibold text-white">{item.label}</p>
-                      <p className="text-xs text-slate-400">{item.detail}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-slate-400">Menos tela solta, mais caminho claro para entrar, iterar e validar.</p>
+              <span className="text-xs text-[var(--aethel-text-secondary)]">Screenshot real</span>
             </div>
-          </div>
-        </section>
-
-<section className="border-y border-white/[0.06] bg-slate-950/45">
-          <div className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
-            {[
-              { value: '1 studio', label: 'entrada unica' },
-              { value: '3 papeis', label: 'architect, engineer, critic' },
-              { value: '1 fluxo', label: 'research ate validacao' },
-              { value: '0 fake', label: 'sem promessas infladas' },
-            ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-5 text-center">
-                <p className="text-3xl font-semibold text-white">{item.value}</p>
-                <p className="mt-1 text-sm text-slate-400">{item.label}</p>
-              </div>
-            ))}
-          </div>
+            <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
+              <Image
+                src="/screenshots/editor.png"
+                alt="Aethel Studio com editor, contexto e preview integrados"
+                width={1600}
+                height={960}
+                className="h-auto w-full object-cover"
+                priority
+              />
+            </div>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {PROOF_STRIP.map((item) => (
+                <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
+                  <p className="text-sm font-semibold text-white">{item.label}</p>
+                  <p className="mt-1 text-xs text-slate-400">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
@@ -398,49 +337,16 @@ export default function LandingPageV3() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="mb-10 max-w-3xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200">Diferenciais</p>
-                <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              Tudo precisa parecer um studio, nao um conjunto de telas soltas.
-                </h2>
-            <p className="mt-4 text-base leading-7 text-slate-400">Contexto, seguranca operacional e prova visual do fluxo precisam aparecer sem excesso de explicacao.</p>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {VALUE_POINTS.map((item) => {
-              const Icon = item.icon
-              return (
-                <div key={item.title} className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.90))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.36)]">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="mt-6 text-xl font-semibold text-white">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-400">{item.description}</p>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-
         <section className="bg-slate-950/35">
           <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-            <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.8fr)] lg:items-center">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">Fluxo de produto</p>
-                <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-                  Fluxo unico, do onboarding ao estado operacional.
-                </h2>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-                  Entrar, iniciar, iterar e validar no mesmo ambiente. Esse e o padrao que a experiencia inteira precisa seguir.
-                </p>
-              </div>
-              <ScreenshotCard
-                src="/screenshots/editor.png"
-                alt="Editor do Aethel"
-                title="IDE e preview"
-                subtitle="contexto, execucao e validacao no mesmo workbench"
-              />
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">Fluxo de produto</p>
+              <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
+                Fluxo unico, do onboarding ao estado operacional.
+              </h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
+                Entrar, iniciar, iterar e validar no mesmo ambiente. Esse e o padrao que a experiencia inteira precisa seguir.
+              </p>
             </div>
 
             <div className="mt-10 grid gap-5 lg:grid-cols-3">

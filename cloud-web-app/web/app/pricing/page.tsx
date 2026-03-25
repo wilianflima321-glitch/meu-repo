@@ -41,21 +41,6 @@ const FAQ_ITEMS = [
   },
 ]
 
-const DECISION_PATH = [
-  {
-    title: 'Entrar rapido',
-    desc: 'Starter e Basic para validar onboarding, contexto e rotina inicial.',
-  },
-  {
-    title: 'Operar de verdade',
-    desc: 'Pro para throughput maior, melhores modelos e uso continuo.',
-  },
-  {
-    title: 'Escalar com time',
-    desc: 'Studio e Enterprise para seats, governanca e rollout do time.',
-  },
-]
-
 const COMPARISON_ROWS = [
   { label: 'Projetos', getValue: (plan: (typeof PLANS)[number]) => formatLimit(plan.limits.projects) },
   { label: 'Tokens por mes', getValue: (plan: (typeof PLANS)[number]) => formatLimit(plan.limits.tokensPerMonth) },
@@ -102,10 +87,10 @@ export default function PricingPage() {
                 Planos transparentes
               </div>
               <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
-                Pricing alinhado ao uso real do studio
+                Pricing claro para builders e equipes.
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--aethel-text-secondary)]">
-                O foco comercial hoje e Apps + Research. Os planos refletem volume, contexto e colaboracao sem esconder limites.
+                Apps + Research sao o foco atual. Os planos escalam por volume, contexto e colaboracao.
               </p>
 
               <div className="mt-8 flex flex-wrap justify-start gap-3">
@@ -186,21 +171,6 @@ export default function PricingPage() {
         </section>
 
         <section className="mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 grid gap-4 lg:grid-cols-3">
-            {DECISION_PATH.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-[24px] border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] p-5"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                  Caminho de decisao
-                </p>
-                <h2 className="mt-3 text-lg font-semibold text-[var(--aethel-text-primary)]">{item.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {corePlans.map((plan) => (
               <article
@@ -319,23 +289,6 @@ export default function PricingPage() {
         ) : null}
 
         <section className="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-4 rounded-[28px] border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 lg:grid-cols-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Como vender o produto certo</p>
-              <h2 className="mt-3 text-2xl font-bold text-[var(--aethel-text-primary)]">A narrativa comercial precisa acompanhar a experiencia do produto</h2>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-              <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Starter e Basic</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Boa entrada para avaliar dashboard, onboarding, workbench e contexto sem cair em uma experiencia inchada.</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-              <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Pro e Studio</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">Onde o produto precisa parecer realmente premium: colaboracao, throughput, historico e operacao sustentada.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.86),rgba(2,6,23,0.86))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
             <div className="border-b border-white/10 px-6 py-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
@@ -377,7 +330,7 @@ export default function PricingPage() {
         <div className="mx-auto mt-12 max-w-3xl px-4 sm:px-6">
           <div className="mb-4 text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Transparencia operacional</p>
-            <h2 className="mt-2 text-2xl font-bold text-[var(--aethel-text-primary)]">Billing readiness real, sem esconder dependencia externa</h2>
+            <h2 className="mt-2 text-2xl font-bold text-[var(--aethel-text-primary)]">Billing readiness real</h2>
           </div>
           <PublicBillingReadiness />
         </div>
