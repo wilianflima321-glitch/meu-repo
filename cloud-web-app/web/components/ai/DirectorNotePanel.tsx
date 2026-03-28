@@ -1,9 +1,9 @@
 ﻿/**
- * DirectorNotePanel - Painel de CrÃ­tica ArtÃ­stica da IA
+ * DirectorNotePanel - Painel de Crítica Artística da IA
  * 
  * A IA age como um "diretor de cinema/jogos" experiente,
- * oferecendo feedback artÃ­stico e tÃ©cnico sobre o projeto.
- * SugestÃµes proativas baseadas em anÃ¡lise de cena.
+ * oferecendo feedback artístico e técnico sobre o projeto.
+ * Sugestões proativas baseadas em análise de cena.
  * 
  * @see AI_SELF_REFLECTION_SYSTEM.md
  * @see IDEIAS_SUGESTOES_INOVACAO.md
@@ -52,16 +52,16 @@ import {
 // ============================================================================
 
 export type NoteCategory = 
-  | 'composition'   // ComposiÃ§Ã£o visual
-  | 'lighting'      // IluminaÃ§Ã£o
+  | 'composition'   // Composição visual
+  | 'lighting'      // Iluminação
   | 'color'         // Paleta de cores
   | 'pacing'        // Ritmo/timing
-  | 'audio'         // Som e mÃºsica
-  | 'gameplay'      // MecÃ¢nicas de jogo
+  | 'audio'         // Som e música
+  | 'gameplay'      // Mecânicas de jogo
   | 'narrative'     // Narrativa
-  | 'performance'   // Performance tÃ©cnica
+  | 'performance'   // Performance técnica
   | 'accessibility' // Acessibilidade
-  | 'ux';           // ExperiÃªncia do usuÃ¡rio
+  | 'ux';           // Experiência do usuário
 
 export type NoteSeverity = 'suggestion' | 'recommendation' | 'critical';
 
@@ -119,11 +119,11 @@ const CATEGORY_INFO: Record<NoteCategory, {
   label: string;
   color: string;
 }> = {
-  composition: { icon: Camera, label: 'ComposiÃ§Ã£o', color: 'text-sky-400' },
-  lighting: { icon: Sparkles, label: 'IluminaÃ§Ã£o', color: 'text-[var(--aethel-warning-light)]' },
+  composition: { icon: Camera, label: 'Composição', color: 'text-sky-400' },
+  lighting: { icon: Sparkles, label: 'Iluminação', color: 'text-[var(--aethel-warning-light)]' },
   color: { icon: Palette, label: 'Cores', color: 'text-cyan-400' },
   pacing: { icon: Clock, label: 'Ritmo', color: 'text-emerald-400' },
-  audio: { icon: Volume2, label: 'Ãudio', color: 'text-violet-400' },
+  audio: { icon: Volume2, label: 'Áudio', color: 'text-violet-400' },
   gameplay: { icon: Gamepad2, label: 'Gameplay', color: 'text-orange-400' },
   narrative: { icon: MessageSquare, label: 'Narrativa', color: 'text-rose-400' },
   performance: { icon: TrendingUp, label: 'Performance', color: 'text-lime-400' },
@@ -141,19 +141,19 @@ const SEVERITY_STYLES: Record<NoteSeverity, {
     bg: 'bg-zinc-800/50',
     border: 'border-zinc-700',
     badge: 'bg-zinc-600 text-zinc-200',
-    label: 'SugestÃ£o',
+    label: 'Sugestão',
   },
   recommendation: {
     bg: 'bg-[var(--aethel-warning)]/10',
     border: 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]',
     badge: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]',
-    label: 'RecomendaÃ§Ã£o',
+    label: 'Recomendação',
   },
   critical: {
     bg: 'bg-red-500/10',
     border: 'border-red-500/30',
     badge: 'bg-red-500/20 text-red-300',
-    label: 'CrÃ­tico',
+    label: 'Crítico',
   },
 };
 
@@ -320,7 +320,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                   <div className="flex items-center gap-2 mb-1">
                     <Lightbulb className="w-3.5 h-3.5 text-violet-400" />
                     <span className="text-xs font-medium text-violet-300">
-                      SugestÃ£o do Diretor
+                      Sugestão do Diretor
                     </span>
                   </div>
                   <p className="text-sm text-violet-200/80">
@@ -352,7 +352,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                              hover:text-zinc-300 transition-colors"
                   >
                     <Film className="w-3.5 h-3.5" />
-                    Ver exemplos de referÃªncia
+                    Ver exemplos de referência
                     <ChevronDown className={`w-3 h-3 transition-transform ${showExamples ? 'rotate-180' : ''}`} />
                   </button>
                   
@@ -411,7 +411,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                     ) : (
                       <>
                         <Wand2 className="w-3.5 h-3.5" />
-                        Aplicar CorreÃ§Ã£o
+                        Aplicar Correção
                       </>
                     )}
                   </button>
@@ -434,7 +434,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                         ? 'bg-green-500/20 text-green-400' 
                         : 'hover:bg-zinc-800 text-zinc-500'
                     }`}
-                    title="Ãštil"
+                    title="Áštil"
                   >
                     <ThumbsUp className="w-3.5 h-3.5" />
                   </button>
@@ -445,7 +445,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                         ? 'bg-red-500/20 text-red-400'
                         : 'hover:bg-zinc-800 text-zinc-500'
                     }`}
-                    title="NÃ£o Ãºtil"
+                    title="Não útil"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
                   </button>
@@ -560,7 +560,7 @@ export function DirectorNotePanel({
                 Notas do Diretor
               </h3>
               <p className="text-xs text-zinc-500">
-                Feedback artÃ­stico por IA
+                Feedback artístico por IA
               </p>
             </div>
           </div>
@@ -609,7 +609,7 @@ export function DirectorNotePanel({
                      transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
-            {isAnalyzing ? 'Analisando...' : 'Nova AnÃ¡lise'}
+            {isAnalyzing ? 'Analisando...' : 'Nova Análise'}
           </button>
           
           <button
@@ -635,7 +635,7 @@ export function DirectorNotePanel({
             <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2 overflow-x-auto">
               {[
                 { key: 'all' as const, label: 'Todas' },
-                { key: 'critical' as const, label: `CrÃ­ticos (${counts.critical})` },
+                { key: 'critical' as const, label: `Críticos (${counts.critical})` },
                 { key: 'recommendation' as const, label: `Recom. (${counts.recommendation})` },
                 { key: 'suggestion' as const, label: `Sugest. (${counts.suggestion})` },
               ].map(({ key, label }) => (
@@ -675,7 +675,7 @@ export function DirectorNotePanel({
                     Nenhuma nota pendente!
                   </p>
                   <p className="text-xs text-zinc-500 mt-1">
-                    O projeto estÃ¡ Ã³timo ou clique para nova anÃ¡lise.
+                    O projeto está ótimo ou clique para nova análise.
                   </p>
                 </div>
               ) : (

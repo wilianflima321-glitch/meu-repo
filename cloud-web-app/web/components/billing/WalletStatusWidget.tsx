@@ -1,9 +1,9 @@
 ﻿/**
  * WalletStatusWidget - Widget Compacto de Saldo na StatusBar
  * 
- * Exibe saldo de crÃ©ditos de forma compacta na StatusBar.
+ * Exibe saldo de créditos de forma compacta na StatusBar.
  * Expande para mostrar detalhes ao clicar.
- * Integra via WebSocket para atualizaÃ§Ãµes em tempo real.
+ * Integra via WebSocket para atualizações em tempo real.
  * 
  * @see ROADMAP_MONETIZACAO_XP_FINAL.md
  * 
@@ -81,7 +81,7 @@ function useWebSocketBalance() {
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    // Conectar ao WebSocket para atualizaÃ§Ãµes em tempo real
+    // Conectar ao WebSocket para atualizações em tempo real
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
     
     try {
@@ -317,7 +317,7 @@ export function WalletStatusWidget({
               <span className={`text-2xl font-bold ${balanceColor}`}>
                 {wallet.available.toLocaleString('pt-BR')}
               </span>
-              <span className="text-sm text-zinc-500">crÃ©ditos</span>
+              <span className="text-sm text-zinc-500">créditos</span>
             </div>
             
             {/* Reserved indicator */}
@@ -352,7 +352,7 @@ export function WalletStatusWidget({
           {/* Recent transactions */}
           {transactions && transactions.length > 0 && (
             <div className="p-3 border-b border-zinc-800">
-              <p className="text-xs text-zinc-500 mb-2">HistÃ³rico recente</p>
+              <p className="text-xs text-zinc-500 mb-2">Histórico recente</p>
               <div className="space-y-1.5">
                 {transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between text-xs">
@@ -377,7 +377,7 @@ export function WalletStatusWidget({
                 <div>
                   <p className="text-sm text-red-300 font-medium">Saldo baixo</p>
                   <p className="text-xs text-red-400/80 mt-0.5">
-                    Recarregue para continuar usando IA e renderizaÃ§Ã£o
+                    Recarregue para continuar usando IA e renderização
                   </p>
                 </div>
               </div>
@@ -430,9 +430,9 @@ export function WalletStatusWidget({
               <AlertTriangle className="w-5 h-5 text-red-400" />
             </div>
             <div>
-              <h4 className="font-medium text-white">CrÃ©ditos acabando</h4>
+              <h4 className="font-medium text-white">Créditos acabando</h4>
               <p className="text-sm text-zinc-400 mt-1">
-                Restam apenas {wallet.available.toLocaleString('pt-BR')} crÃ©ditos. 
+                Restam apenas {wallet.available.toLocaleString('pt-BR')} créditos. 
                 Recarregue para continuar criando.
               </p>
               <div className="flex gap-2 mt-3">

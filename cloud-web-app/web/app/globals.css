@@ -21,7 +21,7 @@
     /* Text Colors */
     --text-primary: #fafafa;    /* zinc-50 */
     --text-secondary: #a1a1aa;  /* zinc-400 */
-    --text-muted: #71717a;      /* zinc-500 */
+    --text-muted: #a1a1aa;      /* zinc-400 - raised for contrast */
 
     /* Border Colors */
     --border-primary: #27272a;  /* zinc-800 */
@@ -80,6 +80,16 @@
     background-image:
       linear-gradient(rgba(39, 39, 42, 0.14) 1px, transparent 1px),
       linear-gradient(to right, rgba(39, 39, 42, 0.14) 1px, transparent 1px);
+  }
+
+  .aethel-panel-soft {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.82));
+    box-shadow: 0 20px 60px rgba(2, 6, 23, 0.28);
+  }
+
+  .aethel-divider-soft {
+    border-color: rgba(255, 255, 255, 0.08);
   }
 }
 

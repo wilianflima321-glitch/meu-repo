@@ -17,8 +17,8 @@ function read(relativePath) {
 const CHECKS = [
   {
     name: 'landing-skip-link',
-    file: 'app/landing-v2.tsx',
-    patterns: ['href="#landing-mission"', '<main id="landing-mission"'],
+    file: 'app/landing-v3.tsx',
+    patterns: ['<main id="main-content"', 'href="/dashboard?onboarding=1&source=landing-primary-cta"'],
   },
   {
     name: 'dashboard-hydration-loading',
@@ -27,7 +27,7 @@ const CHECKS = [
   },
   {
     name: 'dashboard-main-skip-link',
-    file: 'components/AethelDashboardRuntime.tsx',
+    file: 'components/dashboard/DashboardShell.tsx',
     patterns: ['href="#dashboard-main-content"', '<main id="dashboard-main-content"', 'aria-live="polite"'],
   },
   {

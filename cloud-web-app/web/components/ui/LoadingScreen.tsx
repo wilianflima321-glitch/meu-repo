@@ -88,7 +88,7 @@ export function LoadingScreen({
 /* ============================================
    Page Loader (for route transitions)
 ============================================ */
-export function PageLoader({ text = 'Carregando pÃ¡gina...' }: { text?: string }) {
+export function PageLoader({ text = 'Carregando página...' }: { text?: string }) {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">
       <div className="relative w-16 h-16 mb-4">
