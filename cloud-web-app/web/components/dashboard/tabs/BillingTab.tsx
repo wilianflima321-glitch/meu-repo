@@ -327,6 +327,13 @@ export function BillingTab({
       return
     }
 
+    if (planId === 'enterprise') {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/contact-sales?source=dashboard-billing-enterprise'
+      }
+      return
+    }
+
     setBillingActionError(null)
     setBillingActionBusy('checkout')
     try {
@@ -563,10 +570,13 @@ export function BillingTab({
         ) : (
           resolvedPlans.map((plan) => {
             const isCurrent = effectiveCurrentPlan === plan.id
-            const isCheckoutBlocked = billingReadiness?.checkoutReady === false
-            const actionLabel = isCheckoutBlocked
-              ? 'Checkout indisponivel'
-              : plan.price === 0
+            const isEnterprisePlan = plan.id === 'enterprise'
+            const isCheckoutBlocked = billingReadiness?.checkoutReady === false && !isEnterprisePlan
+            const actionLabel = isEnterprisePlan
+              ? 'Falar com vendas'
+              : isCheckoutBlocked
+                ? 'Checkout indisponivel'
+                : plan.price === 0
                 ? 'Comecar gratis'
                 : 'Assinar'
             const displayPrice =

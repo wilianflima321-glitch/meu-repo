@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { API_BASE } from '@/lib/api'
+import { API_BASE, type BillingReadiness } from '@/lib/api'
 import { UsageDashboard } from '@/components/billing/UsageDashboard'
 import { BillingStatusBanner, SubscriptionStatusWidget } from '@/components/billing/BillingIntegration'
 import StudioLayout from '@/components/studio/StudioLayout'
@@ -23,6 +23,9 @@ type Plan = {
   features?: string[]
   limits?: {
     tokensPerMonth?: number
+    projects?: number
+    storage?: number
+    collaborators?: number
   }
 }
 
@@ -30,7 +33,7 @@ type PlansResponse = {
   plans?: Plan[]
 }
 
-const fetcher = async (url: string): Promise<PlansResponse> => {
+const fetcher = async <T,>(url: string): Promise<T> => {
   const res = await fetch(url)
   if (!res.ok) {
     throw new Error(`Failed to load plans (${res.status})`)
@@ -51,6 +54,18 @@ function formatPrice(value: number, currency: Currency): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
 }
 
+function formatStorage(bytes?: number): string {
+  if (typeof bytes !== 'number' || Number.isNaN(bytes) || bytes <= 0) return '-'
+  if (bytes < 1024 * 1024 * 1024) return `${Math.round(bytes / (1024 * 1024))} MB`
+  return `${Math.round(bytes / (1024 * 1024 * 1024))} GB`
+}
+
+function formatLimit(value?: number): string {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '-'
+  if (value < 0) return 'Ilimitado'
+  return value.toLocaleString('pt-BR')
+}
+
 export default function BillingPage() {
   const toast = useToast()
   const [currency, setCurrency] = useState<Currency>('BRL')
@@ -59,15 +74,26 @@ export default function BillingPage() {
   const [showUsage, setShowUsage] = useState(true)
 
   const { data, isLoading, error } = useSWR<PlansResponse>(`${API_BASE}/billing/plans`, fetcher)
+  const { data: readiness } = useSWR<BillingReadiness>(`${API_BASE}/billing/readiness`, fetcher)
   const plans = useMemo(() => data?.plans || [], [data])
 
   const handleSubscribe = async (planId: string) => {
+    if (planId === 'enterprise') {
+      window.location.href = '/contact-sales?source=billing-page-enterprise'
+      return
+    }
+
     setSelectedPlan(planId)
     try {
       const token = localStorage.getItem('token')
       if (!token) {
         toast.warning('Faca login para continuar com a assinatura.')
         window.location.href = '/login'
+        return
+      }
+
+      if (readiness?.checkoutReady === false) {
+        toast.warning('Checkout indisponivel neste ambiente.', 'Configure o runtime de billing antes de liberar upgrade self-serve.')
         return
       }
 
@@ -173,6 +199,17 @@ export default function BillingPage() {
           {showUsage && <UsageDashboard />}
         </div>
 
+        {readiness?.checkoutReady === false && (
+          <div className="mb-6 rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-4 py-3">
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
+              Checkout self-serve ainda nao esta pronto neste ambiente.
+            </p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
+              Seguimos mostrando os planos reais, mas so liberamos assinatura quando checkout e webhook estiverem operacionais. Enterprise continua por contato comercial.
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 aethel-gap-4">
           {plans.map((plan) => {
             const monthlyPrice = currency === 'BRL' ? plan.priceBRL || 0 : plan.price || 0
@@ -181,6 +218,8 @@ export default function BillingPage() {
               : (plan.priceAnnual ?? Number(((plan.price || 0) * 12 * 0.8).toFixed(2)))
             const displayPrice = billingCycle === 'year' ? annualPrice : monthlyPrice
             const tokens = plan.limits?.tokensPerMonth || 0
+            const isEnterprise = plan.id === 'enterprise'
+            const isCheckoutBlocked = readiness?.checkoutReady === false && !isEnterprise
             const isBusy = selectedPlan === plan.id
 
             return (
@@ -204,6 +243,25 @@ export default function BillingPage() {
                   <span className="text-[var(--aethel-text-secondary)] text-sm"> tokens/mes</span>
                 </div>
 
+                <div className="mb-4 grid grid-cols-2 gap-2">
+                  <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Projetos</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">{formatLimit(plan.limits?.projects)}</p>
+                  </div>
+                  <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Storage</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">{formatStorage(plan.limits?.storage)}</p>
+                  </div>
+                  <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Colaboradores</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">{formatLimit(plan.limits?.collaborators)}</p>
+                  </div>
+                  <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-tertiary)]">Fluxo</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">{isEnterprise ? 'Comercial' : 'Self-serve'}</p>
+                  </div>
+                </div>
+
                 <ul className="flex-1 space-y-2 mb-4">
                   {(plan.features || []).slice(0, 6).map((feature) => (
                     <li key={feature} className="aethel-flex items-start aethel-gap-2 text-sm">
@@ -214,11 +272,18 @@ export default function BillingPage() {
                 </ul>
 
                 <button
+                  type="button"
                   onClick={() => handleSubscribe(plan.id)}
-                  disabled={isBusy}
+                  disabled={isBusy || isCheckoutBlocked}
                   className={`aethel-button aethel-button-primary w-full ${isBusy ? 'opacity-50' : ''}`}
                 >
-                  {isBusy ? 'Processando...' : 'Assinar plano'}
+                  {isBusy
+                    ? 'Processando...'
+                    : isEnterprise
+                      ? 'Falar com vendas'
+                      : isCheckoutBlocked
+                        ? 'Checkout indisponivel'
+                        : 'Assinar plano'}
                 </button>
               </div>
             )

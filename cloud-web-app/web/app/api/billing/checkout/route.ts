@@ -57,6 +57,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (planId === 'enterprise') {
+      return NextResponse.json(
+        {
+          error: 'ENTERPRISE_CONTACT_SALES',
+          message: 'Enterprise upgrades are handled through contact sales.',
+          contactSalesUrl: '/contact-sales',
+        },
+        { status: 409 }
+      );
+    }
+
     const billingRuntime = await getBillingRuntimeState();
     if (!billingRuntime.checkoutReady) {
       return billingRuntimeCapabilityResponse('checkout', billingRuntime);
@@ -134,7 +145,6 @@ export async function POST(req: NextRequest) {
                   'STRIPE_PRICE_BASIC_ANNUAL',
                   'STRIPE_PRICE_PRO_ANNUAL',
                   'STRIPE_PRICE_STUDIO_ANNUAL',
-                  'STRIPE_PRICE_ENTERPRISE_ANNUAL',
                 ]
               : [
                   'STRIPE_SECRET_KEY',
@@ -142,7 +152,6 @@ export async function POST(req: NextRequest) {
                   'STRIPE_PRICE_BASIC',
                   'STRIPE_PRICE_PRO',
                   'STRIPE_PRICE_STUDIO',
-                  'STRIPE_PRICE_ENTERPRISE',
                 ],
         },
         { status: 503 }
