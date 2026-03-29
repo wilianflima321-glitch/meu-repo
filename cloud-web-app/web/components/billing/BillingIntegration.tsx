@@ -105,12 +105,13 @@ export function BillingStatusBanner() {
     <div
       className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-4 py-3"
       role="alert"
+      aria-live="polite"
     >
       <div className="flex items-start gap-3">
         <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--aethel-warning)]" aria-hidden="true" />
         <div>
           <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
-            Runtime de billing esta {readiness.status}
+            Runtime de billing esta {formatReadinessStatus(readiness.status)}
           </p>
           {readiness.blockers.length > 0 && (
             <ul className="mt-1 space-y-0.5 text-xs text-[var(--aethel-text-secondary)]">
@@ -219,6 +220,7 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
 
       {/* CTA */}
       <button
+        type="button"
         onClick={() => onSelect(plan.id)}
         disabled={isCurrent || loading}
         className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all ${
@@ -363,7 +365,7 @@ export function SubscriptionStatusWidget() {
   }
 
   return (
-    <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4">
+    <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4" role="status" aria-live="polite">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-[var(--aethel-text-tertiary)]">
@@ -380,7 +382,7 @@ export function SubscriptionStatusWidget() {
               : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
           }`}
         >
-          {subscription.status}
+          {formatSubscriptionStatus(subscription.status)}
         </span>
       </div>
       {subscription.currentPeriodEnd && (
@@ -431,6 +433,7 @@ export function UsageQuotaBar({ label, used, limit, unit = '', variant }: QuotaB
         aria-valuemin={0}
         aria-valuemax={limit}
         aria-label={`${label}: ${Math.round(percentage)}% usado`}
+        aria-valuetext={`${formatNumber(used)}${unit} de ${formatNumber(limit)}${unit} usados`}
       >
         <div
           className={`h-full rounded-full transition-all duration-300 ${barColors[autoVariant]}`}
@@ -444,6 +447,37 @@ export function UsageQuotaBar({ label, used, limit, unit = '', variant }: QuotaB
 // ============================================================================
 // HELPERS
 // ============================================================================
+
+function formatReadinessStatus(status: BillingReadinessState['status']): string {
+  switch (status) {
+    case 'ready':
+      return 'pronto'
+    case 'partial':
+      return 'parcial'
+    default:
+      return 'indisponivel'
+  }
+}
+
+function formatSubscriptionStatus(status: string): string {
+  const normalized = String(status || '').trim().toLowerCase()
+  switch (normalized) {
+    case 'active':
+      return 'ativa'
+    case 'trialing':
+      return 'em teste'
+    case 'past_due':
+      return 'pagamento pendente'
+    case 'canceled':
+      return 'cancelada'
+    case 'incomplete':
+      return 'incompleta'
+    case 'unpaid':
+      return 'inadimplente'
+    default:
+      return normalized || 'sem status'
+  }
+}
 
 function formatStorage(bytes: number): string {
   if (bytes >= 1e12) return `${(bytes / 1e12).toFixed(1)} TB`

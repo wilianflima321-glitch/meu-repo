@@ -139,7 +139,7 @@ const colors = {
   success: 'var(--aethel-success)',
   warning: 'var(--aethel-warning)',
   error: 'var(--aethel-error)',
-  accent: 'var(--aethel-accent)',
+  accent: 'var(--aethel-info)',
 };
 
 const assetTypeConfig: Record<AssetType, { icon: typeof File; color: string; label: string }> = {
@@ -151,7 +151,7 @@ const assetTypeConfig: Record<AssetType, { icon: typeof File; color: string; lab
   blueprint: { icon: Zap, color: colors.primary, label: 'Blueprint' },
   animation: { icon: Layers, color: 'var(--aethel-warning-light)' , label: 'Animation' },
   prefab: { icon: Package, color: 'var(--aethel-info-light)', label: 'Prefab' },
-  level: { icon: Layers, color: 'var(--aethel-accent-light)', label: 'Level' },
+  level: { icon: Layers, color: 'var(--aethel-secondary)', label: 'Level' },
   folder: { icon: Folder, color: colors.warning, label: 'Folder' },
   other: { icon: File, color: colors.textDim, label: 'File' },
 };
@@ -785,7 +785,8 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
                 setSearch(e.target.value);
                 onSearchChange?.(e.target.value);
               }}
-              placeholder="Search assets..."
+              placeholder="Buscar assets..."
+              aria-label="Buscar assets"
               style={{
                 width: '100%',
                 padding: '6px 10px 6px 32px',
@@ -794,7 +795,6 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
                 borderRadius: '6px',
                 color: colors.text,
                 fontSize: '12px',
-                outline: 'none',
               }}
             />
           </div>
@@ -802,6 +802,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           {/* Filter */}
           <select
             value={filterType}
+            aria-label="Filtrar assets por tipo"
             onChange={(e) => {
               const value = e.target.value as AssetType | 'all';
               setFilterType(value);
@@ -827,6 +828,8 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           </select>
 
           <div
+            role="status"
+            aria-live="polite"
             style={{
               padding: '6px 10px',
               borderRadius: '999px',
@@ -852,6 +855,9 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           {/* View Toggle */}
           <div style={{ display: 'flex', background: colors.surface, borderRadius: '6px', padding: '2px' }}>
             <button
+              type="button"
+              aria-label="Visualizacao em grade"
+              title="Visualizacao em grade"
               onClick={() => setView('grid')}
               style={{
                 padding: '4px 8px',
@@ -865,6 +871,9 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
               <Grid size={14} />
             </button>
             <button
+              type="button"
+              aria-label="Visualizacao em lista"
+              title="Visualizacao em lista"
               onClick={() => setView('list')}
               style={{
                 padding: '4px 8px',
@@ -881,7 +890,14 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
 
           {/* Actions */}
           <button
+            type="button"
+            aria-label={
+              storageRuntime.status === 'ready'
+                ? 'Importar arquivos para storage persistente'
+                : 'Importacao desabilitada ate o storage ficar pronto'
+            }
             onClick={() => fileInputRef.current?.click()}
+            disabled={storageRuntime.status !== 'ready'}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -892,13 +908,17 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
               borderRadius: '6px',
               color: colors.text,
               fontSize: '12px',
-              cursor: 'pointer',
-              opacity: storageRuntime.status === 'ready' ? 1 : 0.72,
+              cursor: storageRuntime.status === 'ready' ? 'pointer' : 'not-allowed',
+              opacity: storageRuntime.status === 'ready' ? 1 : 0.56,
             }}
-            title={storageRuntime.detail || 'Importar para o bucket configurado'}
+            title={
+              storageRuntime.status === 'ready'
+                ? (storageRuntime.detail || 'Importar para o bucket configurado')
+                : 'Configure o storage persistente para liberar importacoes'
+            }
           >
             <Upload size={14} />
-            Import
+            Importar
           </button>
           <input
             ref={fileInputRef}
@@ -909,6 +929,9 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           />
 
           <button
+            type="button"
+            aria-label="Atualizar navegador de assets"
+            title="Atualizar navegador de assets"
             onClick={onRefresh}
             style={{
               padding: '6px',
@@ -970,9 +993,11 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
               }}
             >
               <Package size={48} style={{ marginBottom: '16px', opacity: 0.3 }} />
-              <p style={{ margin: 0, fontWeight: 500 }}>No assets found</p>
+              <p style={{ margin: 0, fontWeight: 500 }}>Nenhum asset encontrado</p>
               <p style={{ margin: '8px 0 0', fontSize: '12px' }}>
-                Import assets or create new ones to get started.
+                {storageRuntime.status === 'ready'
+                  ? 'Importe assets ou crie novos arquivos para comecar.'
+                  : 'Configure o storage persistente para habilitar importacoes confiaveis.'}
               </p>
             </div>
           ) : view === 'grid' ? (

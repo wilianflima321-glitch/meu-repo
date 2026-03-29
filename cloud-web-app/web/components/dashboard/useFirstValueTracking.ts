@@ -33,6 +33,10 @@ export type FirstValueSessionSummary = {
 const DEFAULT_FIRST_VALUE_TARGET_MS = 90_000
 const FIRST_VALUE_SESSION_STORAGE_KEY = 'aethel.dashboard.first-value.session-summary'
 
+function getFirstValueSloStatus(durationMs: number, targetMs: number): 'passed_slo' | 'failed_slo' {
+  return durationMs <= targetMs ? 'passed_slo' : 'failed_slo'
+}
+
 function buildInitialSummary(): FirstValueSessionSummary {
   if (typeof window === 'undefined') {
     return {
@@ -137,14 +141,22 @@ export function useFirstValueTracking({
       status: 'completed',
     }))
 
-    trackEvent('user', 'settings_change', {
-      section: 'first-value-guide',
-      action: 'completed',
-      durationMs,
-    })
-
     if (typeof durationMs === 'number') {
-      analytics?.trackPerformance?.('first_value_time', durationMs, 'ms', { surface: 'dashboard' })
+      const sloStatus = getFirstValueSloStatus(durationMs, DEFAULT_FIRST_VALUE_TARGET_MS)
+
+      trackEvent('onboarding', 'first_value_reached', {
+        source: 'first-value-guide',
+        durationMs,
+        targetMs: DEFAULT_FIRST_VALUE_TARGET_MS,
+        sloStatus,
+      })
+
+      analytics?.trackPerformance?.('first_value_time', durationMs, 'ms', {
+        surface: 'dashboard',
+        milestone: 'completed',
+        status: sloStatus,
+        thresholdMs: String(DEFAULT_FIRST_VALUE_TARGET_MS),
+      })
     }
   }, [projectsCount, defaultProjectsCount, firstValueAiSuccess, firstValueOpenedIde, trackEvent])
 

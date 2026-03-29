@@ -34,13 +34,13 @@ export interface PreviewRuntimeInfo {
 }
 
 const LIFECYCLE_LABELS: Record<PreviewLifecycleState, string> = {
-  idle: 'Aguardando preview',
-  provisioning: 'Provisionando sandbox',
-  warming: 'Aquecendo runtime',
-  syncing: 'Sincronizando arquivos',
-  healthy: 'Preview operacional',
-  degraded: 'Preview degradado',
-  failed: 'Preview com falha',
+  idle: 'Preview aguardando inicializacao',
+  provisioning: 'Iniciando sandbox...',
+  warming: 'Aquecendo runtime...',
+  syncing: 'Sincronizando arquivos...',
+  healthy: 'Preview ativo',
+  degraded: 'Preview em fallback',
+  failed: 'Preview indisponivel',
   offline: 'Preview offline',
 };
 
@@ -89,7 +89,7 @@ function PreviewSkeleton() {
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
         <div className="text-center">
-          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Preparando preview</p>
+          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Carregando preview...</p>
           <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
             Conectando runtime, arquivos e superficie visual.
           </p>
@@ -204,9 +204,11 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
 
   const bridgeRef = useRef<HMRBridge | null>(null);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
+  const warmupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const startHealthPolling = useCallback((url: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
+    if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
 
     const poll = async () => {
       try {
@@ -228,7 +230,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
     };
 
     // Initial check after short delay
-    setTimeout(poll, 2000);
+    warmupTimeoutRef.current = setTimeout(poll, 2000);
     pollRef.current = setInterval(poll, 15000);
   }, []);
 
@@ -336,6 +338,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
     return () => {
       bridgeRef.current?.disconnect();
       if (pollRef.current) clearInterval(pollRef.current);
+      if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
     };
   }, []);
 
@@ -440,9 +443,9 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
   // Track effective state
   const effectiveState: PreviewLifecycleState = useMemo(() => {
     if (externalRuntimeUrl) return 'healthy';
-    if (forceInlineFallback) return 'healthy';
+    if (forceInlineFallback || runtime.strategy === 'inline') return 'degraded';
     return runtime.state;
-  }, [externalRuntimeUrl, forceInlineFallback, runtime.state]);
+  }, [externalRuntimeUrl, forceInlineFallback, runtime.state, runtime.strategy]);
 
   if (effectiveState === 'failed') {
     return (
@@ -460,7 +463,41 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
     );
   }
 
-  if (effectiveState === 'idle' || effectiveState === 'provisioning' || effectiveState === 'warming') {
+  if (effectiveState === 'idle') {
+    return (
+      <div className="flex flex-col h-full">
+        {showLifecycleBar && (
+          <LifecycleIndicator state="idle" latencyMs={null} hmrConnected={false} />
+        )}
+        <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--aethel-surface-primary)] px-6 text-center">
+          <div className="max-w-md space-y-2">
+            <h3 className="text-sm font-medium text-[var(--aethel-text-primary)]">Preview pronto para iniciar</h3>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">
+              {runtimeUnavailableReason || 'Inicie o runtime gerenciado ou use o fallback inline para continuar sem prometer um preview remoto ativo.'}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={provision}
+              className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-white transition hover:brightness-110"
+            >
+              Iniciar preview
+            </button>
+            <button
+              type="button"
+              onClick={switchToInline}
+              className="rounded-md border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              Usar fallback inline
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (effectiveState === 'provisioning' || effectiveState === 'warming') {
     return (
       <div className="flex flex-col h-full">
         {showLifecycleBar && (
@@ -494,9 +531,14 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           isStale={isStale}
           onRefresh={onRefresh}
         />
+        {useInline && !externalRuntimeUrl && (
+          <div className="absolute left-1 top-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-warning)]">
+            Fallback inline
+          </div>
+        )}
         {isStale && (
           <div className="absolute top-1 right-1 px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)] text-[10px] rounded-full">
-            Atualizacao pendente
+            Desatualizado
           </div>
         )}
       </div>
