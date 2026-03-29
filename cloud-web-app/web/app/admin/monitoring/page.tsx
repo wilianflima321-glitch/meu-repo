@@ -108,7 +108,8 @@ export default function AdminMonitoringPage() {
     setLoading(true)
     try {
       const token = getToken()
-      const authHeaders = token ? { Authorization: `Bearer ${token}` } : {}
+      const authHeaders: Record<string, string> = {}
+      if (token) authHeaders.Authorization = `Bearer ${token}`
 
       const [healthChecks, coreLoopRes] = await Promise.all([
         runHealthChecks(),

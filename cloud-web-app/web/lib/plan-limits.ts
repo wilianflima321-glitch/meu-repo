@@ -77,54 +77,54 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
   
   // Starter - $3/mês
   'starter': {
-    tokensPerMonth: 100_000,
-    requestsPerDay: 100,
+    tokensPerMonth: 500_000,
+    requestsPerDay: 720,
     projectsMax: 3,
-    storageGB: 2,
+    storageGB: 0.5,
     concurrentSessions: 1,
     maxAgents: 1,
-    maxTokensPerRequest: 4_000,
+    maxTokensPerRequest: 8_000,
     models: STARTER_MODELS,
     features: ['editor', 'preview', 'chat'],
   },
   
   // Basic - $9/mês
   'basic': {
-    tokensPerMonth: 500_000,
-    requestsPerDay: 500,
+    tokensPerMonth: 2_000_000,
+    requestsPerDay: 1440,
     projectsMax: 10,
-    storageGB: 10,
+    storageGB: 2,
     concurrentSessions: 2,
     maxAgents: 1,
-    maxTokensPerRequest: 8_000,
+    maxTokensPerRequest: 16_000,
     models: BUDGET_MODEL_IDS,
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal'],
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'research'],
   },
   
   // Pro - $29/mês
   'pro': {
-    tokensPerMonth: 2_000_000,
-    requestsPerDay: 2000,
-    projectsMax: 50,
-    storageGB: 50,
+    tokensPerMonth: 8_000_000,
+    requestsPerDay: 2880,
+    projectsMax: -1,
+    storageGB: 10,
     concurrentSessions: 5,
     maxAgents: 3,
-    maxTokensPerRequest: 20_000,
+    maxTokensPerRequest: 32_000,
     models: PRO_MODELS,
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents'],
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api'],
   },
   
   // Studio - $79/mês
   'studio': {
-    tokensPerMonth: 10_000_000,
-    requestsPerDay: 10000,
-    projectsMax: 200,
-    storageGB: 200,
+    tokensPerMonth: 25_000_000,
+    requestsPerDay: 7200,
+    projectsMax: -1,
+    storageGB: 50,
     concurrentSessions: 10,
     maxAgents: 3,
-    maxTokensPerRequest: 50_000,
+    maxTokensPerRequest: 64_000,
     models: STUDIO_MODELS,
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api', 'export', 'priority-support'],
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api', 'export', 'priority-support', 'webhooks'],
   },
   
   // Enterprise - custom

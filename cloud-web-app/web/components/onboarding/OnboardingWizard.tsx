@@ -14,7 +14,7 @@
 
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, type KeyboardEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Code, Film, Gamepad2, Search, Sparkles, ArrowRight, Rocket, ChevronLeft, Check } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
@@ -61,7 +61,7 @@ const DOMAINS = [
     name: 'Filmes',
     description: 'Storyboards, descricoes de cenas, roteiros',
     icon: Film,
-    color: 'from-[var(--aethel-accent)] to-[var(--aethel-error)]',
+    color: 'from-[var(--aethel-secondary)] to-[var(--aethel-error)]',
     ariaDescription: 'Gere storyboards, descricoes de cenas e roteiros',
   },
   {
@@ -97,6 +97,8 @@ const DIFFICULTY_COLORS = {
   intermediate: 'text-[var(--aethel-warning)]',
   advanced: 'text-[var(--aethel-error)]',
 }
+
+const FIRST_VALUE_TARGET_MS = 90_000
 
 // ============================================================================
 // COMPONENT
@@ -148,6 +150,13 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           durationMs,
         },
       })
+      if (durationMs > FIRST_VALUE_TARGET_MS) {
+        analytics?.trackPerformance?.('first_value_time', durationMs, 'ms', {
+          surface: 'onboarding-wizard',
+          status: 'failed_slo',
+          thresholdMs: String(FIRST_VALUE_TARGET_MS),
+        })
+      }
       onComplete?.(selectedTemplate)
       router.push(`/dashboard?template=${selectedTemplate.id}`)
     }
@@ -165,7 +174,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
 
   // Keyboard handler for domain/template cards (Enter/Space activation)
   const handleCardKeyDown = useCallback(
-    (e: React.KeyboardEvent, action: () => void) => {
+    (e: KeyboardEvent<HTMLButtonElement>, action: () => void) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         action()
@@ -230,7 +239,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           aria-valuenow={step}
           aria-valuemin={1}
           aria-valuemax={3}
-          aria-label={`Etapa ${step} of 3`}
+          aria-label={`Etapa ${step} de 3`}
         >
           <div
             className="h-full rounded-full bg-[var(--aethel-primary)] transition-all duration-300"

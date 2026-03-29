@@ -1,7 +1,6 @@
 /**
  * Aethel Engine - HMR Bridge
- * WebSocket proxy for Hot Module Replacement messages from Vite/Next.js
- * Connects the preview sandbox to the IDE for real-time updates.
+ * Unified WebSocket bridge for Next.js and Vite preview runtimes.
  */
 
 export type HMRMessageType =
@@ -24,21 +23,17 @@ export interface HMRMessage {
 }
 
 export interface HMRBridgeOptions {
-  /** The URL of the preview runtime (e.g., sandbox URL) */
   runtimeUrl: string
-  /** WebSocket path for HMR (default: /_next/webpack-hmr or /__vite_hmr) */
   hmrPath?: string
-  /** Callback when HMR update is received */
+  hmrPathCandidates?: string[]
   onUpdate?: (msg: HMRMessage) => void
-  /** Callback when connection state changes */
   onConnectionChange?: (connected: boolean) => void
-  /** Callback on error */
   onError?: (error: Error) => void
-  /** Reconnect interval in ms (default: 2000) */
   reconnectInterval?: number
-  /** Max reconnect attempts (default: 10) */
   maxReconnectAttempts?: number
 }
+
+type ResolvedOptions = Omit<Required<HMRBridgeOptions>, 'hmrPath'> & { hmrPath: string | null }
 
 export type HMRBridgeState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed'
 
@@ -48,50 +43,64 @@ export class HMRBridge {
   private reconnectAttempts = 0
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null
-  private options: Required<HMRBridgeOptions>
+  private options: ResolvedOptions
   private listeners: Set<(state: HMRBridgeState) => void> = new Set()
   private messageBuffer: HMRMessage[] = []
+  private pathIndex = 0
+  private connectedThisAttempt = false
 
   constructor(options: HMRBridgeOptions) {
+    const fallbackCandidates = ['/_next/webpack-hmr', '/__vite_hmr']
+    const explicitCandidates = Array.isArray(options.hmrPathCandidates)
+      ? options.hmrPathCandidates
+      : options.hmrPath
+        ? [options.hmrPath]
+        : fallbackCandidates
+    const hmrPathCandidates = Array.from(
+      new Set(
+        explicitCandidates
+          .map((value) => value.trim())
+          .filter((value) => value.length > 0)
+      )
+    )
+
     this.options = {
-      hmrPath: '/_next/webpack-hmr',
+      hmrPath: options.hmrPath ?? null,
       onUpdate: () => {},
       onConnectionChange: () => {},
       onError: () => {},
       reconnectInterval: 2000,
       maxReconnectAttempts: 10,
       ...options,
+      hmrPathCandidates,
     }
   }
 
-  /** Get current bridge state */
   getState(): HMRBridgeState {
     return this.state
   }
 
-  /** Get buffered messages (useful for debugging) */
   getMessageBuffer(): readonly HMRMessage[] {
     return this.messageBuffer
   }
 
-  /** Subscribe to state changes */
   onStateChange(listener: (state: HMRBridgeState) => void): () => void {
     this.listeners.add(listener)
     return () => this.listeners.delete(listener)
   }
 
-  /** Connect to the HMR WebSocket */
   connect(): void {
-    if (this.ws?.readyState === WebSocket.OPEN) return
+    if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return
 
     this.setState('connecting')
-    const runtimeUrl = this.options.runtimeUrl.replace(/^http/, 'ws')
-    const wsUrl = `${runtimeUrl}${this.options.hmrPath}`
+    this.connectedThisAttempt = false
+    const wsUrl = this.getCurrentWsUrl()
 
     try {
       this.ws = new WebSocket(wsUrl)
 
       this.ws.onopen = () => {
+        this.connectedThisAttempt = true
         this.setState('connected')
         this.reconnectAttempts = 0
         this.options.onConnectionChange(true)
@@ -104,7 +113,6 @@ export class HMRBridge {
             ? JSON.parse(event.data)
             : event.data
 
-          // Buffer last 100 messages
           this.messageBuffer.push({ ...msg, timestamp: Date.now() })
           if (this.messageBuffer.length > 100) this.messageBuffer.shift()
 
@@ -116,26 +124,38 @@ export class HMRBridge {
             this.ws?.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }))
           }
         } catch {
-          // Non-JSON messages from Vite/Webpack are common, ignore
+          // Runtime may emit non-JSON HMR payloads.
         }
       }
 
       this.ws.onclose = () => {
         this.options.onConnectionChange(false)
         this.stopHeartbeat()
+        this.ws = null
+
+        if (!this.connectedThisAttempt && this.tryNextPathCandidate()) {
+          this.connect()
+          return
+        }
+
         this.tryReconnect()
       }
 
-      this.ws.onerror = (event) => {
-        this.options.onError(new Error(`HMR WebSocket error: ${event}`))
+      this.ws.onerror = () => {
+        this.options.onError(
+          new Error(`HMR websocket failed on path ${this.options.hmrPathCandidates[this.pathIndex] || 'unknown'}`)
+        )
       }
     } catch (err) {
       this.options.onError(err instanceof Error ? err : new Error(String(err)))
-      this.tryReconnect()
+      if (!this.tryNextPathCandidate()) {
+        this.tryReconnect()
+      } else {
+        this.connect()
+      }
     }
   }
 
-  /** Disconnect from HMR */
   disconnect(): void {
     this.clearReconnectTimer()
     this.stopHeartbeat()
@@ -148,16 +168,29 @@ export class HMRBridge {
     this.options.onConnectionChange(false)
   }
 
-  /** Send a message to the HMR socket */
   send(msg: HMRMessage): boolean {
     if (this.ws?.readyState !== WebSocket.OPEN) return false
     this.ws.send(JSON.stringify(msg))
     return true
   }
 
-  /** Force a full reload signal */
   triggerFullReload(): void {
     this.send({ type: 'full-reload', timestamp: Date.now() })
+  }
+
+  private getCurrentWsUrl(): string {
+    const runtimeUrl = this.options.runtimeUrl.replace(/^http/, 'ws').replace(/\/$/, '')
+    const path = this.options.hmrPathCandidates[this.pathIndex] || '/_next/webpack-hmr'
+    return `${runtimeUrl}${path.startsWith('/') ? path : `/${path}`}`
+  }
+
+  private tryNextPathCandidate(): boolean {
+    if (this.pathIndex < this.options.hmrPathCandidates.length - 1) {
+      this.pathIndex += 1
+      return true
+    }
+    this.pathIndex = 0
+    return false
   }
 
   private setState(state: HMRBridgeState): void {
@@ -170,8 +203,10 @@ export class HMRBridge {
       this.setState('failed')
       return
     }
+
     this.setState('reconnecting')
-    this.reconnectAttempts++
+    this.reconnectAttempts += 1
+    this.pathIndex = 0
     this.clearReconnectTimer()
     this.reconnectTimer = setTimeout(() => this.connect(), this.options.reconnectInterval)
   }
@@ -198,7 +233,6 @@ export class HMRBridge {
   }
 }
 
-/** Factory: create and immediately connect an HMR bridge */
 export function createHMRBridge(options: HMRBridgeOptions): HMRBridge {
   const bridge = new HMRBridge(options)
   bridge.connect()

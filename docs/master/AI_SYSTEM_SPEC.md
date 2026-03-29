@@ -1,159 +1,72 @@
-> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 45_AI_SYSTEM_SPEC_2026-03-22.md. Use o arquivo numerado canônico.
-
-
 # AI_SYSTEM_SPEC (CANONICAL)
 
-**Data:** 2026-03-21
-**Versão:** 2.3
-**Status:** Contrato de Execução
+**Data:** 2026-03-28  
+**Versao:** 2.4  
+**Status:** Contrato de execucao
 
----
+## 1. Escopo
+Este documento descreve o estado real da camada de IA no web app (`cloud-web-app/web`) sem promessas aspiracionais.
 
-## 1. Visão Geral
-O sistema de IA é parte core do Aethel Engine e opera em múltiplas camadas:
+## 2. Arquitetura real (implemented now)
 
-- **L1**: Inline (autocomplete, sugestões)
-- **L2**: Chat (assistente conversacional)
-- **L3**: Actions (comandos estruturados de refactor/fix/test)
-- **L4**: Agent (execução supervisionada com apply/rollback)
-- **L5**: Multi-agent (orquestração paralela com contratos explícitos)
-
-**Regra canônica**: Sem fake-success. Quando o runtime não estiver configurado, o sistema deve retornar estado `PARTIAL` ou `BLOCKED`.
-
----
-
-## 2. Arquitetura Real (Runtime Atual)
-
-```
-[Workbench UI]
-   +- Chat / Inline / Agent / Actions
-   +- Contexto (arquivos, seleção, histórico, erros)
-        ?
-[Next.js API Routes]
-   +- /api/ai/chat
-   +- /api/ai/stream
-   +- /api/ai/agent
-   +- /api/ai/action
-   +- /api/ai/context/*
-   +- /api/ai/core-loop/feedback
-        ?
-[Advanced AI Provider]
-   +- OpenAI
-   +- OpenRouter
-   +- Anthropic
-   +- Google Gemini
+```text
+UI (dashboard + IDE)
+  -> /api/ai/chat, /api/ai/stream, /api/ai/agent, /api/ai/action
+  -> Advanced AI Provider (OpenRouter / OpenAI / Anthropic / Gemini)
+  -> Telemetria (analytics + core-loop feedback)
 ```
 
-**Fonte de verdade do runtime**: `cloud-web-app/web/lib/ai/advanced-ai-provider.ts`.
+Fontes de verdade:
+- `cloud-web-app/web/lib/ai/advanced-ai-provider.ts`
+- `cloud-web-app/web/lib/ai/openrouter-models.ts`
+- `cloud-web-app/web/lib/plan-limits.ts`
 
----
+## 3. Matriz de maturidade
 
-## 3. Provedores e Modelos Suportados (conforme código)
+### Implemented now
+- Router multi-provider com fallback.
+- Catalogo OpenRouter em tiers (`best`, `budget`, `free`) com custo/contexto por modelo.
+- Selector de modelos no Studio baseado em plano e disponibilidade.
+- Claims de plano no JWT (`plan`, `isPro`) para enforcement server-side.
+- Mencoes no chat (`@codebase`, `@docs`, `@diff`, `@error`) com parser dedicado.
 
-A lista de modelos é definida no `MODEL_INFO` e em `getAvailableModels()` do provider. Abaixo está o estado **extraído do código** (pode mudar conforme commit):
+### Partial
+- RAG persistente com vetor em producao (estrutura existe, operacao depende de runtime/credenciais).
+- Evidencia L4/L5 completa para rollback/workspace coverage.
+- Execucao totalmente isolada de agent/runtime para cenarios enterprise.
 
-### OpenRouter (Primário)
+### Aspirational target
+- Memoria persistente cross-workspace com governanca enterprise completa.
+- Orquestracao multi-agent com dependencia/custo/risco totalmente visual no fluxo.
 
-**Tier Free (1)**
-- `openrouter/free`
+## 4. Catalogo de modelos
+O catalogo canonico fica em `openrouter-models.ts`.
 
-**Tier Best (15)**
-- `openai/gpt-5.4-pro`
-- `openai/gpt-5.4`
-- `openai/gpt-5-pro`
-- `openai/gpt-5`
-- `openai/gpt-5-codex`
-- `openai/gpt-5.3-codex`
-- `openai/o3`
-- `anthropic/claude-opus-4.6`
-- `anthropic/claude-sonnet-4.6`
-- `anthropic/claude-opus-4.5`
-- `anthropic/claude-sonnet-4.5`
-- `anthropic/claude-3.7-sonnet`
-- `google/gemini-2.5-pro`
-- `google/gemini-3.1-pro-preview`
-- `openai/gpt-4.1`
+Estado atual no codigo:
+- OpenRouter Best: 15 modelos.
+- OpenRouter Budget: 15 modelos.
+- OpenRouter Free: 1 rota (`openrouter/free`).
+- Fallbacks diretos em `advanced-ai-provider.ts` para OpenAI/Anthropic/Gemini.
 
-**Tier Budget (15)**
-- `openai/gpt-5.4-mini`
-- `openai/gpt-5.4-nano`
-- `openai/gpt-5-mini`
-- `openai/gpt-5-nano`
-- `openai/gpt-4.1-mini`
-- `openai/gpt-4.1-nano`
-- `openai/o3-mini`
-- `openai/o4-mini`
-- `openai/o4-mini-high`
-- `google/gemini-2.5-flash`
-- `google/gemini-2.5-flash-lite`
-- `google/gemini-3.1-flash-lite-preview`
-- `anthropic/claude-3.5-haiku`
-- `openai/gpt-5.1-codex`
-- `openai/gpt-5.2-codex`
+Default atual do dashboard:
+- `DEFAULT_OPENROUTER_MODEL_ID = google/gemini-2.5-flash-lite`
 
-### OpenAI (fallback direto)
-- `gpt-4o`
-- `gpt-4o-mini`
-- `gpt-4-turbo`
-- `o1-preview`
-- `o1-mini`
-
-### Anthropic (fallback direto)
-- `claude-3-5-sonnet-20241022`
-- `claude-3-5-haiku-20241022`
-- `claude-3-opus-20240229`
-
-### Google Gemini (fallback direto)
-- `gemini-1.5-pro`
-- `gemini-1.5-flash`
-- `gemini-2.0-flash-exp`
-
-**Observação:** a seleção efetiva depende das chaves configuradas em `.env.local`. O UI exibe custos aproximados por 1M de tokens
-e aplica multiplicador quando o usuário ativa multi-agent.
-
----
-
-## 4. Roteamento de Modelos
-
-O roteamento é baseado em:
-- tipo de tarefa (inline/chat/agent)
+## 5. Politica de roteamento
+A selecao de modelo considera:
+- tipo de tarefa (chat/action/agent)
 - custo estimado
-- latência esperada
-- plano do usuário
-- disponibilidade do provedor
+- contexto necessario
+- plano do usuario (plan limits)
+- saude/credencial do provider
 
-O modelo default atual está em:
-`cloud-web-app/web/components/dashboard/aethel-dashboard-constants.ts` (usa `google/gemini-2.5-flash-lite`).
-Quando o usuário seleciona modelos Free/Budget/Best, o selector exibe tier e custo estimado.
+Sem credencial valida, a resposta deve permanecer em estado `PARTIAL` ou `BLOCKED` (regra anti-fake-success).
 
----
+## 6. Telemetria e evidencias
+Eventos usados no ciclo principal:
+- `editor_open`
+- `first_value_time` (incluindo falha de SLO > 90s)
+- `core-loop feedback` via endpoints de IA
 
-## 5. Contexto e RAG
-
-O sistema suporta contexto local (arquivos, seleção, histórico) e prepara a base para RAG semântico. O suporte a vector DB é planejado e não deve ser marcado como `COMPLETE` sem runtime real.
-
----
-
-## 6. Observabilidade e Evidência
-
-- `POST /api/ai/core-loop/feedback` registra resultados (LEARN)
-- métricas publicadas em `metrics/latest_run-production.json`
-- dossiê L4 em `metrics/l4-readiness-dossier.json`
-
----
-
-## 7. Segurança e Guardrails
-
-- Sem fake-success
-- Check de provider antes de execução
-- Rate limit por rota (quando configurado)
-- Logs auditáveis no admin
-
----
-
-## 8. Notas de Atualização
-
-Este documento é canônico. Se houver divergência com outros specs antigos, este tem precedência.
-
-
-
+## 7. Regras de atualizacao
+- Atualizar este documento junto com mudancas em `advanced-ai-provider.ts`, `openrouter-models.ts` ou `plan-limits.ts`.
+- Nao promover L4/L5 por inferencia: somente com evidencias de runtime real.

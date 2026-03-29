@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Authentication (Server)
  * Verify JWT tokens and protect API routes.
  */
@@ -11,7 +11,7 @@ function getJwtSecret(): string {
 	const secret = process.env.JWT_SECRET;
 	if (!secret || secret === 'your-secret-key-change-in-production') {
 		throw Object.assign(
-			new Error('AUTH_NOT_CONFIGURED: defina JWT_SECRET (não use default).'),
+			new Error('AUTH_NOT_CONFIGURED: set JWT_SECRET (do not use default).'),
 			{ code: 'AUTH_NOT_CONFIGURED' }
 		);
 	}
@@ -22,6 +22,8 @@ export interface AuthUser {
 	userId: string;
 	email: string;
 	role?: string;
+	plan?: string;
+	isPro?: boolean;
 }
 
 export function verifyToken(token: string): AuthUser | null {
@@ -36,7 +38,6 @@ export function verifyToken(token: string): AuthUser | null {
 export function getUserFromRequest(req: NextRequest): AuthUser | null {
 	const authHeader = req.headers.get('authorization');
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		// Fallback para cookie (alinha com middleware.ts)
 		const cookieToken = req.cookies.get('token')?.value;
 		return cookieToken ? verifyToken(cookieToken) : null;
 	}
@@ -46,8 +47,6 @@ export function getUserFromRequest(req: NextRequest): AuthUser | null {
 }
 
 export function requireAuth(req: NextRequest): AuthUser {
-	// Se JWT_SECRET não estiver configurado, isso é erro de servidor (real-or-fail)
-	// e não deve ser reportado como "401".
 	getJwtSecret();
 
 	const user = getUserFromRequest(req);
@@ -64,11 +63,19 @@ export async function verifyProjectOwnership(projectId: string, userId: string):
 	return !!project;
 }
 
+function buildPlanClaims(plan?: string): Pick<AuthUser, 'plan' | 'isPro'> {
+	if (!plan) return {};
+	const normalized = plan.toLowerCase();
+	return {
+		plan: normalized,
+		isPro: normalized.includes('pro') || normalized.includes('studio') || normalized.includes('enterprise'),
+	};
+}
+
 export function generateToken(userId: string, email: string): string {
-	// role é opcional por compatibilidade, mas recomendado.
 	return jwt.sign({ userId, email }, getJwtSecret(), { expiresIn: '7d' });
 }
 
-export function generateTokenWithRole(userId: string, email: string, role: string): string {
-	return jwt.sign({ userId, email, role }, getJwtSecret(), { expiresIn: '7d' });
+export function generateTokenWithRole(userId: string, email: string, role: string, plan?: string): string {
+	return jwt.sign({ userId, email, role, ...buildPlanClaims(plan) }, getJwtSecret(), { expiresIn: '7d' });
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { createHMRBridge, type HMRBridge } from '@/lib/preview/hmr-bridge';
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -201,7 +202,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
     lastSyncAt: null,
   });
 
-  const wsRef = useRef<WebSocket | null>(null);
+  const bridgeRef = useRef<HMRBridge | null>(null);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const startHealthPolling = useCallback((url: string) => {
@@ -285,27 +286,26 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
   }, [projectId, startHealthPolling]);
 
   const connectHMR = useCallback((runtimeUrl: string) => {
-    if (wsRef.current) wsRef.current.close();
+    bridgeRef.current?.disconnect();
 
     try {
-      const wsUrl = runtimeUrl.replace(/^http/, 'ws') + '/_next/webpack-hmr';
-      const ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        setRuntime((prev) => ({ ...prev, hmrConnected: true }));
-      };
-
-      ws.onclose = () => {
-        setRuntime((prev) => ({ ...prev, hmrConnected: false }));
-      };
-
-      ws.onerror = () => {
-        setRuntime((prev) => ({ ...prev, hmrConnected: false }));
-      };
-
-      wsRef.current = ws;
+      bridgeRef.current = createHMRBridge({
+        runtimeUrl,
+        hmrPathCandidates: ['/_next/webpack-hmr', '/__vite_hmr'],
+        onConnectionChange: (connected) => {
+          setRuntime((prev) => ({ ...prev, hmrConnected: connected }));
+        },
+        onUpdate: (message) => {
+          if (message.type === 'full-reload' || message.type === 'update') {
+            setRuntime((prev) => ({ ...prev, lastSyncAt: Date.now() }));
+          }
+        },
+        onError: () => {
+          setRuntime((prev) => ({ ...prev, hmrConnected: false }));
+        },
+      });
     } catch {
-      // WebSocket not available for this runtime
+      setRuntime((prev) => ({ ...prev, hmrConnected: false }));
     }
   }, []);
 
@@ -334,7 +334,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
 
   useEffect(() => {
     return () => {
-      if (wsRef.current) wsRef.current.close();
+      bridgeRef.current?.disconnect();
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, []);

@@ -96,7 +96,7 @@ function ScreenshotCard({
           <p className="text-xs text-slate-400">{subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_78%,transparent)]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]" />
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
         </div>
@@ -328,7 +328,20 @@ export default function LandingPageV3() {
                       </li>
                     ))}
                   </ul>
-                  <GradientButton variant={plan.variant} onClick={() => router.push('/pricing')}>
+                  <GradientButton
+                    variant={plan.variant}
+                    onClick={() => {
+                      if (plan.title === 'Free') {
+                        router.push('/dashboard?onboarding=1&source=landing-pricing-free')
+                        return
+                      }
+                      if (plan.title === 'Pro') {
+                        router.push('/billing?source=landing-pricing-pro')
+                        return
+                      }
+                      router.push('/contact-sales?source=landing-pricing-enterprise')
+                    }}
+                  >
                     {plan.cta}
                   </GradientButton>
                 </GlassCard>
@@ -382,6 +395,12 @@ export default function LandingPageV3() {
                 className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
               >
                 Ler documentacao
+              </Link>
+              <Link
+                href="/contact-sales"
+                className="inline-flex items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-primary-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-primary)_55%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)]"
+              >
+                Falar com vendas
               </Link>
             </div>
           </div>

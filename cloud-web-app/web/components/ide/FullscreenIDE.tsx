@@ -165,17 +165,6 @@ function IDEContent() {
   const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([])
   const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false)
 
-  const runtimeStateLabel = useMemo(() => {
-    if (runtimeHealth.status === 'reachable') {
-      return typeof runtimeHealth.latencyMs === 'number'
-        ? `pronto ${runtimeHealth.latencyMs}ms`
-        : 'pronto'
-    }
-    if (runtimeHealth.status === 'checking') return 'validando'
-    if (runtimeHealth.status === 'idle') return 'inline'
-    return runtimeHealth.reason || runtimeHealth.status
-  }, [runtimeHealth.latencyMs, runtimeHealth.reason, runtimeHealth.status])
-
   const {
     previewRuntimeUrl,
     previewRuntimeInput,
@@ -211,6 +200,17 @@ function IDEContent() {
     hasToken,
     previewUrlParam,
   })
+
+  const runtimeStateLabel = useMemo(() => {
+    if (runtimeHealth.status === 'reachable') {
+      return typeof runtimeHealth.latencyMs === 'number'
+        ? `pronto ${runtimeHealth.latencyMs}ms`
+        : 'pronto'
+    }
+    if (runtimeHealth.status === 'checking') return 'validando'
+    if (runtimeHealth.status === 'idle') return 'inline'
+    return runtimeHealth.reason || runtimeHealth.status
+  }, [runtimeHealth.latencyMs, runtimeHealth.reason, runtimeHealth.status])
 
   const scheduleRuntimeSync = useCallback(() => {
     if (!previewSandboxId || isSyncingRuntime) return

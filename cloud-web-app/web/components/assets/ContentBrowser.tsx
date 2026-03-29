@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Content Browser Component - Navegador de Assets
  * 
  * Interface profissional para gerenciar e visualizar assets do projeto.
@@ -113,6 +113,12 @@ interface ContentBrowserProps {
   onSearchChange?: (value: string) => void;
   onFilterChange?: (value: AssetType | 'all') => void;
   onPathChange?: (value: string | null) => void;
+}
+
+interface StorageRuntimeState {
+  status: 'checking' | 'ready' | 'partial';
+  label: string;
+  detail: string | null;
 }
 
 // ============================================================================
@@ -516,6 +522,11 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['/Content']));
   const [filterType, setFilterType] = useState<AssetType | 'all'>(filterTypeValue ?? 'all');
   const [lowPolyPreview, setLowPolyPreview] = useState(true);
+  const [storageRuntime, setStorageRuntime] = useState<StorageRuntimeState>({
+    status: 'checking',
+    label: 'Storage verificando',
+    detail: null,
+  });
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -536,6 +547,50 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
       setSelectedPath(selectedPathValue);
     }
   }, [selectedPathValue]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkStorageRuntime = async () => {
+      try {
+        const response = await fetch('/api/health/storage', { cache: 'no-store' });
+        const payload = await response.json().catch(() => ({}));
+        if (cancelled) return;
+
+        const providerLabel = typeof payload?.storage?.type === 'string' ? payload.storage.type : 'Storage';
+        const bucket = typeof payload?.storage?.bucket === 'string' ? payload.storage.bucket : null;
+        const message = typeof payload?.storage?.message === 'string' ? payload.storage.message : null;
+
+        if (response.ok && payload?.storage?.configured) {
+          setStorageRuntime({
+            status: 'ready',
+            label: `${providerLabel} ativo`,
+            detail: bucket ? `bucket ${bucket}` : null,
+          });
+          return;
+        }
+
+        setStorageRuntime({
+          status: 'partial',
+          label: 'Storage parcial',
+          detail: message || 'Configure S3/R2 para uploads persistentes.',
+        });
+      } catch {
+        if (cancelled) return;
+        setStorageRuntime({
+          status: 'partial',
+          label: 'Storage indisponivel',
+          detail: 'Uploads persistentes exigem bucket S3/R2 acessivel.',
+        });
+      }
+    };
+
+    void checkStorageRuntime();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Organize assets into folder structure
   const folderStructure = useMemo((): AssetFolder => {
@@ -771,6 +826,29 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
             <option value="prefab">Prefabs</option>
           </select>
 
+          <div
+            style={{
+              padding: '6px 10px',
+              borderRadius: '999px',
+              background:
+                storageRuntime.status === 'ready'
+                  ? 'color-mix(in_srgb,var(--aethel-success)_16%,transparent)'
+                  : 'color-mix(in_srgb,var(--aethel-warning)_16%,transparent)',
+              color: storageRuntime.status === 'ready' ? colors.success : colors.warning,
+              border: `1px solid ${
+                storageRuntime.status === 'ready'
+                  ? 'color-mix(in_srgb,var(--aethel-success)_24%,transparent)'
+                  : 'color-mix(in_srgb,var(--aethel-warning)_24%,transparent)'
+              }`,
+              fontSize: '11px',
+              whiteSpace: 'nowrap',
+            }}
+            title={storageRuntime.detail || storageRuntime.label}
+          >
+            {storageRuntime.label}
+            {storageRuntime.detail ? ` - ${storageRuntime.detail}` : ''}
+          </div>
+
           {/* View Toggle */}
           <div style={{ display: 'flex', background: colors.surface, borderRadius: '6px', padding: '2px' }}>
             <button
@@ -815,7 +893,9 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
               color: colors.text,
               fontSize: '12px',
               cursor: 'pointer',
+              opacity: storageRuntime.status === 'ready' ? 1 : 0.72,
             }}
+            title={storageRuntime.detail || 'Importar para o bucket configurado'}
           >
             <Upload size={14} />
             Import
@@ -1019,4 +1099,5 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
 };
 
 export default ContentBrowser;
+
 

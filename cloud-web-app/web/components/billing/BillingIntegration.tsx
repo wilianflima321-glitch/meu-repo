@@ -6,7 +6,7 @@
 
 'use client'
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   CreditCard,
@@ -17,8 +17,6 @@ import {
   ArrowRight,
   AlertTriangle,
   Loader2,
-  ExternalLink,
-  RefreshCw,
   Star,
   Users,
   HardDrive,
@@ -67,7 +65,7 @@ interface SubscriptionStatus {
 // PLAN ICONS
 // ============================================================================
 
-const PLAN_ICONS: Record<string, React.ElementType> = {
+const PLAN_ICONS: Record<string, typeof Zap> = {
   starter: Zap,
   basic: Shield,
   pro: Star,
@@ -280,19 +278,19 @@ export function useCheckout() {
 
         const data = await res.json().catch(() => ({}))
 
-          if (!res.ok) {
-            throw new Error(data?.message || data?.error || 'Falha ao iniciar checkout')
-          }
+        if (!res.ok) {
+          throw new Error(data?.message || data?.error || 'Falha ao iniciar checkout')
+        }
 
-          if (data?.checkoutUrl) {
-            window.location.href = data.checkoutUrl
-          } else {
-            throw new Error('URL de checkout nao recebida')
-          }
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Falha no checkout'
-          setError(msg)
-        } finally {
+        if (typeof data?.checkoutUrl === 'string' && data.checkoutUrl) {
+          window.location.href = data.checkoutUrl
+        } else {
+          throw new Error('URL de checkout nao recebida')
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Falha no checkout'
+        setError(msg)
+      } finally {
         setLoading(false)
       }
     },
@@ -315,12 +313,21 @@ export function SubscriptionStatusWidget() {
       try {
         const token = getToken()
         if (!token) return
-        const res = await fetch('/api/billing/portal', {
+        const res = await fetch('/api/billing/subscription', {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (res.ok) {
           const data = await res.json()
-          setSubscription(data?.subscription || null)
+          setSubscription(
+            data?.data
+              ? {
+                  plan: data.data.plan,
+                  status: data.data.subscription?.status || 'inactive',
+                  currentPeriodEnd: data.data.subscription?.currentPeriodEnd,
+                  cancelAtPeriodEnd: false,
+                }
+              : null
+          )
         }
       } catch {
         // Non-critical
