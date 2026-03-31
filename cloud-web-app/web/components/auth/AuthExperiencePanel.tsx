@@ -55,7 +55,7 @@ export default function AuthExperiencePanel({
         <h2 className="mt-5 max-w-xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
           {title}
         </h2>
-        <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+        <p className="mt-4 max-w-xl text-sm leading-6 text-[var(--aethel-text-secondary)] sm:text-base">
           {description}
         </p>
 
@@ -66,7 +66,7 @@ export default function AuthExperiencePanel({
               className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4 backdrop-blur-sm"
             >
               <p className="text-xl font-semibold text-white sm:text-2xl">{item.value}</p>
-              <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
+              <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">{item.label}</p>
             </div>
           ))}
         </div>
@@ -75,7 +75,7 @@ export default function AuthExperiencePanel({
           <div className="mt-8 overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.04] shadow-[0_24px_60px_rgba(15,23,42,0.45)]">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Studio real</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Studio real</p>
                 <p className="mt-1 text-sm text-white">A mesma shell que o usuario encontra ao entrar</p>
               </div>
               <div className="flex items-center gap-2 text-[11px] text-emerald-200">
@@ -84,7 +84,7 @@ export default function AuthExperiencePanel({
               </div>
             </div>
 
-            <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
+            <div className="relative aspect-[16/10] overflow-hidden bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)]">
               <Image
                 src={visual.src}
                 alt={visual.alt}
@@ -92,17 +92,17 @@ export default function AuthExperiencePanel({
                 sizes="(min-width: 1024px) 40vw, 100vw"
                 className="object-cover object-top"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[color-mix(in_srgb,var(--aethel-surface-primary)_82%,transparent)] via-transparent to-transparent" />
             </div>
 
             <div className="space-y-3 px-4 py-4">
-              <p className="text-sm leading-6 text-slate-300">{visual.caption}</p>
+              <p className="text-sm leading-6 text-[var(--aethel-text-secondary)]">{visual.caption}</p>
               {visual.chips?.length ? (
                 <div className="flex flex-wrap gap-2">
                   {visual.chips.map((chip) => (
                     <span
                       key={chip}
-                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-medium text-slate-200"
+                      className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-secondary)]"
                     >
                       {chip}
                     </span>
@@ -114,14 +114,14 @@ export default function AuthExperiencePanel({
         ) : null}
 
         <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
             O que aparece primeiro
           </p>
           <div className="mt-4 space-y-3">
             {highlights.map((item) => (
               <div key={item} className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                <p className="text-sm leading-6 text-slate-300">{item}</p>
+                <p className="text-sm leading-6 text-[var(--aethel-text-secondary)]">{item}</p>
               </div>
             ))}
           </div>
