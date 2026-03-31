@@ -221,6 +221,12 @@ export default function LandingPageV3() {
                 >
                   Ver planos
                 </Link>
+                <Link
+                  href="/workbench-preview.html"
+                  className="inline-flex items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_38%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)]"
+                >
+                  Ver north-star do workbench
+                </Link>
               </div>
             </motion.div>
 
