@@ -152,7 +152,7 @@ export default function AethelHeader() {
             <nav className="hidden md:flex items-center gap-1">
               <Dropdown
                 trigger={
-                  <span className="flex items-center gap-1.5 rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:border-white/10 hover:bg-white/[0.06] hover:text-white">
+                  <span className="flex items-center gap-1.5 rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[var(--aethel-border-subtle)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]">
                     Produtos
                     <ChevronDown className="w-4 h-4" />
                   </span>
@@ -169,8 +169,8 @@ export default function AethelHeader() {
                   className={`
                     rounded-xl px-3 py-2 text-sm font-medium transition-colors
                     ${pathname === link.href
-                      ? 'text-white bg-white/[0.08] border border-white/10'
-                      : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                      ? 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] text-[var(--aethel-text-primary)]'
+                      : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]'
                     }
                   `}
                 >
@@ -187,11 +187,11 @@ export default function AethelHeader() {
               type="button"
               aria-label="Abrir busca global"
               onClick={() => setSearchOpen(true)}
-              className="hidden sm:flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-slate-400 transition-colors hover:bg-white/[0.08] hover:text-slate-200"
+              className="hidden sm:flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]"
             >
               <Search className="w-4 h-4" />
               <span>Buscar...</span>
-              <kbd className="hidden lg:inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/20 px-1.5 py-0.5 text-xs text-slate-500">
+              <kbd className="hidden lg:inline-flex items-center gap-1 rounded-md border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] px-1.5 py-0.5 text-xs text-[var(--aethel-text-quaternary)]">
                 Ctrl+K
               </kbd>
             </button>
@@ -202,7 +202,7 @@ export default function AethelHeader() {
                 <button
                   type="button"
                   aria-label={`Abrir notificacoes${notifications > 0 ? `, ${notifications} pendentes` : ''}`}
-                  className="relative rounded-xl p-2 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+                  className="relative rounded-xl p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
                   <Bell className="w-5 h-5" />
                   {notifications > 0 && (
@@ -229,7 +229,7 @@ export default function AethelHeader() {
                         size="sm"
                         status="online"
                       />
-                      <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
+                      <ChevronDown className="hidden h-4 w-4 text-[var(--aethel-text-tertiary)] sm:block" />
                     </div>
                   }
                   items={userMenuItems}
@@ -259,7 +259,7 @@ export default function AethelHeader() {
               type="button"
               aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              className="rounded-lg p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] hover:text-[var(--aethel-text-primary)] md:hidden"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -268,7 +268,7 @@ export default function AethelHeader() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-slate-800">
+          <div className="border-t border-[var(--aethel-border-secondary)] py-4 md:hidden">
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
@@ -278,8 +278,8 @@ export default function AethelHeader() {
                   className={`
                     px-4 py-3 text-sm font-medium rounded-lg transition-colors
                     ${pathname === link.href
-                      ? 'text-white bg-slate-800'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]'
+                      : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]'
                     }
                   `}
                 >
@@ -287,14 +287,14 @@ export default function AethelHeader() {
                 </Link>
               ))}
               
-              <div className="my-2 border-t border-slate-800" />
+              <div className="my-2 border-t border-[var(--aethel-border-secondary)]" />
               
               {productItems.filter(i => !i.divider).map((item) => (
                 <Link
                   key={item.id}
                   href={item.href || '#'}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
                   {item.icon}
                   {item.label}
@@ -310,20 +310,20 @@ export default function AethelHeader() {
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setSearchOpen(false)}>
           <div className="fixed top-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4">
             <div 
-              className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+              className="overflow-hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.96),rgba(10,14,24,0.94))] shadow-[0_32px_90px_rgba(2,6,23,0.55)]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-700">
-                <Search className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center gap-3 border-b border-[var(--aethel-border-secondary)] px-4 py-3">
+                <Search className="h-5 w-5 text-[var(--aethel-text-tertiary)]" />
                 <input
                   type="text"
                   placeholder="Buscar projetos, comandos, arquivos..."
-                  className="flex-1 bg-transparent text-slate-100 placeholder-slate-500 outline-none text-lg"
+                  className="flex-1 bg-transparent text-lg text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] outline-none"
                   autoFocus
                 />
-                <kbd className="px-2 py-1 text-xs text-slate-500 bg-slate-800 rounded">ESC</kbd>
+                <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_78%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-quaternary)]">ESC</kbd>
               </div>
-              <div className="p-4 text-center text-slate-500 text-sm">
+              <div className="p-4 text-center text-sm text-[var(--aethel-text-quaternary)]">
                 Digite para buscar...
               </div>
             </div>

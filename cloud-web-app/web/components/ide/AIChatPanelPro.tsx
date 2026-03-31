@@ -192,18 +192,18 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
         if (match) {
           const [, language = 'text', code] = match
           return (
-            <div key={i} className="my-3 rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
-              <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800 border-b border-slate-700">
-                <span className="text-xs text-slate-400">{language}</span>
+            <div key={i} className="my-3 overflow-hidden rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))]">
+              <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-1.5">
+                <span className="text-xs text-[var(--aethel-text-tertiary)]">{language}</span>
                 <button
                   onClick={() => onCopy(code)}
-                  className="p-1 rounded hover:bg-slate-700 text-slate-400"
+                  className="rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
                   <Copy className="w-3.5 h-3.5" />
                 </button>
               </div>
               <pre className="p-3 overflow-x-auto text-sm">
-                <code className="text-slate-300">{code}</code>
+                <code className="text-[var(--aethel-text-secondary)]">{code}</code>
               </pre>
             </div>
           )
@@ -214,7 +214,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
           {part.split('\n').map((line, j) => (
             <span key={j}>
               {line.startsWith('- ') ? (
-                <span className="block pl-4 before:content-['•'] before:absolute before:left-0 before:text-slate-500 relative">
+                <span className="relative block pl-4 before:absolute before:left-0 before:text-[var(--aethel-text-quaternary)] before:content-['•']">
                   {line.slice(2)}
                 </span>
               ) : line.startsWith('**') && line.endsWith('**') ? (
@@ -251,7 +251,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
         {message.attachments && message.attachments.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
             {message.attachments.map(att => (
-              <div key={att.id} className="flex items-center gap-2 px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300">
+              <div key={att.id} className="flex items-center gap-2 rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_48%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
                 {att.type === 'image' ? <ImageIcon className="w-3 h-3" /> : <File className="w-3 h-3" />}
                 {att.name}
               </div>
@@ -278,13 +278,13 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
           inline-block max-w-full text-left px-4 py-2.5 rounded-2xl
           ${isUser
             ? 'bg-blue-600 text-white rounded-tr-sm'
-            : 'bg-slate-800 text-slate-200 rounded-tl-sm'
+            : 'rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] text-[var(--aethel-text-secondary)]'
           }
         `}>
           <div className="text-sm">{renderContent(message.content)}</div>
         </div>
         {/* Meta & Actions */}
-        <div className={`flex items-center gap-2 mt-1 text-xs text-slate-500 ${isUser ? 'justify-end' : ''}`}>
+        <div className={`mt-1 flex items-center gap-2 text-xs text-[var(--aethel-text-quaternary)] ${isUser ? 'justify-end' : ''}`}>
           {message.model && (
             <span className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
@@ -302,28 +302,28 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             <div className="flex items-center gap-1 ml-2">
               <button
                 onClick={handleCopy}
-                className="p-1 rounded hover:bg-slate-800"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
                 title="Copy"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <button
                 onClick={onRegenerate}
-                className="p-1 rounded hover:bg-slate-800"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
                 title="Regenerate"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onRate('up')}
-                className="p-1 rounded hover:bg-slate-800"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
                 title="Good response"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onRate('down')}
-                className="p-1 rounded hover:bg-slate-800"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
                 title="Bad response"
               >
                 <ThumbsDown className="w-3.5 h-3.5" />
@@ -695,13 +695,13 @@ export default function AIChatPanelPro({
           <LiveModeIndicator status={liveStatus} onEnd={onToggleLiveMode} />
         )}
         {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+        <div className="flex items-center justify-between border-b border-[var(--aethel-border-secondary)] px-3 py-2">
           {/* Left: History + Model */}
           <div className="flex items-center gap-2">
             {threads.length > 0 && (
               <button
                 onClick={() => setShowHistorySidebar(!showHistorySidebar)}
-                className={`p-1.5 rounded hover:bg-slate-800 ${showHistorySidebar ? 'bg-slate-800 text-blue-400' : 'text-slate-400'}`}
+                className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] ${showHistorySidebar ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}
                 title="Chat History"
               >
                 <History className="w-4 h-4" />
@@ -713,16 +713,16 @@ export default function AIChatPanelPro({
                 <div className="relative">
                   <button
                     onClick={() => setShowModelSelector(!showModelSelector)}
-                    className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-800 text-sm"
+                    className="flex items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
                   >
                     <Sparkles className="w-4 h-4 text-blue-400" />
                     <span>{selectedModel.name}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                    <ChevronDown className="h-3.5 w-3.5 text-[var(--aethel-text-tertiary)]" />
                   </button>
                   {showModelSelector && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
-                      <div className="absolute left-0 top-full mt-1 z-50 min-w-72 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
+                      <div className="absolute left-0 top-full z-50 mt-1 min-w-72 rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.98),rgba(10,14,24,0.94))] py-1 shadow-[0_24px_80px_rgba(2,6,23,0.48)]">
                         {models.map(model => (
                           <button
                             key={model.id}
@@ -732,16 +732,16 @@ export default function AIChatPanelPro({
                             }}
                             className={`
                               w-full flex items-start gap-3 px-3 py-2 text-left
-                              ${model.id === currentModel ? 'bg-blue-500/20' : 'hover:bg-slate-700'}
+                              ${model.id === currentModel ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)]'}
                             `}
                           >
-                            <Sparkles className={`w-4 h-4 mt-0.5 ${model.id === currentModel ? 'text-blue-400' : 'text-slate-500'}`} />
+                            <Sparkles className={`mt-0.5 h-4 w-4 ${model.id === currentModel ? 'text-[var(--aethel-info)]' : 'text-[var(--aethel-text-quaternary)]'}`} />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-sm font-medium text-white">{model.name}</span>
-                                <span className="text-xs text-slate-500">{model.provider}</span>
+                                <span className="text-xs text-[var(--aethel-text-quaternary)]">{model.provider}</span>
                                 {model.tier && (
-                                  <span className="px-1.5 py-0.5 text-[10px] uppercase tracking-wide bg-slate-700 text-slate-300 rounded">
+                                  <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_68%,transparent)] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[var(--aethel-text-secondary)]">
                                     {model.tier}
                                   </span>
                                 )}
@@ -753,10 +753,10 @@ export default function AIChatPanelPro({
                                 )}
                               </div>
                               {model.description && (
-                                <span className="text-xs text-slate-400">{model.description}</span>
+                                <span className="text-xs text-[var(--aethel-text-tertiary)]">{model.description}</span>
                               )}
                               {model.inputCost !== undefined && model.outputCost !== undefined && (
-                                <span className="text-[11px] text-slate-500">
+                                <span className="text-[11px] text-[var(--aethel-text-quaternary)]">
                                   {formatCost(model.inputCost)}/{formatCost(model.outputCost)} per 1M
                                 </span>
                               )}
@@ -769,32 +769,32 @@ export default function AIChatPanelPro({
                   )}
                 </div>
                 {showAdvancedControls ? (
-                  <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                    <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 uppercase tracking-wide">
+                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--aethel-text-tertiary)]">
+                    <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-1.5 py-0.5 uppercase tracking-wide text-[var(--aethel-text-secondary)]">
                       {modelTierLabel}
                     </span>
                     {inputCostLabel && outputCostLabel && (
                       <span>{inputCostLabel}/{outputCostLabel} per 1M</span>
                     )}
                     {agentCount > 1 && (
-                      <span className="text-slate-500">x{agentCount} agents</span>
+                      <span className="text-[var(--aethel-text-quaternary)]">x{agentCount} agents</span>
                     )}
                   </div>
                 ) : (
-                  <div className="text-[11px] text-slate-500 mt-0.5">Modo basico</div>
+                  <div className="mt-0.5 text-[11px] text-[var(--aethel-text-quaternary)]">Modo basico</div>
                 )}
               </div>
               {showAdvancedControls && (
                 <div className="flex items-center gap-1">
-                  <span className="text-[11px] text-slate-500">Agents</span>
+                  <span className="text-[11px] text-[var(--aethel-text-quaternary)]">Agents</span>
                   {[1, 2, 3].map((count) => (
                     <button
                       key={count}
                       onClick={() => setAgentCount(count)}
                       className={`px-2 py-0.5 text-[11px] rounded border ${
                         agentCount === count
-                          ? 'border-blue-400 text-blue-300 bg-blue-500/10'
-                          : 'border-slate-700 text-slate-400 hover:border-slate-500'
+                          ? 'border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
+                          : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
                       }`}
                     >
                       {count}
@@ -812,7 +812,7 @@ export default function AIChatPanelPro({
                 {selectedModel.supportsVoice && onToggleLiveMode && (
                   <button
                     onClick={onToggleLiveMode}
-                    className={`p-1.5 rounded ${isLiveMode ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+                    className={`rounded p-1.5 ${isLiveMode ? 'bg-blue-600 text-white' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
                     title={isLiveMode ? 'Exit Live Mode' : 'Enter Live Mode (Gemini Live style)'}
                   >
                     <Radio className="w-4 h-4" />
@@ -824,7 +824,7 @@ export default function AIChatPanelPro({
                     const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
                     if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
                   }}
-                  className={`p-1.5 rounded ${isSpeaking ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+                  className={`rounded p-1.5 ${isSpeaking ? 'bg-emerald-600 text-white' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
                   title={isSpeaking ? 'Stop speaking' : 'Read last response'}
                 >
                   {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -833,14 +833,14 @@ export default function AIChatPanelPro({
             )}
             <button
               onClick={onClearChat}
-              className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
+              className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
               title="Clear chat"
             >
               <Trash2 className="w-4 h-4" />
             </button>
             <button
               onClick={() => setShowAdvancedControls((prev) => !prev)}
-              className={`p-1.5 rounded ${showAdvancedControls ? 'bg-slate-800 text-slate-200' : 'hover:bg-slate-800 text-slate-400'}`}
+              className={`rounded p-1.5 ${showAdvancedControls ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
               title={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
               aria-pressed={showAdvancedControls}
             >
@@ -856,7 +856,7 @@ export default function AIChatPanelPro({
                 <Bot className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">AI Assistant</h3>
-              <p className="text-sm text-slate-400 max-w-sm mb-6">
+              <p className="mb-6 max-w-sm text-sm text-[var(--aethel-text-tertiary)]">
                 Ask me anything about your code. I can explain, debug, optimize, and generate code.
               </p>
               {selectedModel.supportsVoice && (
@@ -871,7 +871,7 @@ export default function AIChatPanelPro({
                     <button
                       key={label}
                       onClick={() => handleQuickPrompt(prompt)}
-                      className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-300"
+                      className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]"
                     >
                       <Icon className="w-4 h-4" />
                       {label}
@@ -882,7 +882,7 @@ export default function AIChatPanelPro({
                 <button
                   type="button"
                   onClick={() => setShowAdvancedControls(true)}
-                  className="text-xs text-slate-400 hover:text-slate-200"
+                  className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   Mostrar atalhos avancados
                 </button>
@@ -905,7 +905,7 @@ export default function AIChatPanelPro({
               <Bot className="w-4 h-4 text-white animate-pulse" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="inline-block max-w-full text-left px-4 py-2.5 rounded-2xl rounded-tl-sm bg-slate-800 text-slate-200">
+              <div className="inline-block max-w-full rounded-2xl rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] px-4 py-2.5 text-left text-[var(--aethel-text-secondary)]">
                 <div className="text-sm whitespace-pre-wrap">{streamingContent}</div>
                 <span className="inline-block w-2 h-4 bg-blue-400 animate-pulse ml-1" />
               </div>
@@ -918,10 +918,10 @@ export default function AIChatPanelPro({
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
               <Bot className="w-4 h-4 text-white animate-pulse" />
             </div>
-            <div className="flex items-center gap-1 px-4 py-3 bg-slate-800 rounded-2xl rounded-tl-sm">
-              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] px-4 py-3">
+              <div className="h-2 w-2 animate-bounce rounded-full bg-[var(--aethel-text-quaternary)]" style={{ animationDelay: '0ms' }} />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-[var(--aethel-text-quaternary)]" style={{ animationDelay: '150ms' }} />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-[var(--aethel-text-quaternary)]" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
@@ -929,13 +929,13 @@ export default function AIChatPanelPro({
       </div>
       {/* Quick prompts bar */}
       {showAdvancedControls && (
-        <div className="px-3 py-2 border-t border-slate-800">
+        <div className="border-t border-[var(--aethel-border-secondary)] px-3 py-2">
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
             {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
               <button
                 key={label}
                 onClick={() => handleQuickPrompt(prompt)}
-                className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-full text-xs text-slate-300 whitespace-nowrap"
+                className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] px-2.5 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)]"
               >
                 <Icon className="w-3.5 h-3.5" />
                 {label}
@@ -945,7 +945,7 @@ export default function AIChatPanelPro({
         </div>
       )}
         {/* Input area */}
-      <form onSubmit={handleSend} className="p-3 border-t border-slate-800">
+      <form onSubmit={handleSend} className="border-t border-[var(--aethel-border-secondary)] p-3">
         {mentionState.parsed.mentions.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
             {mentionState.parsed.mentions.map((mention, index) => (
@@ -986,7 +986,7 @@ export default function AIChatPanelPro({
               <button
                 type="button"
                 onClick={handleFileAttach}
-                className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
+                className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
                 title="Attach file"
               >
                 <Paperclip className="w-4 h-4" />
@@ -996,7 +996,7 @@ export default function AIChatPanelPro({
               <button
                 type="button"
                 onClick={handleImageAttach}
-                className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
+                className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
                 title="Attach image"
               >
                 <ImageIcon className="w-4 h-4" />
@@ -1005,7 +1005,7 @@ export default function AIChatPanelPro({
             <button
               type="button"
               onClick={handleVoiceToggle}
-              className={`p-1.5 rounded ${isRecording ? 'bg-red-500 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
+              className={`rounded p-1.5 ${isRecording ? 'bg-red-500 text-white' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
               title={isRecording ? 'Stop recording' : 'Voice input'}
             >
               {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -1028,7 +1028,7 @@ export default function AIChatPanelPro({
               onKeyDown={handleComposerKeyDown}
               placeholder={isRecording ? 'Listening...' : 'Ask AI...'}
               disabled={isLoading}
-              className="w-full px-4 py-2.5 pr-12 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none min-h-[44px] max-h-[200px]"
+              className="min-h-[44px] max-h-[200px] w-full resize-none rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-4 py-2.5 pr-12 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] focus:outline-none"
               rows={1}
             />
             <button
@@ -1038,7 +1038,7 @@ export default function AIChatPanelPro({
                 absolute right-2 bottom-2 p-1.5 rounded-lg transition-colors
                 ${input.trim() && !isLoading
                   ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                  : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
                 }
               `}
             >
@@ -1057,7 +1057,7 @@ export default function AIChatPanelPro({
                 key={mention.label}
                 type="button"
                 onClick={() => insertQuickMention(mention.value)}
-                className="rounded-full border border-slate-700 bg-slate-800/70 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-sky-500/50 hover:text-white"
+                className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)]"
               >
                 {mention.label}
               </button>
