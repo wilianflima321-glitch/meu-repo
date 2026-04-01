@@ -504,7 +504,7 @@ export default function IDELayout({
                 </div>
                 <div className="min-w-0">
                   <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-secondary)]">Aethel Studio</div>
-                  <div className="truncate text-[10px] text-[var(--aethel-text-quaternary)]">Apps + Research  Runtime</div>
+                  <div className="truncate text-[10px] text-[var(--aethel-text-quaternary)]">Apps + Pesquisa  Runtime</div>
                 </div>
               </div>
 

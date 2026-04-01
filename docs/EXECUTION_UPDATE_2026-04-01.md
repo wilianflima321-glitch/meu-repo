@@ -30,6 +30,7 @@
   - Banner de erro de voz com mensagem clara e opcao de fechar.
   - Blocos de codigo com acoes (aplicar/diff/criar arquivo) marcadas como pendentes de integracao.
   - ThinkingDisplay com timeline resumida e ToolCallDisplay com params/duracao.
+  - AICommandCenter com input multiline, hint de atalho e descricao do agente ativo.
 - Preview:
   - Indicador de HMR explicita indisponibilidade quando o runtime esta ativo sem hot reload.
   - Normalizacao de URL aceita `localhost:porta` automaticamente.

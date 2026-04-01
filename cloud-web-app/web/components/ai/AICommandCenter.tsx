@@ -73,7 +73,7 @@ export function AICommandCenter() {
   const [activeExecution, setActiveExecution] = useState<AgentExecution | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Auto-scroll para ultima mensagem
   useEffect(() => {
@@ -164,12 +164,20 @@ export function AICommandCenter() {
     processCommand(input)
   }
 
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      processCommand(input)
+    }
+  }
+
   const handleSuggestion = (suggestion: CommandSuggestion) => {
     setSelectedAgent(suggestion.agentId)
     processCommand(suggestion.command)
   }
 
   const agentList = Object.values(AGENTS)
+  const selectedAgentDetails = AGENTS[selectedAgent]
 
   return (
     <div className="flex h-full flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
@@ -194,18 +202,25 @@ export function AICommandCenter() {
           </div>
         </div>
 
-        <select
-          value={selectedAgent}
-          onChange={(e) => setSelectedAgent(e.target.value)}
-          className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)]"
-          aria-label="Selecionar agente"
-        >
-          {agentList.map((agent) => (
-            <option key={agent.id} value={agent.id}>
-              {agent.name}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-col items-end gap-1">
+          <select
+            value={selectedAgent}
+            onChange={(e) => setSelectedAgent(e.target.value)}
+            className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)]"
+            aria-label="Selecionar agente"
+          >
+            {agentList.map((agent) => (
+              <option key={agent.id} value={agent.id}>
+                {agent.name}
+              </option>
+            ))}
+          </select>
+          {selectedAgentDetails?.description && (
+            <span className="text-[11px] text-[var(--aethel-text-quaternary)]">
+              {selectedAgentDetails.description}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
@@ -247,16 +262,22 @@ export function AICommandCenter() {
         onSubmit={handleSubmit}
         className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4"
       >
-        <div className="flex items-center gap-3">
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Digite um comando... (ex: Crie um cubo 3D azul)"
-            disabled={isProcessing}
-            className="flex-1 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)] disabled:opacity-50"
-          />
+        <div className="flex items-start gap-3">
+          <div className="flex-1">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleInputKeyDown}
+              placeholder="Descreva a tarefa... (Shift+Enter para nova linha)"
+              disabled={isProcessing}
+              rows={2}
+              className="w-full resize-none rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)] disabled:opacity-50"
+            />
+            <p className="mt-1 text-[11px] text-[var(--aethel-text-quaternary)]">
+              Enter para executar • Shift+Enter para nova linha
+            </p>
+          </div>
           <button
             type="submit"
             disabled={isProcessing || !input.trim()}
@@ -272,7 +293,7 @@ export function AICommandCenter() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                Processando...
+                Executando agente...
               </>
             ) : (
               <>
