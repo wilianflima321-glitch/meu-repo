@@ -355,33 +355,33 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             <div className="flex items-center gap-1 ml-2">
               <button
                 onClick={handleCopy}
-                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Copiar"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Copiar resposta"
                 aria-label="Copiar resposta"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-[var(--aethel-success)]" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <button
                 onClick={onRegenerate}
-                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Regerar"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Regerar resposta"
                 aria-label="Regerar resposta"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onRate('up')}
-                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Resposta boa"
-                aria-label="Resposta boa"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Marcar resposta como util"
+                aria-label="Marcar resposta como util"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onRate('down')}
-                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Resposta ruim"
-                aria-label="Resposta ruim"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Marcar resposta como insuficiente"
+                aria-label="Marcar resposta como insuficiente"
               >
                 <ThumbsDown className="w-3.5 h-3.5" />
               </button>
@@ -758,7 +758,7 @@ export default function AIChatPanelPro({
             {threads.length > 0 && (
               <button
                 onClick={() => setShowHistorySidebar(!showHistorySidebar)}
-                className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] ${showHistorySidebar ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}
+                className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showHistorySidebar ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}
                 title="Historico do chat"
                 aria-label="Alternar historico do chat"
               >
@@ -771,7 +771,9 @@ export default function AIChatPanelPro({
                 <div className="relative">
                   <button
                     onClick={() => setShowModelSelector(!showModelSelector)}
-                    className="flex items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
+                    aria-label="Abrir seletor de modelo de IA"
+                    aria-expanded={showModelSelector}
+                    className="flex items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                   >
                     <Sparkles className="w-4 h-4 text-[var(--aethel-info-light)]" />
                     <span>{selectedModel.name}</span>
@@ -870,7 +872,7 @@ export default function AIChatPanelPro({
                 {selectedModel.supportsVoice && onToggleLiveMode && (
                   <button
                     onClick={onToggleLiveMode}
-                    className={`rounded p-1.5 ${isLiveMode ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+                    className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isLiveMode ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
                     title={isLiveMode ? 'Sair do modo live' : 'Entrar no modo live (voz em tempo real)'}
                     aria-label={isLiveMode ? 'Sair do modo live' : 'Entrar no modo live'}
                   >
@@ -883,7 +885,7 @@ export default function AIChatPanelPro({
                     const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
                     if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
                   }}
-                  className={`rounded p-1.5 ${isSpeaking ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+                  className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isSpeaking ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
                   title={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
                   aria-label={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
                 >
@@ -893,7 +895,7 @@ export default function AIChatPanelPro({
             )}
             <button
               onClick={onClearChat}
-              className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
+              className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               title="Limpar chat"
               aria-label="Limpar chat"
             >
@@ -901,7 +903,7 @@ export default function AIChatPanelPro({
             </button>
             <button
               onClick={() => setShowAdvancedControls((prev) => !prev)}
-              className={`rounded p-1.5 ${showAdvancedControls ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showAdvancedControls ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
               title={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
               aria-pressed={showAdvancedControls}
               aria-label={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
@@ -933,7 +935,8 @@ export default function AIChatPanelPro({
                     <button
                       key={label}
                       onClick={() => handleQuickPrompt(prompt)}
-                      className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]"
+                      aria-label={`Aplicar prompt rapido: ${label}`}
+                      className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                     >
                       <Icon className="w-4 h-4" />
                       {label}
@@ -997,7 +1000,8 @@ export default function AIChatPanelPro({
               <button
                 key={label}
                 onClick={() => handleQuickPrompt(prompt)}
-                className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] px-2.5 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)]"
+                aria-label={`Aplicar prompt rapido: ${label}`}
+                className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] px-2.5 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               >
                 <Icon className="w-3.5 h-3.5" />
                 {label}
@@ -1035,7 +1039,8 @@ export default function AIChatPanelPro({
             <button
               type="button"
               onClick={stopRecording}
-              className="px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] rounded text-xs text-[var(--aethel-error)]"
+              className="rounded px-2 py-1 text-xs text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              aria-label="Parar gravacao de voz"
             >
               Parar
             </button>
@@ -1061,7 +1066,7 @@ export default function AIChatPanelPro({
               <button
                 type="button"
                 onClick={handleFileAttach}
-                className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
+                className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 title="Anexar arquivo"
                 aria-label="Anexar arquivo"
               >
@@ -1072,7 +1077,7 @@ export default function AIChatPanelPro({
               <button
                 type="button"
                 onClick={handleImageAttach}
-                className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
+                className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 title="Anexar imagem"
                 aria-label="Anexar imagem"
               >
@@ -1082,7 +1087,7 @@ export default function AIChatPanelPro({
             <button
               type="button"
               onClick={handleVoiceToggle}
-              className={`rounded p-1.5 ${isRecording ? 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isRecording ? 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
               title={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
               aria-label={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
             >
@@ -1105,18 +1110,18 @@ export default function AIChatPanelPro({
               value={input}
               onChange={(e) => mentionState.setText(e.target.value, e.target.selectionStart ?? e.target.value.length)}
               onKeyDown={handleComposerKeyDown}
-              placeholder={isRecording ? 'Ouvindo...' : 'Pergunte a IA sobre o seu codigo...'}
+              placeholder={isRecording ? 'Ouvindo...' : 'Pergunte para a IA sobre o seu codigo...'}
               disabled={isLoading}
               aria-controls="mention-suggestions-list"
               aria-label="Mensagem do chat"
-              className="min-h-[44px] max-h-[200px] w-full resize-none rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-4 py-2.5 pr-12 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] focus:outline-none"
+              className="min-h-[44px] max-h-[200px] w-full resize-none rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-4 py-2.5 pr-12 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               rows={1}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
               className={`
-                absolute right-2 bottom-2 p-1.5 rounded-lg transition-colors
+                absolute right-2 bottom-2 rounded-lg p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
                 ${input.trim() && !isLoading
                   ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
                   : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
@@ -1140,7 +1145,7 @@ export default function AIChatPanelPro({
                 key={mention.label}
                 type="button"
                 onClick={() => insertQuickMention(mention.value)}
-                className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               >
                 {mention.label}
               </button>
@@ -1184,9 +1189,8 @@ export default function AIChatPanelPro({
   )
 }
 function formatTime(date: Date): string {
-  return date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
+  return date.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
     minute: '2-digit',
-    hour12: true,
   })
 }

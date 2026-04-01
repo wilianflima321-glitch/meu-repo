@@ -176,7 +176,9 @@ export default function PreviewRuntimeToolbar({
           <button
             type="button"
             onClick={onToggleSettings}
-            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
+            aria-label={showRuntimeSettings ? 'Ocultar configuracoes do runtime de preview' : 'Abrir configuracoes do runtime de preview'}
+            aria-pressed={showRuntimeSettings}
+            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           >
             {showRuntimeSettings ? 'Ocultar runtime' : 'Configurar runtime'}
           </button>
@@ -184,7 +186,8 @@ export default function PreviewRuntimeToolbar({
             type="button"
             onClick={onRunRecommendedAction}
             disabled={primaryActionBusy}
-            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
+            aria-label={`Executar acao recomendada para o runtime: ${runtimePrimaryActionLabel}`}
+            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {primaryActionBusy ? primaryActionBusyLabel : runtimePrimaryActionLabel}
           </button>
@@ -192,7 +195,8 @@ export default function PreviewRuntimeToolbar({
             <button
               type="button"
               onClick={onOpenRuntime}
-              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
+              aria-label="Abrir o preview em nova aba"
+              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Abrir preview
             </button>
@@ -207,12 +211,14 @@ export default function PreviewRuntimeToolbar({
             value={previewRuntimeInput}
             onChange={(event) => onRuntimeInputChange(event.target.value)}
             placeholder="https://localhost:5173"
-            className="min-w-[280px] flex-1 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]"
+            aria-label="URL manual do runtime de preview"
+            className="min-w-[280px] flex-1 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           />
           <button
             type="button"
             onClick={onApplyRuntime}
-            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
+            aria-label="Aplicar a URL manual do runtime"
+            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           >
             Aplicar
           </button>
@@ -220,7 +226,8 @@ export default function PreviewRuntimeToolbar({
             type="button"
             onClick={onDiscoverRuntime}
             disabled={isDiscoveringRuntime}
-            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-70"
+            aria-label="Detectar automaticamente um runtime de preview"
+            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isDiscoveringRuntime ? 'Detectando...' : 'Auto-detectar'}
           </button>
@@ -228,7 +235,8 @@ export default function PreviewRuntimeToolbar({
             type="button"
             onClick={onProvisionRuntime}
             disabled={isProvisioningRuntime || !routeProvisionSupported}
-            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
+            aria-label="Provisionar um runtime de preview gerenciado"
+            className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-success-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponivel'}
           </button>
@@ -237,7 +245,8 @@ export default function PreviewRuntimeToolbar({
               type="button"
               onClick={onSyncRuntime}
               disabled={isSyncingRuntime}
-              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] disabled:cursor-not-allowed disabled:opacity-70"
+              aria-label="Sincronizar os arquivos atuais com o runtime de preview"
+              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-primary-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSyncingRuntime ? 'Sincronizando...' : 'Sincronizar runtime'}
             </button>
@@ -246,7 +255,8 @@ export default function PreviewRuntimeToolbar({
             <button
               type="button"
               onClick={onRevalidate}
-              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
+              aria-label="Revalidar o runtime de preview"
+              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Revalidar
             </button>
@@ -255,7 +265,8 @@ export default function PreviewRuntimeToolbar({
             <button
               type="button"
               onClick={onOpenRuntime}
-              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-white/[0.08]"
+              aria-label="Abrir o runtime em nova aba"
+              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Abrir runtime
             </button>
@@ -264,7 +275,8 @@ export default function PreviewRuntimeToolbar({
             <button
               type="button"
               onClick={onUseFallback}
-              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]"
+              aria-label="Usar o fallback inline do preview"
+              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-error-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Usar fallback inline
             </button>

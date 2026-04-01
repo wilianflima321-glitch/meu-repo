@@ -16,7 +16,7 @@ export function AttachmentPreview({ attachment, onRemove }: AttachmentPreviewPro
         <button
           type="button"
           onClick={onRemove}
-          className="ml-1 rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)]"
+          className="ml-1 rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           aria-label="Remover anexo"
         >
           <X className="h-3 w-3" />
@@ -57,7 +57,7 @@ export function ChatHistorySidebar({
             <button
               type="button"
               onClick={onCreateThread}
-              className="rounded px-2 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)]"
+              className="rounded px-2 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Novo
             </button>
@@ -66,7 +66,7 @@ export function ChatHistorySidebar({
             <button
               type="button"
               onClick={onClose}
-              className="rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)]"
+              className="rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               aria-label="Fechar historico"
             >
               <X className="h-3 w-3" />
@@ -97,7 +97,7 @@ export function ChatHistorySidebar({
                 <button
                   type="button"
                   onClick={() => onArchiveThread(thread.id)}
-                  className="text-[11px] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
+                  className="text-[11px] text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
                   Arquivar
                 </button>
@@ -106,7 +106,7 @@ export function ChatHistorySidebar({
                 <button
                   type="button"
                   onClick={() => onDeleteThread(thread.id)}
-                  className="text-[11px] text-[var(--aethel-error)] hover:text-[var(--aethel-error)]"
+                  className="text-[11px] text-[var(--aethel-error)] transition-colors hover:text-[var(--aethel-error)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
                   Excluir
                 </button>
@@ -137,13 +137,13 @@ export function LiveModeIndicator({ status = 'idle', onEnd }: LiveModeIndicatorP
     <div className="flex items-center justify-between gap-3 border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.86))] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">
         <Zap className="h-3.5 w-3.5 text-[var(--aethel-info-light)]" />
-        <span>Modo live: {label}</span>
+        <span>Modo ao vivo: {label}</span>
       </div>
       {onEnd && (
         <button
           type="button"
           onClick={onEnd}
-          className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)]"
+          className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
         >
           Encerrar
         </button>
@@ -164,7 +164,7 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle }: ThinkingDisp
       type="button"
       onClick={onToggle}
       aria-expanded={isExpanded}
-      className="mb-2 w-full rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-left text-xs text-[var(--aethel-text-secondary)]"
+      className="mb-2 w-full rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-left text-xs text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
     >
       <div className="flex items-center gap-2">
         <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-text-tertiary)]" />
@@ -195,10 +195,10 @@ export function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
   const Icon = icon
   const statusLabel =
     toolCall.status === 'completed'
-      ? 'concluido'
+      ? 'Concluida'
       : toolCall.status === 'failed'
-        ? 'falhou'
-        : 'executando'
+        ? 'Falhou'
+        : 'Em andamento'
   const argsSummary = toolCall.args
     ? Object.entries(toolCall.args)
         .slice(0, 3)
@@ -214,7 +214,7 @@ export function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
   return (
     <div className="mb-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">
-        <Icon className={`h-3.5 w-3.5 ${toolCall.status === 'failed' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'}`} />
+        <Icon className={`h-3.5 w-3.5 ${toolCall.status === 'failed' ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-text-tertiary)]'}`} />
         <span className="font-medium">{toolCall.name}</span>
         <span className="text-[11px] text-[var(--aethel-text-quaternary)]">{statusLabel}</span>
         {durationLabel && (

@@ -87,7 +87,7 @@ function PreviewSkeleton() {
   return (
     <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       <div className="flex flex-col items-center gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--aethel-info)] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--aethel-primary)] border-t-transparent" aria-hidden="true" />
         <div className="text-center">
           <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Carregando preview...</p>
           <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
@@ -189,15 +189,19 @@ function PreviewFailedState({
       </div>
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={onRetry}
-          className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs text-[var(--aethel-text-primary)] transition-colors hover:brightness-110"
+          aria-label="Tentar novamente a inicializacao do preview"
+          className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
         >
           Tentar novamente
         </button>
         {onFallback && (
           <button
+            type="button"
             onClick={onFallback}
-            className="px-3 py-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] text-[var(--aethel-text-secondary)] rounded-md transition-colors"
+            aria-label="Usar o preview inline como fallback"
+            className="rounded-md bg-[var(--aethel-surface-quaternary)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           >
             Usar preview inline
           </button>

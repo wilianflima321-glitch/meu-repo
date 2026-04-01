@@ -51,7 +51,8 @@ export function CodebaseContextPanel({
             type="button"
             onClick={onRefresh}
             disabled={preview.loading}
-            className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+            aria-label="Atualizar o contexto do codebase"
+            className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {preview.loading ? 'Atualizando...' : 'Atualizar contexto'}
           </button>
@@ -77,14 +78,16 @@ export function CodebaseContextPanel({
                 <button
                   type="button"
                   onClick={() => onCopy(result.filePath)}
-                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                  aria-label={`Copiar caminho do arquivo ${result.filePath}`}
+                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
                   Copiar caminho
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenResult(result.filePath, result.startLine, result.endLine)}
-                  className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
+                  aria-label={`Abrir o arquivo ${result.filePath} no trecho sugerido`}
+                  className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
                   Abrir
                 </button>
@@ -97,7 +100,8 @@ export function CodebaseContextPanel({
               <button
                 type="button"
                 onClick={() => onCopy(result.excerpt)}
-                className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-secondary)]"
+                aria-label="Copiar trecho de contexto retornado"
+                className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               >
                 Copiar trecho
               </button>
@@ -153,7 +157,8 @@ export function MentionContextPanel({
                   <button
                     type="button"
                     onClick={() => onOpenFileBlock(block)}
-                    className="rounded border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-primary-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]"
+                    aria-label={`Abrir contexto citado ${block.tag}`}
+                    className="rounded border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-primary-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                   >
                     Abrir
                   </button>
@@ -161,7 +166,8 @@ export function MentionContextPanel({
                 <button
                   type="button"
                   onClick={() => onCopy(block.content)}
-                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                  aria-label={`Copiar conteudo do bloco ${block.tag}`}
+                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 >
                   Copiar
                 </button>

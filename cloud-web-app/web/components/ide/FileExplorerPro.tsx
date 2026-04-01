@@ -141,7 +141,7 @@ function FileTreeNode({
         className={`
           w-full density-row flex items-center gap-1.5 px-2 text-xs text-left
           hover:bg-white/5 active:bg-white/10 transition-colors
-          focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)]
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
           ${isSelected ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}
         `}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
@@ -165,7 +165,7 @@ function FileTreeNode({
         
         {/* Modified indicator */}
         {node.modified && (
-          <span className="w-2 h-2 bg-[var(--aethel-warning-light)] rounded-full" title="Modificado" />
+          <span className="h-2 w-2 rounded-full bg-[var(--aethel-warning-light)]" title="Modificado" aria-label="Arquivo modificado" />
         )}
       </button>
 
