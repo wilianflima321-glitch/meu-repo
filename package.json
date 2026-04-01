@@ -46,12 +46,10 @@
     "test:quick-ai": "npx ts-node -P src/common/tests/tsconfig.cjs.json src/common/tests/quick-ai-test.ts",
     "test:llm": "npx ts-node src/common/llm/tests/llm-integration.test.ts",
     "test:browser": "npx ts-node src/common/web-automation/tests/browser.test.ts",
-    "test:trading": "npx ts-node src/common/trading/tests/exchange.test.ts"
-    ,
+    "test:trading": "npx ts-node src/common/trading/tests/exchange.test.ts",
     "test:web": "npm --prefix cloud-web-app/web test",
     "test:web:fast": "npm --prefix cloud-web-app/web run test:fast",
-    "test:web:changed": "npm --prefix cloud-web-app/web run test:changed"
-    ,
+    "test:web:changed": "npm --prefix cloud-web-app/web run test:changed",
     "desktop:dev": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
     "desktop:build": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
     "portal:dev": "npm --prefix cloud-web-app/web run dev",
@@ -82,40 +80,39 @@
     "@types/sinon": "^21.0.0",
     "@types/testing-library__react": "^10.0.1",
     "axe-core": "^4.7.2",
+    "chai": "^4.4.1",
     "glob": "^11.0.0",
     "ignore": "^7.0.5",
+    "jsdom": "^24.0.0",
     "minimist": "^1.2.8",
     "mocha": "^10.4.0",
     "p-queue": "^9.0.0",
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
-    "chai": "^4.4.1",
     "sinon": "^17.0.1",
-    "jsdom": "^24.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@theia/filesystem": "^1.66.2",
-    
-    "openai": "^4.52.0",
     "@anthropic-ai/sdk": "^0.24.0",
     "@google/generative-ai": "^0.12.0",
+    "@theia/filesystem": "^1.66.2",
+    "axios": "^1.6.8",
+    "ccxt": "^4.2.0",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.5",
+    "framer-motion": "^12.38.0",
     "groq-sdk": "^0.5.0",
-    
+    "inversify": "^6.0.2",
+    "lucide-react": "^1.7.0",
+    "openai": "^4.52.0",
     "playwright": "^1.40.0",
     "playwright-extra": "^4.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
-    
-    "ccxt": "^4.2.0",
+    "react": "^19.2.4",
+    "reflect-metadata": "^0.2.2",
     "technicalindicators": "^3.1.0",
-    
-    "dotenv": "^16.4.5",
-    "axios": "^1.6.8",
-    "ws": "^8.16.0",
     "uuid": "^9.0.1",
-    "crypto-js": "^4.2.0",
-    "inversify": "^6.0.2",
-    "reflect-metadata": "^0.2.2"
+    "ws": "^8.16.0"
   }
 }
