@@ -169,23 +169,23 @@ const Toolbar: React.FC<ToolbarProps> = ({
         {isConnected ? (isReady ? '●' : '○') : '○'}
       </span>
       <span className="status-text">
-        {isConnected ? (isReady ? 'Connected' : 'Connecting...') : 'Disconnected'}
+        {isConnected ? (isReady ? 'Conectado' : 'Conectando...') : 'Desconectado'}
       </span>
     </div>
     <div className="toolbar-right">
-      <button onClick={onNewTab} title="New Terminal (Ctrl+Shift+`)">
+      <button type="button" onClick={onNewTab} title="Novo terminal (Ctrl+Shift+`)" aria-label="Novo terminal (Ctrl+Shift+`)">
         <PlusIcon />
       </button>
-      <button onClick={onSplit} title="Split Terminal">
+      <button type="button" onClick={onSplit} title="Dividir terminal" aria-label="Dividir terminal">
         <SplitIcon />
       </button>
-      <button onClick={onSearch} title="Search (Ctrl+F)" className={searchVisible ? 'active' : ''}>
+      <button type="button" onClick={onSearch} title="Buscar (Ctrl+F)" aria-label="Buscar no terminal (Ctrl+F)" className={searchVisible ? 'active' : ''}>
         <SearchIcon />
       </button>
-      <button onClick={onClear} title="Clear Terminal">
+      <button type="button" onClick={onClear} title="Limpar terminal" aria-label="Limpar terminal">
         <ClearIcon />
       </button>
-      <button onClick={onKill} title="Kill Terminal" className="danger">
+      <button type="button" onClick={onKill} title="Encerrar terminal" aria-label="Encerrar terminal" className="danger">
         <TrashIcon />
       </button>
     </div>
@@ -300,6 +300,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onSelectTab, onCloseTab, onRenameTab 
             <span className="tab-name">{tab.name}</span>
           )}
           <button
+            type="button"
             className="tab-close"
             onClick={(e) => {
               e.stopPropagation();
@@ -420,7 +421,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <input
         ref={inputRef}
         type="text"
-        placeholder="Search..."
+        placeholder="Buscar no terminal..."
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -428,13 +429,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }}
         onKeyDown={handleKeyDown}
       />
-      <button onClick={onFindPrevious} title="Previous (Shift+Enter)">
+      <button type="button" onClick={onFindPrevious} title="Resultado anterior (Shift+Enter)" aria-label="Resultado anterior (Shift+Enter)">
         <ChevronUpIcon />
       </button>
-      <button onClick={onFindNext} title="Next (Enter)">
+      <button type="button" onClick={onFindNext} title="Próximo resultado (Enter)" aria-label="Próximo resultado (Enter)">
         <ChevronDownIcon />
       </button>
-      <button onClick={onClose} title="Close (Escape)">
+      <button type="button" onClick={onClose} title="Fechar busca (Escape)" aria-label="Fechar busca (Escape)">
         <CloseIcon />
       </button>
       <style jsx>{`

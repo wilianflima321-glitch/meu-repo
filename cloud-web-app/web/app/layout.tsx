@@ -31,8 +31,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Aethel Engine - Studio multiagente para apps e pesquisa',
-  description: 'Studio multiagente para apps, pesquisa e execucao assistida por IA com estado operacional explicito.',
+  title: 'Aethel Engine - estúdio multiagente de software',
+  description: 'Estúdio multiagente para apps, pesquisa e construção assistida por IA com operação explícita.',
   metadataBase: new URL('https://aethel.dev'),
   keywords: ['multi-agent IDE', 'AI software studio', 'research to code', 'apps IDE', 'Aethel Engine', 'anti-fake-success'],
   authors: [{ name: 'Aethel Engine Team' }],
@@ -52,21 +52,21 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     url: 'https://aethel.dev',
     siteName: 'Aethel Engine',
-    title: 'Aethel Engine - Studio multiagente para apps e pesquisa',
-    description: 'Pesquisa, planejamento, codigo, preview e readiness no mesmo studio assistido por IA.',
+    title: 'Aethel Engine - estúdio multiagente de software',
+    description: 'Pesquisa, planejamento, código, preview e prontidão em um único estúdio assistido por IA.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Aethel Engine Preview',
+        alt: 'Preview do Aethel Engine',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Aethel Engine',
-    description: 'Studio multiagente para apps e pesquisa',
+    description: 'Estúdio multiagente para apps e pesquisa',
     images: ['/twitter-image.png'],
   },
   icons: {
@@ -97,7 +97,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-[var(--aethel-primary-dark)] focus:px-4 focus:py-2 focus:text-[var(--aethel-text-primary)] focus:outline-none"
         >
-          Ir para o conteudo principal
+          Ir para o conteúdo principal
         </a>
         <ServiceWorkerProvider>
           <ToastProvider>

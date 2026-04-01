@@ -65,11 +65,17 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
 
   return (
     <div className="workspace-switcher-overlay" onClick={onClose}>
-      <div className="workspace-switcher" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="workspace-switcher"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="workspace-switcher-title"
+      >
         <div className="switcher-header">
-          <h3>Workspace</h3>
-          <button className="close-button" onClick={onClose}>
-            x
+          <h3 id="workspace-switcher-title">Gerenciar workspace</h3>
+          <button type="button" className="close-button" onClick={onClose} aria-label="Fechar gerenciador de workspace">
+            ×
           </button>
         </div>
 
@@ -78,6 +84,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
             <div className="section-header">
               <h4>Pastas do workspace</h4>
               <button
+                type="button"
                 className="add-button"
                 onClick={() => setShowAddFolder(!showAddFolder)}
               >
@@ -94,7 +101,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
                   onChange={(e) => setNewFolderPath(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddFolder()}
                 />
-                <button onClick={handleAddFolder}>Adicionar</button>
+                <button type="button" onClick={handleAddFolder}>Adicionar</button>
               </div>
             )}
 
@@ -109,10 +116,12 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
                       <div className="folder-path">{folder.uri}</div>
                     </div>
                     <button
+                      type="button"
                       className="remove-button"
                       onClick={() => handleRemoveFolder(folder.index)}
+                      aria-label={`Remover pasta ${folder.name}`}
                     >
-                      x
+                      ×
                     </button>
                   </div>
                 ))
@@ -127,7 +136,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
 
             <div className="recent-list">
               {recentWorkspaces.length === 0 ? (
-                <div className="empty-state">No Workspaces recentes</div>
+                <div className="empty-state">Nenhum workspace recente</div>
               ) : (
                 recentWorkspaces.map((Workspace) => (
                   <div
@@ -147,28 +156,26 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
         </div>
 
         <style jsx>{`
-          .Workspace-switcher-overlay {
+          .workspace-switcher-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            inset: 0;
+            background: color-mix(in srgb, var(--aethel-surface-primary) 72%, transparent);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 10000;
+            z-index: var(--aethel-z-modal-backdrop, 10000);
+            padding: 24px;
           }
 
-          .Workspace-switcher {
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 6px;
-            width: 600px;
-            max-height: 80vh;
+          .workspace-switcher {
+            background: var(--aethel-surface-secondary);
+            border: 1px solid var(--aethel-border-primary);
+            border-radius: var(--aethel-radius-xl, 16px);
+            width: min(600px, 100%);
+            max-height: min(80vh, 720px);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--aethel-shadow-xl, 0 24px 60px rgba(2, 6, 23, 0.45));
           }
 
           .switcher-header {
@@ -237,9 +244,9 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
           .add-folder-form input {
             flex: 1;
             padding: 6px 8px;
-            background: var(--editor-bg);
-            border: 1px solid var(--panel-border);
-            color: var(--editor-fg);
+            background: var(--aethel-surface-primary);
+            border: 1px solid var(--aethel-border-primary);
+            color: var(--aethel-text-primary);
             font-size: 13px;
             border-radius: 3px;
           }
@@ -267,8 +274,8 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
             justify-content: space-between;
             align-items: center;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
+            background: var(--aethel-surface-tertiary);
+            border-radius: var(--aethel-radius-md, 10px);
           }
 
           .recent-item {
@@ -276,7 +283,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
           }
 
           .recent-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--aethel-surface-quaternary);
           }
 
           .folder-info {
@@ -302,13 +309,13 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ onClose })
           .remove-button {
             background: none;
             border: none;
-            color: var(--editor-fg);
+            color: var(--aethel-text-secondary);
             font-size: 20px;
             cursor: pointer;
             padding: 0;
             width: 24px;
             height: 24px;
-            opacity: 0.6;
+            opacity: 0.72;
           }
 
           .remove-button:hover {
