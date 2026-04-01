@@ -1,17 +1,17 @@
 'use client'
 
 /**
- * Extension Manager - Marketplace & Extension Management
- * Like VS Code Extensions Panel
+ * Gerenciador de extensões - Marketplace e gestão
+ * Inspirado no painel de extensões do VS Code
  *
  * Features:
- * - Browse marketplace
- * - Search extensions
- * - Install/Uninstall
- * - Enable/Disable
- * - Extension details
- * - Recommendations
- * - Categories & Filters
+ * - Explorar marketplace
+ * - Buscar extensões
+ * - Instalar/Desinstalar
+ * - Ativar/Desativar
+ * - Detalhes da extensão
+ * - Recomendações
+ * - Categorias e filtros
  */
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
@@ -102,12 +102,12 @@ interface ExtensionManagerProps {
   extensions?: Extension[]
   onInstall?: (id: string) => Promise<void>
   onUninstall?: (id: string) => Promise<void>
-  onEnable?: (id: string) => void
-  onDisable?: (id: string) => void
+  onAtivar?: (id: string) => void
+  onDesativar?: (id: string) => void
   onOpenSettings?: (id: string) => void
 }
 
-// ============= Category Data =============
+// ============= Categoria Data =============
 
 const CATEGORY_ICONS: Record<ExtensionCategory, React.ReactNode> = {
   language: <FileCode className="w-4 h-4" />,
@@ -124,17 +124,17 @@ const CATEGORY_ICONS: Record<ExtensionCategory, React.ReactNode> = {
 }
 
 const CATEGORY_LABELS: Record<ExtensionCategory, string> = {
-  language: 'Programming Languages',
-  theme: 'Themes',
-  snippet: 'Snippets',
-  debugger: 'Debuggers',
-  formatter: 'Formatters',
+  language: 'Linguagens',
+  theme: 'Temas',
+  snippet: 'Trechos',
+  debugger: 'Depuradores',
+  formatter: 'Formatadores',
   linter: 'Linters',
-  ai: 'AI & Copilot',
-  git: 'Source Control',
-  engine: 'Game Engine',
-  tool: 'Tools',
-  other: 'Other',
+  ai: 'IA & Copiloto',
+  git: 'Controle de versão',
+  engine: 'Engine de jogo',
+  tool: 'Ferramentas',
+  other: 'Outros',
 }
 
 // ============= Format Helpers =============
@@ -150,10 +150,10 @@ function formatDate(date: Date): string {
   const now = new Date()
   const diff = now.getTime() - date.getTime()
 
-  if (diff < 86400000) return 'today'
-  if (diff < 604800000) return `${Math.floor(diff / 86400000)} days ago`
-  if (diff < 2592000000) return `${Math.floor(diff / 604800000)} weeks ago`
-  return `${Math.floor(diff / 2592000000)} months ago`
+  if (diff < 86400000) return 'hoje'
+  if (diff < 604800000) return `${Math.floor(diff / 86400000)} dias atrás`
+  if (diff < 2592000000) return `${Math.floor(diff / 604800000)} semanas atrás`
+  return `${Math.floor(diff / 2592000000)} meses atrás`
 }
 
 // ============= Main Component =============
@@ -162,8 +162,8 @@ export default function ExtensionManager({
   extensions: propExtensions,
   onInstall: propOnInstall,
   onUninstall: propOnUninstall,
-  onEnable: propOnEnable,
-  onDisable: propOnDisable,
+  onAtivar: propOnEnable,
+  onDesativar: propOnDisable,
   onOpenSettings,
 }: ExtensionManagerProps) {
   // Use the hook to fetch real extensions from API
@@ -257,13 +257,13 @@ export default function ExtensionManager({
 
   // Handle uninstall
   const handleUninstall = useCallback(async (ext: Extension) => {
-    const shouldUninstall = await openConfirmDialog({
-      title: 'Uninstall extension',
-      message: `Uninstall "${ext.displayName}"?`,
-      confirmText: 'Uninstall',
-      cancelText: 'Cancel',
+    const shouldDesinstalar = await openConfirmDialog({
+      title: 'Desinstalar extensão',
+      message: `Desinstalar "${ext.displayName}"?`,
+      confirmText: 'Desinstalar',
+      cancelText: 'Cancelar',
     })
-    if (!shouldUninstall) return
+    if (!shouldDesinstalar) return
     setIsLoading(ext.id)
     try {
       // Use prop callback if provided, otherwise use API
@@ -330,7 +330,7 @@ export default function ExtensionManager({
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search extensions..."
+              placeholder="Buscar extensões..."
               className="w-full pl-10 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]"
             />
           </div>
@@ -338,17 +338,17 @@ export default function ExtensionManager({
 
         {/* Views */}
         <div className="p-2">
-          <button
+          <button type="button"
             onClick={() => setActiveView('installed')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
               activeView === 'installed' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
             }`}
           >
             <Package className="w-4 h-4" />
-            <span className="flex-1 text-sm">Installed</span>
+            <span className="flex-1 text-sm">Instaladas</span>
             <span className="text-xs text-[var(--aethel-text-tertiary)]">{counts.installed}</span>
           </button>
-          <button
+          <button type="button"
             onClick={() => setActiveView('marketplace')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
               activeView === 'marketplace' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
@@ -358,31 +358,31 @@ export default function ExtensionManager({
             <span className="flex-1 text-sm">Marketplace</span>
             <span className="text-xs text-[var(--aethel-text-tertiary)]">{counts.available}</span>
           </button>
-          <button
+          <button type="button"
             onClick={() => setActiveView('recommended')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
               activeView === 'recommended' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
             }`}
           >
             <Star className="w-4 h-4" />
-            <span className="flex-1 text-sm">Recommended</span>
+            <span className="flex-1 text-sm">Recomendadas</span>
           </button>
         </div>
 
-        {/* Categories */}
+        {/* Categorias */}
         <div className="flex-1 overflow-y-auto p-2 border-t border-[var(--aethel-border-primary)]">
-          <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2 px-3">Categories</div>
-          <button
+          <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2 px-3">Categorias</div>
+          <button type="button"
             onClick={() => setSelectedCategory('all')}
             className={`w-full flex items-center gap-3 px-3 py-1.5 rounded text-left ${
               selectedCategory === 'all' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span className="text-sm">All</span>
+            <span className="text-sm">Todas</span>
           </button>
           {(Object.keys(CATEGORY_LABELS) as ExtensionCategory[]).map((cat) => (
-            <button
+            <button type="button"
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`w-full flex items-center gap-3 px-3 py-1.5 rounded text-left ${
@@ -401,32 +401,32 @@ export default function ExtensionManager({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
           <h2 className="text-lg font-semibold">
-            {activeView === 'installed' && 'Installed Extensions'}
-            {activeView === 'marketplace' && 'Extension Marketplace'}
-            {activeView === 'recommended' && 'Recommended Extensions'}
+            {activeView === 'installed' && 'Extensões instaladas'}
+            {activeView === 'marketplace' && 'Marketplace de extensões'}
+            {activeView === 'recommended' && 'Extensões recomendadas'}
           </h2>
 
           <div className="flex items-center gap-2">
             {activeView === 'installed' && (
-              <button
+              <button type="button"
                 onClick={() => setShowDisabled(!showDisabled)}
                 className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors ${
                   showDisabled ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]' : 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
                 }`}
               >
                 {showDisabled ? <ToggleLeft className="w-4 h-4" /> : <ToggleRight className="w-4 h-4" />}
-                {showDisabled ? 'Show Disabled' : 'Hide Disabled'}
+                {showDisabled ? 'Mostrar desativadas' : 'Ocultar desativadas'}
               </button>
             )}
-            <button
+            <button type="button"
               onClick={handleRefresh}
               disabled={apiLoading}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded disabled:opacity-50"
-              title="Refresh extensions"
+              title="Atualizar extensões"
             >
               <RefreshCw className={`w-4 h-4 ${apiLoading ? 'animate-spin' : ''}`} />
             </button>
-            <button className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded">
+            <button type="button" className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded">
               <Filter className="w-4 h-4" />
             </button>
           </div>
@@ -438,46 +438,46 @@ export default function ExtensionManager({
           {apiLoading && extensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Loader2 className="w-16 h-16 mb-4 animate-spin text-[var(--aethel-info)]" />
-              <p className="text-lg">Loading extensions...</p>
-              <p className="text-sm">Fetching from marketplace</p>
+              <p className="text-lg">Carregando extensões...</p>
+              <p className="text-sm">Buscando no marketplace</p>
             </div>
           ) : /* Error State */ apiError ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <AlertTriangle className="w-16 h-16 mb-4 text-[var(--aethel-error)]" />
-              <p className="text-lg text-[var(--aethel-error)]">Failed to load extensions</p>
+              <p className="text-lg text-[var(--aethel-error)]">Falha ao carregar extensões</p>
               <p className="text-sm mb-4">{apiError}</p>
-              <button
+              <button type="button"
                 onClick={handleRefresh}
-                className="px-4 py-2 bg-[var(--aethel-info)] hover:bg-sky-700 text-[var(--aethel-text-primary)] rounded transition-colors"
+                className="px-4 py-2 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] rounded transition-colors"
               >
-                Try Again
+                Tentar novamente
               </button>
             </div>
-          ) : /* Empty State for Installed */ activeView === 'installed' && filteredExtensions.length === 0 ? (
+          ) : /* Empty State for Instaladas */ activeView === 'installed' && filteredExtensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Package className="w-16 h-16 mb-4 opacity-50" />
-              <p className="text-lg">No extensions installed</p>
-              <p className="text-sm mb-4">Browse the marketplace to find extensions</p>
-              <button
+              <p className="text-lg">Nenhuma extensão instalada</p>
+              <p className="text-sm mb-4">Explore o marketplace para encontrar extensões</p>
+              <button type="button"
                 onClick={() => setActiveView('marketplace')}
-                className="px-4 py-2 bg-[var(--aethel-info)] hover:bg-sky-700 text-[var(--aethel-text-primary)] rounded transition-colors"
+                className="px-4 py-2 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] rounded transition-colors"
               >
-                Browse Marketplace
+                Explorar marketplace
               </button>
             </div>
           ) : /* Empty State for Search/Filter */ filteredExtensions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               <Search className="w-16 h-16 mb-4 opacity-50" />
-              <p className="text-lg">No extensions found</p>
-              <p className="text-sm">Try adjusting your search or filters</p>
+              <p className="text-lg">Nenhuma extensão encontrada</p>
+              <p className="text-sm">Ajuste a busca ou revise os filtros</p>
             </div>
           ) : activeView === 'installed' && groupedExtensions ? (
             <>
-              {/* Enabled */}
+              {/* Ativadas */}
               {groupedExtensions.enabled && groupedExtensions.enabled.length > 0 && (
                 <div>
                   <div className="px-4 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
-                    Enabled ({groupedExtensions.enabled.length})
+                    Ativadas ({groupedExtensions.enabled.length})
                   </div>
                   {groupedExtensions.enabled.map((ext) => (
                     <ExtensionCard
@@ -495,11 +495,11 @@ export default function ExtensionManager({
                 </div>
               )}
 
-              {/* Disabled */}
+              {/* Desativadas */}
               {showDisabled && groupedExtensions.disabled && groupedExtensions.disabled.length > 0 && (
                 <div>
                   <div className="px-4 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
-                    Disabled ({groupedExtensions.disabled.length})
+                    Desativadas ({groupedExtensions.disabled.length})
                   </div>
                   {groupedExtensions.disabled.map((ext) => (
                     <ExtensionCard
@@ -535,9 +535,9 @@ export default function ExtensionManager({
         </div>
       </div>
 
-      {/* Details Panel */}
+      {/* Painel de detalhes */}
       {selectedExtension && (
-        <ExtensionDetails
+        <ExtensionDetalhes
           extension={selectedExtension}
           isLoading={isLoading === selectedExtension.id}
           onClose={() => setSelectedExtension(null)}
@@ -604,7 +604,7 @@ function ExtensionCard({
           <span className="text-xs text-[var(--aethel-text-tertiary)]">v{extension.version}</span>
           {extension.isBuiltIn && (
             <span className="px-1.5 py-0.5 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] text-[10px] rounded">
-              Built-in
+              Integrada
             </span>
           )}
         </div>
@@ -628,14 +628,14 @@ function ExtensionCard({
           <RefreshCw className="w-4 h-4 animate-spin text-[var(--aethel-text-tertiary)]" />
         ) : extension.isInstalled ? (
           <>
-            <button
+            <button type="button"
               onClick={onToggle}
               className={`p-1.5 rounded transition-colors ${
                 extension.isEnabled
                   ? 'text-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
               }`}
-              title={extension.isEnabled ? 'Disable' : 'Enable'}
+              title={extension.isEnabled ? 'Desativar' : 'Ativar'}
             >
               {extension.isEnabled ? (
                 <CheckCircle className="w-4 h-4" />
@@ -643,39 +643,37 @@ function ExtensionCard({
                 <Circle className="w-4 h-4" />
               )}
             </button>
-            <button
+            <button type="button"
               onClick={onOpenSettings}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
-              title="Settings"
+              title="Configurações"
             >
               <Settings className="w-4 h-4" />
             </button>
             {!extension.isBuiltIn && (
-              <button
+              <button type="button"
                 onClick={onUninstall}
                 className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
-                title="Uninstall"
+                title="Desinstalar"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             )}
           </>
         ) : (
-          <button
+          <button type="button"
             onClick={onInstall}
-            className="px-3 py-1.5 bg-[var(--aethel-info)] hover:bg-sky-700 text-[var(--aethel-text-primary)] text-sm rounded transition-colors"
-          >
-            Install
-          </button>
+            className="px-3 py-1.5 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] text-sm rounded transition-colors"
+          >Instalar</button>
         )}
       </div>
     </div>
   )
 }
 
-// ============= Extension Details =============
+// ============= Extension Detalhes =============
 
-interface ExtensionDetailsProps {
+interface ExtensionDetalhesProps {
   extension: Extension
   isLoading: boolean
   onClose: () => void
@@ -685,7 +683,7 @@ interface ExtensionDetailsProps {
   onOpenSettings: () => void
 }
 
-function ExtensionDetails({
+function ExtensionDetalhes({
   extension,
   isLoading,
   onClose,
@@ -693,7 +691,7 @@ function ExtensionDetails({
   onUninstall,
   onToggle,
   onOpenSettings,
-}: ExtensionDetailsProps) {
+}: ExtensionDetalhesProps) {
   const [activeTab, setActiveTab] = useState<'details' | 'changelog'>('details')
 
   return (
@@ -719,7 +717,7 @@ function ExtensionDetails({
             <h3 className="font-semibold text-lg">{extension.displayName}</h3>
             <p className="text-sm text-[var(--aethel-text-tertiary)]">{extension.publisherDisplayName}</p>
           </div>
-          <button onClick={onClose} className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
+          <button type="button" onClick={onClose} className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -743,13 +741,13 @@ function ExtensionDetails({
         {/* Actions */}
         <div className="flex items-center gap-2 mt-4">
           {isLoading ? (
-            <button disabled className="flex-1 px-4 py-2 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] rounded">
+            <button type="button" disabled className="flex-1 px-4 py-2 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] rounded">
               <RefreshCw className="w-4 h-4 inline animate-spin mr-2" />
-              Loading...
+              Carregando...
             </button>
           ) : extension.isInstalled ? (
             <>
-              <button
+              <button type="button"
                 onClick={onToggle}
                 className={`flex-1 px-4 py-2 rounded transition-colors ${
                   extension.isEnabled
@@ -757,27 +755,25 @@ function ExtensionDetails({
                     : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                 }`}
               >
-                {extension.isEnabled ? 'Disable' : 'Enable'}
+                {extension.isEnabled ? 'Desativar' : 'Ativar'}
               </button>
               {!extension.isBuiltIn && (
-                <button
+                <button type="button"
                   onClick={onUninstall}
                   className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded"
                 >
-                  Uninstall
+                  Desinstalar
                 </button>
               )}
             </>
           ) : (
-            <button
+            <button type="button"
               onClick={onInstall}
-              className="flex-1 px-4 py-2 bg-[var(--aethel-info)] hover:bg-sky-700 text-[var(--aethel-text-primary)] rounded"
+              className="flex-1 px-4 py-2 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] rounded"
             >
-              <Download className="w-4 h-4 inline mr-2" />
-              Install
-            </button>
+              <Download className="w-4 h-4 inline mr-2" />Instalar</button>
           )}
-          <button
+          <button type="button"
             onClick={onOpenSettings}
             className="p-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
           >
@@ -788,21 +784,21 @@ function ExtensionDetails({
 
       {/* Tabs */}
       <div className="flex border-b border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={() => setActiveTab('details')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
-            activeTab === 'details' ? 'text-[var(--aethel-text-primary)] border-b-2 border-sky-500' : 'text-[var(--aethel-text-tertiary)]'
+            activeTab === 'details' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
           }`}
         >
-          Details
+          Detalhes
         </button>
-        <button
+        <button type="button"
           onClick={() => setActiveTab('changelog')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
-            activeTab === 'changelog' ? 'text-[var(--aethel-text-primary)] border-b-2 border-sky-500' : 'text-[var(--aethel-text-tertiary)]'
+            activeTab === 'changelog' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
           }`}
         >
-          Changelog
+          Histórico
         </button>
       </div>
 
@@ -813,12 +809,12 @@ function ExtensionDetails({
             <p className="text-sm text-[var(--aethel-text-secondary)]">{extension.description}</p>
 
             <div>
-              <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Version</h4>
+              <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Versão</h4>
               <p className="text-sm text-[var(--aethel-text-secondary)]">{extension.version}</p>
             </div>
 
             <div>
-              <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Category</h4>
+              <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Categoria</h4>
               <p className="text-sm text-[var(--aethel-text-secondary)]">{CATEGORY_LABELS[extension.category]}</p>
             </div>
 
@@ -835,15 +831,15 @@ function ExtensionDetails({
 
             {extension.repository && (
               <div>
-                <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Repository</h4>
+                <h4 className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Repositório</h4>
                 <a
                   href={extension.repository}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300"
+                  className="flex items-center gap-1 text-sm text-[var(--aethel-info-light)] hover:text-[var(--aethel-info)]"
                 >
                   <ExternalLink className="w-3 h-3" />
-                  View on GitHub
+                  Ver no GitHub
                 </a>
               </div>
             )}
@@ -852,7 +848,7 @@ function ExtensionDetails({
 
         {activeTab === 'changelog' && (
           <div className="text-sm text-[var(--aethel-text-tertiary)]">
-            {extension.changelog || 'No changelog available.'}
+            {extension.changelog || 'Nenhum changelog disponível.'}
           </div>
         )}
       </div>
