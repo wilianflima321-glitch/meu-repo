@@ -36,6 +36,8 @@
   - Normalizacao de URL aceita `localhost:porta` automaticamente.
 - Prompt v0:
   - Novo prompt de melhoria incremental para v0, focado em refino do que ja existe, sem reinventar backend.
+- Landing:
+  - Copy alinhado com Apps + Pesquisa, com disclaimers honestos sobre preview gerenciado.
 
 ## Observacoes
 - Nenhum teste automatizado foi executado nesta rodada.

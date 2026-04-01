@@ -36,7 +36,7 @@ const WORKFLOW = [
 ]
 
 const TRUST_NOTES = [
-  'Workspace unico para descoberta, implementacao e validacao.',
+  'Workspace unico para pesquisa, implementacao e validacao.',
   'Papeis multi-agent com trilha operacional explicita.',
   'Governanca, rollback e readiness visiveis no mesmo fluxo.',
 ]
@@ -45,17 +45,17 @@ const PRICING_TEASER = [
   {
     title: 'Gratis',
     price: '$0',
-    desc: 'Explorar o studio e experimentar o fluxo.',
-    features: ['1 projeto ativo', 'Limites de IA diarios', 'Preview limitado'],
+    desc: 'Explore o studio e valide o fluxo principal.',
+    features: ['1 projeto ativo', 'Limites de IA diarios', 'Preview inline (fallback)'],
     cta: 'Comecar gratis',
     variant: 'secondary' as const,
   },
   {
     title: 'Pro',
     price: '$49',
-    desc: 'Para devs e squads que precisam de velocidade.',
-    features: ['Preview gerenciado', 'RAG + mentions', 'Deploy em 1 clique'],
-    cta: 'Assinar Pro',
+    desc: 'Para devs e squads que precisam de capacidade extra.',
+    features: ['Preview gerenciado (quando disponivel)', 'Contexto RAG expandido', 'Creditos de IA extras'],
+    cta: 'Ver detalhes',
     variant: 'primary' as const,
     highlight: true,
   },
@@ -164,10 +164,10 @@ export default function LandingPageV3() {
                 Crie apps com IA sem perder o controle do que realmente funciona.
               </h1>
 
-              <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
-                O Aethel conecta discovery, implementacao, preview e readiness no mesmo fluxo.
-                O foco principal hoje e <span className="font-medium text-white">Apps + Pesquisa</span>, com governanca explicita e sem promessas falsas.
-              </p>
+                <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
+                  O Aethel conecta pesquisa, implementacao, preview e readiness no mesmo fluxo.
+                  O foco principal hoje e <span className="font-medium text-white">Apps + Pesquisa</span>, com governanca explicita e sem promessas falsas.
+                </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)]">Entregue mais rapido com contexto unico</span>

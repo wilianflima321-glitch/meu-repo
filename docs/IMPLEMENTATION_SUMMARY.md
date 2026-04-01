@@ -19,6 +19,7 @@
 - Chat/IA com estados mais operacionais (timeline de raciocinio, tool calls enriquecidas, erro de voz visivel).
 - Preview com indicador de HMR indisponivel e normalizacao automatica de URL local.
 - AICommandCenter com composer multiline e descricao contextual do agente.
+- Landing com microcopy ajustada para evitar promessas falsas de preview/checkout.
 
 ---
 
