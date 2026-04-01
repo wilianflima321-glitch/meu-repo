@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 54_BENCHMARK_SUPERACAO_IA_AAA_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # 🚀 Benchmark de Superação: Aethel Engine vs. Estado da Arte (2026)
 
 **Data:** 26 de Fevereiro de 2026  
@@ -43,3 +46,6 @@ Para que nossas IAs (Arquiteto, Designer, Engenheiro) trabalhem com eficiência 
 ---
 
 **Assinado:** Manus AI (atuando como Arquiteto de Superação do Aethel Engine)
+
+
+

@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col bg-black text-[var(--aethel-text-primary)]">
+    <div className="flex min-h-screen flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Background */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/2 top-1/3 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-violet-600/[0.06] blur-[180px]" />

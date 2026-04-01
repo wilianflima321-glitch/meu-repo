@@ -34,6 +34,7 @@ interface IDELayoutProps {
   studioTitle?: string
   studioSubtitle?: string
   studioRightSlot?: ReactNode
+  workbenchBanner?: ReactNode
   children?: ReactNode
   fileExplorer?: ReactNode
   searchPanel?: ReactNode
@@ -109,6 +110,7 @@ export default function IDELayout({
   studioTitle = 'Workbench',
   studioSubtitle = 'Editor, preview e runtime no mesmo fluxo.',
   studioRightSlot,
+  workbenchBanner,
   children,
   fileExplorer,
   searchPanel,
@@ -364,7 +366,7 @@ export default function IDELayout({
         { label: 'Redo', shortcut: 'Ctrl+Shift+Z', action: onRedo },
         { separator: true, label: '' },
         { label: 'Cut', shortcut: 'Ctrl+X', action: onCut },
-        { label: 'Copy', shortcut: 'Ctrl+C', action: onCopy },
+        { label: 'Copiar', shortcut: 'Ctrl+C', action: onCopy },
         { label: 'Paste', shortcut: 'Ctrl+V', action: onPaste },
         { separator: true, label: '' },
         { label: 'Find', shortcut: 'Ctrl+F', action: onFind },
@@ -381,7 +383,7 @@ export default function IDELayout({
         { label: 'Explorer', shortcut: 'Ctrl+Shift+E', action: () => openSidebarTab('explorer') },
         { label: 'Search', shortcut: 'Ctrl+Shift+F', action: () => openSidebarTab('search') },
         { label: 'Controle de codigo', shortcut: 'Ctrl+Shift+G', action: () => openSidebarTab('git') },
-        { label: 'Refresh Preview', shortcut: 'Ctrl+Shift+V', action: onTogglePreview },
+        { label: 'Atualizar previa', shortcut: 'Ctrl+Shift+V', action: onTogglePreview },
       ],
     },
     {
@@ -491,6 +493,7 @@ export default function IDELayout({
       {showStudioNav && (
         <StudioGlobalNav title={studioTitle} subtitle={studioSubtitle} rightSlot={studioRightSlot} />
       )}
+      {workbenchBanner}
       <header className="density-header flex items-center justify-between border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_96%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] px-3 shadow-[0_12px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl">
         <div className="flex min-w-0 items-center gap-3">
           {!showStudioNav && (
@@ -501,7 +504,7 @@ export default function IDELayout({
                 </div>
                 <div className="min-w-0">
                   <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-secondary)]">Aethel Studio</div>
-                  <div className="truncate text-[10px] text-[var(--aethel-text-quaternary)]">Apps + Research  Runtime</div>
+                  <div className="truncate text-[10px] text-[var(--aethel-text-quaternary)]">Apps + Pesquisa  Runtime</div>
                 </div>
               </div>
 
@@ -552,9 +555,9 @@ export default function IDELayout({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium text-emerald-200 lg:flex">
+          <div className="hidden items-center gap-1 rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-1 text-[10px] font-medium text-[var(--aethel-success)] lg:flex">
             <Codicon name="pulse" className="text-[11px]" />
-            Pronto para apply
+            Pronto para aplicar
           </div>
           <div className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)] xl:flex">
             <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
@@ -739,11 +742,11 @@ export default function IDELayout({
           <span className="text-[var(--aethel-text-quaternary)]">UTF-8</span>
           <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
             <Codicon name="comment-discussion" className="text-[11px]" />
-            Ready
+            Pronto
           </span>
-          <span className="flex items-center gap-1 text-emerald-300">
+          <span className="flex items-center gap-1 text-[var(--aethel-success)]">
             <Codicon name="circle-filled" className="text-[8px]" />
-            Synced
+            Sincronizado
           </span>
         </div>
       </footer>

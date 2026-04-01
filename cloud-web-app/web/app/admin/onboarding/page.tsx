@@ -51,9 +51,9 @@ function formatPercent(value: number | null): string {
 }
 
 function formatSloStatus(status: OnboardingStats['firstValue']['sloStatus'] | undefined): string {
-  if (status === 'pass') return 'PASS'
-  if (status === 'fail') return 'FAIL'
-  return 'INSUFFICIENT_SAMPLE'
+  if (status === 'pass') return 'APROVADO'
+  if (status === 'fail') return 'FALHOU'
+  return 'AMOSTRA_INSUFICIENTE'
 }
 
 export default function OnboardingAdminPage() {
@@ -97,8 +97,8 @@ export default function OnboardingAdminPage() {
     <div className="mx-auto max-w-6xl p-6">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Onboarding quality</h1>
-          <p className="text-sm text-[var(--aethel-text-secondary)]">Conversao de first value, tempo de ativacao e evidencias por acao.</p>
+          <h1 className="text-3xl font-bold">Qualidade do onboarding</h1>
+          <p className="text-sm text-[var(--aethel-text-secondary)]">Conversao de primeiro valor, tempo de ativacao e evidencias por acao.</p>
           {lastUpdated && <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>}
         </div>
         <div className="flex items-center gap-2">
@@ -134,31 +134,31 @@ export default function OnboardingAdminPage() {
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : stats?.totals.uniqueUsers || 0}</p>
         </div>
         <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">Acao total</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Acoes totais</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : stats?.totals.totalActions || 0}</p>
         </div>
         <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">First value / signup</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Primeiro valor / cadastro</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : formatPercent(stats?.firstValue.completionRateFromSignup || null)}</p>
         </div>
         <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">Median first value time</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Tempo mediano ate primeiro valor</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : formatMs(stats?.firstValue.medianFirstValueTimeMs || null)}</p>
           {!loading && stats?.firstValue && (
-            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">sample={stats.firstValue.sampleSize}</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">amostra={stats.firstValue.sampleSize}</p>
           )}
         </div>
         <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">P95 first value time</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Tempo P95 ate primeiro valor</p>
           <p className="mt-2 text-2xl font-semibold">{loading ? '--' : formatMs(stats?.firstValue.p95FirstValueTimeMs || null)}</p>
           {!loading && stats?.firstValue?.latestCompletedAt && (
-            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">last={new Date(stats.firstValue.latestCompletedAt).toLocaleString()}</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">ultimo={new Date(stats.firstValue.latestCompletedAt).toLocaleString()}</p>
           )}
         </div>
         <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">First value SLO</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">SLO de primeiro valor</p>
           <p className="mt-2 text-lg font-semibold">
-            {loading ? '--' : `target ${formatMs(stats?.firstValue.sloTargetMs || null)}`}
+            {loading ? '--' : `meta ${formatMs(stats?.firstValue.sloTargetMs || null)}`}
           </p>
           {!loading && stats?.firstValue && (
             <p
@@ -170,37 +170,37 @@ export default function OnboardingAdminPage() {
                     : 'text-[var(--aethel-warning)]'
               }`}
             >
-              {formatSloStatus(stats.firstValue.sloStatus)} (evaluated on P95)
+              {formatSloStatus(stats.firstValue.sloStatus)} (avaliado em P95)
             </p>
           )}
         </div>
       </div>
 
       <div className="mb-6 rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-        <h2 className="mb-3 text-base font-semibold text-[var(--aethel-text-secondary)]">First value funnel</h2>
+        <h2 className="mb-3 text-base font-semibold text-[var(--aethel-text-secondary)]">Funil de primeiro valor</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Signups</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Cadastros</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.signups || 0}</p>
           </div>
           <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Onboarding entries</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Entradas no onboarding</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.onboardingEntries || 0}</p>
           </div>
           <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">First project</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Primeiro projeto</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstProjectCreated || 0}</p>
           </div>
           <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">First AI success</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Primeiro sucesso de IA</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstAiSuccess || 0}</p>
           </div>
           <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">First IDE open</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Primeira abertura da IDE</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstIdeOpened || 0}</p>
           </div>
           <div className="rounded border border-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)] bg-[var(--aethel-surface-primary)]/40 p-3">
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Completed</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Concluido</p>
             <p className="mt-1 text-xl font-semibold">{stats?.funnel.firstValueCompleted || 0}</p>
           </div>
         </div>
@@ -208,7 +208,7 @@ export default function OnboardingAdminPage() {
 
       <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
         <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-base font-semibold text-[var(--aethel-text-secondary)]">Actions by type</h2>
+          <h2 className="text-base font-semibold text-[var(--aethel-text-secondary)]">Acoes por tipo</h2>
           <input
             type="text"
             placeholder="Buscar acao"
@@ -218,7 +218,7 @@ export default function OnboardingAdminPage() {
           />
         </div>
         {filteredActions.length > 0 ? (
-          <ul className="divide-y divide-zinc-800/70">
+          <ul className="divide-y divide-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]">
             {filteredActions.map(([action, count]) => (
               <li key={action} className="flex items-center justify-between py-2 text-sm">
                 <span className="text-[var(--aethel-text-secondary)]">{action}</span>
@@ -233,3 +233,4 @@ export default function OnboardingAdminPage() {
     </div>
   )
 }
+

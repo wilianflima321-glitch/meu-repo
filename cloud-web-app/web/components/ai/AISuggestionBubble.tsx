@@ -1,13 +1,13 @@
 ﻿/**
  * AISuggestionBubble - Bolhas de Sugestão Proativa da IA
- * 
+ *
  * Sugestões contextuais não-intrusivas da IA.
  * Aparece próximo ao elemento relevante.
  * Pode ser dispensada ou aplicada rapidamente.
- * 
+ *
  * @see AI_SELF_REFLECTION_SYSTEM.md
  * @see INOVACOES_TECNICAS_DETALHADAS.md
- * 
+ *
  * @module components/ai/AISuggestionBubble
  */
 
@@ -41,7 +41,7 @@ import {
 // TYPES
 // ============================================================================
 
-export type SuggestionType = 
+export type SuggestionType =
   | 'code'        // Sugestão de código
   | 'design'      // Sugestão de design/visual
   | 'performance' // Sugestão de performance
@@ -49,14 +49,14 @@ export type SuggestionType =
   | 'error'       // Correção de erro
   | 'tip';        // Dica geral
 
-export type SuggestionPosition = 
-  | 'top' 
-  | 'bottom' 
-  | 'left' 
-  | 'right' 
-  | 'top-left' 
-  | 'top-right' 
-  | 'bottom-left' 
+export type SuggestionPosition =
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
   | 'bottom-right';
 
 export interface AISuggestion {
@@ -66,6 +66,8 @@ export interface AISuggestion {
   description: string;
   code?: string;
   autoApplyable: boolean;
+  actionLabel?: string;
+  actionCommand?: string;
   priority: 'low' | 'medium' | 'high';
   context?: {
     file?: string;
@@ -97,20 +99,23 @@ const TYPE_CONFIG: Record<SuggestionType, {
   color: string;
   bgColor: string;
   borderColor: string;
+  pulseColor: string;
   label: string;
 }> = {
   code: {
     icon: Code,
-    color: 'text-sky-400',
-    bgColor: 'bg-sky-500/10',
-    borderColor: 'border-sky-500/30',
-    label: 'Código',
+    color: 'text-[var(--aethel-info)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
+    borderColor: 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]',
+    pulseColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
+    label: 'Codigo',
   },
   design: {
     icon: Palette,
-    color: 'text-cyan-400',
-    bgColor: 'bg-cyan-500/10',
-    borderColor: 'border-cyan-500/30',
+    color: 'text-[var(--aethel-primary)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]',
+    borderColor: 'border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)]',
+    pulseColor: 'bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]',
     label: 'Design',
   },
   performance: {
@@ -118,66 +123,70 @@ const TYPE_CONFIG: Record<SuggestionType, {
     color: 'text-[var(--aethel-warning-light)]',
     bgColor: 'bg-[var(--aethel-warning)]/10',
     borderColor: 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]',
+    pulseColor: 'bg-[color-mix(in_srgb,var(--aethel-warning)_28%,transparent)]',
     label: 'Performance',
   },
   ux: {
     icon: Sparkles,
-    color: 'text-violet-400',
-    bgColor: 'bg-violet-500/10',
-    borderColor: 'border-violet-500/30',
+    color: 'text-[var(--aethel-secondary)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-secondary)_12%,transparent)]',
+    borderColor: 'border-[color-mix(in_srgb,var(--aethel-secondary)_35%,transparent)]',
+    pulseColor: 'bg-[color-mix(in_srgb,var(--aethel-secondary)_28%,transparent)]',
     label: 'UX',
   },
   error: {
     icon: AlertCircle,
-    color: 'text-red-400',
-    bgColor: 'bg-red-500/10',
-    borderColor: 'border-red-500/30',
+    color: 'text-[var(--aethel-error)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]',
+    borderColor: 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)]',
+    pulseColor: 'bg-[color-mix(in_srgb,var(--aethel-error)_28%,transparent)]',
     label: 'Erro',
   },
   tip: {
     icon: Lightbulb,
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'border-emerald-500/30',
+    color: 'text-[var(--aethel-success)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]',
+    borderColor: 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)]',
+    pulseColor: 'bg-[color-mix(in_srgb,var(--aethel-success)_28%,transparent)]',
     label: 'Dica',
   },
 };
 
-const POSITION_STYLES: Record<SuggestionPosition, { 
+const POSITION_STYLES: Record<SuggestionPosition, {
   initial: { x: number; y: number; scale: number };
   arrow: string;
 }> = {
-  'top': { 
+  'top': {
     initial: { x: 0, y: 10, scale: 0.95 },
-    arrow: 'bottom-[-6px] left-1/2 -translate-x-1/2 border-t-zinc-800 border-l-transparent border-r-transparent border-b-transparent border-t-[6px] border-l-[6px] border-r-[6px]',
+    arrow: 'bottom-[-6px] left-1/2 -translate-x-1/2 border-t-[var(--aethel-surface-secondary)] border-l-transparent border-r-transparent border-b-transparent border-t-[6px] border-l-[6px] border-r-[6px]',
   },
   'bottom': {
     initial: { x: 0, y: -10, scale: 0.95 },
-    arrow: 'top-[-6px] left-1/2 -translate-x-1/2 border-b-zinc-800 border-l-transparent border-r-transparent border-t-transparent border-b-[6px] border-l-[6px] border-r-[6px]',
+    arrow: 'top-[-6px] left-1/2 -translate-x-1/2 border-b-[var(--aethel-surface-secondary)] border-l-transparent border-r-transparent border-t-transparent border-b-[6px] border-l-[6px] border-r-[6px]',
   },
   'left': {
     initial: { x: 10, y: 0, scale: 0.95 },
-    arrow: 'right-[-6px] top-1/2 -translate-y-1/2 border-l-zinc-800 border-t-transparent border-b-transparent border-r-transparent border-l-[6px] border-t-[6px] border-b-[6px]',
+    arrow: 'right-[-6px] top-1/2 -translate-y-1/2 border-l-[var(--aethel-surface-secondary)] border-t-transparent border-b-transparent border-r-transparent border-l-[6px] border-t-[6px] border-b-[6px]',
   },
   'right': {
     initial: { x: -10, y: 0, scale: 0.95 },
-    arrow: 'left-[-6px] top-1/2 -translate-y-1/2 border-r-zinc-800 border-t-transparent border-b-transparent border-l-transparent border-r-[6px] border-t-[6px] border-b-[6px]',
+    arrow: 'left-[-6px] top-1/2 -translate-y-1/2 border-r-[var(--aethel-surface-secondary)] border-t-transparent border-b-transparent border-l-transparent border-r-[6px] border-t-[6px] border-b-[6px]',
   },
   'top-left': {
     initial: { x: 10, y: 10, scale: 0.95 },
-    arrow: 'bottom-[-6px] right-4 border-t-zinc-800 border-l-transparent border-r-transparent border-b-transparent border-t-[6px] border-l-[6px] border-r-[6px]',
+    arrow: 'bottom-[-6px] right-4 border-t-[var(--aethel-surface-secondary)] border-l-transparent border-r-transparent border-b-transparent border-t-[6px] border-l-[6px] border-r-[6px]',
   },
   'top-right': {
     initial: { x: -10, y: 10, scale: 0.95 },
-    arrow: 'bottom-[-6px] left-4 border-t-zinc-800 border-l-transparent border-r-transparent border-b-transparent border-t-[6px] border-l-[6px] border-r-[6px]',
+    arrow: 'bottom-[-6px] left-4 border-t-[var(--aethel-surface-secondary)] border-l-transparent border-r-transparent border-b-transparent border-t-[6px] border-l-[6px] border-r-[6px]',
   },
   'bottom-left': {
     initial: { x: 10, y: -10, scale: 0.95 },
-    arrow: 'top-[-6px] right-4 border-b-zinc-800 border-l-transparent border-r-transparent border-t-transparent border-b-[6px] border-l-[6px] border-r-[6px]',
+    arrow: 'top-[-6px] right-4 border-b-[var(--aethel-surface-secondary)] border-l-transparent border-r-transparent border-t-transparent border-b-[6px] border-l-[6px] border-r-[6px]',
   },
   'bottom-right': {
     initial: { x: -10, y: -10, scale: 0.95 },
-    arrow: 'top-[-6px] left-4 border-b-zinc-800 border-l-transparent border-r-transparent border-t-transparent border-b-[6px] border-l-[6px] border-r-[6px]',
+    arrow: 'top-[-6px] left-4 border-b-[var(--aethel-surface-secondary)] border-l-transparent border-r-transparent border-t-transparent border-b-[6px] border-l-[6px] border-r-[6px]',
   },
 };
 
@@ -185,10 +194,10 @@ const POSITION_STYLES: Record<SuggestionPosition, {
 // SUB-COMPONENTS
 // ============================================================================
 
-function AIPulse({ color }: { color: string }) {
+function AIPulse({ className }: { className: string }) {
   return (
     <motion.div
-      className={`absolute inset-0 rounded-full ${color.replace('text-', 'bg-').replace('-400', '-500/30')}`}
+      className={`absolute inset-0 rounded-full ${className}`}
       animate={{
         scale: [1, 1.5, 1],
         opacity: [0.3, 0, 0.3],
@@ -212,19 +221,20 @@ function CodePreview({ code }: { code: string }) {
   }, [code]);
 
   return (
-    <div className="relative mt-2 rounded bg-zinc-950 border border-zinc-800 overflow-hidden">
-      <pre className="p-2 text-xs text-zinc-300 overflow-x-auto max-h-[100px]">
+    <div className="relative mt-2 rounded bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] overflow-hidden">
+      <pre className="p-2 text-xs text-[var(--aethel-text-secondary)] overflow-x-auto max-h-[100px]">
         <code>{code}</code>
       </pre>
       <button
+        type="button"
         onClick={handleCopy}
-        className="absolute top-1 right-1 p-1 bg-zinc-800 hover:bg-zinc-700 
-                 rounded transition-colors"
+        className="absolute top-1 right-1 p-1 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
+        aria-label={copied ? 'Copiado' : 'Copiar codigo'}
       >
         {copied ? (
-          <Check className="w-3 h-3 text-emerald-400" />
+          <Check className="w-3 h-3 text-[var(--aethel-success)]" />
         ) : (
-          <Copy className="w-3 h-3 text-zinc-500" />
+          <Copy className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
         )}
       </button>
     </div>
@@ -249,6 +259,7 @@ export function AISuggestionBubble({
   const [isVisible, setIsVisible] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+  const [applyError, setApplyError] = useState<string | null>(null);
   const [showActions, setShowActions] = useState(false);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout>();
@@ -297,9 +308,12 @@ export function AISuggestionBubble({
   const handleApply = useCallback(async () => {
     if (!onApply) return;
     setIsApplying(true);
+    setApplyError(null);
     try {
       await onApply(suggestion);
       setIsVisible(false);
+    } catch (error) {
+      setApplyError('Nao foi possivel aplicar agora. Tente novamente.');
     } finally {
       setIsApplying(false);
     }
@@ -351,8 +365,8 @@ export function AISuggestionBubble({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={`
-          relative z-50 w-72 
-          bg-zinc-900 border ${config.borderColor} rounded-xl shadow-xl
+          relative z-50 w-72
+          bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-xl shadow-xl
           ${className}
         `}
       >
@@ -365,11 +379,11 @@ export function AISuggestionBubble({
             <div className="flex items-center gap-2">
               {/* AI icon with pulse */}
               <div className="relative w-8 h-8 flex items-center justify-center">
-                <AIPulse color={config.color} />
+                <AIPulse className={config.pulseColor} />
                 <motion.div
                   animate={{ rotate: [0, 5, -5, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className={`relative z-10 w-6 h-6 rounded-lg ${config.bgColor} 
+                  className={`relative z-10 w-6 h-6 rounded-lg ${config.bgColor}
                             flex items-center justify-center`}
                 >
                   <Brain className={`w-4 h-4 ${config.color}`} />
@@ -382,12 +396,12 @@ export function AISuggestionBubble({
                     {config.label}
                   </span>
                   {suggestion.priority === 'high' && (
-                    <span className="px-1 py-0.5 bg-red-500/20 rounded text-[10px] text-red-400">
+                    <span className="px-1 py-0.5 bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] rounded text-[10px] text-[var(--aethel-error)]">
                       Importante
                     </span>
                   )}
                 </div>
-                <h4 className="text-sm font-medium text-white mt-0.5">
+                <h4 className="text-sm font-medium text-[var(--aethel-text-primary)] mt-0.5">
                   {suggestion.title}
                 </h4>
               </div>
@@ -395,17 +409,19 @@ export function AISuggestionBubble({
 
             {/* Close button */}
             <button
+              type="button"
               onClick={handleDismiss}
-              className="p-1 hover:bg-zinc-800 rounded transition-colors"
+              className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
+              aria-label="Dispensar sugestao"
             >
-              <X className="w-4 h-4 text-zinc-500" />
+              <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             </button>
           </div>
         </div>
 
         {/* Content */}
         <div className="p-3">
-          <p className="text-sm text-zinc-300 leading-relaxed">
+          <p className="text-sm text-[var(--aethel-text-secondary)] leading-relaxed">
             {suggestion.description}
           </p>
 
@@ -416,7 +432,7 @@ export function AISuggestionBubble({
 
           {/* Context info */}
           {suggestion.context?.file && (
-            <div className="mt-2 flex items-center gap-1.5 text-xs text-zinc-500">
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-[var(--aethel-text-tertiary)]">
               <Code className="w-3 h-3" />
               <span className="truncate">{suggestion.context.file}</span>
               {suggestion.context.line && (
@@ -428,15 +444,16 @@ export function AISuggestionBubble({
 
         {/* Actions */}
         <div className="p-3 pt-0 flex items-center gap-2">
-          {suggestion.autoApplyable && (
+          {suggestion.autoApplyable && onApply && (
             <button
+              type="button"
               onClick={handleApply}
               disabled={isApplying}
               className={`
                 flex-1 flex items-center justify-center gap-1.5 py-2
-                bg-gradient-to-r from-blue-600 to-cyan-600
-                hover:from-blue-500 hover:to-cyan-500
-                rounded-lg text-sm font-medium transition-all
+                bg-[linear-gradient(120deg,var(--aethel-primary),var(--aethel-info))]
+                hover:brightness-110
+                rounded-lg text-sm font-medium text-[var(--aethel-text-primary)] transition-all
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
             >
@@ -453,7 +470,7 @@ export function AISuggestionBubble({
               ) : (
                 <>
                   <Wand2 className="w-4 h-4" />
-                  Aplicar
+                  {suggestion.actionLabel || 'Aplicar'}
                 </>
               )}
             </button>
@@ -461,12 +478,13 @@ export function AISuggestionBubble({
 
           {onLearnMore && (
             <button
+              type="button"
               onClick={() => onLearnMore(suggestion)}
-              className="flex items-center gap-1 px-3 py-2 bg-zinc-800 
-                       hover:bg-zinc-700 rounded-lg text-sm text-zinc-300
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)]
+                       hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-sm text-[var(--aethel-text-secondary)]
                        transition-colors"
             >
-              Saber mais
+              Saiba mais
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           )}
@@ -474,10 +492,14 @@ export function AISuggestionBubble({
           {/* More options */}
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowActions(!showActions)}
-              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="p-2 hover:bg-[var(--aethel-surface-tertiary)] rounded-lg transition-colors"
+              aria-label="Mais opcoes"
+              aria-haspopup="true"
+              aria-expanded={showActions}
             >
-              <MoreHorizontal className="w-4 h-4 text-zinc-500" />
+              <MoreHorizontal className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             </button>
 
             <AnimatePresence>
@@ -487,38 +509,47 @@ export function AISuggestionBubble({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="absolute bottom-full right-0 mb-1 py-1 w-40
-                           bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl"
+                           bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-xl"
                 >
                   <button
+                    type="button"
                     onClick={() => handleFeedback(true)}
                     className="w-full flex items-center gap-2 px-3 py-1.5
-                             hover:bg-zinc-700 text-sm text-zinc-300 transition-colors"
+                             hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-secondary)] transition-colors"
                   >
                     <ThumbsUp className="w-3.5 h-3.5" />
-                    Áštil
+                    Util
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleFeedback(false)}
                     className="w-full flex items-center gap-2 px-3 py-1.5
-                             hover:bg-zinc-700 text-sm text-zinc-300 transition-colors"
+                             hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-secondary)] transition-colors"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
-                    Não útil
+                    Nao util
                   </button>
-                  <div className="my-1 border-t border-zinc-700" />
+                  <div className="my-1 border-t border-[var(--aethel-border-primary)]" />
                   <button
+                    type="button"
                     onClick={handleDismiss}
                     className="w-full flex items-center gap-2 px-3 py-1.5
-                             hover:bg-zinc-700 text-sm text-zinc-400 transition-colors"
+                             hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-tertiary)] transition-colors"
                   >
                     <VolumeX className="w-3.5 h-3.5" />
-                    Não mostrar novamente
+                    Nao mostrar novamente
                   </button>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
+
+        {applyError && (
+          <div className="px-3 pb-3 text-xs text-[var(--aethel-error)]" role="status" aria-live="polite">
+            {applyError}
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   );
@@ -558,7 +589,7 @@ export function SuggestionManager({
         return b.createdAt - a.createdAt;
       })
       .slice(0, maxVisible);
-    
+
     setVisibleSuggestions(sorted);
   }, [suggestions, maxVisible]);
 
@@ -623,6 +654,8 @@ export function AISuggestionBubbleAuto() {
               title: s.title,
               description: s.description,
               autoApplyable: !!s.action,
+              actionLabel: s.action?.label,
+              actionCommand: s.action?.command,
               priority: s.priority,
               createdAt: Date.now(),
               expiresAt: s.expiresAt,
@@ -646,11 +679,23 @@ export function AISuggestionBubbleAuto() {
 
   const handleApply = useCallback(async (suggestion: AISuggestion) => {
     try {
-      // Em produção, chamar API para aplicar
-      console.log('Applying suggestion:', suggestion.id);
+      const res = await fetch(`/api/ai/suggestions/${suggestion.id}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'apply',
+          command: suggestion.actionCommand || null,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Falha ao aplicar sugestao.');
+      }
+
       setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
     } catch (e) {
-      console.error('Failed to apply suggestion:', e);
+      console.error('Falha ao aplicar sugestao:', e);
+      throw e;
     }
   }, []);
 

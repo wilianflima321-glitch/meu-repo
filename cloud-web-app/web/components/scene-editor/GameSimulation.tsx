@@ -21,11 +21,11 @@ export function GameSimulation({ objects }: GameSimulationProps) {
     async function init() {
       await initPhysicsEngine();
       if (!active) return;
-      
+
       const world = new PhysicsWorld();
       world.init(new THREE.Vector3(0, -9.81, 0)); // Standard Gravity
       physicsWorld.current = world;
-      
+
       // Create bodies for current scene objects
       objects.forEach(obj => {
         // Only if it has physics properties (we'll assume a 'rigidbody' property for now)
@@ -61,14 +61,14 @@ export function GameSimulation({ objects }: GameSimulationProps) {
         };
 
         const body = world.createBody(bodyConfig);
-        
+
         // Default Collider (Box) matching the visual geometry
         const geometryType = obj.properties.geometry as string || 'box';
         // Simplification: Assume 1x1x1 for now or read scale
         const scale = new THREE.Vector3(...obj.scale);
-        
+
         let colliderConfig: ColliderConfig;
-        
+
         if (geometryType === 'sphere') {
             colliderConfig = { shape: 'sphere', radius: 0.5 * scale.x };
         } else if (geometryType === 'plane') { // Floor
@@ -76,19 +76,19 @@ export function GameSimulation({ objects }: GameSimulationProps) {
         } else {
             colliderConfig = { shape: 'box', halfExtents: scale.clone().multiplyScalar(0.5) };
         }
-        
-        colliderConfig.material = { 
-            friction: 0.5, 
-            restitution: 0.5, 
-            density: 1, 
-            frictionCombine: 'average', 
-            restitutionCombine: 'average' 
+
+        colliderConfig.material = {
+            friction: 0.5,
+            restitution: 0.5,
+            density: 1,
+            frictionCombine: 'average',
+            restitutionCombine: 'average'
         };
 
         // Use PhysicsWorld.addCollider instead of body.addCollider
         world.addCollider(body.id, colliderConfig);
         bodyMap.current.set(obj.id, body);
-        
+
     } catch (e) {
         console.error("Failed to create body for", obj.name, e);
     }
@@ -104,11 +104,11 @@ export function GameSimulation({ objects }: GameSimulationProps) {
     bodyMap.current.forEach((body, id) => {
       // Find the visual object in the Three.js scene
       const object3D = scene.getObjectByName(id);
-      
+
       if (object3D && body.rawBody.isDynamic()) {
          const pos = body.position; // Use getter instead of getPosition()
          const rot = body.rotation; // Use getter instead of getRotation()
-         
+
          object3D.position.set(pos.x, pos.y, pos.z);
          object3D.quaternion.set(rot.x, rot.y, rot.z, rot.w);
       }

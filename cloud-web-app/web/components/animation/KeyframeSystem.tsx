@@ -28,7 +28,7 @@ function resolveCssVarRgba(varName: string, alpha: number, fallback: string): st
 // TYPES - Professional Keyframe System (Premiere/After Effects style)
 // ============================================================================
 
-export type EasingType = 
+export type EasingType =
   | 'linear'
   | 'easeIn'
   | 'easeOut'
@@ -92,19 +92,19 @@ export function evaluateEasing(easing: EasingType, t: number, bezierIn?: { x: nu
   switch (easing) {
     case 'linear':
       return t
-    
+
     case 'easeIn':
       return t * t * t
-    
+
     case 'easeOut':
       return 1 - Math.pow(1 - t, 3)
-    
+
     case 'easeInOut':
       return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
-    
+
     case 'hold':
       return t < 1 ? 0 : 1
-    
+
     case 'bounce':
       if (t < 1 / 2.75) {
         return 7.5625 * t * t
@@ -118,17 +118,17 @@ export function evaluateEasing(easing: EasingType, t: number, bezierIn?: { x: nu
         const t2 = t - 2.625 / 2.75
         return 7.5625 * t2 * t2 + 0.984375
       }
-    
+
     case 'elastic':
       if (t === 0 || t === 1) return t
       const p = 0.3
       const s = p / 4
       return Math.pow(2, -10 * t) * Math.sin((t - s) * (2 * Math.PI) / p) + 1
-    
+
     case 'bezier':
       if (!bezierIn || !bezierOut) return t
       return cubicBezier(bezierIn.x, bezierIn.y, bezierOut.x, bezierOut.y, t)
-    
+
     default:
       return t
   }
@@ -138,7 +138,7 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number, t: number):
   // Newton-Raphson iteration to find t for given x
   const epsilon = 0.0001
   let guess = t
-  
+
   for (let i = 0; i < 8; i++) {
     const x = bezierX(x1, x2, guess) - t
     if (Math.abs(x) < epsilon) break
@@ -146,7 +146,7 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number, t: number):
     if (Math.abs(dx) < epsilon) break
     guess -= x / dx
   }
-  
+
   return bezierY(y1, y2, guess)
 }
 
@@ -172,19 +172,19 @@ export function interpolateValue(
   defaultValue: KeyframeValue
 ): KeyframeValue {
   if (keyframes.length === 0) return defaultValue
-  
+
   const sorted = [...keyframes].sort((a, b) => a.time - b.time)
-  
+
   // Before first keyframe
   if (time <= sorted[0].time) return sorted[0].value
-  
+
   // After last keyframe
   if (time >= sorted[sorted.length - 1].time) return sorted[sorted.length - 1].value
-  
+
   // Find surrounding keyframes
   let prevKf = sorted[0]
   let nextKf = sorted[1]
-  
+
   for (let i = 0; i < sorted.length - 1; i++) {
     if (time >= sorted[i].time && time <= sorted[i + 1].time) {
       prevKf = sorted[i]
@@ -192,26 +192,26 @@ export function interpolateValue(
       break
     }
   }
-  
+
   // Calculate normalized time between keyframes
   const duration = nextKf.time - prevKf.time
   const localT = duration > 0 ? (time - prevKf.time) / duration : 0
-  
+
   // Apply easing
   const easedT = evaluateEasing(prevKf.easing, localT, prevKf.bezierOut, nextKf.bezierIn)
-  
+
   // Interpolate based on value type
   if (typeof prevKf.value === 'number' && typeof nextKf.value === 'number') {
     return prevKf.value + (nextKf.value - prevKf.value) * easedT
   }
-  
+
   if (Array.isArray(prevKf.value) && Array.isArray(nextKf.value)) {
     return prevKf.value.map((v, i) => {
       const nextV = (nextKf.value as number[])[i] ?? v
       return v + (nextV - v) * easedT
     })
   }
-  
+
   // For strings (e.g., colors), return prev value until we reach next keyframe
   return easedT < 0.5 ? prevKf.value : nextKf.value
 }
@@ -235,7 +235,7 @@ export function KeyframeEditor({
 }: KeyframeEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  
+
   const [dragging, setDragging] = useState<{
     trackId: string
     propertyId: string
@@ -243,7 +243,7 @@ export function KeyframeEditor({
     startX: number
     startTime: number
   } | null>(null)
-  
+
   const [hoveredKeyframe, setHoveredKeyframe] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<{
     x: number
@@ -252,7 +252,7 @@ export function KeyframeEditor({
     propertyId: string
     keyframeId: string
   } | null>(null)
-  
+
   const trackHeight = 24
   const propertyHeight = 20
   const headerWidth = 200
@@ -274,7 +274,7 @@ export function KeyframeEditor({
     error: resolveCssVarColor('--aethel-error', 'rgb(239, 68, 68)'),
     primaryAlpha: resolveCssVarRgba('--aethel-primary', 0.5, 'rgb(99, 102, 241)'),
   }), [])
-  
+
   // Calculate total height
   const totalHeight = useMemo(() => {
     return tracks.reduce((sum, track) => {
@@ -285,7 +285,7 @@ export function KeyframeEditor({
       return sum + h
     }, 0)
   }, [tracks])
-  
+
   // Draw keyframe diamonds
   const drawKeyframe = useCallback((
     ctx: CanvasRenderingContext2D,
@@ -298,15 +298,15 @@ export function KeyframeEditor({
     ctx.save()
     ctx.translate(x, y)
     ctx.rotate(Math.PI / 4)
-    
+
     const size = keyframeSize / 2
-    
+
     // Shadow for depth
     if (selected || hovered) {
       ctx.shadowColor = selected ? palette.primaryLight : palette.textMuted
       ctx.shadowBlur = 6
     }
-    
+
     // Fill based on state
     if (selected) {
       ctx.fillStyle = palette.primary
@@ -315,14 +315,14 @@ export function KeyframeEditor({
     } else {
       ctx.fillStyle = palette.textMuted
     }
-    
+
     ctx.fillRect(-size, -size, size * 2, size * 2)
-    
+
     // Border
     ctx.strokeStyle = selected ? palette.primaryDark : palette.textQuaternary
     ctx.lineWidth = 1
     ctx.strokeRect(-size, -size, size * 2, size * 2)
-    
+
     // Easing indicator (small icon inside)
     ctx.shadowBlur = 0
     if (easing !== 'linear') {
@@ -330,7 +330,7 @@ export function KeyframeEditor({
       ctx.font = '6px sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      
+
       let icon = ''
       switch (easing) {
         case 'easeIn': icon = 'I'; break
@@ -341,14 +341,14 @@ export function KeyframeEditor({
         case 'bounce': icon = '~'; break
         case 'elastic': icon = 'E'; break
       }
-      
+
       ctx.rotate(-Math.PI / 4)
       ctx.fillText(icon, 0, 0)
     }
-    
+
     ctx.restore()
   }, [keyframeSize, palette])
-  
+
   // Draw easing curve preview between keyframes
   const drawEasingCurve = useCallback((
     ctx: CanvasRenderingContext2D,
@@ -361,10 +361,10 @@ export function KeyframeEditor({
   ) => {
     ctx.beginPath()
     ctx.moveTo(x1, y)
-    
+
     const steps = 20
     const curveHeight = 6
-    
+
     for (let i = 1; i <= steps; i++) {
       const t = i / steps
       const x = x1 + (x2 - x1) * t
@@ -372,31 +372,31 @@ export function KeyframeEditor({
       const yOffset = (0.5 - easedT) * curveHeight
       ctx.lineTo(x, y + yOffset)
     }
-    
+
     ctx.strokeStyle = palette.primaryAlpha
     ctx.lineWidth = 1
     ctx.stroke()
   }, [palette])
-  
+
   // Main render
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    
+
     const width = canvas.width
     const height = canvas.height
-    
+
     // Clear
     ctx.fillStyle = palette.surfaceBase
     ctx.fillRect(0, 0, width, height)
-    
+
     // Draw timeline grid
     ctx.strokeStyle = palette.border
     ctx.lineWidth = 1
-    
+
     const secondWidth = pixelsPerSecond
     for (let s = 0; s <= duration; s++) {
       const x = headerWidth + s * secondWidth
@@ -405,63 +405,63 @@ export function KeyframeEditor({
       ctx.lineTo(x, height)
       ctx.stroke()
     }
-    
+
     // Draw tracks and keyframes
     let y = 0
-    
+
     for (const track of tracks) {
       // Track header background
       ctx.fillStyle = palette.surfaceMid
       ctx.fillRect(0, y, headerWidth, trackHeight)
-      
+
       // Track label
       ctx.fillStyle = palette.textSecondary
       ctx.font = 'bold 11px system-ui'
       ctx.textAlign = 'left'
       ctx.textBaseline = 'middle'
       ctx.fillText(track.clipId.slice(0, 20), 24, y + trackHeight / 2)
-      
+
       // Expand/collapse button
       ctx.fillStyle = palette.textQuaternary
       ctx.font = '10px system-ui'
       ctx.fillText(track.expanded ? 'v' : '>', 8, y + trackHeight / 2)
-      
+
       // Track background
       ctx.fillStyle = palette.surfaceStrong
       ctx.fillRect(headerWidth, y, width - headerWidth, trackHeight)
-      
+
       y += trackHeight
-      
+
       if (track.expanded) {
         for (const prop of track.properties) {
           // Property row background
           ctx.fillStyle = palette.surfaceMid
           ctx.fillRect(0, y, headerWidth, propertyHeight)
-          
+
           // Property label
           ctx.fillStyle = palette.textTertiary
           ctx.font = '10px system-ui'
           ctx.fillText(`  ${prop.name}`, 24, y + propertyHeight / 2)
-          
+
           // Property timeline background
           ctx.fillStyle = palette.surfaceBase
           ctx.fillRect(headerWidth, y, width - headerWidth, propertyHeight)
-          
+
           // Draw keyframes and curves
           const sorted = [...prop.keyframes].sort((a, b) => a.time - b.time)
-          
+
           for (let i = 0; i < sorted.length; i++) {
             const kf = sorted[i]
             const x = headerWidth + kf.time * pixelsPerSecond
             const centerY = y + propertyHeight / 2
-            
+
             // Draw curve to next keyframe
             if (i < sorted.length - 1) {
               const nextKf = sorted[i + 1]
               const nextX = headerWidth + nextKf.time * pixelsPerSecond
               drawEasingCurve(ctx, x, nextX, centerY, kf.easing, kf.bezierOut, nextKf.bezierIn)
             }
-            
+
             // Draw keyframe diamond
             drawKeyframe(
               ctx,
@@ -472,12 +472,12 @@ export function KeyframeEditor({
               kf.easing
             )
           }
-          
+
           y += propertyHeight
         }
       }
     }
-    
+
     // Draw playhead
     const playheadX = headerWidth + currentTime * pixelsPerSecond
     ctx.strokeStyle = palette.error
@@ -486,7 +486,7 @@ export function KeyframeEditor({
     ctx.moveTo(playheadX, 0)
     ctx.lineTo(playheadX, height)
     ctx.stroke()
-    
+
     // Playhead head
     ctx.fillStyle = palette.error
     ctx.beginPath()
@@ -495,7 +495,7 @@ export function KeyframeEditor({
     ctx.lineTo(playheadX, 8)
     ctx.closePath()
     ctx.fill()
-    
+
   }, [
     tracks,
     currentTime,
@@ -510,7 +510,7 @@ export function KeyframeEditor({
     propertyHeight,
     trackHeight,
   ])
-  
+
   // Hit test for keyframe
   const hitTestKeyframe = useCallback((clientX: number, clientY: number): {
     trackId: string
@@ -519,41 +519,41 @@ export function KeyframeEditor({
   } | null => {
     const canvas = canvasRef.current
     if (!canvas) return null
-    
+
     const rect = canvas.getBoundingClientRect()
     const x = clientX - rect.left
     const y = clientY - rect.top
-    
+
     let currentY = 0
-    
+
     for (const track of tracks) {
       currentY += trackHeight
-      
+
       if (track.expanded) {
         for (const prop of track.properties) {
           const centerY = currentY + propertyHeight / 2
-          
+
           for (const kf of prop.keyframes) {
             const kfX = headerWidth + kf.time * pixelsPerSecond
             const dist = Math.sqrt((x - kfX) ** 2 + (y - centerY) ** 2)
-            
+
             if (dist <= keyframeSize) {
               return { trackId: track.id, propertyId: prop.id, keyframe: kf }
             }
           }
-          
+
           currentY += propertyHeight
         }
       }
     }
-    
+
     return null
   }, [tracks, pixelsPerSecond, headerWidth, keyframeSize, propertyHeight, trackHeight])
-  
+
   // Mouse handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     const hit = hitTestKeyframe(e.clientX, e.clientY)
-    
+
     if (hit) {
       // Start dragging keyframe
       setDragging({
@@ -563,7 +563,7 @@ export function KeyframeEditor({
         startX: e.clientX,
         startTime: hit.keyframe.time
       })
-      
+
       // Update selection
       if (e.shiftKey && onSelectionChange) {
         if (selectedKeyframes.includes(hit.keyframe.id)) {
@@ -578,11 +578,11 @@ export function KeyframeEditor({
       // Check for track header click
       const canvas = canvasRef.current
       if (!canvas) return
-      
+
       const rect = canvas.getBoundingClientRect()
       const x = e.clientX - rect.left
       const y = e.clientY - rect.top
-      
+
       if (x < headerWidth) {
         let currentY = 0
         for (const track of tracks) {
@@ -598,11 +598,11 @@ export function KeyframeEditor({
       } else if (e.detail === 2) {
         // Double-click to add keyframe
         const time = (x - headerWidth) / pixelsPerSecond
-        
+
         let currentY = 0
         for (const track of tracks) {
           currentY += trackHeight
-          
+
           if (track.expanded) {
             for (const prop of track.properties) {
               if (y >= currentY && y < currentY + propertyHeight) {
@@ -615,32 +615,32 @@ export function KeyframeEditor({
           }
         }
       }
-      
+
       // Clear selection on empty click
       if (onSelectionChange) {
         onSelectionChange([])
       }
     }
   }, [hitTestKeyframe, selectedKeyframes, onSelectionChange, tracks, pixelsPerSecond, onKeyframeAdd, onTrackToggle])
-  
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const hit = hitTestKeyframe(e.clientX, e.clientY)
     setHoveredKeyframe(hit?.keyframe.id ?? null)
-    
+
     if (dragging) {
       const dx = e.clientX - dragging.startX
       const newTime = Math.max(0, Math.min(duration, dragging.startTime + dx / pixelsPerSecond))
       onKeyframeMove(dragging.trackId, dragging.propertyId, dragging.keyframeId, newTime)
     }
   }, [hitTestKeyframe, dragging, duration, pixelsPerSecond, onKeyframeMove])
-  
+
   const handleMouseUp = useCallback(() => {
     setDragging(null)
   }, [])
-  
+
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
-    
+
     const hit = hitTestKeyframe(e.clientX, e.clientY)
     if (hit) {
       setContextMenu({
@@ -652,7 +652,7 @@ export function KeyframeEditor({
       })
     }
   }, [hitTestKeyframe])
-  
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Delete' || e.key === 'Backspace') {
       // Delete selected keyframes
@@ -668,26 +668,26 @@ export function KeyframeEditor({
       onSelectionChange?.([])
     }
   }, [tracks, selectedKeyframes, onKeyframeDelete, onSelectionChange])
-  
+
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
-  
+
   // Context menu UI
   const renderContextMenu = () => {
     if (!contextMenu) return null
-    
+
     const handleEasingChange = (easing: EasingType) => {
       onKeyframeUpdate(contextMenu.trackId, contextMenu.propertyId, contextMenu.keyframeId, { easing })
       setContextMenu(null)
     }
-    
+
     const handleDelete = () => {
       onKeyframeDelete(contextMenu.trackId, contextMenu.propertyId, contextMenu.keyframeId)
       setContextMenu(null)
     }
-    
+
     return (
       <div
         style={{
@@ -754,7 +754,7 @@ export function KeyframeEditor({
       </div>
     )
   }
-  
+
   return (
     <div ref={containerRef} style={{ position: 'relative' }}>
       <canvas
@@ -804,13 +804,13 @@ export function KeyframeControls({
 }: KeyframeControlsProps) {
   const currentKeyframe = property.keyframes.find(kf => Math.abs(kf.time - currentTime) < 0.05)
   const currentValue = interpolateValue(property.keyframes, currentTime, property.defaultValue)
-  
+
   const hasKeyframeAtTime = !!currentKeyframe
-  
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
       <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, minWidth: 80 }}>{property.name}</span>
-      
+
       {/* Keyframe toggle button */}
       <button
         onClick={() => {
@@ -838,7 +838,7 @@ export function KeyframeControls({
           {hasKeyframeAtTime ? 'v' : '+'}
         </span>
       </button>
-      
+
       {/* Value input */}
       {typeof currentValue === 'number' && (
         <input
@@ -864,11 +864,11 @@ export function KeyframeControls({
           }}
         />
       )}
-      
+
       {property.unit && (
         <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: 10 }}>{property.unit}</span>
       )}
-      
+
       {/* Navigation to prev/next keyframe */}
       <button
         onClick={() => {

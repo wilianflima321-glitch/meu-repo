@@ -5,7 +5,7 @@ import Codicon from '@/components/ide/Codicon'
 
 /**
  * Enhanced sidebar navigation shell for the Aethel Dashboard.
- * Provides collapsible sidebar with active states, tooltips, mobile drawer, 
+ * Provides collapsible sidebar with active states, tooltips, mobile drawer,
  * and keyboard navigation. This is a presentation wrapper; tab routing is
  * handled by the parent dashboard runtime.
  */

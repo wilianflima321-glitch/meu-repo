@@ -358,7 +358,7 @@ const BlendShapeSlider: React.FC<BlendShapeSliderProps> = React.memo(({ name, va
 
   return (
     <div className="flex items-center gap-2 py-1">
-      <label className="text-xs text-slate-400 w-32 truncate" title={displayName}>
+      <label className="text-xs text-[var(--aethel-text-tertiary)] w-32 truncate" title={displayName}>
         {displayName}
       </label>
       <input
@@ -368,13 +368,13 @@ const BlendShapeSlider: React.FC<BlendShapeSliderProps> = React.memo(({ name, va
         step="0.01"
         value={value}
         onChange={(e) => onChange(name, parseFloat(e.target.value))}
-        className="flex-1 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 
-                   [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full 
+        className="flex-1 h-1 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
+                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3
+                   [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full
                    [&::-webkit-slider-thumb]:bg-sky-500 [&::-webkit-slider-thumb]:cursor-pointer
                    [&::-webkit-slider-thumb]:hover:bg-sky-400"
       />
-      <span className="text-xs text-slate-500 w-10 text-right font-mono">
+      <span className="text-xs text-[var(--aethel-text-tertiary)] w-10 text-right font-mono">
         {value.toFixed(2)}
       </span>
     </div>
@@ -396,9 +396,9 @@ const EmotionPresetButton: React.FC<EmotionPresetButtonProps> = React.memo(({ pr
     <button
       onClick={onClick}
       className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200
-                  ${isActive 
-                    ? 'bg-sky-600 text-white ring-2 ring-sky-400' 
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                  ${isActive
+                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-sky-400'
+                    : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
     >
       <span className="text-2xl mb-1">{preset.icon}</span>
       <span className="text-xs font-medium">{preset.name}</span>
@@ -538,7 +538,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const time = (x / rect.width) * duration
-    
+
     if (e.shiftKey) {
       onAddKeyframe(time, selectedViseme)
     } else {
@@ -547,17 +547,17 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
   }
 
   return (
-    <div className="bg-slate-800 rounded-lg p-4">
+    <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold text-slate-300">Lip Sync Timeline</h4>
+        <h4 className="text-sm font-semibold text-[var(--aethel-text-secondary)]">Lip Sync Timeline</h4>
         <div className="flex items-center gap-2">
           <button
             onClick={togglePlayback}
-            className="px-3 py-1 bg-sky-600 hover:bg-sky-500 rounded text-xs font-medium transition-colors"
+            className="px-3 py-1 bg-[var(--aethel-info)] hover:bg-sky-500 rounded text-xs font-medium transition-colors"
           >
             {isPlaying ? ' Pause' : ' Play'}
           </button>
-          <span className="text-xs text-slate-400 font-mono">
+          <span className="text-xs text-[var(--aethel-text-tertiary)] font-mono">
             {currentTime.toFixed(2)}s / {duration.toFixed(2)}s
           </span>
         </div>
@@ -571,8 +571,8 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
             onClick={() => setSelectedViseme(viseme.id)}
             className={`px-2 py-1 text-xs rounded transition-colors
                         ${selectedViseme === viseme.id
-                          ? 'bg-sky-600 text-white'
-                          : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                          ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+                          : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
           >
             {viseme.label}
           </button>
@@ -582,16 +582,16 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
       {/* Timeline Track */}
       <div
         onClick={handleTimelineClick}
-        className="relative h-16 bg-slate-900 rounded cursor-crosshair"
+        className="relative h-16 bg-[var(--aethel-surface-primary)] rounded cursor-crosshair"
       >
         {/* Time markers */}
         {Array.from({ length: Math.ceil(duration) + 1 }).map((_, i) => (
           <div
             key={i}
-            className="absolute top-0 h-full border-l border-slate-700"
+            className="absolute top-0 h-full border-l border-[var(--aethel-border-primary)]"
             style={{ left: `${(i / duration) * 100}%` }}
           >
-            <span className="absolute top-0 left-1 text-xs text-slate-600">{i}s</span>
+            <span className="absolute top-0 left-1 text-xs text-[var(--aethel-text-quaternary)]">{i}s</span>
           </div>
         ))}
 
@@ -610,7 +610,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
           >
             <div className="w-4 h-8 bg-sky-500 rounded-sm flex items-center justify-center
                             group-hover:bg-sky-400 transition-colors">
-              <span className="text-xs font-bold text-white">
+              <span className="text-xs font-bold text-[var(--aethel-text-primary)]">
                 {VISEMES.find(v => v.id === kf.viseme)?.label.charAt(0) || '?'}
               </span>
             </div>
@@ -624,7 +624,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
         />
       </div>
 
-      <p className="text-xs text-slate-500 mt-2">
+      <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">
         Shift+Click to add keyframe  Alt+Click on keyframe to remove  Click to seek
       </p>
     </div>
@@ -654,16 +654,16 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
   }, [searchQuery])
 
   return (
-    <div className="bg-slate-800 rounded-lg p-4">
-      <h4 className="text-sm font-semibold text-slate-300 mb-3">FACS Action Units Reference</h4>
-      
+    <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-4">
+      <h4 className="text-sm font-semibold text-[var(--aethel-text-secondary)] mb-3">FACS Action Units Reference</h4>
+
       <input
         type="text"
         placeholder="Search action units..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-sm
-                   text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-2 
+        className="w-full px-3 py-2 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded text-sm
+                   text-[var(--aethel-text-secondary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2
                    focus:ring-sky-500 mb-3"
       />
 
@@ -671,27 +671,27 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
         {filteredAUs.map(au => (
           <div
             key={au.au}
-            className="bg-slate-900 rounded p-2 cursor-pointer hover:bg-slate-850 transition-colors"
+            className="bg-[var(--aethel-surface-primary)] rounded p-2 cursor-pointer hover:bg-[var(--aethel-surface-secondary)] transition-colors"
             onClick={() => setExpandedAU(expandedAU === au.au ? null : au.au)}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono bg-sky-600 px-2 py-0.5 rounded">
+                <span className="text-xs font-mono bg-[var(--aethel-info)] px-2 py-0.5 rounded">
                   {au.au}
                 </span>
-                <span className="text-sm text-slate-300">{au.name}</span>
+                <span className="text-sm text-[var(--aethel-text-secondary)]">{au.name}</span>
               </div>
-              <span className="text-slate-500">{expandedAU === au.au ? '' : ''}</span>
+              <span className="text-[var(--aethel-text-tertiary)]">{expandedAU === au.au ? '' : ''}</span>
             </div>
-            
+
             {expandedAU === au.au && (
-              <div className="mt-2 pl-2 border-l-2 border-slate-700">
-                <p className="text-xs text-slate-400 mb-2">{au.description}</p>
+              <div className="mt-2 pl-2 border-l-2 border-[var(--aethel-border-primary)]">
+                <p className="text-xs text-[var(--aethel-text-tertiary)] mb-2">{au.description}</p>
                 <div className="flex flex-wrap gap-1">
                   {au.relatedBlendShapes.map(bs => (
                     <span
                       key={bs}
-                      className="text-xs bg-slate-700 px-2 py-0.5 rounded text-slate-300"
+                      className="text-xs bg-[var(--aethel-surface-quaternary)] px-2 py-0.5 rounded text-[var(--aethel-text-secondary)]"
                     >
                       {bs}
                     </span>
@@ -704,7 +704,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
                   }}
                   className="mt-2 text-xs text-sky-400 hover:text-sky-300"
                 >
-                  Apply to sliders 
+                  Apply to sliders
                 </button>
               </div>
             )}
@@ -730,7 +730,7 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
   // Create a generic face geometry with morph targets
   const geometry = useMemo(() => {
     const geo = new THREE.SphereGeometry(1, 64, 64)
-    
+
     // Create morph target attributes for face deformation
     const morphAttributes: { [key: string]: THREE.BufferAttribute[] } = {
       position: []
@@ -741,10 +741,10 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
 
     // Generate morph targets for each blend shape category
     const allShapes = BLEND_SHAPE_CATEGORIES.flatMap(cat => cat.shapes)
-    
+
     allShapes.forEach((shapeName, idx) => {
       const morphPositions = new Float32Array(posArray.length)
-      
+
       for (let i = 0; i < posArray.length; i += 3) {
         const x = posArray[i]
         const y = posArray[i + 1]
@@ -844,7 +844,7 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
   // Update morph target influences based on blend shapes
   useFrame(() => {
     if (!meshRef.current) return
-    
+
     const morphInfluences = meshRef.current.morphTargetInfluences
     if (!morphInfluences) return
 
@@ -873,7 +873,7 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
 
 const FacePreview3D: React.FC<FacePreview3DProps> = React.memo(({ blendShapes }) => {
   return (
-    <div className="w-full h-full min-h-[300px] bg-slate-900 rounded-lg overflow-hidden">
+    <div className="w-full h-full min-h-[300px] bg-[var(--aethel-surface-primary)] rounded-lg overflow-hidden">
       <Canvas camera={{ position: [0, 0, 3], fov: 45 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
@@ -917,7 +917,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
   const [currentTime, setCurrentTime] = useState(0)
   const [duration] = useState(5)
   const [showFACS, setShowFACS] = useState(false)
-  const [audioData] = useState<number[]>(() => 
+  const [audioData] = useState<number[]>(() =>
     Array.from({ length: 100 }, () => Math.random() * 0.5 + 0.2)
   )
 
@@ -1002,7 +1002,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
         blendShapeCount: Object.keys(blendShapes).length,
       },
     }
-    
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -1025,17 +1025,17 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
   }, [blendShapes])
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-white">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-bold text-sky-400">
              Facial Animation Editor
           </h2>
-          <span className="text-xs text-slate-500 bg-slate-700 px-2 py-1 rounded">
+          <span className="text-xs text-[var(--aethel-text-tertiary)] bg-[var(--aethel-surface-quaternary)] px-2 py-1 rounded">
             Character: {characterId}
           </span>
-          <span className="text-xs text-slate-500 bg-slate-700 px-2 py-1 rounded">
+          <span className="text-xs text-[var(--aethel-text-tertiary)] bg-[var(--aethel-surface-quaternary)] px-2 py-1 rounded">
             {activeBlendShapesCount}/52 Active
           </span>
         </div>
@@ -1043,19 +1043,19 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           <button
             onClick={() => setShowFACS(!showFACS)}
             className={`px-3 py-1.5 text-sm rounded transition-colors
-                        ${showFACS ? 'bg-sky-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+                        ${showFACS ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
           >
              FACS Reference
           </button>
           <button
             onClick={handleReset}
-            className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 rounded transition-colors"
+            className="px-3 py-1.5 text-sm bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
           >
              Reset
           </button>
           <button
             onClick={handleExport}
-            className="px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-500 rounded transition-colors"
+            className="px-3 py-1.5 text-sm bg-[var(--aethel-info)] hover:bg-sky-500 rounded transition-colors"
           >
              Export JSON
           </button>
@@ -1068,13 +1068,13 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
         <div className="flex-1 flex flex-col p-4 overflow-y-auto custom-scrollbar">
           {/* 3D Face Preview */}
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-slate-400 mb-2">3D Preview</h3>
+            <h3 className="text-sm font-semibold text-[var(--aethel-text-tertiary)] mb-2">3D Preview</h3>
             <FacePreview3D blendShapes={blendShapes} />
           </div>
 
           {/* Emotion Presets */}
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-slate-400 mb-2">Emotion Presets</h3>
+            <h3 className="text-sm font-semibold text-[var(--aethel-text-tertiary)] mb-2">Emotion Presets</h3>
             <div className="grid grid-cols-7 gap-2">
               {EMOTION_PRESETS.map(preset => (
                 <EmotionPresetButton
@@ -1089,7 +1089,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
 
           {/* Audio Waveform */}
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-slate-400 mb-2">Audio Waveform</h3>
+            <h3 className="text-sm font-semibold text-[var(--aethel-text-tertiary)] mb-2">Audio Waveform</h3>
             <AudioWaveform
               audioData={audioData}
               duration={duration}
@@ -1113,21 +1113,21 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
         </div>
 
         {/* Right Panel - Blend Shape Sliders */}
-        <div className="w-96 bg-slate-800 border-l border-slate-700 flex flex-col overflow-hidden">
+        <div className="w-96 bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)] flex flex-col overflow-hidden">
           {/* Category Tabs */}
-          <div className="flex flex-wrap gap-1 p-2 bg-slate-850 border-b border-slate-700">
+          <div className="flex flex-wrap gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
             {BLEND_SHAPE_CATEGORIES.map(category => (
               <button
                 key={category.name}
                 onClick={() => setActiveCategory(category.name)}
                 className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1
                             ${activeCategory === category.name
-                              ? 'bg-sky-600 text-white'
-                              : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                              ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+                              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
               >
                 <span>{category.icon}</span>
                 <span>{category.name}</span>
-                <span className="text-slate-500">({category.shapes.length})</span>
+                <span className="text-[var(--aethel-text-tertiary)]">({category.shapes.length})</span>
               </button>
             ))}
           </div>
@@ -1148,7 +1148,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
 
           {/* FACS Reference Panel (Collapsible) */}
           {showFACS && (
-            <div className="border-t border-slate-700 p-3 max-h-80 overflow-hidden">
+            <div className="border-t border-[var(--aethel-border-primary)] p-3 max-h-80 overflow-hidden">
               <FACSReference onSelectAU={handleFACSSelect} />
             </div>
           )}

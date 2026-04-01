@@ -14,10 +14,11 @@ export function Checkbox({ checked, onCheckedChange, className, ...props }: Chec
       type="checkbox"
       checked={checked}
       onChange={(e) => onCheckedChange?.(e.target.checked)}
-      className={cn('h-4 w-4 rounded border-slate-600 text-sky-500', className)}
+      className={cn('h-4 w-4 rounded border-[var(--aethel-border-secondary)] text-[var(--aethel-info)]', className)}
       {...props}
     />
   );
 }
 
 export default Checkbox;
+

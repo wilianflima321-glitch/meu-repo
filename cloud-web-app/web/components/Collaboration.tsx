@@ -2,7 +2,7 @@
 
 /**
  * Collaboration Components - Aethel Engine
- * 
+ *
  * Componentes para colaboracao em tempo real:
  * - Avatares de presenca
  * - Cursores remotos
@@ -81,10 +81,10 @@ const CollaborationContext = createContext<CollaborationContextType>({
   updateStatus: () => {},
 });
 
-export function CollaborationProvider({ 
+export function CollaborationProvider({
   children,
-  user 
-}: { 
+  user
+}: {
   children: ReactNode;
   user?: { id: string; name: string; email: string; avatar?: string };
 }) {
@@ -106,16 +106,16 @@ export function CollaborationProvider({
 
   const connect = (roomId: string) => {
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || `ws://localhost:3001/collaboration`;
-    
+
     try {
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
         setIsConnected(true);
-        ws.send(JSON.stringify({ 
-          type: 'join_room', 
-          data: { roomId, user: currentUser } 
+        ws.send(JSON.stringify({
+          type: 'join_room',
+          data: { roomId, user: currentUser }
         }));
       };
 
@@ -155,9 +155,9 @@ export function CollaborationProvider({
         break;
       case 'cursor_move':
         const cursor = message.data as { userId: string; position: { x: number; y: number } };
-        setRoomUsers(prev => 
-          prev.map(u => u.id === cursor.userId 
-            ? { ...u, cursor: cursor.position } 
+        setRoomUsers(prev =>
+          prev.map(u => u.id === cursor.userId
+            ? { ...u, cursor: cursor.position }
             : u
           )
         );
@@ -178,9 +178,9 @@ export function CollaborationProvider({
 
   const leaveRoom = () => {
     if (wsRef.current) {
-      wsRef.current.send(JSON.stringify({ 
-        type: 'leave_room', 
-        data: { roomId: roomIdRef.current } 
+      wsRef.current.send(JSON.stringify({
+        type: 'leave_room',
+        data: { roomId: roomIdRef.current }
       }));
       wsRef.current.close();
       wsRef.current = null;
@@ -246,13 +246,13 @@ interface PresenceAvatarsProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function PresenceAvatars({ 
-  maxDisplay = 4, 
+export function PresenceAvatars({
+  maxDisplay = 4,
   showStatus = true,
-  size = 'md' 
+  size = 'md'
 }: PresenceAvatarsProps) {
   const { roomUsers, currentUser } = useCollaboration();
-  
+
   // Filtra usuario atual
   const otherUsers = roomUsers.filter(u => u.id !== currentUser?.id);
   const displayed = otherUsers.slice(0, maxDisplay);
@@ -292,7 +292,7 @@ export function PresenceAvatars({
         <div
           key={user.id}
           className={`relative rounded-full border-2 border-[var(--aethel-border-primary)] ${sizeClasses[size]}`}
-          style={{ 
+          style={{
             marginLeft: index > 0 ? -8 : 0,
             backgroundColor: user.color,
             zIndex: displayed.length - index,
@@ -312,17 +312,17 @@ export function PresenceAvatars({
               {user.name.charAt(0).toUpperCase()}
             </div>
           )}
-          
+
           {showStatus && (
-            <div 
+            <div
               className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--aethel-border-primary)] ${statusColors[user.status]}`}
             />
           )}
         </div>
       ))}
-      
+
       {overflow > 0 && (
-        <div 
+        <div
           className={`rounded-full bg-[var(--aethel-surface-quaternary)] border-2 border-[var(--aethel-border-primary)] flex items-center justify-center text-[var(--aethel-text-primary)] font-medium ${sizeClasses[size]}`}
           style={{ marginLeft: -8 }}
         >
@@ -339,7 +339,7 @@ export function PresenceAvatars({
 
 export function CursorOverlay() {
   const { roomUsers, currentUser } = useCollaboration();
-  
+
   const cursors = roomUsers
     .filter(u => u.id !== currentUser?.id && u.cursor)
     .map(u => ({
@@ -372,7 +372,7 @@ export function CursorOverlay() {
               strokeWidth="1.5"
             />
           </svg>
-          
+
           {/* Name label */}
           <div
             className="absolute top-5 left-2 px-2 py-0.5 rounded text-xs text-[var(--aethel-text-primary)] whitespace-nowrap"
@@ -392,14 +392,14 @@ export function CursorOverlay() {
 
 export function TypingIndicator() {
   const { roomUsers, currentUser } = useCollaboration();
-  
+
   const typingUsers = roomUsers.filter(u => u.id !== currentUser?.id && u.typing);
 
   if (typingUsers.length === 0) return null;
 
   const names = typingUsers.map(u => u.name);
   let text = '';
-  
+
   if (names.length === 1) {
     text = `${names[0]} esta digitando...`;
   } else if (names.length === 2) {
@@ -500,13 +500,13 @@ export function UserListPanel() {
 
       <div className="space-y-2">
         {roomUsers.map(user => (
-          <div 
+          <div
             key={user.id}
             className={`flex items-center gap-3 p-2 rounded-lg ${
               user.id === currentUser?.id ? 'bg-[var(--aethel-surface-tertiary)]' : ''
             }`}
           >
-            <div 
+            <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--aethel-text-primary)] font-medium relative"
               style={{ backgroundColor: user.color }}
             >
@@ -527,7 +527,7 @@ export function UserListPanel() {
                 user.status === 'busy' ? 'bg-[var(--aethel-error)]' : 'bg-[var(--aethel-text-quaternary)]'
               }`} />
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="text-sm text-[var(--aethel-text-primary)] truncate">
                 {user.name}

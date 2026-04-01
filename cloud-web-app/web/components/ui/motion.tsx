@@ -274,8 +274,8 @@ export const focusRing = {
 
 // Reveal animation for sections
 export const revealUp: Variants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 40,
   },
   show: {
@@ -371,10 +371,10 @@ interface StaggerContainerProps {
   staggerDelay?: number
 }
 
-export function StaggerContainer({ 
-  children, 
-  className, 
-  staggerDelay = 0.05 
+export function StaggerContainer({
+  children,
+  className,
+  staggerDelay = 0.05
 }: StaggerContainerProps) {
   return (
     <motion.div
@@ -397,12 +397,12 @@ export function StaggerContainer({
   )
 }
 
-export function StaggerItem({ 
-  children, 
-  className 
-}: { 
+export function StaggerItem({
+  children,
+  className
+}: {
   children: ReactNode
-  className?: string 
+  className?: string
 }) {
   return (
     <motion.div

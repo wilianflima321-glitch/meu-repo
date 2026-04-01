@@ -1,9 +1,9 @@
 /**
  * TimeMachineSlider - Componente de Viagem no Tempo para Versões
- * 
+ *
  * Permite navegar entre versões históricas do projeto.
  * Integrado com sistema de controle de versão.
- * 
+ *
  * @module components/collaboration/TimeMachineSlider
  */
 
@@ -147,7 +147,7 @@ export function TimeMachineSlider({
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days === 0) {
       const hours = Math.floor(diff / (1000 * 60 * 60));
       if (hours === 0) {
@@ -158,7 +158,7 @@ export function TimeMachineSlider({
     }
     if (days === 1) return 'Ontem';
     if (days < 7) return `${days} dias atrás`;
-    
+
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: 'short',
@@ -169,7 +169,7 @@ export function TimeMachineSlider({
   // Empty state
   if (versions.length === 0) {
     return (
-      <div className={`flex items-center justify-center p-4 text-gray-500 ${className}`}>
+      <div className={`flex items-center justify-center p-4 text-[var(--aethel-text-secondary)] ${className}`}>
         <History className="w-5 h-5 mr-2" />
         <span>Nenhum histórico disponível</span>
       </div>
@@ -183,19 +183,19 @@ export function TimeMachineSlider({
         <button
           onClick={handlePrevious}
           disabled={selectedIndex === 0}
-          className="p-1 rounded hover:bg-gray-700 disabled:opacity-50"
+          className="p-1 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
-        
-        <span className="text-sm text-gray-400 min-w-[80px] text-center">
+
+        <span className="text-sm text-[var(--aethel-text-secondary)] min-w-[80px] text-center">
           {selectedIndex + 1} / {versions.length}
         </span>
-        
+
         <button
           onClick={handleNext}
           disabled={selectedIndex === versions.length - 1}
-          className="p-1 rounded hover:bg-gray-700 disabled:opacity-50"
+          className="p-1 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -204,18 +204,18 @@ export function TimeMachineSlider({
   }
 
   return (
-    <div className={`bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 ${className}`}>
+    <div className={`bg-[var(--aethel-surface-secondary)]/90 backdrop-blur-sm rounded-lg border border-[var(--aethel-border-primary)] ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-700">
+      <div className="flex items-center justify-between p-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-blue-400" />
-          <span className="text-sm font-medium text-white">Máquina do Tempo</span>
+          <Clock className="w-4 h-4 text-[var(--aethel-info-light)]" />
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Máquina do Tempo</span>
         </div>
-        
+
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-white"
+            className="p-1 rounded hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
             title="Mostrar detalhes"
           >
             <History className="w-4 h-4" />
@@ -238,23 +238,23 @@ export function TimeMachineSlider({
                 className="w-16 h-12 rounded object-cover"
               />
             )}
-            
+
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-white truncate">
+              <p className="text-sm text-[var(--aethel-text-primary)] truncate">
                 {selectedVersion.message || 'Sem descrição'}
               </p>
-              
-              <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+
+              <div className="flex items-center gap-3 mt-1 text-xs text-[var(--aethel-text-secondary)]">
                 <span className="flex items-center gap-1">
                   <User className="w-3 h-3" />
                   {selectedVersion.author}
                 </span>
-                
+
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   {formatDate(new Date(selectedVersion.timestamp))}
                 </span>
-                
+
                 {selectedVersion.branch && (
                   <span className="flex items-center gap-1">
                     <GitBranch className="w-3 h-3" />
@@ -262,12 +262,12 @@ export function TimeMachineSlider({
                   </span>
                 )}
               </div>
-              
+
               {selectedVersion.changes && (
                 <div className="flex items-center gap-2 mt-1 text-xs">
-                  <span className="text-green-400">+{selectedVersion.changes.added}</span>
-                  <span className="text-yellow-400">~{selectedVersion.changes.modified}</span>
-                  <span className="text-red-400">-{selectedVersion.changes.deleted}</span>
+                  <span className="text-[var(--aethel-success-light)]">+{selectedVersion.changes.added}</span>
+                  <span className="text-[var(--aethel-warning-light)]">~{selectedVersion.changes.modified}</span>
+                  <span className="text-[var(--aethel-error-light)]">-{selectedVersion.changes.deleted}</span>
                 </div>
               )}
             </div>
@@ -282,12 +282,12 @@ export function TimeMachineSlider({
             max={versions.length - 1}
             value={selectedIndex}
             onChange={handleSliderChange}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            className="w-full h-2 bg-[var(--aethel-surface-secondary)] rounded-lg appearance-none cursor-pointer accent-blue-500"
           />
-          
+
           {/* Version markers */}
           {variant === 'full' && (
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-[var(--aethel-text-secondary)]">
               <span>{formatDate(new Date(versions[0]?.timestamp))}</span>
               <span>{formatDate(new Date(versions[versions.length - 1]?.timestamp))}</span>
             </div>
@@ -300,57 +300,57 @@ export function TimeMachineSlider({
             <button
               onClick={handleFirst}
               disabled={selectedIndex === 0}
-              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 text-gray-400 hover:text-white"
+              className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               title="Primeira versão"
             >
               <SkipBack className="w-4 h-4" />
             </button>
-            
+
             <button
               onClick={handlePrevious}
               disabled={selectedIndex === 0}
-              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 text-gray-400 hover:text-white"
+              className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               title="Versão anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            
+
             <button
               onClick={togglePlayback}
-              className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-white"
+              className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               title={isPlaying ? 'Pausar' : 'Reproduzir'}
             >
               {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             </button>
-            
+
             <button
               onClick={handleNext}
               disabled={selectedIndex === versions.length - 1}
-              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 text-gray-400 hover:text-white"
+              className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               title="Próxima versão"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
-            
+
             <button
               onClick={handleLast}
               disabled={selectedIndex === versions.length - 1}
-              className="p-1.5 rounded hover:bg-gray-700 disabled:opacity-50 text-gray-400 hover:text-white"
+              className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               title="Última versão"
             >
               <SkipForward className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-[var(--aethel-text-secondary)]">
               {selectedIndex + 1} / {versions.length}
             </span>
-            
+
             {onRestore && selectedIndex < versions.length - 1 && (
               <button
                 onClick={handleRestore}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded"
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded"
               >
                 <RotateCcw className="w-3 h-3" />
                 Restaurar
@@ -367,7 +367,7 @@ export function TimeMachineSlider({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-t border-gray-700 overflow-hidden"
+            className="border-t border-[var(--aethel-border-primary)] overflow-hidden"
           >
             <div className="p-3 max-h-48 overflow-y-auto">
               <div className="space-y-2">
@@ -377,19 +377,19 @@ export function TimeMachineSlider({
                     onClick={() => setSelectedIndex(index)}
                     className={`w-full flex items-center gap-2 p-2 rounded text-left transition-colors ${
                       index === selectedIndex
-                        ? 'bg-blue-600/20 border border-blue-500'
-                        : 'hover:bg-gray-700/50'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+                        : 'hover:bg-[var(--aethel-surface-secondary)]/50'
                     }`}
                   >
                     <div className={`w-2 h-2 rounded-full ${
-                      index === selectedIndex ? 'bg-blue-500' : 'bg-gray-500'
+                      index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
                     }`} />
-                    
+
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white truncate">
+                      <p className="text-sm text-[var(--aethel-text-primary)] truncate">
                         {version.message || 'Sem descrição'}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-[var(--aethel-text-secondary)]">
                         {version.author} • {formatDate(new Date(version.timestamp))}
                       </p>
                     </div>

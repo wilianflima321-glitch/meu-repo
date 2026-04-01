@@ -6,6 +6,7 @@
  */
 
 import { prisma } from './db';
+import { OPENROUTER_BEST_MODELS, OPENROUTER_BUDGET_MODELS, OPENROUTER_FREE_MODELS } from './ai/openrouter-models';
 
 // ============================================================================
 // DEFINIÇÃO DE LIMITES POR PLANO
@@ -23,6 +24,43 @@ export interface PlanLimits {
   features: string[];      // Features habilitadas
 }
 
+const FREE_MODEL_IDS = OPENROUTER_FREE_MODELS.map((model) => model.id);
+const BUDGET_MODEL_IDS = [...FREE_MODEL_IDS, ...OPENROUTER_BUDGET_MODELS.map((model) => model.id)];
+const BEST_MODEL_IDS = OPENROUTER_BEST_MODELS.map((model) => model.id);
+
+const STARTER_TRIAL_MODELS = [
+  ...FREE_MODEL_IDS,
+  'google/gemini-2.5-flash-lite',
+  'google/gemini-3.1-flash-lite-preview',
+  'openai/gpt-5-nano',
+  'openai/gpt-5.4-nano',
+  'openai/gpt-4.1-nano',
+  'anthropic/claude-3.5-haiku',
+];
+
+const STARTER_MODELS = Array.from(new Set([
+  ...STARTER_TRIAL_MODELS,
+  'openai/gpt-5-mini',
+  'openai/gpt-5.4-mini',
+  'openai/gpt-4.1-mini',
+  'google/gemini-2.5-flash',
+]));
+
+const PRO_BEST_MODELS = [
+  'openai/gpt-5',
+  'openai/gpt-5.4',
+  'openai/gpt-5-codex',
+  'openai/o3',
+  'anthropic/claude-sonnet-4.6',
+  'anthropic/claude-3.7-sonnet',
+  'google/gemini-2.5-pro',
+  'openai/gpt-4.1',
+];
+
+const STUDIO_BEST_MODELS = BEST_MODEL_IDS.filter((model) => model !== 'openai/gpt-5.4-pro');
+const PRO_MODELS = Array.from(new Set([...BUDGET_MODEL_IDS, ...PRO_BEST_MODELS]));
+const STUDIO_MODELS = Array.from(new Set([...BUDGET_MODEL_IDS, ...STUDIO_BEST_MODELS]));
+
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
   // Free trial - muito limitado
   'starter_trial': {
@@ -33,60 +71,60 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
     concurrentSessions: 1,
     maxAgents: 1,
     maxTokensPerRequest: 2_000,
-    models: ['gpt-4o-mini', 'gemini-1.5-flash'],
+    models: STARTER_TRIAL_MODELS,
     features: ['editor', 'preview'],
   },
   
   // Starter - $3/mês
   'starter': {
-    tokensPerMonth: 100_000,
-    requestsPerDay: 100,
+    tokensPerMonth: 500_000,
+    requestsPerDay: 720,
     projectsMax: 3,
-    storageGB: 2,
+    storageGB: 0.5,
     concurrentSessions: 1,
     maxAgents: 1,
-    maxTokensPerRequest: 4_000,
-    models: ['gpt-4o-mini', 'gemini-1.5-flash', 'claude-3-5-haiku-20241022'],
+    maxTokensPerRequest: 8_000,
+    models: STARTER_MODELS,
     features: ['editor', 'preview', 'chat'],
   },
   
   // Basic - $9/mês
   'basic': {
-    tokensPerMonth: 500_000,
-    requestsPerDay: 500,
+    tokensPerMonth: 2_000_000,
+    requestsPerDay: 1440,
     projectsMax: 10,
-    storageGB: 10,
+    storageGB: 2,
     concurrentSessions: 2,
     maxAgents: 1,
-    maxTokensPerRequest: 8_000,
-    models: ['gpt-4o-mini', 'gpt-4o', 'gemini-1.5-flash', 'gemini-1.5-pro', 'claude-3-5-haiku-20241022'],
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal'],
+    maxTokensPerRequest: 16_000,
+    models: BUDGET_MODEL_IDS,
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'research'],
   },
   
   // Pro - $29/mês
   'pro': {
-    tokensPerMonth: 2_000_000,
-    requestsPerDay: 2000,
-    projectsMax: 50,
-    storageGB: 50,
+    tokensPerMonth: 8_000_000,
+    requestsPerDay: 2880,
+    projectsMax: -1,
+    storageGB: 10,
     concurrentSessions: 5,
     maxAgents: 3,
-    maxTokensPerRequest: 20_000,
-    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gemini-1.5-flash', 'gemini-1.5-pro', 'claude-3-5-haiku-20241022', 'claude-3-5-sonnet-20241022'],
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents'],
+    maxTokensPerRequest: 32_000,
+    models: PRO_MODELS,
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api'],
   },
   
   // Studio - $79/mês
   'studio': {
-    tokensPerMonth: 10_000_000,
-    requestsPerDay: 10000,
-    projectsMax: 200,
-    storageGB: 200,
+    tokensPerMonth: 25_000_000,
+    requestsPerDay: 7200,
+    projectsMax: -1,
+    storageGB: 50,
     concurrentSessions: 10,
     maxAgents: 3,
-    maxTokensPerRequest: 50_000,
-    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gemini-1.5-flash', 'gemini-1.5-pro', 'claude-3-5-haiku-20241022', 'claude-3-5-sonnet-20241022', 'claude-3-opus-20240229'],
-    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api', 'export', 'priority-support'],
+    maxTokensPerRequest: 64_000,
+    models: STUDIO_MODELS,
+    features: ['editor', 'preview', 'chat', 'debugger', 'terminal', 'git', 'collaboration', 'agents', 'api', 'export', 'priority-support', 'webhooks'],
   },
   
   // Enterprise - custom
@@ -129,11 +167,52 @@ export interface QuotaCheckResult {
   code?: 'QUOTA_EXCEEDED' | 'MODEL_NOT_ALLOWED' | 'FEATURE_NOT_ALLOWED' | 'RATE_LIMITED';
 }
 
-const MODEL_ALIASES: Record<string, string[]> = {
-  'google/gemini-3.1-flash-lite-preview': ['gemini-1.5-flash', 'google:gemini-3.1-flash-lite-preview', 'openrouter:google/gemini-3.1-flash-lite-preview'],
-  'openai/gpt-4o-mini': ['gpt-4o-mini', 'openai:gpt-4o-mini'],
-  'anthropic/claude-3.5-haiku': ['claude-3-5-haiku-20241022', 'claude-3-haiku', 'anthropic:claude-3.5-haiku'],
-};
+const MODEL_ALIASES = buildModelAliases([...BUDGET_MODEL_IDS, ...BEST_MODEL_IDS]);
+
+function buildModelAliases(models: string[]): Record<string, string[]> {
+  const map: Record<string, string[]> = {};
+  for (const id of models) {
+    const parts = id.split('/');
+    if (parts.length === 2) {
+      const [provider, name] = parts;
+      map[id] = [
+        name,
+        `${provider}:${name}`,
+        `openrouter:${id}`,
+      ];
+    } else {
+      map[id] = [];
+    }
+  }
+
+  // Extra compatibility aliases for common direct-provider IDs
+  if (map['anthropic/claude-3.5-haiku']) {
+    map['anthropic/claude-3.5-haiku'].push('claude-3-5-haiku-20241022', 'claude-3.5-haiku');
+  }
+  if (map['anthropic/claude-3.7-sonnet']) {
+    map['anthropic/claude-3.7-sonnet'].push('claude-3-7-sonnet-20250219', 'claude-3.7-sonnet');
+  }
+  if (map['openai/gpt-5.4']) {
+    map['openai/gpt-5.4'].push('gpt-5.4');
+  }
+  if (map['openai/gpt-5']) {
+    map['openai/gpt-5'].push('gpt-5');
+  }
+  if (map['openai/gpt-5.4-mini']) {
+    map['openai/gpt-5.4-mini'].push('gpt-5.4-mini');
+  }
+  if (map['openai/gpt-5.4-nano']) {
+    map['openai/gpt-5.4-nano'].push('gpt-5.4-nano');
+  }
+  if (map['openai/gpt-5-mini']) {
+    map['openai/gpt-5-mini'].push('gpt-5-mini');
+  }
+  if (map['openai/gpt-5-nano']) {
+    map['openai/gpt-5-nano'].push('gpt-5-nano');
+  }
+
+  return map;
+}
 
 function normalizeModelIdentifier(model: string): string {
   const raw = String(model || '').trim();

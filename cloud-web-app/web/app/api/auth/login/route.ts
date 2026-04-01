@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate JWT token (real-or-fail). JWT-only (no server sessions).
-    const token = generateTokenWithRole(user.id, user.email, (user as any).role || 'user');
+    const token = generateTokenWithRole(user.id, user.email, (user as any).role || 'user', user.plan || undefined);
 
     // Return user data (without password)
     const response = NextResponse.json({

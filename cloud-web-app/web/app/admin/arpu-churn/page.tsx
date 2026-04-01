@@ -65,7 +65,7 @@ export default function ArpuChurnPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">ARPU e churn</h1>
-      
+
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">ARPU (30d)</h3>

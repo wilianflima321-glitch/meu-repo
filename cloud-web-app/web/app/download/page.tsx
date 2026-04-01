@@ -88,7 +88,7 @@ export default function DownloadPage() {
     'IDE com Monaco Editor e terminal integrado',
     'Fluxo multi-agent com Architect, Engineer e Critic',
     'Preview unificado com status e readiness visiveis',
-    'Templates e onboarding guiado para Apps e Research',
+    'Templates e onboarding guiado para Apps e Pesquisa',
     'Audit trail e rollback deterministico por change set',
     'Sync com o web studio e handoff para deploy',
   ]
@@ -97,7 +97,7 @@ export default function DownloadPage() {
   const CurrentIcon = current.icon
 
   return (
-    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.06] blur-[160px]" />
         <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[160px]" />
@@ -115,7 +115,7 @@ export default function DownloadPage() {
             Download <span className="gradient-text">Aethel Studio</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
-            IDE e studio operacional para Apps e Research. Games e Films seguem em fase experimental.
+            IDE e studio operacional para Apps e Pesquisa. Games e Films seguem em fase experimental.
           </p>
         </section>
 

@@ -14,7 +14,7 @@
 
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, type KeyboardEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Code, Film, Gamepad2, Search, Sparkles, ArrowRight, Rocket, ChevronLeft, Check } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
@@ -61,7 +61,7 @@ const DOMAINS = [
     name: 'Filmes',
     description: 'Storyboards, descricoes de cenas, roteiros',
     icon: Film,
-    color: 'from-[var(--aethel-accent)] to-[var(--aethel-error)]',
+    color: 'from-[var(--aethel-secondary)] to-[var(--aethel-error)]',
     ariaDescription: 'Gere storyboards, descricoes de cenas e roteiros',
   },
   {
@@ -97,6 +97,8 @@ const DIFFICULTY_COLORS = {
   intermediate: 'text-[var(--aethel-warning)]',
   advanced: 'text-[var(--aethel-error)]',
 }
+
+const FIRST_VALUE_TARGET_MS = 90_000
 
 // ============================================================================
 // COMPONENT
@@ -148,6 +150,13 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           durationMs,
         },
       })
+      if (durationMs > FIRST_VALUE_TARGET_MS) {
+        analytics?.trackPerformance?.('first_value_time', durationMs, 'ms', {
+          surface: 'onboarding-wizard',
+          status: 'failed_slo',
+          thresholdMs: String(FIRST_VALUE_TARGET_MS),
+        })
+      }
       onComplete?.(selectedTemplate)
       router.push(`/dashboard?template=${selectedTemplate.id}`)
     }
@@ -165,7 +174,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
 
   // Keyboard handler for domain/template cards (Enter/Space activation)
   const handleCardKeyDown = useCallback(
-    (e: React.KeyboardEvent, action: () => void) => {
+    (e: KeyboardEvent<HTMLButtonElement>, action: () => void) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         action()
@@ -189,7 +198,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
             {step > 1 && (
               <button
                 onClick={handleBack}
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/5 hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
                 aria-label={`Voltar para a etapa ${step - 1}: ${STEP_LABELS[step - 2]}`}
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -207,7 +216,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                   <div
                     className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-all ${
                       s < step
-                        ? 'bg-[var(--aethel-primary)] text-white'
+                        ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                         : s === step
                         ? 'border-2 border-[var(--aethel-primary)] text-[var(--aethel-primary-light)]'
                         : 'border border-[var(--aethel-border-subtle)] text-[var(--aethel-text-tertiary)]'
@@ -230,7 +239,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           aria-valuenow={step}
           aria-valuemin={1}
           aria-valuemax={3}
-          aria-label={`Etapa ${step} of 3`}
+          aria-label={`Etapa ${step} de 3`}
         >
           <div
             className="h-full rounded-full bg-[var(--aethel-primary)] transition-all duration-300"
@@ -273,7 +282,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
                 className="group relative overflow-hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-5 text-left transition-all hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-tertiary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] sm:p-6"
                 >
                   <div className={`mb-3 inline-flex rounded-xl bg-gradient-to-br ${domain.color} p-3`}>
-                    <Icon className="h-6 w-6 text-white" aria-hidden="true" />
+                    <Icon className="h-6 w-6 text-[var(--aethel-text-primary)]" aria-hidden="true" />
                   </div>
                   <h4 className="text-base font-semibold text-[var(--aethel-text-primary)] sm:text-lg">
                     {domain.name}
@@ -369,7 +378,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
         <div className="space-y-6 animate-fade-in" role="group" aria-labelledby="step3-heading">
           <div className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]" aria-hidden="true">
-              <Rocket className="h-8 w-8 text-white" />
+              <Rocket className="h-8 w-8 text-[var(--aethel-text-primary)]" />
             </div>
             <h3
               id="step3-heading"
@@ -413,7 +422,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <button
               onClick={handleStart}
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] transition-all hover:shadow-xl hover:shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary-light)] sm:w-auto sm:text-lg"
+              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] px-8 py-3.5 text-base font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] transition-all hover:shadow-xl hover:shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary-light)] sm:w-auto sm:text-lg"
               aria-label={`Comece a construir o projeto ${selectedTemplate.name}`}
             >
               Comecar agora

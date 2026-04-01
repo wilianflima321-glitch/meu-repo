@@ -17,55 +17,55 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<string, string> = {
   primary: `
-    bg-gradient-to-r from-blue-600 to-blue-500 
-    text-white font-medium
-    hover:from-blue-500 hover:to-blue-400
-    active:from-blue-700 active:to-blue-600
-    shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40
-    border border-blue-500/20
+    bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))]
+    text-[var(--aethel-text-primary)] font-medium
+    hover:brightness-110
+    active:brightness-95
+    shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)]
+    border border-[color-mix(in_srgb,var(--aethel-primary)_25%,transparent)]
   `,
   secondary: `
-    bg-slate-800/80 text-slate-100 
-    hover:bg-slate-700 
-    active:bg-slate-800
-    border border-slate-600/50 hover:border-slate-500/50
+    bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)] text-[var(--aethel-text-primary)]
+    hover:bg-[var(--aethel-surface-quaternary)]
+    active:bg-[var(--aethel-surface-tertiary)]
+    border border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] hover:border-[var(--aethel-border-secondary)]
     shadow-md shadow-black/20
   `,
   ghost: `
-    bg-transparent text-slate-300 
-    hover:bg-slate-800/60 hover:text-white 
-    active:bg-slate-800
-    border border-transparent hover:border-slate-700/50
+    bg-transparent text-[var(--aethel-text-secondary)]
+    hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]
+    active:bg-[var(--aethel-surface-tertiary)]
+    border border-transparent hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)]
   `,
   danger: `
-    bg-gradient-to-r from-red-600 to-red-500 
-    text-white font-medium
-    hover:from-red-500 hover:to-red-400
-    active:from-red-700 active:to-red-600
-    shadow-lg shadow-red-500/25 hover:shadow-red-500/40
-    border border-red-500/20
+    bg-[var(--aethel-error)]
+    text-[var(--aethel-text-primary)] font-medium
+    hover:brightness-110
+    active:brightness-95
+    shadow-lg shadow-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)]
+    border border-[color-mix(in_srgb,var(--aethel-error)_25%,transparent)]
   `,
   success: `
-    bg-gradient-to-r from-emerald-600 to-emerald-500 
-    text-white font-medium
-    hover:from-emerald-500 hover:to-emerald-400
-    active:from-emerald-700 active:to-emerald-600
-    shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40
-    border border-emerald-500/20
+    bg-[var(--aethel-success)]
+    text-[var(--aethel-text-primary)] font-medium
+    hover:brightness-110
+    active:brightness-95
+    shadow-lg shadow-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)]
+    border border-[color-mix(in_srgb,var(--aethel-success)_25%,transparent)]
   `,
   outline: `
-    bg-transparent text-slate-200 
-    hover:bg-slate-800/40 hover:text-white
-    active:bg-slate-800/60
-    border border-slate-600 hover:border-slate-500
+    bg-transparent text-[var(--aethel-text-secondary)]
+    hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_40%,transparent)] hover:text-[var(--aethel-text-primary)]
+    active:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)]
+    border border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-primary)]
   `,
   premium: `
-    bg-gradient-to-r from-blue-600 via-cyan-600 to-cyan-500 
-    text-white font-semibold
-    hover:from-blue-500 hover:via-cyan-500 hover:to-cyan-400
-    active:from-blue-700 active:via-cyan-700 active:to-cyan-600
-    shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/50
-    border border-white/10
+    bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))]
+    text-[var(--aethel-text-primary)] font-semibold
+    hover:brightness-110
+    active:brightness-95
+    shadow-xl shadow-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] hover:shadow-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]
+    border border-[color-mix(in_srgb,var(--aethel-border-primary)_40%,transparent)]
   `,
 }
 
@@ -110,11 +110,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const roundedClass = rounded === 'full' ? 'rounded-full' : 'rounded-lg'
 
     const computedClassName = `
-      inline-flex items-center justify-center 
+      inline-flex items-center justify-center
       ${roundedClass}
       transition-all duration-200 ease-out
       transform active:scale-[0.98]
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
       ${variantClasses[variant]}
       ${sizeClasses[size]}
@@ -161,3 +161,4 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button'
 
 export default Button
+

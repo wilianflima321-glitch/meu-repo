@@ -1,9 +1,9 @@
 /**
  * Landscape/Terrain Editor - Editor de Terrenos Profissional
- * 
+ *
  * Sistema completo estilo Unreal Engine para criar e editar
  * terrenos procedurais com sculpting, painting e foliage.
- * 
+ *
  * NÃO É MOCK - Sistema real com Three.js!
  */
 
@@ -97,24 +97,24 @@ function TerrainMesh({
   const brushIndicatorRef = useRef<THREE.Mesh>(null);
   const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
   const brushColor = useMemo(() => resolveCssVarColor('--aethel-success', '#22c55e'), []);
-  
+
   // Generate geometry from heightmap
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(width, height, resolution - 1, resolution - 1);
     geo.rotateX(-Math.PI / 2);
-    
+
     const positions = geo.attributes.position.array as Float32Array;
-    
+
     for (let i = 0; i < heightmap.length; i++) {
       positions[i * 3 + 1] = heightmap[i] * maxHeight;
     }
-    
+
     geo.computeVertexNormals();
     geo.attributes.position.needsUpdate = true;
-    
+
     return geo;
   }, [heightmap, resolution, width, height, maxHeight]);
-  
+
   // Generate material with texture blending
   const material = useMemo(() => {
     const mat = new THREE.MeshStandardMaterial({
@@ -124,24 +124,24 @@ function TerrainMesh({
       flatShading: false,
       wireframe: false,
     });
-    
+
     return mat;
   }, [layers]);
-  
+
   const handlePointerMove = useCallback((e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     if (e.point) {
       setBrushPosition(e.point.clone());
     }
   }, []);
-  
+
   const handlePointerDown = useCallback((e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     if (brushActive && e.point && e.face) {
       onBrushStroke(e.point.clone(), e.face.normal.clone());
     }
   }, [brushActive, onBrushStroke]);
-  
+
   // Update brush indicator
   useFrame(() => {
     if (brushIndicatorRef.current && brushPosition) {
@@ -149,7 +149,7 @@ function TerrainMesh({
       brushIndicatorRef.current.position.y += 0.1;
     }
   });
-  
+
   return (
     <group>
       <mesh
@@ -161,7 +161,7 @@ function TerrainMesh({
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}
       />
-      
+
       {/* Brush Indicator */}
       {brushPosition && brushActive && (
         <mesh ref={brushIndicatorRef} rotation-x={-Math.PI / 2}>
@@ -206,34 +206,34 @@ function LandscapeScene({
     []
   );
   const gizmoLabelColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
-  
+
   useEffect(() => {
     heightmapRef.current = heightmap;
   }, [heightmap]);
-  
+
   const handleBrushStroke = useCallback((point: THREE.Vector3, _normal: THREE.Vector3) => {
     const newHeightmap = new Float32Array(heightmapRef.current);
-    
+
     // Convert world position to heightmap coordinates
     const hx = Math.floor(((point.x + config.width / 2) / config.width) * config.resolution);
     const hz = Math.floor(((point.z + config.height / 2) / config.height) * config.resolution);
-    
+
     const brushRadiusPixels = Math.floor((brushSettings.size / config.width) * config.resolution);
-    
+
     for (let dx = -brushRadiusPixels; dx <= brushRadiusPixels; dx++) {
       for (let dz = -brushRadiusPixels; dz <= brushRadiusPixels; dz++) {
         const x = hx + dx;
         const z = hz + dz;
-        
+
         if (x < 0 || x >= config.resolution || z < 0 || z >= config.resolution) continue;
-        
+
         const dist = Math.sqrt(dx * dx + dz * dz) / brushRadiusPixels;
         if (dist > 1) continue;
-        
+
         // Calculate falloff
         const falloff = Math.pow(1 - dist, brushSettings.falloff);
         const index = z * config.resolution + x;
-        
+
         switch (brushSettings.mode) {
           case 'sculpt':
             switch (brushSettings.operation) {
@@ -252,7 +252,7 @@ function LandscapeScene({
                 break;
             }
             break;
-            
+
           case 'smooth':
             // Average with neighbors
             let sum = 0;
@@ -270,13 +270,13 @@ function LandscapeScene({
             const avg = sum / count;
             newHeightmap[index] = THREE.MathUtils.lerp(newHeightmap[index], avg, brushSettings.strength * falloff * 0.1);
             break;
-            
+
           case 'flatten':
             const centerIndex = hz * config.resolution + hx;
             const flattenTarget = heightmapRef.current[centerIndex];
             newHeightmap[index] = THREE.MathUtils.lerp(newHeightmap[index], flattenTarget, brushSettings.strength * falloff * 0.1);
             break;
-            
+
           case 'erosion':
             // Simple erosion simulation
             const slope = calculateSlope(heightmapRef.current, x, z, config.resolution);
@@ -285,23 +285,23 @@ function LandscapeScene({
             }
             break;
         }
-        
+
         // Clamp values
         newHeightmap[index] = Math.max(0, Math.min(1, newHeightmap[index]));
       }
     }
-    
+
     onHeightmapChange(newHeightmap);
   }, [brushSettings, config, onHeightmapChange]);
-  
+
   return (
     <>
       {/* Lighting */}
       <ambientLight intensity={0.4} />
-      <directionalLight 
-        position={[50, 100, 50]} 
-        intensity={1.2} 
-        castShadow 
+      <directionalLight
+        position={[50, 100, 50]}
+        intensity={1.2}
+        castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={200}
         shadow-camera-left={-100}
@@ -310,10 +310,10 @@ function LandscapeScene({
         shadow-camera-bottom={-100}
       />
       <hemisphereLight args={[skyColor, groundColor, 0.3]} />
-      
+
       {/* Sky */}
       <color attach="background" args={[skyColor]} />
-      
+
       {/* Terrain */}
       <TerrainMesh
         heightmap={heightmap}
@@ -326,7 +326,7 @@ function LandscapeScene({
         brushSize={brushSettings.size}
         brushActive={brushActive}
       />
-      
+
       {/* Grid */}
       <Grid
         position={[0, -0.01, 0]}
@@ -341,15 +341,15 @@ function LandscapeScene({
         fadeStrength={1}
         followCamera={false}
       />
-      
+
       {/* Controls */}
-      <OrbitControls 
-        makeDefault 
+      <OrbitControls
+        makeDefault
         minDistance={10}
         maxDistance={500}
         maxPolarAngle={Math.PI * 0.45}
       />
-      
+
       {/* Gizmo */}
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
         <GizmoViewport axisColors={gizmoAxisColors} labelColor={gizmoLabelColor} />
@@ -362,7 +362,7 @@ function LandscapeScene({
 function calculateSlope(heightmap: Float32Array, x: number, z: number, resolution: number): number {
   const index = z * resolution + x;
   let maxDiff = 0;
-  
+
   for (let dx = -1; dx <= 1; dx++) {
     for (let dz = -1; dz <= 1; dz++) {
       if (dx === 0 && dz === 0) continue;
@@ -374,7 +374,7 @@ function calculateSlope(heightmap: Float32Array, x: number, z: number, resolutio
       }
     }
   }
-  
+
   return maxDiff;
 }
 
@@ -409,14 +409,14 @@ function Toolbar({
     { mode: 'foliage', icon: '🌿', label: 'Foliage' },
     { mode: 'erosion', icon: '💧', label: 'Erosion' },
   ];
-  
+
   const operations: { op: SculptOperation; icon: string; label: string }[] = [
     { op: 'raise', icon: '⬆️', label: 'Raise' },
     { op: 'lower', icon: '⬇️', label: 'Lower' },
     { op: 'level', icon: '➡️', label: 'Level' },
     { op: 'noise', icon: '🎲', label: 'Noise' },
   ];
-  
+
   return (
     <div style={{
       display: 'flex',
@@ -442,9 +442,9 @@ function Toolbar({
       >
         ✏️ {brushActive ? 'Painting' : 'Navigate'}
       </button>
-      
+
       <div style={{ width: '1px', height: '24px', background: 'var(--aethel-surface-quaternary)' }} />
-      
+
       {/* Mode Buttons */}
       <div style={{ display: 'flex', gap: '4px' }}>
         {modes.map(({ mode, icon, label }) => (
@@ -466,7 +466,7 @@ function Toolbar({
           </button>
         ))}
       </div>
-      
+
       {/* Sculpt Operations (only show when in sculpt mode) */}
       {brushSettings.mode === 'sculpt' && (
         <>
@@ -493,9 +493,9 @@ function Toolbar({
           </div>
         </>
       )}
-      
+
       <div style={{ flex: 1 }} />
-      
+
       {/* Generate Menu */}
       <div style={{ position: 'relative' }}>
         <button
@@ -559,7 +559,7 @@ function Toolbar({
           ))}
         </div>
       </div>
-      
+
       {/* Import/Export */}
       <button
         onClick={onImport}
@@ -619,7 +619,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
       }}>
         🖌️ Brush Settings
       </div>
-      
+
       <div style={{ padding: '12px' }}>
         {/* Size */}
         <div style={{ marginBottom: '16px' }}>
@@ -636,7 +636,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
             style={{ width: '100%' }}
           />
         </div>
-        
+
         {/* Strength */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', fontSize: '12px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
@@ -652,7 +652,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
             style={{ width: '100%' }}
           />
         </div>
-        
+
         {/* Falloff */}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', fontSize: '12px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
@@ -668,7 +668,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
             style={{ width: '100%' }}
           />
         </div>
-        
+
         {/* Target Height (for level operation) */}
         {brushSettings.mode === 'sculpt' && brushSettings.operation === 'level' && (
           <div style={{ marginBottom: '16px' }}>
@@ -687,7 +687,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
           </div>
         )}
       </div>
-      
+
       {/* Brush Presets */}
       <div style={{
         padding: '12px',
@@ -788,7 +788,7 @@ function LayersPanel({
           + Add
         </button>
       </div>
-      
+
       <div style={{ padding: '8px' }}>
         {layers.map((layer, index) => (
           <div
@@ -828,7 +828,7 @@ function LayersPanel({
                 </button>
               )}
             </div>
-            
+
             {selectedLayer === layer.id && (
               <div style={{ marginTop: '12px' }}>
                 {/* Color */}
@@ -843,7 +843,7 @@ function LayersPanel({
                     />
                   </label>
                 </div>
-                
+
                 {/* Tiling */}
                 <div style={{ marginBottom: '8px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -864,7 +864,7 @@ function LayersPanel({
                     />
                   </label>
                 </div>
-                
+
                 {/* Height Range */}
                 <div style={{ marginBottom: '8px' }}>
                   <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Height Range:</span>
@@ -932,7 +932,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
     ],
     foliage: [],
   });
-  
+
   // Heightmap
   const [heightmap, setHeightmap] = useState<Float32Array>(() => {
     const data = new Float32Array(config.resolution * config.resolution);
@@ -941,15 +941,15 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
       for (let x = 0; x < config.resolution; x++) {
         const nx = x / config.resolution;
         const nz = z / config.resolution;
-        data[z * config.resolution + x] = 
-          0.3 + 
+        data[z * config.resolution + x] =
+          0.3 +
           Math.sin(nx * Math.PI * 2) * 0.1 +
           Math.cos(nz * Math.PI * 3) * 0.1;
       }
     }
     return data;
   });
-  
+
   // Brush settings
   const [brushSettings, setBrushSettings] = useState<BrushSettings>({
     size: 10,
@@ -958,30 +958,30 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
     mode: 'sculpt',
     operation: 'raise',
   });
-  
+
   const [brushActive, setBrushActive] = useState(false);
   const [selectedLayer, setSelectedLayer] = useState<string | null>('1');
   const [activePanel, setActivePanel] = useState<'brush' | 'layers'>('brush');
   const canvasBackground = useMemo(() => resolveCssVarColor('--aethel-info-light', '#87ceeb'), []);
-  
+
   // Generate terrain
   const handleGenerateTerrain = useCallback((type: string) => {
     const newHeightmap = new Float32Array(config.resolution * config.resolution);
-    
+
     for (let z = 0; z < config.resolution; z++) {
       for (let x = 0; x < config.resolution; x++) {
         const nx = x / config.resolution - 0.5;
         const nz = z / config.resolution - 0.5;
         const dist = Math.sqrt(nx * nx + nz * nz);
-        
+
         let height = 0;
-        
+
         switch (type) {
           case 'flat':
             height = 0.3;
             break;
           case 'hills':
-            height = 0.3 + 
+            height = 0.3 +
               Math.sin(x * 0.1) * Math.cos(z * 0.1) * 0.2 +
               Math.sin(x * 0.05 + 1) * Math.cos(z * 0.07 + 2) * 0.15;
             break;
@@ -993,7 +993,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
             height = 0.8 - Math.pow(Math.abs(nx) * 2, 0.5) * 0.6;
             break;
           case 'island':
-            height = Math.max(0, 0.6 - dist * 1.5) + 
+            height = Math.max(0, 0.6 - dist * 1.5) +
               Math.sin(x * 0.1) * Math.cos(z * 0.1) * 0.1;
             break;
           case 'canyon':
@@ -1001,14 +1001,14 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
             height = canyonDist < 0.1 ? 0.1 : 0.5 + Math.sin(z * 0.1) * 0.1;
             break;
         }
-        
+
         newHeightmap[z * config.resolution + x] = Math.max(0, Math.min(1, height));
       }
     }
-    
+
     setHeightmap(newHeightmap);
   }, [config.resolution]);
-  
+
   // Export
   const handleExport = useCallback(() => {
     const data = {
@@ -1023,7 +1023,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
     a.click();
     URL.revokeObjectURL(url);
   }, [config, heightmap]);
-  
+
   // Import
   const handleImport = useCallback(() => {
     const input = document.createElement('input');
@@ -1040,7 +1040,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
     };
     input.click();
   }, []);
-  
+
   // Layer management
   const handleAddLayer = useCallback(() => {
     const newLayer: TerrainLayer = {
@@ -1057,14 +1057,14 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
     };
     setConfig({ ...config, layers: [...config.layers, newLayer] });
   }, [config]);
-  
+
   const handleUpdateLayer = useCallback((id: string, updates: Partial<TerrainLayer>) => {
     setConfig({
       ...config,
       layers: config.layers.map(l => l.id === id ? { ...l, ...updates } : l),
     });
   }, [config]);
-  
+
   const handleRemoveLayer = useCallback((id: string) => {
     setConfig({
       ...config,
@@ -1074,7 +1074,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
       setSelectedLayer(config.layers[0]?.id || null);
     }
   }, [config, selectedLayer]);
-  
+
   return (
     <div style={{
       display: 'flex',
@@ -1092,7 +1092,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
         onExport={handleExport}
         onImport={handleImport}
       />
-      
+
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* 3D Viewport */}
@@ -1111,7 +1111,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
             />
           </Canvas>
         </div>
-        
+
         {/* Side Panel */}
         <div style={{
           width: '280px',
@@ -1144,7 +1144,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
               </button>
             ))}
           </div>
-          
+
           {/* Panel Content */}
           <div style={{ flex: 1, overflow: 'auto' }}>
             {activePanel === 'brush' ? (
@@ -1165,7 +1165,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Status Bar */}
       <div style={{
         padding: '6px 12px',

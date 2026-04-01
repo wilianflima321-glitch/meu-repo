@@ -1,6 +1,6 @@
 /**
  * Advanced Settings Panel - RBAC, Webhooks, API Keys
- * 
+ *
  * Painel de configurações avançadas com L5 design
  */
 
@@ -42,14 +42,14 @@ export function AdvancedSettingsPanel() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Configurações Avançadas</h1>
-        <p className="text-sm text-white/60 mt-1">
+        <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)]">Configurações Avançadas</h1>
+        <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
           Gerencie API Keys, Webhooks e permissões de time
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-white/10">
+      <div className="flex gap-2 border-b border-[var(--aethel-border-primary)]">
         {[
           { id: 'api-keys', label: 'API Keys', icon: Key },
           { id: 'webhooks', label: 'Webhooks', icon: Webhook },
@@ -60,8 +60,8 @@ export function AdvancedSettingsPanel() {
             onClick={() => setActiveTab(id as any)}
             className={`px-4 py-3 font-medium text-sm transition-all flex items-center gap-2 ${
               activeTab === id
-                ? 'text-blue-400 border-b-2 border-blue-400'
-                : 'text-white/60 hover:text-white/80'
+                ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+                : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
             }`}
           >
             <Icon size={16} />
@@ -140,7 +140,7 @@ function APIKeysTab() {
   return (
     <motion.div {...eliteAnimations.fadeInUp} className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-white">API Keys</h2>
+        <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">API Keys</h2>
         <GlassButton
           variant="primary"
           size="sm"
@@ -153,9 +153,9 @@ function APIKeysTab() {
 
       {keys.length === 0 ? (
         <GlassCard className="p-8 text-center">
-          <Key size={48} className="mx-auto mb-4 text-white/40" />
-          <p className="text-white/60">Nenhuma API Key criada</p>
-          <p className="text-sm text-white/40 mt-1">
+          <Key size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
+          <p className="text-[var(--aethel-text-secondary)]">Nenhuma API Key criada</p>
+          <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
             Crie sua primeira API Key para integrar com a API
           </p>
         </GlassCard>
@@ -204,8 +204,8 @@ function APIKeyCard({
     <GlassCard className="p-4 space-y-3">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-semibold text-white">{apiKey.name}</h3>
-          <p className="text-xs text-white/60 mt-1">
+          <h3 className="font-semibold text-[var(--aethel-text-primary)]">{apiKey.name}</h3>
+          <p className="text-xs text-[var(--aethel-text-secondary)] mt-1">
             Criada em {new Date(apiKey.createdAt).toLocaleDateString()}
           </p>
         </div>
@@ -223,23 +223,23 @@ function APIKeyCard({
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-medium text-white/60">Chave</label>
+        <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Chave</label>
         <div className="flex gap-2">
           <input
             type={showSecret ? 'text' : 'password'}
             value={apiKey.key}
             readOnly
-            className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm font-mono"
+            className="flex-1 px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)] text-sm font-mono"
           />
           <button
             onClick={() => onCopy(apiKey.key)}
-            className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
             <Copy size={16} />
           </button>
           <button
             onClick={() => setShowSecret(!showSecret)}
-            className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
             {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
@@ -247,17 +247,17 @@ function APIKeyCard({
       </div>
 
       {apiKey.expiresAt && (
-        <div className="flex items-center gap-2 text-xs text-white/60">
+        <div className="flex items-center gap-2 text-xs text-[var(--aethel-text-secondary)]">
           <Clock size={14} />
           Expira em {new Date(apiKey.expiresAt).toLocaleDateString()}
         </div>
       )}
 
-      <div className="flex gap-2 pt-2 border-t border-white/10">
+      <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
         <button
           onClick={() => onRevoke(apiKey.id)}
           disabled={apiKey.status === 'revoked'}
-          className="flex-1 px-3 py-1.5 rounded-lg bg-red-500/20 text-red-300 text-xs font-medium hover:bg-red-500/30 disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
+          className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
         >
           <Trash2 size={14} />
           Revogar
@@ -298,7 +298,7 @@ function WebhooksTab() {
   return (
     <motion.div {...eliteAnimations.fadeInUp} className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-white">Webhooks</h2>
+        <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Webhooks</h2>
         <GlassButton
           variant="primary"
           size="sm"
@@ -311,9 +311,9 @@ function WebhooksTab() {
 
       {webhooks.length === 0 ? (
         <GlassCard className="p-8 text-center">
-          <Webhook size={48} className="mx-auto mb-4 text-white/40" />
-          <p className="text-white/60">Nenhum webhook configurado</p>
-          <p className="text-sm text-white/40 mt-1">
+          <Webhook size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
+          <p className="text-[var(--aethel-text-secondary)]">Nenhum webhook configurado</p>
+          <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
             Configure webhooks para receber eventos em tempo real
           </p>
         </GlassCard>
@@ -342,10 +342,10 @@ function WebhookCard({ webhook }: { webhook: any }) {
     <GlassCard className="p-4 space-y-3">
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-semibold text-white font-mono text-sm break-all">
+          <h3 className="font-semibold text-[var(--aethel-text-primary)] font-mono text-sm break-all">
             {webhook.url}
           </h3>
-          <p className="text-xs text-white/60 mt-1">
+          <p className="text-xs text-[var(--aethel-text-secondary)] mt-1">
             {webhook.events.length} evento(s)
           </p>
         </div>
@@ -358,20 +358,20 @@ function WebhookCard({ webhook }: { webhook: any }) {
         {webhook.events.slice(0, 3).map((event: string) => (
           <span
             key={event}
-            className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/70"
+            className="text-xs px-2 py-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-secondary)]"
           >
             {event}
           </span>
         ))}
         {webhook.events.length > 3 && (
-          <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/70">
+          <span className="text-xs px-2 py-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-secondary)]">
             +{webhook.events.length - 3}
           </span>
         )}
       </div>
 
       {webhook.failureCount > 0 && (
-        <div className="flex items-center gap-2 text-xs text-yellow-300">
+        <div className="flex items-center gap-2 text-xs text-[var(--aethel-warning-light)]">
           <AlertCircle size={14} />
           {webhook.failureCount} falha(s) recente(s)
         </div>
@@ -391,7 +391,7 @@ function TeamTab() {
   return (
     <motion.div {...eliteAnimations.fadeInUp} className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-white">Membros do Time</h2>
+        <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Membros do Time</h2>
         <GlassButton
           variant="primary"
           size="sm"
@@ -404,19 +404,19 @@ function TeamTab() {
 
       {members.length === 0 ? (
         <GlassCard className="p-8 text-center">
-          <Users size={48} className="mx-auto mb-4 text-white/40" />
-          <p className="text-white/60">Nenhum membro no time</p>
-          <p className="text-sm text-white/40 mt-1">
+          <Users size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
+          <p className="text-[var(--aethel-text-secondary)]">Nenhum membro no time</p>
+          <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
             Convide membros para colaborar no seu projeto
           </p>
         </GlassCard>
       ) : (
         <StaggerContainer className="space-y-3">
           {members.map((member) => (
-            <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border border-white/10 bg-white/5">
+            <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]">
               <div>
-                <p className="font-medium text-white">{member.name}</p>
-                <p className="text-xs text-white/60">{member.email}</p>
+                <p className="font-medium text-[var(--aethel-text-primary)]">{member.name}</p>
+                <p className="text-xs text-[var(--aethel-text-secondary)]">{member.email}</p>
               </div>
               <AnimatedBadge variant="info">{member.role}</AnimatedBadge>
             </div>
@@ -465,7 +465,7 @@ function CreateAPIKeyDialog({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-40"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -474,10 +474,10 @@ function CreateAPIKeyDialog({
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <GlassCard className="w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold text-white">Nova API Key</h2>
+              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Nova API Key</h2>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-white/60">Nome</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Nome</label>
                 <GlassInput
                   placeholder="Ex: Production API"
                   value={name}
@@ -486,7 +486,7 @@ function CreateAPIKeyDialog({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-white/60">Permissões</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Permissões</label>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {allPermissions.map((perm) => (
                     <label key={perm} className="flex items-center gap-2 cursor-pointer">
@@ -502,13 +502,13 @@ function CreateAPIKeyDialog({
                         }}
                         className="w-4 h-4 rounded"
                       />
-                      <span className="text-sm text-white/80">{perm}</span>
+                      <span className="text-sm text-[var(--aethel-text-secondary)]">{perm}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2 border-t border-white/10">
+              <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
                 <GlassButton
                   variant="primary"
                   onClick={onCreateKey}
@@ -564,7 +564,7 @@ function CreateWebhookDialog({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-40"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -573,10 +573,10 @@ function CreateWebhookDialog({
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <GlassCard className="w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold text-white">Novo Webhook</h2>
+              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Novo Webhook</h2>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-white/60">URL</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">URL</label>
                 <GlassInput
                   placeholder="https://seu-servidor.com/webhook"
                   value={url}
@@ -585,7 +585,7 @@ function CreateWebhookDialog({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-white/60">Eventos</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Eventos</label>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {Object.values(WebhookEvent).map((event) => (
                     <label key={event} className="flex items-center gap-2 cursor-pointer">
@@ -601,13 +601,13 @@ function CreateWebhookDialog({
                         }}
                         className="w-4 h-4 rounded"
                       />
-                      <span className="text-sm text-white/80">{event}</span>
+                      <span className="text-sm text-[var(--aethel-text-secondary)]">{event}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2 border-t border-white/10">
+              <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
                 <GlassButton
                   variant="primary"
                   onClick={handleCreate}
@@ -661,7 +661,7 @@ function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-40"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -670,10 +670,10 @@ function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () 
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <GlassCard className="w-full max-w-md p-6 space-y-4">
-              <h2 className="text-xl font-bold text-white">Convidar Membro</h2>
+              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Convidar Membro</h2>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-white/60">Email</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Email</label>
                 <GlassInput
                   placeholder="membro@exemplo.com"
                   value={email}
@@ -682,11 +682,11 @@ function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () 
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-medium text-white/60">Role</label>
+                <label className="text-xs font-medium text-[var(--aethel-text-secondary)]">Role</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white"
+                  className="w-full px-4 py-2.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)]"
                 >
                   <option value="developer">Developer</option>
                   <option value="viewer">Viewer</option>
@@ -694,7 +694,7 @@ function InviteTeamMemberDialog({ open, onClose }: { open: boolean; onClose: () 
                 </select>
               </div>
 
-              <div className="flex gap-2 pt-2 border-t border-white/10">
+              <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
                 <GlassButton
                   variant="primary"
                   onClick={handleInvite}

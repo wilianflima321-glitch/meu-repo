@@ -38,39 +38,37 @@ export default function StudioActionRail({
   const fullAccessExpiryLabel = fullAccessExpiresAt
     ? new Date(fullAccessExpiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : null
+  const operationalTone =
+    backendOnline && aiProviderConfigured
+      ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+      : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+  const operationalLabel = backendOnline
+    ? aiProviderConfigured
+      ? 'Operacao OK'
+      : 'IA pendente'
+    : 'Backend offline'
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
       {typeof backendOnline === 'boolean' && typeof aiProviderConfigured === 'boolean' && (
-        <div className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] text-slate-300 xl:flex">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-              backendOnline
-                ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
-                : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
-            }`}
-          >
-            <span className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'}`} />
-            Backend {backendOnline ? 'online' : 'offline'}
+        <div className="hidden items-center gap-2 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-3 py-2 text-[10px] text-[var(--aethel-text-secondary)] xl:flex">
+          <span className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${operationalTone}`}>
+            <span
+              className={`h-2 w-2 rounded-full ${
+                backendOnline && aiProviderConfigured ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-warning)]'
+              }`}
+            />
+            {operationalLabel}
           </span>
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-              aiProviderConfigured
-                ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
-            }`}
-          >
-            IA {aiProviderConfigured ? 'configurada' : 'pendente'}
-          </span>
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-              fullAccessActive
-                ? 'border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'border-white/10 bg-white/[0.04] text-slate-300'
-            }`}
-          >
-            {fullAccessActive ? `Full Access${fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}` : 'Guardrails ativos'}
-          </span>
+          {fullAccessActive ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-0.5 text-[10px] font-medium text-[var(--aethel-primary-light)]">
+              Full Access{fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
+              Guardrails ativos
+            </span>
+          )}
         </div>
       )}
 
@@ -78,7 +76,7 @@ export default function StudioActionRail({
         <button
           type="button"
           onClick={onResetDashboard}
-          className="hidden rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:text-white lg:inline-flex"
+          className="hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] lg:inline-flex"
         >
           Redefinir painel
         </button>
@@ -102,7 +100,7 @@ export default function StudioActionRail({
           className={`hidden rounded-xl border px-3 py-2 text-xs font-medium transition disabled:opacity-60 lg:inline-flex ${
             fullAccessActive
               ? 'border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
-              : 'border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/20'
+              : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
           }`}
         >
           {fullAccessBusy ? 'Aguarde...' : fullAccessActive ? 'Revogar Full Access' : 'Habilitar Full Access'}
@@ -113,7 +111,7 @@ export default function StudioActionRail({
         <button
           type="button"
           onClick={onToggleTheme}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
           aria-label="Alternar tema"
         >
           {theme === 'dark' ? (
@@ -132,7 +130,7 @@ export default function StudioActionRail({
         <button
           type="button"
           onClick={onToggleSidebar}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-300 transition hover:border-white/20 hover:text-white md:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] md:hidden"
           aria-label={sidebarOpen ? 'Fechar menu lateral' : 'Abrir menu lateral'}
           aria-expanded={sidebarOpen}
         >
@@ -146,7 +144,7 @@ export default function StudioActionRail({
         <button
           type="button"
           onClick={onOpenIde}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
+          className="inline-flex items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
         >
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

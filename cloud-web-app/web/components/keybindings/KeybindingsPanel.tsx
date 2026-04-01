@@ -1,6 +1,6 @@
 /**
  * Aethel Keybindings Panel
- * 
+ *
  * UI completa para visualizar e customizar atalhos de teclado.
  */
 
@@ -284,30 +284,30 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
   const [whenClause, setWhenClause] = useState<string>('');
   const [isRecording, setIsRecording] = useState(false);
   const [conflict, setConflict] = useState<KeybindingWithSource | null>(null);
-  
+
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isRecording) return;
-      
+
       e.preventDefault();
       e.stopPropagation();
-      
+
       // Ignore modifier-only presses
       if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
-      
+
       const parts: string[] = [];
       if (e.ctrlKey) parts.push('ctrl');
       if (e.shiftKey) parts.push('shift');
       if (e.altKey) parts.push('alt');
       if (e.metaKey) parts.push('meta');
       parts.push(e.key.toLowerCase());
-      
+
       const keyString = parts.join('+');
       setRecordedKey(keyString);
       setIsRecording(false);
-      
+
       // Check for conflicts
       const bindings = keybindingsService.getKeybindingsForCommand(command);
       const conflicting = keybindingsService.getAllKeybindings().find(
@@ -315,13 +315,13 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
       );
       setConflict(conflicting || null);
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, isRecording, command]);
-  
+
   if (!isOpen) return null;
-  
+
   return (
     <div style={styles.modal} onClick={onClose}>
       <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -333,7 +333,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
           <div style={{ ...styles.input, backgroundColor: 'var(--aethel-border-secondary)', marginBottom: '16px' }}>
             {command}
           </div>
-          
+
           <label style={styles.label}>Atalho</label>
           <div
             style={{
@@ -349,7 +349,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
               {isRecording ? 'Pressione as teclas...' : 'Clique para gravar'}
             </div>
           </div>
-          
+
           <label style={styles.label}>Condicao (When)</label>
           <input
             type="text"
@@ -358,7 +358,7 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
             onChange={e => setWhenClause(e.target.value)}
             placeholder="ex: editorTextFocus"
           />
-          
+
           {conflict && (
             <div style={styles.conflictWarning}>
                Conflito: Este atalho ja esta sendo usado por {`"${conflict.command}"`}
@@ -397,7 +397,7 @@ interface KeybindingRowProps {
 
 const KeybindingRow: React.FC<KeybindingRowProps> = ({ keybinding, onEdit, onReset }) => {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   const getSourceColor = (source: string) => {
     switch (source) {
       case 'user': return 'var(--aethel-success)';
@@ -405,7 +405,7 @@ const KeybindingRow: React.FC<KeybindingRowProps> = ({ keybinding, onEdit, onRes
       default: return 'var(--aethel-text-quaternary)';
     }
   };
-  
+
   return (
     <div
       style={{
@@ -421,13 +421,13 @@ const KeybindingRow: React.FC<KeybindingRowProps> = ({ keybinding, onEdit, onRes
           <div style={styles.commandWhen}>when: {keybinding.when}</div>
         )}
       </div>
-      
+
       <div style={styles.keyColumn}>
         <span style={styles.keyBadge}>
           {formatKeyCombo(parseKeyCombo(keybinding.key))}
         </span>
       </div>
-      
+
       <div style={styles.sourceColumn}>
         <span
           style={{
@@ -439,17 +439,17 @@ const KeybindingRow: React.FC<KeybindingRowProps> = ({ keybinding, onEdit, onRes
           {keybinding.source}
         </span>
       </div>
-      
+
       <div style={{
         ...styles.actionsColumn,
         ...(isHovered ? styles.actionsVisible : {}),
       }}>
         <button style={styles.iconButton} onClick={onEdit} title="Editar">
-          
+
         </button>
         {keybinding.source === 'user' && (
           <button style={styles.iconButton} onClick={onReset} title="Resetar">
-            
+
           </button>
         )}
       </div>
@@ -469,25 +469,25 @@ export const KeybindingsPanel: React.FC = () => {
   const [keybindings, setKeybindings] = useState<KeybindingWithSource[]>([]);
   const [editingCommand, setEditingCommand] = useState<string | null>(null);
   const [editingKey, setEditingKey] = useState<string | undefined>();
-  
+
   useEffect(() => {
     const loadKeybindings = () => {
       setKeybindings(keybindingsService.getAllKeybindings());
     };
-    
+
     loadKeybindings();
     keybindingsService.on('keybindingsChanged', loadKeybindings);
-    
+
     return () => {
       keybindingsService.off('keybindingsChanged', loadKeybindings);
     };
   }, []);
-  
+
   const filteredKeybindings = useMemo(() => {
     return keybindings.filter(kb => {
       // Filter by source
       if (filter !== 'all' && kb.source !== filter) return false;
-      
+
       // Filter by search
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -496,28 +496,28 @@ export const KeybindingsPanel: React.FC = () => {
         const matchesWhen = kb.when?.toLowerCase().includes(query);
         if (!matchesCommand && !matchesKey && !matchesWhen) return false;
       }
-      
+
       return true;
     });
   }, [keybindings, filter, searchQuery]);
-  
+
   const handleSaveKeybinding = (key: string, when?: string) => {
     if (!editingCommand) return;
-    
+
     keybindingsService.addUserKeybinding({
       key,
       command: editingCommand,
       when,
     });
-    
+
     setEditingCommand(null);
     setEditingKey(undefined);
   };
-  
+
   const handleResetKeybinding = (key: string) => {
     keybindingsService.removeUserKeybinding(key);
   };
-  
+
   const handleExport = () => {
     const json = keybindingsService.exportUserKeybindings();
     const blob = new Blob([json], { type: 'application/json' });
@@ -528,7 +528,7 @@ export const KeybindingsPanel: React.FC = () => {
     a.click();
     URL.revokeObjectURL(url);
   };
-  
+
   const handleImport = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -536,13 +536,13 @@ export const KeybindingsPanel: React.FC = () => {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      
+
       const text = await file.text();
       keybindingsService.importUserKeybindings(text);
     };
     input.click();
   };
-  
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -558,7 +558,7 @@ export const KeybindingsPanel: React.FC = () => {
           />
         </div>
       </div>
-      
+
       <div style={styles.toolbar}>
         {(['all', 'default', 'user', 'extension'] as FilterType[]).map(f => (
           <button
@@ -572,9 +572,9 @@ export const KeybindingsPanel: React.FC = () => {
             {f === 'all' ? 'Todos' : f === 'default' ? 'Padrao' : f === 'user' ? 'Usuario' : 'Extensoes'}
           </button>
         ))}
-        
+
         <div style={{ flex: 1 }} />
-        
+
         <button style={styles.filterButton} onClick={handleImport}>
            Importar
         </button>
@@ -582,7 +582,7 @@ export const KeybindingsPanel: React.FC = () => {
            Exportar
         </button>
       </div>
-      
+
       <div style={styles.content}>
         {filteredKeybindings.length === 0 ? (
           <div style={styles.emptyState}>
@@ -603,7 +603,7 @@ export const KeybindingsPanel: React.FC = () => {
           ))
         )}
       </div>
-      
+
       <KeybindingRecordModal
         isOpen={!!editingCommand}
         command={editingCommand || ''}

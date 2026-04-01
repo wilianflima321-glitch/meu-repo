@@ -31,6 +31,8 @@ const THRESHOLDS: CoreLoopThresholds = {
   regressionRateMax: L4_REGRESSION_RATE_MAX,
   sandboxCoverage: L4_SANDBOX_COVERAGE_TARGET,
   feedbackCoverageMin: L4_FEEDBACK_COVERAGE_TARGET,
+  workspaceCoverageMin: 0.05,
+  requireRollbackEvidence: true,
 }
 
 const WINDOW_HOURS = [24, 24 * 7, 24 * 30]
@@ -127,6 +129,8 @@ export const GET = withAdminAuth(async () => {
         successfulApplyRuns: primaryWindow.reportProduction.metrics.successfulApplyRuns,
         failedApplyRuns: primaryWindow.reportProduction.metrics.failedApplyRuns,
         blockedApplyRuns: primaryWindow.reportProduction.metrics.blockedApplyRuns,
+        rollbackSuccessCount: primaryWindow.reportProduction.metrics.rollbackSuccessCount,
+        rollbackEvidenceRate: primaryWindow.reportProduction.metrics.rollbackEvidenceRate,
       },
       metricsAll: primaryWindow.reportAll.metrics,
       rehearsalMetrics: primaryWindow.reportRehearsal.metrics,

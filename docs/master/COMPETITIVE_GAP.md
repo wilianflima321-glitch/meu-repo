@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 47_COMPETITIVE_GAP_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # COMPETITIVE_GAP.md
 ## Análise Competitiva Detalhada - Sem Marketing
 **Data:** Janeiro 2026  
@@ -491,3 +494,15 @@ Análise honesta de onde estamos vs concorrentes, identificando gaps reais e opo
 - `WORKBENCH_SPEC.md` - Especificação técnica do Workbench
 - `AI_SYSTEM_SPEC.md` - Especificação do sistema de AI
 
+
+
+
+
+## Addendum 2026-04-01 (Competitive gaps grounded in repo evidence)
+- UX consistency gap vs Linear/Cursor: multiple toast systems and skeleton variants still coexist, which would be unified in best-in-class tools.
+- Design-system drift gap vs Vercel/Figma: multiple globals.css definitions create token divergence risk.
+- Localization gap vs premium tooling: IDE/editor still contain English string literals (partial PT-BR).
+- Preview/runtime parity gap vs Vercel/Replit: runtime provisioning is explicit but still depends on provider tokens and may degrade to fallback.
+
+Notes:
+- This addendum is evidence-based from file scans and runtime API behavior; it avoids speculative claims.

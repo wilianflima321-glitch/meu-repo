@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { createHMRBridge, type HMRBridge } from '@/lib/preview/hmr-bridge';
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -33,14 +34,22 @@ export interface PreviewRuntimeInfo {
 }
 
 const LIFECYCLE_LABELS: Record<PreviewLifecycleState, string> = {
-  idle: 'Waiting for preview',
-  provisioning: 'Starting sandbox...',
-  warming: 'Warming up runtime...',
-  syncing: 'Syncing project files...',
-  healthy: 'Preview running',
-  degraded: 'Preview degraded',
-  failed: 'Preview failed',
+  idle: 'Aguardando preview',
+  provisioning: 'Iniciando sandbox...',
+  warming: 'Aquecendo runtime...',
+  syncing: 'Sincronizando arquivos do projeto...',
+  healthy: 'Preview em execucao',
+  degraded: 'Preview degradado',
+  failed: 'Falha no preview',
   offline: 'Preview offline',
+};
+
+const STRATEGY_LABELS: Record<PreviewStrategy, string> = {
+  e2b: 'sandbox gerenciado',
+  webcontainer: 'webcontainer',
+  iframe: 'runtime externo',
+  inline: 'fallback inline',
+  none: 'sem runtime',
 };
 
 const LIFECYCLE_COLORS: Record<PreviewLifecycleState, string> = {
@@ -49,7 +58,7 @@ const LIFECYCLE_COLORS: Record<PreviewLifecycleState, string> = {
   warming: 'bg-[var(--aethel-warning-light)] animate-pulse',
   syncing: 'bg-[var(--aethel-primary)] animate-pulse',
   healthy: 'bg-[var(--aethel-success)]',
-  degraded: 'bg-orange-500',
+  degraded: 'bg-[var(--aethel-warning)]',
   failed: 'bg-[var(--aethel-error)]',
   offline: 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)]',
 };
@@ -78,8 +87,13 @@ function PreviewSkeleton() {
   return (
     <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm">Loading preview...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--aethel-primary)] border-t-transparent" aria-hidden="true" />
+        <div className="text-center">
+          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Carregando preview...</p>
+          <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
+            Conectando runtime, arquivos e superficie visual.
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -89,18 +103,40 @@ function LifecycleIndicator({
   state,
   latencyMs,
   hmrConnected,
+  strategy,
+  filesInSync,
+  lastSyncAt,
 }: {
   state: PreviewLifecycleState;
   latencyMs: number | null;
   hmrConnected: boolean;
+  strategy?: PreviewStrategy;
+  filesInSync?: number;
+  lastSyncAt?: number | null;
 }) {
+  const showHmrWarning = state === 'healthy' && strategy && strategy !== 'inline' && !hmrConnected;
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur-sm border-b border-[var(--aethel-border-secondary)]/50 text-xs">
       <div className={`w-2 h-2 rounded-full ${LIFECYCLE_COLORS[state]}`} />
       <span className="text-[var(--aethel-text-secondary)]">{LIFECYCLE_LABELS[state]}</span>
+      {strategy && (
+        <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+          {STRATEGY_LABELS[strategy]}
+        </span>
+      )}
       {latencyMs !== null && state === 'healthy' && (
         <span className="text-[var(--aethel-text-tertiary)]">{latencyMs}ms</span>
       )}
+      {filesInSync !== undefined && filesInSync > 0 && (
+        <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+          sincr {filesInSync}
+        </span>
+      )}
+      {lastSyncAt ? (
+        <span className="text-[var(--aethel-text-quaternary)]">
+          atual. {new Date(lastSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      ) : null}
       {hmrConnected && (
         <span className="ml-auto flex items-center gap-1 text-[var(--aethel-success)]">
           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
@@ -108,6 +144,14 @@ function LifecycleIndicator({
             <path d="M4.5 4a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1-.708.708l-1.5-1.5A.5.5 0 0 1 4.5 4zm7 0a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708-.708l1.5-1.5A.5.5 0 0 1 11.5 4z" />
           </svg>
           HMR
+        </span>
+      )}
+      {showHmrWarning && (
+        <span className="ml-auto flex items-center gap-1 text-[var(--aethel-warning)]">
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 1a.75.75 0 0 1 .66.39l6 11A.75.75 0 0 1 14 13H2a.75.75 0 0 1-.66-1.11l6-11A.75.75 0 0 1 8 1zm0 3.25a.75.75 0 0 0-.75.75v3.5a.75.75 0 0 0 1.5 0V5a.75.75 0 0 0-.75-.75zm0 7.5a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8z" />
+          </svg>
+          HMR indisponivel
         </span>
       )}
     </div>
@@ -118,10 +162,12 @@ function PreviewFailedState({
   error,
   onRetry,
   onFallback,
+  strategy,
 }: {
   error: string | null;
   onRetry: () => void;
   onFallback?: () => void;
+  strategy?: PreviewStrategy;
 }) {
   return (
     <div className="flex flex-col items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] gap-4 p-6">
@@ -131,22 +177,33 @@ function PreviewFailedState({
         </svg>
       </div>
       <div className="text-center">
-        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-1">Preview Failed</h3>
-        <p className="text-xs text-[var(--aethel-text-tertiary)] max-w-xs">{error || 'Could not connect to preview runtime'}</p>
+        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-1">Falha no preview</h3>
+        <p className="text-xs text-[var(--aethel-text-tertiary)] max-w-xs">
+          {error || 'Nao foi possivel conectar ao runtime de preview.'}
+        </p>
+        {strategy && (
+          <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+            estrategia {STRATEGY_LABELS[strategy]}
+          </p>
+        )}
       </div>
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={onRetry}
-          className="px-3 py-1.5 text-xs bg-violet-600 hover:bg-violet-500 text-[var(--aethel-text-primary)] rounded-md transition-colors"
+          aria-label="Tentar novamente a inicializacao do preview"
+          className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
         >
-          Retry
+          Tentar novamente
         </button>
         {onFallback && (
           <button
+            type="button"
             onClick={onFallback}
-            className="px-3 py-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] text-[var(--aethel-text-secondary)] rounded-md transition-colors"
+            aria-label="Usar o preview inline como fallback"
+            className="rounded-md bg-[var(--aethel-surface-quaternary)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           >
-            Use Inline Preview
+            Usar preview inline
           </button>
         )}
       </div>
@@ -172,11 +229,32 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
     lastSyncAt: null,
   });
 
-  const wsRef = useRef<WebSocket | null>(null);
+  const bridgeRef = useRef<HMRBridge | null>(null);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
+  const warmupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const syncResetRef = useRef<NodeJS.Timeout | null>(null);
+  const hmrUnsubscribeRef = useRef<(() => void) | null>(null);
+
+  const resolveStrategy = (payload: any): PreviewStrategy => {
+    const provider = payload?.provider || payload?.metadata?.provider;
+    const rawStrategy = payload?.strategy || payload?.metadata?.strategy;
+    if (rawStrategy) {
+      if (rawStrategy === 'browser-side') return 'webcontainer';
+      if (rawStrategy === 'local') return 'iframe';
+      if (rawStrategy === 'managed') return provider === 'e2b' ? 'e2b' : 'iframe';
+      if (rawStrategy === 'inline') return 'inline';
+    }
+    const mode = payload?.metadata?.mode;
+    if (mode === 'local_fallback') return 'iframe';
+    if (provider === 'webcontainers') return 'webcontainer';
+    if (provider === 'e2b') return 'e2b';
+    if (mode === 'managed') return 'e2b';
+    return 'iframe';
+  };
 
   const startHealthPolling = useCallback((url: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
+    if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
 
     const poll = async () => {
       try {
@@ -198,7 +276,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
     };
 
     // Initial check after short delay
-    setTimeout(poll, 2000);
+    warmupTimeoutRef.current = setTimeout(poll, 2000);
     pollRef.current = setInterval(poll, 15000);
   }, []);
 
@@ -214,16 +292,17 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || data.message || `Provision failed (${res.status})`);
+        throw new Error(data.error || data.message || `Falha ao provisionar (${res.status})`);
       }
 
       const data = await res.json();
 
       if (data.runtimeUrl) {
+        const resolvedStrategy = resolveStrategy(data);
         setRuntime((prev) => ({
           ...prev,
           state: 'warming',
-          strategy: data.strategy || 'e2b',
+          strategy: resolvedStrategy,
           runtimeUrl: data.runtimeUrl,
           sandboxId: data.sandboxId || null,
           startedAt: Date.now(),
@@ -233,57 +312,80 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
       } else if (data.discoveryResult?.preferredRuntimeUrl) {
         setRuntime((prev) => ({
           ...prev,
-          state: 'healthy',
+          state: 'warming',
           strategy: 'iframe',
           runtimeUrl: data.discoveryResult.preferredRuntimeUrl,
           startedAt: Date.now(),
           latencyMs: data.discoveryResult.candidates?.[0]?.latencyMs || null,
         }));
+        startHealthPolling(data.discoveryResult.preferredRuntimeUrl);
       } else {
         setRuntime((prev) => ({
           ...prev,
           state: 'failed',
-          error: 'No preview runtime available. Start a local dev server or configure E2B.',
+          error: 'Nenhum runtime de preview disponivel. Inicie um servidor local de desenvolvimento ou configure o E2B.',
         }));
       }
     } catch (err) {
       setRuntime((prev) => ({
         ...prev,
         state: 'failed',
-        error: err instanceof Error ? err.message : 'Unknown provision error',
+        error: err instanceof Error ? err.message : 'Falha ao provisionar o preview.',
       }));
     }
   }, [projectId, startHealthPolling]);
 
   const connectHMR = useCallback((runtimeUrl: string) => {
-    if (wsRef.current) wsRef.current.close();
+    bridgeRef.current?.disconnect();
+    hmrUnsubscribeRef.current?.();
 
     try {
-      const wsUrl = runtimeUrl.replace(/^http/, 'ws') + '/_next/webpack-hmr';
-      const ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        setRuntime((prev) => ({ ...prev, hmrConnected: true }));
-      };
-
-      ws.onclose = () => {
-        setRuntime((prev) => ({ ...prev, hmrConnected: false }));
-      };
-
-      ws.onerror = () => {
-        setRuntime((prev) => ({ ...prev, hmrConnected: false }));
-      };
-
-      wsRef.current = ws;
+      bridgeRef.current = createHMRBridge({
+        runtimeUrl,
+        hmrPathCandidates: ['/_next/webpack-hmr', '/__vite_hmr'],
+        onConnectionChange: (connected) => {
+          setRuntime((prev) => ({ ...prev, hmrConnected: connected }));
+        },
+        onUpdate: (message) => {
+          if (message.type === 'full-reload' || message.type === 'update') {
+            if (syncResetRef.current) clearTimeout(syncResetRef.current);
+            const syncedAt = Date.now();
+            setRuntime((prev) => ({
+              ...prev,
+              state: prev.strategy === 'inline' ? 'degraded' : 'syncing',
+              filesInSync: prev.filesInSync + 1,
+              lastSyncAt: syncedAt,
+            }));
+            syncResetRef.current = setTimeout(() => {
+              setRuntime((prev) => ({
+                ...prev,
+                state: prev.strategy === 'inline' ? 'degraded' : 'healthy',
+              }));
+            }, 900);
+          }
+        },
+        onError: () => {
+          setRuntime((prev) => ({ ...prev, hmrConnected: false }));
+        },
+      });
+      hmrUnsubscribeRef.current = bridgeRef.current.onStateChange((state) => {
+        if (state === 'failed' || state === 'reconnecting') {
+          setRuntime((prev) => {
+            if (prev.strategy === 'inline') return prev;
+            if (prev.state === 'degraded') return prev;
+            return { ...prev, state: 'degraded' };
+          });
+        }
+      });
     } catch {
-      // WebSocket not available for this runtime
+      setRuntime((prev) => ({ ...prev, hmrConnected: false }));
     }
   }, []);
 
   const switchToInline = useCallback(() => {
     setRuntime((prev) => ({
       ...prev,
-      state: 'healthy',
+      state: 'degraded',
       strategy: 'inline',
       runtimeUrl: null,
       sandboxId: null,
@@ -305,8 +407,11 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
 
   useEffect(() => {
     return () => {
-      if (wsRef.current) wsRef.current.close();
+      bridgeRef.current?.disconnect();
+      hmrUnsubscribeRef.current?.();
       if (pollRef.current) clearInterval(pollRef.current);
+      if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
+      if (syncResetRef.current) clearTimeout(syncResetRef.current);
     };
   }, []);
 
@@ -363,7 +468,7 @@ export type CanonicalPreviewSurfaceProps = CanonicalLiveProps | CanonicalRuntime
  * - 'scene': 3D scene preview (Nexus Canvas)
  *
  * Runtime variant includes full lifecycle management:
- * idle → provisioning → warming → syncing → healthy / degraded / failed
+ * idle -> provisioning -> warming -> syncing -> healthy / degraded / failed
  *
  * @see docs/master/DUPLICATIONS_AND_CONFLICTS.md (C-07)
  */
@@ -406,35 +511,71 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
 
   // Determine effective URL
   const effectiveUrl = externalRuntimeUrl || runtime.runtimeUrl;
-  const useInline = forceInlineFallback || runtime.strategy === 'inline' || !effectiveUrl;
+  const effectiveStrategy = runtime.strategy === 'none' && externalRuntimeUrl ? 'iframe' : runtime.strategy;
+  const useInline = forceInlineFallback || effectiveStrategy === 'inline' || !effectiveUrl;
 
   // Track effective state
   const effectiveState: PreviewLifecycleState = useMemo(() => {
-    if (externalRuntimeUrl) return 'healthy';
-    if (forceInlineFallback) return 'healthy';
+    if (externalRuntimeUrl) return 'degraded';
+    if (forceInlineFallback || effectiveStrategy === 'inline') return 'degraded';
     return runtime.state;
-  }, [externalRuntimeUrl, forceInlineFallback, runtime.state]);
+  }, [externalRuntimeUrl, forceInlineFallback, runtime.state, effectiveStrategy]);
 
   if (effectiveState === 'failed') {
     return (
       <div className="flex flex-col h-full">
         {showLifecycleBar && (
-          <LifecycleIndicator state="failed" latencyMs={null} hmrConnected={false} />
+          <LifecycleIndicator state="failed" latencyMs={null} hmrConnected={false} strategy={effectiveStrategy} />
         )}
         <PreviewFailedState
           error={runtime.error ?? runtimeUnavailableReason ?? null}
           onRetry={provision}
           onFallback={switchToInline}
+          strategy={effectiveStrategy}
         />
       </div>
     );
   }
 
-  if (effectiveState === 'idle' || effectiveState === 'provisioning' || effectiveState === 'warming') {
+  if (effectiveState === 'idle') {
     return (
       <div className="flex flex-col h-full">
         {showLifecycleBar && (
-          <LifecycleIndicator state={effectiveState} latencyMs={null} hmrConnected={false} />
+          <LifecycleIndicator state="idle" latencyMs={null} hmrConnected={false} />
+        )}
+        <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--aethel-surface-primary)] px-6 text-center">
+          <div className="max-w-md space-y-2">
+            <h3 className="text-sm font-medium text-[var(--aethel-text-primary)]">Preview pronto para iniciar</h3>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">
+              {runtimeUnavailableReason || 'Inicie o runtime gerenciado ou use o fallback inline para continuar sem prometer um preview remoto ativo.'}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={provision}
+              className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:brightness-110"
+            >
+              Iniciar preview
+            </button>
+            <button
+              type="button"
+              onClick={switchToInline}
+              className="rounded-md border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              Usar fallback inline
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (effectiveState === 'provisioning' || effectiveState === 'warming') {
+    return (
+      <div className="flex flex-col h-full">
+        {showLifecycleBar && (
+          <LifecycleIndicator state={effectiveState} latencyMs={null} hmrConnected={false} strategy={effectiveStrategy} />
         )}
         <PreviewSkeleton />
       </div>
@@ -448,6 +589,9 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           state={effectiveState}
           latencyMs={runtime.latencyMs}
           hmrConnected={runtime.hmrConnected}
+          strategy={effectiveStrategy}
+          filesInSync={runtime.filesInSync}
+          lastSyncAt={runtime.lastSyncAt}
         />
       )}
       <div className="flex-1 relative">
@@ -463,9 +607,14 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           isStale={isStale}
           onRefresh={onRefresh}
         />
+        {useInline && !externalRuntimeUrl && (
+          <div className="absolute left-1 top-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-warning)]">
+            Fallback inline
+          </div>
+        )}
         {isStale && (
           <div className="absolute top-1 right-1 px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)] text-[10px] rounded-full">
-            Stale
+            Desatualizado
           </div>
         )}
       </div>

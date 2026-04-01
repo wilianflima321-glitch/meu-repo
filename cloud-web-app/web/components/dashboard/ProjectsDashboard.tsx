@@ -194,7 +194,7 @@ const ProjectCard: React.FC<{
   onShare: () => void;
 }> = ({ project, view, onOpen, onToggleFavorite, onDelete, onDuplicate, onShare }) => {
   const [showMenu, setShowMenu] = useState(false);
-  
+
   const relativeTime = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -235,7 +235,7 @@ const ProjectCard: React.FC<{
         >
           {typeIcons[project.type]}
         </div>
-        
+
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ color: colors.text, fontWeight: 500, fontSize: '14px' }}>{project.name}</span>
@@ -243,7 +243,7 @@ const ProjectCard: React.FC<{
           </div>
           <div style={{ fontSize: '12px', color: colors.textMuted }}>{project.description || 'Sem descricao'}</div>
         </div>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: colors.textMuted, fontSize: '12px' }}>
             <Users size={14} />
@@ -254,7 +254,7 @@ const ProjectCard: React.FC<{
             {relativeTime(project.lastModified)}
           </div>
         </div>
-        
+
         <ChevronRight size={18} color={colors.textDim} />
       </div>
     );
@@ -284,7 +284,7 @@ const ProjectCard: React.FC<{
         onClick={onOpen}
         style={{
           height: '120px',
-          background: project.thumbnail 
+          background: project.thumbnail
             ? `url(${project.thumbnail}) center/cover`
             : `linear-gradient(135deg, ${typeColors[project.type]}20, ${colors.bg})`,
           display: 'flex',
@@ -298,7 +298,7 @@ const ProjectCard: React.FC<{
             {React.cloneElement(typeIcons[project.type] as React.ReactElement, { size: 48 })}
           </div>
         )}
-        
+
         {/* Status badge */}
         {project.status !== 'active' && (
           <div
@@ -318,7 +318,7 @@ const ProjectCard: React.FC<{
             {project.status === 'paused' ? 'Pausado' : 'Arquivado'}
           </div>
         )}
-        
+
         {/* Favorite */}
         <button
           onClick={(e) => {
@@ -344,7 +344,7 @@ const ProjectCard: React.FC<{
           {project.isFavorite ? <Star size={16} fill={colors.warning} /> : <StarOff size={16} />}
         </button>
       </div>
-      
+
       {/* Content */}
       <div style={{ padding: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -375,7 +375,7 @@ const ProjectCard: React.FC<{
               {project.description || 'Sem descricao'}
             </p>
           </div>
-          
+
           {/* Menu */}
           <div style={{ position: 'relative' }}>
             <button
@@ -398,7 +398,7 @@ const ProjectCard: React.FC<{
             >
               <MoreHorizontal size={16} />
             </button>
-            
+
             {showMenu && (
               <>
                 <div
@@ -430,7 +430,7 @@ const ProjectCard: React.FC<{
             )}
           </div>
         </div>
-        
+
         {/* Meta */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
           <div
@@ -449,7 +449,7 @@ const ProjectCard: React.FC<{
             {typeIcons[project.type]}
             {project.type.charAt(0).toUpperCase() + project.type.slice(1)}
           </div>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: colors.textMuted, fontSize: '11px' }}>
             <Clock size={12} />
             {relativeTime(project.lastModified)}
@@ -537,7 +537,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
         }}
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div
         style={{
@@ -562,7 +562,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
             Configure seu novo projeto de desenvolvimento.
           </p>
         </div>
-        
+
         <form onSubmit={handleSubmit} style={{ padding: '0 24px 24px' }}>
           {/* Name */}
           <div style={{ marginBottom: '16px' }}>
@@ -587,7 +587,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
               autoFocus
             />
           </div>
-          
+
           {/* Type */}
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: colors.text }}>
@@ -620,7 +620,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
               ))}
             </div>
           </div>
-          
+
           {/* Description */}
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 500, color: colors.text }}>
@@ -644,7 +644,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
               }}
             />
           </div>
-          
+
           {/* Actions */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
             <button
@@ -778,7 +778,7 @@ export const ProjectsDashboard: React.FC = () => {
               Gerencie seus projetos e comece a criar.
             </p>
           </div>
-          
+
           <button
             onClick={() => setShowCreateModal(true)}
             style={{
@@ -846,7 +846,7 @@ export const ProjectsDashboard: React.FC = () => {
               }}
             />
           </div>
-          
+
           {/* Filter */}
           <select
             value={filterType}
@@ -872,7 +872,7 @@ export const ProjectsDashboard: React.FC = () => {
             <option value="api">API</option>
             <option value="library">Library</option>
           </select>
-          
+
           {/* View toggle */}
           <div
             style={{
@@ -929,7 +929,7 @@ export const ProjectsDashboard: React.FC = () => {
               {search ? 'Nenhum projeto encontrado' : 'Comece criando seu primeiro projeto'}
             </h3>
             <p style={{ margin: '0 0 24px 0', color: colors.textMuted, fontSize: '14px' }}>
-              {search 
+              {search
                 ? 'Tente uma busca diferente ou ajuste os filtros.'
                 : 'Crie um novo projeto e comece a desenvolver sua proxima grande ideia.'}
             </p>

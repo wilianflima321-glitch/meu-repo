@@ -1,6 +1,6 @@
 /**
  * Aethel IDE - Split Editor Component
- * 
+ *
  * Componente profissional para split editor como VS Code.
  * Suporta multiplos grupos de editores, drag & drop de tabs,
  * e redimensionamento de paineis.
@@ -9,10 +9,10 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { 
-  X, 
-  MoreHorizontal, 
-  SplitSquareHorizontal, 
+import {
+  X,
+  MoreHorizontal,
+  SplitSquareHorizontal,
   SplitSquareVertical,
   Maximize2,
   Pin,
@@ -88,24 +88,24 @@ const Tab: React.FC<TabProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  
+
   // Close menu on click outside
   useEffect(() => {
     if (!showMenu) return;
-    
+
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setShowMenu(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showMenu]);
-  
+
   const getFileIcon = () => {
     if (tab.icon) return tab.icon;
-    
+
     const ext = tab.path?.split('.').pop()?.toLowerCase();
     const iconColors: Record<string, string> = {
       ts: 'text-[var(--aethel-primary-light)]',
@@ -121,17 +121,17 @@ const Tab: React.FC<TabProps> = ({
       json: 'text-[var(--aethel-warning)]',
       md: 'text-[var(--aethel-text-tertiary)]',
     };
-    
+
     return <FileCode size={14} className={iconColors[ext || ''] || 'text-[var(--aethel-text-tertiary)]'} />;
   };
-  
+
   return (
     <div
       className={`
         group relative flex items-center gap-1.5 h-9 px-3 cursor-pointer
         border-r border-[var(--aethel-border-primary)] select-none
-        ${isActive 
-          ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-primary)]' 
+        ${isActive
+          ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-primary)]'
           : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
         }
         ${tab.preview ? 'italic' : ''}
@@ -157,22 +157,22 @@ const Tab: React.FC<TabProps> = ({
       {tab.pinned && (
         <Pin size={10} className="text-[var(--aethel-text-quaternary)] flex-shrink-0" />
       )}
-      
+
       {/* File icon */}
       <span className="flex-shrink-0">
         {getFileIcon()}
       </span>
-      
+
       {/* Tab title */}
       <span className="truncate max-w-[120px] text-sm">
         {tab.title}
       </span>
-      
+
       {/* Dirty indicator */}
       {tab.dirty && (
         <Circle size={8} className="flex-shrink-0 fill-current text-[var(--aethel-text-primary)]" />
       )}
-      
+
       {/* Close button */}
       <button
         className={`
@@ -192,7 +192,7 @@ const Tab: React.FC<TabProps> = ({
           <X size={14} />
         )}
       </button>
-      
+
       {/* Context Menu */}
       {showMenu && (
         <div
@@ -289,14 +289,14 @@ const TabBar: React.FC<TabBarProps> = ({
 }) => {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const tabsContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Sort tabs: pinned first
   const sortedTabs = [...group.tabs].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
     return 0;
   });
-  
+
   const handleDragStart = (e: React.DragEvent, tab: EditorTab) => {
     e.dataTransfer.setData('application/json', JSON.stringify({
       tabId: tab.id,
@@ -304,17 +304,17 @@ const TabBar: React.FC<TabBarProps> = ({
     }));
     e.dataTransfer.effectAllowed = 'move';
   };
-  
+
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverIndex(index);
   };
-  
+
   const handleDrop = (e: React.DragEvent, index: number) => {
     e.preventDefault();
     setDragOverIndex(null);
-    
+
     try {
       const data = JSON.parse(e.dataTransfer.getData('application/json'));
       onTabMove(data.tabId, data.groupId, index);
@@ -322,22 +322,22 @@ const TabBar: React.FC<TabBarProps> = ({
       // Invalid drop
     }
   };
-  
+
   const handleDragLeave = () => {
     setDragOverIndex(null);
   };
-  
+
   return (
-    <div 
+    <div
       className={`
-        flex items-center h-9 bg-[var(--aethel-surface-tertiary)] border-b 
+        flex items-center h-9 bg-[var(--aethel-surface-tertiary)] border-b
         ${isActiveGroup ? 'border-b-[var(--aethel-surface-secondary)]' : 'border-b-[var(--aethel-border-secondary)]'}
       `}
       onClick={onGroupFocus}
       role="tablist"
     >
       {/* Tabs */}
-      <div 
+      <div
         ref={tabsContainerRef}
         className="flex-1 flex items-center overflow-x-auto overflow-y-hidden
                    scrollbar-thin scrollbar-thumb-[var(--aethel-border-secondary)] scrollbar-track-transparent"
@@ -362,7 +362,7 @@ const TabBar: React.FC<TabBarProps> = ({
             />
           </React.Fragment>
         ))}
-        
+
         {/* End drop zone */}
         <div
           className="flex-1 min-w-[20px] h-full"
@@ -374,7 +374,7 @@ const TabBar: React.FC<TabBarProps> = ({
           )}
         </div>
       </div>
-      
+
       {/* Actions */}
       <div className="flex items-center gap-0.5 px-1 border-l border-[var(--aethel-border-secondary)]">
         <button
@@ -447,9 +447,9 @@ const EditorGroupView: React.FC<EditorGroupViewProps> = ({
   renderEditor,
 }) => {
   const activeTab = group.tabs.find(t => t.id === group.activeTabId) || null;
-  
+
   return (
-    <div 
+    <div
       className={`
         flex flex-col h-full
         ${isActiveGroup ? 'ring-1 ring-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]' : ''}
@@ -469,7 +469,7 @@ const EditorGroupView: React.FC<EditorGroupViewProps> = ({
         onGroupClose={onGroupClose}
         canClose={canClose}
       />
-      
+
       {/* Breadcrumbs */}
       {activeTab && activeTab.path && (
         <div className="flex items-center gap-1 h-6 px-3 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-secondary)] text-xs text-[var(--aethel-text-tertiary)]">
@@ -481,7 +481,7 @@ const EditorGroupView: React.FC<EditorGroupViewProps> = ({
           ))}
         </div>
       )}
-      
+
       {/* Editor Content */}
       <div className="flex-1 overflow-hidden bg-[var(--aethel-surface-secondary)]">
         {renderEditor(activeTab)}
@@ -505,42 +505,42 @@ const ResizableDivider: React.FC<ResizableDividerProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const startPosRef = useRef(0);
-  
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     startPosRef.current = direction === 'horizontal' ? e.clientX : e.clientY;
     document.body.style.cursor = direction === 'horizontal' ? 'col-resize' : 'row-resize';
   };
-  
+
   useEffect(() => {
     if (!isDragging) return;
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       const currentPos = direction === 'horizontal' ? e.clientX : e.clientY;
       const delta = currentPos - startPosRef.current;
       startPosRef.current = currentPos;
       onResize(delta);
     };
-    
+
     const handleMouseUp = () => {
       setIsDragging(false);
       document.body.style.cursor = '';
     };
-    
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-    
+
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, direction, onResize]);
-  
+
   return (
     <div
       className={`
-        ${direction === 'horizontal' 
-          ? 'w-1 cursor-col-resize hover:bg-[var(--aethel-primary)]/50' 
+        ${direction === 'horizontal'
+          ? 'w-1 cursor-col-resize hover:bg-[var(--aethel-primary)]/50'
           : 'h-1 cursor-row-resize hover:bg-[var(--aethel-primary)]/50'
         }
         ${isDragging ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-border-secondary)]'}
@@ -568,10 +568,10 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
   renderEditor,
   splitDirection = 'horizontal',
 }) => {
-  const [groupSizes, setGroupSizes] = useState<number[]>(() => 
+  const [groupSizes, setGroupSizes] = useState<number[]>(() =>
     groups.map(() => 100 / groups.length)
   );
-  
+
   // Update sizes when groups change
   useEffect(() => {
     setGroupSizes((prev) => {
@@ -579,30 +579,30 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
       return groups.map(() => 100 / groups.length);
     });
   }, [groups]);
-  
+
   const handleResize = useCallback((index: number, delta: number) => {
     setGroupSizes(prev => {
-      const containerSize = splitDirection === 'horizontal' 
-        ? window.innerWidth 
+      const containerSize = splitDirection === 'horizontal'
+        ? window.innerWidth
         : window.innerHeight;
       const deltaPercent = (delta / containerSize) * 100;
-      
+
       const newSizes = [...prev];
       const minSize = 10; // 10% minimum
-      
+
       // Adjust current and next group
       const newSize1 = newSizes[index] + deltaPercent;
       const newSize2 = newSizes[index + 1] - deltaPercent;
-      
+
       if (newSize1 >= minSize && newSize2 >= minSize) {
         newSizes[index] = newSize1;
         newSizes[index + 1] = newSize2;
       }
-      
+
       return newSizes;
     });
   }, [splitDirection]);
-  
+
   if (groups.length === 0) {
     return (
       <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-quaternary)]">
@@ -614,9 +614,9 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
       </div>
     );
   }
-  
+
   return (
-    <div 
+    <div
       className={`
         flex h-full w-full
         ${splitDirection === 'horizontal' ? 'flex-row' : 'flex-col'}
@@ -636,7 +636,7 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
               onTabClick={(tabId) => onTabClick(tabId, group.id)}
               onTabClose={(tabId) => onTabClose(tabId, group.id)}
               onTabPin={(tabId) => onTabPin(tabId, group.id)}
-              onTabMove={(tabId, fromGroupId, targetIndex) => 
+              onTabMove={(tabId, fromGroupId, targetIndex) =>
                 onTabMove(tabId, fromGroupId, group.id, targetIndex)
               }
               onGroupFocus={() => onGroupFocus(group.id)}
@@ -646,7 +646,7 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
               renderEditor={(tab) => renderEditor(group.id, tab)}
             />
           </div>
-          
+
           {/* Divider between groups */}
           {index < groups.length - 1 && (
             <ResizableDivider

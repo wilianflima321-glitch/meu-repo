@@ -1,12 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { 
-  FolderOpen, 
-  Search, 
-  Inbox, 
-  FileText, 
-  Users, 
+import {
+  FolderOpen,
+  Search,
+  Inbox,
+  FileText,
+  Users,
   Sparkles,
   Plus,
   ArrowRight,
@@ -87,17 +87,17 @@ export function PremiumEmptyState({
       >
         {/* Glow background */}
         <div className="absolute inset-0 bg-gradient-to-r from-[var(--aethel-primary)]/20 via-[var(--aethel-accent)]/20 to-[var(--aethel-info)]/20 blur-3xl" />
-        
+
         {/* Icon container */}
-        <div className="relative rounded-2xl border border-white/[0.1] bg-white/[0.05] backdrop-blur-sm p-6 shadow-2xl shadow-[var(--aethel-primary)]/10">
-          <div className="text-slate-300">
+        <div className="relative rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] backdrop-blur-sm p-6 shadow-2xl shadow-[var(--aethel-primary)]/10">
+          <div className="text-[var(--aethel-text-secondary)]">
             {icon || Illustration || <Sparkles className="h-16 w-16" />}
           </div>
-          
+
           {/* Animated sparkles */}
           <motion.div
             className="absolute -top-2 -right-2"
-            animate={{ 
+            animate={{
               scale: [1, 1.2, 1],
               opacity: [0.5, 1, 0.5],
             }}
@@ -116,33 +116,33 @@ export function PremiumEmptyState({
       )}
 
       {/* Title */}
-      <motion.h3 
+      <motion.h3
         variants={staggerItem}
-        className="mb-3 text-2xl font-bold text-white"
+        className="mb-3 text-2xl font-bold text-[var(--aethel-text-primary)]"
       >
         {title}
       </motion.h3>
 
       {/* Description */}
-      <motion.p 
+      <motion.p
         variants={staggerItem}
-        className="mb-8 max-w-md text-base text-slate-400 leading-relaxed"
+        className="mb-8 max-w-md text-base text-[var(--aethel-text-tertiary)] leading-relaxed"
       >
         {description}
       </motion.p>
 
       {/* Suggestions */}
       {suggestions && suggestions.length > 0 && (
-        <motion.div 
+        <motion.div
           variants={staggerItem}
           className="mb-8 flex flex-wrap items-center justify-center gap-2"
         >
-          <span className="text-xs text-slate-500">Sugestões:</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Sugestões:</span>
           {suggestions.map((suggestion) => (
             <motion.button
               key={suggestion}
               onClick={() => primaryAction?.onClick()}
-              className="rounded-full border border-white/[0.1] bg-white/[0.03] px-3 py-1 text-xs text-[var(--aethel-text-tertiary)] transition-all hover:border-[var(--aethel-primary)]/30 hover:bg-[var(--aethel-primary)]/10 hover:text-[var(--aethel-primary-light)]"
+              className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-tertiary)] transition-all hover:border-[var(--aethel-primary)]/30 hover:bg-[var(--aethel-primary)]/10 hover:text-[var(--aethel-primary-light)]"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -153,7 +153,7 @@ export function PremiumEmptyState({
       )}
 
       {/* Actions */}
-      <motion.div 
+      <motion.div
         variants={staggerItem}
         className="flex flex-wrap items-center justify-center gap-3"
       >
@@ -278,11 +278,11 @@ export function EmptyNotifications() {
   return (
     <GlassCard variant="default" className="p-6">
       <div className="flex flex-col items-center text-center">
-        <div className="mb-4 rounded-xl bg-white/[0.05] p-4 text-slate-400">
+        <div className="mb-4 rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 text-[var(--aethel-text-tertiary)]">
           <Inbox className="h-8 w-8" />
         </div>
-        <h4 className="text-sm font-medium text-slate-200">Sem notificacoes</h4>
-        <p className="mt-1 text-xs text-slate-500">
+        <h4 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Sem notificacoes</h4>
+        <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
           Novas atualizacoes aparecerao aqui
         </p>
       </div>
@@ -290,21 +290,21 @@ export function EmptyNotifications() {
   )
 }
 
-export function EmptyData({ 
+export function EmptyData({
   title = 'Sem dados',
   description = 'Nenhum dado disponivel no momento',
-}: { 
+}: {
   title?: string
-  description?: string 
+  description?: string
 }) {
   return (
     <GlassCard variant="default" className="p-8">
       <div className="flex flex-col items-center text-center">
-        <div className="mb-4 rounded-xl border border-white/[0.1] bg-white/[0.03] p-4">
-          <Database className="h-8 w-8 text-slate-400" />
+        <div className="mb-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+          <Database className="h-8 w-8 text-[var(--aethel-text-tertiary)]" />
         </div>
-        <h4 className="text-base font-medium text-slate-200">{title}</h4>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
+        <h4 className="text-base font-medium text-[var(--aethel-text-secondary)]">{title}</h4>
+        <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">{description}</p>
       </div>
     </GlassCard>
   )
@@ -318,11 +318,11 @@ interface ErrorStateProps {
   onHome?: () => void
 }
 
-export function ErrorState({ 
+export function ErrorState({
   title = 'Algo deu errado',
   message,
   onRetry,
-  onHome 
+  onHome
 }: ErrorStateProps) {
   return (
     <motion.div
@@ -343,8 +343,8 @@ export function ErrorState({
             </div>
           </div>
 
-          <h3 className="mb-2 text-xl font-bold text-white">{title}</h3>
-          <p className="mb-6 text-sm text-slate-400">{message}</p>
+          <h3 className="mb-2 text-xl font-bold text-[var(--aethel-text-primary)]">{title}</h3>
+          <p className="mb-6 text-sm text-[var(--aethel-text-tertiary)]">{message}</p>
 
           <div className="flex gap-3">
             {onRetry && (
@@ -371,10 +371,10 @@ interface ComingSoonProps {
   eta?: string
 }
 
-export function ComingSoon({ 
-  feature, 
+export function ComingSoon({
+  feature,
   description,
-  eta 
+  eta
 }: ComingSoonProps) {
   return (
     <GlassCard variant="elevated" className="p-8">
@@ -386,22 +386,22 @@ export function ComingSoon({
             transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
             style={{ padding: 2 }}
           >
-            <div className="h-full w-full rounded-full bg-slate-950" />
+            <div className="h-full w-full rounded-full bg-[var(--aethel-surface-primary)]" />
           </motion.div>
-          <div className="relative rounded-full border border-white/[0.1] bg-white/[0.05] p-5">
+          <div className="relative rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-5">
             <Rocket className="h-10 w-10 text-[var(--aethel-primary-light)]" />
           </div>
         </div>
 
         <GlowBadge color="primary" className="mb-4">Em breve</GlowBadge>
-        
-        <h3 className="mb-2 text-xl font-bold text-white">{feature}</h3>
-        <p className="mb-4 max-w-sm text-sm text-slate-400">
+
+        <h3 className="mb-2 text-xl font-bold text-[var(--aethel-text-primary)]">{feature}</h3>
+        <p className="mb-4 max-w-sm text-sm text-[var(--aethel-text-tertiary)]">
           {description || 'Esta funcionalidade esta em desenvolvimento e estara disponivel em uma atualizacao futura.'}
         </p>
-        
+
         {eta && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">
             Previsao: <span className="text-[var(--aethel-primary-light)]">{eta}</span>
           </p>
         )}
@@ -427,8 +427,8 @@ export function FirstValueGuide({ steps, currentStep }: FirstValueGuideProps) {
     <GlassCard variant="elevated" className="p-6">
       <div className="mb-6">
         <GlowBadge color="info" className="mb-2">Primeiros passos</GlowBadge>
-        <h3 className="text-lg font-bold text-white">Guia de inicio rapido</h3>
-        <p className="text-sm text-slate-400">Complete estas etapas para aproveitar ao maximo</p>
+        <h3 className="text-lg font-bold text-[var(--aethel-text-primary)]">Guia de inicio rapido</h3>
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">Complete estas etapas para aproveitar ao maximo</p>
       </div>
 
       <div className="space-y-4">
@@ -436,11 +436,11 @@ export function FirstValueGuide({ steps, currentStep }: FirstValueGuideProps) {
           <motion.div
             key={step.title}
             className={`relative flex gap-4 p-4 rounded-xl border ${
-              step.completed 
-                ? 'border-[var(--aethel-success)]/30 bg-[var(--aethel-success)]/5' 
+              step.completed
+                ? 'border-[var(--aethel-success)]/30 bg-[var(--aethel-success)]/5'
                 : index === currentStep
                 ? 'border-[var(--aethel-primary)]/30 bg-[var(--aethel-primary)]/5'
-                : 'border-white/[0.06] bg-white/[0.02]'
+                : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
             }`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -452,7 +452,7 @@ export function FirstValueGuide({ steps, currentStep }: FirstValueGuideProps) {
                 ? 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success-light)]'
                 : index === currentStep
                 ? 'bg-[var(--aethel-primary)]/20 text-[var(--aethel-primary-light)]'
-                : 'bg-white/[0.05] text-[var(--aethel-text-tertiary)]'
+                : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)]'
             }`}>
               {step.completed ? (
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -467,8 +467,8 @@ export function FirstValueGuide({ steps, currentStep }: FirstValueGuideProps) {
               <h4 className={`text-sm font-medium ${step.completed ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-text-secondary)]'}`}>
                 {step.title}
               </h4>
-              <p className="mt-0.5 text-xs text-slate-500">{step.description}</p>
-              
+              <p className="mt-0.5 text-xs text-[var(--aethel-text-tertiary)]">{step.description}</p>
+
               {index === currentStep && step.action && (
                 <button
                   onClick={step.action}

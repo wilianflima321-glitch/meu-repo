@@ -1,11 +1,11 @@
 /**
  * AETHEL ENGINE - User Library Component
- * 
+ *
  * User's purchased/downloaded assets library with:
- * - Purchased assets
- * - Favorites
- * - Download history
- * - Collections
+ * - Assets comprados
+ * - Favoritos
+ * - Historico de downloads
+ * - Colecoes
  */
 
 'use client';
@@ -14,8 +14,8 @@ import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Download, Heart, FolderOpen, Clock, Package, 
+import {
+    Download, Heart, FolderOpen, Clock, Package,
     Grid, List, Search, Filter, MoreVertical,
     Trash2, FolderPlus, Star, Check, ExternalLink,
     ChevronRight, Plus, Edit2, X
@@ -27,6 +27,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Tabs, TabContent, TabList, TabTrigger } from '@/components/ui/Tabs';
 import { ScrollArea } from '@/components/ui/ScrollArea';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useToastActions } from '@/components/ui';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -50,7 +51,6 @@ import {
     ContextMenuTrigger,
     ContextMenuSeparator,
 } from '@/components/ui/context-menu';
-import { toast } from 'sonner';
 
 // ============================================================================
 // Types
@@ -90,31 +90,31 @@ interface Collection {
 
 async function fetchPurchasedAssets(): Promise<LibraryAsset[]> {
     const res = await fetch('/api/marketplace/library/purchased');
-    if (!res.ok) throw new Error('Failed to fetch purchases');
+    if (!res.ok) throw new Error('Falha ao carregar compras');
     return res.json();
 }
 
 async function fetchFavorites(): Promise<LibraryAsset[]> {
     const res = await fetch('/api/marketplace/library/favorites');
-    if (!res.ok) throw new Error('Failed to fetch favorites');
+    if (!res.ok) throw new Error('Falha ao carregar favoritos');
     return res.json();
 }
 
 async function fetchDownloadHistory(): Promise<LibraryAsset[]> {
     const res = await fetch('/api/marketplace/library/downloads');
-    if (!res.ok) throw new Error('Failed to fetch downloads');
+    if (!res.ok) throw new Error('Falha ao carregar downloads');
     return res.json();
 }
 
 async function fetchCollections(): Promise<Collection[]> {
     const res = await fetch('/api/marketplace/collections');
-    if (!res.ok) throw new Error('Failed to fetch collections');
+    if (!res.ok) throw new Error('Falha ao carregar colecoes');
     return res.json();
 }
 
 async function downloadAsset(assetId: string): Promise<Blob> {
     const res = await fetch(`/api/marketplace/assets/${assetId}/download`);
-    if (!res.ok) throw new Error('Download failed');
+    if (!res.ok) throw new Error('Falha no download');
     return res.blob();
 }
 
@@ -122,13 +122,13 @@ async function downloadAsset(assetId: string): Promise<Blob> {
 // Sub-Components
 // ============================================================================
 
-function AssetCard({ 
-    asset, 
+function AssetCard({
+    asset,
     viewMode,
     onDownload,
     onRemove,
     onAddToCollection
-}: { 
+}: {
     asset: LibraryAsset;
     viewMode: 'grid' | 'list';
     onDownload: (id: string) => void;
@@ -179,18 +179,18 @@ function AssetCard({
                                 <h3 className="font-medium truncate">{asset.name}</h3>
                                 {asset.hasUpdate && (
                                     <Badge variant="secondary" className="text-xs">
-                                        Update Available
+                                        Atualizacao disponivel
                                     </Badge>
                                 )}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {asset.creator.name} • {asset.category} • {formatFileSize(asset.fileSize)}
+                                {asset.creator.name} - {asset.category} - {formatFileSize(asset.fileSize)}
                             </p>
                         </div>
 
                         {/* Rating */}
                         <div className="flex items-center gap-1 text-sm">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-4 h-4 fill-yellow-400 text-[var(--aethel-warning-light)]" />
                             {asset.rating.toFixed(1)}
                         </div>
 
@@ -202,7 +202,7 @@ function AssetCard({
                                 disabled={isDownloading}
                             >
                                 <Download className="w-4 h-4 mr-1" />
-                                {isDownloading ? 'Downloading...' : 'Download'}
+                                {isDownloading ? 'Baixando...' : 'Baixar'}
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -213,19 +213,19 @@ function AssetCard({
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={() => onAddToCollection(asset.id)}>
                                         <FolderPlus className="w-4 h-4 mr-2" />
-                                        Add to Collection
+                                        Adicionar a colecao
                                     </DropdownMenuItem>
                                     <DropdownMenuItem>
                                         <ExternalLink className="w-4 h-4 mr-2" />
-                                        View in Marketplace
+                                        Ver no Marketplace
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                        className="text-red-500"
+                                    <DropdownMenuItem
+                                        className="text-[var(--aethel-error-light)]"
                                         onClick={() => onRemove(asset.id)}
                                     >
                                         <Trash2 className="w-4 h-4 mr-2" />
-                                        Remove from Library
+                                        Remover da biblioteca
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -235,23 +235,23 @@ function AssetCard({
                 <ContextMenuContent>
                     <ContextMenuItem onClick={handleDownload}>
                         <Download className="w-4 h-4 mr-2" />
-                        Download
+                        Baixar
                     </ContextMenuItem>
                     <ContextMenuItem onClick={() => onAddToCollection(asset.id)}>
                         <FolderPlus className="w-4 h-4 mr-2" />
-                        Add to Collection
+                        Adicionar a colecao
                     </ContextMenuItem>
                     <ContextMenuItem>
                         <ExternalLink className="w-4 h-4 mr-2" />
-                        View in Marketplace
+                        Ver no Marketplace
                     </ContextMenuItem>
                     <ContextMenuSeparator />
-                    <ContextMenuItem 
-                        className="text-red-500"
+                    <ContextMenuItem
+                        className="text-[var(--aethel-error-light)]"
                         onClick={() => onRemove(asset.id)}
                     >
                         <Trash2 className="w-4 h-4 mr-2" />
-                        Remove
+                        Remover
                     </ContextMenuItem>
                 </ContextMenuContent>
             </ContextMenu>
@@ -277,19 +277,19 @@ function AssetCard({
                             unoptimized
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                         />
-                        
+
                         {/* Update badge */}
                         {asset.hasUpdate && (
                             <Badge className="absolute top-2 right-2">
-                                Update Available
+                                Atualizacao disponivel
                             </Badge>
                         )}
 
                         {/* Quick download */}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <Button onClick={handleDownload} disabled={isDownloading}>
                                 <Download className="w-4 h-4 mr-2" />
-                                {isDownloading ? 'Downloading...' : 'Download'}
+                                {isDownloading ? 'Baixando...' : 'Baixar'}
                             </Button>
                         </div>
                     </div>
@@ -300,7 +300,7 @@ function AssetCard({
                         <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
                             {asset.creator.name}
                             {asset.creator.verified && (
-                                <Check className="w-3 h-3 text-blue-500" />
+                                <Check className="w-3 h-3 text-[var(--aethel-info-light)]" />
                             )}
                         </p>
                         <div className="flex items-center justify-between mt-2">
@@ -315,31 +315,31 @@ function AssetCard({
             <ContextMenuContent>
                 <ContextMenuItem onClick={handleDownload}>
                     <Download className="w-4 h-4 mr-2" />
-                    Download
+                    Baixar
                 </ContextMenuItem>
                 <ContextMenuItem onClick={() => onAddToCollection(asset.id)}>
                     <FolderPlus className="w-4 h-4 mr-2" />
-                    Add to Collection
+                    Adicionar a colecao
                 </ContextMenuItem>
                 <ContextMenuSeparator />
-                <ContextMenuItem 
-                    className="text-red-500"
+                <ContextMenuItem
+                    className="text-[var(--aethel-error-light)]"
                     onClick={() => onRemove(asset.id)}
                 >
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Remove
+                    Remover
                 </ContextMenuItem>
             </ContextMenuContent>
         </ContextMenu>
     );
 }
 
-function CollectionCard({ 
+function CollectionCard({
     collection,
     onClick,
     onEdit,
     onDelete
-}: { 
+}: {
     collection: Collection;
     onClick: () => void;
     onEdit: () => void;
@@ -374,9 +374,9 @@ function CollectionCard({
                     <h3 className="font-medium truncate">{collection.name}</h3>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button 
-                                size="icon" 
-                                variant="ghost" 
+                            <Button
+                                size="icon"
+                                variant="ghost"
                                 className="h-8 w-8 opacity-0 group-hover:opacity-100"
                             >
                                 <MoreVertical className="w-4 h-4" />
@@ -388,18 +388,18 @@ function CollectionCard({
                                 onEdit();
                             }}>
                                 <Edit2 className="w-4 h-4 mr-2" />
-                                Edit
+                                Editar
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                                className="text-red-500"
+                            <DropdownMenuItem
+                                className="text-[var(--aethel-error-light)]"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onDelete();
                                 }}
                             >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
+                                Excluir
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -412,12 +412,12 @@ function CollectionCard({
     );
 }
 
-function EmptyState({ 
-    icon: Icon, 
-    title, 
+function EmptyState({
+    icon: Icon,
+    title,
     description,
-    action 
-}: { 
+    action
+}: {
     icon: React.ElementType;
     title: string;
     description: string;
@@ -455,6 +455,7 @@ function LoadingGrid() {
 
 export default function UserLibrary() {
     const queryClient = useQueryClient();
+    const toast = useToastActions();
     const [activeTab, setActiveTab] = useState('purchased');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState('');
@@ -492,11 +493,11 @@ export default function UserLibrary() {
             a.download = `asset-${assetId}.zip`;
             a.click();
             URL.revokeObjectURL(url);
-            toast.success('Download started');
+            toast.success('Baixar iniciado.');
             queryClient.invalidateQueries({ queryKey: ['library-downloads'] });
         },
         onError: () => {
-            toast.error('Download failed');
+            toast.error('Falha no download.');
         },
     });
 
@@ -506,19 +507,19 @@ export default function UserLibrary() {
     }, [downloadMutation]);
 
     const handleRemove = useCallback((assetId: string) => {
-        toast.success('Removed from library');
+        toast.success('Removido da biblioteca.');
     }, []);
 
     const handleAddToCollection = useCallback((assetId: string) => {
         // Open collection picker dialog
-        toast.info('Select a collection');
+        toast.info('Selecione uma colecao.');
     }, []);
 
     const handleCreateCollection = useCallback(() => {
         if (!newCollectionName.trim()) return;
-        
-        // Create collection API call
-        toast.success(`Collection "${newCollectionName}" created`);
+
+        // Criar collection API call
+        toast.success(`Colecao "${newCollectionName}" criada.`);
         setNewCollectionName('');
         setIsCreateDialogOpen(false);
         queryClient.invalidateQueries({ queryKey: ['collections'] });
@@ -528,7 +529,7 @@ export default function UserLibrary() {
     const filterAssets = (assets: LibraryAsset[] | undefined) => {
         if (!assets) return [];
         if (!searchQuery) return assets;
-        return assets.filter(asset => 
+        return assets.filter(asset =>
             asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             asset.category.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -539,14 +540,14 @@ export default function UserLibrary() {
             {/* Header */}
             <header className="border-b px-6 py-4">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">My Library</h1>
-                    
+                    <h1 className="text-2xl font-bold">Minha biblioteca</h1>
+
                     <div className="flex items-center gap-4">
                         {/* Search */}
                         <div className="relative w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search library..."
+                                placeholder="Buscar na biblioteca..."
                                 className="pl-10"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -582,7 +583,7 @@ export default function UserLibrary() {
                     <TabList className="h-12">
                         <TabTrigger value="purchased" className="gap-2">
                             <Package className="w-4 h-4" />
-                            Purchased
+                            Comprados
                             {purchased && (
                                 <Badge variant="secondary" className="ml-1">
                                     {purchased.length}
@@ -591,33 +592,33 @@ export default function UserLibrary() {
                         </TabTrigger>
                         <TabTrigger value="favorites" className="gap-2">
                             <Heart className="w-4 h-4" />
-                            Favorites
+                            Favoritos
                         </TabTrigger>
                         <TabTrigger value="downloads" className="gap-2">
                             <Clock className="w-4 h-4" />
-                            Download History
+                            Historico de downloads
                         </TabTrigger>
                         <TabTrigger value="collections" className="gap-2">
                             <FolderOpen className="w-4 h-4" />
-                            Collections
+                            Colecoes
                         </TabTrigger>
                     </TabList>
                 </div>
 
                 <ScrollArea className="flex-1">
                     <div className="p-6">
-                        {/* Purchased */}
+                        {/* Comprados */}
                         <TabContent value="purchased" className="m-0">
                             {loadingPurchased ? (
                                 <LoadingGrid />
                             ) : filterAssets(purchased).length === 0 ? (
                                 <EmptyState
                                     icon={Package}
-                                    title="No purchased assets"
-                                    description="Assets you purchase from the Marketplace will appear here"
+                                    title="Nenhum asset comprado"
+                                    description="Assets comprados no Marketplace aparecerao aqui"
                                     action={
                                         <Button>
-                                            Browse Marketplace
+                                            Explorar Marketplace
                                             <ChevronRight className="w-4 h-4 ml-1" />
                                         </Button>
                                     }
@@ -642,15 +643,15 @@ export default function UserLibrary() {
                             )}
                         </TabContent>
 
-                        {/* Favorites */}
+                        {/* Favoritos */}
                         <TabContent value="favorites" className="m-0">
                             {loadingFavorites ? (
                                 <LoadingGrid />
                             ) : filterAssets(favorites).length === 0 ? (
                                 <EmptyState
                                     icon={Heart}
-                                    title="No favorites yet"
-                                    description="Click the heart icon on any asset to add it to your favorites"
+                                    title="Nenhum favorito ainda"
+                                    description="Clique no coracao em um asset para adicionar aos favoritos"
                                 />
                             ) : (
                                 <div className={cn(
@@ -672,15 +673,15 @@ export default function UserLibrary() {
                             )}
                         </TabContent>
 
-                        {/* Download History */}
+                        {/* Historico de downloads */}
                         <TabContent value="downloads" className="m-0">
                             {loadingDownloads ? (
                                 <LoadingGrid />
                             ) : filterAssets(downloads).length === 0 ? (
                                 <EmptyState
                                     icon={Clock}
-                                    title="No download history"
-                                    description="Your downloaded assets will appear here"
+                                    title="Sem historico de downloads"
+                                    description="Seus assets baixados aparecerao aqui"
                                 />
                             ) : (
                                 <div className={cn(
@@ -702,37 +703,37 @@ export default function UserLibrary() {
                             )}
                         </TabContent>
 
-                        {/* Collections */}
+                        {/* Colecoes */}
                         <TabContent value="collections" className="m-0">
                             <div className="flex items-center justify-between mb-6">
                                 <p className="text-muted-foreground">
-                                    Organize your assets into collections
+                                    Organize seus assets em colecoes
                                 </p>
                                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                                     <DialogTrigger asChild>
                                         <Button>
                                             <Plus className="w-4 h-4 mr-2" />
-                                            Create Collection
+                                            Criar colecao
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent>
                                         <DialogHeader>
-                                            <DialogTitle>Create Collection</DialogTitle>
+                                            <DialogTitle>Criar colecao</DialogTitle>
                                             <DialogDescription>
-                                                Give your collection a name to get started
+                                                De um nome para iniciar a colecao
                                             </DialogDescription>
                                         </DialogHeader>
                                         <Input
-                                            placeholder="Collection name..."
+                                            placeholder="Nome da colecao..."
                                             value={newCollectionName}
                                             onChange={(e) => setNewCollectionName(e.target.value)}
                                         />
                                         <DialogFooter>
                                             <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                                                Cancel
+                                                Cancelar
                                             </Button>
                                             <Button onClick={handleCreateCollection}>
-                                                Create
+                                                Criar
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -744,12 +745,12 @@ export default function UserLibrary() {
                             ) : !collections || collections.length === 0 ? (
                                 <EmptyState
                                     icon={FolderOpen}
-                                    title="No collections yet"
-                                    description="Create a collection to organize your assets"
+                                    title="Nenhuma colecao ainda"
+                                    description="Crie uma colecao para organizar seus assets"
                                     action={
                                         <Button onClick={() => setIsCreateDialogOpen(true)}>
                                             <Plus className="w-4 h-4 mr-2" />
-                                            Create Collection
+                                            Criar colecao
                                         </Button>
                                     }
                                 />
@@ -762,7 +763,7 @@ export default function UserLibrary() {
                                             onClick={() => {}}
                                             onEdit={() => {}}
                                             onDelete={() => {
-                                                toast.success(`Collection "${collection.name}" deleted`);
+        toast.success(`Colecao "${collection.name}" removida.`);
                                             }}
                                         />
                                     ))}

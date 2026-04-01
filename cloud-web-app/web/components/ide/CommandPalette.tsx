@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import {
   createContext,
@@ -105,6 +105,10 @@ function createDefaultCommands(handlers: {
   newFile?: () => void
   newFolder?: () => void
   switchProject?: () => void
+  undo?: () => void
+  redo?: () => void
+  find?: () => void
+  replace?: () => void
   toggleSidebar?: () => void
   toggleTerminal?: () => void
   aiChat?: () => void
@@ -137,6 +141,7 @@ function createDefaultCommands(handlers: {
       category: 'file',
       shortcut: 'Ctrl+Shift+S',
       action: handlers.saveAll || (() => {}),
+      when: () => typeof handlers.saveAll === 'function',
       keywords: ['save', 'all', 'salvar', 'tudo'],
     },
     {
@@ -157,6 +162,46 @@ function createDefaultCommands(handlers: {
       icon: 'new-folder',
       action: handlers.newFolder || (() => {}),
       keywords: ['new', 'folder', 'nova', 'pasta'],
+    },
+    {
+      id: 'edit.undo',
+      label: 'Desfazer',
+      description: 'Desfazer a ultima acao',
+      category: 'edit',
+      shortcut: 'Ctrl+Z',
+      action: handlers.undo || (() => {}),
+      when: () => typeof handlers.undo === 'function',
+      keywords: ['undo', 'desfazer'],
+    },
+    {
+      id: 'edit.redo',
+      label: 'Refazer',
+      description: 'Refazer a acao desfeita',
+      category: 'edit',
+      shortcut: 'Ctrl+Y',
+      action: handlers.redo || (() => {}),
+      when: () => typeof handlers.redo === 'function',
+      keywords: ['redo', 'refazer'],
+    },
+    {
+      id: 'edit.find',
+      label: 'Buscar',
+      description: 'Buscar no arquivo',
+      category: 'edit',
+      shortcut: 'Ctrl+F',
+      action: handlers.find || (() => {}),
+      when: () => typeof handlers.find === 'function',
+      keywords: ['find', 'search', 'buscar'],
+    },
+    {
+      id: 'edit.replace',
+      label: 'Substituir',
+      description: 'Buscar e substituir',
+      category: 'edit',
+      shortcut: 'Ctrl+H',
+      action: handlers.replace || (() => {}),
+      when: () => typeof handlers.replace === 'function',
+      keywords: ['replace', 'substituir'],
     },
     {
       id: 'view.toggleSidebar',
@@ -245,7 +290,7 @@ function highlightMatches(text: string, indices: number[]): ReactNode {
   indices.forEach((index, i) => {
     if (index > last) nodes.push(text.slice(last, index))
     nodes.push(
-      <span key={`match-${i}`} className="text-blue-300 font-semibold">
+      <span key={`match-${i}`} className="text-[var(--aethel-info-light)] font-semibold">
         {text[index]}
       </span>
     )
@@ -261,6 +306,10 @@ export function CommandPaletteProvider({
   onOpenFileDialog,
   onSaveFile,
   onSaveAll,
+  onUndo,
+  onRedo,
+  onFind,
+  onReplace,
   onNewFile,
   onNewFolder,
   onSwitchProject,
@@ -275,6 +324,10 @@ export function CommandPaletteProvider({
   onOpenFileDialog?: () => void
   onSaveFile?: () => void
   onSaveAll?: () => void
+  onUndo?: () => void
+  onRedo?: () => void
+  onFind?: () => void
+  onReplace?: () => void
   onNewFile?: () => void
   onNewFolder?: () => void
   onSwitchProject?: () => void
@@ -291,6 +344,10 @@ export function CommandPaletteProvider({
       openFile: onOpenFileDialog,
       saveFile: onSaveFile,
       saveAll: onSaveAll,
+      undo: onUndo,
+      redo: onRedo,
+      find: onFind,
+      replace: onReplace,
       newFile: onNewFile,
       newFolder: onNewFolder,
       switchProject: onSwitchProject,
@@ -307,6 +364,10 @@ export function CommandPaletteProvider({
         openFile: onOpenFileDialog,
         saveFile: onSaveFile,
         saveAll: onSaveAll,
+        undo: onUndo,
+        redo: onRedo,
+        find: onFind,
+        replace: onReplace,
         newFile: onNewFile,
         newFolder: onNewFolder,
         switchProject: onSwitchProject,
@@ -320,6 +381,10 @@ export function CommandPaletteProvider({
     onOpenFileDialog,
     onSaveFile,
     onSaveAll,
+    onUndo,
+    onRedo,
+    onFind,
+    onReplace,
     onNewFile,
     onNewFolder,
     onSwitchProject,
@@ -554,16 +619,16 @@ function CommandPaletteUI({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[1px]" onClick={close} />
+      <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-[1px]" onClick={close} />
       <div
         className="fixed left-1/2 top-[12%] z-50 w-[680px] max-w-[94vw] -translate-x-1/2"
         role="dialog"
         aria-modal="true"
         aria-label="Paleta de comandos"
       >
-        <div className="overflow-hidden rounded-lg border border-slate-700/80 bg-[#0f131b] shadow-2xl">
-          <div className="flex items-center gap-2 border-b border-slate-700/70 px-3 py-2.5">
-            {currentMode.prefix && <span className="font-mono text-xs text-cyan-300">{currentMode.prefix}</span>}
+        <div className="overflow-hidden rounded-lg border border-[var(--aethel-border-secondary)]/80 bg-[var(--aethel-surface-primary)] shadow-2xl">
+          <div className="flex items-center gap-2 border-b border-[var(--aethel-border-secondary)]/70 px-3 py-2.5">
+            {currentMode.prefix && <span className="font-mono text-xs text-[var(--aethel-info-light)]">{currentMode.prefix}</span>}
             <input
               ref={inputRef}
               type="text"
@@ -571,24 +636,24 @@ function CommandPaletteUI({
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleInputKeyDown}
               placeholder={currentMode.placeholder}
-              className="flex-1 bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-500"
+              className="flex-1 bg-transparent text-sm text-[var(--aethel-text-primary)] outline-none placeholder:text-[var(--aethel-text-tertiary)]"
               autoComplete="off"
               spellCheck={false}
               aria-label="Entrada da paleta de comandos"
             />
-            <div className="hidden items-center gap-2 text-[10px] text-slate-500 md:flex">
-              <kbd className="rounded bg-slate-800 px-1.5 py-0.5">Up/Down</kbd>
+            <div className="hidden items-center gap-2 text-[10px] text-[var(--aethel-text-tertiary)] md:flex">
+              <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5">Up/Down</kbd>
               <span>Navegar</span>
-              <kbd className="rounded bg-slate-800 px-1.5 py-0.5">Enter</kbd>
+              <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5">Enter</kbd>
               <span>Selecionar</span>
-              <kbd className="rounded bg-slate-800 px-1.5 py-0.5">Esc</kbd>
+              <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5">Esc</kbd>
               <span>Fechar</span>
             </div>
           </div>
 
           <div ref={listRef} className="max-h-[420px] overflow-y-auto" role="listbox" aria-label="Resultados da paleta">
             {!filteredItems.length && (
-              <div className="px-4 py-8 text-center text-xs text-slate-500">Nenhum resultado encontrado</div>
+              <div className="px-4 py-8 text-center text-xs text-[var(--aethel-text-tertiary)]">Nenhum resultado encontrado</div>
             )}
 
             {filteredItems.map((item, index) => {
@@ -602,17 +667,17 @@ function CommandPaletteUI({
                     role="option"
                     aria-selected={index === selectedIndex}
                     className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
-                      index === selectedIndex ? 'bg-blue-500/20' : 'hover:bg-slate-800/70'
+                      index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]' : 'hover:bg-[var(--aethel-surface-tertiary)]/70'
                     }`}
                   >
-                    <Codicon name={icon} className="text-slate-400" />
+                    <Codicon name={icon} className="text-[var(--aethel-text-tertiary)]" />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-xs text-slate-100">{highlightMatches(item.label, item.labelMatch.indices)}</div>
-                      {item.description && <div className="truncate text-[11px] text-slate-500">{item.description}</div>}
+                      <div className="truncate text-xs text-[var(--aethel-text-primary)]">{highlightMatches(item.label, item.labelMatch.indices)}</div>
+                      {item.description && <div className="truncate text-[11px] text-[var(--aethel-text-tertiary)]">{item.description}</div>}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-slate-500">{CATEGORY_LABELS[item.category]}</span>
-                      {item.shortcut && <kbd className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400">{item.shortcut}</kbd>}
+                      <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{CATEGORY_LABELS[item.category]}</span>
+                      {item.shortcut && <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)]">{item.shortcut}</kbd>}
                     </div>
                   </button>
                 )
@@ -628,16 +693,16 @@ function CommandPaletteUI({
                     role="option"
                     aria-selected={index === selectedIndex}
                     className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
-                      index === selectedIndex ? 'bg-blue-500/20' : 'hover:bg-slate-800/70'
+                      index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]' : 'hover:bg-[var(--aethel-surface-tertiary)]/70'
                     }`}
                   >
-                    <Codicon name={icon} className="text-slate-400" />
+                    <Codicon name={icon} className="text-[var(--aethel-text-tertiary)]" />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-xs text-slate-100">{highlightMatches(item.name, item.nameMatch.indices)}</div>
-                      <div className="truncate text-[11px] text-slate-500">{item.path}</div>
+                      <div className="truncate text-xs text-[var(--aethel-text-primary)]">{highlightMatches(item.name, item.nameMatch.indices)}</div>
+                      <div className="truncate text-[11px] text-[var(--aethel-text-tertiary)]">{item.path}</div>
                     </div>
                     {item.modified && <span className="text-xs text-[var(--aethel-warning-light)]">M</span>}
-                    {item.gitStatus && <span className="text-xs text-slate-500">{item.gitStatus}</span>}
+                    {item.gitStatus && <span className="text-xs text-[var(--aethel-text-tertiary)]">{item.gitStatus}</span>}
                   </button>
                 )
               }
@@ -646,13 +711,13 @@ function CommandPaletteUI({
             })}
           </div>
 
-          <div className="flex items-center justify-between border-t border-slate-700/70 px-3 py-1.5 text-[10px] text-slate-500">
+          <div className="flex items-center justify-between border-t border-[var(--aethel-border-secondary)]/70 px-3 py-1.5 text-[10px] text-[var(--aethel-text-tertiary)]">
             <div className="flex items-center gap-3">
               <span>
-                <kbd className="rounded bg-slate-800 px-1 py-0.5">Ctrl+Shift+P</kbd> Comandos
+                <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1 py-0.5">Ctrl+Shift+P</kbd> Comandos
               </span>
               <span>
-                <kbd className="rounded bg-slate-800 px-1 py-0.5">Ctrl+P</kbd> Arquivos
+                <kbd className="rounded bg-[var(--aethel-surface-tertiary)] px-1 py-0.5">Ctrl+P</kbd> Arquivos
               </span>
             </div>
             <span>{filteredItems.length} resultados</span>
@@ -674,3 +739,5 @@ export function useRegisterCommand(command: CommandItem, deps: unknown[] = []) {
 }
 
 export default CommandPaletteProvider
+
+

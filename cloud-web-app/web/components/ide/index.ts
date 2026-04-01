@@ -1,6 +1,17 @@
 // IDE Components - Unified Export
 // Aethel Engine IDE Components
 
+// Modern IDE Components (2026 UX Improvements)
+export {
+  ModernIDEShell,
+  ModernIDELoading,
+} from './ModernIDEShell'
+
+export {
+  InlineAIChat,
+} from './InlineAIChat'
+
+// Legacy Components (for backwards compatibility)
 export { default as IDELayout } from './IDELayout'
 export { default as FileExplorerPro } from './FileExplorerPro'
 export { default as GitPanelPro } from './GitPanelPro'

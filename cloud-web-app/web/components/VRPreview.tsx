@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 const GameViewport = dynamic(() => import('./engine/GameViewport'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-slate-900 text-slate-400">
+    <div className="w-full h-full flex items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]">
       Inicializando Engine 3D...
     </div>
   ),
@@ -15,3 +15,4 @@ const GameViewport = dynamic(() => import('./engine/GameViewport'), {
 export default function VRPreview() {
   return <GameViewport mode="edit" />;
 }
+

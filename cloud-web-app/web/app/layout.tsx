@@ -1,4 +1,4 @@
-﻿import '../styles/globals.css'
+import './globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
@@ -6,6 +6,7 @@ import ClientLayout from '../components/ClientLayout'
 import { ServiceWorkerProvider } from '../components/ServiceWorkerProvider'
 import WebVitalsReporter from '../components/analytics/WebVitalsReporter'
 import CookieConsent from '../components/ui/CookieConsent'
+import { ToastProvider } from '../components/ui/toast-system'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -30,8 +31,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Aethel Engine - Multi-agent software studio',
-  description: 'Multi-agent software studio for apps, research and operationally explicit AI-assisted building.',
+  title: 'Aethel Engine - Studio multiagente para apps e pesquisa',
+  description: 'Studio multiagente para apps, pesquisa e execucao assistida por IA com estado operacional explicito.',
   metadataBase: new URL('https://aethel.dev'),
   keywords: ['multi-agent IDE', 'AI software studio', 'research to code', 'apps IDE', 'Aethel Engine', 'anti-fake-success'],
   authors: [{ name: 'Aethel Engine Team' }],
@@ -51,8 +52,8 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     url: 'https://aethel.dev',
     siteName: 'Aethel Engine',
-    title: 'Aethel Engine - Multi-agent software studio',
-    description: 'Research, planning, code, preview and readiness in one AI-assisted studio.',
+    title: 'Aethel Engine - Studio multiagente para apps e pesquisa',
+    description: 'Pesquisa, planejamento, codigo, preview e readiness no mesmo studio assistido por IA.',
     images: [
       {
         url: '/og-image.png',
@@ -65,7 +66,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Aethel Engine',
-    description: 'Multi-agent software studio for apps and research',
+    description: 'Studio multiagente para apps e pesquisa',
     images: ['/twitter-image.png'],
   },
   icons: {
@@ -94,21 +95,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-[var(--aethel-primary-dark)] focus:px-4 focus:py-2 focus:text-white focus:outline-none"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-[var(--aethel-primary-dark)] focus:px-4 focus:py-2 focus:text-[var(--aethel-text-primary)] focus:outline-none"
         >
-          Skip to main content
+          Ir para o conteudo principal
         </a>
         <ServiceWorkerProvider>
-          <WebVitalsReporter />
-          <div
-            id="main-content"
-            className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
-          >
-            <ClientLayout>
-              {children}
-            </ClientLayout>
-          </div>
-          <CookieConsent />
+          <ToastProvider>
+            <WebVitalsReporter />
+            <div
+              id="main-content"
+              className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
+            >
+              <ClientLayout>
+                {children}
+              </ClientLayout>
+            </div>
+            <CookieConsent />
+          </ToastProvider>
         </ServiceWorkerProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { 
+import {
   TrendingUp, AlertTriangle, Shield, Zap,
   CreditCard, Activity, RefreshCw,
   CheckCircle, XCircle
@@ -36,18 +36,25 @@ export default function AdminDashboardPro() {
   const [opsNotice, setOpsNotice] = useState<OpsNotice | null>(null)
 
   const metrics: AdminMetric[] = [
-    { label: 'Total Users', value: '2,847', change: 12.5, status: 'up' },
-    { label: 'Active Projects', value: '1,234', change: 8.3, status: 'up' },
-    { label: 'API Requests (24h)', value: '2.3M', change: -2.1, status: 'down' },
+    { label: 'Usuarios totais', value: '2,847', change: 12.5, status: 'up' },
+    { label: 'Projetos ativos', value: '1,234', change: 8.3, status: 'up' },
+    { label: 'Requisicoes API (24h)', value: '2.3M', change: -2.1, status: 'down' },
     { label: 'Saude do sistema', value: '99.8%', change: 0.2, status: 'stable' }
   ]
 
   const securityEvents: SecurityEvent[] = [
-    { id: '1', type: 'login', user: 'user@example.com', timestamp: '2 min ago', status: 'success' },
-    { id: '2', type: 'api_call', user: 'api-key-xxxxx', timestamp: '5 min ago', status: 'success' },
-    { id: '3', type: 'permission_change', user: 'admin@aethel.ai', timestamp: '12 min ago', status: 'success' },
-    { id: '4', type: 'data_access', user: 'unknown-ip', timestamp: '18 min ago', status: 'suspicious' }
+    { id: '1', type: 'login', user: 'user@example.com', timestamp: '2 min atras', status: 'success' },
+    { id: '2', type: 'api_call', user: 'api-key-xxxxx', timestamp: '5 min atras', status: 'success' },
+    { id: '3', type: 'permission_change', user: 'admin@aethel.ai', timestamp: '12 min atras', status: 'success' },
+    { id: '4', type: 'data_access', user: 'unknown-ip', timestamp: '18 min atras', status: 'suspicious' }
   ]
+
+  const eventLabels: Record<SecurityEvent['type'], string> = {
+    login: 'Login',
+    api_call: 'Chamada API',
+    permission_change: 'Mudanca de permissao',
+    data_access: 'Acesso a dados',
+  }
 
   const handleRefresh = async () => {
     setRefreshing(true)
@@ -62,53 +69,59 @@ export default function AdminDashboardPro() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 900))
       const labels: Record<OpsAction, string> = {
-        backup: 'Database backup enfileirado com sucesso.',
-        cache_flush: 'Cache flush executado com sucesso.',
-        logs_export: 'Export de logs iniciado. Verifique downloads em instantes.',
-        feature_flags: 'Feature flags sincronizadas com sucesso.',
+        backup: 'Backup de database enfileirado.',
+        cache_flush: 'Cache flush solicitado.',
+        logs_export: 'Exportacao de logs iniciada. Verifique downloads em instantes.',
+        feature_flags: 'Feature flags sincronizadas.',
       }
       setOpsNotice({ type: 'success', message: labels[action] })
     } catch {
-      setOpsNotice({ type: 'error', message: 'Falha ao executar operação. Tente novamente.' })
+      setOpsNotice({ type: 'error', message: 'Falha ao executar operacao. Tente novamente.' })
     } finally {
       setRunningAction(null)
     }
   }
 
   return (
-    <div className="flex flex-col h-full bg-zinc-950 text-zinc-100 overflow-hidden">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-xl">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-xl">
         <div>
-          <h1 className="text-2xl font-bold uppercase tracking-wider">Admin Console Pro</h1>
-          <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest mt-1">Enterprise Operations Center</p>
+          <h1 className="text-2xl font-bold uppercase tracking-wider">Admin Console</h1>
+          <p className="text-xs text-[var(--aethel-text-tertiary)] font-medium uppercase tracking-widest mt-1">Centro de operacoes</p>
         </div>
         <button
+          type="button"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50"
+          className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg transition-colors disabled:opacity-50"
+          aria-label="Atualizar painel"
         >
           <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
         </button>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex items-center gap-1 px-6 py-3 border-b border-zinc-800 bg-zinc-900/30 overflow-x-auto">
+      <div className="flex items-center gap-1 px-6 py-3 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] overflow-x-auto">
         {(['overview', 'billing', 'security', 'ops'] as const).map(tab => (
           <button
             key={tab}
+            type="button"
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
               activeTab === tab
-                ? 'bg-blue-600 text-white'
-                : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200'
+                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+                : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             {tab === 'overview' && <Activity className="inline mr-2" size={14} />}
             {tab === 'billing' && <CreditCard className="inline mr-2" size={14} />}
             {tab === 'security' && <Shield className="inline mr-2" size={14} />}
             {tab === 'ops' && <Zap className="inline mr-2" size={14} />}
-            {tab}
+            {tab === 'overview' && 'Visao geral'}
+            {tab === 'billing' && 'Faturamento'}
+            {tab === 'security' && 'Seguranca'}
+            {tab === 'ops' && 'Operacoes'}
           </button>
         ))}
       </div>
@@ -121,13 +134,13 @@ export default function AdminDashboardPro() {
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {metrics.map((metric, idx) => (
-                <div key={idx} className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors">
-                  <p className="text-xs text-zinc-500 uppercase font-bold tracking-widest mb-2">{metric.label}</p>
+                <div key={idx} className="p-4 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-secondary)] transition-colors">
+                  <p className="text-xs text-[var(--aethel-text-tertiary)] uppercase font-bold tracking-widest mb-2">{metric.label}</p>
                   <div className="flex items-end justify-between">
-                    <p className="text-2xl font-bold text-zinc-100">{metric.value}</p>
+                    <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">{metric.value}</p>
                     <div className={`flex items-center gap-1 text-xs font-bold ${
                       metric.status === 'up' ? 'text-[var(--aethel-success)]' :
-                      metric.status === 'down' ? 'text-rose-400' : 'text-zinc-400'
+                      metric.status === 'down' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'
                     }`}>
                       <TrendingUp size={14} />
                       {metric.change > 0 ? '+' : ''}{metric.change}%
@@ -138,7 +151,7 @@ export default function AdminDashboardPro() {
             </div>
 
             {/* Status do Sistema */}
-            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
+            <div className="p-6 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-2xl">
                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Activity size={20} className="text-[var(--aethel-primary)]" />
                   Status do sistema
@@ -150,9 +163,9 @@ export default function AdminDashboardPro() {
                   { label: 'Cache Layer', status: 'online' },
                   { label: 'Message Queue', status: 'online' }
                 ].map((service, idx) => (
-                  <div key={idx} className="p-3 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
+                  <div key={idx} className="p-3 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-xs font-bold text-zinc-400 uppercase">{service.label}</p>
+                      <p className="text-xs font-bold text-[var(--aethel-text-tertiary)] uppercase">{service.label}</p>
                       <div className="w-2 h-2 rounded-full bg-[var(--aethel-success)] shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
                     </div>
                     <p className="text-xs text-[var(--aethel-success)] font-bold">{service.status}</p>
@@ -166,23 +179,23 @@ export default function AdminDashboardPro() {
         {/* Billing Tab */}
         {activeTab === 'billing' && (
           <div className="space-y-6">
-            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
+            <div className="p-6 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-2xl">
                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <CreditCard size={20} className="text-[var(--aethel-warning)]" />
                   Visao geral de faturamento
                 </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-zinc-800/50 rounded-lg">
-                  <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Monthly Revenue</p>
+                <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] rounded-lg">
+                  <p className="text-xs text-[var(--aethel-text-tertiary)] uppercase font-bold mb-2">Receita mensal</p>
                   <p className="text-2xl font-bold text-[var(--aethel-warning)]">$47,234</p>
                 </div>
-                <div className="p-4 bg-zinc-800/50 rounded-lg">
-                  <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Active Subscriptions</p>
+                <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] rounded-lg">
+                  <p className="text-xs text-[var(--aethel-text-tertiary)] uppercase font-bold mb-2">Assinaturas ativas</p>
                   <p className="text-2xl font-bold text-[var(--aethel-success)]">1,847</p>
                 </div>
-                <div className="p-4 bg-zinc-800/50 rounded-lg">
-                  <p className="text-xs text-zinc-500 uppercase font-bold mb-2">Churn Rate</p>
-                  <p className="text-2xl font-bold text-rose-400">2.3%</p>
+                <div className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] rounded-lg">
+                  <p className="text-xs text-[var(--aethel-text-tertiary)] uppercase font-bold mb-2">Churn</p>
+                  <p className="text-2xl font-bold text-[var(--aethel-error)]">2.3%</p>
                 </div>
               </div>
             </div>
@@ -192,25 +205,25 @@ export default function AdminDashboardPro() {
         {/* Security Tab */}
         {activeTab === 'security' && (
           <div className="space-y-6">
-            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
+            <div className="p-6 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-2xl">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Shield size={20} className="text-[var(--aethel-primary)]" />
-                Security Events
+                Eventos de seguranca
               </h2>
               <div className="space-y-3">
                 {securityEvents.map(event => (
-                  <div key={event.id} className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-zinc-600 transition-colors">
+                  <div key={event.id} className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[var(--aethel-border-secondary)] transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {event.status === 'success' && <CheckCircle size={16} className="text-[var(--aethel-success)]" />}
-                        {event.status === 'failed' && <XCircle size={16} className="text-rose-400" />}
+                        {event.status === 'failed' && <XCircle size={16} className="text-[var(--aethel-error)]" />}
                         {event.status === 'suspicious' && <AlertTriangle size={16} className="text-[var(--aethel-warning)]" />}
                         <div>
-                          <p className="text-sm font-bold text-zinc-200 capitalize">{event.type.replace('_', ' ')}</p>
-                          <p className="text-xs text-zinc-500">{event.user}</p>
+                          <p className="text-sm font-bold text-[var(--aethel-text-primary)]">{eventLabels[event.type]}</p>
+                          <p className="text-xs text-[var(--aethel-text-tertiary)]">{event.user}</p>
                         </div>
                       </div>
-                      <p className="text-xs text-zinc-600">{event.timestamp}</p>
+                      <p className="text-xs text-[var(--aethel-text-quaternary)]">{event.timestamp}</p>
                     </div>
                   </div>
                 ))}
@@ -222,17 +235,17 @@ export default function AdminDashboardPro() {
         {/* Ops Tab */}
         {activeTab === 'ops' && (
           <div className="space-y-6">
-            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
+            <div className="p-6 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-2xl">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Zap size={20} className="text-[var(--aethel-primary)]" />
-                Operations
+                Operacoes
               </h2>
               {opsNotice && (
                 <div
                   className={`mb-4 rounded-lg border px-3 py-2 text-sm ${
                     opsNotice.type === 'success'
                       ? 'border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success-light)]'
-                      : 'border-rose-500/40 bg-[var(--aethel-error)]/10 text-[var(--aethel-error-light)]'
+                      : 'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 text-[var(--aethel-error-light)]'
                   }`}
                   role="status"
                   aria-live="polite"
@@ -244,39 +257,39 @@ export default function AdminDashboardPro() {
                 <button
                   onClick={() => runOpsAction('backup')}
                   disabled={runningAction !== null}
-                  className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Database Backup</p>
-                  <p className="text-xs text-zinc-600 mt-1">Last backup: 2 hours ago</p>
+                  <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Backup de database</p>
+                  <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Ultimo backup: 2 horas</p>
                 </button>
                 <button
                   onClick={() => runOpsAction('cache_flush')}
                   disabled={runningAction !== null}
-                  className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Cache Flush</p>
-                  <p className="text-xs text-zinc-600 mt-1">Clear all cached data</p>
+                  <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Limpar cache</p>
+                  <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Limpar dados em cache</p>
                 </button>
                 <button
                   onClick={() => runOpsAction('logs_export')}
                   disabled={runningAction !== null}
-                  className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Logs Export</p>
-                  <p className="text-xs text-zinc-600 mt-1">Download system logs</p>
+                  <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Exportar logs</p>
+                  <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Baixar logs do sistema</p>
                 </button>
                 <button
                   onClick={() => runOpsAction('feature_flags')}
                   disabled={runningAction !== null}
-                  className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:border-blue-500/50 transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <p className="text-sm font-bold text-zinc-200 group-hover:text-[var(--aethel-primary)] transition-colors">Feature Flags</p>
-                    <p className="text-xs text-zinc-600 mt-1">Gerencie os toggles de features</p>
+                  <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Feature Flags</p>
+                    <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Gerencie os toggles de features</p>
                 </button>
               </div>
               {runningAction && (
-                <p className="mt-3 text-xs text-zinc-400" aria-live="polite">
-                  Executando operação...
+                <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]" aria-live="polite">
+                  Executando operacao...
                 </p>
               )}
             </div>
@@ -286,3 +299,7 @@ export default function AdminDashboardPro() {
     </div>
   )
 }
+
+
+
+

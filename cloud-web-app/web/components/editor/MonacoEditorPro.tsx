@@ -8,7 +8,7 @@ import { getAuthHeaders, submitChangeFeedback } from '@/lib/ai/change-feedback-c
 
 /**
  * Professional Monaco Editor Component
- * 
+ *
  * Editor de codigo de nivel profissional com:
  * - IntelliSense completo (autocomplete, type hints, etc)
  * - Inline Edit (Cmd+K) integrado
@@ -33,7 +33,7 @@ export interface MonacoEditorProps {
   defaultValue?: string;
   language?: string;
   path?: string;
-  
+
   // Callbacks
   onChange?: (value: string | undefined, event: monacoEditor.editor.IModelContentChangedEvent) => void;
   onSave?: (value: string) => void;
@@ -42,7 +42,7 @@ export interface MonacoEditorProps {
   onCursorChange?: (position: { line: number; column: number }) => void;
   onSelectionChange?: (selection: { text: string; range: monacoEditor.IRange }) => void;
   onMount?: (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: Monaco) => void;
-  
+
   // Options
   readOnly?: boolean;
   minimap?: boolean;
@@ -52,13 +52,13 @@ export interface MonacoEditorProps {
   tabSize?: number;
   theme?: string;
   height?: string | number;
-  
+
   // Features
   enableInlineEdit?: boolean;
   enableAISuggestions?: boolean;
   enableGitDecorations?: boolean;
   enableErrorDecorations?: boolean;
-  
+
   // Data
   diagnostics?: Diagnostic[];
   gitChanges?: GitChange[];
@@ -191,7 +191,7 @@ export function MonacoEditorPro({
   const decorationsRef = useRef<string[]>([]);
   const lspDisposablesRef = useRef<monacoEditor.IDisposable[]>([]);
   const inlineCompletionDisposableRef = useRef<monacoEditor.IDisposable | null>(null);
-  
+
   // Inline edit integration
   const { isOpen, selection, openInlineEdit, closeInlineEdit } = useInlineEdit();
   const [editorSelection, setEditorSelection] = useState({
@@ -208,11 +208,11 @@ export function MonacoEditorPro({
   const handleMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;
     monacoRef.current = monaco;
-    
+
     // Register custom theme
     monaco.editor.defineTheme('dark', AETHEL_DARK_THEME);
     monaco.editor.setTheme('dark');
-    
+
     // Register LSP providers for supported languages
     const lspLanguages = ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'];
     if (lspLanguages.includes(language)) {
@@ -243,7 +243,7 @@ export function MonacoEditorPro({
         console.warn('[MonacoEditorPro] Failed to register inline completions:', err);
       });
     }
-    
+
     // Configure editor
     editor.updateOptions({
       fontSize,
@@ -313,13 +313,13 @@ export function MonacoEditorPro({
         enabled: true,
       },
     });
-    
+
     // Register keybindings
     registerKeybindings(editor, monaco);
-    
+
     // Register commands
     registerCommands(editor, monaco);
-    
+
     // Setup cursor change listener
     editor.onDidChangeCursorPosition((e) => {
       onCursorChange?.({
@@ -327,7 +327,7 @@ export function MonacoEditorPro({
         column: e.position.column,
       });
     });
-    
+
     // Setup selection change listener
     editor.onDidChangeCursorSelection((e) => {
       const model = editor.getModel();
@@ -343,7 +343,7 @@ export function MonacoEditorPro({
         });
       }
     });
-    
+
     // Call user's onMount
     onMountProp?.(editor, monaco);
   // registerKeybindings/registerCommands are intentionally invoked during mount lifecycle.
@@ -402,7 +402,7 @@ export function MonacoEditorPro({
         onSave?.(value);
       },
     });
-    
+
     // Cmd+K - Inline Edit
     if (enableInlineEdit) {
       editor.addAction({
@@ -412,7 +412,7 @@ export function MonacoEditorPro({
         run: () => {
           const selection = editor.getSelection();
           const model = editor.getModel();
-          
+
           if (selection && model) {
             const selectedText = model.getValueInRange(selection);
             openInlineEdit(
@@ -427,7 +427,7 @@ export function MonacoEditorPro({
         },
       });
     }
-    
+
     // Cmd+Shift+K - Delete Line
     editor.addAction({
       id: 'aethel.deleteLine',
@@ -437,7 +437,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.deleteLines', null);
       },
     });
-    
+
     // Cmd+D - Add Selection to Next Find Match
     editor.addAction({
       id: 'aethel.addSelectionToNextFindMatch',
@@ -447,7 +447,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.addSelectionToNextFindMatch', null);
       },
     });
-    
+
     // Alt+Up/Down - Move Line
     editor.addAction({
       id: 'aethel.moveLineUp',
@@ -457,7 +457,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.moveLinesUpAction', null);
       },
     });
-    
+
     editor.addAction({
       id: 'aethel.moveLineDown',
       label: 'Move Line Down',
@@ -466,7 +466,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.moveLinesDownAction', null);
       },
     });
-    
+
     // Cmd+/ - Toggle Comment
     editor.addAction({
       id: 'aethel.toggleComment',
@@ -476,7 +476,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.commentLine', null);
       },
     });
-    
+
     // F2 - Rename Symbol
     editor.addAction({
       id: 'aethel.rename',
@@ -486,7 +486,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.rename', null);
       },
     });
-    
+
     // F12 - Go to Definition
     editor.addAction({
       id: 'aethel.goToDefinition',
@@ -496,7 +496,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.revealDefinition', null);
       },
     });
-    
+
     // Cmd+. - Quick Fix
     editor.addAction({
       id: 'aethel.quickFix',
@@ -524,7 +524,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.action.formatDocument', null);
       },
     });
-    
+
     // Fold All
     editor.addAction({
       id: 'aethel.foldAll',
@@ -534,7 +534,7 @@ export function MonacoEditorPro({
         editor.trigger('', 'editor.foldAll', null);
       },
     });
-    
+
     // Unfold All
     editor.addAction({
       id: 'aethel.unfoldAll',
@@ -549,10 +549,10 @@ export function MonacoEditorPro({
   // Apply diagnostics decorations
   useEffect(() => {
     if (!editorRef.current || !monacoRef.current || !enableErrorDecorations) return;
-    
+
     const editor = editorRef.current;
     const monaco = monacoRef.current;
-    
+
     const decorations: monacoEditor.editor.IModelDeltaDecoration[] = diagnostics.map(diag => {
       const severity = {
         error: monaco.MarkerSeverity.Error,
@@ -560,14 +560,14 @@ export function MonacoEditorPro({
         info: monaco.MarkerSeverity.Info,
         hint: monaco.MarkerSeverity.Hint,
       }[diag.severity];
-      
+
       const className = {
         error: 'editor-error-decoration',
         warning: 'editor-warning-decoration',
         info: 'editor-info-decoration',
         hint: 'editor-hint-decoration',
       }[diag.severity];
-      
+
       return {
         range: new monaco.Range(
           diag.line,
@@ -585,24 +585,24 @@ export function MonacoEditorPro({
         },
       };
     });
-    
+
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
   }, [diagnostics, enableErrorDecorations]);
 
   // Apply git decorations
   useEffect(() => {
     if (!editorRef.current || !monacoRef.current || !enableGitDecorations) return;
-    
+
     const editor = editorRef.current;
     const monaco = monacoRef.current;
-    
+
     const gitDecorations: monacoEditor.editor.IModelDeltaDecoration[] = gitChanges.map(change => {
       const glyphClass = {
         added: 'git-glyph-added',
         modified: 'git-glyph-modified',
         deleted: 'git-glyph-deleted',
       }[change.type];
-      
+
       return {
         range: new monaco.Range(change.startLine, 1, change.endLine, 1),
         options: {
@@ -611,7 +611,7 @@ export function MonacoEditorPro({
         },
       };
     });
-    
+
     // Apply separately from diagnostics
     editor.deltaDecorations([], gitDecorations);
   }, [gitChanges, enableGitDecorations]);
@@ -787,7 +787,7 @@ export function MonacoEditorPro({
     onSave?.(nextDocument);
     setInlineEditFeedback({
       type: 'success',
-      message: 'Patch applied and persisted.',
+      message: 'Patch aplicado e persistido.',
     });
     setInlineEditNeedsFullAccess(false);
     return true;
@@ -799,8 +799,8 @@ export function MonacoEditorPro({
         <div
           className={`absolute right-2 top-2 z-30 max-w-[420px] rounded border px-2 py-1 text-xs ${
             inlineEditFeedback.type === 'error'
-              ? 'border-red-500/40 bg-red-500/10 text-red-200'
-              : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
+              ? 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]'
+              : 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
           }`}
           role="status"
           aria-live="polite"
@@ -810,7 +810,7 @@ export function MonacoEditorPro({
             <button
               type="button"
               onClick={onRequestFullAccess}
-              className="mt-1 rounded border border-cyan-500/40 bg-cyan-500/10 px-2 py-0.5 text-[11px] text-cyan-100 hover:bg-cyan-500/20"
+              className="mt-1 rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2 py-0.5 text-[11px] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
             >
               Enable Full Access
             </button>
@@ -838,7 +838,7 @@ export function MonacoEditorPro({
           </div>
         }
       />
-      
+
       {/* Inline Edit Modal */}
       {enableInlineEdit && (
         <InlineEditModal
@@ -851,7 +851,7 @@ export function MonacoEditorPro({
           cursorPosition={selection.position}
         />
       )}
-      
+
       {/* CSS for decorations */}
       <style jsx global>{`
         .editor-error-decoration {

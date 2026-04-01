@@ -1,6 +1,6 @@
 ﻿/**
- * AETHEL ENGINE - Creator Dashboard
- * 
+ * AETHEL ENGINE - Painel do criador
+ *
  * Full creator dashboard for asset sellers with:
  * - Analytics overview
  * - Revenue tracking
@@ -14,8 +14,8 @@
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { 
-    BarChart3, DollarSign, Download, Eye, Star, 
+import {
+    BarChart3, DollarSign, Download, Eye, Star,
     TrendingUp, TrendingDown, Package, MessageSquare,
     Settings, Upload, Edit, Trash2, MoreVertical,
     ChevronRight,
@@ -112,10 +112,10 @@ interface RecentSale {
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const STATUS_CONFIG = {
-    published: { label: 'Published', color: 'bg-green-500', icon: CheckCircle },
-    draft: { label: 'Draft', color: 'bg-muted', icon: Clock },
-    pending: { label: 'Pending Review', color: 'bg-yellow-500', icon: AlertCircle },
-    rejected: { label: 'Rejected', color: 'bg-red-500', icon: XCircle },
+    published: { label: 'Publicado', color: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]', icon: CheckCircle },
+    draft: { label: 'Rascunho', color: 'bg-muted', icon: Clock },
+    pending: { label: 'Revisao pendente', color: 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]', icon: AlertCircle },
+    rejected: { label: 'Rejeitado', color: 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]', icon: XCircle },
 };
 
 function isNotImplementedError(error: Error | null | undefined): boolean {
@@ -153,7 +153,7 @@ async function buildApiError(response: Response, fallbackMessage: string): Promi
 async function fetchCreatorStats(): Promise<DashboardStats> {
     const response = await fetch('/api/marketplace/creator/stats');
     if (!response.ok) {
-        throw await buildApiError(response, 'Failed to fetch creator stats');
+        throw await buildApiError(response, 'Falha ao carregar estatisticas do criador');
     }
     return response.json();
 }
@@ -161,7 +161,7 @@ async function fetchCreatorStats(): Promise<DashboardStats> {
 async function fetchRevenueData(): Promise<RevenueData[]> {
     const response = await fetch('/api/marketplace/creator/revenue');
     if (!response.ok) {
-        throw await buildApiError(response, 'Failed to fetch revenue data');
+        throw await buildApiError(response, 'Falha ao carregar dados de receita');
     }
     return response.json();
 }
@@ -169,7 +169,7 @@ async function fetchRevenueData(): Promise<RevenueData[]> {
 async function fetchCreatorAssets(): Promise<AssetPerformance[]> {
     const response = await fetch('/api/marketplace/creator/assets');
     if (!response.ok) {
-        throw await buildApiError(response, 'Failed to fetch assets');
+        throw await buildApiError(response, 'Falha ao carregar assets');
     }
     return response.json();
 }
@@ -196,11 +196,11 @@ function LoadingCard() {
     );
 }
 
-function ErrorState({ 
-    message, 
-    onRetry 
-}: { 
-    message: string; 
+function ErrorState({
+    message,
+    onRetry
+}: {
+    message: string;
     onRetry: () => void;
 }) {
     return (
@@ -209,17 +209,17 @@ function ErrorState({
             <p className="text-sm text-muted-foreground text-center">{message}</p>
             <Button variant="outline" size="sm" onClick={onRetry}>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
+                Tentar novamente
             </Button>
         </div>
     );
 }
 
-function EmptyState({ 
-    icon: Icon, 
-    title, 
-    description 
-}: { 
+function EmptyState({
+    icon: Icon,
+    title,
+    description
+}: {
     icon: React.ElementType;
     title: string;
     description: string;
@@ -241,14 +241,14 @@ function EmptyState({
 // Sub-Components
 // ============================================================================
 
-function StatCard({ 
-    title, 
-    value, 
-    change, 
+function StatCard({
+    title,
+    value,
+    change,
     icon: Icon,
     prefix = '',
-    suffix = '' 
-}: { 
+    suffix = ''
+}: {
     title: string;
     value: number | string;
     change: number;
@@ -257,7 +257,7 @@ function StatCard({
     suffix?: string;
 }) {
     const isPositive = change >= 0;
-    
+
     return (
         <Card>
             <CardContent className="p-6">
@@ -269,7 +269,7 @@ function StatCard({
                         </p>
                         <div className={cn(
                             "flex items-center gap-1 text-sm mt-2",
-                            isPositive ? "text-green-500" : "text-red-500"
+                            isPositive ? "text-[var(--aethel-success-light)]" : "text-[var(--aethel-error-light)]"
                         )}>
                             {isPositive ? (
                                 <TrendingUp className="w-4 h-4" />
@@ -277,7 +277,7 @@ function StatCard({
                                 <TrendingDown className="w-4 h-4" />
                             )}
                             <span>{isPositive ? '+' : ''}{change}%</span>
-                            <span className="text-muted-foreground">vs last month</span>
+                            <span className="text-muted-foreground">vs mes anterior</span>
                         </div>
                     </div>
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -289,7 +289,7 @@ function StatCard({
     );
 }
 
-function RevenueChart({ data, isLoading, error, onRetry }: { 
+function RevenueChart({ data, isLoading, error, onRetry }: {
     data: RevenueData[];
     isLoading: boolean;
     error: Error | null;
@@ -301,16 +301,16 @@ function RevenueChart({ data, isLoading, error, onRetry }: {
         <Card className="col-span-2">
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                    <CardTitle>Revenue Overview</CardTitle>
-                    <CardDescription>Your earnings over time</CardDescription>
+                    <CardTitle>Visao de receita</CardTitle>
+                    <CardDescription>Seus ganhos ao longo do tempo</CardDescription>
                 </div>
                 <div className="w-32">
                     <Select
                         options={[
-                            { value: '7d', label: 'Last 7 days' },
-                            { value: '30d', label: 'Last 30 days' },
-                            { value: '90d', label: 'Last 90 days' },
-                            { value: '1y', label: 'Last year' },
+                            { value: '7d', label: 'Ultimos 7 dias' },
+                            { value: '30d', label: 'Ultimos 30 dias' },
+                            { value: '90d', label: 'Ultimos 90 dias' },
+                            { value: '1y', label: 'Ultimo ano' },
                         ]}
                         value={period}
                         onChange={setPeriod}
@@ -326,17 +326,17 @@ function RevenueChart({ data, isLoading, error, onRetry }: {
                     isNotImplementedError(error) ? (
                         <EmptyState
                             icon={AlertCircle}
-                            title="Revenue timeline unavailable"
+                            title="Linha do tempo de receita indisponivel"
                             description={stripErrorCodePrefix(error.message)}
                         />
                     ) : (
-                        <ErrorState message={error.message || 'Unable to load revenue data'} onRetry={onRetry} />
+                        <ErrorState message={error.message || 'Falha ao carregar dados de receita'} onRetry={onRetry} />
                     )
                 ) : data.length === 0 ? (
-                    <EmptyState 
+                    <EmptyState
                         icon={TrendingUp}
-                        title="No revenue data yet"
-                        description="Your revenue chart will populate as you start making sales on the marketplace."
+                        title="Sem dados de receita ainda"
+                        description="Seu grafico de receita aparecera quando suas vendas iniciarem no marketplace."
                     />
                 ) : (
                     <div className="h-80">
@@ -349,33 +349,33 @@ function RevenueChart({ data, isLoading, error, onRetry }: {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                                <XAxis 
-                                    dataKey="date" 
-                                    tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                <XAxis
+                                    dataKey="date"
+                                    tickFormatter={(date) => new Date(date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })}
                                     stroke="hsl(var(--muted-foreground))"
                                     fontSize={12}
                                 />
-                                <YAxis 
+                                <YAxis
                                     stroke="hsl(var(--muted-foreground))"
                                     fontSize={12}
                                     tickFormatter={(value) => `$${value}`}
                                 />
-                                <Tooltip 
-                                    contentStyle={{ 
+                                <Tooltip
+                                    contentStyle={{
                                         backgroundColor: 'hsl(var(--card))',
                                         border: '1px solid hsl(var(--border))',
                                         borderRadius: '8px',
                                     }}
-                                    formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']}
+                                    formatter={(value: number) => [`$${value.toFixed(2)}`, 'Receita']}
                                     labelFormatter={(date) => new Date(date).toLocaleDateString()}
                                 />
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="revenue" 
-                                    stroke="#3b82f6" 
+                                <Area
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="#3b82f6"
                                     strokeWidth={2}
-                                    fillOpacity={1} 
-                                    fill="url(#colorRevenue)" 
+                                    fillOpacity={1}
+                                    fill="url(#colorRevenue)"
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -395,17 +395,17 @@ interface CategoryData {
 async function fetchCategoryBreakdown(): Promise<CategoryData[]> {
     const response = await fetch('/api/marketplace/creator/categories');
     if (!response.ok) {
-        throw await buildApiError(response, 'Failed to load category data');
+        throw await buildApiError(response, 'Falha ao carregar dados de categorias');
     }
     return response.json();
 }
 
 function CategoryBreakdown() {
-    const { 
-        data, 
-        isLoading, 
-        error, 
-        refetch 
+    const {
+        data,
+        isLoading,
+        error,
+        refetch
     } = useQuery({
         queryKey: ['creator-category-breakdown'],
         queryFn: fetchCategoryBreakdown,
@@ -415,22 +415,22 @@ function CategoryBreakdown() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Sales by Category</CardTitle>
-                <CardDescription>Revenue distribution</CardDescription>
+                <CardTitle>Vendas por categoria</CardTitle>
+                <CardDescription>Distribuicao de receita</CardDescription>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
                     <LoadingSpinner className="h-48" />
                 ) : error ? (
-                    <ErrorState 
-                        message={error.message || 'Unable to load category data'} 
-                        onRetry={() => refetch()} 
+                    <ErrorState
+                        message={error.message || 'Falha ao carregar dados de categorias'}
+                        onRetry={() => refetch()}
                     />
                 ) : !data || data.length === 0 ? (
-                    <EmptyState 
+                    <EmptyState
                         icon={Package}
-                        title="No category data yet"
-                        description="Category distribution will appear here once your assets record sales."
+                        title="Sem dados de categoria ainda"
+                        description="A distribuicao por categoria aparecera quando seus assets tiverem vendas."
                     />
                 ) : (
                     <>
@@ -450,8 +450,8 @@ function CategoryBreakdown() {
                                             <Cell key={index} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip 
-                                        contentStyle={{ 
+                                    <Tooltip
+                                        contentStyle={{
                                             backgroundColor: 'hsl(var(--card))',
                                             border: '1px solid hsl(var(--border))',
                                             borderRadius: '8px',
@@ -464,13 +464,13 @@ function CategoryBreakdown() {
                             {data.map((item, index) => (
                                 <div key={item.name} className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <div 
+                                        <div
                                             className="w-3 h-3 rounded-full"
                                             style={{ backgroundColor: COLORS[index] }}
                                         />
                                         <span className="text-sm">{item.name}</span>
                                     </div>
-                                    <span className="text-sm font-medium">$ {item.revenue.toLocaleString('en-US')}</span>
+                                    <span className="text-sm font-medium">$ {item.revenue.toLocaleString('pt-BR')}</span>
                                 </div>
                             ))}
                         </div>
@@ -481,7 +481,7 @@ function CategoryBreakdown() {
     );
 }
 
-function TopAssets({ assets, isLoading, error, onRetry }: { 
+function TopAssets({ assets, isLoading, error, onRetry }: {
     assets: AssetPerformance[];
     isLoading: boolean;
     error: Error | null;
@@ -491,11 +491,11 @@ function TopAssets({ assets, isLoading, error, onRetry }: {
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                    <CardTitle>Top Performing Assets</CardTitle>
-                    <CardDescription>Your best sellers this month</CardDescription>
+                    <CardTitle>Assets com melhor desempenho</CardTitle>
+                    <CardDescription>Seus mais vendidos no mes</CardDescription>
                 </div>
                 <Button variant="ghost" size="sm">
-                    View All
+                    Ver tudo
                     <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
             </CardHeader>
@@ -503,12 +503,12 @@ function TopAssets({ assets, isLoading, error, onRetry }: {
                 {isLoading ? (
                     <LoadingSpinner className="h-48" />
                 ) : error ? (
-                    <ErrorState message={error.message || 'Unable to load top assets'} onRetry={onRetry} />
+                    <ErrorState message={error.message || 'Falha ao carregar melhores assets'} onRetry={onRetry} />
                 ) : assets.length === 0 ? (
-                    <EmptyState 
+                    <EmptyState
                         icon={Package}
-                        title="No assets yet"
-                        description="Your top performing assets will appear here once you publish your first asset."
+                        title="Nenhum asset ainda"
+                        description="Seus assets com melhor desempenho aparecerao quando voce publicar o primeiro asset."
                     />
                 ) : (
                     <div className="space-y-4">
@@ -534,7 +534,7 @@ function TopAssets({ assets, isLoading, error, onRetry }: {
                                 <div className="text-right">
                                     <p className="font-medium">${(asset.revenue / 100).toFixed(2)}</p>
                                     <p className="text-sm text-muted-foreground">
-                                        {asset.downloads} sales
+                                        {asset.downloads} vendas
                                     </p>
                                 </div>
                             </div>
@@ -546,7 +546,7 @@ function TopAssets({ assets, isLoading, error, onRetry }: {
     );
 }
 
-function AssetTable({ assets, isLoading, error, onRetry }: { 
+function AssetTable({ assets, isLoading, error, onRetry }: {
     assets: AssetPerformance[];
     isLoading: boolean;
     error: Error | null;
@@ -556,24 +556,24 @@ function AssetTable({ assets, isLoading, error, onRetry }: {
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                    <CardTitle>All Assets</CardTitle>
-                    <CardDescription>Manage your published assets</CardDescription>
+                    <CardTitle>Todos os assets</CardTitle>
+                    <CardDescription>Gerencie seus assets publicados</CardDescription>
                 </div>
                 <Button>
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload New
+                    Enviar novo
                 </Button>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
                     <LoadingSpinner className="h-48" />
                 ) : error ? (
-                    <ErrorState message={error.message || 'Unable to load your assets'} onRetry={onRetry} />
+                    <ErrorState message={error.message || 'Falha ao carregar seus assets'} onRetry={onRetry} />
                 ) : assets.length === 0 ? (
-                    <EmptyState 
+                    <EmptyState
                         icon={FileX}
-                        title="No assets published"
-                        description="Start by uploading your first asset to the marketplace. Your assets will appear here for easy management."
+                        title="Nenhum asset publicado"
+                        description="Envie seu primeiro asset para o marketplace. Seus assets aparecerao aqui para facilitar a gestao."
                     />
                 ) : (
                     <Table>
@@ -581,10 +581,10 @@ function AssetTable({ assets, isLoading, error, onRetry }: {
                             <TableRow>
                                 <TableHead>Asset</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Price</TableHead>
-                                <TableHead className="text-right">Revenue</TableHead>
+                                <TableHead className="text-right">Preco</TableHead>
+                                <TableHead className="text-right">Receita</TableHead>
                                 <TableHead className="text-right">Downloads</TableHead>
-                                <TableHead className="text-right">Rating</TableHead>
+                                <TableHead className="text-right">Avaliacao</TableHead>
                                 <TableHead></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -614,13 +614,13 @@ function AssetTable({ assets, isLoading, error, onRetry }: {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge 
+                                            <Badge
                                                 variant="secondary"
                                                 className={cn(
                                                     "gap-1",
-                                                    asset.status === 'published' && "bg-green-100 text-green-800",
-                                                    asset.status === 'pending' && "bg-yellow-100 text-yellow-800",
-                                                    asset.status === 'rejected' && "bg-red-100 text-red-800"
+                                                    asset.status === 'published' && "bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]",
+                                                    asset.status === 'pending' && "bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]",
+                                                    asset.status === 'rejected' && "bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]"
                                                 )}
                                             >
                                                 <StatusIcon className="w-3 h-3" />
@@ -638,7 +638,7 @@ function AssetTable({ assets, isLoading, error, onRetry }: {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-1">
-                                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                                <Star className="w-4 h-4 fill-yellow-400 text-[var(--aethel-warning-light)]" />
                                                 {asset.rating.toFixed(1)}
                                             </div>
                                         </TableCell>
@@ -652,20 +652,20 @@ function AssetTable({ assets, isLoading, error, onRetry }: {
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuItem>
                                                         <Edit className="w-4 h-4 mr-2" />
-                                                        Edit
+                                                        Editar
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem>
                                                         <Eye className="w-4 h-4 mr-2" />
-                                                        View
+                                                        Ver
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem>
                                                         <BarChart3 className="w-4 h-4 mr-2" />
-                                                        Analytics
+                                                        Analiticos
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
-                                                    <DropdownMenuItem className="text-red-500">
+                                                    <DropdownMenuItem className="text-[var(--aethel-error-light)]">
                                                         <Trash2 className="w-4 h-4 mr-2" />
-                                                        Delete
+                                                        Excluir
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
@@ -684,7 +684,7 @@ function AssetTable({ assets, isLoading, error, onRetry }: {
 async function fetchRecentSales(): Promise<RecentSale[]> {
     const response = await fetch('/api/marketplace/creator/sales/recent');
     if (!response.ok) {
-        throw await buildApiError(response, 'Failed to load recent sales');
+        throw await buildApiError(response, 'Falha ao carregar vendas recentes');
     }
     return response.json();
 }
@@ -694,25 +694,25 @@ function formatTimeAgo(dateString: string): string {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
-    
-    if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    
+
+    if (diffMins < 1) return 'agora';
+    if (diffMins < 60) return `${diffMins}m atras`;
+
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    
+    if (diffHours < 24) return `${diffHours}h atras`;
+
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
-    
-    return date.toLocaleDateString('en-US');
+    if (diffDays < 7) return `${diffDays}d atras`;
+
+    return date.toLocaleDateString('pt-BR');
 }
 
 function RecentSales() {
-    const { 
-        data: sales, 
-        isLoading, 
-        error, 
-        refetch 
+    const {
+        data: vendas,
+        isLoading,
+        error,
+        refetch
     } = useQuery({
         queryKey: ['creator-recent-sales'],
         queryFn: fetchRecentSales,
@@ -722,8 +722,8 @@ function RecentSales() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Recent Sales</CardTitle>
-                <CardDescription>Latest transactions</CardDescription>
+                <CardTitle>Vendas recentes</CardTitle>
+                <CardDescription>Ultimas transacoes</CardDescription>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -732,20 +732,20 @@ function RecentSales() {
                     isNotImplementedError(error) ? (
                         <EmptyState
                             icon={AlertCircle}
-                            title="Recent sales unavailable"
+                            title="Vendas recentes indisponiveis"
                             description={stripErrorCodePrefix(error.message)}
                         />
                     ) : (
-                        <ErrorState 
-                            message={error.message || 'Unable to load recent sales'} 
-                            onRetry={() => refetch()} 
+                        <ErrorState
+                            message={error.message || 'Falha ao carregar vendas recentes'}
+                            onRetry={() => refetch()}
                         />
                     )
-                ) : !sales || sales.length === 0 ? (
-                    <EmptyState 
+                ) : !sales || vendas.length === 0 ? (
+                    <EmptyState
                         icon={Inbox}
-                        title="No sales yet"
-                        description="Recent sales will appear here when your assets start selling."
+                        title="Sem vendas ainda"
+                        description="As vendas recentes aparecerao quando seus assets comecarem a vender."
                     />
                 ) : (
                     <div className="space-y-4">
@@ -759,7 +759,7 @@ function RecentSales() {
                                     <p className="text-sm text-muted-foreground">{sale.buyerName}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-medium text-green-500">+$ {sale.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                                    <p className="font-medium text-[var(--aethel-success-light)]">+$ {sale.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                     <p className="text-sm text-muted-foreground">{formatTimeAgo(sale.date)}</p>
                                 </div>
                             </div>
@@ -779,11 +779,11 @@ export default function CreatorDashboard() {
     const [activeTab, setActiveTab] = useState('overview');
 
     // Fetch stats
-    const { 
-        data: stats, 
-        isLoading: statsLoading, 
+    const {
+        data: stats,
+        isLoading: statsLoading,
         error: statsError,
-        refetch: refetchStats 
+        refetch: refetchStats
     } = useQuery({
         queryKey: ['creator-stats'],
         queryFn: fetchCreatorStats,
@@ -791,11 +791,11 @@ export default function CreatorDashboard() {
     });
 
     // Fetch revenue data
-    const { 
-        data: revenueData, 
-        isLoading: revenueLoading, 
+    const {
+        data: revenueData,
+        isLoading: revenueLoading,
         error: revenueError,
-        refetch: refetchRevenue 
+        refetch: refetchRevenue
     } = useQuery({
         queryKey: ['creator-revenue'],
         queryFn: fetchRevenueData,
@@ -803,11 +803,11 @@ export default function CreatorDashboard() {
     });
 
     // Fetch assets
-    const { 
-        data: assets, 
-        isLoading: assetsLoading, 
+    const {
+        data: assets,
+        isLoading: assetsLoading,
         error: assetsError,
-        refetch: refetchAssets 
+        refetch: refetchAssets
     } = useQuery({
         queryKey: ['creator-assets'],
         queryFn: fetchCreatorAssets,
@@ -845,23 +845,23 @@ export default function CreatorDashboard() {
             <header className="border-b px-6 py-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Creator Dashboard</h1>
+                        <h1 className="text-2xl font-bold">Painel do criador</h1>
                         <p className="text-muted-foreground">
-                            Manage your assets and track performance
+                            Gerencie seus assets e acompanhe desempenho
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="outline" onClick={handleRefetchAll} disabled={isRefreshing}>
                             <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                            Refresh
+                            Atualizar
                         </Button>
                         <Button variant="outline">
                             <Settings className="w-4 h-4 mr-2" />
-                            Settings
+                            Configuracoes
                         </Button>
                         <Button>
                             <Upload className="w-4 h-4 mr-2" />
-                            Upload Asset
+                            Enviar asset
                         </Button>
                     </div>
                 </div>
@@ -873,7 +873,7 @@ export default function CreatorDashboard() {
                     <TabList className="h-12">
                         <TabTrigger value="overview" className="gap-2">
                             <BarChart3 className="w-4 h-4" />
-                            Overview
+                            Visao geral
                         </TabTrigger>
                         <TabTrigger value="assets" className="gap-2">
                             <Package className="w-4 h-4" />
@@ -881,11 +881,11 @@ export default function CreatorDashboard() {
                         </TabTrigger>
                         <TabTrigger value="analytics" className="gap-2">
                             <TrendingUp className="w-4 h-4" />
-                            Analytics
+                            Analiticos
                         </TabTrigger>
                         <TabTrigger value="reviews" className="gap-2">
                             <MessageSquare className="w-4 h-4" />
-                            Reviews
+                            Avaliacoes
                             {displayStats.pendingReviews > 0 && (
                                 <Badge variant="secondary" className="ml-1">
                                     {displayStats.pendingReviews}
@@ -894,7 +894,7 @@ export default function CreatorDashboard() {
                         </TabTrigger>
                         <TabTrigger value="payouts" className="gap-2">
                             <DollarSign className="w-4 h-4" />
-                            Payouts
+                            Pagamentos
                         </TabTrigger>
                     </TabList>
                 </div>
@@ -914,16 +914,16 @@ export default function CreatorDashboard() {
                             ) : statsError ? (
                                 <Card className="col-span-4">
                                     <CardContent className="p-6">
-                                        <ErrorState 
-                                            message="Unable to load dashboard statistics" 
-                                            onRetry={() => refetchStats()} 
+                                        <ErrorState
+                                            message="Falha ao carregar estatisticas do painel"
+                                            onRetry={() => refetchStats()}
                                         />
                                     </CardContent>
                                 </Card>
                             ) : (
                                 <>
                                     <StatCard
-                                        title="Total Revenue"
+                                        title="Receita total"
                                         value={displayStats.totalRevenue}
                                         change={displayStats.revenueChange}
                                         icon={DollarSign}
@@ -936,13 +936,13 @@ export default function CreatorDashboard() {
                                         icon={Download}
                                     />
                                     <StatCard
-                                        title="Views"
+                                        title="Visualizacoes"
                                         value={displayStats.totalViews}
                                         change={displayStats.viewsChange}
                                         icon={Eye}
                                     />
                                     <StatCard
-                                        title="Average Rating"
+                                        title="Media de avaliacao"
                                         value={displayStats.averageRating}
                                         change={displayStats.ratingChange}
                                         icon={Star}
@@ -953,8 +953,8 @@ export default function CreatorDashboard() {
 
                         {/* Charts */}
                         <div className="grid grid-cols-3 gap-6 mb-6">
-                            <RevenueChart 
-                                data={revenueData ?? []} 
+                            <RevenueChart
+                                data={revenueData ?? []}
                                 isLoading={revenueLoading}
                                 error={revenueError as Error | null}
                                 onRetry={() => refetchRevenue()}
@@ -964,8 +964,8 @@ export default function CreatorDashboard() {
 
                         {/* Bottom Grid */}
                         <div className="grid grid-cols-2 gap-6">
-                            <TopAssets 
-                                assets={assets ?? []} 
+                            <TopAssets
+                                assets={assets ?? []}
                                 isLoading={assetsLoading}
                                 error={assetsError as Error | null}
                                 onRetry={() => refetchAssets()}
@@ -976,8 +976,8 @@ export default function CreatorDashboard() {
 
                     {/* Assets Tab */}
                     <TabContent value="assets" className="p-6 m-0">
-                        <AssetTable 
-                            assets={assets ?? []} 
+                        <AssetTable
+                            assets={assets ?? []}
                             isLoading={assetsLoading}
                             error={assetsError as Error | null}
                             onRetry={() => refetchAssets()}
@@ -987,16 +987,16 @@ export default function CreatorDashboard() {
                     {/* Analytics Tab */}
                     <TabContent value="analytics" className="p-6 m-0">
                         <div className="grid grid-cols-2 gap-6">
-                            <RevenueChart 
-                                data={revenueData ?? []} 
+                            <RevenueChart
+                                data={revenueData ?? []}
                                 isLoading={revenueLoading}
                                 error={revenueError as Error | null}
                                 onRetry={() => refetchRevenue()}
                             />
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Download Trends</CardTitle>
-                                    <CardDescription>Daily downloads over time</CardDescription>
+                                    <CardTitle>Tendencias de download</CardTitle>
+                                    <CardDescription>Downloads diarios ao longo do tempo</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     {revenueLoading ? (
@@ -1005,38 +1005,38 @@ export default function CreatorDashboard() {
                                         isNotImplementedError(revenueError as Error) ? (
                                             <EmptyState
                                                 icon={AlertCircle}
-                                                title="Download trends unavailable"
+                                                title="Tendencias de download indisponiveis"
                                                 description={stripErrorCodePrefix((revenueError as Error).message)}
                                             />
                                         ) : (
-                                            <ErrorState 
-                                                message="Unable to load download trends" 
-                                                onRetry={() => refetchRevenue()} 
+                                            <ErrorState
+                                                message="Falha ao carregar tendencias de download"
+                                                onRetry={() => refetchRevenue()}
                                             />
                                         )
                                     ) : !revenueData || revenueData.length === 0 ? (
-                                        <EmptyState 
+                                        <EmptyState
                                             icon={Download}
-                                            title="No download data yet"
-                                            description="Download trends will appear here once your assets start getting traction."
+                                            title="Sem dados de download ainda"
+                                            description="As tendencias de download aparecerao quando seus assets ganharem tracao."
                                         />
                                     ) : (
                                         <div className="h-80">
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <BarChart data={revenueData.slice(-14)}>
                                                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                                                    <XAxis 
-                                                        dataKey="date" 
-                                                        tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { weekday: 'short' })}
+                                                    <XAxis
+                                                        dataKey="date"
+                                                        tickFormatter={(date) => new Date(date).toLocaleDateString('pt-BR', { weekday: 'short' })}
                                                         stroke="hsl(var(--muted-foreground))"
                                                         fontSize={12}
                                                     />
-                                                    <YAxis 
+                                                    <YAxis
                                                         stroke="hsl(var(--muted-foreground))"
                                                         fontSize={12}
                                                     />
-                                                    <Tooltip 
-                                                        contentStyle={{ 
+                                                    <Tooltip
+                                                        contentStyle={{
                                                             backgroundColor: 'hsl(var(--card))',
                                                             border: '1px solid hsl(var(--border))',
                                                             borderRadius: '8px',
@@ -1056,12 +1056,12 @@ export default function CreatorDashboard() {
                     <TabContent value="reviews" className="p-6 m-0">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Pending Reviews</CardTitle>
-                                <CardDescription>Reviews awaiting your response</CardDescription>
+                                <CardTitle>Avaliacoes pendentes</CardTitle>
+                                <CardDescription>Avaliacoes aguardando sua resposta</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <p className="text-muted-foreground text-center py-8">
-                                    No pending reviews at this time
+                                    Sem avaliacoes pendentes no momento
                                 </p>
                             </CardContent>
                         </Card>
@@ -1074,12 +1074,12 @@ export default function CreatorDashboard() {
                                 <CardContent className="p-6">
                                     <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Available Balance (Estimated)</p>
+                                    <p className="text-sm text-muted-foreground">Saldo disponivel (estimado)</p>
                                     <p className="text-3xl font-bold mt-1">
-                                        ${estimatedAvailableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ${estimatedAvailableBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-2">
-                                        Estimated from marketplace aggregate metrics.
+                                        Estimado a partir de metricas agregadas do marketplace.
                                     </p>
                                 </div>
                                 <Badge variant="secondary" className="text-[10px]">
@@ -1090,23 +1090,23 @@ export default function CreatorDashboard() {
                     </Card>
                             <Card>
                                 <CardContent className="p-6">
-                                    <p className="text-sm text-muted-foreground">Pending</p>
+                                    <p className="text-sm text-muted-foreground">Pendente</p>
                                     <p className="text-2xl font-bold mt-1">
-                                        ${estimatedPendingBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ${estimatedPendingBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                     <p className="text-sm text-muted-foreground mt-2">
-                                        Payout pipeline is unavailable until transaction ledger is enabled.
+                                        Pipeline de payouts indisponivel ate habilitar o ledger de transacoes.
                                     </p>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent className="p-6">
-                                    <p className="text-sm text-muted-foreground">Total Earned</p>
+                                    <p className="text-sm text-muted-foreground">Total recebido</p>
                                     <p className="text-2xl font-bold mt-1">
-                                        ${estimatedTotalEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ${estimatedTotalEarned.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                     <p className="text-sm text-muted-foreground mt-2">
-                                        Estimated total based on current marketplace data model.
+                                        Total estimado com base no modelo atual de dados do marketplace.
                                     </p>
                                 </CardContent>
                             </Card>

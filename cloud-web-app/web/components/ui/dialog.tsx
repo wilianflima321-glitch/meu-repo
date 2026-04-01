@@ -102,13 +102,13 @@ export function DialogContent({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="fixed inset-0 bg-black/60"
+        className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)]"
         onClick={() => setOpen(false)}
         aria-hidden="true"
       />
       <div
         className={cn(
-          'relative z-10 w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl',
+          'relative z-10 w-full max-w-lg rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-6 shadow-2xl',
           className
         )}
       >
@@ -134,7 +134,7 @@ export function DialogTitle({
   className,
 }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn('text-lg font-semibold text-slate-100', className)}>
+    <h3 className={cn('text-lg font-semibold text-[var(--aethel-text-primary)]', className)}>
       {children}
     </h3>
   );
@@ -145,7 +145,7 @@ export function DialogDescription({
   className,
 }: HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn('text-sm text-slate-400', className)}>{children}</p>
+    <p className={cn('text-sm text-[var(--aethel-text-tertiary)]', className)}>{children}</p>
   );
 }
 

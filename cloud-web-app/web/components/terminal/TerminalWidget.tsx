@@ -1,6 +1,6 @@
 /**
  * Aethel Engine - Terminal Widget Component
- * 
+ *
  * Componente React de terminal profissional com:
  * - WebSocket PTY real
  * - Tabs múltiplas
@@ -255,19 +255,19 @@ interface TabsProps {
 const Tabs: React.FC<TabsProps> = ({ tabs, onSelectTab, onCloseTab, onRenameTab }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
-  
+
   const handleDoubleClick = (tab: TerminalTab) => {
     setEditingId(tab.id);
     setEditValue(tab.name);
   };
-  
+
   const handleBlur = () => {
     if (editingId && editValue.trim()) {
       onRenameTab(editingId, editValue.trim());
     }
     setEditingId(null);
   };
-  
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleBlur();
@@ -275,7 +275,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onSelectTab, onCloseTab, onRenameTab 
       setEditingId(null);
     }
   };
-  
+
   return (
     <div className="terminal-tabs">
       {tabs.map((tab) => (
@@ -394,13 +394,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   useEffect(() => {
     if (visible && inputRef.current) {
       inputRef.current.focus();
     }
   }, [visible]);
-  
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       if (e.shiftKey) {
@@ -412,9 +412,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
       onClose();
     }
   };
-  
+
   if (!visible) return null;
-  
+
   return (
     <div className="search-bar">
       <input
@@ -556,9 +556,9 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [searchVisible, setSearchVisible] = useState(false);
-  
+
   const activeTab = tabs.find((t) => t.id === activeTabId);
-  
+
   const {
     terminalRef,
     isConnected,
@@ -588,7 +588,7 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
 
   const handleNewTab = useCallback(() => {
     if (tabs.length >= maxTabs) return;
-    
+
     const id = `terminal_${Date.now()}`;
     const newTab: TerminalTab = {
       id,
@@ -598,14 +598,14 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
       shell: initialShell,
       isActive: true,
     };
-    
+
     setTabs((prev) => [
       ...prev.map((t) => ({ ...t, isActive: false })),
       newTab,
     ]);
     setActiveTabId(id);
   }, [tabs.length, maxTabs, initialCwd, initialShell]);
-  
+
   // Update session ID when created
   useEffect(() => {
     if (sessionId && activeTabId) {
@@ -617,14 +617,14 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
       onSessionCreated?.(sessionId);
     }
   }, [sessionId, activeTabId, onSessionCreated]);
-  
+
   // Create initial tab
   useEffect(() => {
     if (tabs.length === 0) {
       handleNewTab();
     }
   }, [tabs.length, handleNewTab]);
-  
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -644,24 +644,24 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
         focus();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [searchVisible, focus, handleNewTab, terminalRef]);
-  
+
   const handleSelectTab = useCallback((id: string) => {
     setTabs((prev) =>
       prev.map((t) => ({ ...t, isActive: t.id === id }))
     );
     setActiveTabId(id);
   }, []);
-  
+
   const handleCloseTab = useCallback((id: string) => {
     const tab = tabs.find((t) => t.id === id);
     if (tab?.sessionId) {
       onSessionClosed?.(tab.sessionId);
     }
-    
+
     setTabs((prev) => {
       const filtered = prev.filter((t) => t.id !== id);
       if (filtered.length === 0) {
@@ -686,7 +686,7 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
       }
       return filtered;
     });
-    
+
     if (id === activeTabId) {
       setTabs((prev) => {
         const active = prev.find((t) => t.isActive);
@@ -697,25 +697,25 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
       });
     }
   }, [tabs, activeTabId, initialCwd, initialShell, onSessionClosed]);
-  
+
   const handleRenameTab = useCallback((id: string, name: string) => {
     setTabs((prev) =>
       prev.map((t) => (t.id === id ? { ...t, name } : t))
     );
   }, []);
-  
+
   const handleSplit = useCallback(() => {
     // P0 fallback: keep user flow productive by opening another tab session.
     handleNewTab();
   }, [handleNewTab]);
-  
+
   const handleKill = useCallback(() => {
     disconnect();
     if (activeTabId) {
       handleCloseTab(activeTabId);
     }
   }, [disconnect, activeTabId, handleCloseTab]);
-  
+
   return (
     <div className={`terminal-widget ${className}`}>
       {showTabs && (

@@ -18,19 +18,19 @@ export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   };
 
   return (
-    <div className="h-8 bg-slate-800 border-b border-slate-700 flex items-center px-3 text-sm">
+    <div className="h-8 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-primary)] flex items-center px-3 text-sm">
       {items.map((item, index) => (
         <div key={index} className="flex items-center">
           {index > 0 && (
-            <span className="mx-2 text-slate-600">›</span>
+            <span className="mx-2 text-[var(--aethel-text-quaternary)]">›</span>
           )}
           <button
             onClick={() => handleClick(item)}
             disabled={!item.path}
             className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
               item.path
-                ? 'text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer'
-                : 'text-white cursor-default'
+                ? 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] cursor-pointer'
+                : 'text-[var(--aethel-text-primary)] cursor-default'
             }`}
           >
             {item.icon && <span>{item.icon}</span>}

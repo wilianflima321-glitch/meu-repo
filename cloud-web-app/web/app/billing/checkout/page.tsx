@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getToken } from '@/lib/auth';
 
-const ALLOWED_PLANS = new Set(['starter', 'basic', 'pro', 'studio', 'enterprise']);
+const SELF_SERVE_PLANS = new Set(['starter', 'basic', 'pro', 'studio']);
 const ALLOWED_INTERVALS = new Set(['month', 'year']);
 
 export default function BillingCheckoutPage() {
@@ -16,7 +16,7 @@ export default function BillingCheckoutPage() {
 
   const planId = useMemo(() => {
     const raw = (searchParams.get('plan') || searchParams.get('planId') || '').trim().toLowerCase();
-    return ALLOWED_PLANS.has(raw) ? raw : '';
+    return raw;
   }, [searchParams]);
 
   const interval = useMemo(() => {
@@ -29,6 +29,15 @@ export default function BillingCheckoutPage() {
       try {
         if (!planId) {
           throw new Error('Plano inválido para checkout.');
+        }
+
+        if (planId === 'enterprise') {
+          router.replace('/contact-sales?source=billing-checkout-enterprise');
+          return;
+        }
+
+        if (!SELF_SERVE_PLANS.has(planId)) {
+          throw new Error('Plano invalido para checkout.');
         }
 
         const token = getToken();

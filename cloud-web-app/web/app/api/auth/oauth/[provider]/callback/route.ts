@@ -238,7 +238,8 @@ export async function GET(
     const token = generateTokenWithRole(
       user.id,
       user.email,
-      (user as any).role || 'user'
+      (user as any).role || 'user',
+      (user as any).plan || undefined
     );
 
     // Redirect to dashboard with token cookie

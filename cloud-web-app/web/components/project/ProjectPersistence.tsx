@@ -168,23 +168,23 @@ export function serializeProject(project: ProjectData): string {
       }
     }
   }
-  
+
   return JSON.stringify(file, null, 2)
 }
 
 export function deserializeProject(content: string): ProjectData {
   const file = JSON.parse(content) as ProjectFile
-  
+
   if (file.magic !== PROJECT_FILE_MAGIC) {
     throw new Error('Invalid project file format')
   }
-  
+
   // Version migration could happen here
   if (file.version !== PROJECT_FILE_VERSION) {
     console.warn(`Project version mismatch: ${file.version} vs ${PROJECT_FILE_VERSION}. Attempting migration...`)
     // Future: Add migration logic
   }
-  
+
   return file.data
 }
 
@@ -199,13 +199,13 @@ export function saveProjectToLocalStorage(project: ProjectData): void {
   try {
     const projects = getProjectsFromLocalStorage()
     const index = projects.findIndex(p => p.metadata.id === project.metadata.id)
-    
+
     if (index >= 0) {
       projects[index] = project
     } else {
       projects.push(project)
     }
-    
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects))
   } catch (error) {
     console.error('Failed to save project to local storage:', error)
@@ -268,7 +268,7 @@ export async function saveProjectToFile(project: ProjectData): Promise<void> {
     downloadProject(project)
     return
   }
-  
+
   try {
     const handle = await (window as any).showSaveFilePicker({
       suggestedName: `${project.metadata.name}${PROJECT_FILE_EXTENSION}`,
@@ -277,7 +277,7 @@ export async function saveProjectToFile(project: ProjectData): Promise<void> {
         accept: { 'application/json': [PROJECT_FILE_EXTENSION] }
       }]
     })
-    
+
     const writable = await handle.createWritable()
     await writable.write(serializeProject(project))
     await writable.close()
@@ -294,7 +294,7 @@ export async function loadProjectFromFile(): Promise<ProjectData | null> {
     // Fallback: use file input
     return loadProjectViaInput()
   }
-  
+
   try {
     const [handle] = await (window as any).showOpenFilePicker({
       types: [{
@@ -302,7 +302,7 @@ export async function loadProjectFromFile(): Promise<ProjectData | null> {
         accept: { 'application/json': [PROJECT_FILE_EXTENSION] }
       }]
     })
-    
+
     const file = await handle.getFile()
     const content = await file.text()
     return deserializeProject(content)
@@ -319,7 +319,7 @@ function downloadProject(project: ProjectData): void {
   const content = serializeProject(project)
   const blob = new Blob([content], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
-  
+
   const a = document.createElement('a')
   a.href = url
   a.download = `${project.metadata.name}${PROJECT_FILE_EXTENSION}`
@@ -334,14 +334,14 @@ function loadProjectViaInput(): Promise<ProjectData | null> {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = PROJECT_FILE_EXTENSION
-    
+
     input.onchange = async () => {
       const file = input.files?.[0]
       if (!file) {
         resolve(null)
         return
       }
-      
+
       try {
         const content = await file.text()
         resolve(deserializeProject(content))
@@ -350,7 +350,7 @@ function loadProjectViaInput(): Promise<ProjectData | null> {
         resolve(null)
       }
     }
-    
+
     input.click()
   })
 }
@@ -364,34 +364,34 @@ interface ProjectContextValue {
   isDirty: boolean
   isLoading: boolean
   error: string | null
-  
+
   // Actions
   newProject: (name: string, settings?: Partial<ProjectSettings>) => Promise<void>
   openProject: () => Promise<void>
   saveProject: () => Promise<void>
   saveProjectAs: () => Promise<void>
   closeProject: () => Promise<void>
-  
+
   // Updates
   updateMetadata: (updates: Partial<ProjectMetadata>) => void
   updateSettings: (updates: Partial<ProjectSettings>) => void
   updateTimeline: (updates: Partial<Timeline>) => void
-  
+
   // Assets
   addAsset: (asset: MediaAsset) => void
   removeAsset: (assetId: string) => void
   updateAsset: (assetId: string, updates: Partial<MediaAsset>) => void
-  
+
   // Clips
   addClip: (clip: TimelineClip) => void
   removeClip: (clipId: string) => void
   updateClip: (clipId: string, updates: Partial<TimelineClip>) => void
-  
+
   // Tracks
   addTrack: (track: TimelineTrack) => void
   removeTrack: (trackId: string) => void
   updateTrack: (trackId: string, updates: Partial<TimelineTrack>) => void
-  
+
   // Recent projects
   recentProjects: ProjectMetadata[]
   openRecentProject: (projectId: string) => Promise<void>
@@ -417,14 +417,14 @@ export function ProjectProvider({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [recentProjects, setRecentProjects] = useState<ProjectMetadata[]>([])
-  
+
   // Load recent projects on mount
   useEffect(() => {
     const projects = getProjectsFromLocalStorage()
     setRecentProjects(projects.map(p => p.metadata).sort((a, b) =>
       new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime()
     ))
-    
+
     // Check for autosave recovery
     const autosave = loadAutosave()
     if (!autosave) return
@@ -441,19 +441,19 @@ export function ProjectProvider({
       clearAutosave()
     })()
   }, [])
-  
+
   // Autosave
   useEffect(() => {
     if (!project || !isDirty) return
-    
+
     const timer = setInterval(() => {
       saveAutosave(project)
       console.log('Project autosaved')
     }, autosaveInterval)
-    
+
     return () => clearInterval(timer)
   }, [project, isDirty, autosaveInterval])
-  
+
   // Warn before unload if dirty
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -462,11 +462,11 @@ export function ProjectProvider({
         e.returnValue = ''
       }
     }
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [isDirty])
-  
+
   const createDefaultProject = useCallback((name: string, settings?: Partial<ProjectSettings>): ProjectData => ({
     metadata: {
       id: `project-${Date.now()}`,
@@ -497,7 +497,7 @@ export function ProjectProvider({
       markers: []
     }
   }), [])
-  
+
   const newProject = useCallback(async (name: string, settings?: Partial<ProjectSettings>) => {
     if (isDirty) {
       const confirmed = await openConfirmDialog({
@@ -508,14 +508,14 @@ export function ProjectProvider({
       })
       if (!confirmed) return
     }
-    
+
     const newProj = createDefaultProject(name, settings)
     setProject(newProj)
     setIsDirty(false)
     setError(null)
     clearAutosave()
   }, [isDirty, createDefaultProject])
-  
+
   const openProject = useCallback(async () => {
     if (isDirty) {
       const confirmed = await openConfirmDialog({
@@ -526,17 +526,17 @@ export function ProjectProvider({
       })
       if (!confirmed) return
     }
-    
+
     setIsLoading(true)
     setError(null)
-    
+
     try {
       const loadedProject = await loadProjectFromFile()
       if (loadedProject) {
         setProject(loadedProject)
         setIsDirty(false)
         clearAutosave()
-        
+
         // Add to recent
         saveProjectToLocalStorage(loadedProject)
       }
@@ -546,13 +546,13 @@ export function ProjectProvider({
       setIsLoading(false)
     }
   }, [isDirty])
-  
+
   const saveProject = useCallback(async () => {
     if (!project) return
-    
+
     setIsLoading(true)
     setError(null)
-    
+
     try {
       await saveProjectToFile(project)
       saveProjectToLocalStorage(project)
@@ -564,10 +564,10 @@ export function ProjectProvider({
       setIsLoading(false)
     }
   }, [project])
-  
+
   const saveProjectAs = useCallback(async () => {
     if (!project) return
-    
+
     // Create a new project ID for "Save As"
     const newProject: ProjectData = {
       ...project,
@@ -577,11 +577,11 @@ export function ProjectProvider({
         createdAt: new Date().toISOString()
       }
     }
-    
+
     setProject(newProject)
     await saveProject()
   }, [project, saveProject])
-  
+
   const closeProject = useCallback(async () => {
     if (isDirty) {
       const confirmed = await openConfirmDialog({
@@ -592,12 +592,12 @@ export function ProjectProvider({
       })
       if (!confirmed) return
     }
-    
+
     setProject(null)
     setIsDirty(false)
     clearAutosave()
   }, [isDirty])
-  
+
   const updateMetadata = useCallback((updates: Partial<ProjectMetadata>) => {
     setProject(prev => prev ? {
       ...prev,
@@ -605,7 +605,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const updateSettings = useCallback((updates: Partial<ProjectSettings>) => {
     setProject(prev => prev ? {
       ...prev,
@@ -613,7 +613,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const updateTimeline = useCallback((updates: Partial<Timeline>) => {
     setProject(prev => prev ? {
       ...prev,
@@ -621,7 +621,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const addAsset = useCallback((asset: MediaAsset) => {
     setProject(prev => prev ? {
       ...prev,
@@ -629,7 +629,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const removeAsset = useCallback((assetId: string) => {
     setProject(prev => prev ? {
       ...prev,
@@ -637,7 +637,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const updateAsset = useCallback((assetId: string, updates: Partial<MediaAsset>) => {
     setProject(prev => prev ? {
       ...prev,
@@ -645,7 +645,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const addClip = useCallback((clip: TimelineClip) => {
     setProject(prev => prev ? {
       ...prev,
@@ -656,7 +656,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const removeClip = useCallback((clipId: string) => {
     setProject(prev => prev ? {
       ...prev,
@@ -667,7 +667,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const updateClip = useCallback((clipId: string, updates: Partial<TimelineClip>) => {
     setProject(prev => prev ? {
       ...prev,
@@ -678,7 +678,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const addTrack = useCallback((track: TimelineTrack) => {
     setProject(prev => prev ? {
       ...prev,
@@ -689,7 +689,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const removeTrack = useCallback((trackId: string) => {
     setProject(prev => prev ? {
       ...prev,
@@ -701,7 +701,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const updateTrack = useCallback((trackId: string, updates: Partial<TimelineTrack>) => {
     setProject(prev => prev ? {
       ...prev,
@@ -712,7 +712,7 @@ export function ProjectProvider({
     } : null)
     setIsDirty(true)
   }, [])
-  
+
   const openRecentProject = useCallback(async (projectId: string) => {
     if (isDirty) {
       const confirmed = await openConfirmDialog({
@@ -723,17 +723,17 @@ export function ProjectProvider({
       })
       if (!confirmed) return
     }
-    
+
     const projects = getProjectsFromLocalStorage()
     const found = projects.find(p => p.metadata.id === projectId)
-    
+
     if (found) {
       setProject(found)
       setIsDirty(false)
       clearAutosave()
     }
   }, [isDirty])
-  
+
   const value = useMemo<ProjectContextValue>(() => ({
     project,
     isDirty,
@@ -767,7 +767,7 @@ export function ProjectProvider({
     addTrack, removeTrack, updateTrack,
     openRecentProject
   ])
-  
+
   return (
     <ProjectContext.Provider value={value}>
       {children}
@@ -802,9 +802,9 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
   const [width, setWidth] = useState(1920)
   const [height, setHeight] = useState(1080)
   const [frameRate, setFrameRate] = useState(30)
-  
+
   if (!open) return null
-  
+
   const presets = [
     { label: '1080p HD', width: 1920, height: 1080 },
     { label: '4K UHD', width: 3840, height: 2160 },
@@ -813,7 +813,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
     { label: 'Instagram Story', width: 1080, height: 1920 },
     { label: 'YouTube Shorts', width: 1080, height: 1920 },
   ]
-  
+
   return (
     <div style={{
       position: 'fixed',
@@ -832,7 +832,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
         boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
       }}>
         <h2 style={{ color: '#fff', margin: '0 0 20px 0', fontSize: 18 }}>New Project</h2>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Project name */}
           <div>
@@ -854,7 +854,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
               }}
             />
           </div>
-          
+
           {/* Resolution presets */}
           <div>
             <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
@@ -883,7 +883,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
               ))}
             </div>
           </div>
-          
+
           {/* Custom resolution */}
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1 }}>
@@ -925,7 +925,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
               />
             </div>
           </div>
-          
+
           {/* Frame rate */}
           <div>
             <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
@@ -952,7 +952,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
             </select>
           </div>
         </div>
-        
+
         {/* Actions */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 24 }}>
           <button

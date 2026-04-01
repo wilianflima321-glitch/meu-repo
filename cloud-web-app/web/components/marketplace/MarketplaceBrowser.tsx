@@ -1,6 +1,6 @@
 /**
  * AETHEL ENGINE - Marketplace Browser Component
- * 
+ *
  * Full-featured asset marketplace browser with:
  * - Grid/List views
  * - Advanced filtering & search
@@ -15,9 +15,9 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Search, Filter, Grid, List, Heart, Star, Download, 
-    ShoppingCart, ChevronDown, X, Check, Loader2, 
+import {
+    Search, Filter, Grid, List, Heart, Star, Download,
+    ShoppingCart, ChevronDown, X, Check, Loader2,
     Package, Palette, Box, Music, Code, FileImage,
     Zap, Crown, Clock, TrendingUp, Tag, ExternalLink
 } from 'lucide-react';
@@ -37,7 +37,7 @@ import {
 import { Tabs, TabContent, TabList, TabTrigger } from '@/components/ui/Tabs';
 import { ScrollArea } from '@/components/ui/ScrollArea';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { toast } from 'sonner';
+import { useToastActions } from '@/components/ui';
 
 // ============================================================================
 // Types
@@ -79,12 +79,12 @@ interface Asset {
     updatedAt: string;
 }
 
-type AssetCategory = 
-    | '3d-models' 
-    | 'textures' 
-    | 'materials' 
-    | 'audio' 
-    | 'scripts' 
+type AssetCategory =
+    | '3d-models'
+    | 'textures'
+    | 'materials'
+    | 'audio'
+    | 'scripts'
     | 'animations'
     | 'particles'
     | 'shaders'
@@ -145,13 +145,13 @@ const LICENSE_OPTIONS = [
 // ============================================================================
 
 async function fetchAssets(
-    filters: FilterState, 
+    filters: FilterState,
     page: number = 1
 ): Promise<MarketplaceResponse> {
     const params = new URLSearchParams();
     params.set('page', page.toString());
     params.set('limit', '24');
-    
+
     if (filters.query) params.set('q', filters.query);
     if (filters.categories.length) params.set('categories', filters.categories.join(','));
     if (filters.freeOnly) params.set('free', 'true');
@@ -160,9 +160,9 @@ async function fetchAssets(
     if (filters.priceRange[1] < 1000) params.set('maxPrice', filters.priceRange[1].toString());
     if (filters.licenses.length) params.set('licenses', filters.licenses.join(','));
     params.set('sort', filters.sortBy);
-    
+
     const response = await fetch(`/api/marketplace/assets?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch assets');
+    if (!response.ok) throw new Error('Falha ao carregar assets');
     return response.json();
 }
 
@@ -170,14 +170,14 @@ async function addToFavorites(assetId: string): Promise<void> {
     const response = await fetch(`/api/marketplace/favorites/${assetId}`, {
         method: 'POST',
     });
-    if (!response.ok) throw new Error('Failed to add to favorites');
+    if (!response.ok) throw new Error('Falha ao adicionar aos favoritos');
 }
 
 async function removeFromFavorites(assetId: string): Promise<void> {
     const response = await fetch(`/api/marketplace/favorites/${assetId}`, {
         method: 'DELETE',
     });
-    if (!response.ok) throw new Error('Failed to remove from favorites');
+    if (!response.ok) throw new Error('Falha ao remover dos favoritos');
 }
 
 async function addToCart(assetId: string): Promise<void> {
@@ -186,21 +186,21 @@ async function addToCart(assetId: string): Promise<void> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assetId }),
     });
-    if (!response.ok) throw new Error('Failed to add to cart');
+    if (!response.ok) throw new Error('Falha ao adicionar ao carrinho');
 }
 
 // ============================================================================
 // Sub-Components
 // ============================================================================
 
-function AssetCard({ 
-    asset, 
+function AssetCard({
+    asset,
     viewMode,
     onFavorite,
     onAddToCart,
     onSelect
-}: { 
-    asset: Asset; 
+}: {
+    asset: Asset;
     viewMode: 'grid' | 'list';
     onFavorite: (id: string) => void;
     onAddToCart: (id: string) => void;
@@ -248,36 +248,36 @@ function AssetCard({
                         className="w-full h-full object-cover"
                     />
                 </div>
-                
+
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                         <div>
                             <h3 className="font-semibold truncate">{asset.name}</h3>
                             <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                by {asset.creator.name}
+                                por {asset.creator.name}
                                 {asset.creator.verified && (
-                                    <Check className="w-3 h-3 text-blue-500" />
+                                    <Check className="w-3 h-3 text-[var(--aethel-info-light)]" />
                                 )}
                             </p>
                         </div>
                         <div className="text-right">
                             <p className={cn(
                                 "font-bold",
-                                asset.isFree ? "text-green-500" : "text-foreground"
+                                asset.isFree ? "text-[var(--aethel-success-light)]" : "text-foreground"
                             )}>
                                 {formatPrice(asset.price, asset.currency)}
                             </p>
                         </div>
                     </div>
-                    
+
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                         {asset.shortDescription}
                     </p>
-                    
+
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-3 h-3 fill-yellow-400 text-[var(--aethel-warning-light)]" />
                             {asset.stats.rating.toFixed(1)}
                         </span>
                         <span className="flex items-center gap-1">
@@ -299,7 +299,7 @@ function AssetCard({
                             onFavorite(asset.id);
                         }}
                     >
-                        <Heart className={cn("w-4 h-4", isFavorited && "fill-red-500 text-red-500")} />
+                        <Heart className={cn("w-4 h-4", isFavorited && "fill-red-500 text-[var(--aethel-error-light)]")} />
                     </Button>
                     {!asset.isFree && (
                         <Button
@@ -343,7 +343,7 @@ function AssetCard({
                     unoptimized
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                
+
                 {/* Badges */}
                 <div className="absolute top-2 left-2 flex gap-1">
                     {asset.isFeatured && (
@@ -352,7 +352,7 @@ function AssetCard({
                         </Badge>
                     )}
                     {asset.isNew && (
-                        <Badge variant="default" className="bg-green-500">
+                        <Badge variant="default" className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]">
                             Novo
                         </Badge>
                     )}
@@ -365,7 +365,7 @@ function AssetCard({
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2"
+                            className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] flex items-center justify-center gap-2"
                         >
                             <Button
                                 size="sm"
@@ -378,7 +378,7 @@ function AssetCard({
                             >
                                 <Heart className={cn(
                                     "w-4 h-4 mr-1",
-                                    isFavorited && "fill-red-500 text-red-500"
+                                    isFavorited && "fill-red-500 text-[var(--aethel-error-light)]"
                                 )} />
                                 {isFavorited ? 'Salvo' : 'Salvar'}
                             </Button>
@@ -411,28 +411,28 @@ function AssetCard({
                     <h3 className="font-semibold line-clamp-1 flex-1">{asset.name}</h3>
                     <span className={cn(
                         "font-bold text-sm whitespace-nowrap",
-                        asset.isFree ? "text-green-500" : "text-foreground"
+                        asset.isFree ? "text-[var(--aethel-success-light)]" : "text-foreground"
                     )}>
                         {formatPrice(asset.price, asset.currency)}
                     </span>
                 </div>
-                
+
                 <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                     {asset.creator.name}
                     {asset.creator.verified && (
-                        <Check className="w-3 h-3 text-blue-500" />
+                        <Check className="w-3 h-3 text-[var(--aethel-info-light)]" />
                     )}
                 </p>
 
                 <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-3 h-3 fill-yellow-400 text-[var(--aethel-warning-light)]" />
                             {asset.stats.rating.toFixed(1)}
                         </span>
                         <span className="flex items-center gap-1">
                             <Download className="w-3 h-3" />
-                            {asset.stats.downloads >= 1000 
+                            {asset.stats.downloads >= 1000
                                 ? `${(asset.stats.downloads / 1000).toFixed(1)}k`
                                 : asset.stats.downloads
                             }
@@ -447,11 +447,11 @@ function AssetCard({
     );
 }
 
-function FilterSidebar({ 
-    filters, 
-    onChange 
-}: { 
-    filters: FilterState; 
+function FilterSidebar({
+    filters,
+    onChange
+}: {
+    filters: FilterState;
     onChange: (filters: FilterState) => void;
 }) {
     const toggleCategory = (category: AssetCategory) => {
@@ -484,7 +484,7 @@ function FilterSidebar({
                             className={cn(
                                 "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
                                 "hover:bg-accent",
-                                filters.categories.includes(category.id) 
+                                filters.categories.includes(category.id)
                                     ? "bg-primary/10 text-primary font-medium"
                                     : "text-muted-foreground"
                             )}
@@ -508,7 +508,7 @@ function FilterSidebar({
                         min={0}
                         max={1000}
                         step={10}
-                        onValueChange={(value) => 
+                        onValueChange={(value) =>
                             onChange({ ...filters, priceRange: value as [number, number] })
                         }
                     />
@@ -521,7 +521,7 @@ function FilterSidebar({
                     <Checkbox
                         id="free-only"
                         checked={filters.freeOnly}
-                        onCheckedChange={(checked) => 
+                        onCheckedChange={(checked) =>
                             onChange({ ...filters, freeOnly: !!checked })
                         }
                     />
@@ -566,8 +566,8 @@ function FilterSidebar({
                                 checked={filters.licenses.includes(license.value)}
                                 onCheckedChange={() => toggleLicense(license.value)}
                             />
-                            <label 
-                                htmlFor={license.value} 
+                            <label
+                                htmlFor={license.value}
                                 className="text-sm cursor-pointer"
                             >
                                 {license.label}
@@ -621,7 +621,8 @@ function AssetGridSkeleton({ count = 12 }: { count?: number }) {
 
 export default function MarketplaceBrowser() {
     const queryClient = useQueryClient();
-    
+    const toast = useToastActions();
+
     const [filters, setFilters] = useState<FilterState>({
         query: '',
         categories: [],
@@ -631,7 +632,7 @@ export default function MarketplaceBrowser() {
         sortBy: 'popular',
         freeOnly: false,
     });
-    
+
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
     const [showFilters, setShowFilters] = useState(true);
@@ -704,7 +705,7 @@ export default function MarketplaceBrowser() {
             <header className="border-b px-6 py-4">
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="text-2xl font-bold">Marketplace</h1>
-                    
+
                     {/* Search */}
                     <div className="flex-1 max-w-xl">
                         <div className="relative">
@@ -826,7 +827,7 @@ export default function MarketplaceBrowser() {
                             {/* Results info */}
                             <div className="flex items-center justify-between mb-4">
                                 <p className="text-sm text-muted-foreground">
-                                    {data?.total 
+                                    {data?.total
                                         ? `${data.total.toLocaleString()} assets encontrados`
                                         : 'Carregando...'}
                                 </p>
@@ -855,7 +856,7 @@ export default function MarketplaceBrowser() {
                                     <p className="text-muted-foreground mb-4">
                                         Tente ajustar seus filtros ou termos de busca
                                     </p>
-                                    <Button 
+                                    <Button
                                         variant="outline"
                                         onClick={() => handleFilterChange({
                                             query: '',

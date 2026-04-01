@@ -1,12 +1,12 @@
 ﻿/**
  * WalletStatusWidget - Widget Compacto de Saldo na StatusBar
- * 
+ *
  * Exibe saldo de créditos de forma compacta na StatusBar.
  * Expande para mostrar detalhes ao clicar.
  * Integra via WebSocket para atualizações em tempo real.
- * 
+ *
  * @see ROADMAP_MONETIZACAO_XP_FINAL.md
- * 
+ *
  * @module components/billing/WalletStatusWidget
  */
 
@@ -83,10 +83,10 @@ function useWebSocketBalance() {
   useEffect(() => {
     // Conectar ao WebSocket para atualizações em tempo real
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
-    
+
     try {
       wsRef.current = new WebSocket(`${wsUrl}/wallet`);
-      
+
       wsRef.current.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -129,9 +129,9 @@ function formatCredits(amount: number): string {
 
 function getBalanceColor(available: number, limit: number): string {
   const ratio = available / limit;
-  if (ratio > 0.5) return 'text-emerald-400';
+  if (ratio > 0.5) return 'text-[var(--aethel-success-light)]';
   if (ratio > 0.2) return 'text-[var(--aethel-warning-light)]';
-  return 'text-red-400';
+  return 'text-[var(--aethel-error-light)]';
 }
 
 function getPlanIcon(plan: string): React.ReactNode {
@@ -156,7 +156,7 @@ function getPlanBadgeClass(plan: string): string {
     case 'starter':
       return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
     default:
-      return 'bg-zinc-500/20 text-zinc-300 border-zinc-500/30';
+      return 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_20%,transparent)] text-[var(--aethel-text-secondary)] border-[color-mix(in_srgb,var(--aethel-text-tertiary)_35%,transparent)]';
   }
 }
 
@@ -164,15 +164,15 @@ function getPlanBadgeClass(plan: string): string {
 // MAIN COMPONENT
 // ============================================================================
 
-export function WalletStatusWidget({ 
-  onOpenWallet, 
+export function WalletStatusWidget({
+  onOpenWallet,
   onRecharge,
-  className = '' 
+  className = ''
 }: WalletStatusWidgetProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showLowBalanceAlert, setShowLowBalanceAlert] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // Fetch wallet data
   const { data: wallet, error, isLoading, mutate } = useSWR<WalletData>(
     '/api/wallet/summary',
@@ -218,8 +218,8 @@ export function WalletStatusWidget({
   if (isLoading) {
     return (
       <div className={`flex items-center gap-1.5 px-2 py-1 ${className}`}>
-        <Coins className="w-4 h-4 text-zinc-500 animate-pulse" />
-        <span className="text-xs text-zinc-500">...</span>
+        <Coins className="w-4 h-4 text-[var(--aethel-text-tertiary)] animate-pulse" />
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">...</span>
       </div>
     );
   }
@@ -229,8 +229,8 @@ export function WalletStatusWidget({
     return (
       <button
         onClick={() => mutate()}
-        className={`flex items-center gap-1.5 px-2 py-1 text-zinc-500 
-                   hover:text-zinc-400 transition-colors ${className}`}
+        className={`flex items-center gap-1.5 px-2 py-1 text-[var(--aethel-text-tertiary)]
+                   hover:text-[var(--aethel-text-tertiary)] transition-colors ${className}`}
         title="Erro ao carregar saldo. Clique para tentar novamente."
       >
         <AlertTriangle className="w-4 h-4" />
@@ -249,8 +249,8 @@ export function WalletStatusWidget({
         onClick={() => setIsExpanded(!isExpanded)}
         className={`
           flex items-center gap-2 px-2.5 py-1 rounded-md transition-all
-          hover:bg-zinc-800 group
-          ${isExpanded ? 'bg-zinc-800' : ''}
+          hover:bg-[var(--aethel-surface-quaternary)] group
+          ${isExpanded ? 'bg-[var(--aethel-surface-quaternary)]' : ''}
           ${wallet.lowBalanceWarning ? 'animate-pulse' : ''}
         `}
       >
@@ -260,18 +260,18 @@ export function WalletStatusWidget({
           <span className={`text-sm font-medium ${balanceColor}`}>
             {formatCredits(wallet.available)}
           </span>
-          
+
           {/* Trend indicator */}
           {wallet.trend === 'down' && (
-            <TrendingDown className="w-3 h-3 text-red-400" />
+            <TrendingDown className="w-3 h-3 text-[var(--aethel-error-light)]" />
           )}
           {wallet.trend === 'up' && (
-            <TrendingUp className="w-3 h-3 text-emerald-400" />
+            <TrendingUp className="w-3 h-3 text-[var(--aethel-success-light)]" />
           )}
         </div>
 
         {/* Separator */}
-        <div className="w-px h-4 bg-zinc-700" />
+        <div className="w-px h-4 bg-[var(--aethel-surface-tertiary)]" />
 
         {/* Plan badge */}
         <div className={`
@@ -283,46 +283,46 @@ export function WalletStatusWidget({
         </div>
 
         {/* Expand indicator */}
-        {isExpanded 
-          ? <ChevronUp className="w-3 h-3 text-zinc-500" />
-          : <ChevronDown className="w-3 h-3 text-zinc-500" />
+        {isExpanded
+          ? <ChevronUp className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
+          : <ChevronDown className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
         }
       </button>
 
       {/* Low Balance Alert Badge */}
       {wallet.lowBalanceWarning && !isExpanded && (
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+        <div className="absolute -top-1 -right-1 w-2 h-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-full animate-ping" />
       )}
 
       {/* Expanded Dropdown */}
       {isExpanded && (
-        <div className="absolute bottom-full right-0 mb-2 w-72 
-                      bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl
+        <div className="absolute bottom-full right-0 mb-2 w-72
+                      bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg shadow-xl
                       animate-in slide-in-from-bottom-2 fade-in duration-200">
           {/* Header */}
-          <div className="p-3 border-b border-zinc-800">
+          <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-white">Carteira</span>
+              <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Carteira</span>
               <button
                 onClick={() => mutate()}
-                className="p-1 hover:bg-zinc-800 rounded transition-colors"
+                className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
                 title="Atualizar"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-zinc-500" />
+                <RefreshCw className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
               </button>
             </div>
-            
+
             {/* Balance display */}
             <div className="flex items-baseline gap-1">
               <span className={`text-2xl font-bold ${balanceColor}`}>
                 {wallet.available.toLocaleString('pt-BR')}
               </span>
-              <span className="text-sm text-zinc-500">créditos</span>
+              <span className="text-sm text-[var(--aethel-text-tertiary)]">créditos</span>
             </div>
-            
+
             {/* Reserved indicator */}
             {wallet.reserved > 0 && (
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
                 <Clock className="w-3 h-3 inline mr-1" />
                 {wallet.reserved.toLocaleString('pt-BR')} reservados
               </p>
@@ -330,36 +330,36 @@ export function WalletStatusWidget({
           </div>
 
           {/* Usage bar */}
-          <div className="p-3 border-b border-zinc-800">
+          <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-zinc-400">Uso mensal</span>
-              <span className="text-zinc-300">{usagePercent}%</span>
+              <span className="text-[var(--aethel-text-tertiary)]">Uso mensal</span>
+              <span className="text-[var(--aethel-text-secondary)]">{usagePercent}%</span>
             </div>
-            <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-              <div 
+            <div className="h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
+              <div
                 className={`h-full transition-all duration-500 ${
-                  usagePercent > 80 ? 'bg-red-500' :
-                  usagePercent > 50 ? 'bg-[var(--aethel-warning)]' : 'bg-emerald-500'
+                  usagePercent > 80 ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
+                  usagePercent > 50 ? 'bg-[var(--aethel-warning)]' : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                 }`}
                 style={{ width: `${Math.min(usagePercent, 100)}%` }}
               />
             </div>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
               {wallet.monthlyUsage.toLocaleString('pt-BR')} / {wallet.monthlyLimit.toLocaleString('pt-BR')}
             </p>
           </div>
 
           {/* Recent transactions */}
           {transactions && transactions.length > 0 && (
-            <div className="p-3 border-b border-zinc-800">
-              <p className="text-xs text-zinc-500 mb-2">Histórico recente</p>
+            <div className="p-3 border-b border-[var(--aethel-border-primary)]">
+              <p className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Histórico recente</p>
               <div className="space-y-1.5">
                 {transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-400 truncate max-w-[160px]">
+                    <span className="text-[var(--aethel-text-tertiary)] truncate max-w-[160px]">
                       {tx.description}
                     </span>
-                    <span className={tx.amount < 0 ? 'text-red-400' : 'text-emerald-400'}>
+                    <span className={tx.amount < 0 ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-success-light)]'}>
                       {tx.amount < 0 ? '' : '+'}
                       {tx.amount.toLocaleString('pt-BR')}
                     </span>
@@ -371,12 +371,12 @@ export function WalletStatusWidget({
 
           {/* Low balance warning */}
           {wallet.lowBalanceWarning && (
-            <div className="p-3 bg-red-500/10 border-b border-red-500/20">
+            <div className="p-3 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border-b border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                <AlertTriangle className="w-4 h-4 text-[var(--aethel-error-light)] flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm text-red-300 font-medium">Saldo baixo</p>
-                  <p className="text-xs text-red-400/80 mt-0.5">
+                  <p className="text-sm text-[var(--aethel-error-light)] font-medium">Saldo baixo</p>
+                  <p className="text-xs text-[var(--aethel-error-light)] mt-0.5">
                     Recarregue para continuar usando IA e renderização
                   </p>
                 </div>
@@ -404,8 +404,8 @@ export function WalletStatusWidget({
                 onOpenWallet?.();
               }}
               className="flex-1 flex items-center justify-center gap-1.5 py-2
-                       bg-zinc-800 hover:bg-zinc-700 rounded-md
-                       text-sm text-zinc-300 transition-colors"
+                       bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] rounded-md
+                       text-sm text-[var(--aethel-text-secondary)] transition-colors"
             >
               Ver Detalhes
               <ExternalLink className="w-3.5 h-3.5" />
@@ -416,23 +416,23 @@ export function WalletStatusWidget({
 
       {/* Low Balance Modal (non-blocking) */}
       {showLowBalanceAlert && wallet.lowBalanceWarning && (
-        <div className="fixed bottom-20 right-4 w-80 bg-zinc-900 border border-red-500/30 
+        <div className="fixed bottom-20 right-4 w-80 bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]
                       rounded-lg shadow-2xl p-4 animate-in slide-in-from-right-5 z-50">
           <button
             onClick={() => setShowLowBalanceAlert(false)}
-            className="absolute top-2 right-2 p-1 hover:bg-zinc-800 rounded"
+            className="absolute top-2 right-2 p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
           >
-            <X className="w-4 h-4 text-zinc-500" />
+            <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           </button>
-          
+
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-red-400" />
+            <div className="w-10 h-10 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-lg flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-[var(--aethel-error-light)]" />
             </div>
             <div>
-              <h4 className="font-medium text-white">Créditos acabando</h4>
-              <p className="text-sm text-zinc-400 mt-1">
-                Restam apenas {wallet.available.toLocaleString('pt-BR')} créditos. 
+              <h4 className="font-medium text-[var(--aethel-text-primary)]">Créditos acabando</h4>
+              <p className="text-sm text-[var(--aethel-text-tertiary)] mt-1">
+                Restam apenas {wallet.available.toLocaleString('pt-BR')} créditos.
                 Recarregue para continuar criando.
               </p>
               <div className="flex gap-2 mt-3">
@@ -441,15 +441,15 @@ export function WalletStatusWidget({
                     setShowLowBalanceAlert(false);
                     onRecharge?.();
                   }}
-                  className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 
+                  className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500
                            rounded text-sm font-medium transition-colors"
                 >
                   Recarregar agora
                 </button>
                 <button
                   onClick={() => setShowLowBalanceAlert(false)}
-                  className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 
-                           rounded text-sm text-zinc-300 transition-colors"
+                  className="px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)]
+                           rounded text-sm text-[var(--aethel-text-secondary)] transition-colors"
                 >
                   Depois
                 </button>

@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 62_FORGE_SUPERIORITY_ARCHITECTURE_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # 🛠️ The Forge: Arquitetura de Superação (VS Code & Unreal Killer)
 
 **Data:** 26 de Fevereiro de 2026  
@@ -75,3 +78,6 @@ Para superar os concorrentes, o Forge adere a princípios rigorosos:
 ---
 
 **Assinado:** Manus AI (atuando como Arquiteto de Superação do Aethel Engine)
+
+
+

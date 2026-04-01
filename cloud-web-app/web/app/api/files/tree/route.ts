@@ -85,7 +85,7 @@ async function buildTree(params: {
 
       if (isDirectory) {
         treeEntry.expanded = false
-        treeEntry.children = currentDepth < 2 ? await buildTree({ dirPath: fullPath, scopedRoot, maxDepth, currentDepth: currentDepth + 1 }) : []
+        treeEntry.children = await buildTree({ dirPath: fullPath, scopedRoot, maxDepth, currentDepth: currentDepth + 1 })
       } else {
         try {
           const stats = await fs.stat(fullPath)
@@ -161,3 +161,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+

@@ -38,7 +38,7 @@ export interface AvatarFallbackProps extends HTMLAttributes<HTMLDivElement> {
 export function AvatarFallback({ children = '?', className = '', ...props }: AvatarFallbackProps) {
   return (
     <div
-      className={`flex h-full w-full items-center justify-center text-sm font-medium text-white ${className}`}
+      className={`flex h-full w-full items-center justify-center text-sm font-medium text-[var(--aethel-text-primary)] ${className}`}
       {...props}
     >
       {children}
@@ -55,9 +55,9 @@ const sizeClasses: Record<string, { container: string; text: string; status: str
 }
 
 const statusColors: Record<string, string> = {
-  online: 'bg-emerald-500',
-  offline: 'bg-slate-500',
-  busy: 'bg-red-500',
+  online: 'bg-[var(--aethel-success)]',
+  offline: 'bg-[var(--aethel-text-tertiary)]',
+  busy: 'bg-[var(--aethel-error)]',
   away: 'bg-[var(--aethel-warning)]',
 }
 
@@ -72,18 +72,18 @@ function getInitials(name: string): string {
 
 function getColorFromName(name: string): string {
   const colors = [
-    'bg-sky-600',
-    'bg-blue-600',
-    'bg-cyan-600',
-    'bg-rose-600',
-    'bg-orange-600',
+    'bg-[var(--aethel-primary)]',
+    'bg-[var(--aethel-info)]',
+    'bg-[var(--aethel-secondary)]',
+    'bg-[var(--aethel-accent)]',
+    'bg-[var(--aethel-warning)]',
     'bg-[var(--aethel-warning-dark)]',
-    'bg-emerald-600',
-    'bg-teal-600',
-    'bg-cyan-600',
-    'bg-blue-600',
+    'bg-[var(--aethel-success)]',
+    'bg-[var(--aethel-primary-dark)]',
+    'bg-[var(--aethel-accent)]',
+    'bg-[var(--aethel-info)]',
   ]
-  
+
   const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
   return colors[hash % colors.length]
 }
@@ -106,8 +106,8 @@ export function Avatar({
           ${sizeConfig.container}
           rounded-full overflow-hidden
           flex items-center justify-center
-          ring-2 ring-slate-700
-          ${!src ? getColorFromName(name) : 'bg-slate-700'}
+          ring-2 ring-[var(--aethel-border-primary)]
+          ${!src ? getColorFromName(name) : 'bg-[var(--aethel-surface-tertiary)]'}
         `}
       >
         {src ? (
@@ -118,19 +118,19 @@ export function Avatar({
             className="object-cover"
           />
         ) : (
-          <span className={`font-medium text-white ${sizeConfig.text}`}>
+          <span className={`font-medium text-[var(--aethel-text-primary)] ${sizeConfig.text}`}>
             {getInitials(name)}
           </span>
         )}
       </div>
-      
+
       {status && (
         <span
           className={`
             absolute bottom-0 right-0
             ${sizeConfig.status}
             rounded-full
-            ring-2 ring-slate-900
+            ring-2 ring-[var(--aethel-border-secondary)]
             ${statusColors[status]}
           `}
         />
@@ -157,18 +157,18 @@ export function AvatarGroup({ avatars, max = 4, size = 'sm' }: AvatarGroupProps)
           src={avatar.src}
           name={avatar.name}
           size={size}
-          className="ring-2 ring-slate-900"
+          className="ring-2 ring-[var(--aethel-border-secondary)]"
         />
       ))}
       {remaining > 0 && (
         <div
           className={`
             ${sizeClasses[size].container}
-            rounded-full bg-slate-700
+            rounded-full bg-[var(--aethel-surface-tertiary)]
             flex items-center justify-center
-            ring-2 ring-slate-900
+            ring-2 ring-[var(--aethel-border-secondary)]
             ${sizeClasses[size].text}
-            text-slate-300 font-medium
+            text-[var(--aethel-text-secondary)] font-medium
           `}
         >
           +{remaining}
@@ -179,3 +179,4 @@ export function AvatarGroup({ avatars, max = 4, size = 'sm' }: AvatarGroupProps)
 }
 
 export default Avatar
+

@@ -2,17 +2,17 @@
 
 /**
  * AETHEL ENGINE - AI Agent Dashboard
- * 
+ *
  * Dashboard profissional para monitoramento de agentes de IA.
  * Mostra agentes ativos, execucoes, erros, custos e Metricas.
- * 
+ *
  * Features:
  * - Lista de agentes ativos com status
  * - Historico de execucoes
  * - Metricas de custo (tokens/API calls)
  * - Log de erros e warnings
  * - Controle de sandbox
- * 
+ *
  * @module components/dashboard/AIAgentDashboard
  */
 
@@ -175,7 +175,7 @@ function getAgentTypeIcon(type: AgentType) {
 
 function getStatusColor(status: AgentStatus): string {
   switch (status) {
-    case 'running': return 'text-green-400'
+    case 'running': return 'text-[var(--aethel-success-light)]'
     case 'waiting': return 'text-[var(--aethel-warning)]'
     case 'error': return 'text-[var(--aethel-error)]'
     case 'completed': return 'text-[var(--aethel-primary-light)]'
@@ -185,11 +185,11 @@ function getStatusColor(status: AgentStatus): string {
 
 function getStatusBg(status: AgentStatus): string {
   switch (status) {
-    case 'running': return 'bg-green-500/20'
+    case 'running': return 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
     case 'waiting': return 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'
     case 'error': return 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]'
     case 'completed': return 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
-    default: return 'bg-gray-500/20'
+    default: return 'bg-[var(--aethel-surface-secondary)]/20'
   }
 }
 
@@ -308,7 +308,7 @@ export function AIAgentDashboard({
 
   // Kill agent handler
   const handleKillAgent = useCallback((agentId: string) => {
-    setAgents(prev => prev.map(a => 
+    setAgents(prev => prev.map(a =>
       a.id === agentId ? { ...a, status: 'idle' as AgentStatus, currentTask: undefined, progress: 0 } : a
     ))
     onKillAgent?.(agentId)
@@ -328,7 +328,7 @@ export function AIAgentDashboard({
               {metrics.activeAgents} ativos
             </span>
           </div>
-          
+
           <button
             onClick={refresh}
             disabled={isRefreshing}
@@ -385,7 +385,7 @@ export function AIAgentDashboard({
                     <div className="text-[var(--aethel-text-secondary)]">{getAgentTypeIcon(agent.type)}</div>
                     <span className="text-[var(--aethel-text-primary)] font-medium">{agent.name}</span>
                     {agent.sandboxed && (
-                      <div className="text-green-400" title="Executando em Sandbox">
+                      <div className="text-[var(--aethel-success-light)]" title="Executando em Sandbox">
                         <Icons.Shield />
                       </div>
                     )}
@@ -471,7 +471,7 @@ export function AIAgentDashboard({
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
                     {exec.status === 'success' ? (
-                      <div className="text-green-400"><Icons.Check /></div>
+                      <div className="text-[var(--aethel-success-light)]"><Icons.Check /></div>
                     ) : (
                       <div className="text-[var(--aethel-error)]"><Icons.Warning /></div>
                     )}
@@ -510,7 +510,7 @@ export function AIAgentDashboard({
                 icon={<Icons.Check />}
                 label="Taxa de Sucesso"
                 value={`${metrics.successRate.toFixed(1)}%`}
-                color="text-green-400"
+                color="text-[var(--aethel-success-light)]"
               />
               <MetricCard
                 icon={<Icons.Code />}
@@ -553,7 +553,7 @@ export function AIAgentDashboard({
                     }
                   })
                   const maxExecs = Math.max(...hourlyData, 1)
-                  
+
                   return hourlyData.map((count, i) => {
                     const height = (count / maxExecs) * 100
                     const hour = (now.getHours() - 23 + i + 24) % 24
@@ -582,7 +582,7 @@ export function AIAgentDashboard({
                 {(() => {
                   // Agrupa uso por modelo das execucoes + agentes ativos
                   const modelUsage: Record<string, { tokens: number; cost: number }> = {}
-                  
+
                   // Dados dos agentes ativos
                   agents.forEach(agent => {
                     if (!modelUsage[agent.model]) {
@@ -590,7 +590,7 @@ export function AIAgentDashboard({
                     }
                     modelUsage[agent.model].tokens += agent.tokensUsed
                   })
-                  
+
                   // Dados das execucoes
                   executions.forEach(exec => {
                     const agent = agents.find(a => a.id === exec.agentId)
@@ -601,7 +601,7 @@ export function AIAgentDashboard({
                     modelUsage[model].tokens += exec.tokensUsed
                     modelUsage[model].cost += exec.cost
                   })
-                  
+
                   const entries = Object.entries(modelUsage)
                   if (entries.length === 0) {
                     return (
@@ -610,9 +610,9 @@ export function AIAgentDashboard({
                       </div>
                     )
                   }
-                  
+
                   const totalTokens = entries.reduce((sum, [, data]) => sum + data.tokens, 0) || 1
-                  
+
                   return entries
                     .sort((a, b) => b[1].tokens - a[1].tokens)
                     .slice(0, 5)

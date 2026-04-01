@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
+import { OPENROUTER_MODELS } from '@/lib/ai/openrouter-models';
 
 // =============================================================================
 // FINANCE METRICS API
@@ -74,12 +75,17 @@ const PLAN_PRICES: Record<string, number> = {
 
 // AI model costs per 1K tokens
 const MODEL_COSTS: Record<string, { input: number; output: number }> = {
+  ...Object.fromEntries(
+    OPENROUTER_MODELS.map((model) => [
+      model.id,
+      { input: model.inputCost / 1000, output: model.outputCost / 1000 },
+    ])
+  ),
   'gpt-4o': { input: 0.005, output: 0.015 },
   'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
   'gpt-4-turbo': { input: 0.01, output: 0.03 },
-  'claude-3-5-sonnet': { input: 0.003, output: 0.015 },
-  'claude-3-opus': { input: 0.015, output: 0.075 },
-  'claude-3-haiku': { input: 0.00025, output: 0.00125 },
+  'claude-3-5-sonnet-20241022': { input: 0.003, output: 0.015 },
+  'claude-3-5-haiku-20241022': { input: 0.0008, output: 0.004 },
   'gemini-1.5-pro': { input: 0.00125, output: 0.005 },
   'gemini-1.5-flash': { input: 0.000075, output: 0.0003 },
 };

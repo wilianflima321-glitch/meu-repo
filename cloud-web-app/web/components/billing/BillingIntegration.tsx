@@ -6,7 +6,7 @@
 
 'use client'
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   CreditCard,
@@ -17,8 +17,6 @@ import {
   ArrowRight,
   AlertTriangle,
   Loader2,
-  ExternalLink,
-  RefreshCw,
   Star,
   Users,
   HardDrive,
@@ -67,7 +65,7 @@ interface SubscriptionStatus {
 // PLAN ICONS
 // ============================================================================
 
-const PLAN_ICONS: Record<string, React.ElementType> = {
+const PLAN_ICONS: Record<string, typeof Zap> = {
   starter: Zap,
   basic: Shield,
   pro: Star,
@@ -107,12 +105,13 @@ export function BillingStatusBanner() {
     <div
       className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-4 py-3"
       role="alert"
+      aria-live="polite"
     >
       <div className="flex items-start gap-3">
         <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--aethel-warning)]" aria-hidden="true" />
         <div>
           <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
-            Runtime de billing esta {readiness.status}
+            Runtime de billing esta {formatReadinessStatus(readiness.status)}
           </p>
           {readiness.blockers.length > 0 && (
             <ul className="mt-1 space-y-0.5 text-xs text-[var(--aethel-text-secondary)]">
@@ -154,7 +153,7 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
     >
       {/* Popular badge */}
       {plan.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--aethel-primary)] px-3 py-0.5 text-xs font-bold text-white">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--aethel-primary)] px-3 py-0.5 text-xs font-bold text-[var(--aethel-text-primary)]">
           Popular
         </div>
       )}
@@ -221,13 +220,14 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
 
       {/* CTA */}
       <button
+        type="button"
         onClick={() => onSelect(plan.id)}
         disabled={isCurrent || loading}
         className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all ${
           isCurrent
             ? 'cursor-default border border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
             : plan.popular
-            ? 'bg-[var(--aethel-primary)] text-white hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
+            ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
             : 'border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
         }`}
         aria-label={isCurrent ? `Plano atual: ${plan.name}` : `Selecionar plano ${plan.name}`}
@@ -280,19 +280,19 @@ export function useCheckout() {
 
         const data = await res.json().catch(() => ({}))
 
-          if (!res.ok) {
-            throw new Error(data?.message || data?.error || 'Falha ao iniciar checkout')
-          }
+        if (!res.ok) {
+          throw new Error(data?.message || data?.error || 'Falha ao iniciar checkout')
+        }
 
-          if (data?.checkoutUrl) {
-            window.location.href = data.checkoutUrl
-          } else {
-            throw new Error('URL de checkout nao recebida')
-          }
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Falha no checkout'
-          setError(msg)
-        } finally {
+        if (typeof data?.checkoutUrl === 'string' && data.checkoutUrl) {
+          window.location.href = data.checkoutUrl
+        } else {
+          throw new Error('URL de checkout nao recebida')
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Falha no checkout'
+        setError(msg)
+      } finally {
         setLoading(false)
       }
     },
@@ -315,12 +315,21 @@ export function SubscriptionStatusWidget() {
       try {
         const token = getToken()
         if (!token) return
-        const res = await fetch('/api/billing/portal', {
+        const res = await fetch('/api/billing/subscription', {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (res.ok) {
           const data = await res.json()
-          setSubscription(data?.subscription || null)
+          setSubscription(
+            data?.data
+              ? {
+                  plan: data.data.plan,
+                  status: data.data.subscription?.status || 'inactive',
+                  currentPeriodEnd: data.data.subscription?.currentPeriodEnd,
+                  cancelAtPeriodEnd: false,
+                }
+              : null
+          )
         }
       } catch {
         // Non-critical
@@ -356,7 +365,7 @@ export function SubscriptionStatusWidget() {
   }
 
   return (
-    <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4">
+    <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4" role="status" aria-live="polite">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-[var(--aethel-text-tertiary)]">
@@ -373,7 +382,7 @@ export function SubscriptionStatusWidget() {
               : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
           }`}
         >
-          {subscription.status}
+          {formatSubscriptionStatus(subscription.status)}
         </span>
       </div>
       {subscription.currentPeriodEnd && (
@@ -424,6 +433,7 @@ export function UsageQuotaBar({ label, used, limit, unit = '', variant }: QuotaB
         aria-valuemin={0}
         aria-valuemax={limit}
         aria-label={`${label}: ${Math.round(percentage)}% usado`}
+        aria-valuetext={`${formatNumber(used)}${unit} de ${formatNumber(limit)}${unit} usados`}
       >
         <div
           className={`h-full rounded-full transition-all duration-300 ${barColors[autoVariant]}`}
@@ -437,6 +447,37 @@ export function UsageQuotaBar({ label, used, limit, unit = '', variant }: QuotaB
 // ============================================================================
 // HELPERS
 // ============================================================================
+
+function formatReadinessStatus(status: BillingReadinessState['status']): string {
+  switch (status) {
+    case 'ready':
+      return 'pronto'
+    case 'partial':
+      return 'parcial'
+    default:
+      return 'indisponivel'
+  }
+}
+
+function formatSubscriptionStatus(status: string): string {
+  const normalized = String(status || '').trim().toLowerCase()
+  switch (normalized) {
+    case 'active':
+      return 'ativa'
+    case 'trialing':
+      return 'em teste'
+    case 'past_due':
+      return 'pagamento pendente'
+    case 'canceled':
+      return 'cancelada'
+    case 'incomplete':
+      return 'incompleta'
+    case 'unpaid':
+      return 'inadimplente'
+    default:
+      return normalized || 'sem status'
+  }
+}
 
 function formatStorage(bytes: number): string {
   if (bytes >= 1e12) return `${(bytes / 1e12).toFixed(1)} TB`

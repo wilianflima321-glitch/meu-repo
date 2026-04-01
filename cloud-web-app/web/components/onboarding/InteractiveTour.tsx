@@ -1,19 +1,19 @@
-﻿/**
+/**
  * Interactive Tour System - Tour Interativo Guiado
- * 
- * Sistema profissional de tour guiado com spotlight, tooltips e navegação.
+ *
+ * Sistema profissional de tour guiado com spotlight, tooltips e navegao.
  * Similar ao Intercom Product Tours ou Appcues.
- * 
+ *
  * @module components/onboarding/InteractiveTour
  */
 
 'use client';
 
-import React, { 
-  useState, 
-  useEffect, 
-  useCallback, 
-  createContext, 
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  createContext,
   useContext,
   ReactNode,
   useRef,
@@ -92,7 +92,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
   const startTour = useCallback((tour: Tour) => {
     setActiveTour(tour);
     setCurrentStepIndex(0);
-    
+
     // Execute beforeStep if exists
     if (tour.steps[0]?.beforeStep) {
       tour.steps[0].beforeStep();
@@ -111,25 +111,25 @@ export function TourProvider({ children }: { children: ReactNode }) {
 
   const nextStep = useCallback(async () => {
     if (!activeTour) return;
-    
+
     const currentStep = activeTour.steps[currentStepIndex];
-    
+
     // Execute afterStep
     if (currentStep?.afterStep) {
       await currentStep.afterStep();
     }
-    
+
     if (currentStepIndex < activeTour.steps.length - 1) {
       const nextIndex = currentStepIndex + 1;
-      
+
       // Execute beforeStep of next step
       if (activeTour.steps[nextIndex]?.beforeStep) {
         await activeTour.steps[nextIndex].beforeStep();
       }
-      
+
       setCurrentStepIndex(nextIndex);
     } else {
-      // Ášltimo passo - finaliza tour
+      // ltimo passo - finaliza tour
       if (activeTour.onComplete) {
         activeTour.onComplete();
       }
@@ -220,7 +220,7 @@ function TourOverlay() {
       if (target) {
         const rect = target.getBoundingClientRect();
         setTargetRect(rect);
-        
+
         // Scroll into view if needed
         if (rect.top < 0 || rect.bottom > window.innerHeight) {
           target.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -232,11 +232,11 @@ function TourOverlay() {
     };
 
     findTarget();
-    
+
     // Re-calculate on resize
     window.addEventListener('resize', findTarget);
     window.addEventListener('scroll', findTarget, true);
-    
+
     return () => {
       window.removeEventListener('resize', findTarget);
       window.removeEventListener('scroll', findTarget, true);
@@ -250,7 +250,7 @@ function TourOverlay() {
     const tooltip = tooltipRef.current;
     const tooltipRect = tooltip.getBoundingClientRect();
     const padding = currentStep.spotlightPadding || 8;
-    
+
     let top = 0;
     let left = 0;
 
@@ -260,7 +260,7 @@ function TourOverlay() {
       left = (window.innerWidth - tooltipRect.width) / 2;
     } else {
       const placement = currentStep.placement || 'bottom';
-      
+
       switch (placement) {
         case 'top':
           top = targetRect.top - tooltipRect.height - padding - 12;
@@ -312,12 +312,12 @@ function TourOverlay() {
               )}
             </mask>
           </defs>
-          <rect 
-            x="0" 
-            y="0" 
-            width="100%" 
-            height="100%" 
-            fill="rgba(0, 0, 0, 0.75)" 
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="rgba(0, 0, 0, 0.75)"
             mask="url(#spotlight-mask)"
           />
         </svg>
@@ -340,37 +340,37 @@ function TourOverlay() {
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className="absolute w-96 max-w-[calc(100vw-32px)] bg-slate-800 rounded-xl shadow-2xl border border-slate-700 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
+        className="absolute w-96 max-w-[calc(100vw-32px)] bg-[var(--aethel-surface-secondary)] rounded-xl shadow-2xl border border-[var(--aethel-border-primary)] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
         style={{
           top: tooltipPosition.top,
           left: tooltipPosition.left,
         }}
       >
         {/* Header */}
-        <div className="px-5 py-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] border-b border-slate-700">
+        <div className="px-5 py-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-sky-400" />
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-[var(--aethel-text-tertiary)] font-medium">
                 Passo {currentStepIndex + 1} de {totalSteps}
               </span>
             </div>
             <button
               onClick={endTour}
-              className="p-1 text-slate-400 hover:text-white rounded transition-colors"
+              className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] rounded transition-colors"
               aria-label="Fechar tour"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <h3 className="mt-2 text-lg font-semibold text-white">
+          <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
             {currentStep.title}
           </h3>
         </div>
 
         {/* Content */}
         <div className="px-5 py-4">
-          <div className="text-sm text-slate-300 leading-relaxed">
+          <div className="text-sm text-[var(--aethel-text-secondary)] leading-relaxed">
             {currentStep.content}
           </div>
 
@@ -378,7 +378,7 @@ function TourOverlay() {
           {currentStep.action && (
             <button
               onClick={currentStep.action.onClick}
-              className="mt-4 w-full px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white text-sm font-medium rounded-lg transition-colors"
+              className="mt-4 w-full px-4 py-2 bg-sky-500 hover:bg-sky-400 text-[var(--aethel-text-primary)] text-sm font-medium rounded-lg transition-colors"
             >
               {currentStep.action.label}
             </button>
@@ -386,7 +386,7 @@ function TourOverlay() {
         </div>
 
         {/* Footer with navigation */}
-        <div className="px-5 py-3 bg-slate-900/50 border-t border-slate-700 flex items-center justify-between">
+        <div className="px-5 py-3 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] border-t border-[var(--aethel-border-primary)] flex items-center justify-between">
           {/* Progress dots */}
           <div className="flex gap-1.5">
             {Array.from({ length: totalSteps }).map((_, i) => (
@@ -394,11 +394,11 @@ function TourOverlay() {
                 key={i}
                 onClick={() => goToStep(i)}
                 className={`w-2 h-2 rounded-full transition-all ${
-                  i === currentStepIndex 
-                    ? 'bg-sky-500 w-4' 
-                    : i < currentStepIndex 
-                    ? 'bg-sky-400/50' 
-                    : 'bg-slate-600'
+                  i === currentStepIndex
+                    ? 'bg-sky-500 w-4'
+                    : i < currentStepIndex
+                    ? 'bg-sky-400/50'
+                    : 'bg-[var(--aethel-surface-quaternary)]'
                 }`}
               />
             ))}
@@ -409,7 +409,7 @@ function TourOverlay() {
             {!isFirstStep && (
               <button
                 onClick={prevStep}
-                className="px-3 py-1.5 text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+                className="px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors flex items-center gap-1"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Anterior
@@ -417,7 +417,7 @@ function TourOverlay() {
             )}
             <button
               onClick={nextStep}
-              className="px-4 py-1.5 bg-sky-500 hover:bg-sky-400 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
+              className="px-4 py-1.5 bg-sky-500 hover:bg-sky-400 text-[var(--aethel-text-primary)] text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
             >
               {isLastStep ? (
                 <>
@@ -426,7 +426,7 @@ function TourOverlay() {
                 </>
               ) : (
                 <>
-                  Próximo
+                  Prximo
                   <ChevronRight className="w-4 h-4" />
                 </>
               )}
@@ -453,28 +453,28 @@ export const TOURS = {
         id: 'welcome',
         target: '',
         placement: 'center' as const,
-        title: 'Bem-vindo ao Aethel Engine! ðŸŽ®',
-        content: 'Vamos fazer um tour rápido pelas principais funcionalidades. Você pode pular a qualquer momento pressionando ESC.',
+        title: 'Bem-vindo ao Aethel Engine! 🎮',
+        content: 'Vamos fazer um tour rpido pelas principais funcionalidades. Voc pode pular a qualquer momento pressionando ESC.',
       },
       {
         id: 'file-explorer',
         target: '[data-tour="file-explorer"]',
         placement: 'right' as const,
         title: 'Explorador de Arquivos',
-        content: 'Aqui você gerencia todos os arquivos do seu projeto. Clique com botão direito para criar pastas, arquivos e assets.',
+        content: 'Aqui voc gerencia todos os arquivos do seu projeto. Clique com boto direito para criar pastas, arquivos e assets.',
       },
       {
         id: 'code-editor',
         target: '[data-tour="code-editor"]',
         placement: 'left' as const,
-        title: 'Editor de Código',
+        title: 'Editor de Cdigo',
         content: (
           <div>
             <p>Editor poderoso com autocomplete e IA integrada.</p>
-            <ul className="mt-2 text-xs space-y-1 text-slate-400">
-              <li>â€¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+K</kbd> - Edição com IA</li>
-              <li>â€¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+P</kbd> - Busca rápida</li>
-              <li>â€¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+Shift+P</kbd> - Comandos</li>
+            <ul className="mt-2 text-xs space-y-1 text-[var(--aethel-text-tertiary)]">
+              <li>• <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Cmd+K</kbd> - Edio com IA</li>
+              <li>• <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Cmd+P</kbd> - Busca rpida</li>
+              <li>• <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Cmd+Shift+P</kbd> - Comandos</li>
             </ul>
           </div>
         ),
@@ -484,7 +484,7 @@ export const TOURS = {
         target: '[data-tour="terminal"]',
         placement: 'top' as const,
         title: 'Terminal Integrado',
-        content: 'Terminal completo com acesso ao sistema. Execute comandos, gerencie dependências e faça builds.',
+        content: 'Terminal completo com acesso ao sistema. Execute comandos, gerencie dependncias e faa builds.',
       },
       {
         id: 'viewport',
@@ -498,21 +498,21 @@ export const TOURS = {
         target: '[data-tour="ai-assistant"]',
         placement: 'left' as const,
         title: 'Assistente de IA',
-        content: 'Seu parceiro de desenvolvimento. Peça para criar código, assets, ou explicar conceitos. A IA pode até executar ações automaticamente!',
+        content: 'Seu parceiro de desenvolvimento. Pea para criar cdigo, assets, ou explicar conceitos. A IA pode at executar aes automaticamente!',
       },
       {
         id: 'play-button',
         target: '[data-tour="play-button"]',
         placement: 'bottom' as const,
         title: 'Testar seu Jogo',
-        content: 'Clique em Play para testar seu jogo instantaneamente no navegador. Hot reload mantém suas alterações em tempo real.',
+        content: 'Clique em Play para testar seu jogo instantaneamente no navegador. Hot reload mantm suas alteraes em tempo real.',
       },
       {
         id: 'tour-complete',
         target: '',
         placement: 'center' as const,
-        title: 'Pronto para criar! ðŸš€',
-        content: 'Você conhece o básico. Explore, experimente e divirta-se criando! Se precisar de ajuda, a IA está sempre disponível.',
+        title: 'Pronto para criar! 🚀',
+        content: 'Voc conhece o bsico. Explore, experimente e divirta-se criando! Se precisar de ajuda, a IA est sempre disponvel.',
       },
     ],
   },
@@ -526,29 +526,29 @@ export const TOURS = {
         id: 'intro',
         target: '',
         placement: 'center' as const,
-        title: 'Visual Scripting (Blueprints) ðŸ”§',
-        content: 'Crie lógica de jogo sem escrever código! Conecte nós visualmente para programar comportamentos.',
+        title: 'Visual Scripting (Blueprints) 🔧',
+        content: 'Crie lgica de jogo sem escrever cdigo! Conecte ns visualmente para programar comportamentos.',
       },
       {
         id: 'node-palette',
         target: '[data-tour="node-palette"]',
         placement: 'right' as const,
-        title: 'Paleta de Nós',
-        content: 'Arraste nós daqui para o canvas. Temos eventos, condições, ações, matemática e muito mais.',
+        title: 'Paleta de Ns',
+        content: 'Arraste ns daqui para o canvas. Temos eventos, condies, aes, matemtica e muito mais.',
       },
       {
         id: 'canvas',
         target: '[data-tour="vs-canvas"]',
         placement: 'left' as const,
-        title: 'Canvas de Edição',
-        content: 'Conecte os nós arrastando das portas. Linhas brancas são fluxo de execução, coloridas são dados.',
+        title: 'Canvas de Edio',
+        content: 'Conecte os ns arrastando das portas. Linhas brancas so fluxo de execuo, coloridas so dados.',
       },
       {
         id: 'variables',
         target: '[data-tour="vs-variables"]',
         placement: 'right' as const,
-        title: 'Variáveis',
-        content: 'Crie variáveis para armazenar valores. Arraste-as para o canvas para usar.',
+        title: 'Variveis',
+        content: 'Crie variveis para armazenar valores. Arraste-as para o canvas para usar.',
       },
     ],
   },
@@ -560,7 +560,7 @@ export const TOURS = {
 
 export function useStartTour() {
   const { startTour } = useTour();
-  
+
   return {
     startIDETour: () => startTour(TOURS.ideIntro as Tour),
     startVisualScriptingTour: () => startTour(TOURS.visualScripting as Tour),
@@ -573,3 +573,4 @@ export function useStartTour() {
 // ============================================================================
 
 export default TourProvider;
+

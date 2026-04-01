@@ -22,15 +22,15 @@ type AuthResponse = {
 
 const DEFAULT_MISSION = 'Criar primeiro projeto web com chat e live preview'
 const REGISTER_HIGHLIGHTS = [
-  'Wizard de onboarding para escolher missao, template e provider sem navegar por telas soltas.',
-  'Studio Home com projetos, sinais de readiness, billing e conectividade em uma unica shell.',
-  'Entrada pensada para levar voce ao primeiro valor e nao apenas para abrir mais um dashboard vazio.',
+  'Wizard de onboarding para escolher missao e template sem navegar por telas soltas.',
+  'Studio Home com projetos, readiness e billing em uma unica shell.',
+  'Entrada pensada para levar voce ao primeiro valor, nao a um dashboard vazio.',
 ]
 
 const REGISTER_STATS = [
   { value: '90s', label: 'alvo de first value' },
   { value: 'Apps', label: 'dominio principal' },
-  { value: 'Multi', label: 'agent workflow' },
+  { value: 'Multi', label: 'workflow guiado' },
 ]
 
 const SOCIAL_AUTH_MESSAGE =
@@ -118,12 +118,12 @@ export default function RegisterPageV2() {
       >
         Ir para formulario de cadastro
       </a>
-      <div className="pointer-events-none absolute inset-0 bg-grid-zinc-700/[0.12]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.22),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-grid-aethel" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-primary)_22%,transparent),transparent_55%)]" />
 
       <div className="relative z-10 w-full max-w-6xl">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)] lg:items-stretch">
-          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-cyan-950/20 sm:p-8">
+          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-[0_24px_70px_rgba(2,8,23,0.35)] sm:p-8">
             <div className="mb-6 flex items-center justify-between gap-3">
               <Link href="/" className="inline-flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
                 <Codicon name="arrow-left" />
@@ -142,14 +142,14 @@ export default function RegisterPageV2() {
                   width={36}
                   height={36}
                   sizes="36px"
-                  className="rounded-lg ring-1 ring-zinc-700/70"
+                  className="rounded-lg ring-1 ring-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]"
                   priority
                 />
                 <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]/90">Aethel Studio</span>
               </div>
               <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Criar conta no Aethel</h1>
               <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Entre no Studio Home e siga para o onboarding com projeto, contexto e preview no mesmo fluxo.
+                Entre no Studio Home e siga para onboarding, projeto e preview no mesmo fluxo.
               </p>
             </div>
 
@@ -231,12 +231,12 @@ export default function RegisterPageV2() {
                 </div>
               )}
 
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                  Primeiro passo apos criar
+                  Primeiro passo
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                  Voce segue para o dashboard com onboarding ativo e missao inicial preparada para acelerar o primeiro valor.
+                  Voce segue para o dashboard com onboarding ativo e missao inicial preparada.
                 </p>
               </div>
 
@@ -264,7 +264,7 @@ export default function RegisterPageV2() {
               >
                 <Codicon name="github-inverted" />
                 Continuar com GitHub
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   em breve
                 </span>
               </button>
@@ -276,7 +276,7 @@ export default function RegisterPageV2() {
               >
                 <Codicon name="google" />
                 Continuar com Google
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   em breve
                 </span>
               </button>
@@ -298,13 +298,13 @@ export default function RegisterPageV2() {
             eyebrow="Primeiro acesso"
             domainLabel={`Onboarding ${requestedPlan}`}
             title="Crie a conta ja com o contexto certo para entrar no produto."
-            description="O cadastro precisa preparar o usuario para usar o studio, nao apenas empilhar campos. Por isso a experiencia aponta para missao, onboarding e fluxo operacional logo na entrada."
+            description="O cadastro precisa preparar o usuario para usar o studio, nao apenas empilhar campos."
             highlights={REGISTER_HIGHLIGHTS}
             stats={REGISTER_STATS}
             visual={{
               src: '/screenshots/editor.png',
               alt: 'Workbench do Aethel Studio',
-              caption: 'O primeiro acesso precisa apontar para um produto real: chat, editor, preview e proximas etapas legiveis no mesmo workbench.',
+              caption: 'O primeiro acesso precisa apontar para chat, editor e preview no mesmo workbench.',
               chips: ['Mission-first', 'Onboarding guiado', 'IDE + preview'],
             }}
           />
@@ -313,3 +313,4 @@ export default function RegisterPageV2() {
     </main>
   )
 }
+

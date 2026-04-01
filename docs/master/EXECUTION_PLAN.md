@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 49_EXECUTION_PLAN_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # EXECUTION_PLAN.md
 ## Plano de Execução - Roadmap P0/P1/P2/P3
 **Data:** Janeiro 2026  
@@ -709,3 +712,24 @@ Este documento é um **contrato de execução**. Ao prosseguir, a equipe concord
 - `WORKBENCH_SPEC.md`
 - `AI_SYSTEM_SPEC.md`
 
+
+
+
+
+## Addendum 2026-04-01 (Execution priorities based on evidence)
+
+### P0 (immediate)
+- Unify toast systems: migrate legacy `Toast.tsx`, `DashboardToast`, `NotificationToast`, and `sonner` usage into `components/ui/toast-system.tsx`.
+- Unify skeleton variants into a single canonical API (replace `SkeletonLoading`, `SkeletonStates`, `PremiumSkeleton`).
+- Consolidate globals.css into a single source of truth (remove legacy palette in `styles/globals.css`).
+- Finish PT-BR localization for remaining IDE/editor English strings (27 files flagged in scan).
+- Remove or archive `_deprecated/` components after migration checkpoint.
+
+### P1 (next)
+- Re-run `INTERFACE_CRITICAL_SWEEP.md` and `MOJIBAKE_SCAN.md` after token/locale cleanup.
+- Validate preview/runtime readiness flows in live configuration (provider tokens + health checks).
+- Normalize marketplace toast usage to the unified system.
+
+### P2 (later)
+- Reduce monolithic editor/engine panels by extracting shared primitives into `components/ui`.
+- Expand automated UX scans for English strings and token drift in CI.

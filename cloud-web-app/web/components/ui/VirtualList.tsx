@@ -1,6 +1,6 @@
 /**
  * Aethel IDE - Virtualized List Component
- * 
+ *
  * Lista virtualizada de alta performance para renderizar
  * milhares de itens sem degradação de performance.
  * Similar ao que VS Code usa para file explorer e search results.
@@ -8,11 +8,11 @@
 
 'use client';
 
-import React, { 
-  useRef, 
-  useState, 
-  useEffect, 
-  useCallback, 
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
   useMemo,
   forwardRef,
   useImperativeHandle
@@ -110,10 +110,10 @@ function VirtualListInner<T extends VirtualListItem>(
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(height);
-  
+
   // Track measured heights for variable height items
   const measuredHeights = useRef<Map<string, number>>(new Map());
-  
+
   // Calculate total height
   const totalHeight = useMemo(() => {
     return items.reduce((acc, item) => {
@@ -121,21 +121,21 @@ function VirtualListInner<T extends VirtualListItem>(
       return acc + height;
     }, 0);
   }, [items, itemHeight]);
-  
+
   // Calculate visible range
   const { startIndex, endIndex, offsetTop } = useMemo(() => {
     let offset = 0;
     let startIndex = 0;
     let endIndex = items.length - 1;
     let offsetTop = 0;
-    
+
     // Find start index
     for (let i = 0; i < items.length; i++) {
       const h = measuredHeights.current.get(items[i].id) || items[i].height || itemHeight;
       if (offset + h > scrollTop) {
         startIndex = Math.max(0, i - overscan);
         offsetTop = offset;
-        
+
         // Adjust offset for overscan
         for (let j = startIndex; j < i; j++) {
           offsetTop -= measuredHeights.current.get(items[j].id) || items[j].height || itemHeight;
@@ -144,7 +144,7 @@ function VirtualListInner<T extends VirtualListItem>(
       }
       offset += h;
     }
-    
+
     // Find end index
     offset = offsetTop;
     for (let i = startIndex; i < items.length; i++) {
@@ -155,28 +155,28 @@ function VirtualListInner<T extends VirtualListItem>(
         break;
       }
     }
-    
+
     return { startIndex, endIndex, offsetTop };
   }, [items, scrollTop, containerHeight, itemHeight, overscan]);
-  
+
   // Get visible items
   const visibleItems = useMemo(() => {
     return items.slice(startIndex, endIndex + 1);
   }, [items, startIndex, endIndex]);
-  
+
   // Handle scroll
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
     const newScrollTop = target.scrollTop;
     setScrollTop(newScrollTop);
     onScroll?.(newScrollTop);
-    
+
     // Check end reached
     if (onEndReached && totalHeight - newScrollTop - containerHeight < endReachedThreshold) {
       onEndReached();
     }
   }, [onScroll, onEndReached, totalHeight, containerHeight, endReachedThreshold]);
-  
+
   // Handle resize
   useResizeObserver(containerRef, useCallback((entry) => {
     setContainerHeight(entry.contentRect.height);
@@ -202,20 +202,20 @@ function VirtualListInner<T extends VirtualListItem>(
 
     containerRef.current.scrollTop = Math.max(0, scrollPosition);
   }, [items, containerHeight, itemHeight]);
-  
+
   // Keyboard navigation
   useEffect(() => {
     if (!enableKeyboard || !containerRef.current) return;
     const container = containerRef.current;
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedId || !onSelect) return;
-      
+
       const currentIndex = items.findIndex(item => item.id === selectedId);
       if (currentIndex === -1) return;
-      
+
       let nextIndex = currentIndex;
-      
+
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -244,18 +244,18 @@ function VirtualListInner<T extends VirtualListItem>(
         default:
           return;
       }
-      
+
       if (nextIndex !== currentIndex) {
         onSelect(items[nextIndex].id);
         // Scroll into view
         scrollToItemInternal(nextIndex, 'center');
       }
     };
-    
+
     container.addEventListener('keydown', handleKeyDown);
     return () => container.removeEventListener('keydown', handleKeyDown);
   }, [enableKeyboard, selectedId, onSelect, items, containerHeight, itemHeight, scrollToItemInternal]);
-  
+
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
     scrollTo: (offset: number) => {
@@ -266,14 +266,14 @@ function VirtualListInner<T extends VirtualListItem>(
     scrollToItem: scrollToItemInternal,
     getScrollOffset: () => scrollTop,
   }), [scrollToItemInternal, scrollTop]);
-  
+
   // Calculate item positions
   const getItemStyle = useCallback((index: number): React.CSSProperties => {
     let top = offsetTop;
     for (let i = startIndex; i < index; i++) {
       top += measuredHeights.current.get(items[i].id) || items[i].height || itemHeight;
     }
-    
+
     return {
       position: 'absolute',
       top,
@@ -282,7 +282,7 @@ function VirtualListInner<T extends VirtualListItem>(
       height: measuredHeights.current.get(items[index].id) || items[index].height || itemHeight,
     };
   }, [items, startIndex, offsetTop, itemHeight]);
-  
+
   return (
     <div
       ref={containerRef}
@@ -340,20 +340,20 @@ export function VirtualGrid<T extends VirtualListItem>({
 }: VirtualGridProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
-  
+
   // Calculate columns
   const columns = Math.max(1, Math.floor((width + gap) / (itemWidth + gap)));
   const rows = Math.ceil(items.length / columns);
   const totalHeight = rows * (itemHeight + gap) - gap;
-  
+
   // Calculate visible rows
   const startRow = Math.max(0, Math.floor(scrollTop / (itemHeight + gap)) - overscan);
   const endRow = Math.min(rows - 1, Math.ceil((scrollTop + height) / (itemHeight + gap)) + overscan);
-  
+
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop);
   }, []);
-  
+
   // Get visible items
   const visibleItems: Array<{ item: T; index: number }> = [];
   for (let row = startRow; row <= endRow; row++) {
@@ -364,7 +364,7 @@ export function VirtualGrid<T extends VirtualListItem>({
       }
     }
   }
-  
+
   return (
     <div
       ref={containerRef}
@@ -383,7 +383,7 @@ export function VirtualGrid<T extends VirtualListItem>({
             width: itemWidth,
             height: itemHeight,
           };
-          
+
           return (
             <div key={item.id} style={style}>
               {renderItem(item, index, style)}
@@ -411,20 +411,20 @@ export function useInfiniteScroll(
   options: UseInfiniteScrollOptions
 ) {
   const { hasMore, isLoading, onLoadMore, threshold = 200 } = options;
-  
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    
+
     const handleScroll = () => {
       if (isLoading || !hasMore) return;
-      
+
       const { scrollTop, scrollHeight, clientHeight } = container;
       if (scrollHeight - scrollTop - clientHeight < threshold) {
         onLoadMore();
       }
     };
-    
+
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
   }, [containerRef, hasMore, isLoading, onLoadMore, threshold]);
@@ -465,7 +465,7 @@ export const VirtualFileTree: React.FC<VirtualFileTreeProps> = ({
   // Flatten tree for virtualization
   const flattenedNodes = useMemo(() => {
     const result: FileTreeNode[] = [];
-    
+
     const flatten = (items: FileTreeNode[], depth: number) => {
       for (const item of items) {
         result.push({ ...item, depth });
@@ -474,20 +474,20 @@ export const VirtualFileTree: React.FC<VirtualFileTreeProps> = ({
         }
       }
     };
-    
+
     flatten(nodes, 0);
     return result;
   }, [nodes]);
-  
+
   const renderItem = useCallback((node: FileTreeNode) => {
     const isSelected = node.id === selectedId;
     const hasChildren = node.type === 'directory' && node.children && node.children.length > 0;
-    
+
     return (
       <div
         className={`
           flex items-center gap-1 px-2 py-1 cursor-pointer select-none
-          ${isSelected ? 'bg-blue-600/30 text-white' : 'text-gray-300 hover:bg-white/5'}
+          ${isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]/60'}
         `}
         style={{ paddingLeft: `${node.depth * 16 + 8}px` }}
         onClick={() => {
@@ -498,8 +498,8 @@ export const VirtualFileTree: React.FC<VirtualFileTreeProps> = ({
         }}
       >
         {hasChildren && (
-          <span 
-            className="flex-shrink-0 text-gray-400"
+          <span
+            className="flex-shrink-0 text-[var(--aethel-text-tertiary)]"
             onClick={(e) => {
               e.stopPropagation();
               onNodeExpand?.(node);
@@ -509,13 +509,13 @@ export const VirtualFileTree: React.FC<VirtualFileTreeProps> = ({
           </span>
         )}
         {!hasChildren && <span className="w-3" />}
-        
+
         {node.icon || (node.type === 'directory' ? '📁' : '📄')}
         <span className="truncate text-sm">{node.name}</span>
       </div>
     );
   }, [selectedId, onNodeClick, onNodeExpand]);
-  
+
   return (
     <VirtualList
       items={flattenedNodes.map(n => ({ ...n, height: 28 }))}

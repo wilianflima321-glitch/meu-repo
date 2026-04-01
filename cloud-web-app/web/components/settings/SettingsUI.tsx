@@ -41,6 +41,7 @@ import {
   AlertCircle,
   type LucideIcon,
 } from 'lucide-react';
+import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models';
 export type SettingType =
   | 'string'
   | 'number'
@@ -394,19 +395,10 @@ const DEFAULT_SETTINGS: SettingDefinition[] = [
   {
     key: 'aethel.ai.model',
     type: 'enum',
-    default: 'google/gemini-3.1-flash-lite-preview',
+    default: DEFAULT_OPENROUTER_MODEL_ID,
     description: 'The AI model to use for code completion.',
     category: ['Aethel Engine', 'AI'],
-    enum: [
-      'google/gemini-3.1-flash-lite-preview',
-      'openai/gpt-4o-mini',
-      'anthropic/claude-3.5-haiku',
-      'gpt-4o',
-      'gpt-4-turbo',
-      'claude-3-opus',
-      'claude-3-sonnet',
-      'local-llm',
-    ],
+    enum: OPENROUTER_MODEL_OPTIONS.map((option) => option.value),
   },
   {
     key: 'aethel.ai.temperature',
@@ -570,7 +562,7 @@ function BooleanSetting({
         type="checkbox"
         checked={value}
         onChange={e => onChange(e.target.checked)}
-        className="mt-1 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+        className="mt-1 rounded border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-info)] focus:ring-[var(--aethel-info)]"
       />
       <div className="flex-1 min-w-0">
         <SettingLabel definition={definition} modified={modified} onReset={onReset} />
@@ -598,7 +590,7 @@ function StringSetting({
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-3 py-1.5 mt-2 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
+        className="w-full px-3 py-1.5 mt-2 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
       />
     </div>
   );
@@ -627,7 +619,7 @@ function NumberSetting({
           min={definition.minimum}
           max={definition.maximum}
           step={definition.maximum && definition.maximum <= 1 ? 0.1 : 1}
-          className="w-32 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
+          className="w-32 px-3 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
         />
         {definition.minimum !== undefined && definition.maximum !== undefined && (
           <input
@@ -663,7 +655,7 @@ function EnumSetting({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-3 py-1.5 mt-2 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
+        className="w-full px-3 py-1.5 mt-2 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
       >
         {definition.enum?.map((opt, index) => (
           <option key={opt} value={opt}>
@@ -712,11 +704,11 @@ function ArraySetting({
                 next[index] = e.target.value;
                 onChange(next);
               }}
-              className="flex-1 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
+              className="flex-1 px-3 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
             />
             <button
               onClick={() => removeItem(index)}
-              className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded"
+              className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
             >
               <Minus className="w-4 h-4" />
             </button>
@@ -729,12 +721,12 @@ function ArraySetting({
             onChange={e => setNewItem(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && addItem()}
             placeholder="Add item..."
-            className="flex-1 px-3 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500"
+            className="flex-1 px-3 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
           />
           <button
             onClick={addItem}
             disabled={!newItem.trim()}
-            className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded disabled:opacity-50"
+            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-success)] hover:bg-[var(--aethel-surface-tertiary)] rounded disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -771,7 +763,7 @@ function ColorSetting({
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder="#000000"
-          className="w-32 px-3 py-1.5 text-sm bg-slate-800 text-white rounded border border-slate-700 outline-none focus:ring-1 focus:ring-sky-500 font-mono"
+          className="w-32 px-3 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
         />
       </div>
     </div>
@@ -794,7 +786,7 @@ function SettingLabel({
     <div className="flex items-start gap-2">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-white">
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">
             {displayName}
           </span>
           {modified && (
@@ -806,17 +798,17 @@ function SettingLabel({
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-0.5">
           {definition.description}
         </p>
-        <p className="text-xs text-slate-600 font-mono mt-0.5">
+        <p className="text-xs text-[var(--aethel-text-quaternary)] font-mono mt-0.5">
           {definition.key}
         </p>
       </div>
       {modified && (
         <button
           onClick={onReset}
-          className="p-1 text-slate-500 hover:text-white hover:bg-slate-800 rounded"
+          className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           title="Reset to default"
         >
           <RotateCcw className="w-4 h-4" />
@@ -964,12 +956,12 @@ export function SettingsUI({
     }
   };
   return (
-    <div className={`h-full flex flex-col bg-slate-900 ${className || ''}`}>
+    <div className={`h-full flex flex-col bg-[var(--aethel-surface-secondary)] ${className || ''}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
-          <Settings className="w-5 h-5 text-slate-400" />
-          <span className="text-lg font-medium text-white">Settings</span>
+          <Settings className="w-5 h-5 text-[var(--aethel-text-tertiary)]" />
+          <span className="text-lg font-medium text-[var(--aethel-text-primary)]">Settings</span>
         </div>
         {/* Scope toggle */}
         <div className="flex items-center gap-2">
@@ -978,7 +970,7 @@ export function SettingsUI({
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition-colors ${
               scope === 'user'
                 ? 'bg-sky-600/20 text-sky-400'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
             <User className="w-4 h-4" />
@@ -989,19 +981,19 @@ export function SettingsUI({
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition-colors ${
               scope === 'workspace'
                 ? 'bg-sky-600/20 text-sky-400'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
             <Folder className="w-4 h-4" />
             Workspace
           </button>
-          <div className="w-px h-6 bg-slate-700 mx-1" />
+          <div className="w-px h-6 bg-[var(--aethel-surface-quaternary)] mx-1" />
           <button
             onClick={() => setShowJSON(!showJSON)}
             className={`p-1.5 rounded transition-colors ${
               showJSON
                 ? 'bg-sky-600/20 text-sky-400'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
             title="Open Settings (JSON)"
           >
@@ -1010,28 +1002,28 @@ export function SettingsUI({
         </div>
       </div>
       {/* Search */}
-      <div className="px-4 py-2 border-b border-slate-800">
+      <div className="px-4 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search settings..."
-            className="w-full pl-10 pr-8 py-2 text-sm bg-slate-800 text-white placeholder-slate-500 rounded-lg outline-none focus:ring-1 focus:ring-sky-500"
+            className="w-full pl-10 pr-8 py-2 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded-lg outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2"
             >
-              <X className="w-4 h-4 text-slate-500 hover:text-white" />
+              <X className="w-4 h-4 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]" />
             </button>
           )}
         </div>
         {searchQuery && (
-          <div className="mt-2 text-xs text-slate-500">
+          <div className="mt-2 text-xs text-[var(--aethel-text-tertiary)]">
             {filteredSettings.length} settings found
           </div>
         )}
@@ -1039,12 +1031,12 @@ export function SettingsUI({
       {/* Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Categories sidebar */}
-        <div className="w-56 border-r border-slate-800 overflow-y-auto">
+        <div className="w-56 border-r border-[var(--aethel-border-primary)] overflow-y-auto">
           {categories.map(category => (
             <div key={category.id}>
               <button
                 onClick={() => toggleCategory(category.id)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800/50"
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]/50"
               >
                 {expandedCategories.has(category.id) ? (
                   <ChevronDown className="w-4 h-4" />
@@ -1062,7 +1054,7 @@ export function SettingsUI({
                         const el = document.getElementById(`setting-category-${category.id}-${child.id}`);
                         el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }}
-                      className="w-full text-left px-3 py-1.5 text-sm text-slate-500 hover:text-white hover:bg-slate-800/50 rounded"
+                      className="w-full text-left px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]/50 rounded"
                     >
                       {child.label}
                     </button>
@@ -1076,10 +1068,10 @@ export function SettingsUI({
         <div className="flex-1 overflow-y-auto p-6">
           {showJSON ? (
             <div className="space-y-4">
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[var(--aethel-text-tertiary)]">
                 {scope === 'user' ? 'User Settings (JSON)' : 'Workspace Settings (JSON)'}
               </p>
-              <pre className="p-4 bg-slate-800 rounded-lg text-sm text-slate-300 font-mono overflow-x-auto">
+              <pre className="p-4 bg-[var(--aethel-surface-tertiary)] rounded-lg text-sm text-[var(--aethel-text-secondary)] font-mono overflow-x-auto">
                 {JSON.stringify(
                   Object.fromEntries(
                     Array.from(settings.keys())
@@ -1097,14 +1089,14 @@ export function SettingsUI({
                 const [root, sub] = category.split(' > ');
                 return (
                   <div key={category} id={`setting-category-${root}-${sub || ''}`}>
-                    <h2 className="text-sm font-medium text-slate-400 mb-4">
+                    <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4">
                       {category}
                     </h2>
                     <div className="space-y-6">
                       {categorySettings.map(setting => (
                         <div
                           key={setting.key}
-                          className="pb-4 border-b border-slate-800/50 last:border-0"
+                          className="pb-4 border-b border-[var(--aethel-border-primary)]/50 last:border-0"
                         >
                           {renderSetting(setting)}
                         </div>
@@ -1114,7 +1106,7 @@ export function SettingsUI({
                 );
               })}
               {filteredSettings.length === 0 && (
-                <div className="text-center py-12 text-slate-500">
+                <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
                   <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>No settings found matching {`"${searchQuery}"`}</p>
                 </div>
@@ -1135,11 +1127,11 @@ export function QuickSettingsPopup({
 }) {
   const { settings, getValue, setValue } = useSettings();
   return (
-    <div className="absolute bottom-full right-0 mb-2 w-64 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
-        <span className="text-sm font-medium text-white">Quick Settings</span>
-        <button onClick={onClose} className="p-1 hover:bg-slate-800 rounded">
-          <X className="w-4 h-4 text-slate-400" />
+    <div className="absolute bottom-full right-0 mb-2 w-64 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
+        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Quick Settings</span>
+        <button onClick={onClose} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
+          <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         </button>
       </div>
       <div className="p-2 space-y-2">
@@ -1152,14 +1144,14 @@ export function QuickSettingsPopup({
             return (
               <label
                 key={key}
-                className="flex items-center justify-between px-2 py-1.5 hover:bg-slate-800/50 rounded cursor-pointer"
+                className="flex items-center justify-between px-2 py-1.5 hover:bg-[var(--aethel-surface-tertiary)]/50 rounded cursor-pointer"
               >
-                <span className="text-sm text-slate-300">{displayName}</span>
+                <span className="text-sm text-[var(--aethel-text-secondary)]">{displayName}</span>
                 <input
                   type="checkbox"
                   checked={value as boolean}
                   onChange={e => setValue(key, e.target.checked)}
-                  className="rounded border-slate-600 bg-slate-800 text-sky-500"
+                  className="rounded border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-info)]"
                 />
               </label>
             );
@@ -1167,11 +1159,11 @@ export function QuickSettingsPopup({
           if (setting.type === 'enum' && setting.enum) {
             return (
               <div key={key} className="px-2 py-1.5">
-                <span className="text-xs text-slate-400">{displayName}</span>
+                <span className="text-xs text-[var(--aethel-text-tertiary)]">{displayName}</span>
                 <select
                   value={value as string}
                   onChange={e => setValue(key, e.target.value)}
-                  className="w-full mt-1 px-2 py-1 text-sm bg-slate-800 text-white rounded border border-slate-700"
+                  className="w-full mt-1 px-2 py-1 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded border border-[var(--aethel-border-primary)]"
                 >
                   {setting.enum.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>
@@ -1187,3 +1179,4 @@ export function QuickSettingsPopup({
   );
 }
 export default SettingsUI;
+

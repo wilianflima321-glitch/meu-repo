@@ -45,38 +45,38 @@ export function MediaStudioToolbar({
   onStop,
 }: ToolbarProps) {
   return (
-    <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-800 bg-slate-900">
-      <div className="text-sm font-semibold text-slate-200">Media Studio</div>
+    <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
+      <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">Media Studio</div>
 
       <button
-        className="ml-3 px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700"
+        className="ml-3 px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         onClick={onTogglePlay}
       >
-        {isPlaying ? 'Pause' : 'Play'}
+        {isPlaying ? 'Pausar' : 'Tocar'}
       </button>
       <button
-        className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700"
+        className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         onClick={onStop}
       >
-        Stop
+        Parar
       </button>
 
       <button
-        className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 disabled:opacity-50"
+        className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)] disabled:opacity-50"
         onClick={onExport}
         disabled={exporting}
       >
         {exporting ? 'Exportando...' : 'Exportar WebM'}
       </button>
 
-      {exportStatus && <div className="text-xs text-slate-400">{exportStatus}</div>}
+      {exportStatus && <div className="text-xs text-[var(--aethel-text-tertiary)]">{exportStatus}</div>}
 
-      <div className="ml-3 text-xs text-slate-400 font-mono">
+      <div className="ml-3 text-xs text-[var(--aethel-text-quaternary)] font-mono">
         {formatTime(currentTime)} / {formatTime(duration)}
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <label className="text-xs text-slate-400 flex items-center gap-2">
+        <label className="text-xs text-[var(--aethel-text-quaternary)] flex items-center gap-2">
           Zoom
           <input
             type="range"
@@ -87,7 +87,7 @@ export function MediaStudioToolbar({
           />
         </label>
 
-        <label className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 cursor-pointer">
+        <label className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)] cursor-pointer">
           Importar
           <input
             className="hidden"
@@ -114,11 +114,11 @@ type AssetBinProps = {
 
 export function MediaStudioAssetBin({ assets, selectedAssetId, onSelectAsset }: AssetBinProps) {
   return (
-    <div className="w-64 border-r border-slate-800 bg-slate-950/30">
-      <div className="px-3 py-2 text-xs text-slate-400 border-b border-slate-800">Assets</div>
+    <div className="w-64 border-r border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]">
+      <div className="px-3 py-2 text-xs text-[var(--aethel-text-quaternary)] border-b border-[var(--aethel-border-primary)]">Assets</div>
       <div className="p-2 space-y-1 overflow-auto h-full">
         {assets.length === 0 ? (
-          <div className="text-sm text-slate-500 p-2">
+          <div className="text-sm text-[var(--aethel-text-quaternary)] p-2">
             Importe um arquivo de midia (imagem, audio ou video) para comecar.
           </div>
         ) : (
@@ -129,12 +129,12 @@ export function MediaStudioAssetBin({ assets, selectedAssetId, onSelectAsset }: 
               className={
                 'w-full text-left px-2 py-1.5 rounded border ' +
                 (selectedAssetId === asset.id
-                  ? 'bg-slate-800 border-slate-700 text-slate-100'
-                  : 'bg-transparent border-transparent hover:bg-slate-800/50 text-slate-300')
+                  ? 'bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)]'
+                  : 'bg-transparent border-transparent hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_75%,transparent)] text-[var(--aethel-text-secondary)]')
               }
             >
               <div className="text-sm truncate">{asset.name}</div>
-              <div className="text-xs text-slate-500">{asset.kind.toUpperCase()}</div>
+              <div className="text-xs text-[var(--aethel-text-quaternary)]">{asset.kind.toUpperCase()}</div>
             </button>
           ))
         )}
@@ -172,7 +172,7 @@ export function MediaStudioPreviewPanel({
 }: PreviewProps) {
   return (
     <div className="flex-1 min-h-0 p-3">
-      <div className="h-full bg-slate-950/30 border border-slate-800 rounded">
+      <div className="h-full bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] border border-[var(--aethel-border-primary)] rounded">
         {preview.kind === 'video' ? (
           <div className="p-3">
             <VideoPreview
@@ -203,21 +203,21 @@ export function MediaStudioPreviewPanel({
             />
             <div className="mt-2 flex gap-2">
               <button
-                className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700"
+                className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
                 onClick={onAudioPlay}
               >
-                Play Audio
+                Tocar audio
               </button>
               <button
-                className="px-3 py-1 rounded bg-slate-800 text-slate-200 text-sm hover:bg-slate-700"
+                className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
                 onClick={onAudioPause}
               >
-                Pause Audio
+                Pausar audio
               </button>
             </div>
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center text-slate-500">
+          <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
             Selecione um asset ou clip para visualizar.
           </div>
         )}
@@ -250,19 +250,19 @@ export function MediaStudioInspectorPanel({
 
   return (
     <div className="p-3 space-y-3">
-      <div className="text-sm font-semibold text-slate-200">Inspector</div>
+      <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">Inspector</div>
 
       <div className="space-y-1">
-        <div className="text-xs text-slate-400">Clip</div>
-        <div className="text-sm text-slate-200 truncate">{selectedClip.name}</div>
-        <div className="text-xs text-slate-500">{selectedClip.type.toUpperCase()}</div>
+        <div className="text-xs text-[var(--aethel-text-quaternary)]">Clip</div>
+        <div className="text-sm text-[var(--aethel-text-secondary)] truncate">{selectedClip.name}</div>
+        <div className="text-xs text-[var(--aethel-text-quaternary)]">{selectedClip.type.toUpperCase()}</div>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <label className="text-xs text-slate-400">
-          Start
+        <label className="text-xs text-[var(--aethel-text-quaternary)]">
+          Inicio
           <input
-            className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+            className="mt-1 w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded px-2 py-1 text-[var(--aethel-text-primary)]"
             type="number"
             step="0.1"
             value={selectedClip.startTime}
@@ -280,10 +280,10 @@ export function MediaStudioInspectorPanel({
           />
         </label>
 
-        <label className="text-xs text-slate-400">
-          Duration
+        <label className="text-xs text-[var(--aethel-text-quaternary)]">
+          Duracao
           <input
-            className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+            className="mt-1 w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded px-2 py-1 text-[var(--aethel-text-primary)]"
             type="number"
             step="0.1"
             value={selectedClip.duration}
@@ -305,10 +305,10 @@ export function MediaStudioInspectorPanel({
           />
         </label>
 
-        <label className="text-xs text-slate-400">
-          In
+        <label className="text-xs text-[var(--aethel-text-quaternary)]">
+          Entrada
           <input
-            className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+            className="mt-1 w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded px-2 py-1 text-[var(--aethel-text-primary)]"
             type="number"
             step="0.1"
             value={selectedClip.inPoint}
@@ -326,10 +326,10 @@ export function MediaStudioInspectorPanel({
           />
         </label>
 
-        <label className="text-xs text-slate-400">
-          Out
+        <label className="text-xs text-[var(--aethel-text-quaternary)]">
+          Saida
           <input
-            className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+            className="mt-1 w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded px-2 py-1 text-[var(--aethel-text-primary)]"
             type="number"
             step="0.1"
             value={selectedClip.outPoint}
@@ -348,8 +348,8 @@ export function MediaStudioInspectorPanel({
         </label>
 
         {isAudio && (
-          <label className="col-span-2 text-xs text-slate-400">
-            Gain
+          <label className="col-span-2 text-xs text-[var(--aethel-text-quaternary)]">
+            Ganho
             <input
               className="mt-1 w-full"
               type="range"
@@ -372,10 +372,10 @@ export function MediaStudioInspectorPanel({
           </label>
         )}
 
-        <label className="col-span-2 text-xs text-slate-400">
-          Transition (overlap)
+        <label className="col-span-2 text-xs text-[var(--aethel-text-quaternary)]">
+          Transicao (sobreposicao)
           <select
-            className="mt-1 w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+            className="mt-1 w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded px-2 py-1 text-[var(--aethel-text-primary)]"
             value={selectedClip.transition ?? 'crossfade'}
             onChange={(e) => {
               const value = e.target.value as TransitionType
@@ -388,12 +388,12 @@ export function MediaStudioInspectorPanel({
             }}
           >
             <option value="crossfade">Crossfade</option>
-            <option value="dipToBlack">Dip to Black</option>
+            <option value="dipToBlack">Escurecer para preto</option>
           </select>
         </label>
 
-        <label className="col-span-2 text-xs text-slate-400">
-          Crossfade (overlap)
+        <label className="col-span-2 text-xs text-[var(--aethel-text-quaternary)]">
+          Crossfade (sobreposicao)
           <input
             className="mt-1 w-full"
             type="range"
@@ -416,8 +416,8 @@ export function MediaStudioInspectorPanel({
         </label>
 
         {isVisual && (
-          <label className="col-span-2 text-xs text-slate-400">
-            Opacity
+          <label className="col-span-2 text-xs text-[var(--aethel-text-quaternary)]">
+            Opacidade
             <input
               className="mt-1 w-full"
               type="range"
@@ -447,11 +447,11 @@ export function MediaStudioInspectorPanel({
         )}
 
         {isVisual && (
-          <label className="col-span-2 text-xs text-slate-400">
-            Color (Brightness / Contrast / Saturation)
+          <label className="col-span-2 text-xs text-[var(--aethel-text-quaternary)]">
+            Cor (Brilho / Contraste / Saturacao)
             <div className="mt-1 space-y-2">
               <InspectorRangeRow
-                label="Bright"
+                label="Brilho"
                 max={2}
                 min={0}
                 step={0.01}
@@ -471,7 +471,7 @@ export function MediaStudioInspectorPanel({
                 }}
               />
               <InspectorRangeRow
-                label="Contrast"
+                label="Contraste"
                 max={2}
                 min={0}
                 step={0.01}
@@ -491,7 +491,7 @@ export function MediaStudioInspectorPanel({
                 }}
               />
               <InspectorRangeRow
-                label="Saturate"
+                label="Saturacao"
                 max={3}
                 min={0}
                 step={0.01}
@@ -515,11 +515,11 @@ export function MediaStudioInspectorPanel({
         )}
 
         {isVisual && (
-          <label className="col-span-2 text-xs text-slate-400">
-            Blur / Grayscale
+          <label className="col-span-2 text-xs text-[var(--aethel-text-quaternary)]">
+            Desfoque / Escala de cinza
             <div className="mt-1 space-y-2">
               <InspectorRangeRow
-                label="Blur"
+                label="Desfoque"
                 max={16}
                 min={0}
                 step={0.1}
@@ -539,7 +539,7 @@ export function MediaStudioInspectorPanel({
                 }}
               />
               <InspectorRangeRow
-                label="Gray"
+                label="Cinza"
                 max={1}
                 min={0}
                 step={0.01}
@@ -563,7 +563,7 @@ export function MediaStudioInspectorPanel({
         )}
       </div>
 
-      <div className="text-xs text-slate-500 font-mono">Playhead: {formatTime(currentTime)}</div>
+      <div className="text-xs text-[var(--aethel-text-quaternary)] font-mono">Cabecote: {formatTime(currentTime)}</div>
     </div>
   )
 }
@@ -579,7 +579,7 @@ export function MediaStudioMixerPanel({ clips, setProject }: MixerProps) {
 
   return (
     <div className="p-3">
-      <div className="text-sm font-semibold text-slate-200 mb-2">Mixer</div>
+      <div className="text-sm font-semibold text-[var(--aethel-text-primary)] mb-2">Mixer</div>
       <div className="flex gap-2 overflow-x-auto">
         {audioClips.map((clip) => (
           <MixerChannel
@@ -628,7 +628,7 @@ function InspectorRangeRow({
 }: InspectorRangeRowProps) {
   return (
     <div className="flex items-center gap-2">
-      <span className="w-16 text-[11px] text-slate-500">{label}</span>
+      <span className="w-16 text-[11px] text-[var(--aethel-text-quaternary)]">{label}</span>
       <input
         className="flex-1"
         type="range"
@@ -641,6 +641,9 @@ function InspectorRangeRow({
           onChange(Number.isFinite(nextValue) ? nextValue : value)
         }}
       />
+      <span className="w-10 text-[11px] text-right text-[var(--aethel-text-quaternary)]">
+        {Number.isFinite(value) ? value.toFixed(2) : '0.00'}
+      </span>
     </div>
   )
 }

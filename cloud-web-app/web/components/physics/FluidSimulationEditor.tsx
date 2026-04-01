@@ -1,9 +1,9 @@
 /**
  * FLUID SIMULATION EDITOR - Aethel Engine
- * 
+ *
  * Editor visual profissional para simulação de fluidos usando SPH.
  * Sistema de partículas com física realista em tempo real.
- * 
+ *
  * FEATURES:
  * - Particle count configurável (100-10000)
  * - Viscosity e Surface Tension sliders
@@ -21,10 +21,10 @@
 
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree, ThreeEvent } from '@react-three/fiber';
-import { 
-  OrbitControls, 
-  Grid, 
-  Environment, 
+import {
+  OrbitControls,
+  Grid,
+  Environment,
   GizmoHelper,
   GizmoViewport,
   Line,
@@ -32,7 +32,7 @@ import {
   Box as DreiBox,
 } from '@react-three/drei';
 import * as THREE from 'three';
-import { 
+import {
   Droplet,
   Play,
   Pause,
@@ -213,12 +213,12 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon, defaultOpen = true, children }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  
+
   return (
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] 
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -243,12 +243,12 @@ interface FluidParticles3DProps {
 function FluidParticles3D({ simulation, params, editorState }: FluidParticles3DProps) {
   const pointsRef = useRef<THREE.Points>(null);
   const instancedMeshRef = useRef<THREE.InstancedMesh>(null);
-  
+
   // Create instanced geometry for particles
   const particleGeometry = useMemo(() => {
     return new THREE.SphereGeometry(params.particleRadius, 8, 8);
   }, [params.particleRadius]);
-  
+
   // Create material with fluid color
   const particleMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
@@ -259,34 +259,34 @@ function FluidParticles3D({ simulation, params, editorState }: FluidParticles3DP
       roughness: 0.3,
     });
   }, [params.color, params.opacity]);
-  
+
   // Dummy object for matrix calculations
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  
+
   // Update particle positions each frame
   useFrame((_, delta) => {
     if (!simulation || !editorState.isSimulating) return;
-    
+
     // Update simulation
     simulation.update(Math.min(delta, 0.033));
-    
+
     // Update instanced mesh
     if (instancedMeshRef.current) {
       const mesh = instancedMeshRef.current;
-      
+
       for (let i = 0; i < simulation.particles.length; i++) {
         const p = simulation.particles[i];
         dummy.position.copy(p.position);
-        
+
         // Scale based on density for visual feedback
-        const densityScale = editorState.showDensityColors 
+        const densityScale = editorState.showDensityColors
           ? 0.8 + (p.density / params.restDensity) * 0.4
           : 1;
         dummy.scale.setScalar(densityScale);
-        
+
         dummy.updateMatrix();
         mesh.setMatrixAt(i, dummy.matrix);
-        
+
         // Color based on velocity if enabled
         if (editorState.showVelocityColors) {
           const speed = p.velocity.length();
@@ -295,14 +295,14 @@ function FluidParticles3D({ simulation, params, editorState }: FluidParticles3DP
           mesh.setColorAt(i, color);
         }
       }
-      
+
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     }
   });
-  
+
   if (!simulation) return null;
-  
+
   return (
     <instancedMesh
       ref={instancedMeshRef}
@@ -325,33 +325,33 @@ interface BoundaryBoxProps {
 
 function BoundaryBox({ params, visible, onResize }: BoundaryBoxProps) {
   if (!visible) return null;
-  
+
   const { boundarySize, boundaryPosition } = params;
-  
+
   return (
     <group position={[boundaryPosition.x, boundaryPosition.y, boundaryPosition.z]}>
       {/* Wireframe box */}
       <mesh>
         <boxGeometry args={[boundarySize.x, boundarySize.y, boundarySize.z]} />
-        <meshBasicMaterial 
-          color="#06b6d4" 
-          wireframe 
-          transparent 
-          opacity={0.5} 
+        <meshBasicMaterial
+          color="#06b6d4"
+          wireframe
+          transparent
+          opacity={0.5}
         />
       </mesh>
-      
+
       {/* Bottom plane indicator */}
       <mesh position={[0, -boundarySize.y / 2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[boundarySize.x, boundarySize.z]} />
-        <meshBasicMaterial 
-          color="#06b6d4" 
-          transparent 
-          opacity={0.1} 
+        <meshBasicMaterial
+          color="#06b6d4"
+          transparent
+          opacity={0.1}
           side={THREE.DoubleSide}
         />
       </mesh>
-      
+
       {/* Dimension labels */}
       <Html position={[boundarySize.x / 2 + 0.3, 0, 0]}>
         <div className="text-[10px] text-[var(--aethel-info)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
@@ -383,21 +383,21 @@ interface FlowArrowsProps {
 
 function FlowArrows({ params, visible }: FlowArrowsProps) {
   const { flowDirection, flowStrength, boundaryPosition, boundarySize } = params;
-  
+
   // useMemo must be called before any conditional return
   const arrows = useMemo(() => {
     if (!visible || flowStrength === 0) return [];
-    
+
     const result: { position: THREE.Vector3; direction: THREE.Vector3 }[] = [];
     const dir = new THREE.Vector3(flowDirection.x, flowDirection.y, flowDirection.z).normalize();
     const arrowLength = flowStrength * 0.5;
-    
+
     // Create a grid of flow arrows
     const gridSize = 3;
     const spacingX = boundarySize.x / (gridSize + 1);
     const spacingY = boundarySize.y / (gridSize + 1);
     const spacingZ = boundarySize.z / (gridSize + 1);
-    
+
     for (let x = 1; x <= gridSize; x++) {
       for (let z = 1; z <= gridSize; z++) {
         const pos = new THREE.Vector3(
@@ -408,12 +408,12 @@ function FlowArrows({ params, visible }: FlowArrowsProps) {
         result.push({ position: pos, direction: dir.clone().multiplyScalar(arrowLength) });
       }
     }
-    
+
     return result;
   }, [visible, flowDirection, flowStrength, boundaryPosition, boundarySize]);
-  
+
   if (!visible || params.flowStrength === 0 || arrows.length === 0) return null;
-  
+
   return (
     <group>
       {arrows.map((arrow, index) => (
@@ -429,7 +429,7 @@ function FlowArrows({ params, visible }: FlowArrowsProps) {
           </mesh>
         </group>
       ))}
-      
+
       {/* Flow strength indicator */}
       <Html position={[boundaryPosition.x, boundaryPosition.y + boundarySize.y / 2 + 0.5, boundaryPosition.z]}>
         <div className="text-xs text-[var(--aethel-success)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-2 py-1 rounded flex items-center gap-1">
@@ -453,10 +453,10 @@ interface ToolbarProps {
   onReset: () => void;
 }
 
-function Toolbar({ 
-  selectedTool, 
-  onToolChange, 
-  isSimulating, 
+function Toolbar({
+  selectedTool,
+  onToolChange,
+  isSimulating,
   onToggleSimulation,
   onReset,
 }: ToolbarProps) {
@@ -466,22 +466,22 @@ function Toolbar({
     { id: 'boundary', icon: <Box className="w-4 h-4" />, label: 'Edit Boundary' },
     { id: 'flow', icon: <Wind className="w-4 h-4" />, label: 'Set Flow Direction' },
   ];
-  
+
   return (
     <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Simulation controls */}
       <button
         onClick={onToggleSimulation}
         className={`p-2 rounded transition-colors ${
-          isSimulating 
-            ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' 
+          isSimulating
+            ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
             : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
         }`}
         title={isSimulating ? 'Pause Simulation' : 'Play Simulation'}
       >
         {isSimulating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
       </button>
-      
+
       <button
         onClick={onReset}
         className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
@@ -489,9 +489,9 @@ function Toolbar({
       >
         <RotateCcw className="w-4 h-4" />
       </button>
-      
+
       <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
-      
+
       {/* Tools */}
       {tools.map((tool) => (
         <button
@@ -522,22 +522,22 @@ interface SimulationStatsProps {
 
 function SimulationStats({ simulation, params }: SimulationStatsProps) {
   const [stats, setStats] = useState({ avgDensity: 0, avgSpeed: 0, maxSpeed: 0 });
-  
+
   useEffect(() => {
     if (!simulation) return;
-    
+
     const interval = setInterval(() => {
       let totalDensity = 0;
       let totalSpeed = 0;
       let maxSpeed = 0;
-      
+
       for (const p of simulation.particles) {
         totalDensity += p.density;
         const speed = p.velocity.length();
         totalSpeed += speed;
         if (speed > maxSpeed) maxSpeed = speed;
       }
-      
+
       const count = simulation.particles.length || 1;
       setStats({
         avgDensity: totalDensity / count,
@@ -545,10 +545,10 @@ function SimulationStats({ simulation, params }: SimulationStatsProps) {
         maxSpeed,
       });
     }, 100);
-    
+
     return () => clearInterval(interval);
   }, [simulation]);
-  
+
   return (
     <div className="space-y-1 text-xs">
       <div className="flex justify-between">
@@ -608,7 +608,7 @@ export default function FluidSimulationEditor({
     enableSurfaceMeshing: false,
     meshResolution: 32,
   };
-  
+
   // State
   const [params, setParams] = useState<FluidParams>({ ...defaultParams, ...initialParams });
   const [editorState, setEditorState] = useState<FluidEditorState>({
@@ -621,11 +621,11 @@ export default function FluidSimulationEditor({
   });
   const [selectedTool, setSelectedTool] = useState<FluidToolType>('view');
   const [isBaking, setIsBaking] = useState(false);
-  
+
   // Simulation reference
   const initialParamsRef = useRef(params);
   const simulationRef = useRef<SPHFluidSimulation | null>(null);
-  
+
   // Initialize simulation
   useEffect(() => {
     simulationRef.current = new SPHFluidSimulation(initialParamsRef.current);
@@ -633,7 +633,7 @@ export default function FluidSimulationEditor({
       simulationRef.current = null;
     };
   }, []);
-  
+
   // Update simulation params
   useEffect(() => {
     if (simulationRef.current) {
@@ -641,22 +641,22 @@ export default function FluidSimulationEditor({
     }
     onFluidUpdate?.(params);
   }, [params, onFluidUpdate]);
-  
+
   // Apply preset
   const applyPreset = useCallback((preset: FluidPreset) => {
     setParams((prev) => ({ ...prev, ...preset.params }));
     setEditorState((prev) => ({ ...prev, currentPreset: preset.id }));
-    
+
     if (simulationRef.current) {
       simulationRef.current.updateParams(preset.params);
     }
   }, []);
-  
+
   // Toggle simulation
   const toggleSimulation = useCallback(() => {
     setEditorState((prev) => ({ ...prev, isSimulating: !prev.isSimulating }));
   }, []);
-  
+
   // Reset simulation
   const resetSimulation = useCallback(() => {
     if (simulationRef.current) {
@@ -664,26 +664,26 @@ export default function FluidSimulationEditor({
     }
     setEditorState((prev) => ({ ...prev, isSimulating: false }));
   }, []);
-  
+
   // Update a single param
   const updateParam = useCallback(<K extends keyof FluidParams>(key: K, value: FluidParams[K]) => {
     setParams((prev) => ({ ...prev, [key]: value }));
   }, []);
-  
+
   // Bake to mesh (placeholder - would generate a mesh from particles)
   const bakeToMesh = useCallback(async () => {
     setIsBaking(true);
-    
+
     // Simulate baking process
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    
+
     // In a real implementation, this would use marching cubes or similar
     // to generate a mesh from the particle positions
     console.log('Baking fluid to mesh with resolution:', params.meshResolution);
-    
+
     setIsBaking(false);
   }, [params.meshResolution]);
-  
+
   // Export configuration
   const handleExport = useCallback(() => {
     const exportData = {
@@ -694,9 +694,9 @@ export default function FluidSimulationEditor({
         version: '1.0',
       },
     };
-    
+
     onExport?.({ params });
-    
+
     // Also trigger download
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -706,7 +706,7 @@ export default function FluidSimulationEditor({
     a.click();
     URL.revokeObjectURL(url);
   }, [params, volumeId, onExport]);
-  
+
   // Import configuration
   const handleImport = useCallback(() => {
     const input = document.createElement('input');
@@ -715,7 +715,7 @@ export default function FluidSimulationEditor({
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
@@ -731,7 +731,7 @@ export default function FluidSimulationEditor({
     };
     input.click();
   }, []);
-  
+
   return (
     <div className="flex h-full w-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Toolbar */}
@@ -744,40 +744,40 @@ export default function FluidSimulationEditor({
           onReset={resetSimulation}
         />
       </div>
-      
+
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [5, 5, 5], fov: 50 }} shadows>
           <color attach="background" args={['#0f172a']} />
-          
+
           <ambientLight intensity={0.4} />
-          <directionalLight 
-            position={[10, 10, 5]} 
-            intensity={1} 
-            castShadow 
+          <directionalLight
+            position={[10, 10, 5]}
+            intensity={1}
+            castShadow
             shadow-mapSize={[2048, 2048]}
           />
           <pointLight position={[-5, 5, -5]} intensity={0.5} color="#0ea5e9" />
-          
+
           {/* Fluid particles */}
           <FluidParticles3D
             simulation={simulationRef.current}
             params={params}
             editorState={editorState}
           />
-          
+
           {/* Boundary box */}
           <BoundaryBox
             params={params}
             visible={editorState.showBoundary}
           />
-          
+
           {/* Flow arrows */}
           <FlowArrows
             params={params}
             visible={editorState.showFlowArrows}
           />
-          
+
           <Grid infiniteGrid fadeDistance={30} />
           <OrbitControls makeDefault />
           <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
@@ -785,12 +785,12 @@ export default function FluidSimulationEditor({
           </GizmoHelper>
           <Environment preset="warehouse" />
         </Canvas>
-        
+
         {/* Viewport info overlay */}
         <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-3 rounded">
           <div className="text-xs text-[var(--aethel-text-secondary)] mb-2">Simulation Status</div>
           <SimulationStats simulation={simulationRef.current} params={params} />
-          
+
           <div className="mt-2 pt-2 border-t border-[var(--aethel-border-secondary)]">
             <div className="flex items-center gap-2 text-xs">
               <div className={`w-2 h-2 rounded-full ${editorState.isSimulating ? 'bg-[var(--aethel-success)] animate-pulse' : 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)]'}`} />
@@ -798,7 +798,7 @@ export default function FluidSimulationEditor({
             </div>
           </div>
         </div>
-        
+
         {/* View toggles */}
         <div className="absolute top-4 right-80 flex flex-col gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-2 rounded">
           <button
@@ -812,7 +812,7 @@ export default function FluidSimulationEditor({
           <button
             onClick={() => setEditorState((p) => ({ ...p, showFlowArrows: !p.showFlowArrows }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showFlowArrows ? 'bg-green-600 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+              editorState.showFlowArrows ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
             }`}
           >
             <Wind className="w-3 h-3" /> Flow
@@ -835,7 +835,7 @@ export default function FluidSimulationEditor({
           </button>
         </div>
       </div>
-      
+
       {/* Settings Panel */}
       <div className="w-72 bg-[var(--aethel-surface-tertiary)] border-l border-[var(--aethel-border-secondary)] overflow-y-auto">
         <div className="p-4">
@@ -862,7 +862,7 @@ export default function FluidSimulationEditor({
               </button>
             </div>
           </div>
-          
+
           {/* Presets */}
           <CollapsibleSection title="Fluid Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
@@ -882,7 +882,7 @@ export default function FluidSimulationEditor({
               ))}
             </div>
           </CollapsibleSection>
-          
+
           {/* Particle Settings */}
           <CollapsibleSection title="Particles" icon={<Droplet className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <Slider
@@ -895,7 +895,7 @@ export default function FluidSimulationEditor({
               icon={<Target className="w-3 h-3 text-[var(--aethel-text-secondary)]" />}
               tooltip="Number of fluid particles (affects performance)"
             />
-            
+
             <Slider
               label="Particle Radius"
               value={params.particleRadius}
@@ -905,7 +905,7 @@ export default function FluidSimulationEditor({
               unit="m"
               onChange={(v) => updateParam('particleRadius', v)}
             />
-            
+
             <Slider
               label="Smoothing Radius"
               value={params.smoothingRadius}
@@ -917,7 +917,7 @@ export default function FluidSimulationEditor({
               tooltip="SPH kernel radius"
             />
           </CollapsibleSection>
-          
+
           {/* Physical Properties */}
           <CollapsibleSection title="Physical Properties" icon={<Waves className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <Slider
@@ -929,7 +929,7 @@ export default function FluidSimulationEditor({
               onChange={(v) => updateParam('viscosity', v)}
               tooltip="Fluid thickness (0=water, 1=honey)"
             />
-            
+
             <Slider
               label="Surface Tension"
               value={params.surfaceTension}
@@ -939,7 +939,7 @@ export default function FluidSimulationEditor({
               onChange={(v) => updateParam('surfaceTension', v)}
               tooltip="Cohesion between particles"
             />
-            
+
             <Slider
               label="Rest Density"
               value={params.restDensity}
@@ -949,7 +949,7 @@ export default function FluidSimulationEditor({
               unit=" kg/m³"
               onChange={(v) => updateParam('restDensity', v)}
             />
-            
+
             <Slider
               label="Stiffness"
               value={params.stiffness}
@@ -959,7 +959,7 @@ export default function FluidSimulationEditor({
               onChange={(v) => updateParam('stiffness', v)}
               tooltip="Pressure response strength"
             />
-            
+
             <Slider
               label="Temperature"
               value={params.temperature}
@@ -971,7 +971,7 @@ export default function FluidSimulationEditor({
               icon={<Thermometer className="w-3 h-3 text-orange-400" />}
             />
           </CollapsibleSection>
-          
+
           {/* Appearance */}
           <CollapsibleSection title="Appearance" icon={<Palette className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <ColorPicker
@@ -979,7 +979,7 @@ export default function FluidSimulationEditor({
               value={params.color}
               onChange={(v) => updateParam('color', v)}
             />
-            
+
             <Slider
               label="Opacity"
               value={params.opacity}
@@ -989,7 +989,7 @@ export default function FluidSimulationEditor({
               onChange={(v) => updateParam('opacity', v)}
             />
           </CollapsibleSection>
-          
+
           {/* Gravity */}
           <CollapsibleSection title="Gravity" icon={<ArrowDown className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <Vector3Input
@@ -1000,7 +1000,7 @@ export default function FluidSimulationEditor({
               max={20}
               step={0.1}
             />
-            
+
             {/* Quick gravity presets */}
             <div className="grid grid-cols-3 gap-1 mt-2">
               <button
@@ -1023,7 +1023,7 @@ export default function FluidSimulationEditor({
               </button>
             </div>
           </CollapsibleSection>
-          
+
           {/* Boundary */}
           <CollapsibleSection title="Boundary Volume" icon={<Box className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <Vector3Input
@@ -1034,7 +1034,7 @@ export default function FluidSimulationEditor({
               max={20}
               step={0.1}
             />
-            
+
             <Vector3Input
               label="Position"
               value={params.boundaryPosition}
@@ -1044,7 +1044,7 @@ export default function FluidSimulationEditor({
               step={0.1}
             />
           </CollapsibleSection>
-          
+
           {/* Flow */}
           <CollapsibleSection title="External Flow" icon={<Wind className="w-4 h-4 text-[var(--aethel-success)]" />} defaultOpen={false}>
             <Vector3Input
@@ -1055,7 +1055,7 @@ export default function FluidSimulationEditor({
               max={1}
               step={0.1}
             />
-            
+
             <Slider
               label="Flow Strength"
               value={params.flowStrength}
@@ -1065,7 +1065,7 @@ export default function FluidSimulationEditor({
               onChange={(v) => updateParam('flowStrength', v)}
             />
           </CollapsibleSection>
-          
+
           {/* Bake to Mesh */}
           <CollapsibleSection title="Surface Meshing" icon={<RefreshCw className="w-4 h-4 text-[var(--aethel-info)]" />} defaultOpen={false}>
             <div className="flex items-center justify-between mb-3">
@@ -1077,7 +1077,7 @@ export default function FluidSimulationEditor({
                 className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]"
               />
             </div>
-            
+
             <Slider
               label="Mesh Resolution"
               value={params.meshResolution}
@@ -1087,11 +1087,11 @@ export default function FluidSimulationEditor({
               onChange={(v) => updateParam('meshResolution', v)}
               tooltip="Higher = smoother but slower"
             />
-            
+
             <button
               onClick={bakeToMesh}
               disabled={isBaking}
-              className="w-full mt-3 p-2 rounded bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] 
+              className="w-full mt-3 p-2 rounded bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)]
                        disabled:bg-[var(--aethel-surface-quaternary)] disabled:text-[var(--aethel-text-tertiary)]
                        transition-colors flex items-center justify-center gap-2"
             >
@@ -1108,7 +1108,7 @@ export default function FluidSimulationEditor({
               )}
             </button>
           </CollapsibleSection>
-          
+
           {/* Volume ID */}
           {volumeId && (
             <div className="mt-4 pt-4 border-t border-[var(--aethel-border-secondary)]">

@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/Input';
 
 /**
  * Aethel Integrated Terminal
- * 
+ *
  * Terminal profissional com:
  * - Múltiplas instâncias/tabs
  * - Xterm.js com addons
@@ -86,13 +86,13 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
   const [isMaximized, setIsMaximized] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const terminalRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Create new terminal instance
   const createTerminal = useCallback((name?: string) => {
     const id = `term-${Date.now()}`;
-    
+
     const terminal = new XTerm({
       theme: CATPPUCCIN_THEME,
       fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
@@ -103,15 +103,15 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
       allowTransparency: true,
       scrollback: 10000,
     });
-    
+
     const fitAddon = new FitAddon();
     const webLinksAddon = new WebLinksAddon();
     const searchAddon = new SearchAddon();
-    
+
     terminal.loadAddon(fitAddon);
     terminal.loadAddon(webLinksAddon);
     terminal.loadAddon(searchAddon);
-    
+
     const instance: TerminalInstance = {
       id,
       name: name || `Terminal ${terminals.length + 1}`,
@@ -123,10 +123,10 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
       currentLine: '',
       cwd: initialCwd,
     };
-    
+
     setTerminals(prev => [...prev, instance]);
     setActiveTerminalId(id);
-    
+
     return instance;
   }, [terminals.length, initialCwd]);
 
@@ -140,37 +140,37 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
   // Mount terminal to DOM when active
   useEffect(() => {
     if (!activeTerminalId) return;
-    
+
     const instance = terminals.find(t => t.id === activeTerminalId);
     if (!instance) return;
-    
+
     const container = terminalRefs.current.get(activeTerminalId);
     if (!container) return;
-    
+
     // Check if already mounted
     if (container.querySelector('.xterm')) return;
-    
+
     instance.terminal.open(container);
     instance.fitAddon.fit();
-    
+
     // Write welcome message
     instance.terminal.writeln('\x1b[38;5;141m╔════════════════════════════════════════════╗\x1b[0m');
     instance.terminal.writeln('\x1b[38;5;141m║\x1b[0m     \x1b[1;38;5;183mAethel Engine Terminal\x1b[0m                 \x1b[38;5;141m║\x1b[0m');
     instance.terminal.writeln('\x1b[38;5;141m╚════════════════════════════════════════════╝\x1b[0m');
     instance.terminal.writeln('');
-    
+
     // Write prompt
     writePrompt(instance);
-    
+
     // Handle input
     setupInputHandler(instance);
-    
+
     // Handle resize
     const resizeObserver = new ResizeObserver(() => {
       instance.fitAddon.fit();
     });
     resizeObserver.observe(container);
-    
+
     return () => {
       resizeObserver.disconnect();
     };
@@ -186,38 +186,38 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
   // Setup input handler
   function setupInputHandler(instance: TerminalInstance) {
     let currentLine = '';
-    
+
     instance.terminal.onData(async (data) => {
       const code = data.charCodeAt(0);
-      
+
       if (code === 13) { // Enter
         instance.terminal.writeln('');
-        
+
         if (currentLine.trim()) {
           // Add to history
           instance.history.push(currentLine);
           instance.historyIndex = instance.history.length;
-          
+
           // Execute command
           await executeCommand(instance, currentLine);
         }
-        
+
         currentLine = '';
         writePrompt(instance);
-        
+
       } else if (code === 127) { // Backspace
         if (currentLine.length > 0) {
           currentLine = currentLine.slice(0, -1);
           instance.terminal.write('\b \b');
         }
-        
+
       } else if (code === 27) { // Escape sequences
         if (data === '\x1b[A') { // Up arrow
           if (instance.historyIndex > 0) {
             // Clear current line
             instance.terminal.write('\r\x1b[K');
             writePrompt(instance);
-            
+
             instance.historyIndex--;
             currentLine = instance.history[instance.historyIndex];
             instance.terminal.write(currentLine);
@@ -226,7 +226,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           if (instance.historyIndex < instance.history.length - 1) {
             instance.terminal.write('\r\x1b[K');
             writePrompt(instance);
-            
+
             instance.historyIndex++;
             currentLine = instance.history[instance.historyIndex];
             instance.terminal.write(currentLine);
@@ -241,16 +241,16 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
         } else if (data === '\x1b[D') { // Left arrow
           // Allow left arrow
         }
-        
+
       } else if (code === 3) { // Ctrl+C
         instance.terminal.writeln('^C');
         currentLine = '';
         writePrompt(instance);
-        
+
       } else if (code === 12) { // Ctrl+L (clear)
         instance.terminal.clear();
         writePrompt(instance);
-        
+
       } else if (code === 9) { // Tab (autocomplete)
         // Simple tab completion
         const completions = getCompletions(currentLine);
@@ -264,7 +264,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           writePrompt(instance);
           instance.terminal.write(currentLine);
         }
-        
+
       } else if (code >= 32) { // Printable characters
         currentLine += data;
         instance.terminal.write(data);
@@ -275,14 +275,14 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
   // Execute command
   const executeCommand = async (instance: TerminalInstance, command: string) => {
     const [cmd, ...args] = command.trim().split(/\s+/);
-    
+
     try {
       // Built-in commands
       if (cmd === 'clear' || cmd === 'cls') {
         instance.terminal.clear();
         return;
       }
-      
+
       if (cmd === 'cd') {
         const newDir = args[0] || '~';
         if (newDir === '~') {
@@ -298,12 +298,12 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
         }
         return;
       }
-      
+
       if (cmd === 'pwd') {
         instance.terminal.writeln(instance.cwd);
         return;
       }
-      
+
       if (cmd === 'help') {
         instance.terminal.writeln('\x1b[1mBuilt-in commands:\x1b[0m');
         instance.terminal.writeln('  clear, cls    - Clear terminal');
@@ -315,10 +315,10 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
         instance.terminal.writeln('  All other commands are sent to the backend API');
         return;
       }
-      
+
       // Send to API for real execution
       instance.terminal.writeln('\x1b[38;5;245m⏳ Executing...\x1b[0m');
-      
+
       const response = await fetch('/api/terminal/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -327,9 +327,9 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           cwd: instance.cwd,
         }),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.error) {
         instance.terminal.writeln(`\x1b[38;5;203m${result.error}\x1b[0m`);
       } else {
@@ -339,16 +339,16 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
             instance.terminal.writeln(line);
           });
         }
-        
+
         // Update cwd if changed
         if (result.cwd) {
           instance.cwd = result.cwd;
         }
       }
-      
+
       // Callback
       onCommand?.(command, result.output || result.error);
-      
+
     } catch (error) {
       instance.terminal.writeln(`\x1b[38;5;203mError: ${error}\x1b[0m`);
     }
@@ -361,12 +361,12 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
       'cd', 'ls', 'pwd', 'clear', 'help', 'git', 'npm', 'node',
       'python', 'pip', 'cat', 'echo', 'mkdir', 'rm', 'cp', 'mv',
     ];
-    
+
     if (line.includes(' ')) {
       // File completion would go here
       return [];
     }
-    
+
     return commands.filter(c => c.startsWith(lastWord));
   };
 
@@ -376,9 +376,9 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
     if (instance) {
       instance.terminal.dispose();
     }
-    
+
     setTerminals(prev => prev.filter(t => t.id !== id));
-    
+
     if (activeTerminalId === id) {
       const remaining = terminals.filter(t => t.id !== id);
       setActiveTerminalId(remaining.length > 0 ? remaining[0].id : null);
@@ -407,11 +407,11 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
 
   return (
     <div className={cn(
-      'flex flex-col bg-[#1e1e2e] border-t border-[#313244]',
+      'flex flex-col bg-[var(--aethel-surface-primary)] border-t border-[var(--aethel-border-primary)]',
       isMaximized ? 'fixed inset-0 z-50' : 'h-64'
     )}>
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-2 py-1 bg-[#181825] border-b border-[#313244]">
+      <div className="flex items-center justify-between px-2 py-1 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         {/* Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto">
           {terminals.map((t) => (
@@ -421,8 +421,8 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1 text-xs rounded transition-colors',
                 t.id === activeTerminalId
-                  ? 'bg-[#313244] text-white'
-                  : 'text-[#6c7086] hover:text-white hover:bg-[#313244]/50'
+                  ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]'
+                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
               )}
             >
               <Terminal className="h-3 w-3" />
@@ -432,7 +432,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
                   e.stopPropagation();
                   closeTerminal(t.id);
                 }}
-                className="ml-1 hover:text-red-400"
+                className="ml-1 hover:text-[var(--aethel-error-light)]"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -442,19 +442,19 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
             variant="ghost"
             size="icon"
             onClick={() => createTerminal()}
-            className="h-6 w-6 text-[#6c7086] hover:text-white"
+            className="h-6 w-6 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <Plus className="h-3 w-3" />
           </Button>
         </div>
-        
+
         {/* Actions */}
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowSearch(!showSearch)}
-            className="h-6 w-6 text-[#6c7086] hover:text-white"
+            className="h-6 w-6 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <Search className="h-3 w-3" />
           </Button>
@@ -462,7 +462,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
             variant="ghost"
             size="icon"
             onClick={copySelection}
-            className="h-6 w-6 text-[#6c7086] hover:text-white"
+            className="h-6 w-6 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <Copy className="h-3 w-3" />
           </Button>
@@ -473,7 +473,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
               const instance = terminals.find(t => t.id === activeTerminalId);
               if (instance) instance.terminal.clear();
             }}
-            className="h-6 w-6 text-[#6c7086] hover:text-white"
+            className="h-6 w-6 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <Trash2 className="h-3 w-3" />
           </Button>
@@ -481,7 +481,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
             variant="ghost"
             size="icon"
             onClick={() => setIsMaximized(!isMaximized)}
-            className="h-6 w-6 text-[#6c7086] hover:text-white"
+            className="h-6 w-6 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             {isMaximized ? (
               <Minimize2 className="h-3 w-3" />
@@ -491,16 +491,16 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           </Button>
         </div>
       </div>
-      
+
       {/* Search Bar */}
       {showSearch && (
-        <div className="flex items-center gap-2 px-2 py-1 bg-[#181825] border-b border-[#313244]">
-          <Search className="h-3 w-3 text-[#6c7086]" />
+        <div className="flex items-center gap-2 px-2 py-1 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
+          <Search className="h-3 w-3 text-[var(--aethel-text-tertiary)]" />
           <Input
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search..."
-            className="h-6 text-xs bg-[#1e1e2e] border-[#313244]"
+            className="h-6 text-xs bg-[var(--aethel-surface-primary)] border-[var(--aethel-border-primary)]"
           />
           <Button
             variant="ghost"
@@ -526,7 +526,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           </Button>
         </div>
       )}
-      
+
       {/* Terminal Content */}
       <div className="flex-1 relative" ref={containerRef}>
         {terminals.map((t) => (

@@ -1,9 +1,9 @@
 /**
  * Content Browser - Gerenciador de Assets Profissional
- * 
+ *
  * Sistema completo estilo Unreal Engine para navegar,
  * importar, organizar e gerenciar assets do projeto.
- * 
+ *
  * NÃO É MOCK - Sistema real e funcional!
  */
 
@@ -65,7 +65,7 @@ function AssetCard({
   onContextMenu: (e: React.MouseEvent) => void;
 }) {
   const config = ASSET_CONFIG[asset.type];
-  
+
   return (
     <div
       onClick={onSelect}
@@ -115,7 +115,7 @@ function AssetCard({
         ) : (
           <span>{config.icon}</span>
         )}
-        
+
         {/* Starred indicator */}
         {asset.starred && (
           <div style={{
@@ -128,7 +128,7 @@ function AssetCard({
           </div>
         )}
       </div>
-      
+
       {/* Name */}
       <div style={{
         fontSize: '12px',
@@ -160,7 +160,7 @@ function AssetRow({
   onContextMenu: (e: React.MouseEvent) => void;
 }) {
   const config = ASSET_CONFIG[asset.type];
-  
+
   return (
     <div
       onClick={onSelect}
@@ -214,7 +214,7 @@ function ContextMenu({
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, [onClose]);
-  
+
   const items = asset ? [
     { id: 'open', label: '📂 Open', divider: false },
     { id: 'rename', label: '✏️ Rename', divider: false },
@@ -230,7 +230,7 @@ function ContextMenu({
     { id: 'new_blueprint', label: '📐 New Blueprint', divider: false },
     { id: 'new_particle', label: '✨ New Particle System', divider: false },
   ];
-  
+
   return (
     <div
       style={{
@@ -338,7 +338,7 @@ function FolderTree({
       </div>
     );
   }
-  
+
   const rootFolder: Asset = {
     id: 'root',
     name: 'Content',
@@ -349,7 +349,7 @@ function FolderTree({
     modifiedAt: new Date(),
     children: assets.filter(a => a.type === 'folder'),
   };
-  
+
   return (
     <div style={{
       width: '220px',
@@ -390,13 +390,13 @@ function ImportModal({
     flipY: false,
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const droppedFiles = Array.from(e.dataTransfer.files);
     setFiles(prev => [...prev, ...droppedFiles]);
   }, []);
-  
+
   return (
     <div style={{
       position: 'fixed',
@@ -435,7 +435,7 @@ function ImportModal({
             ✕
           </button>
         </div>
-        
+
         {/* Drop Zone */}
         <div
           onDrop={handleDrop}
@@ -471,7 +471,7 @@ function ImportModal({
             }}
           />
         </div>
-        
+
         {/* File List */}
         {files.length > 0 && (
           <div style={{ margin: '0 20px', maxHeight: '150px', overflow: 'auto' }}>
@@ -503,12 +503,12 @@ function ImportModal({
             ))}
           </div>
         )}
-        
+
         {/* Options */}
         <div style={{ padding: '20px', borderTop: '1px solid var(--aethel-border-primary)' }}>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
             gap: '12px',
             marginBottom: '16px',
           }}>
@@ -536,7 +536,7 @@ function ImportModal({
               </label>
             ))}
           </div>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <label style={{ color: 'var(--aethel-text-secondary)', fontSize: '13px' }}>Scale:</label>
             <input
@@ -557,7 +557,7 @@ function ImportModal({
             />
           </div>
         </div>
-        
+
         {/* Actions */}
         <div style={{
           padding: '16px 20px',
@@ -635,7 +635,7 @@ export default function ContentBrowser({
     { id: '11', name: 'MainLevel.level', type: 'level', path: '/Environments/MainLevel.level', size: 5000000, createdAt: new Date(), modifiedAt: new Date() },
     { id: '12', name: 'Fire.vfx', type: 'particle', path: '/Effects/Fire.vfx', size: 25000, createdAt: new Date(), modifiedAt: new Date() },
   ]);
-  
+
   const [currentPath, setCurrentPath] = useState('/');
   const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<AssetFilter>({});
@@ -644,7 +644,7 @@ export default function ContentBrowser({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; asset: Asset | null } | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
-  
+
   // Filter and sort assets
   const displayedAssets = useMemo(() => {
     let filtered = assets.filter(a => {
@@ -659,25 +659,25 @@ export default function ContentBrowser({
         const pathParts = a.path.split('/').filter(Boolean);
         if (pathParts.length > 1) return false;
       }
-      
+
       // Type filter
       if (filter.type?.length && !filter.type.includes(a.type)) return false;
-      
+
       // Search filter
       if (filter.search && !a.name.toLowerCase().includes(filter.search.toLowerCase())) return false;
-      
+
       // Starred filter
       if (filter.starred && !a.starred) return false;
-      
+
       return true;
     });
-    
+
     // Sort
     filtered.sort((a, b) => {
       // Folders first
       if (a.type === 'folder' && b.type !== 'folder') return -1;
       if (a.type !== 'folder' && b.type === 'folder') return 1;
-      
+
       let cmp = 0;
       switch (sortBy) {
         case 'name': cmp = a.name.localeCompare(b.name); break;
@@ -685,13 +685,13 @@ export default function ContentBrowser({
         case 'size': cmp = a.size - b.size; break;
         case 'date': cmp = a.modifiedAt.getTime() - b.modifiedAt.getTime(); break;
       }
-      
+
       return sortOrder === 'asc' ? cmp : -cmp;
     });
-    
+
     return filtered;
   }, [assets, currentPath, filter, sortBy, sortOrder]);
-  
+
   const handleSelect = useCallback((asset: Asset, e: React.MouseEvent) => {
     if (e.ctrlKey || e.metaKey) {
       // Toggle selection
@@ -710,15 +710,15 @@ export default function ContentBrowser({
       const lastIndex = displayedAssets.findIndex(a => a.id === lastSelected);
       const currentIndex = displayedAssets.findIndex(a => a.id === asset.id);
       const [start, end] = [Math.min(lastIndex, currentIndex), Math.max(lastIndex, currentIndex)];
-      
+
       setSelectedAssets(new Set(displayedAssets.slice(start, end + 1).map(a => a.id)));
     } else {
       setSelectedAssets(new Set([asset.id]));
     }
-    
+
     onAssetSelect?.(asset);
   }, [displayedAssets, selectedAssets, onAssetSelect]);
-  
+
   const handleDoubleClick = useCallback((asset: Asset) => {
     if (asset.type === 'folder') {
       setCurrentPath(asset.path);
@@ -726,15 +726,15 @@ export default function ContentBrowser({
       onAssetOpen?.(asset);
     }
   }, [onAssetOpen]);
-  
+
   const handleContextMenu = useCallback((e: React.MouseEvent, asset: Asset | null) => {
     e.preventDefault();
     setContextMenu({ x: e.clientX, y: e.clientY, asset });
   }, []);
-  
+
   const handleContextAction = useCallback(async (action: string) => {
     const asset = contextMenu?.asset;
-    
+
     switch (action) {
       case 'new_folder':
         const folderName = await openPromptDialog({
@@ -757,11 +757,11 @@ export default function ContentBrowser({
           setAssets(prev => [...prev, newFolder]);
         }
         break;
-        
+
       case 'import':
         setShowImportModal(true);
         break;
-        
+
       case 'rename':
         if (asset) {
           const newName = await openPromptDialog({
@@ -772,13 +772,13 @@ export default function ContentBrowser({
             cancelText: 'Cancel',
           });
           if (newName && newName !== asset.name) {
-            setAssets(prev => prev.map(a => 
+            setAssets(prev => prev.map(a =>
               a.id === asset.id ? { ...a, name: newName, modifiedAt: new Date() } : a
             ));
           }
         }
         break;
-        
+
       case 'duplicate':
         if (asset) {
           const duplicate: Asset = {
@@ -791,15 +791,15 @@ export default function ContentBrowser({
           setAssets(prev => [...prev, duplicate]);
         }
         break;
-        
+
       case 'star':
         if (asset) {
-          setAssets(prev => prev.map(a => 
+          setAssets(prev => prev.map(a =>
             a.id === asset.id ? { ...a, starred: !a.starred } : a
           ));
         }
         break;
-        
+
       case 'delete':
         if (asset && await openConfirmDialog({
           title: 'Delete asset',
@@ -817,7 +817,7 @@ export default function ContentBrowser({
         break;
     }
   }, [contextMenu, currentPath]);
-  
+
   const handleImport = useCallback((files: File[], options: ImportOptions) => {
     // Process imported files
     for (const file of files) {
@@ -834,7 +834,7 @@ export default function ContentBrowser({
       setAssets(prev => [...prev, newAsset]);
     }
   }, [currentPath]);
-  
+
   return (
     <div style={{
       display: 'flex',
@@ -857,12 +857,12 @@ export default function ContentBrowser({
           setSortOrder(order);
         }}
       />
-      
+
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Folder Tree */}
         <FolderTree assets={assets} currentPath={currentPath} onNavigate={setCurrentPath} />
-        
+
         {/* Asset Grid/List */}
         <div
           style={{
@@ -911,7 +911,7 @@ export default function ContentBrowser({
                 <span>Size</span>
                 <span>Modified</span>
               </div>
-              
+
               {displayedAssets.map(asset => (
                 <AssetRow
                   key={asset.id}
@@ -924,7 +924,7 @@ export default function ContentBrowser({
               ))}
             </div>
           )}
-          
+
           {displayedAssets.length === 0 && (
             <div style={{
               display: 'flex',
@@ -954,7 +954,7 @@ export default function ContentBrowser({
           )}
         </div>
       </div>
-      
+
       {/* Status Bar */}
       <div style={{
         padding: '6px 12px',
@@ -971,7 +971,7 @@ export default function ContentBrowser({
           {formatFileSize(displayedAssets.reduce((sum, a) => sum + a.size, 0))} total
         </span>
       </div>
-      
+
       {/* Context Menu */}
       {contextMenu && (
         <ContextMenu
@@ -982,7 +982,7 @@ export default function ContentBrowser({
           onAction={handleContextAction}
         />
       )}
-      
+
       {/* Import Modal */}
       {showImportModal && (
         <ImportModal

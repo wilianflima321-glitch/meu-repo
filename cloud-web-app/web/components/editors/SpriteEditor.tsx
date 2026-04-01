@@ -3,7 +3,7 @@
 /**
  * Sprite Editor - Professional Pixel Art & Sprite Animation Tool
  * Similar to Aseprite/Piskel with game engine integration
- * 
+ *
  * Features:
  * - Pixel-perfect drawing tools
  * - Animation timeline with onion skinning
@@ -165,7 +165,7 @@ const DEFAULT_PALETTE: Color[] = [
   { r: 170, g: 170, b: 170, a: 1 },
   { r: 204, g: 204, b: 204, a: 1 },
   { r: 255, g: 255, b: 255, a: 1 },
-  
+
   // Row 2: Reds & Oranges
   { r: 255, g: 0, b: 0, a: 1 },
   { r: 255, g: 85, b: 0, a: 1 },
@@ -175,7 +175,7 @@ const DEFAULT_PALETTE: Color[] = [
   { r: 170, g: 85, b: 0, a: 1 },
   { r: 170, g: 170, b: 0, a: 1 },
   { r: 85, g: 0, b: 0, a: 1 },
-  
+
   // Row 3: Greens
   { r: 0, g: 255, b: 0, a: 1 },
   { r: 0, g: 170, b: 0, a: 1 },
@@ -185,7 +185,7 @@ const DEFAULT_PALETTE: Color[] = [
   { r: 0, g: 255, b: 170, a: 1 },
   { r: 0, g: 255, b: 255, a: 1 },
   { r: 0, g: 170, b: 170, a: 1 },
-  
+
   // Row 4: Blues & Purples
   { r: 0, g: 0, b: 255, a: 1 },
   { r: 0, g: 85, b: 255, a: 1 },
@@ -212,9 +212,9 @@ function ToolButton({ icon, active, onClick, tooltip, shortcut }: ToolButtonProp
     <button
       onClick={onClick}
       className={`p-2 rounded transition-colors ${
-        active 
-          ? 'bg-sky-600 text-white' 
-          : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+        active
+          ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+          : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)]'
       }`}
       title={`${tooltip}${shortcut ? ` (${shortcut})` : ''}`}
     >
@@ -239,7 +239,7 @@ function ColorSwatch({ color, selected, onClick, onRightClick, size = 'md' }: Co
     md: 'w-6 h-6',
     lg: 'w-8 h-8',
   }[size]
-  
+
   return (
     <button
       onClick={onClick}
@@ -248,7 +248,7 @@ function ColorSwatch({ color, selected, onClick, onRightClick, size = 'md' }: Co
         onRightClick?.()
       }}
       className={`${sizeClass} rounded border-2 ${
-        selected ? 'border-white' : 'border-slate-600'
+        selected ? 'border-[var(--aethel-border-primary)]' : 'border-[var(--aethel-border-secondary)]'
       }`}
       style={{ backgroundColor: colorToRgba(color) }}
       title={colorToHex(color)}
@@ -282,27 +282,27 @@ function LayerPanel({
   onMoveLayer,
 }: LayerPanelProps) {
   return (
-    <div className="flex flex-col h-full bg-slate-800 border-l border-slate-700">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700">
-        <span className="text-sm font-medium text-white flex items-center gap-2">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)]">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
+        <span className="text-sm font-medium text-[var(--aethel-text-primary)] flex items-center gap-2">
           <Layers className="w-4 h-4" />
           Layers
         </span>
         <button
           onClick={onAddLayer}
-          className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white"
+          className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           title="Add Layer"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {[...layers].reverse().map((layer, idx) => (
           <div
             key={layer.id}
-            className={`flex items-center gap-2 px-2 py-1.5 border-b border-slate-700 cursor-pointer ${
-              layer.id === currentLayerId ? 'bg-sky-600/20' : 'hover:bg-slate-700/50'
+            className={`flex items-center gap-2 px-2 py-1.5 border-b border-[var(--aethel-border-primary)] cursor-pointer ${
+              layer.id === currentLayerId ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)]'
             }`}
             onClick={() => onSelectLayer(layer.id)}
           >
@@ -311,30 +311,30 @@ function LayerPanel({
                 e.stopPropagation()
                 onToggleVisibility(layer.id)
               }}
-              className="p-1 hover:bg-slate-600 rounded text-slate-400"
+              className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
             >
               {layer.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
             </button>
-            
+
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 onToggleLock(layer.id)
               }}
-              className="p-1 hover:bg-slate-600 rounded text-slate-400"
+              className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
             >
               {layer.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
             </button>
-            
-            <span className="flex-1 text-sm text-white truncate">{layer.name}</span>
-            
+
+            <span className="flex-1 text-sm text-[var(--aethel-text-primary)] truncate">{layer.name}</span>
+
             <div className="flex items-center gap-1">
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   onDuplicateLayer(layer.id)
                 }}
-                className="p-1 hover:bg-slate-600 rounded text-slate-400"
+                className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
                 title="Duplicate"
               >
                 <Copy className="w-3 h-3" />
@@ -344,7 +344,7 @@ function LayerPanel({
                   e.stopPropagation()
                   onDeleteLayer(layer.id)
                 }}
-                className="p-1 hover:bg-slate-600 rounded text-red-400"
+                className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-error)]"
                 title="Delete"
               >
                 <Trash2 className="w-3 h-3" />
@@ -389,68 +389,68 @@ function Timeline({
   onSetFrameDuration,
 }: TimelineProps) {
   return (
-    <div className="flex flex-col bg-slate-800 border-t border-slate-700">
+    <div className="flex flex-col bg-[var(--aethel-surface-secondary)] border-t border-[var(--aethel-border-primary)]">
       {/* Playback controls */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <button
           onClick={onPrevFrame}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Previous Frame"
         >
           <SkipBack className="w-4 h-4" />
         </button>
-        
+
         <button
           onClick={isPlaying ? onPause : onPlay}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </button>
-        
+
         <button
           onClick={onNextFrame}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Next Frame"
         >
           <SkipForward className="w-4 h-4" />
         </button>
-        
-        <span className="text-xs text-slate-500 ml-2">
+
+        <span className="text-xs text-[var(--aethel-text-tertiary)] ml-2">
           Frame {currentFrameIndex + 1} / {frames.length}
         </span>
-        
+
         <div className="flex-1" />
-        
+
         <button
           onClick={onAddFrame}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Add Frame"
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
-      
+
       {/* Frame strip */}
       <div className="flex items-center gap-1 p-2 overflow-x-auto">
         {frames.map((frame, idx) => (
           <div
             key={frame.id}
             className={`relative flex-shrink-0 w-16 h-16 rounded border-2 cursor-pointer ${
-              idx === currentFrameIndex 
-                ? 'border-sky-500' 
-                : 'border-slate-600 hover:border-slate-500'
+              idx === currentFrameIndex
+                ? 'border-sky-500'
+                : 'border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
             }`}
             onClick={() => onSelectFrame(idx)}
           >
             {/* Mini preview would go here */}
-            <div className="absolute inset-0 bg-slate-700 flex items-center justify-center">
-              <span className="text-xs text-slate-400">{idx + 1}</span>
+            <div className="absolute inset-0 bg-[var(--aethel-surface-quaternary)] flex items-center justify-center">
+              <span className="text-xs text-[var(--aethel-text-tertiary)]">{idx + 1}</span>
             </div>
-            
+
             {/* Frame duration */}
-            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-center">
-              <span className="text-[10px] text-slate-300">{frame.duration}ms</span>
+            <div className="absolute bottom-0 left-0 right-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] text-center">
+              <span className="text-[10px] text-[var(--aethel-text-secondary)]">{frame.duration}ms</span>
             </div>
           </div>
         ))}
@@ -465,7 +465,7 @@ export default function SpriteEditor() {
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const previewCanvasRef = useRef<HTMLCanvasElement>(null)
-  
+
   // State
   const [state, setState] = useState<SpriteEditorState>({
     width: 32,
@@ -489,39 +489,39 @@ export default function SpriteEditor() {
     onionSkinFrames: 2,
     palette: DEFAULT_PALETTE,
   })
-  
+
   const [isPlaying, setIsPlaying] = useState(false)
   const [isDrawing, setIsDrawing] = useState(false)
   const [lastPos, setLastPos] = useState<{ x: number; y: number } | null>(null)
-  
+
   // History for undo/redo
   const [history, setHistory] = useState<Layer[][]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
-  
+
   // Get current animation, frame, layer
-  const currentAnimation = useMemo(() => 
+  const currentAnimation = useMemo(() =>
     state.animations.find(a => a.id === state.currentAnimationId)!,
     [state.animations, state.currentAnimationId]
   )
-  
-  const currentFrame = useMemo(() => 
+
+  const currentFrame = useMemo(() =>
     currentAnimation.frames[state.currentFrameIndex],
     [currentAnimation, state.currentFrameIndex]
   )
-  
-  const currentLayer = useMemo(() => 
+
+  const currentLayer = useMemo(() =>
     currentFrame.layers.find(l => l.id === state.currentLayerId)!,
     [currentFrame, state.currentLayerId]
   )
-  
+
   // Render canvas
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    
+
     const { width, height, zoom, showGrid, gridSize } = state
 
     const getVar = (name: string, fallback: string) => {
@@ -551,10 +551,10 @@ export default function SpriteEditor() {
     const gridDark = getVar('--aethel-surface-tertiary', '#2a2a2a')
     const gridLight = getVar('--aethel-surface-quaternary', '#3a3a3a')
     const gridStroke = getVar('--aethel-text-primary', '#ffffff')
-    
+
     // Clear
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    
+
     // Checkerboard background (transparent indicator)
     const checkerSize = zoom / 2
     for (let y = 0; y < height; y++) {
@@ -564,7 +564,7 @@ export default function SpriteEditor() {
         ctx.fillRect(x * zoom, y * zoom, zoom, zoom)
       }
     }
-    
+
     // Render onion skin (previous frames)
     if (state.onionSkinning && state.currentFrameIndex > 0) {
       ctx.globalAlpha = 0.3
@@ -580,7 +580,7 @@ export default function SpriteEditor() {
       }
       ctx.globalAlpha = 1
     }
-    
+
     // Render layers
     currentFrame.layers.filter(l => l.visible).forEach(layer => {
       ctx.globalAlpha = layer.opacity
@@ -591,19 +591,19 @@ export default function SpriteEditor() {
       })
     })
     ctx.globalAlpha = 1
-    
+
     // Grid
     if (showGrid && zoom >= 4) {
       ctx.strokeStyle = toRgba(gridStroke, 0.1)
       ctx.lineWidth = 1
-      
+
       for (let x = 0; x <= width; x += gridSize) {
         ctx.beginPath()
         ctx.moveTo(x * zoom, 0)
         ctx.lineTo(x * zoom, height * zoom)
         ctx.stroke()
       }
-      
+
       for (let y = 0; y <= height; y += gridSize) {
         ctx.beginPath()
         ctx.moveTo(0, y * zoom)
@@ -612,17 +612,17 @@ export default function SpriteEditor() {
       }
     }
   }, [state, currentAnimation, currentFrame])
-  
+
   // Render on state change
   useEffect(() => {
     renderCanvas()
   }, [renderCanvas])
-  
+
   // Set pixel
   const setPixel = useCallback((x: number, y: number, color: Color) => {
     if (x < 0 || x >= state.width || y < 0 || y >= state.height) return
     if (currentLayer.locked) return
-    
+
     setState(prev => {
       const newAnimations = prev.animations.map(anim => {
         if (anim.id !== prev.currentAnimationId) return anim
@@ -649,7 +649,7 @@ export default function SpriteEditor() {
       return { ...prev, animations: newAnimations }
     })
   }, [state.width, state.height, currentLayer.locked])
-  
+
   // Draw line (Bresenham's algorithm)
   const drawLine = useCallback((x0: number, y0: number, x1: number, y1: number, color: Color) => {
     const dx = Math.abs(x1 - x0)
@@ -657,10 +657,10 @@ export default function SpriteEditor() {
     const sx = x0 < x1 ? 1 : -1
     const sy = y0 < y1 ? 1 : -1
     let err = dx - dy
-    
+
     while (true) {
       setPixel(x0, y0, color)
-      
+
       if (x0 === x1 && y0 === y1) break
       const e2 = 2 * err
       if (e2 > -dy) {
@@ -673,55 +673,55 @@ export default function SpriteEditor() {
       }
     }
   }, [setPixel])
-  
+
   // Flood fill
   const floodFill = useCallback((startX: number, startY: number, fillColor: Color) => {
     const targetColor = currentLayer.pixels.get(`${startX},${startY}`) || { r: 0, g: 0, b: 0, a: 0 }
-    
+
     // Don't fill if target color is same as fill color
-    if (targetColor.r === fillColor.r && 
-        targetColor.g === fillColor.g && 
-        targetColor.b === fillColor.b && 
+    if (targetColor.r === fillColor.r &&
+        targetColor.g === fillColor.g &&
+        targetColor.b === fillColor.b &&
         targetColor.a === fillColor.a) return
-    
+
     const stack: [number, number][] = [[startX, startY]]
     const visited = new Set<string>()
-    
+
     while (stack.length > 0) {
       const [x, y] = stack.pop()!
       const key = `${x},${y}`
-      
+
       if (visited.has(key)) continue
       if (x < 0 || x >= state.width || y < 0 || y >= state.height) continue
-      
+
       const pixelColor = currentLayer.pixels.get(key) || { r: 0, g: 0, b: 0, a: 0 }
-      
+
       if (pixelColor.r !== targetColor.r ||
           pixelColor.g !== targetColor.g ||
           pixelColor.b !== targetColor.b ||
           pixelColor.a !== targetColor.a) continue
-      
+
       visited.add(key)
       setPixel(x, y, fillColor)
-      
+
       stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1])
     }
   }, [currentLayer, state.width, state.height, setPixel])
-  
+
   // Mouse handlers
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const rect = canvas.getBoundingClientRect()
     const x = Math.floor((e.clientX - rect.left) / state.zoom)
     const y = Math.floor((e.clientY - rect.top) / state.zoom)
-    
+
     setIsDrawing(true)
     setLastPos({ x, y })
-    
+
     const color = e.button === 2 ? state.secondaryColor : state.primaryColor
-    
+
     switch (state.tool) {
       case 'pencil':
         setPixel(x, y, color)
@@ -742,21 +742,21 @@ export default function SpriteEditor() {
         break
     }
   }, [state.zoom, state.tool, state.primaryColor, state.secondaryColor, currentLayer, setPixel, floodFill])
-  
+
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !lastPos) return
-    
+
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const rect = canvas.getBoundingClientRect()
     const x = Math.floor((e.clientX - rect.left) / state.zoom)
     const y = Math.floor((e.clientY - rect.top) / state.zoom)
-    
+
     if (x === lastPos.x && y === lastPos.y) return
-    
+
     const color = e.buttons === 2 ? state.secondaryColor : state.primaryColor
-    
+
     switch (state.tool) {
       case 'pencil':
         drawLine(lastPos.x, lastPos.y, x, y, color)
@@ -765,15 +765,15 @@ export default function SpriteEditor() {
         drawLine(lastPos.x, lastPos.y, x, y, { r: 0, g: 0, b: 0, a: 0 })
         break
     }
-    
+
     setLastPos({ x, y })
   }, [isDrawing, lastPos, state.zoom, state.tool, state.primaryColor, state.secondaryColor, drawLine])
-  
+
   const handleMouseUp = useCallback(() => {
     setIsDrawing(false)
     setLastPos(null)
   }, [])
-  
+
   // Layer operations
   const addLayer = useCallback(() => {
     const layerId = `layer-${Date.now()}`
@@ -795,7 +795,7 @@ export default function SpriteEditor() {
       currentLayerId: layerId,
     }))
   }, [])
-  
+
   // Frame operations
   const addFrame = useCallback(() => {
     const frameId = `frame-${Date.now()}`
@@ -817,26 +817,26 @@ export default function SpriteEditor() {
       currentFrameIndex: currentAnimation.frames.length,
     }))
   }, [currentFrame, currentAnimation])
-  
+
   // Animation playback
   useEffect(() => {
     if (!isPlaying) return
-    
+
     const interval = setInterval(() => {
       setState(prev => ({
         ...prev,
         currentFrameIndex: (prev.currentFrameIndex + 1) % currentAnimation.frames.length,
       }))
     }, currentFrame.duration)
-    
+
     return () => clearInterval(interval)
   }, [isPlaying, currentAnimation.frames.length, currentFrame.duration])
-  
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return
-      
+
       switch (e.key.toLowerCase()) {
         case 'b':
           setState(prev => ({ ...prev, tool: 'pencil' }))
@@ -869,56 +869,56 @@ export default function SpriteEditor() {
           break
       }
     }
-    
+
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
-  
+
   return (
-    <div className="flex flex-col h-full bg-slate-900">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-primary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-white">Sprite Editor</span>
-          <span className="text-xs text-slate-500">{state.width} × {state.height}</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Sprite Editor</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{state.width} × {state.height}</span>
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <button className="p-1.5 hover:bg-slate-700 rounded text-slate-400" title="Export">
+          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Export">
             <Download className="w-4 h-4" />
           </button>
-          <button className="p-1.5 hover:bg-slate-700 rounded text-slate-400" title="Import">
+          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Import">
             <Upload className="w-4 h-4" />
           </button>
-          <button className="p-1.5 hover:bg-slate-700 rounded text-slate-400" title="Settings">
+          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Settings">
             <Settings className="w-4 h-4" />
           </button>
         </div>
       </div>
-      
+
       <div className="flex-1 flex overflow-hidden">
         {/* Left toolbar */}
-        <div className="flex flex-col gap-1 p-2 bg-slate-800 border-r border-slate-700">
+        <div className="flex flex-col gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)]">
           <ToolButton icon={<Pencil className="w-4 h-4" />} active={state.tool === 'pencil'} onClick={() => setState(s => ({ ...s, tool: 'pencil' }))} tooltip="Pencil" shortcut="B" />
           <ToolButton icon={<Eraser className="w-4 h-4" />} active={state.tool === 'eraser'} onClick={() => setState(s => ({ ...s, tool: 'eraser' }))} tooltip="Eraser" shortcut="E" />
           <ToolButton icon={<PaintBucket className="w-4 h-4" />} active={state.tool === 'fill'} onClick={() => setState(s => ({ ...s, tool: 'fill' }))} tooltip="Fill" shortcut="G" />
           <ToolButton icon={<Pipette className="w-4 h-4" />} active={state.tool === 'eyedropper'} onClick={() => setState(s => ({ ...s, tool: 'eyedropper' }))} tooltip="Eyedropper" shortcut="I" />
           <ToolButton icon={<Square className="w-4 h-4" />} active={state.tool === 'rectangle'} onClick={() => setState(s => ({ ...s, tool: 'rectangle' }))} tooltip="Rectangle" shortcut="R" />
           <ToolButton icon={<Circle className="w-4 h-4" />} active={state.tool === 'circle'} onClick={() => setState(s => ({ ...s, tool: 'circle' }))} tooltip="Circle" shortcut="C" />
-          
-          <div className="h-px bg-slate-700 my-2" />
-          
+
+          <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
+
           <ToolButton icon={<Undo className="w-4 h-4" />} active={false} onClick={() => {}} tooltip="Undo" shortcut="Ctrl+Z" />
           <ToolButton icon={<Redo className="w-4 h-4" />} active={false} onClick={() => {}} tooltip="Redo" shortcut="Ctrl+Y" />
-          
-          <div className="h-px bg-slate-700 my-2" />
-          
+
+          <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
+
           <ToolButton icon={<ZoomIn className="w-4 h-4" />} active={false} onClick={() => setState(s => ({ ...s, zoom: Math.min(32, s.zoom + 2) }))} tooltip="Zoom In" shortcut="+" />
           <ToolButton icon={<ZoomOut className="w-4 h-4" />} active={false} onClick={() => setState(s => ({ ...s, zoom: Math.max(2, s.zoom - 2) }))} tooltip="Zoom Out" shortcut="-" />
           <ToolButton icon={<Grid className="w-4 h-4" />} active={state.showGrid} onClick={() => setState(s => ({ ...s, showGrid: !s.showGrid }))} tooltip="Toggle Grid" />
-          
+
           <div className="flex-1" />
-          
+
           {/* Color selectors */}
           <div className="relative">
             <ColorSwatch color={state.primaryColor} size="lg" />
@@ -927,9 +927,9 @@ export default function SpriteEditor() {
             </div>
           </div>
         </div>
-        
+
         {/* Canvas area */}
-        <div className="flex-1 flex items-center justify-center bg-slate-950 overflow-auto">
+        <div className="flex-1 flex items-center justify-center bg-[var(--aethel-surface-primary)] overflow-auto">
           <canvas
             ref={canvasRef}
             width={state.width * state.zoom}
@@ -942,14 +942,14 @@ export default function SpriteEditor() {
             onContextMenu={(e) => e.preventDefault()}
           />
         </div>
-        
+
         {/* Right panel - Layers & Palette */}
         <div className="w-64 flex flex-col">
           {/* Palette */}
-          <div className="p-3 bg-slate-800 border-b border-slate-700">
+          <div className="p-3 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center gap-2 mb-2">
-              <Palette className="w-4 h-4 text-slate-400" />
-              <span className="text-sm font-medium text-white">Palette</span>
+              <Palette className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+              <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Palette</span>
             </div>
             <div className="grid grid-cols-8 gap-1">
               {state.palette.map((color, idx) => (
@@ -963,7 +963,7 @@ export default function SpriteEditor() {
               ))}
             </div>
           </div>
-          
+
           {/* Layers */}
           <LayerPanel
             layers={currentFrame.layers}
@@ -996,7 +996,7 @@ export default function SpriteEditor() {
           />
         </div>
       </div>
-      
+
       {/* Timeline */}
       <Timeline
         frames={currentAnimation.frames}

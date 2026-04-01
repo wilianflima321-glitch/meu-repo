@@ -15,7 +15,7 @@ export default function GitPanel() {
   const [showConsent, setShowConsent] = useState(false);
   const [consentRequest, setConsentRequest] = useState<any>(null);
   const [consentChargeId, setConsentChargeId] = useState<string>('');
-  
+
   const gitClient = useMemo(() => getGitClient('/workspace'), []);
   const consentManager = useMemo(() => getConsentManager(), []);
 
@@ -56,7 +56,7 @@ export default function GitPanel() {
 
   const handleCommit = async () => {
     if (!commitMessage.trim()) return;
-    
+
     try {
       await gitClient.commit(commitMessage);
       setCommitMessage('');
@@ -79,7 +79,7 @@ export default function GitPanel() {
     });
 
     const response = await consentManager.requestConsent(request);
-    
+
     if (response.approved) {
       try {
         await gitClient.push();
@@ -135,24 +135,24 @@ export default function GitPanel() {
 
   return (
     <>
-      <div className="git-panel h-full bg-gradient-to-br from-slate-900 via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-slate-900 p-6">
+      <div className="git-panel h-full bg-gradient-to-br from-[var(--aethel-surface-primary)] via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-[var(--aethel-surface-primary)] p-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">
               Git - {status?.branch || 'main'}
             </h2>
             <div className="flex gap-2">
               <button
                 onClick={handlePull}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                className="px-4 py-2 bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded-lg transition-colors"
               >
                 Pull
               </button>
               <button
                 onClick={handlePush}
                 disabled={!status?.ahead || status.ahead === 0}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white rounded-lg transition-colors"
+                className="px-4 py-2 bg-[var(--aethel-success)] hover:brightness-110 disabled:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
               >
                 Push ({status?.ahead || 0})
               </button>
@@ -162,12 +162,12 @@ export default function GitPanel() {
           {/* Status Indicators */}
           <div className="flex gap-4 text-sm">
             {status && status.ahead > 0 && (
-              <div className="text-green-400">
+              <div className="text-[var(--aethel-success-light)]">
                 Ahead: {status.ahead}
               </div>
             )}
             {status && status.behind > 0 && (
-              <div className="text-red-400">
+              <div className="text-[var(--aethel-error-light)]">
                 Behind: {status.behind}
               </div>
             )}
@@ -178,12 +178,12 @@ export default function GitPanel() {
         <div className="space-y-6">
           {/* Staged Changes */}
           {status && status.staged.length > 0 && (
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4">
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-white">Staged Changes ({status.staged.length})</h3>
+                <h3 className="font-semibold text-[var(--aethel-text-primary)]">Staged Changes ({status.staged.length})</h3>
                 <button
                   onClick={() => handleUnstage(status.staged.map(f => f.path))}
-                  className="text-sm text-slate-400 hover:text-white"
+                  className="text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   Unstage All
                 </button>
@@ -192,7 +192,7 @@ export default function GitPanel() {
                 {status.staged.map((file) => (
                   <div
                     key={file.path}
-                    className="flex items-center gap-2 p-2 bg-slate-700 rounded hover:bg-slate-600 cursor-pointer"
+                    className="flex items-center gap-2 p-2 bg-[var(--aethel-surface-quaternary)] rounded hover:bg-[var(--aethel-surface-tertiary)] cursor-pointer"
                     onClick={() => toggleFileSelection(file.path)}
                   >
                     <input
@@ -201,8 +201,8 @@ export default function GitPanel() {
                       onChange={() => {}}
                       className="w-4 h-4"
                     />
-                    <span className="text-green-400">{getStatusIcon(file.status)}</span>
-                    <span className="flex-1 text-slate-300">{file.path}</span>
+                    <span className="text-[var(--aethel-success-light)]">{getStatusIcon(file.status)}</span>
+                    <span className="flex-1 text-[var(--aethel-text-secondary)]">{file.path}</span>
                   </div>
                 ))}
               </div>
@@ -211,12 +211,12 @@ export default function GitPanel() {
 
           {/* Unstaged Changes */}
           {status && status.unstaged.length > 0 && (
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4">
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-white">Changes ({status.unstaged.length})</h3>
+                <h3 className="font-semibold text-[var(--aethel-text-primary)]">Changes ({status.unstaged.length})</h3>
                 <button
                   onClick={() => handleStage(status.unstaged.map(f => f.path))}
-                  className="text-sm text-slate-400 hover:text-white"
+                  className="text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   Stage All
                 </button>
@@ -225,11 +225,11 @@ export default function GitPanel() {
                 {status.unstaged.map((file) => (
                   <div
                     key={file.path}
-                    className="flex items-center gap-2 p-2 bg-slate-700 rounded hover:bg-slate-600 cursor-pointer"
+                    className="flex items-center gap-2 p-2 bg-[var(--aethel-surface-quaternary)] rounded hover:bg-[var(--aethel-surface-tertiary)] cursor-pointer"
                     onClick={() => handleStage([file.path])}
                   >
-                    <span className="text-yellow-400">{getStatusIcon(file.status)}</span>
-                    <span className="flex-1 text-slate-300">{file.path}</span>
+                    <span className="text-[var(--aethel-warning-light)]">{getStatusIcon(file.status)}</span>
+                    <span className="flex-1 text-[var(--aethel-text-secondary)]">{file.path}</span>
                   </div>
                 ))}
               </div>
@@ -238,17 +238,17 @@ export default function GitPanel() {
 
           {/* Untracked Files */}
           {status && status.untracked.length > 0 && (
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4">
-              <h3 className="font-semibold text-white mb-3">Untracked Files ({status.untracked.length})</h3>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4">
+              <h3 className="font-semibold text-[var(--aethel-text-primary)] mb-3">Untracked Files ({status.untracked.length})</h3>
               <div className="space-y-2">
                 {status.untracked.map((file) => (
                   <div
                     key={file.path}
-                    className="flex items-center gap-2 p-2 bg-slate-700 rounded hover:bg-slate-600 cursor-pointer"
+                    className="flex items-center gap-2 p-2 bg-[var(--aethel-surface-quaternary)] rounded hover:bg-[var(--aethel-surface-tertiary)] cursor-pointer"
                     onClick={() => handleStage([file.path])}
                   >
-                    <span className="text-slate-400">?</span>
-                    <span className="flex-1 text-slate-300">{file.path}</span>
+                    <span className="text-[var(--aethel-text-tertiary)]">?</span>
+                    <span className="flex-1 text-[var(--aethel-text-secondary)]">{file.path}</span>
                   </div>
                 ))}
               </div>
@@ -257,17 +257,17 @@ export default function GitPanel() {
 
           {/* Conflicted Files */}
           {status && status.conflicted.length > 0 && (
-            <div className="bg-red-900/20 backdrop-blur-sm rounded-lg p-4 border border-red-500">
-              <h3 className="font-semibold text-red-400 mb-3">Conflicts ({status.conflicted.length})</h3>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] backdrop-blur-sm rounded-lg p-4 border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]">
+              <h3 className="font-semibold text-[var(--aethel-error-light)] mb-3">Conflicts ({status.conflicted.length})</h3>
               <div className="space-y-2">
                 {status.conflicted.map((file) => (
                   <div
                     key={file.path}
-                    className="flex items-center gap-2 p-2 bg-red-900/30 rounded"
+                    className="flex items-center gap-2 p-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded"
                   >
-                      <span className="text-red-400 text-xs font-semibold">WARN</span>
-                    <span className="flex-1 text-red-300">{file.path}</span>
-                    <button className="text-sm text-red-400 hover:text-red-300">
+                      <span className="text-[var(--aethel-error-light)] text-xs font-semibold">WARN</span>
+                    <span className="flex-1 text-[var(--aethel-error-light)]">{file.path}</span>
+                    <button className="text-sm text-[var(--aethel-error-light)] hover:text-[var(--aethel-error-light)]">
                       Resolve
                     </button>
                   </div>
@@ -279,19 +279,19 @@ export default function GitPanel() {
 
         {/* Commit Section */}
         {status && status.staged.length > 0 && (
-          <div className="mt-6 bg-slate-800/50 backdrop-blur-sm rounded-lg p-4">
-            <h3 className="font-semibold text-white mb-3">Commit Changes</h3>
+          <div className="mt-6 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4">
+            <h3 className="font-semibold text-[var(--aethel-text-primary)] mb-3">Commit Changes</h3>
             <textarea
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
               placeholder="Commit message..."
-              className="w-full p-3 bg-slate-700 text-white rounded-lg mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full p-3 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-[var(--aethel-info)]"
               rows={3}
             />
             <button
               onClick={handleCommit}
               disabled={!commitMessage.trim()}
-              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg transition-colors"
+              className="w-full px-4 py-2 bg-[var(--aethel-primary)] hover:brightness-110 disabled:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
             >
               Commit {status.staged.length} file{status.staged.length !== 1 ? 's' : ''}
             </button>

@@ -2,16 +2,16 @@
 
 /**
  * @-Mentions Parser for AI Chat
- * Like Cursor/GitHub Copilot - allows referencing files, functions, symbols
+ * Similar ao Cursor/GitHub Copilot - permite referenciar arquivos, funcoes e simbolos
  * 
  * Supported mention types:
- * - @file:path/to/file.ts - Reference a file
- * - @function:functionName - Reference a function
- * - @symbol:SymbolName - Reference a class/interface/type
- * - @selection - Reference current selection
- * - @diagnostics - Reference current errors
- * - @git:diff - Reference git diff
- * - @terminal - Reference terminal output
+ * - @file:path/to/file.ts - Referencia um arquivo
+ * - @function:functionName - Referencia uma funcao
+ * - @symbol:SymbolName - Referencia uma classe/interface/tipo
+ * - @selection - Referencia a selecao atual
+ * - @diagnostics - Referencia erros atuais
+ * - @git:diff - Referencia o diff do git
+ * - @terminal - Referencia a saida do terminal
  */
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
@@ -179,63 +179,63 @@ export class MentionParser {
       case 'codebase':
         return this.resolveCodebase()
       default:
-        return `[Unable to resolve ${mention.type}]`
+        return `[Nao foi possivel resolver ${mention.type}]`
     }
   }
   
   private async resolveFile(path: string): Promise<string> {
     // In real implementation, read file from workspace
-    return `--- File: ${path} ---\n// File content would be loaded here`
+    return `--- Arquivo: ${path} ---\n// O conteudo do arquivo seria carregado aqui`
   }
   
   private async resolveFolder(path: string): Promise<string> {
     // In real implementation, list folder contents
-    return `--- Folder: ${path} ---\n// Folder structure would be listed here`
+    return `--- Pasta: ${path} ---\n// A estrutura da pasta seria listada aqui`
   }
   
   private async resolveFunction(name: string): Promise<string> {
     // In real implementation, find function definition
-    return `--- Function: ${name} ---\n// Function definition would be here`
+    return `--- Funcao: ${name} ---\n// A definicao da funcao apareceria aqui`
   }
   
   private async resolveSymbol(name: string): Promise<string> {
     // In real implementation, find symbol definition
-    return `--- Symbol: ${name} ---\n// Symbol definition would be here`
+    return `--- Simbolo: ${name} ---\n// A definicao do simbolo apareceria aqui`
   }
   
   private async resolveSelection(): Promise<string> {
     // In real implementation, get current editor selection
-    return `--- Current Selection ---\n// Selected code would be here`
+    return `--- Selecao Atual ---\n// O codigo selecionado apareceria aqui`
   }
   
   private async resolveDiagnostics(): Promise<string> {
     // In real implementation, get current errors/warnings
-    return `--- Diagnostics ---\n// Current errors and warnings would be listed here`
+    return `--- Diagnosticos ---\n// Os erros e avisos atuais apareceriam aqui`
   }
   
   private async resolveGit(type: string): Promise<string> {
     // In real implementation, get git info
-    return `--- Git ${type} ---\n// Git information would be here`
+    return `--- Git ${type} ---\n// As informacoes do Git apareceriam aqui`
   }
   
   private async resolveTerminal(): Promise<string> {
     // In real implementation, get recent terminal output
-    return `--- Terminal Output ---\n// Recent terminal output would be here`
+    return `--- Saida do Terminal ---\n// A saida recente do terminal apareceria aqui`
   }
   
   private async resolveWeb(url: string): Promise<string> {
     // In real implementation, fetch web content
-    return `--- Web: ${url} ---\n// Web content would be fetched here`
+    return `--- Web: ${url} ---\n// O conteudo da web seria buscado aqui`
   }
   
   private async resolveDocs(query: string): Promise<string> {
     // In real implementation, search documentation
-    return `--- Docs: ${query} ---\n// Documentation search results would be here`
+    return `--- Docs: ${query} ---\n// Os resultados da documentacao apareceriam aqui`
   }
   
   private async resolveCodebase(): Promise<string> {
     // In real implementation, get codebase overview
-    return `--- Codebase ---\n// Codebase structure and key files would be here`
+    return `--- Codebase ---\n// A estrutura da codebase e os arquivos principais apareceriam aqui`
   }
 }
 
@@ -297,17 +297,17 @@ export class MentionSuggestionProvider {
     // If no type specified yet, show all mention types
     if (!mentionType || !Object.keys(MENTION_PATTERNS).includes(mentionType)) {
       const allTypes: MentionSuggestion[] = [
-        { type: 'file', value: '', displayName: '@file:', description: 'Reference a file', icon: '📄' },
-        { type: 'folder', value: '', displayName: '@folder:', description: 'Reference a folder', icon: '📁' },
-        { type: 'function', value: '', displayName: '@function:', description: 'Reference a function', icon: '🔧' },
-        { type: 'symbol', value: '', displayName: '@symbol:', description: 'Reference a class/interface', icon: '🏷️' },
-        { type: 'selection', value: '', displayName: '@selection', description: 'Current selection', icon: '✂️' },
-        { type: 'diagnostics', value: '', displayName: '@diagnostics', description: 'Current errors', icon: '⚠️' },
-        { type: 'git', value: '', displayName: '@git:', description: 'Git diff/status', icon: '🔀' },
-        { type: 'terminal', value: '', displayName: '@terminal', description: 'Terminal output', icon: '💻' },
-        { type: 'web', value: '', displayName: '@web:', description: 'Fetch web content', icon: '🌐' },
-        { type: 'docs', value: '', displayName: '@docs:', description: 'Search docs', icon: '📚' },
-        { type: 'codebase', value: '', displayName: '@codebase', description: 'Entire codebase', icon: '🗂️' },
+        { type: 'file', value: '', displayName: '@file:', description: 'Referenciar arquivo', icon: 'FILE' },
+        { type: 'folder', value: '', displayName: '@folder:', description: 'Referenciar pasta', icon: 'DIR' },
+        { type: 'function', value: '', displayName: '@function:', description: 'Referenciar funcao', icon: 'FN' },
+        { type: 'symbol', value: '', displayName: '@symbol:', description: 'Referenciar classe, interface ou tipo', icon: 'SYM' },
+        { type: 'selection', value: '', displayName: '@selection', description: 'Selecao atual', icon: 'SEL' },
+        { type: 'diagnostics', value: '', displayName: '@diagnostics', description: 'Erros e avisos atuais', icon: 'ERR' },
+        { type: 'git', value: '', displayName: '@git:', description: 'Diff, staged ou status do Git', icon: 'GIT' },
+        { type: 'terminal', value: '', displayName: '@terminal', description: 'Saida recente do terminal', icon: 'TERM' },
+        { type: 'web', value: '', displayName: '@web:', description: 'Buscar conteudo da web', icon: 'WEB' },
+        { type: 'docs', value: '', displayName: '@docs:', description: 'Buscar documentacao', icon: 'DOC' },
+        { type: 'codebase', value: '', displayName: '@codebase', description: 'Codebase inteira', icon: 'CODE' },
       ]
       
       // Filter by partial type match
@@ -326,8 +326,8 @@ export class MentionSuggestionProvider {
             type: 'file' as MentionType,
             value: f,
             displayName: `@file:${f}`,
-            description: 'File reference',
-            icon: '📄',
+            description: 'Referencia de arquivo',
+            icon: 'FILE',
             preview: `// ${f}`,
           }))
       
@@ -339,8 +339,8 @@ export class MentionSuggestionProvider {
             type: 'function' as MentionType,
             value: f,
             displayName: `@function:${f}`,
-            description: 'Function reference',
-            icon: '🔧',
+            description: 'Referencia de funcao',
+            icon: 'FN',
           }))
       
       case 'symbol':
@@ -351,15 +351,15 @@ export class MentionSuggestionProvider {
             type: 'symbol' as MentionType,
             value: s,
             displayName: `@symbol:${s}`,
-            description: 'Symbol reference',
-            icon: '🏷️',
+            description: 'Referencia de simbolo',
+            icon: 'SYM',
           }))
       
       case 'git':
         return [
-          { type: 'git' as MentionType, value: 'diff', displayName: '@git:diff', description: 'Git diff', icon: '🔀' },
-          { type: 'git' as MentionType, value: 'staged', displayName: '@git:staged', description: 'Staged changes', icon: '✅' },
-          { type: 'git' as MentionType, value: 'status', displayName: '@git:status', description: 'Git status', icon: '📊' },
+          { type: 'git' as MentionType, value: 'diff', displayName: '@git:diff', description: 'Diff do Git', icon: 'DIFF' },
+          { type: 'git' as MentionType, value: 'staged', displayName: '@git:staged', description: 'Mudancas em staged', icon: 'OK' },
+          { type: 'git' as MentionType, value: 'status', displayName: '@git:status', description: 'Status do Git', icon: 'STAT' },
         ].filter(s => s.value.includes(mentionValue.toLowerCase()))
       
       default:
@@ -513,45 +513,47 @@ interface MentionChipProps {
 
 export function MentionChip({ mention, onRemove }: MentionChipProps) {
   const icons: Record<MentionType, string> = {
-    file: '📄',
-    folder: '📁',
-    function: '🔧',
-    symbol: '🏷️',
-    selection: '✂️',
-    diagnostics: '⚠️',
-    git: '🔀',
-    terminal: '💻',
-    web: '🌐',
-    docs: '📚',
-    codebase: '🗂️',
+    file: 'FILE',
+    folder: 'DIR',
+    function: 'FN',
+    symbol: 'SYM',
+    selection: 'SEL',
+    diagnostics: 'ERR',
+    git: 'GIT',
+    terminal: 'TERM',
+    web: 'WEB',
+    docs: 'DOC',
+    codebase: 'CODE',
   }
-  
+
   const colors: Record<MentionType, string> = {
-    file: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    folder: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-    function: 'bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-accent-light)_85%,transparent)] border-[color-mix(in_srgb,var(--aethel-accent)_30%,transparent)]',
-    symbol: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
-    selection: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    diagnostics: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-    git: 'bg-red-500/20 text-red-300 border-red-500/30',
-    terminal: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-    web: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-    docs: 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-primary-light)_85%,transparent)] border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]',
-    codebase: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    file: 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-info-light)_90%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
+    folder: 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[color-mix(in_srgb,var(--aethel-warning-light)_90%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_28%,transparent)]',
+    function: 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-primary-light)_90%,transparent)] border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]',
+    symbol: 'bg-[color-mix(in_srgb,var(--aethel-secondary)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-secondary)_85%,white)] border-[color-mix(in_srgb,var(--aethel-secondary)_30%,transparent)]',
+    selection: 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[color-mix(in_srgb,var(--aethel-success-light)_90%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_28%,transparent)]',
+    diagnostics: 'bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] text-[color-mix(in_srgb,var(--aethel-error)_88%,white)] border-[color-mix(in_srgb,var(--aethel-error)_28%,transparent)]',
+    git: 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[color-mix(in_srgb,var(--aethel-warning-light)_88%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_28%,transparent)]',
+    terminal: 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] text-[var(--aethel-text-secondary)] border-[var(--aethel-border-secondary)]',
+    web: 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[color-mix(in_srgb,var(--aethel-info-light)_90%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)]',
+    docs: 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[color-mix(in_srgb,var(--aethel-primary-light)_90%,transparent)] border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)]',
+    codebase: 'bg-[color-mix(in_srgb,var(--aethel-secondary)_18%,transparent)] text-[color-mix(in_srgb,var(--aethel-secondary)_85%,white)] border-[color-mix(in_srgb,var(--aethel-secondary)_28%,transparent)]',
   }
-  
+
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border ${colors[mention.type]}`}>
-      <span>{icons[mention.type]}</span>
+    <span className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 ${colors[mention.type]}`}>
+      <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">{icons[mention.type]}</span>
       <span className="text-xs font-medium">
         {mention.value || mention.type}
       </span>
       {onRemove && (
         <button
+          type="button"
           onClick={onRemove}
+          aria-label={`Remover mention ${mention.value || mention.type}`}
           className="ml-1 hover:opacity-70"
         >
-          ×
+          x
         </button>
       )}
     </span>
@@ -565,33 +567,45 @@ interface SuggestionListProps {
   activeIndex: number
   onSelect: (suggestion: MentionSuggestion) => void
   onHover: (index: number) => void
+  listboxId?: string
 }
 
-export function SuggestionList({ suggestions, activeIndex, onSelect, onHover }: SuggestionListProps) {
+export function SuggestionList({ suggestions, activeIndex, onSelect, onHover, listboxId }: SuggestionListProps) {
   return (
-    <div className="absolute bottom-full left-0 mb-2 w-80 max-h-64 overflow-y-auto bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50">
+    <div
+      id={listboxId}
+      role="listbox"
+      aria-label="Sugestoes de mentions"
+      aria-activedescendant={activeIndex >= 0 ? `mention-suggestion-${activeIndex}` : undefined}
+      className="absolute bottom-full left-0 mb-2 w-80 max-h-64 overflow-y-auto bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-xl z-50"
+    >
       {suggestions.map((suggestion, idx) => (
         <div
           key={`${suggestion.type}-${suggestion.value}-${idx}`}
+          id={`mention-suggestion-${idx}`}
+          role="option"
+          aria-selected={idx === activeIndex}
           className={`flex items-center gap-3 px-3 py-2 cursor-pointer ${
-            idx === activeIndex ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_30%,transparent)]' : 'hover:bg-slate-700/50'
+            idx === activeIndex ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_30%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)]'
           }`}
           onClick={() => onSelect(suggestion)}
           onMouseEnter={() => onHover(idx)}
         >
-          <span className="text-lg">{suggestion.icon}</span>
+          <span className="min-w-[2.75rem] text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+            {suggestion.icon}
+          </span>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-white truncate">
+            <div className="text-sm font-medium text-[var(--aethel-text-primary)] truncate">
               {suggestion.displayName}
             </div>
             {suggestion.description && (
-              <div className="text-xs text-slate-400 truncate">
+              <div className="text-xs text-[var(--aethel-text-tertiary)] truncate">
                 {suggestion.description}
               </div>
             )}
           </div>
           {idx === activeIndex && (
-            <span className="text-xs text-slate-500">Tab ↹</span>
+            <span className="text-xs text-[var(--aethel-text-quaternary)]">Tab</span>
           )}
         </div>
       ))}
@@ -600,3 +614,4 @@ export function SuggestionList({ suggestions, activeIndex, onSelect, onHover }: 
 }
 
 export default MentionParser
+

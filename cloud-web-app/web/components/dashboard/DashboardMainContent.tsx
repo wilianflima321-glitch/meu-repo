@@ -79,8 +79,8 @@ export function DashboardMainContent({
   onUseCaseSelect,
 }: DashboardMainContentProps) {
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-      {showFirstValueGuide && (
+    <div className="mx-auto w-full max-w-[1600px] space-y-4 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+      {showFirstValueGuide && activeTab === 'overview' && (
         <FirstValueGuide
           firstProjectCreated={firstProjectCreated}
           firstAiSuccess={firstValueAiSuccess}

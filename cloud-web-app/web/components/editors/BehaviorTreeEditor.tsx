@@ -223,8 +223,8 @@ const BTNodeComponent: React.FC<{
         <div className="flex items-center gap-2 px-3 py-2">
           <span className="text-lg">{style.icon}</span>
           <div>
-            <div className="text-white text-sm font-medium">{node.name}</div>
-            <div className="text-xs text-gray-400 capitalize">{node.type}</div>
+            <div className="text-[var(--aethel-text-primary)] text-sm font-medium">{node.name}</div>
+            <div className="text-xs text-[var(--aethel-text-tertiary)] capitalize">{node.type}</div>
           </div>
         </div>
 
@@ -242,7 +242,7 @@ const BTNodeComponent: React.FC<{
       {/* Add Child Button */}
       {canAddChild && (
         <button
-          className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-6 h-6 rounded-full bg-slate-700 hover:bg-slate-600 text-white text-xs flex items-center justify-center"
+          className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-6 h-6 rounded-full bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] text-xs flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
             onAddChild();
@@ -429,29 +429,29 @@ export default function BehaviorTreeEditor() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)]">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-4">
-          <h2 className="text-white font-semibold"> Behavior Tree Editor</h2>
+          <h2 className="text-[var(--aethel-text-primary)] font-semibold"> Behavior Tree Editor</h2>
           <input
             type="text"
             value={tree.name}
             onChange={(e) => setTree(prev => ({ ...prev, name: e.target.value }))}
-            className="px-2 py-1 bg-slate-700 text-white rounded text-sm"
+            className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-sm"
           />
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsSimulating(!isSimulating)}
             className={`px-3 py-1 rounded text-sm font-medium ${
-              isSimulating ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-            } text-white`}
+              isSimulating ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : 'bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+            } text-[var(--aethel-text-primary)]`}
           >
             {isSimulating ? ' Stop' : ' Simulate'}
           </button>
           <button
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+            className="px-3 py-1 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
             onClick={() => setShowAddMenu({ parentId: null, position: { x: 400, y: 100 } })}
           >
             + Add Root
@@ -510,16 +510,16 @@ export default function BehaviorTreeEditor() {
           {/* Add Menu */}
           {showAddMenu && (
             <div
-              className="absolute bg-slate-800 rounded-lg shadow-2xl border border-slate-600 z-50"
+              className="absolute bg-[var(--aethel-surface-secondary)] rounded-lg shadow-2xl border border-[var(--aethel-border-secondary)] z-50"
               style={{ left: showAddMenu.position.x + 150, top: showAddMenu.position.y, minWidth: 200 }}
             >
-              <div className="px-3 py-2 border-b border-slate-600">
-                <span className="text-white text-sm font-medium">Add Node</span>
+              <div className="px-3 py-2 border-b border-[var(--aethel-border-secondary)]">
+                <span className="text-[var(--aethel-text-primary)] text-sm font-medium">Add Node</span>
               </div>
               <div className="max-h-80 overflow-y-auto">
                 {Object.entries(templateGroups).map(([group, keys]) => (
                   <div key={group}>
-                    <div className="px-3 py-1 text-xs font-semibold uppercase text-gray-400">
+                    <div className="px-3 py-1 text-xs font-semibold uppercase text-[var(--aethel-text-tertiary)]">
                       {group}
                     </div>
                     {keys.map((key) => {
@@ -528,7 +528,7 @@ export default function BehaviorTreeEditor() {
                       return (
                         <button
                           key={key}
-                          className="w-full px-3 py-1 text-left text-sm text-gray-300 hover:bg-slate-700 flex items-center gap-2"
+                          className="w-full px-3 py-1 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] flex items-center gap-2"
                           onClick={() => addNode(key, showAddMenu.parentId, showAddMenu.position)}
                         >
                           <span style={{ color: style.color }}>{style.icon}</span>
@@ -545,7 +545,7 @@ export default function BehaviorTreeEditor() {
 
         {/* Properties Panel */}
         {selectedNode && (
-          <div className="w-72 bg-slate-800 border-l border-slate-700 overflow-y-auto">
+          <div className="w-72 bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)] overflow-y-auto">
             <div className="p-4">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-2xl">{NODE_STYLES[selectedNode.type].icon}</span>
@@ -562,16 +562,16 @@ export default function BehaviorTreeEditor() {
                         }
                       }));
                     }}
-                    className="bg-transparent text-white font-semibold border-b border-transparent hover:border-gray-500 focus:border-blue-500 outline-none"
+                    className="bg-transparent text-[var(--aethel-text-primary)] font-semibold border-b border-transparent hover:border-[var(--aethel-border-primary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] outline-none"
                   />
-                  <div className="text-xs text-gray-400 capitalize">{selectedNode.type}</div>
+                  <div className="text-xs text-[var(--aethel-text-tertiary)] capitalize">{selectedNode.type}</div>
                 </div>
               </div>
 
               <div className="space-y-3">
                 {Object.entries(selectedNode.properties).map(([key, value]) => (
                   <div key={key}>
-                    <label className="block text-xs text-gray-400 mb-1 capitalize">
+                    <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1 capitalize">
                       {key.replace(/([A-Z])/g, ' $1')}
                     </label>
                     {typeof value === 'boolean' ? (
@@ -593,7 +593,7 @@ export default function BehaviorTreeEditor() {
                           }}
                           className="w-4 h-4"
                         />
-                        <span className="text-sm text-gray-300">{key}</span>
+                        <span className="text-sm text-[var(--aethel-text-secondary)]">{key}</span>
                       </label>
                     ) : typeof value === 'number' ? (
                       <input
@@ -611,7 +611,7 @@ export default function BehaviorTreeEditor() {
                             }
                           }));
                         }}
-                        className="w-full px-2 py-1 bg-slate-700 text-white rounded text-sm"
+                        className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-sm"
                       />
                     ) : (
                       <input
@@ -629,7 +629,7 @@ export default function BehaviorTreeEditor() {
                             }
                           }));
                         }}
-                        className="w-full px-2 py-1 bg-slate-700 text-white rounded text-sm"
+                        className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-sm"
                       />
                     )}
                   </div>
@@ -638,7 +638,7 @@ export default function BehaviorTreeEditor() {
 
               <button
                 onClick={() => deleteNode(selectedNodeId!)}
-                className="mt-4 w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+                className="mt-4 w-full px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
               >
                  Delete Node
               </button>
@@ -648,7 +648,7 @@ export default function BehaviorTreeEditor() {
       </div>
 
       {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 py-1 bg-slate-800 border-t border-slate-700 text-xs text-gray-400">
+      <div className="flex items-center justify-between px-4 py-1 bg-[var(--aethel-surface-secondary)] border-t border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-tertiary)]">
         <span>Nodes: {Object.keys(tree.nodes).length}</span>
         <span>{isSimulating ? ' Simulating' : ' Idle'}</span>
       </div>

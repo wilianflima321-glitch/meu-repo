@@ -29,6 +29,7 @@ import {
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 import { buildMentionContextBlock } from '@/lib/server/mention-context'
+import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -258,7 +259,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       projectId, 
       agentId, 
       useTools = true, 
-      model: rawModel = 'gpt-4o', 
+        model: rawModel = DEFAULT_OPENROUTER_MODEL_ID, 
       qualityMode: rawQualityMode = 'studio',
       enableWebResearch = true,
       agentCount: requestedAgentCount = 1,

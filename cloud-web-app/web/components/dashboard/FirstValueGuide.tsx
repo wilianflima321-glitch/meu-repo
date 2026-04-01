@@ -78,12 +78,12 @@ export function FirstValueGuide({
   }, [])
 
   const previewStatusLabel = useMemo(() => {
-    if (!previewReadiness?.strategy) return 'Preview path unknown'
+    if (!previewReadiness?.strategy) return 'Caminho do preview desconhecido'
     if (previewReadiness.strategy === 'managed') {
-      return previewReadiness.status === 'ready' ? 'Managed preview available' : 'Managed preview configured with blockers'
+      return previewReadiness.status === 'ready' ? 'Preview gerenciado disponivel' : 'Preview gerenciado com bloqueios'
     }
-    if (previewReadiness.strategy === 'local') return 'Local dev preview detected'
-    return 'Inline preview fallback active'
+    if (previewReadiness.strategy === 'local') return 'Preview local detectado'
+    return 'Fallback inline do preview ativo'
   }, [previewReadiness])
 
   const previewActionLabel = useMemo(() => {
@@ -113,9 +113,9 @@ export function FirstValueGuide({
   const sessionStatusLabel =
     sessionSummary.status === 'completed'
       ? sessionSummary.durationMs !== null && sessionSummary.durationMs <= sessionSummary.targetMs
-        ? 'Target met'
-        : 'Completed above target'
-      : 'Session in progress'
+        ? 'Meta atingida'
+        : 'Concluido acima da meta'
+      : 'Sessao em andamento'
 
   return (
     <section className="aethel-m-4 aethel-rounded-lg border border-[var(--aethel-primary)]/30 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] aethel-p-4 md:aethel-m-6">
@@ -123,7 +123,7 @@ export function FirstValueGuide({
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-[var(--aethel-primary-light)]">Primeiro valor em menos de 2 minutos</h3>
           <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
-            Crie um projeto, configure o provider de IA e abra o preview da IDE com um starter pronto para iteracao.
+            Crie um projeto, configure o provedor de IA e abra o preview da IDE com um starter pronto para iteracao.
           </p>
           <div className="mt-3">
             <div className="h-1.5 w-full rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">
@@ -140,29 +140,29 @@ export function FirstValueGuide({
           <ul className="mt-2 space-y-1 text-[11px] text-[var(--aethel-text-secondary)]">
             <li>{firstProjectCreated ? '[OK]' : '[ ]'} Primeiro projeto criado ({formatDuration(milestoneDurations.firstProjectCreatedMs)})</li>
             <li>{firstAiSuccess ? '[OK]' : '[ ]'} Primeira resposta de IA recebida ({formatDuration(milestoneDurations.firstAiSuccessMs)})</li>
-            <li>{firstIdeOpened ? '[OK]' : '[ ]'} IDE live preview aberta ({formatDuration(milestoneDurations.firstIdeOpenedMs)})</li>
+            <li>{firstIdeOpened ? '[OK]' : '[ ]'} Preview da IDE aberto ({formatDuration(milestoneDurations.firstIdeOpenedMs)})</li>
           </ul>
 
           <div className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">First value session</p>
+              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Sessao de primeiro valor</p>
               <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
                 {sessionStatusLabel}
               </span>
             </div>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
-                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Started</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Inicio</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">
                   {sessionSummary.startedAt ? new Date(sessionSummary.startedAt).toLocaleTimeString() : '--'}
                 </p>
               </div>
               <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
-                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Duration</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Duracao</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.durationMs)}</p>
               </div>
               <div className="rounded border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
-                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Target</p>
+                <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Meta</p>
                 <p className="mt-1 text-[11px] text-[var(--aethel-text-primary)]">{formatDuration(sessionSummary.targetMs)}</p>
               </div>
             </div>
@@ -170,9 +170,9 @@ export function FirstValueGuide({
 
           <div className="mt-4 rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_40%,transparent)] p-3">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Preview readiness</p>
+              <p className="text-[11px] font-medium text-[var(--aethel-text-primary)]">Prontidao do preview</p>
               <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">
-                {previewReadiness?.strategy || 'unknown'}
+                {previewReadiness?.strategy || 'desconhecido'}
               </span>
               {previewReadiness?.managedProvider && (
               <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)]">

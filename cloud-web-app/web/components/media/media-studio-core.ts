@@ -68,7 +68,7 @@ export async function computeAudioPeaksFromUrl(audioUrl: string, peakCount: numb
       peaks.push(Math.max(Math.abs(min), Math.abs(max)))
     }
 
-    // Boa prática: liberar recursos (não fecha o contexto global do app; este é local)
+// Boa pratica: liberar recursos (nao fecha o contexto global do app; este e local)
     try {
       await audioContext.close()
     } catch {
@@ -227,7 +227,7 @@ export function computeVisualAlphaAtTime(clip: MediaProject['clips'][number], t:
   const clipStart = clip.startTime
   const clipEnd = clip.startTime + clip.duration
 
-  // fora do intervalo do clip, não contribui
+// fora do intervalo do clip, nao contribui
   if (t < clipStart || t > clipEnd) return 0
 
   let alpha = 1
@@ -277,7 +277,7 @@ export function applyEffectsToContext(ctx: CanvasRenderingContext2D, effects?: C
 
 export function drawFitContain(ctx: CanvasRenderingContext2D, source: CanvasImageSource, w: number, h: number) {
   // tenta ler width/height do source
-  // @ts-expect-error: CanvasImageSource é união; alguns membros têm width/height
+// @ts-expect-error: CanvasImageSource e uniao; alguns membros tem width/height
   const sw = source.videoWidth ?? source.naturalWidth ?? source.width
   // @ts-expect-error idem
   const sh = source.videoHeight ?? source.naturalHeight ?? source.height

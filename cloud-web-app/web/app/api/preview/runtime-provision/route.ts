@@ -519,16 +519,20 @@ export async function POST(request: NextRequest) {
     const readyWaitMs = parseReadyWaitMs(process.env.AETHEL_PREVIEW_PROVISION_READY_WAIT_MS)
     const readyPollMs = parseReadyPollMs(process.env.AETHEL_PREVIEW_PROVISION_READY_POLL_MS)
     const provisionEndpoints = parseConfiguredProvisionEndpoints(provisionEndpoint, provisionEndpointsCsv)
+    const managedProviderId =
+      providerConfig?.id || (provisionEndpoints.length > 0 ? 'custom-endpoint' : null)
+    const localProviderId = 'local'
 
     if (providerConfig?.id === 'webcontainers') {
       return capabilityResponse({
         error: 'RUNTIME_PROVISION_BROWSER_SIDE_PROVIDER',
         status: 501,
-        message: 'WebContainers is declared as the managed preview provider, but browser-side runtime wiring is not active in this route.',
+        message: 'WebContainers esta declarado como provider gerenciado, mas o runtime no navegador nao esta ativo nesta rota.',
         capability: CAPABILITY,
         capabilityStatus: 'PARTIAL',
         metadata: {
           mode: 'browser_side_provider',
+          strategy: 'browser-side',
           provider: providerConfig.id,
           setupEnv: providerConfig.setupEnv,
         },
@@ -545,11 +549,12 @@ export async function POST(request: NextRequest) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_FAILED',
           status: 503,
-          message: 'Workspace root not found for E2B provisioning.',
+          message: 'Workspace root nao encontrado para provisionamento E2B.',
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           metadata: {
             mode: 'managed',
+            strategy: 'managed',
             provider: providerConfig.id,
             projectId,
             workspaceRoot,
@@ -560,11 +565,12 @@ export async function POST(request: NextRequest) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_FAILED',
           status: 503,
-          message: 'E2B provisioning requires E2B_API_KEY.',
+          message: 'Provisionamento E2B exige E2B_API_KEY.',
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           metadata: {
             mode: 'managed',
+            strategy: 'managed',
             provider: providerConfig.id,
             projectId,
             missing: ['E2B_API_KEY'],
@@ -575,11 +581,12 @@ export async function POST(request: NextRequest) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_FAILED',
           status: 503,
-          message: 'E2B provisioning requires AETHEL_PREVIEW_E2B_TEMPLATE.',
+          message: 'Provisionamento E2B exige AETHEL_PREVIEW_E2B_TEMPLATE.',
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           metadata: {
             mode: 'managed',
+            strategy: 'managed',
             provider: providerConfig.id,
             projectId,
             missing: ['AETHEL_PREVIEW_E2B_TEMPLATE'],
@@ -604,11 +611,12 @@ export async function POST(request: NextRequest) {
           return capabilityResponse({
             error: 'RUNTIME_PROVISION_INVALID_URL',
             status: 502,
-            message: 'E2B returned an invalid or blocked runtime URL.',
+            message: 'E2B retornou uma URL de runtime invalida ou bloqueada.',
             capability: CAPABILITY,
             capabilityStatus: 'PARTIAL',
             metadata: {
               mode: 'managed',
+              strategy: 'managed',
               provider: providerConfig.id,
               projectId,
               runtimeUrl: e2bResult.runtimeUrl,
@@ -634,11 +642,12 @@ export async function POST(request: NextRequest) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_FAILED',
           status: 503,
-          message: error instanceof Error ? error.message : 'E2B provision failed.',
+          message: error instanceof Error ? error.message : 'Falha ao provisionar E2B.',
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           metadata: {
             mode: 'managed',
+            strategy: 'managed',
             provider: providerConfig?.id || 'e2b',
             projectId,
           },
@@ -650,13 +659,14 @@ export async function POST(request: NextRequest) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_BACKEND_NOT_CONFIGURED',
           status: 503,
-          message: 'Managed preview provision backend is not configured.',
+          message: 'Backend de provisionamento gerenciado nao configurado.',
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           metadata: {
             mode: 'local_fallback',
+            strategy: 'local',
             preferredRuntimeUrl: null,
-            provider: providerConfig?.id || null,
+            provider: localProviderId,
             setupEnv: providerConfig?.setupEnv || ['AETHEL_PREVIEW_PROVISION_ENDPOINT', 'AETHEL_PREVIEW_PROVISION_ENDPOINTS'],
           },
         })
@@ -668,8 +678,12 @@ export async function POST(request: NextRequest) {
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           runtimeUrl: localRuntime,
+          strategy: 'local',
+          provider: localProviderId,
           metadata: {
             mode: 'local_fallback',
+            strategy: 'local',
+            provider: localProviderId,
             managed: false,
           },
         },
@@ -709,12 +723,13 @@ export async function POST(request: NextRequest) {
             return capabilityResponse({
               error: 'RUNTIME_PROVISION_INVALID_URL',
               status: 502,
-              message: 'Provision backend returned an invalid or blocked runtime URL.',
+              message: 'Backend de provisionamento retornou URL invalida ou bloqueada.',
               capability: CAPABILITY,
               capabilityStatus: 'PARTIAL',
               metadata: {
                 mode: 'managed',
-                provider: providerConfig?.id || 'custom-endpoint',
+                strategy: 'managed',
+                provider: managedProviderId || 'custom-endpoint',
                 projectId,
                 endpoint,
                 attempt: index + 1,
@@ -730,16 +745,17 @@ export async function POST(request: NextRequest) {
       return capabilityResponse({
         error: 'RUNTIME_PROVISION_FAILED',
         status: 503,
-        message: 'Managed preview provision request failed.',
+        message: 'Falha ao solicitar provisionamento gerenciado.',
         capability: CAPABILITY,
         capabilityStatus: 'PARTIAL',
-        metadata: {
-          mode: 'managed',
-          provider: providerConfig?.id || 'custom-endpoint',
-          projectId,
-          attempts: failures,
-          attemptCount: failures.length,
-          totalEndpoints: provisionEndpoints.length,
+      metadata: {
+        mode: 'managed',
+        strategy: 'managed',
+        provider: managedProviderId || 'custom-endpoint',
+        projectId,
+        attempts: failures,
+        attemptCount: failures.length,
+        totalEndpoints: provisionEndpoints.length,
         },
       })
     }
@@ -754,12 +770,14 @@ export async function POST(request: NextRequest) {
         return capabilityResponse({
           error: 'RUNTIME_PROVISION_UNHEALTHY',
           status: 503,
-          message: 'Provisioned runtime is not reachable yet.',
+          message: 'Runtime provisionado ainda nao esta acessivel.',
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           metadata: {
             mode: 'managed',
+            strategy: 'managed',
             projectId,
+            provider: managedProviderId || providerConfig?.id || 'custom-endpoint',
             runtimeUrl: managedSuccess.runtimeUrl,
             endpoint: managedSuccess.endpoint,
             attempt: managedSuccess.attempt,
@@ -782,10 +800,13 @@ export async function POST(request: NextRequest) {
           capability: CAPABILITY,
           capabilityStatus: 'PARTIAL',
           runtimeUrl: managedSuccess.runtimeUrl,
+          strategy: 'managed',
+          provider: managedProviderId || 'custom-endpoint',
           metadata: {
             mode: 'managed',
             managed: true,
-            provider: providerConfig?.id || 'custom-endpoint',
+            strategy: 'managed',
+            provider: managedProviderId || 'custom-endpoint',
             projectId,
             endpoint: managedSuccess.endpoint,
             attempt: managedSuccess.attempt,
@@ -810,12 +831,13 @@ export async function POST(request: NextRequest) {
       return capabilityResponse({
         error: 'RUNTIME_PROVISION_EXCEPTION',
         status: 503,
-        message: error instanceof Error ? error.message : 'Managed preview provision failed.',
+        message: error instanceof Error ? error.message : 'Falha ao provisionar preview gerenciado.',
         capability: CAPABILITY,
         capabilityStatus: 'PARTIAL',
         metadata: {
           mode: 'managed',
-          provider: providerConfig?.id || 'custom-endpoint',
+          strategy: 'managed',
+          provider: managedProviderId || 'custom-endpoint',
           projectId,
           endpoint: managedSuccess.endpoint,
           attempt: managedSuccess.attempt,
@@ -829,12 +851,13 @@ export async function POST(request: NextRequest) {
     return capabilityResponse({
       error: 'RUNTIME_PROVISION_EXCEPTION',
       status: 503,
-      message: error instanceof Error ? error.message : 'Managed preview provision failed.',
+      message: error instanceof Error ? error.message : 'Falha ao provisionar preview gerenciado.',
       capability: CAPABILITY,
       capabilityStatus: 'PARTIAL',
       metadata: {
         mode: 'managed',
-        provider: null,
+        strategy: 'managed',
+        provider: managedProviderId || null,
       },
     })
   }

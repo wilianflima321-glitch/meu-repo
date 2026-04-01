@@ -1,6 +1,6 @@
 /**
  * AETHEL ENGINE - Asset Detail Panel
- * 
+ *
  * Full asset detail view with:
  * - 3D preview
  * - Image gallery
@@ -16,18 +16,18 @@ import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { 
-    OrbitControls, 
-    Environment, 
-    useGLTF, 
+import {
+    OrbitControls,
+    Environment,
+    useGLTF,
     PresentationControls,
     Stage,
     Html,
     useProgress
 } from '@react-three/drei';
-import { 
-    Star, Download, Heart, ShoppingCart, Share2, Flag,
-    ChevronLeft, ChevronRight, Check, ExternalLink, 
+import {
+    Star, Baixar, Heart, ShoppingCart, Share2, Flag,
+    ChevronLeft, ChevronRight, Check, ExternalLink,
     User, Calendar, FileText, Box, Palette, Tag,
     MessageSquare, ThumbsUp, Shield, Loader2, Play, Pause
 } from 'lucide-react';
@@ -40,7 +40,7 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 import { Textarea } from '@/components/ui/Textarea';
 import { Progress } from '@/components/ui/progress';
-import { toast } from 'sonner';
+import { useToastActions } from '@/components/ui';
 import * as THREE from 'three';
 
 // ============================================================================
@@ -60,7 +60,7 @@ interface AssetDetail {
     thumbnailUrl: string;
     previewUrl?: string;
     modelUrl?: string;
-    fileSize: number;
+    fileTamanho: number;
     version: string;
     compatibility: string[];
     license: 'standard' | 'extended' | 'exclusive';
@@ -76,7 +76,7 @@ interface AssetDetail {
         downloads: number;
         rating: number;
         reviewCount: number;
-        favorites: number;
+        favoritos: number;
     };
     files: {
         name: string;
@@ -111,7 +111,7 @@ interface Review {
 }
 
 // ============================================================================
-// 3D Preview Components
+// Preview 3D Components
 // ============================================================================
 
 function Loader() {
@@ -121,7 +121,7 @@ function Loader() {
             <div className="flex flex-col items-center gap-2">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 <span className="text-sm text-muted-foreground">
-                    Loading {progress.toFixed(0)}%
+                    Carregando {progress.toFixed(0)}%
                 </span>
             </div>
         </Html>
@@ -131,7 +131,7 @@ function Loader() {
 function Model({ url }: { url: string }) {
     const { scene } = useGLTF(url);
     const ref = useRef<THREE.Group>(null);
-    
+
     useEffect(() => {
         // Center and scale the model
         const box = new THREE.Box3().setFromObject(scene);
@@ -139,7 +139,7 @@ function Model({ url }: { url: string }) {
         const maxDim = Math.max(size.x, size.y, size.z);
         const scale = 2 / maxDim;
         scene.scale.setScalar(scale);
-        
+
         const center = box.getCenter(new THREE.Vector3());
         scene.position.sub(center.multiplyScalar(scale));
     }, [scene]);
@@ -151,8 +151,8 @@ function ModelPreview({ modelUrl }: { modelUrl: string }) {
     const [autoRotate, setAutoRotate] = useState(true);
 
     return (
-        <div className="relative w-full h-full min-h-[400px] bg-gradient-to-b from-slate-900 to-slate-800 rounded-lg overflow-hidden">
-            <Canvas 
+        <div className="relative w-full h-full min-h-[400px] bg-gradient-to-b from-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)] rounded-lg overflow-hidden">
+            <Canvas
                 camera={{ position: [0, 0, 5], fov: 50 }}
                 shadows
             >
@@ -160,7 +160,7 @@ function ModelPreview({ modelUrl }: { modelUrl: string }) {
                     <Stage environment="city" intensity={0.5}>
                         <Model url={modelUrl} />
                     </Stage>
-                    <OrbitControls 
+                    <OrbitControls
                         autoRotate={autoRotate}
                         autoRotateSpeed={2}
                         enablePan={false}
@@ -202,7 +202,7 @@ function ImageGallery({ images }: { images: string[] }) {
                     unoptimized
                     className="w-full h-full object-cover"
                 />
-                
+
                 {/* Navigation arrows */}
                 {images.length > 1 && (
                     <>
@@ -210,7 +210,7 @@ function ImageGallery({ images }: { images: string[] }) {
                             size="icon"
                             variant="secondary"
                             className="absolute left-2 top-1/2 -translate-y-1/2"
-                            onClick={() => setCurrentIndex(i => 
+                            onClick={() => setCurrentIndex(i =>
                                 i === 0 ? images.length - 1 : i - 1
                             )}
                         >
@@ -220,7 +220,7 @@ function ImageGallery({ images }: { images: string[] }) {
                             size="icon"
                             variant="secondary"
                             className="absolute right-2 top-1/2 -translate-y-1/2"
-                            onClick={() => setCurrentIndex(i => 
+                            onClick={() => setCurrentIndex(i =>
                                 i === images.length - 1 ? 0 : i + 1
                             )}
                         >
@@ -239,8 +239,8 @@ function ImageGallery({ images }: { images: string[] }) {
                             onClick={() => setCurrentIndex(index)}
                             className={cn(
                                 "flex-shrink-0 w-20 h-14 rounded-md overflow-hidden border-2 transition-colors",
-                                currentIndex === index 
-                                    ? "border-primary" 
+                                currentIndex === index
+                                    ? "border-primary"
                                     : "border-transparent hover:border-muted-foreground/50"
                             )}
                         >
@@ -275,7 +275,7 @@ function RatingStars({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'm
                     className={cn(
                         sizes[size],
                         star <= Math.round(rating)
-                            ? "fill-yellow-400 text-yellow-400"
+                            ? "fill-yellow-400 text-[var(--aethel-warning-light)]"
                             : "text-muted-foreground"
                     )}
                 />
@@ -296,30 +296,30 @@ function ReviewCard({ review }: { review: Review }) {
                         {review.user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                 </Avatar>
-                
+
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium">{review.user.name}</span>
                         {review.verified && (
                             <Badge variant="secondary" className="text-xs">
                                 <Check className="w-3 h-3 mr-1" />
-                                Verified Purchase
+                                Compra verificada
                             </Badge>
                         )}
                         <span className="text-sm text-muted-foreground">
                             {new Date(review.createdAt).toLocaleDateString()}
                         </span>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 mt-1">
                         <RatingStars rating={review.rating} size="sm" />
                         <span className="font-medium">{review.title}</span>
                     </div>
-                    
+
                     <p className="text-sm text-muted-foreground mt-2">
                         {review.content}
                     </p>
-                    
+
                     <div className="flex items-center gap-4 mt-3">
                         <Button
                             variant="ghost"
@@ -328,11 +328,11 @@ function ReviewCard({ review }: { review: Review }) {
                             className={cn(isHelpful && "text-primary")}
                         >
                             <ThumbsUp className="w-4 h-4 mr-1" />
-                            Helpful ({review.helpful + (isHelpful ? 1 : 0)})
+                            Util ({review.helpful + (isHelpful ? 1 : 0)})
                         </Button>
                         <Button variant="ghost" size="sm">
                             <Flag className="w-4 h-4 mr-1" />
-                            Report
+                            Denunciar
                         </Button>
                     </div>
                 </div>
@@ -343,17 +343,17 @@ function ReviewCard({ review }: { review: Review }) {
 
 function RatingBreakdown({ stats }: { stats: { [key: number]: number } }) {
     const total = Object.values(stats).reduce((a, b) => a + b, 0);
-    
+
     return (
         <div className="space-y-2">
             {[5, 4, 3, 2, 1].map((star) => {
                 const count = stats[star] || 0;
                 const percentage = total > 0 ? (count / total) * 100 : 0;
-                
+
                 return (
                     <div key={star} className="flex items-center gap-2">
                         <span className="w-8 text-sm text-muted-foreground">
-                            {star} ★
+                            {star} *
                         </span>
                         <Progress value={percentage} className="flex-1 h-2" />
                         <span className="w-12 text-sm text-muted-foreground text-right">
@@ -380,23 +380,24 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
     const [isFavorited, setIsFavorited] = useState(false);
     const [reviewText, setReviewText] = useState('');
     const [userRating, setUserRating] = useState(0);
+    const toast = useToastActions();
 
     // Fetch asset details
     const { data: asset, isLoading } = useQuery<AssetDetail>({
         queryKey: ['asset', assetId],
         queryFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}`);
-            if (!res.ok) throw new Error('Failed to fetch asset');
+            if (!res.ok) throw new Error('Falha ao carregar asset');
             return res.json();
         },
     });
 
-    // Fetch reviews
+    // Fetch avaliacoes
     const { data: reviews } = useQuery<Review[]>({
         queryKey: ['asset-reviews', assetId],
         queryFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}/reviews`);
-            if (!res.ok) throw new Error('Failed to fetch reviews');
+            if (!res.ok) throw new Error('Falha ao carregar avaliacoes');
             return res.json();
         },
     });
@@ -409,7 +410,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ assetId }),
             });
-            if (!res.ok) throw new Error('Checkout failed');
+            if (!res.ok) throw new Error('Falha no checkout');
             return res.json();
         },
         onSuccess: (data) => {
@@ -419,15 +420,15 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             }
         },
         onError: () => {
-            toast.error('Failed to start checkout');
+            toast.error('Falha ao iniciar o checkout.');
         },
     });
 
-    // Download mutation
+    // Baixar mutation
     const downloadMutation = useMutation({
         mutationFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}/download`);
-            if (!res.ok) throw new Error('Download failed');
+            if (!res.ok) throw new Error('Falha no download');
             return res.blob();
         },
         onSuccess: (blob) => {
@@ -437,10 +438,10 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             a.download = `${asset?.name || 'asset'}.zip`;
             a.click();
             URL.revokeObjectURL(url);
-            toast.success('Download started');
+            toast.success('Baixar iniciado.');
         },
         onError: () => {
-            toast.error('Download failed');
+            toast.error('Falha no download.');
         },
     });
 
@@ -449,12 +450,12 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         mutationFn: async () => {
             const method = isFavorited ? 'DELETE' : 'POST';
             const res = await fetch(`/api/marketplace/favorites/${assetId}`, { method });
-            if (!res.ok) throw new Error('Failed to update favorites');
+            if (!res.ok) throw new Error('Falha ao atualizar favoritos');
         },
         onSuccess: () => {
             setIsFavorited(!isFavorited);
             queryClient.invalidateQueries({ queryKey: ['favorites'] });
-            toast.success(isFavorited ? 'Removed from favorites' : 'Added to favorites');
+            toast.success(isFavorited ? 'Removido dos favoritos.' : 'Adicionado aos favoritos.');
         },
     });
 
@@ -466,8 +467,8 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
     };
 
     const formatPrice = (price: number, currency: string) => {
-        if (price === 0) return 'Free';
-        return new Intl.NumberFormat('en-US', {
+        if (price === 0) return 'Gratis';
+        return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: currency || 'USD',
         }).format(price / 100);
@@ -490,9 +491,9 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
     if (!asset) {
         return (
             <div className="flex flex-col items-center justify-center h-full">
-                <p className="text-muted-foreground">Asset not found</p>
+                <p className="text-muted-foreground">Asset nao encontrado</p>
                 <Button variant="outline" className="mt-4" onClick={onClose}>
-                    Go Back
+                    Voltar
                 </Button>
             </div>
         );
@@ -504,9 +505,9 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             <header className="flex items-center justify-between px-6 py-4 border-b">
                 <Button variant="ghost" onClick={onClose}>
                     <ChevronLeft className="w-4 h-4 mr-2" />
-                    Back to Marketplace
+                    Voltar ao Marketplace
                 </Button>
-                
+
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
@@ -515,7 +516,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                     >
                         <Heart className={cn(
                             "w-4 h-4",
-                            isFavorited && "fill-red-500 text-red-500"
+                            isFavorited && "fill-red-500 text-[var(--aethel-error-light)]"
                         )} />
                     </Button>
                     <Button variant="outline" size="icon">
@@ -529,12 +530,12 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                     <div className="grid lg:grid-cols-5 gap-8">
                         {/* Left column - Preview */}
                         <div className="lg:col-span-3 space-y-6">
-                            {/* 3D Preview or Image Gallery */}
+                            {/* Preview 3D or Image Gallery */}
                             {asset.modelUrl ? (
                                 <Tabs defaultValue="3d">
                                     <TabList>
-                                        <TabTrigger value="3d">3D Preview</TabTrigger>
-                                        <TabTrigger value="images">Images</TabTrigger>
+                                        <TabTrigger value="3d">Preview 3D</TabTrigger>
+                                        <TabTrigger value="images">Imagens</TabTrigger>
                                     </TabList>
                                     <TabContent value="3d" className="mt-4">
                                         <ModelPreview modelUrl={asset.modelUrl} />
@@ -547,44 +548,44 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                 <ImageGallery images={asset.images} />
                             )}
 
-                            {/* Description */}
+                            {/* Descricao */}
                             <div>
-                                <h2 className="text-lg font-semibold mb-4">Description</h2>
-                                <div 
+                                <h2 className="text-lg font-semibold mb-4">Descricao</h2>
+                                <div
                                     className="prose prose-sm dark:prose-invert max-w-none"
                                     dangerouslySetInnerHTML={{ __html: asset.description }}
                                 />
                             </div>
 
-                            {/* Technical Details */}
+                            {/* Detalhes tecnicos */}
                             <div>
-                                <h2 className="text-lg font-semibold mb-4">Technical Details</h2>
+                                <h2 className="text-lg font-semibold mb-4">Detalhes tecnicos</h2>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="flex items-center gap-2">
                                         <Box className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Category:</span>{' '}
+                                            <span className="text-muted-foreground">Categoria:</span>{' '}
                                             {asset.category}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <FileText className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Size:</span>{' '}
+                                            <span className="text-muted-foreground">Tamanho:</span>{' '}
                                             {formatFileSize(asset.fileSize)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Tag className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Version:</span>{' '}
+                                            <span className="text-muted-foreground">Versao:</span>{' '}
                                             {asset.version}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Shield className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">License:</span>{' '}
+                                            <span className="text-muted-foreground">Licenca:</span>{' '}
                                             {asset.license.charAt(0).toUpperCase() + asset.license.slice(1)}
                                         </span>
                                     </div>
@@ -592,10 +593,10 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
 
                                 {/* Included files */}
                                 <div className="mt-6">
-                                    <h3 className="font-medium mb-3">Included Files</h3>
+                                    <h3 className="font-medium mb-3">Arquivos inclusos</h3>
                                     <div className="space-y-2">
                                         {asset.files.map((file, index) => (
-                                            <div 
+                                            <div
                                                 key={index}
                                                 className="flex items-center justify-between px-3 py-2 bg-muted rounded-md text-sm"
                                             >
@@ -608,9 +609,9 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                     </div>
                                 </div>
 
-                                {/* Compatibility */}
+                                {/* Compatibilidade */}
                                 <div className="mt-6">
-                                    <h3 className="font-medium mb-3">Compatibility</h3>
+                                    <h3 className="font-medium mb-3">Compatibilidade</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {asset.compatibility.map((item) => (
                                             <Badge key={item} variant="secondary">
@@ -625,11 +626,11 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                             <div>
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-lg font-semibold">
-                                        Reviews ({asset.stats.reviewCount})
+                                        Avaliacoes ({asset.stats.reviewCount})
                                     </h2>
                                     <Button variant="outline" size="sm">
                                         <MessageSquare className="w-4 h-4 mr-2" />
-                                        Write a Review
+                                        Escrever avaliacao
                                     </Button>
                                 </div>
 
@@ -641,12 +642,12 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </div>
                                         <RatingStars rating={asset.stats.rating} />
                                         <div className="text-sm text-muted-foreground mt-1">
-                                            {asset.stats.reviewCount} reviews
+                                            {asset.stats.reviewCount} avaliacoes
                                         </div>
                                     </div>
                                     <div className="flex-1">
-                                        <RatingBreakdown 
-                                            stats={{ 5: 45, 4: 20, 3: 8, 2: 3, 1: 2 }} 
+                                        <RatingBreakdown
+                                            stats={{ 5: 45, 4: 20, 3: 8, 2: 3, 1: 2 }}
                                         />
                                     </div>
                                 </div>
@@ -666,7 +667,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                 {/* Main info card */}
                                 <div className="p-6 border rounded-lg bg-card">
                                     <h1 className="text-2xl font-bold mb-2">{asset.name}</h1>
-                                    
+
                                     <div className="flex items-center gap-2 mb-4">
                                         <RatingStars rating={asset.stats.rating} />
                                         <span className="text-sm text-muted-foreground">
@@ -681,8 +682,8 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
 
                                     {/* Action buttons */}
                                     {asset.isOwned ? (
-                                        <Button 
-                                            className="w-full" 
+                                        <Button
+                                            className="w-full"
                                             size="lg"
                                             onClick={() => downloadMutation.mutate()}
                                             disabled={downloadMutation.isPending}
@@ -692,11 +693,11 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             ) : (
                                                 <Download className="w-4 h-4 mr-2" />
                                             )}
-                                            Download
+                                            Baixar
                                         </Button>
                                     ) : asset.price === 0 ? (
-                                        <Button 
-                                            className="w-full" 
+                                        <Button
+                                            className="w-full"
                                             size="lg"
                                             onClick={() => downloadMutation.mutate()}
                                             disabled={downloadMutation.isPending}
@@ -706,12 +707,12 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             ) : (
                                                 <Download className="w-4 h-4 mr-2" />
                                             )}
-                                            Get for Free
+                                            Baixar gratis
                                         </Button>
                                     ) : (
                                         <div className="space-y-2">
-                                            <Button 
-                                                className="w-full" 
+                                            <Button
+                                                className="w-full"
                                                 size="lg"
                                                 onClick={() => purchaseMutation.mutate()}
                                                 disabled={purchaseMutation.isPending}
@@ -721,11 +722,11 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                                 ) : (
                                                     <ShoppingCart className="w-4 h-4 mr-2" />
                                                 )}
-                                                Buy Now
+                                                Comprar agora
                                             </Button>
                                             <Button variant="outline" className="w-full" size="lg">
                                                 <ShoppingCart className="w-4 h-4 mr-2" />
-                                                Add to Cart
+                                                Adicionar ao carrinho
                                             </Button>
                                         </div>
                                     )}
@@ -740,11 +741,11 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Heart className="w-4 h-4 text-muted-foreground" />
-                                            <span>{asset.stats.favorites.toLocaleString()} favorites</span>
+                                            <span>{asset.stats.favorites.toLocaleString()} favoritos</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Calendar className="w-4 h-4 text-muted-foreground" />
-                                            <span>Updated {new Date(asset.updatedAt).toLocaleDateString()}</span>
+                                            <span>Atualizado em {new Date(asset.updatedAt).toLocaleDateString()}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -762,7 +763,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             <div className="flex items-center gap-2">
                                                 <span className="font-medium">{asset.creator.name}</span>
                                                 {asset.creator.verified && (
-                                                    <Check className="w-4 h-4 text-blue-500" />
+                                                    <Check className="w-4 h-4 text-[var(--aethel-info-light)]" />
                                                 )}
                                             </div>
                                             <p className="text-sm text-muted-foreground">
@@ -771,7 +772,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </div>
                                         <Button variant="outline" size="sm">
                                             <ExternalLink className="w-4 h-4 mr-2" />
-                                            View Profile
+                                            Ver perfil
                                         </Button>
                                     </div>
                                 </div>
@@ -788,10 +789,10 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                     </div>
                                 </div>
 
-                                {/* Report */}
+                                {/* Denunciar */}
                                 <Button variant="ghost" className="w-full text-muted-foreground">
                                     <Flag className="w-4 h-4 mr-2" />
-                                    Report this asset
+                                    Denunciar este asset
                                 </Button>
                             </div>
                         </div>
@@ -801,3 +802,4 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         </div>
     );
 }
+

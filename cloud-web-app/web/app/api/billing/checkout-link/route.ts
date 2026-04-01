@@ -4,7 +4,7 @@ import { readPaymentGatewayConfig } from '@/lib/server/payment-gateway-config';
 import { capabilityResponse } from '@/lib/server/capability-response';
 import { buildAppUrl } from '@/lib/server/app-origin';
 
-const ALLOWED_PLANS = new Set(['starter', 'basic', 'pro', 'studio', 'enterprise']);
+const SELF_SERVE_PLANS = new Set(['starter', 'basic', 'pro', 'studio']);
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,9 +46,20 @@ export async function POST(req: NextRequest) {
     const intervalRaw = typeof body?.interval === 'string' ? body.interval.trim().toLowerCase() : '';
     const interval = intervalRaw === 'year' || intervalRaw === 'month' ? intervalRaw : 'month';
 
-    if (!ALLOWED_PLANS.has(planId)) {
+    if (planId === 'enterprise') {
       return NextResponse.json(
-        { error: 'INVALID_PLAN', message: 'Valid plans: starter, basic, pro, studio, enterprise' },
+        {
+          error: 'ENTERPRISE_CONTACT_SALES',
+          message: 'Enterprise checkout is handled through contact sales.',
+          contactSalesUrl: '/contact-sales',
+        },
+        { status: 409 }
+      );
+    }
+
+    if (!SELF_SERVE_PLANS.has(planId)) {
+      return NextResponse.json(
+        { error: 'INVALID_PLAN', message: 'Valid self-serve plans: starter, basic, pro, studio' },
         { status: 400 }
       );
     }

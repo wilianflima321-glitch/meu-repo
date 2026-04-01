@@ -99,7 +99,7 @@ export default function ScalabilityPage() {
           Carregando métricas...
         </div>
       )}
-      
+
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">
           <h3 className="text-lg font-semibold">Uso de CPU</h3>

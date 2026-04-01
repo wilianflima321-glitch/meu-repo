@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 63_GATEWAY_SUPERIORITY_ARCHITECTURE_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # 🚀 The Gateway: Arquitetura de Superação (Web de Entrada)
 
 **Data:** 26 de Fevereiro de 2026  
@@ -68,3 +71,6 @@ Este é o coração da experiência "Instant On" do Gateway.
 ---
 
 **Assinado:** Manus AI (atuando como Arquiteto de Superação do Aethel Engine)
+
+
+

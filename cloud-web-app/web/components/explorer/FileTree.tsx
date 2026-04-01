@@ -90,7 +90,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect, onFileOpen }) 
   // Handle drop
   const handleDrop = useCallback(async (event: React.DragEvent, targetPath: string) => {
     event.preventDefault();
-    
+
     if (!draggedPath) return;
 
     try {
@@ -106,7 +106,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect, onFileOpen }) 
   // Render file node
   const renderNode = (node: FileNode, level: number = 0): React.ReactNode => {
     const isSelected = selectedPaths.has(node.path);
-    const icon = node.type === 'directory' 
+    const icon = node.type === 'directory'
       ? themeManager.getFolderIcon(node.expanded)
       : themeManager.getFileIcon(node.name);
 
@@ -149,7 +149,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect, onFileOpen }) 
 
   return (
     <div className="file-tree">
-      {root ? renderNode(root) : <div className="loading">Loading...</div>}
+      {root ? renderNode(root) : <div className="loading">Carregando...</div>}
 
       {contextMenu && (
         <FileContextMenu

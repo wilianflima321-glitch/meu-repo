@@ -73,7 +73,7 @@ export function Dropdown({ trigger, items, align = 'right', width = 'auto' }: Dr
             ${align === 'right' ? 'right-0' : 'left-0'}
             ${widthClasses[width]}
             py-1 rounded-lg
-            bg-slate-800 border border-slate-700
+            bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]
             shadow-xl shadow-black/30
             animate-in fade-in-0 zoom-in-95 duration-200
           `}
@@ -81,16 +81,16 @@ export function Dropdown({ trigger, items, align = 'right', width = 'auto' }: Dr
         >
           {items.map((item, index) => {
             if (item.divider) {
-              return <div key={index} className="my-1 border-t border-slate-700" />
+              return <div key={index} className="my-1 border-t border-[var(--aethel-border-primary)]" />
             }
 
             const baseClasses = `
               flex items-center gap-3 w-full px-4 py-2 text-sm text-left
               transition-colors duration-150
               ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-              ${item.danger 
-                ? 'text-red-400 hover:bg-red-500/10' 
-                : 'text-slate-200 hover:bg-slate-700'
+              ${item.danger
+                ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]'
+                : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
               }
             `
 
@@ -148,7 +148,7 @@ export function DropdownButton({
   return (
     <Dropdown
       trigger={
-        <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-200 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-colors">
+        <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
           {children}
           <ChevronDown className="w-4 h-4" />
         </span>

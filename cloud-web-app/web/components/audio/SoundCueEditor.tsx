@@ -1,9 +1,9 @@
 ﻿/**
  * SOUND CUE NODE EDITOR - Aethel Engine
- * 
+ *
  * Editor visual de Sound Cues no estilo Unreal Engine.
  * Permite criar grafos de áudio complexos com routing, efeitos e modulação.
- * 
+ *
  * FEATURES:
  * - Node-based audio graph
  * - Mixer/routing nodes
@@ -478,7 +478,7 @@ interface SoundNodeData extends Record<string, unknown> {
 
 function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
   const { definition, parameters, onParameterChange } = data;
-  
+
   const getPinColor = (type: string) => {
     switch (type) {
       case 'audio': return '#22c55e';
@@ -487,7 +487,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
       default: return '#64748b';
     }
   };
-  
+
   return (
     <div
       style={{
@@ -512,7 +512,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
         <span style={{ fontSize: '12px', opacity: 0.8 }}>{definition.category}</span>
         <span style={{ fontWeight: 'bold', fontSize: '13px' }}>{definition.name}</span>
       </div>
-      
+
       {/* Body */}
       <div style={{ padding: '12px' }}>
         {/* Pins */}
@@ -536,7 +536,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
               </div>
             ))}
           </div>
-          
+
           {/* Output pins */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
             {definition.outputs.map((pin) => (
@@ -557,7 +557,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
             ))}
           </div>
         </div>
-        
+
         {/* Parameters */}
         {definition.parameters.length > 0 && (
           <div style={{ borderTop: '1px solid #374151', paddingTop: '8px', marginTop: '8px' }}>
@@ -571,7 +571,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
                     </span>
                   )}
                 </div>
-                
+
                 {param.type === 'float' && (
                   <input
                     type="range"
@@ -583,7 +583,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
                     style={{ width: '100%', height: '4px' }}
                   />
                 )}
-                
+
                 {param.type === 'bool' && (
                   <input
                     type="checkbox"
@@ -591,7 +591,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
                     onChange={(e) => onParameterChange(id, param.id, e.target.checked)}
                   />
                 )}
-                
+
                 {param.type === 'enum' && (
                   <select
                     value={(parameters[param.id] as string) ?? param.value as string}
@@ -613,7 +613,7 @@ function SoundNode({ id, data, selected }: NodeProps<Node<SoundNodeData>>) {
                 )}
               </div>
             ))}
-            
+
             {definition.parameters.length > 3 && (
               <div style={{ fontSize: '10px', color: '#64748b', textAlign: 'center' }}>
                 +{definition.parameters.length - 3} more params
@@ -639,31 +639,31 @@ interface NodeCatalogProps {
 function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProps) {
   const categories = useMemo(() => {
     const cats: Record<string, SoundNodeDefinition[]> = {};
-    
+
     Object.values(nodeDefinitions).forEach((def) => {
       if (!cats[def.category]) cats[def.category] = [];
       cats[def.category].push(def);
     });
-    
+
     // Filter by search
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       Object.keys(cats).forEach((cat) => {
-        cats[cat] = cats[cat].filter((def) => 
+        cats[cat] = cats[cat].filter((def) =>
           def.name.toLowerCase().includes(query) ||
           def.category.toLowerCase().includes(query)
         );
         if (cats[cat].length === 0) delete cats[cat];
       });
     }
-    
+
     return cats;
   }, [searchQuery]);
-  
+
   return (
     <div style={{ padding: '12px', background: '#0f172a', borderRadius: '8px' }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Node Catalog</h3>
-      
+
       {/* Search */}
       <input
         type="text"
@@ -681,20 +681,20 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
           marginBottom: '12px',
         }}
       />
-      
+
       {/* Categories */}
       <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
         {Object.entries(categories).map(([category, nodes]) => (
           <div key={category} style={{ marginBottom: '12px' }}>
-            <h4 style={{ 
-              color: '#64748b', 
-              fontSize: '11px', 
+            <h4 style={{
+              color: '#64748b',
+              fontSize: '11px',
               textTransform: 'uppercase',
               marginBottom: '6px',
             }}>
               {category}
             </h4>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {nodes.map((def) => (
                 <button
@@ -751,7 +751,7 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Preview</h3>
-      
+
       {/* Playback controls */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
         <button
@@ -771,7 +771,7 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
           {isPlaying ? '? Stop' : '? Play'}
         </button>
       </div>
-      
+
       {/* Volume */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -788,7 +788,7 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
           style={{ width: '100%' }}
         />
       </div>
-      
+
       {/* Waveform visualization placeholder */}
       <div style={{
         marginTop: '12px',
@@ -837,10 +837,10 @@ interface ParametersPanelProps {
 
 function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueChange }: ParametersPanelProps) {
   const [newParamName, setNewParamName] = useState('');
-  
+
   const addParameter = () => {
     if (!newParamName.trim()) return;
-    
+
     const newParam: SoundCueParameter = {
       id: crypto.randomUUID(),
       name: newParamName,
@@ -849,11 +849,11 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
       min: 0,
       max: 1,
     };
-    
+
     onChange([...parameters, newParam]);
     setNewParamName('');
   };
-  
+
   return (
     <div style={{
       padding: '12px',
@@ -861,7 +861,7 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Cue Parameters</h3>
-      
+
       {/* Parameter list */}
       <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
         {parameters.map((param) => (
@@ -889,7 +889,7 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
                 ×
               </button>
             </div>
-            
+
             {param.type === 'float' && (
               <>
                 <input
@@ -911,7 +911,7 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
           </div>
         ))}
       </div>
-      
+
       {/* Add parameter */}
       <div style={{ display: 'flex', gap: '8px' }}>
         <input
@@ -977,13 +977,13 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
     connections: [],
     parameters: [],
   });
-  
+
   // UI state
   const [searchQuery, setSearchQuery] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [previewVolume, setPreviewVolume] = useState(0.7);
   const [runtimeValues, setRuntimeValues] = useState<Record<string, number | boolean>>({});
-  
+
   // Handle parameter changes on nodes
   const handleParameterChange = useCallback((nodeId: string, paramId: string, value: unknown) => {
     setCue((prev) => ({
@@ -995,7 +995,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       ),
     }));
   }, []);
-  
+
   // Convert to React Flow format
   const initialNodes: Node<SoundNodeData>[] = useMemo(() => {
     return cue.nodes.map((node) => ({
@@ -1009,7 +1009,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       },
     }));
   }, [cue.nodes, handleParameterChange]);
-  
+
   const initialEdges: Edge[] = useMemo(() => {
     return cue.connections.map((conn) => ({
       id: conn.id,
@@ -1021,10 +1021,10 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       animated: isPlaying,
     }));
   }, [cue.connections, isPlaying]);
-  
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  
+
   // Add new node
   const addNode = useCallback((type: SoundNodeType) => {
     const newNode: SoundCueNode = {
@@ -1033,12 +1033,12 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       position: { x: 200, y: 200 },
       parameters: {},
     };
-    
+
     setCue((prev) => ({
       ...prev,
       nodes: [...prev.nodes, newNode],
     }));
-    
+
     setNodes((nds) => [
       ...nds,
       {
@@ -1053,11 +1053,11 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       },
     ]);
   }, [setNodes, handleParameterChange]);
-  
+
   // Handle connections
   const onConnect = useCallback((connection: Connection) => {
     if (!connection.source || !connection.target) return;
-    
+
     const newConnection: SoundCueConnection = {
       id: crypto.randomUUID(),
       sourceNode: connection.source,
@@ -1065,12 +1065,12 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       targetNode: connection.target,
       targetPin: connection.targetHandle || 'audio',
     };
-    
+
     setCue((prev) => ({
       ...prev,
       connections: [...prev.connections, newConnection],
     }));
-    
+
     setEdges((eds) =>
       addEdge(
         {
@@ -1083,23 +1083,23 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
       )
     );
   }, [setEdges, isPlaying]);
-  
+
   // Preview controls
   const handlePlay = useCallback(() => {
     setIsPlaying(true);
     // Would trigger actual audio playback
     console.log('Playing sound cue:', cue);
   }, [cue]);
-  
+
   const handleStop = useCallback(() => {
     setIsPlaying(false);
   }, []);
-  
+
   // Notify parent
   useEffect(() => {
     onChange?.(cue);
   }, [cue, onChange]);
-  
+
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', background: '#0f172a' }}>
       {/* Left sidebar */}
@@ -1118,7 +1118,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
           onSearchChange={setSearchQuery}
         />
       </div>
-      
+
       {/* Main graph */}
       <div style={{ flex: 1 }}>
         <ReactFlow
@@ -1138,7 +1138,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
             nodeColor={(n) => nodeDefinitions[(n.data as SoundNodeData).definition?.type]?.color || '#64748b'}
           />
           <Background color="#1e293b" gap={20} />
-          
+
           <Panel position="top-left">
             <div style={{
               background: '#1e293b',
@@ -1151,7 +1151,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
               ?? {cue.name}
             </div>
           </Panel>
-          
+
           <Panel position="top-right">
             <div style={{
               background: '#1e293b',
@@ -1165,7 +1165,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
           </Panel>
         </ReactFlow>
       </div>
-      
+
       {/* Right sidebar */}
       <div style={{
         width: '260px',
@@ -1183,14 +1183,14 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
           volume={previewVolume}
           onVolumeChange={setPreviewVolume}
         />
-        
+
         <ParametersPanel
           parameters={cue.parameters}
           onChange={(params) => setCue((prev) => ({ ...prev, parameters: params }))}
           runtimeValues={runtimeValues}
           onRuntimeValueChange={(id, value) => setRuntimeValues((prev) => ({ ...prev, [id]: value }))}
         />
-        
+
         {/* Attenuation preview */}
         <div style={{
           padding: '12px',

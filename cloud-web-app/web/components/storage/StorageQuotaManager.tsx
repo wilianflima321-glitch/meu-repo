@@ -100,13 +100,13 @@ function getWarningLevel(usagePercent: number): 'ok' | 'warning' | 'critical' | 
 function getWarningColor(level: string): string {
   switch (level) {
     case 'blocked':
-      return 'bg-rose-400'
+      return 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
     case 'critical':
-      return 'bg-rose-300'
+      return 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
     case 'warning':
-      return 'bg-yellow-300'
+      return 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]'
     default:
-      return 'bg-emerald-300'
+      return 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
   }
 }
 
@@ -325,7 +325,7 @@ export function StorageQuotaManager({
   if (isLoading) {
     return (
       <div className={`aethel-card aethel-p-4 ${className}`}>
-        <div className="flex items-center gap-2 text-zinc-400">
+        <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
           <div className="animate-spin">
             <Icons.Refresh />
           </div>
@@ -337,17 +337,17 @@ export function StorageQuotaManager({
 
   return (
     <div className={`aethel-card ${className}`}>
-      <div className="border-b border-white/10 p-4">
+      <div className="border-b border-[var(--aethel-border-primary)] p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="text-sky-300">
               <Icons.Storage />
             </div>
-            <h3 className="text-sm font-semibold text-white">Armazenamento</h3>
+            <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Armazenamento</h3>
           </div>
 
           {storageInfo.isPersisted ? (
-            <div className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-1 text-xs text-emerald-300">
+            <div className="flex items-center gap-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2 py-1 text-xs text-[var(--aethel-success-light)]">
               <Icons.Shield />
               <span>Persistente</span>
             </div>
@@ -369,10 +369,10 @@ export function StorageQuotaManager({
           <div
             className={`mb-4 flex items-start gap-2 rounded-lg p-3 ${
               storageInfo.warningLevel === 'blocked'
-                ? 'bg-rose-500/20 text-rose-200'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
                 : storageInfo.warningLevel === 'critical'
-                  ? 'bg-rose-500/10 text-rose-200'
-                  : 'bg-yellow-500/10 text-yellow-200'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
+                  : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
             }`}
           >
             <Icons.Warning />
@@ -394,27 +394,27 @@ export function StorageQuotaManager({
         )}
 
         <div className="mb-2">
-          <div className="mb-1 flex justify-between text-xs text-zinc-500">
+          <div className="mb-1 flex justify-between text-xs text-[var(--aethel-text-tertiary)]">
             <span>{formatBytes(storageInfo.used)} usado</span>
             <span>{formatBytes(storageInfo.quota)} total</span>
           </div>
-          <div className="h-3 overflow-hidden rounded-full bg-white/10">
+          <div className="h-3 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_45%,transparent)]">
             <div
               className={`h-full transition-all duration-500 ${getWarningColor(storageInfo.warningLevel)}`}
               style={{ width: `${Math.min(storageInfo.usagePercent, 100)}%` }}
             />
           </div>
-          <div className="mt-1 flex justify-between text-[11px] text-zinc-600">
+          <div className="mt-1 flex justify-between text-[11px] text-[var(--aethel-text-quaternary)]">
             <span>{storageInfo.usagePercent.toFixed(1)}% usado</span>
             <span>{formatBytes(storageInfo.quota - storageInfo.used)} livre</span>
           </div>
         </div>
       </div>
 
-      <div className="border-t border-white/10">
+      <div className="border-t border-[var(--aethel-border-primary)]">
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="flex w-full items-center justify-between p-3 text-xs text-zinc-400 hover:bg-white/[0.04]"
+          className="flex w-full items-center justify-between p-3 text-xs text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
         >
           <span>Detalhes do cache</span>
           <svg
@@ -437,7 +437,7 @@ export function StorageQuotaManager({
                     className={`flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors ${
                       selectedForCleanup.has(entry.name)
                         ? 'border border-sky-500/50 bg-sky-500/10'
-                        : 'bg-white/[0.03] hover:bg-white/[0.06]'
+                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                     }`}
                     onClick={() => {
                       const newSelection = new Set(selectedForCleanup)
@@ -449,14 +449,14 @@ export function StorageQuotaManager({
                       setSelectedForCleanup(newSelection)
                     }}
                   >
-                    <span className="rounded-md bg-white/10 px-2 py-1 text-[10px] text-zinc-300">
+                    <span className="rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_45%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-text-secondary)]">
                       {getCacheTypeLabel(entry.type)}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm text-white">{entry.name}</p>
-                      <p className="text-xs text-zinc-500">{entry.type}</p>
+                      <p className="truncate text-sm text-[var(--aethel-text-primary)]">{entry.name}</p>
+                      <p className="text-xs text-[var(--aethel-text-tertiary)]">{entry.type}</p>
                     </div>
-                    <span className="text-xs text-zinc-500">{formatBytes(entry.size)}</span>
+                    <span className="text-xs text-[var(--aethel-text-tertiary)]">{formatBytes(entry.size)}</span>
                     {selectedForCleanup.has(entry.name) && (
                       <div className="text-sky-300">
                         <Icons.Check />
@@ -466,7 +466,7 @@ export function StorageQuotaManager({
                 ))}
               </div>
             ) : (
-              <p className="mb-4 text-xs text-zinc-500">Nenhum cache encontrado.</p>
+              <p className="mb-4 text-xs text-[var(--aethel-text-tertiary)]">Nenhum cache encontrado.</p>
             )}
 
             <div className="flex flex-wrap gap-2">
@@ -497,7 +497,7 @@ export function StorageQuotaManager({
         )}
       </div>
 
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-[var(--aethel-border-primary)] p-4">
         <button className="aethel-button aethel-button-ghost w-full justify-center gap-2 text-xs">
           <Icons.Download />
           <span>Exportar assets locais</span>
@@ -527,7 +527,7 @@ export function StorageQuotaCompact({ className = '' }: { className?: string }) 
   return (
     <div className={`flex items-center gap-2 text-xs ${className}`}>
       <div className={`h-2 w-2 rounded-full ${getWarningColor(level)}`} />
-      <span className="text-zinc-500">
+      <span className="text-[var(--aethel-text-tertiary)]">
         {formatBytes(info.used)} / {formatBytes(info.quota)}
       </span>
     </div>
@@ -535,3 +535,4 @@ export function StorageQuotaCompact({ className = '' }: { className?: string }) 
 }
 
 export default StorageQuotaManager
+

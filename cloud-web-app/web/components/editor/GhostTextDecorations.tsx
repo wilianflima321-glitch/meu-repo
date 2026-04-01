@@ -2,7 +2,7 @@
 
 /**
  * Ghost Text Decorations Component
- * 
+ *
  * Renderiza as sugestões inline (ghost text) no Monaco Editor.
  * Integra com o GhostTextProvider para mostrar completions em tempo real.
  */
@@ -56,11 +56,11 @@ const GHOST_TEXT_STYLES = `
     font-style: italic !important;
     pointer-events: none;
   }
-  
+
   .ghost-text-line {
     background-color: transparent;
   }
-  
+
   .ghost-text-tooltip {
     position: absolute;
     background: var(--aethel-surface-elevated);
@@ -73,13 +73,13 @@ const GHOST_TEXT_STYLES = `
     pointer-events: none;
     white-space: nowrap;
   }
-  
+
   .ghost-text-shortcut {
     display: inline-flex;
     align-items: center;
     gap: 4px;
   }
-  
+
   .ghost-text-shortcut kbd {
     background: var(--aethel-surface-tertiary);
     border: 1px solid var(--aethel-border-primary);
@@ -89,12 +89,12 @@ const GHOST_TEXT_STYLES = `
     font-size: 10px;
     color: var(--aethel-text-secondary);
   }
-  
+
   @keyframes ghost-text-fade-in {
     from { opacity: 0; }
     to { opacity: 0.7; }
   }
-  
+
   .ghost-text-decoration {
     animation: ghost-text-fade-in 0.15s ease-out;
   }
@@ -119,12 +119,12 @@ export function GhostTextDecorations({
     visible: false,
     loading: false,
   });
-  
+
   const decorationIds = useRef<string[]>([]);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const lastContent = useRef<string>('');
   const stylesInjected = useRef(false);
-  
+
   // Inject styles once
   useEffect(() => {
     if (!stylesInjected.current && typeof document !== 'undefined') {
@@ -134,11 +134,11 @@ export function GhostTextDecorations({
       stylesInjected.current = true;
     }
   }, []);
-  
+
   // ============================================================================
   // HELPERS
   // ============================================================================
-  
+
   const clearDecorations = useCallback(() => {
     if (decorationIds.current.length > 0) {
       monacoEditor.deltaDecorations(decorationIds.current, []);
@@ -146,18 +146,18 @@ export function GhostTextDecorations({
     }
     setState(prev => ({ ...prev, completion: null, visible: false }));
   }, [monacoEditor]);
-  
+
   const showGhostText = useCallback((completion: CompletionResult, position: Position) => {
     const model = monacoEditor.getModel();
     if (!model) return;
-    
+
     // Clear existing decorations
     clearDecorations();
-    
+
     // Split completion into lines
     const lines = completion.text.split('\n');
     const firstLine = lines[0];
-    
+
     // Create decoration for inline text
     const decorations: editor.IModelDeltaDecoration[] = [
       {
@@ -170,13 +170,13 @@ export function GhostTextDecorations({
         },
       },
     ];
-    
+
     // Add decorations for additional lines if multi-line
     if (lines.length > 1) {
       for (let i = 1; i < lines.length && i < 5; i++) { // Limit to 5 lines
         const lineNumber = position.lineNumber + i;
         const lineCount = model.getLineCount();
-        
+
         if (lineNumber <= lineCount) {
           decorations.push({
             range: new Range(lineNumber, 1, lineNumber, 1),
@@ -190,9 +190,9 @@ export function GhostTextDecorations({
         }
       }
     }
-    
+
     decorationIds.current = monacoEditor.deltaDecorations([], decorations);
-    
+
     setState({
       completion,
       position,
@@ -200,14 +200,14 @@ export function GhostTextDecorations({
       loading: false,
     });
   }, [monacoEditor, clearDecorations]);
-  
+
   const fetchCompletions = useCallback(async () => {
     if (!enabled) return;
-    
+
     const model = monacoEditor.getModel();
     const position = monacoEditor.getPosition();
     if (!model || !position) return;
-    
+
     // Get code context
     const textUntilPosition = model.getValueInRange({
       startLineNumber: 1,
@@ -215,19 +215,19 @@ export function GhostTextDecorations({
       endLineNumber: position.lineNumber,
       endColumn: position.column,
     });
-    
+
     const textAfterPosition = model.getValueInRange({
       startLineNumber: position.lineNumber,
       startColumn: position.column,
       endLineNumber: model.getLineCount(),
       endColumn: model.getLineMaxColumn(model.getLineCount()),
     });
-    
+
     // Skip if cursor is at start of line with no content
     const currentLine = model.getLineContent(position.lineNumber);
     const trimmedPrefix = currentLine.slice(0, position.column - 1).trim();
     if (!trimmedPrefix && position.column <= 1) return;
-    
+
     // Create request
     const request: CompletionRequest = {
       prefix: textUntilPosition,
@@ -237,12 +237,12 @@ export function GhostTextDecorations({
       cursorLine: position.lineNumber,
       cursorColumn: position.column,
     };
-    
+
     setState(prev => ({ ...prev, loading: true }));
-    
+
     try {
       const completions = await ghostTextProvider.getCompletions(request);
-      
+
       if (completions.length > 0) {
         showGhostText(completions[0], position);
       } else {
@@ -253,18 +253,18 @@ export function GhostTextDecorations({
       clearDecorations();
     }
   }, [enabled, monacoEditor, language, filePath, showGhostText, clearDecorations]);
-  
+
   // ============================================================================
   // ACCEPT HANDLERS
   // ============================================================================
-  
+
   const acceptCompletion = useCallback(() => {
     const { completion, position } = state;
     if (!completion || !position) return false;
-    
+
     const model = monacoEditor.getModel();
     if (!model) return false;
-    
+
     // Insert the completion text
     monacoEditor.executeEdits('ghost-text', [
       {
@@ -273,35 +273,35 @@ export function GhostTextDecorations({
         forceMoveMarkers: true,
       },
     ]);
-    
+
     // Move cursor to end of inserted text
     const lines = completion.text.split('\n');
     const newLine = position.lineNumber + lines.length - 1;
-    const newColumn = lines.length > 1 
-      ? lines[lines.length - 1].length + 1 
+    const newColumn = lines.length > 1
+      ? lines[lines.length - 1].length + 1
       : position.column + lines[0].length;
-    
+
     monacoEditor.setPosition({ lineNumber: newLine, column: newColumn });
-    
+
     clearDecorations();
     onAccept?.(completion);
-    
+
     return true;
   }, [state, monacoEditor, clearDecorations, onAccept]);
-  
+
   const acceptPartialCompletion = useCallback((wordCount: number = 1) => {
     const { completion, position } = state;
     if (!completion || !position) return false;
-    
+
     const model = monacoEditor.getModel();
     if (!model) return false;
-    
+
     // Get first N words
     const words = completion.text.split(/(\s+)/);
     const partialText = words.slice(0, wordCount * 2 - 1).join('');
-    
+
     if (!partialText) return false;
-    
+
     // Insert partial text
     monacoEditor.executeEdits('ghost-text-partial', [
       {
@@ -310,55 +310,55 @@ export function GhostTextDecorations({
         forceMoveMarkers: true,
       },
     ]);
-    
+
     // Update position
     const newColumn = position.column + partialText.length;
     monacoEditor.setPosition({ lineNumber: position.lineNumber, column: newColumn });
-    
+
     clearDecorations();
     onPartialAccept?.(partialText);
-    
+
     // Trigger new completion fetch
     setTimeout(fetchCompletions, 100);
-    
+
     return true;
   }, [state, monacoEditor, clearDecorations, onPartialAccept, fetchCompletions]);
-  
+
   const dismissCompletion = useCallback(() => {
     clearDecorations();
     onDismiss?.();
     ghostTextProvider.cancel();
   }, [clearDecorations, onDismiss]);
-  
+
   // ============================================================================
   // EVENT HANDLERS
   // ============================================================================
-  
+
   useEffect(() => {
     if (!enabled) {
       clearDecorations();
       return;
     }
-    
+
     // Content change handler
     const contentDisposable = monacoEditor.onDidChangeModelContent((e) => {
       const newContent = monacoEditor.getValue();
-      
+
       // Skip if content didn't actually change (e.g., from our own edits)
       if (newContent === lastContent.current) return;
       lastContent.current = newContent;
-      
+
       // Clear existing ghost text
       clearDecorations();
-      
+
       // Debounce fetch
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
-      
+
       debounceTimer.current = setTimeout(fetchCompletions, 300);
     });
-    
+
     // Cursor change handler
     const cursorDisposable = monacoEditor.onDidChangeCursorPosition((e) => {
       // Clear ghost text when cursor moves (unless from our edits)
@@ -366,11 +366,11 @@ export function GhostTextDecorations({
         clearDecorations();
       }
     });
-    
+
     // Key handler for accept/dismiss
     const keyDisposable = monacoEditor.onKeyDown((e) => {
       if (!state.visible) return;
-      
+
       // Tab to accept
       if (e.keyCode === 2 /* Tab */) {
         if (acceptCompletion()) {
@@ -378,7 +378,7 @@ export function GhostTextDecorations({
           e.stopPropagation();
         }
       }
-      
+
       // Ctrl+Right to accept word
       if (e.keyCode === 17 /* RightArrow */ && e.ctrlKey) {
         if (acceptPartialCompletion(1)) {
@@ -386,7 +386,7 @@ export function GhostTextDecorations({
           e.stopPropagation();
         }
       }
-      
+
       // Escape to dismiss
       if (e.keyCode === 9 /* Escape */) {
         dismissCompletion();
@@ -394,12 +394,12 @@ export function GhostTextDecorations({
         e.stopPropagation();
       }
     });
-    
+
     return () => {
       contentDisposable.dispose();
       cursorDisposable.dispose();
       keyDisposable.dispose();
-      
+
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
@@ -414,11 +414,11 @@ export function GhostTextDecorations({
     acceptPartialCompletion,
     dismissCompletion,
   ]);
-  
+
   // ============================================================================
   // RENDER
   // ============================================================================
-  
+
   // Tooltip for keyboard shortcuts
   const tooltipContent = state.visible && state.position && (
     <AnimatePresence>
@@ -443,7 +443,7 @@ export function GhostTextDecorations({
       </motion.div>
     </AnimatePresence>
   );
-  
+
   return (
     <>
       {/* Loading indicator */}
@@ -481,10 +481,10 @@ export function GhostTextDecorations({
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Keyboard shortcuts tooltip */}
       {tooltipContent}
-      
+
       {/* Pulse animation style */}
       <style jsx global>{`
         @keyframes pulse {

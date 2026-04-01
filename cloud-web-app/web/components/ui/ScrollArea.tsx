@@ -30,7 +30,7 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(
           'relative',
           orientationClasses[orientation],
           scrollbarSizeClasses[scrollbarSize],
-          'scrollbar-track-slate-800 scrollbar-thumb-slate-600 hover:scrollbar-thumb-slate-500',
+          'scrollbar-track-[var(--aethel-surface-secondary)] scrollbar-thumb-[var(--aethel-surface-quaternary)] hover:scrollbar-thumb-[var(--aethel-border-secondary)]',
           className
         )}
         {...props}

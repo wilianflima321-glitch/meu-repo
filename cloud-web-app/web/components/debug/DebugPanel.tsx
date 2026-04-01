@@ -2,7 +2,7 @@
 
 /**
  * Aethel Debug Panel
- * 
+ *
  * UI completa para debugging similar ao VS Code.
  * Inclui call stack, variables, watches, breakpoints e console.
  */
@@ -61,7 +61,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
   const [activeTab, setActiveTab] = useState<DebugPanelTab>('variables');
   const [session, setSession] = useState<DebugAdapter | null>(null);
   const [status, setStatus] = useState<'stopped' | 'running' | 'paused'>('stopped');
-  
+
   // State for different panels
   const [threads, setThreads] = useState<Thread[]>([]);
   const [currentThread, setCurrentThread] = useState<number>(1);
@@ -77,34 +77,34 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
   const [breakpoints, setBreakpoints] = useState<Map<string, Breakpoint[]>>(new Map());
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
   const [consoleInput, setConsoleInput] = useState('');
-  
+
   const consoleEndRef = useRef<HTMLDivElement>(null);
-  
+
   // ============================================================================
   // SESSION MANAGEMENT
   // ============================================================================
-  
+
   const refreshState = useCallback(async () => {
     const activeSession = debugSessionManager.getActiveSession();
     if (!activeSession) return;
-    
+
     setSession(activeSession);
-    
+
     // Get threads
     const threadList = await activeSession.getThreads();
     setThreads(threadList);
-    
+
     // Get stack trace
     const { stackFrames } = await activeSession.getStackTrace(currentThread);
     setCallStack(stackFrames);
-    
+
     if (stackFrames.length > 0 && !selectedFrame) {
       setSelectedFrame(stackFrames[0].id);
-      
+
       // Get scopes for top frame
       const frameScopes = await activeSession.getScopes(stackFrames[0].id);
       setScopes(frameScopes);
-      
+
       // Load variables for first scope
       const vars = new Map<number, DebugVariable[]>();
       for (const scope of frameScopes) {
@@ -113,14 +113,14 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
       }
       setVariables(vars);
     }
-    
+
     // Get breakpoints
     setBreakpoints(activeSession.getState().breakpoints);
-    
+
     // Get watches
     const watchRes = await activeSession.evaluateWatches();
     setWatchResults(watchRes);
-    
+
     // Get console
     setConsoleMessages(activeSession.getConsoleMessages());
   }, [currentThread, selectedFrame]);
@@ -158,66 +158,66 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
       debugSessionManager.off('event', handleEvent);
     };
   }, [refreshState]);
-  
+
   // ============================================================================
   // CONTROL ACTIONS
   // ============================================================================
-  
+
   const handleContinue = useCallback(async () => {
     if (session) {
       await session.continue(currentThread);
     }
   }, [session, currentThread]);
-  
+
   const handlePause = useCallback(async () => {
     if (session) {
       await session.pause(currentThread);
     }
   }, [session, currentThread]);
-  
+
   const handleStop = useCallback(async () => {
     if (session) {
       await debugSessionManager.terminateSession(session.getState().id);
     }
   }, [session]);
-  
+
   const handleStepOver = useCallback(async () => {
     if (session) {
       await session.stepOver(currentThread);
     }
   }, [session, currentThread]);
-  
+
   const handleStepInto = useCallback(async () => {
     if (session) {
       await session.stepInto(currentThread);
     }
   }, [session, currentThread]);
-  
+
   const handleStepOut = useCallback(async () => {
     if (session) {
       await session.stepOut(currentThread);
     }
   }, [session, currentThread]);
-  
+
   const handleRestart = useCallback(async () => {
     if (session) {
       await session.terminate();
       // Re-launch would happen here
     }
   }, [session]);
-  
+
   // ============================================================================
   // FRAME SELECTION
   // ============================================================================
-  
+
   const handleFrameSelect = useCallback(async (frame: StackFrame) => {
     setSelectedFrame(frame.id);
     onFrameSelect?.(frame);
-    
+
     if (session) {
       const frameScopes = await session.getScopes(frame.id);
       setScopes(frameScopes);
-      
+
       const vars = new Map<number, DebugVariable[]>();
       for (const scope of frameScopes) {
         const scopeVars = await session.getVariables(scope.variablesReference);
@@ -226,11 +226,11 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
       setVariables(vars);
     }
   }, [session, onFrameSelect]);
-  
+
   // ============================================================================
   // VARIABLE EXPANSION
   // ============================================================================
-  
+
   const toggleScope = useCallback((scopeRef: number) => {
     setExpandedScopes(prev => {
       const next = new Set(prev);
@@ -242,10 +242,10 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
       return next;
     });
   }, []);
-  
+
   const toggleVariable = useCallback(async (varRef: number) => {
     if (!session) return;
-    
+
     setExpandedVars(prev => {
       const next = new Set(prev);
       if (next.has(varRef)) {
@@ -255,62 +255,62 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
       }
       return next;
     });
-    
+
     // Load children if not already loaded
     if (!variables.has(varRef)) {
       const children = await session.getVariables(varRef);
       setVariables(prev => new Map(prev).set(varRef, children));
     }
   }, [session, variables]);
-  
+
   // ============================================================================
   // WATCHES
   // ============================================================================
-  
+
   const addWatch = useCallback(() => {
     if (!newWatch.trim()) return;
-    
+
     setWatches(prev => [...prev, newWatch.trim()]);
     session?.addWatch(newWatch.trim());
     setNewWatch('');
-    
+
     // Refresh watch results
     session?.evaluateWatches().then(setWatchResults);
   }, [newWatch, session]);
-  
+
   const removeWatch = useCallback((expression: string) => {
     setWatches(prev => prev.filter(w => w !== expression));
     session?.removeWatch(expression);
     setWatchResults(prev => prev.filter(w => w.expression !== expression));
   }, [session]);
-  
+
   // ============================================================================
   // CONSOLE
   // ============================================================================
-  
+
   const handleConsoleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consoleInput.trim() || !session) return;
-    
+
     await session.evaluate(consoleInput.trim(), selectedFrame || undefined, 'repl');
     setConsoleMessages(session.getConsoleMessages());
     setConsoleInput('');
-    
+
     // Scroll to bottom
     setTimeout(() => {
       consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   }, [consoleInput, session, selectedFrame]);
-  
+
   // ============================================================================
   // RENDER HELPERS
   // ============================================================================
-  
+
   const renderVariable = (variable: DebugVariable, depth: number = 0) => {
     const hasChildren = variable.variablesReference > 0;
     const isExpanded = expandedVars.has(variable.variablesReference);
     const children = variables.get(variable.variablesReference) || [];
-    
+
     return (
       <div key={variable.name} style={{ marginLeft: depth * 16 }}>
         <div
@@ -329,16 +329,16 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
             <span className="text-[var(--aethel-text-quaternary)] ml-1 text-xs">({variable.type})</span>
           )}
         </div>
-        
+
         {hasChildren && isExpanded && children.map(child => renderVariable(child, depth + 1))}
       </div>
     );
   };
-  
+
   // ============================================================================
   // RENDER
   // ============================================================================
-  
+
   const tabs: { id: DebugPanelTab; label: string; icon: React.ReactNode }[] = [
     { id: 'variables', label: 'Variables', icon: <Variable size={14} /> },
     { id: 'watch', label: 'Watch', icon: <Eye size={14} /> },
@@ -346,7 +346,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
     { id: 'breakpoints', label: 'Breakpoints', icon: <Circle size={14} /> },
     { id: 'console', label: 'Debug Console', icon: <Terminal size={14} /> },
   ];
-  
+
   return (
     <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Toolbar */}
@@ -359,7 +359,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         >
           {status === 'paused' ? <Play size={16} className="text-[var(--aethel-success-light)]" /> : <Pause size={16} />}
         </button>
-        
+
         <button
           onClick={handleStop}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
@@ -368,7 +368,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         >
           <Square size={16} className="text-[var(--aethel-error-light)]" />
         </button>
-        
+
         <button
           onClick={handleRestart}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
@@ -377,9 +377,9 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         >
           <RotateCcw size={16} />
         </button>
-        
+
         <div className="w-px h-4 bg-[var(--aethel-border-primary)] mx-1" />
-        
+
         <button
           onClick={handleStepOver}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
@@ -388,7 +388,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         >
           <SkipForward size={16} />
         </button>
-        
+
         <button
           onClick={handleStepInto}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
@@ -397,7 +397,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         >
           <ArrowDown size={16} />
         </button>
-        
+
         <button
           onClick={handleStepOut}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
@@ -406,18 +406,18 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
         >
           <ArrowUp size={16} />
         </button>
-        
+
         <div className="flex-1" />
-        
+
         <div className="flex items-center gap-2 text-xs text-[var(--aethel-text-quaternary)]">
           <Bug size={14} />
           <span>
-            {status === 'stopped' ? 'Not debugging' : 
+            {status === 'stopped' ? 'Not debugging' :
              status === 'running' ? 'Running...' : 'Paused'}
           </span>
         </div>
       </div>
-      
+
       {/* Tabs */}
       <div className="flex border-b border-[var(--aethel-border-primary)]">
         {tabs.map(tab => (
@@ -426,8 +426,8 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
             onClick={() => setActiveTab(tab.id)}
             className={`
               flex items-center gap-1.5 px-3 py-2 text-xs transition-colors
-              ${activeTab === tab.id 
-                ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary-light)]' 
+              ${activeTab === tab.id
+                ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary-light)]'
                 : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'}
             `}
           >
@@ -436,7 +436,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
           </button>
         ))}
       </div>
-      
+
       {/* Content */}
       <div className="flex-1 overflow-auto">
         <AnimatePresence mode="wait">
@@ -455,12 +455,12 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                     className="flex items-center gap-1 py-1 px-2 bg-[var(--aethel-border-primary)] rounded cursor-pointer"
                     onClick={() => toggleScope(scope.variablesReference)}
                   >
-                    {expandedScopes.has(scope.variablesReference) 
-                      ? <ChevronDown size={14} /> 
+                    {expandedScopes.has(scope.variablesReference)
+                      ? <ChevronDown size={14} />
                       : <ChevronRight size={14} />}
                     <span className="text-sm font-medium">{scope.name}</span>
                   </div>
-                  
+
                   {expandedScopes.has(scope.variablesReference) && (
                     <div className="mt-1">
                       {(variables.get(scope.variablesReference) || []).map(v => renderVariable(v))}
@@ -468,7 +468,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   )}
                 </div>
               ))}
-              
+
               {scopes.length === 0 && (
                 <div className="text-center text-[var(--aethel-text-quaternary)] py-8">
                   No variables available
@@ -476,7 +476,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
               )}
             </motion.div>
           )}
-          
+
           {/* Watch */}
           {activeTab === 'watch' && (
             <motion.div
@@ -502,7 +502,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   <Plus size={14} />
                 </button>
               </div>
-              
+
               {watchResults.map((watch, i) => (
                 <div
                   key={i}
@@ -524,7 +524,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
               ))}
             </motion.div>
           )}
-          
+
           {/* Call Stack */}
           {activeTab === 'callstack' && (
             <motion.div
@@ -548,7 +548,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   ))}
                 </select>
               )}
-              
+
               {callStack.map((frame, i) => (
                 <div
                   key={frame.id}
@@ -564,7 +564,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   </span>
                 </div>
               ))}
-              
+
               {callStack.length === 0 && (
                 <div className="text-center text-[var(--aethel-text-quaternary)] py-8">
                   No call stack
@@ -572,7 +572,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
               )}
             </motion.div>
           )}
-          
+
           {/* Breakpoints */}
           {activeTab === 'breakpoints' && (
             <motion.div
@@ -603,7 +603,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   ))}
                 </div>
               ))}
-              
+
               {breakpoints.size === 0 && (
                 <div className="text-center text-[var(--aethel-text-quaternary)] py-8">
                   No breakpoints set
@@ -611,7 +611,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
               )}
             </motion.div>
           )}
-          
+
           {/* Console */}
           {activeTab === 'console' && (
             <motion.div
@@ -641,7 +641,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                 ))}
                 <div ref={consoleEndRef} />
               </div>
-              
+
               <form onSubmit={handleConsoleSubmit} className="border-t border-[var(--aethel-border-primary)] p-2">
                 <div className="flex items-center gap-2">
                   <ChevronRight size={14} className="text-[var(--aethel-text-quaternary)]" />

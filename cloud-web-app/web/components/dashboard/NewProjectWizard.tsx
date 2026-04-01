@@ -1,15 +1,15 @@
 /**
  * NewProjectWizard - Experiencia de Onboarding "Time-to-Fun"
- * 
+ *
  * Wizard visual imersivo para criacao de projetos.
  * Meta: Usuario com jogo rodando em < 30 segundos.
- * 
+ *
  * Fluxo:
  * 1. Escolha de Genero (Cards com video preview)
  * 2. Escolha de Estilo Visual (Vibe)
  * 3. Loading cinematografico
  * 4. Redirect para editor com projeto pronto
- * 
+ *
  * @see DETALHAMENTO_UX_STRATEGY_2026.md - Secao 1
  */
 
@@ -201,7 +201,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Auto-generate project name
@@ -230,7 +230,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       setLoadingStep(currentStep);
       const stepData = LOADING_STEPS[currentStep];
       const progressIncrement = 100 / LOADING_STEPS.length;
-      
+
       // Animate progress within step
       const progressInterval = setInterval(() => {
         currentProgress += progressIncrement / 10;
@@ -268,7 +268,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         }
 
         const { projectId } = await response.json();
-        
+
         // Small delay for dramatic effect
         setTimeout(() => {
           if (onComplete) {
@@ -501,7 +501,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
                 }}
               />
               {/* Color palette fallback */}
-              <div 
+              <div
                 className="w-full h-full flex"
                 style={{ display: 'flex' }}
               >

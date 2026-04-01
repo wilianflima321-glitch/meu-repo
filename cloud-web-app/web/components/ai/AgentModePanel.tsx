@@ -179,6 +179,21 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
     }
   }
 
+  const getStatusLabel = (s: typeof status) => {
+    switch (s) {
+      case 'running':
+        return 'EM EXECUCAO'
+      case 'paused':
+        return 'PAUSADO'
+      case 'completed':
+        return 'CONCLUIDO'
+      case 'failed':
+        return 'FALHOU'
+      default:
+        return 'OCIOSO'
+    }
+  }
+
   const getStatusColor = (s: string) => {
     switch (s) {
       case 'running':
@@ -207,9 +222,9 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5 text-[var(--aethel-info-light)]" />
-          <span className="font-semibold text-[var(--aethel-text-primary)]">Agent Mode</span>
+          <span className="font-semibold text-[var(--aethel-text-primary)]">Modo agente</span>
           <span className={cn('rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] px-2 py-0.5 text-xs', getStatusColor(status))}>
-            {status.toUpperCase()}
+            {getStatusLabel(status)}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -308,7 +323,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
               >
                 <button
                   onClick={() => toggleStepExpand(step.id)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-white/[0.05]"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]"
                 >
                   {isExpanded ? (
                     <ChevronDown className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
@@ -406,7 +421,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             size="icon"
             onClick={handleSubmit}
             disabled={!input.trim() || status === 'running'}
-            className="absolute bottom-2 right-2 h-8 w-8 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)]"
+            className="absolute bottom-2 right-2 h-8 w-8 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary-dark)]"
           >
             {status === 'running' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>

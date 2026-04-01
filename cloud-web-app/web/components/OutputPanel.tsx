@@ -51,17 +51,17 @@ export default function OutputPanel() {
 
   const getSeverityColor = (severity?: string) => {
     switch (severity) {
-      case 'error': return 'text-red-400';
-      case 'warning': return 'text-yellow-400';
-      case 'info': return 'text-blue-400';
-      default: return 'text-slate-300';
+      case 'error': return 'text-[var(--aethel-error-light)]';
+      case 'warning': return 'text-[var(--aethel-warning-light)]';
+      case 'info': return 'text-[var(--aethel-info-light)]';
+      default: return 'text-[var(--aethel-text-secondary)]';
     }
   };
 
   return (
-    <div className="h-full bg-slate-900 flex flex-col">
+    <div className="h-full bg-[var(--aethel-surface-secondary)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-700">
+      <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)]">
         <div className="flex">
           {channels.map(channel => (
             <button
@@ -69,8 +69,8 @@ export default function OutputPanel() {
               onClick={() => setActiveChannel(channel)}
               className={`px-4 py-2 text-sm transition-colors border-b-2 ${
                 activeChannel === channel
-                  ? 'border-[var(--aethel-primary)] text-white bg-slate-800'
-                  : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)] bg-[var(--aethel-surface-tertiary)]'
+                  : 'border-transparent text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
               }`}
             >
               {channel}
@@ -81,17 +81,17 @@ export default function OutputPanel() {
         <div className="flex items-center gap-2 px-3">
           <input
             type="text"
-            placeholder="Filter..."
+            placeholder="Filtrar..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="px-3 py-1 bg-slate-800 text-white text-sm rounded focus:outline-none focus:ring-2 focus:ring-sky-500"
+            className="px-3 py-1 bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[var(--aethel-info)]"
           />
           <button
             onClick={clearMessages}
-            className="p-1 hover:bg-slate-800 rounded transition-colors"
-            title="Clear Output"
+            className="rounded px-2 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
+            title="Limpar saida"
           >
-            ðŸ—‘ï¸
+            Limpar
           </button>
         </div>
       </div>
@@ -102,8 +102,8 @@ export default function OutputPanel() {
         className="flex-1 overflow-y-auto p-3 font-mono text-sm"
       >
         {filteredMessages.length === 0 ? (
-          <div className="text-slate-500 text-center py-8">
-            No output to display
+          <div className="text-[var(--aethel-text-tertiary)] text-center py-8">
+            Nenhuma saida para exibir
           </div>
         ) : (
           filteredMessages.map((msg, index) => (
@@ -111,7 +111,7 @@ export default function OutputPanel() {
               key={index}
               className={`mb-1 ${getSeverityColor(msg.severity)}`}
             >
-              <span className="text-slate-600 mr-2">
+              <span className="text-[var(--aethel-text-quaternary)] mr-2">
                 [{msg.timestamp.toLocaleTimeString()}]
               </span>
               <span className="whitespace-pre-wrap">{msg.message}</span>

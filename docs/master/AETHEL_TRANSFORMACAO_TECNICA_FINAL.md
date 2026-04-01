@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 60_AETHEL_TRANSFORMACAO_TECNICA_FINAL_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # 🎯 Aethel Engine: Transformação Técnica Completa (2026)
 
 **Data:** 27 de Fevereiro de 2026  
@@ -263,3 +266,6 @@ O Aethel Engine está pronto para a fase de **implementação ativa** e desenvol
 **Papel:** Arquiteto de Transformação do Aethel Engine  
 **Data:** 27 de Fevereiro de 2026  
 **Status:** 🚀 PRONTO PARA DESENVOLVIMENTO ATIVO
+
+
+

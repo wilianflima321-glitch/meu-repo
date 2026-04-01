@@ -140,29 +140,29 @@ export default function AethelResearch() {
   }
 
   return (
-    <div className="flex h-full flex-col space-y-6 overflow-y-auto bg-zinc-950 p-6 text-zinc-100">
+    <div className="flex h-full flex-col space-y-6 overflow-y-auto bg-[var(--aethel-surface-primary)] p-6 text-[var(--aethel-text-primary)]">
       <div className="mb-4 flex items-center gap-3">
-        <div className="rounded-lg border border-blue-500/30 bg-blue-600/20 p-2">
-          <Search className="text-blue-400" size={20} />
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)] p-2">
+          <Search className="text-[var(--aethel-info-light)]" size={20} />
         </div>
         <div>
-          <h2 className="text-lg font-bold uppercase tracking-wider">Aethel Research</h2>
-          <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500">Deep verification engine</p>
+          <h2 className="text-lg font-bold uppercase tracking-wider">Pesquisa Aethel</h2>
+          <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--aethel-text-quaternary)]">Motor de verificacao profunda</p>
         </div>
       </div>
 
       <form onSubmit={handleSearch} className="group relative">
-        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 opacity-20 blur transition duration-500 group-focus-within:opacity-50"></div>
-        <div className="relative flex items-center rounded-xl border border-zinc-800 bg-zinc-900 p-2 pl-4">
-          <Globe className="mr-3 text-zinc-500" size={18} />
+        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] opacity-20 blur transition duration-500 group-focus-within:opacity-50"></div>
+        <div className="relative flex items-center rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-2 pl-4">
+          <Globe className="mr-3 text-[var(--aethel-text-quaternary)]" size={18} />
           <input
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search with verified context..."
-            className="flex-1 bg-transparent py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none"
+            placeholder="Buscar com contexto verificado..."
+            className="flex-1 bg-transparent py-2 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none"
           />
-          <button type="submit" className="ml-2 rounded-lg bg-blue-600 p-2 text-white transition-all hover:bg-blue-500">
+          <button type="submit" className="ml-2 rounded-lg bg-[var(--aethel-primary)] p-2 text-[var(--aethel-text-primary)] transition-all hover:brightness-110">
             <Search size={18} />
           </button>
         </div>
@@ -171,19 +171,19 @@ export default function AethelResearch() {
       {result.status !== 'idle' && (
         <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-500">
           {result.status !== 'complete' && (
-            <div className="rounded-xl border border-zinc-800 border-dashed bg-zinc-900/50 p-4">
+            <div className="rounded-xl border border-[var(--aethel-border-primary)] border-dashed bg-[var(--aethel-surface-secondary)]/50 p-4">
               <div className="flex items-center gap-4">
-                <Loader2 className="animate-spin text-blue-500" size={20} />
+                <Loader2 className="animate-spin text-[var(--aethel-info)]" size={20} />
                 <div className="flex-1">
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--aethel-surface-tertiary)]">
                     <div
-                      className={`h-full bg-blue-500 transition-all duration-1000 ${
+                      className={`h-full bg-[var(--aethel-info)] transition-all duration-1000 ${
                         result.status === 'searching' ? 'w-1/3' : 'w-2/3'
                       }`}
                     ></div>
                   </div>
-                  <p className="mt-2 text-[10px] font-bold uppercase tracking-tighter text-zinc-500">
-                    {result.status === 'searching' ? 'Collecting sources...' : 'Scoring credibility and synthesis...'}
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-tighter text-[var(--aethel-text-quaternary)]">
+                    {result.status === 'searching' ? 'Coletando fontes...' : 'Pontuando credibilidade e sintese...'}
                   </p>
                 </div>
               </div>
@@ -192,85 +192,85 @@ export default function AethelResearch() {
 
           {result.status === 'complete' && (
             <>
-              <div className="group relative overflow-hidden rounded-2xl border border-blue-500/20 bg-blue-600/5 p-5">
+              <div className="group relative overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] p-5">
                 <div className="absolute right-0 top-0 p-3 opacity-10 transition-opacity group-hover:opacity-20">
-                  <Shield size={64} className="text-blue-400" />
+                  <Shield size={64} className="text-[var(--aethel-info-light)]" />
                 </div>
                 <div className="mb-3 flex items-center gap-2">
-                  <CheckCircle size={16} className="text-emerald-400" />
-                  <span className="text-[10px] font-bold uppercase text-emerald-500">Verified synthesis package</span>
+                  <CheckCircle size={16} className="text-[var(--aethel-success)]" />
+                  <span className="text-[10px] font-bold uppercase text-[var(--aethel-success)]">Pacote de sintese verificada</span>
                 </div>
-                <p className="text-sm leading-relaxed text-zinc-200">{result.summary}</p>
+                <p className="text-sm leading-relaxed text-[var(--aethel-text-primary)]">{result.summary}</p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handleOpenInIde}
-                  className="inline-flex items-center gap-2 rounded-lg border border-blue-500/40 bg-blue-600/15 px-3 py-2 text-xs font-semibold text-blue-100 hover:bg-blue-600/25"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)]"
                 >
                   <Send size={14} />
-                  Open in IDE
+                  Abrir na IDE
                 </button>
                 <button
                   type="button"
                   onClick={handleCopyPrompt}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900/70 px-3 py-2 text-xs font-semibold text-zinc-200 hover:border-zinc-600"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/70 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)]"
                 >
                   <Copy size={14} />
-                  Copy Prompt
+                  Copiar prompt
                 </button>
-                {handoffMessage && <span className="text-xs text-zinc-400">{handoffMessage}</span>}
+                {handoffMessage && <span className="text-xs text-[var(--aethel-text-tertiary)]">{handoffMessage}</span>}
               </div>
 
               <div className="space-y-3">
-                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  <BookOpen size={14} /> High-credibility sources
+                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-quaternary)]">
+                  <BookOpen size={14} /> Fontes de alta credibilidade
                 </h3>
                 <div className="grid grid-cols-1 gap-3">
                   {result.sources.map((source) => (
                     <div
                       key={source.id}
-                      className="group rounded-xl border border-zinc-800 bg-zinc-900 p-4 transition-colors hover:border-zinc-700"
+                      className="group rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 transition-colors hover:border-[var(--aethel-border-primary)]"
                     >
                       <div className="mb-2 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-zinc-200 transition-colors group-hover:text-blue-400">
+                          <span className="text-xs font-bold text-[var(--aethel-text-primary)] transition-colors group-hover:text-[var(--aethel-info-light)]">
                             {source.title}
                           </span>
-                          {source.verified && <Shield size={12} className="text-blue-500" />}
+                          {source.verified && <Shield size={12} className="text-[var(--aethel-info)]" />}
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="rounded bg-zinc-800 px-1.5 py-0.5 text-[9px] font-mono text-zinc-400">
-                            {Math.round(source.credibility * 100)}% confidence
+                          <div className="rounded bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 text-[9px] font-mono text-[var(--aethel-text-tertiary)]">
+                            {Math.round(source.credibility * 100)}% confianca
                           </div>
-                          <a href={source.url} target="_blank" rel="noreferrer" className="text-zinc-600 hover:text-zinc-300">
+                          <a href={source.url} target="_blank" rel="noreferrer" className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]">
                             <ExternalLink size={12} />
                           </a>
                         </div>
                       </div>
-                      <p className="line-clamp-2 text-[11px] text-zinc-500">{source.snippet}</p>
+                      <p className="line-clamp-2 text-[11px] text-[var(--aethel-text-quaternary)]">{source.snippet}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
+                <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/30 p-4">
                   <div className="mb-2 flex items-center gap-2">
-                    <Database size={14} className="text-blue-400" />
-                    <span className="text-[10px] font-bold uppercase text-zinc-500">Raw dataset</span>
+                    <Database size={14} className="text-[var(--aethel-info-light)]" />
+                    <span className="text-[10px] font-bold uppercase text-[var(--aethel-text-quaternary)]">Dataset bruto</span>
                   </div>
-                  <div className="text-lg font-bold text-zinc-200">1.2 TB</div>
-                  <div className="text-[9px] text-zinc-600">Indexed and deduplicated</div>
+                  <div className="text-lg font-bold text-[var(--aethel-text-primary)]">1.2 TB</div>
+                  <div className="text-[9px] text-[var(--aethel-text-quaternary)]">Indexado e deduplicado</div>
                 </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-4">
+                <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/30 p-4">
                   <div className="mb-2 flex items-center gap-2">
                     <BarChart3 size={14} className="text-orange-400" />
-                    <span className="text-[10px] font-bold uppercase text-zinc-500">Latency</span>
+                    <span className="text-[10px] font-bold uppercase text-[var(--aethel-text-quaternary)]">Latencia</span>
                   </div>
-                  <div className="text-lg font-bold text-zinc-200">450ms</div>
-                  <div className="text-[9px] text-zinc-600">Parallel verification pass</div>
+                  <div className="text-lg font-bold text-[var(--aethel-text-primary)]">450ms</div>
+                  <div className="text-[9px] text-[var(--aethel-text-quaternary)]">Passagem paralela de verificacao</div>
                 </div>
               </div>
             </>
@@ -280,3 +280,5 @@ export default function AethelResearch() {
     </div>
   )
 }
+
+

@@ -36,6 +36,7 @@ import {
   Check,
   Info,
 } from 'lucide-react'
+import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models'
 
 // ============= Types =============
 
@@ -232,24 +233,8 @@ const ENGINE_SETTINGS: Record<string, Setting[]> = {
 
 const AI_SETTINGS: Record<string, Setting[]> = {
   models: [
-    { id: 'ai.defaultModel', label: 'Default Model', type: 'select', value: 'google/gemini-3.1-flash-lite-preview', options: [
-      { value: 'google/gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite (OpenRouter)' },
-      { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini (OpenRouter)' },
-      { value: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku (OpenRouter)' },
-      { value: 'gpt-4o', label: 'GPT-4o (OpenAI)' },
-      { value: 'gpt-4o-mini', label: 'GPT-4o Mini (OpenAI)' },
-      { value: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4 (Anthropic)' },
-      { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro (Google)' },
-      { value: 'deepseek-chat', label: 'DeepSeek Chat' },
-    ]},
-    { id: 'ai.codeModel', label: 'Code Generation Model', type: 'select', value: 'google/gemini-3.1-flash-lite-preview', options: [
-      { value: 'google/gemini-3.1-flash-lite-preview', label: 'Gemini 3.1 Flash Lite (OpenRouter)' },
-      { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini (OpenRouter)' },
-      { value: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku (OpenRouter)' },
-      { value: 'gpt-4o', label: 'GPT-4o' },
-      { value: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4' },
-      { value: 'deepseek-coder', label: 'DeepSeek Coder' },
-    ]},
+    { id: 'ai.defaultModel', label: 'Default Model', type: 'select', value: DEFAULT_OPENROUTER_MODEL_ID, options: OPENROUTER_MODEL_OPTIONS },
+    { id: 'ai.codeModel', label: 'Code Generation Model', type: 'select', value: DEFAULT_OPENROUTER_MODEL_ID, options: OPENROUTER_MODEL_OPTIONS },
     { id: 'ai.embeddingModel', label: 'Embedding Model', type: 'select', value: 'text-embedding-3-small', options: [
       { value: 'text-embedding-3-small', label: 'OpenAI Small' },
       { value: 'text-embedding-3-large', label: 'OpenAI Large' },
@@ -315,14 +300,14 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
     { id: 'editor.inlayHints', label: 'Inlay Hints', type: 'toggle', value: true },
   ],
   keyboard: [
-    { id: 'key.commandPalette', label: 'Paleta de comandos', type: 'keybinding', value: '⌘K' },
-    { id: 'key.save', label: 'Save', type: 'keybinding', value: '⌘S' },
-    { id: 'key.find', label: 'Find', type: 'keybinding', value: '⌘F' },
-    { id: 'key.replace', label: 'Replace', type: 'keybinding', value: '⌘H' },
-    { id: 'key.goToFile', label: 'Ir para arquivo', type: 'keybinding', value: '⌘P' },
-    { id: 'key.goToLine', label: 'Go to Line', type: 'keybinding', value: '⌘G' },
-    { id: 'key.toggleTerminal', label: 'Toggle Terminal', type: 'keybinding', value: '⌘J' },
-    { id: 'key.toggleSidebar', label: 'Toggle Sidebar', type: 'keybinding', value: '⌘B' },
+    { id: 'key.commandPalette', label: 'Paleta de comandos', type: 'keybinding', value: 'Ctrl+K' },
+    { id: 'key.save', label: 'Salvar', type: 'keybinding', value: 'Ctrl+S' },
+    { id: 'key.find', label: 'Buscar', type: 'keybinding', value: 'Ctrl+F' },
+    { id: 'key.replace', label: 'Substituir', type: 'keybinding', value: 'Ctrl+H' },
+    { id: 'key.goToFile', label: 'Ir para arquivo', type: 'keybinding', value: 'Ctrl+P' },
+    { id: 'key.goToLine', label: 'Ir para linha', type: 'keybinding', value: 'Ctrl+G' },
+    { id: 'key.toggleTerminal', label: 'Alternar terminal', type: 'keybinding', value: 'Ctrl+J' },
+    { id: 'key.toggleSidebar', label: 'Alternar barra lateral', type: 'keybinding', value: 'Ctrl+B' },
   ],
 }
 
@@ -341,11 +326,11 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
           onClick={() => onChange(!setting.value)}
           className={`
             w-11 h-6 rounded-full transition-colors relative
-            ${setting.value ? 'bg-sky-600' : 'bg-slate-700'}
+            ${setting.value ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}
           `}
         >
           <div className={`
-            absolute top-1 w-4 h-4 rounded-full bg-white transition-transform
+            absolute top-1 w-4 h-4 rounded-full bg-[var(--aethel-surface-secondary)] transition-transform
             ${setting.value ? 'left-6' : 'left-1'}
           `} />
         </button>
@@ -356,7 +341,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
         <select
           value={setting.value}
           onChange={(e) => onChange(e.target.value)}
-          className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white"
+          className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)]"
         >
           {setting.options?.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -370,7 +355,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
           type="text"
           value={setting.value}
           onChange={(e) => onChange(e.target.value)}
-          className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white w-32"
+          className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] w-32"
         />
       )
 
@@ -384,9 +369,9 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
             step={setting.step}
             value={setting.value}
             onChange={(e) => onChange(parseFloat(e.target.value))}
-            className="w-32 accent-sky-600"
+            className="w-32 accent-[var(--aethel-info)]"
           />
-          <span className="text-sm text-slate-400 w-12 text-right">{setting.value}</span>
+          <span className="text-sm text-[var(--aethel-text-tertiary)] w-12 text-right">{setting.value}</span>
         </div>
       )
 
@@ -397,15 +382,15 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
             type="color"
             value={setting.value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-8 h-8 rounded border border-slate-700 cursor-pointer"
+            className="w-8 h-8 rounded border border-[var(--aethel-border-secondary)] cursor-pointer"
           />
-          <span className="text-sm text-slate-400 font-mono">{setting.value}</span>
+          <span className="text-sm text-[var(--aethel-text-tertiary)] font-mono">{setting.value}</span>
         </div>
       )
 
     case 'keybinding':
       return (
-        <button className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white font-mono">
+        <button className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] font-mono">
           {setting.value}
         </button>
       )
@@ -459,19 +444,19 @@ export default function EngineSettingsPage() {
   const currentSettings = getCurrentSettings()
 
   return (
-    <div className="h-full flex bg-slate-950">
+    <div className="h-full flex bg-[var(--aethel-surface-primary)]">
       {/* Sidebar */}
-      <div className="w-64 flex flex-col border-r border-slate-800">
+      <div className="w-64 flex flex-col border-r border-[var(--aethel-border-primary)]">
         {/* Search */}
-        <div className="p-3 border-b border-slate-800">
+        <div className="p-3 border-b border-[var(--aethel-border-primary)]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar ajustes..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500"
+              className="w-full pl-9 pr-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)]"
             />
           </div>
         </div>
@@ -490,8 +475,8 @@ export default function EngineSettingsPage() {
                 className={`
                   w-full flex items-center gap-3 px-4 py-2 text-sm
                   ${activeSection === section.id
-                    ? 'text-white bg-slate-800/50'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
+                    ? 'text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]/30'
                   }
                 `}
               >
@@ -501,7 +486,7 @@ export default function EngineSettingsPage() {
 
               {/* Subsections */}
               {activeSection === section.id && section.subsections && (
-                <div className="ml-4 pl-4 border-l border-slate-800">
+                <div className="ml-4 pl-4 border-l border-[var(--aethel-border-primary)]">
                   {section.subsections.map(sub => (
                     <button
                       key={sub.id}
@@ -509,8 +494,8 @@ export default function EngineSettingsPage() {
                       className={`
                         w-full flex items-center gap-2 px-3 py-1.5 text-sm
                         ${activeSubsection === sub.id
-                          ? 'text-sky-400'
-                          : 'text-slate-500 hover:text-slate-300'
+                          ? 'text-[var(--aethel-info)]'
+                          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
                         }
                       `}
                     >
@@ -528,12 +513,12 @@ export default function EngineSettingsPage() {
       {/* Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--aethel-border-primary)]">
           <div>
-            <h1 className="text-xl font-semibold text-white">
+            <h1 className="text-xl font-semibold text-[var(--aethel-text-primary)]">
               {SETTING_SECTIONS.find(s => s.id === activeSection)?.label}
             </h1>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-[var(--aethel-text-tertiary)]">
               {SETTING_SECTIONS.find(s => s.id === activeSection)?.subsections?.find(sub => sub.id === activeSubsection)?.label}
             </p>
           </div>
@@ -542,14 +527,14 @@ export default function EngineSettingsPage() {
               <>
                 <button
                   onClick={handleReset}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 hover:text-white"
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   <RotateCcw className="w-4 h-4" />
-                  Reset
+                  Redefinir
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-2 px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-sm"
+                  className="flex items-center gap-2 px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
                 >
                   <Save className="w-4 h-4" />
                   Salvar alteracoes
@@ -563,21 +548,21 @@ export default function EngineSettingsPage() {
         <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-3xl space-y-6">
             {currentSettings.map(setting => (
-              <div key={setting.id} className="flex items-start justify-between gap-8 py-3 border-b border-slate-800/50">
+              <div key={setting.id} className="flex items-start justify-between gap-8 py-3 border-b border-[var(--aethel-border-primary)]/50">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-white">{setting.label}</span>
+                    <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{setting.label}</span>
                     {setting.description && (
                       <div className="group relative">
-                        <Info className="w-3.5 h-3.5 text-slate-500 cursor-help" />
-                        <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-slate-800 text-xs text-slate-300 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        <Info className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)] cursor-help" />
+                        <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] text-xs text-[var(--aethel-text-secondary)] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                           {setting.description}
                         </div>
                       </div>
                     )}
                   </div>
                   {setting.description && (
-                    <p className="text-xs text-slate-500 mt-0.5">{setting.description}</p>
+                    <p className="text-xs text-[var(--aethel-text-tertiary)] mt-0.5">{setting.description}</p>
                   )}
                 </div>
                 <SettingInput
@@ -588,9 +573,9 @@ export default function EngineSettingsPage() {
             ))}
 
             {currentSettings.length === 0 && (
-              <div className="text-center py-12 text-slate-500">
+              <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
                 <Settings className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>No settings available for this section</p>
+                <p>Nenhuma configuracao disponivel para esta secao</p>
               </div>
             )}
           </div>
@@ -599,3 +584,4 @@ export default function EngineSettingsPage() {
     </div>
   )
 }
+

@@ -10,9 +10,12 @@ import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
 import CanonicalPreviewSurface from "@/components/preview/CanonicalPreviewSurface";
 import PreviewRuntimeToolbar from "@/components/ide/PreviewRuntimeToolbar";
+import WorkbenchMissionBar from "@/components/ide/WorkbenchMissionBar";
 import TabBar, { TabProvider } from "@/components/editor/TabBar";
 import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
-import CommandPaletteProvider from "@/components/ide/CommandPalette";
+import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
+import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
+import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
 import { analytics } from "@/lib/analytics";
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
@@ -115,7 +118,11 @@ function IDEContent() {
   const fileParam = searchParams.get("file");
   const projectIdParam = searchParams.get("projectId");
   const entryParam = searchParams.get("entry");
+  const missionParam = searchParams.get("mission");
   const previewUrlParam = searchParams.get("previewUrl");
+  const sourceParam = searchParams.get("source");
+  const shellParam = searchParams.get('shell');
+  const useModernShell = shellParam === 'modern';
 
   const projectId = useMemo(() => {
     if (projectIdParam && projectIdParam.trim()) {
@@ -138,6 +145,12 @@ function IDEContent() {
     if (stored === "0") return false;
     return window.innerWidth >= 1440;
   });
+  const [modernPanelState, setModernPanelState] = useState<ModernPanelState>(() => ({
+    sidebar: { open: true, size: 20 },
+    editor: { open: true, size: 45 },
+    preview: { open: true, size: 35 },
+    chat: { open: false, size: 25 },
+  }));
   const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
   const [initialFileResolved, setInitialFileResolved] = useState(false);
   const [isCompactViewport, setIsCompactViewport] = useState(false)
@@ -148,6 +161,9 @@ function IDEContent() {
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const runtimeSyncTimerRef = useRef<number | null>(null)
   const lastRuntimeSyncAtRef = useRef<number>(0)
+
+  const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([])
+  const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false)
 
   const {
     previewRuntimeUrl,
@@ -185,6 +201,17 @@ function IDEContent() {
     previewUrlParam,
   })
 
+  const runtimeStateLabel = useMemo(() => {
+    if (runtimeHealth.status === 'reachable') {
+      return typeof runtimeHealth.latencyMs === 'number'
+        ? `pronto ${runtimeHealth.latencyMs}ms`
+        : 'pronto'
+    }
+    if (runtimeHealth.status === 'checking') return 'validando'
+    if (runtimeHealth.status === 'idle') return 'inline'
+    return runtimeHealth.reason || runtimeHealth.status
+  }, [runtimeHealth.latencyMs, runtimeHealth.reason, runtimeHealth.status])
+
   const scheduleRuntimeSync = useCallback(() => {
     if (!previewSandboxId || isSyncingRuntime) return
     if (runtimeSyncTimerRef.current) {
@@ -198,6 +225,53 @@ function IDEContent() {
       void syncRuntime()
     }, 1500)
   }, [previewSandboxId, isSyncingRuntime, syncRuntime])
+
+  const openCommandPalette = useCallback((mode: 'commands' | 'files' = 'commands') => {
+    window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode } }))
+  }, [])
+
+  const handleBackToDashboard = useCallback(() => {
+    const params = new URLSearchParams()
+    if (projectId && projectId !== 'default') params.set('projectId', projectId)
+    if (missionParam) params.set('mission', missionParam)
+    if (sourceParam) params.set('source', sourceParam)
+    window.location.assign(params.toString() ? `/dashboard?${params.toString()}` : '/dashboard')
+  }, [missionParam, projectId, sourceParam])
+
+  const handleOpenSettings = useCallback(() => {
+    const params = new URLSearchParams(window.location.search)
+    const currentProjectId = params.get('projectId')
+    const next = currentProjectId ? `/settings?projectId=${encodeURIComponent(currentProjectId)}` : '/settings'
+    window.location.assign(next)
+  }, [])
+
+  const handleEditorUndo = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'undo', null)
+  }, [])
+
+  const handleEditorRedo = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'redo', null)
+  }, [])
+
+  const handleEditorFind = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'actions.find', null)
+  }, [])
+
+  const handleEditorReplace = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'editor.action.startFindReplaceAction', null)
+  }, [])
+
+  const emitLayoutEvent = useCallback((eventName: string) => {
+    window.dispatchEvent(new Event(eventName))
+  }, [])
+
+  const handleAIInline = useCallback(() => {
+    editorRef.current?.trigger('aethel', 'aethel.inlineEdit', null)
+  }, [])
+
+  const handleAIPanel = useCallback(() => {
+    emitLayoutEvent('aethel.layout.openAI')
+  }, [emitLayoutEvent])
 
   useEffect(() => {
     return () => {
@@ -241,8 +315,133 @@ function IDEContent() {
   }, [])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!projectId) return
+    let cancelled = false
+
+    const flattenTree = (nodes: Array<{ name: string; path: string; type: 'file' | 'directory'; children?: any[] }>): FileItem[] => {
+      const out: FileItem[] = []
+      const walk = (list: any[]) => {
+        for (const node of list) {
+          if (!node || typeof node.path !== 'string' || typeof node.name !== 'string') continue
+          const nodeType = node.type === 'directory' ? 'folder' : 'file'
+          out.push({
+            path: node.path,
+            name: node.name,
+            type: nodeType,
+          })
+          if (Array.isArray(node.children) && node.children.length) {
+            walk(node.children)
+          }
+        }
+      }
+      walk(nodes)
+      return out
+    }
+
+    const load = async () => {
+      try {
+        const res = await fetch('/api/files/tree', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-project-id': projectId,
+          },
+          body: JSON.stringify({ path: '/', maxDepth: 6, projectId }),
+        })
+        if (!res.ok) {
+          if (!cancelled) {
+            setWorkspaceFiles([])
+            setWorkspaceFilesLoaded(true)
+          }
+          return
+        }
+        const data = (await res.json().catch(() => null)) as any
+        const rawTree = Array.isArray(data?.children)
+          ? data.children
+          : Array.isArray(data?.tree)
+            ? data.tree
+            : []
+        const flattened = flattenTree(rawTree)
+        if (!cancelled) {
+          setWorkspaceFiles(flattened)
+          setWorkspaceFilesLoaded(true)
+        }
+      } catch {
+        if (!cancelled) {
+          setWorkspaceFiles([])
+          setWorkspaceFilesLoaded(true)
+        }
+      }
+    }
+
+    void load()
+
+    return () => {
+      cancelled = true
+    }
+  }, [projectId])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onCommand = (event: Event) => {
+      const detail = (event as CustomEvent<{ command?: string }>).detail
+      const command = detail?.command
+      if (!command) return
+
+      switch (command) {
+        case 'workbench.action.quickOpen':
+          openCommandPalette('files')
+          return
+        case 'workbench.action.showCommands':
+          openCommandPalette('commands')
+          return
+        case 'workbench.action.toggleSidebarVisibility':
+          emitLayoutEvent('aethel.layout.toggleSidebar')
+          return
+        case 'workbench.action.terminal.toggleTerminal':
+          emitLayoutEvent('aethel.layout.toggleTerminal')
+          return
+        case 'undo':
+          handleEditorUndo()
+          return
+        case 'redo':
+          handleEditorRedo()
+          return
+        case 'actions.find':
+          handleEditorFind()
+          return
+        case 'editor.action.startFindReplaceAction':
+          handleEditorReplace()
+          return
+        case 'aethel.ai.inlineChat':
+          handleAIInline()
+          return
+        case 'aethel.ai.openChat':
+          handleAIPanel()
+          return
+        default:
+          return
+      }
+    }
+
+    window.addEventListener('aethel:command', onCommand as EventListener)
+    return () => window.removeEventListener('aethel:command', onCommand as EventListener)
+  }, [emitLayoutEvent, handleAIInline, handleAIPanel, handleEditorFind, handleEditorRedo, handleEditorReplace, handleEditorUndo, openCommandPalette])
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(PREVIEW_ENABLED_STORAGE_KEY, previewEnabled ? "1" : "0");
+  }, [previewEnabled]);
+
+  useEffect(() => {
+    setModernPanelState((prev) => ({
+      ...prev,
+      preview: {
+        ...prev.preview,
+        open: previewEnabled,
+      },
+    }));
   }, [previewEnabled]);
 
   useEffect(() => {
@@ -351,6 +550,11 @@ function IDEContent() {
     },
     [projectId, previewEnabled, previewSandboxId, scheduleRuntimeSync, syncRuntimeFile]
   );
+
+  const handleSaveActiveFile = useCallback(() => {
+    if (!activeFile) return
+    void writeFile(activeFile.path, activeFile.content)
+  }, [activeFile, writeFile])
 
   useEffect(() => {
     if (!fileParam) return;
@@ -519,10 +723,6 @@ function IDEContent() {
     void readFile(path);
   }, [readFile]);
 
-  const emitLayoutEvent = useCallback((eventName: string) => {
-    window.dispatchEvent(new Event(eventName));
-  }, []);
-
   const handleRunRecommendedPreviewAction = useCallback(() => {
     if (runtimePrimaryAction === 'provision') {
       void provisionRuntime('manual').then(() => {
@@ -672,144 +872,171 @@ function IDEContent() {
   return (
     <CommandPaletteProvider
       onOpenFile={handlePaletteOpenFile}
+      onOpenFileDialog={() => openCommandPalette('files')}
+      onSaveFile={handleSaveActiveFile}
+      onUndo={handleEditorUndo}
+      onRedo={handleEditorRedo}
+      onFind={handleEditorFind}
+      onReplace={handleEditorReplace}
+      onOpenSettings={handleOpenSettings}
       onToggleSidebar={() => emitLayoutEvent("aethel.layout.toggleSidebar")}
       onToggleTerminal={() => emitLayoutEvent("aethel.layout.toggleTerminal")}
-      onAIChat={() => emitLayoutEvent("aethel.layout.openAI")}
+      onAIChat={handleAIPanel}
+      files={workspaceFilesLoaded ? workspaceFiles : []}
     >
       <TabProvider>
-        <IDELayout
-          showStudioNav
-          studioTitle="Workbench"
-          studioSubtitle="Editor, preview e runtime no mesmo fluxo."
-          studioRightSlot={
-            <Link
-              href="/dashboard"
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-white/20 hover:text-white"
-            >
-              Voltar ao dashboard
-            </Link>
-          }
-          fileExplorer={<FileExplorerPro onFileSelect={handleFileSelect} />}
-          aiChatPanel={<AIChatPanelContainer />}
-          onTogglePreview={() => setPreviewEnabled((prev) => !prev)}
-        >
-          <div className="h-full flex flex-col">
-            {isCompactViewport && (
-              <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
-                Viewport compacto detectado. Para melhor experiencia use desktop {'>='} 1024px.
-              </div>
-            )}
-            <TabBar />
-            {previewEnabled && (
-              <PreviewRuntimeToolbar
-                previewRuntimeUrl={previewRuntimeUrl}
-                runtimeHealthStatus={runtimeHealth.status}
-                runtimeHealthLatencyMs={runtimeHealth.latencyMs}
-                runtimeHealthCheckedAt={runtimeHealthCheckedAt}
-                runtimeHealthHint={runtimeHealthHint}
-                runtimeReadiness={runtimeReadiness}
-                runtimePrimaryAction={
-                  runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
-                    ? runtimePrimaryAction
-                    : 'inline'
-                }
-                runtimePrimaryActionLabel={runtimePrimaryActionLabel}
-                runtimeStrategyLabel={runtimeStrategyLabel}
-                runtimeStrategyHint={runtimeStrategyHint}
-                showRuntimeSettings={showRuntimeSettings}
-                previewRuntimeInput={previewRuntimeInput}
-                onToggleSettings={() => setShowRuntimeSettings((prev) => !prev)}
-                onRuntimeInputChange={setPreviewRuntimeInput}
-                onApplyRuntime={applyRuntimeUrl}
-                onUseFallback={handleUseInlineFallback}
-                isDiscoveringRuntime={isDiscoveringRuntime}
-                isProvisioningRuntime={isProvisioningRuntime}
-                isSyncingRuntime={isSyncingRuntime}
-                canSyncRuntime={Boolean(previewSandboxId)}
-                runtimeDiscoveryMessage={runtimeDiscoveryMessage}
-                runtimeDiscoveryTone={runtimeDiscoveryTone}
-                onRunRecommendedAction={handleRunRecommendedPreviewAction}
-                onDiscoverRuntime={() => {
-                  void discoverRuntime('manual').then(() => {
-                    void refreshRuntimeReadiness()
-                  })
-                }}
-                onProvisionRuntime={() => {
-                  void provisionRuntime('manual').then(() => {
-                    void refreshRuntimeReadiness()
-                  })
-                }}
-                onSyncRuntime={() => {
-                  void syncRuntime().then(() => {
-                    void refreshRuntimeReadiness()
-                  })
-                }}
-                onRevalidate={() => {
-                  if (!previewRuntimeUrl) return
-                  void checkRuntimeHealth(previewRuntimeUrl)
-                  analytics?.track?.('engine', 'render_time', {
-                    metadata: {
-                      surface: 'ide-preview-runtime-health',
-                      action: 'manual-revalidate',
-                      runtimeUrl: previewRuntimeUrl,
-                    },
-                  })
-                }}
-                onOpenRuntime={() => {
-                  if (!previewRuntimeUrl) return
-                  window.open(previewRuntimeUrl, '_blank', 'noopener,noreferrer')
-                }}
-              />
-            )}
-            <div className="flex-1 overflow-hidden">
-              {isReadingFile && (
-                <div className="h-full flex items-center justify-center text-zinc-400">
-                  Loading file...
-                </div>
-              )}
-
-              {!isReadingFile && fileError && (
-                <div className="h-full flex items-center justify-center px-6">
-                  <div className="max-w-xl rounded border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                    {fileError}
+        {useModernShell ? (
+          <ModernIDEShell
+            projectName={`Project ${projectId}`}
+            activeFileName={activeFile?.path}
+            panelState={modernPanelState}
+            onToggleSidebar={() => {
+              setModernPanelState((prev) => ({
+                ...prev,
+                sidebar: {
+                  ...prev.sidebar,
+                  open: !prev.sidebar.open,
+                },
+              }))
+            }}
+            onTogglePanel={(panel) => {
+              if (panel === 'preview') {
+                setPreviewEnabled((prev) => !prev)
+                return
+              }
+              if (panel === 'chat') {
+                handleAIPanel()
+              }
+              setModernPanelState((prev) => ({
+                ...prev,
+                [panel]: {
+                  ...prev[panel],
+                  open: !prev[panel].open,
+                },
+              }))
+            }}
+          >
+            {{
+              sidebar: <FileExplorerPro onFileSelect={handleFileSelect} />,
+              chat: <AIChatPanelContainer />,
+              editor: (
+                <div className="h-full flex flex-col">
+                  {isCompactViewport && (
+                    <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
+                      Viewport compacto detectado. Para melhor experiencia use desktop {'>='} 1024px.
+                    </div>
+                  )}
+                  <TabBar />
+                  <div className="flex-1 overflow-hidden">
+                    {isReadingFile && (
+                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Carregando arquivo...</div>
+                    )}
+                    {!isReadingFile && fileError && (
+                      <div className="h-full flex items-center justify-center px-6">
+                        <div className="max-w-xl rounded border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">{fileError}</div>
+                      </div>
+                    )}
+                    {!isReadingFile && !fileError && activeFile && (
+                      <div className="h-full min-h-0">
+                        <MonacoEditorPro
+                          path={activeFile.path}
+                          value={activeFile.content}
+                          language={activeFile.language}
+                          fullAccessActive={Boolean(fullAccessActiveGrant)}
+                          onMount={(editor) => {
+                            editorRef.current = editor
+                          }}
+                          onAiApplyResult={handleInlineApplyResult}
+                          onRequestFullAccess={handleToggleFullAccess}
+                          onChange={(value) => {
+                            setActiveFile((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    content: value ?? "",
+                                  }
+                                : prev
+                            )
+                          }}
+                          onSave={(value) => {
+                            void writeFile(activeFile.path, value)
+                          }}
+                        />
+                      </div>
+                    )}
+                    {!isReadingFile && !fileError && !activeFile && (
+                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para comecar a editar.</div>
+                    )}
                   </div>
                 </div>
-              )}
-
-              {!isReadingFile && !fileError && activeFile && (
-                <div className={`h-full min-h-0 ${previewEnabled ? "grid grid-cols-1 xl:grid-cols-2" : ""}`}>
-                  <div className={`h-full min-h-0 ${previewEnabled ? "border-r border-zinc-800" : ""}`}>
-                    <MonacoEditorPro
-                      path={activeFile.path}
-                      value={activeFile.content}
-                      language={activeFile.language}
-                      fullAccessActive={Boolean(fullAccessActiveGrant)}
-                      onMount={(editor) => {
-                        editorRef.current = editor
-                      }}
-                      onAiApplyResult={handleInlineApplyResult}
-                      onRequestFullAccess={handleToggleFullAccess}
-                      onChange={(value) => {
-                        setActiveFile((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                content: value ?? "",
-                              }
-                            : prev
-                        );
-                      }}
-                      onSave={(value) => {
-                        void writeFile(activeFile.path, value);
-                      }}
-                    />
-                  </div>
-                  {previewEnabled && (
-                    <div className="h-full min-h-0 bg-zinc-950">
+              ),
+              preview: (
+                <div className="h-full min-h-0 bg-[var(--aethel-surface-primary)] flex flex-col">
+                  <PreviewRuntimeToolbar
+                    previewRuntimeUrl={previewRuntimeUrl}
+                    runtimeHealthStatus={runtimeHealth.status}
+                    runtimeHealthLatencyMs={runtimeHealth.latencyMs}
+                    runtimeHealthCheckedAt={runtimeHealthCheckedAt}
+                    runtimeHealthHint={runtimeHealthHint}
+                    runtimeReadiness={runtimeReadiness}
+                    runtimePrimaryAction={
+                      runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
+                        ? runtimePrimaryAction
+                        : 'inline'
+                    }
+                    runtimePrimaryActionLabel={runtimePrimaryActionLabel}
+                    runtimeStrategyLabel={runtimeStrategyLabel}
+                    runtimeStrategyHint={runtimeStrategyHint}
+                    showRuntimeSettings={showRuntimeSettings}
+                    previewRuntimeInput={previewRuntimeInput}
+                    onToggleSettings={() => setShowRuntimeSettings((prev) => !prev)}
+                    onRuntimeInputChange={setPreviewRuntimeInput}
+                    onApplyRuntime={applyRuntimeUrl}
+                    onUseFallback={handleUseInlineFallback}
+                    isDiscoveringRuntime={isDiscoveringRuntime}
+                    isProvisioningRuntime={isProvisioningRuntime}
+                    isSyncingRuntime={isSyncingRuntime}
+                    canSyncRuntime={Boolean(previewSandboxId)}
+                    runtimeDiscoveryMessage={runtimeDiscoveryMessage}
+                    runtimeDiscoveryTone={runtimeDiscoveryTone}
+                    onRunRecommendedAction={handleRunRecommendedPreviewAction}
+                    onDiscoverRuntime={() => {
+                      void discoverRuntime('manual').then(() => {
+                        void refreshRuntimeReadiness()
+                      })
+                    }}
+                    onProvisionRuntime={() => {
+                      void provisionRuntime('manual').then(() => {
+                        void refreshRuntimeReadiness()
+                      })
+                    }}
+                    onSyncRuntime={() => {
+                      void syncRuntime().then(() => {
+                        void refreshRuntimeReadiness()
+                      })
+                    }}
+                    onRevalidate={() => {
+                      if (!previewRuntimeUrl) return
+                      void checkRuntimeHealth(previewRuntimeUrl)
+                      analytics?.track?.('engine', 'render_time', {
+                        metadata: {
+                          surface: 'ide-preview-runtime-health',
+                          action: 'manual-revalidate',
+                          runtimeUrl: previewRuntimeUrl,
+                        },
+                      })
+                    }}
+                    onOpenRuntime={() => {
+                      if (!previewRuntimeUrl) return
+                      window.open(previewRuntimeUrl, '_blank', 'noopener,noreferrer')
+                    }}
+                  />
+                  {activeFile ? (
+                    <div className="flex-1 min-h-0">
                       <CanonicalPreviewSurface
                         key={`${activeFile.path}:${previewRefreshTick}`}
                         variant="runtime"
-                        title="Live Preview"
+                        title="Preview ao vivo"
                         filePath={activeFile.path}
                         content={activeFile.content}
                         projectId={projectId}
@@ -820,70 +1047,237 @@ function IDEContent() {
                         onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
                       />
                     </div>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para visualizar o preview.</div>
                   )}
                 </div>
+              ),
+            }}
+          </ModernIDEShell>
+        ) : (
+          <IDELayout
+            showStudioNav
+            studioTitle="Workbench"
+            studioSubtitle="Editor, preview e runtime no mesmo fluxo."
+            onCommandPalette={() => openCommandPalette('commands')}
+            workbenchBanner={
+              <WorkbenchMissionBar
+                mission={missionParam}
+                source={sourceParam || entryParam}
+                projectId={projectId}
+                previewEnabled={previewEnabled}
+                runtimeStrategyLabel={runtimeStrategyLabel}
+                runtimeStateLabel={runtimeStateLabel}
+                onOpenAiPanel={handleAIPanel}
+                onTogglePreview={() => setPreviewEnabled((prev) => !prev)}
+                onOpenCommandPalette={() => openCommandPalette('commands')}
+                onBackToDashboard={handleBackToDashboard}
+              />
+            }
+            studioRightSlot={
+              <Link
+                href={projectId && projectId !== 'default' ? `/dashboard?projectId=${encodeURIComponent(projectId)}` : "/dashboard"}
+                className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"
+              >
+                Voltar ao dashboard
+              </Link>
+            }
+            fileExplorer={<FileExplorerPro onFileSelect={handleFileSelect} />}
+            aiChatPanel={<AIChatPanelContainer />}
+            onTogglePreview={() => setPreviewEnabled((prev) => !prev)}
+          >
+            <div className="h-full flex flex-col">
+              {isCompactViewport && (
+                <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
+                  Viewport compacto detectado. Para melhor experiencia use desktop {'>='} 1024px.
+                </div>
               )}
+              <TabBar />
+              {previewEnabled && (
+                <PreviewRuntimeToolbar
+                  previewRuntimeUrl={previewRuntimeUrl}
+                  runtimeHealthStatus={runtimeHealth.status}
+                  runtimeHealthLatencyMs={runtimeHealth.latencyMs}
+                  runtimeHealthCheckedAt={runtimeHealthCheckedAt}
+                  runtimeHealthHint={runtimeHealthHint}
+                  runtimeReadiness={runtimeReadiness}
+                  runtimePrimaryAction={
+                    runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
+                      ? runtimePrimaryAction
+                      : 'inline'
+                  }
+                  runtimePrimaryActionLabel={runtimePrimaryActionLabel}
+                  runtimeStrategyLabel={runtimeStrategyLabel}
+                  runtimeStrategyHint={runtimeStrategyHint}
+                  showRuntimeSettings={showRuntimeSettings}
+                  previewRuntimeInput={previewRuntimeInput}
+                  onToggleSettings={() => setShowRuntimeSettings((prev) => !prev)}
+                  onRuntimeInputChange={setPreviewRuntimeInput}
+                  onApplyRuntime={applyRuntimeUrl}
+                  onUseFallback={handleUseInlineFallback}
+                  isDiscoveringRuntime={isDiscoveringRuntime}
+                  isProvisioningRuntime={isProvisioningRuntime}
+                  isSyncingRuntime={isSyncingRuntime}
+                  canSyncRuntime={Boolean(previewSandboxId)}
+                  runtimeDiscoveryMessage={runtimeDiscoveryMessage}
+                  runtimeDiscoveryTone={runtimeDiscoveryTone}
+                  onRunRecommendedAction={handleRunRecommendedPreviewAction}
+                  onDiscoverRuntime={() => {
+                    void discoverRuntime('manual').then(() => {
+                      void refreshRuntimeReadiness()
+                    })
+                  }}
+                  onProvisionRuntime={() => {
+                    void provisionRuntime('manual').then(() => {
+                      void refreshRuntimeReadiness()
+                    })
+                  }}
+                  onSyncRuntime={() => {
+                    void syncRuntime().then(() => {
+                      void refreshRuntimeReadiness()
+                    })
+                  }}
+                  onRevalidate={() => {
+                    if (!previewRuntimeUrl) return
+                    void checkRuntimeHealth(previewRuntimeUrl)
+                    analytics?.track?.('engine', 'render_time', {
+                      metadata: {
+                        surface: 'ide-preview-runtime-health',
+                        action: 'manual-revalidate',
+                        runtimeUrl: previewRuntimeUrl,
+                      },
+                    })
+                  }}
+                  onOpenRuntime={() => {
+                    if (!previewRuntimeUrl) return
+                    window.open(previewRuntimeUrl, '_blank', 'noopener,noreferrer')
+                  }}
+                />
+              )}
+              <div className="flex-1 overflow-hidden">
+                {isReadingFile && (
+                  <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
+                    Carregando arquivo...
+                  </div>
+                )}
 
-              {!isReadingFile && !fileError && !activeFile && (
-                <div className="h-full flex items-center justify-center text-zinc-500">
-                  Select a file to start editing.
+                {!isReadingFile && fileError && (
+                  <div className="h-full flex items-center justify-center px-6">
+                    <div className="max-w-xl rounded border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">
+                      {fileError}
+                    </div>
+                  </div>
+                )}
+
+                {!isReadingFile && !fileError && activeFile && (
+                  <div className={`h-full min-h-0 ${previewEnabled ? "grid grid-cols-1 xl:grid-cols-2" : ""}`}>
+                    <div className={`h-full min-h-0 ${previewEnabled ? "border-r border-[var(--aethel-border-primary)]" : ""}`}>
+                      <MonacoEditorPro
+                        path={activeFile.path}
+                        value={activeFile.content}
+                        language={activeFile.language}
+                        fullAccessActive={Boolean(fullAccessActiveGrant)}
+                        onMount={(editor) => {
+                          editorRef.current = editor
+                        }}
+                        onAiApplyResult={handleInlineApplyResult}
+                        onRequestFullAccess={handleToggleFullAccess}
+                        onChange={(value) => {
+                          setActiveFile((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  content: value ?? "",
+                                }
+                              : prev
+                          );
+                        }}
+                        onSave={(value) => {
+                          void writeFile(activeFile.path, value);
+                        }}
+                      />
+                    </div>
+                    {previewEnabled && (
+                      <div className="h-full min-h-0 bg-[var(--aethel-surface-primary)]">
+                        <CanonicalPreviewSurface
+                          key={`${activeFile.path}:${previewRefreshTick}`}
+                          variant="runtime"
+                          title="Preview ao vivo"
+                          filePath={activeFile.path}
+                          content={activeFile.content}
+                          projectId={projectId}
+                          runtimeUrl={previewRuntimeUrl ?? undefined}
+                          forceInlineFallback={forceInlinePreviewFallback}
+                          runtimeUnavailableReason={runtimeHealth.reason}
+                          isStale={isSavingFile}
+                          onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!isReadingFile && !fileError && !activeFile && (
+                  <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
+                    Selecione um arquivo para comecar a editar.
+                  </div>
+                )}
+              </div>
+              {activeFile && (
+                <div className="h-7 border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
+                  <span>
+                    {isSavingFile
+                      ? "Salvando..."
+                      : lastSavedAt
+                        ? `Salvo as ${lastSavedAt.toLocaleTimeString()}`
+                        : "Pronto"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {lastAiApply?.rollbackToken && (
+                      <button
+                        type="button"
+                        onClick={handleRollbackLastAiApply}
+                        disabled={rollbackBusy}
+                        className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] disabled:opacity-60"
+                        title="Rollback da ultima aplicacao inline da IA"
+                      >
+                        {rollbackBusy ? 'Desfazendo...' : 'Desfazer IA'}
+                      </button>
+                    )}
+                    {fullAccessActiveGrant && (
+                      <span className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-info-light)]">
+                        Full Access ativo{fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}
+                      </span>
+                    )}
+                    {hasToken && (
+                      <button
+                        type="button"
+                        onClick={handleToggleFullAccess}
+                        disabled={fullAccessBusy}
+                        className={`rounded border px-2 py-0.5 text-[10px] disabled:opacity-60 ${
+                          fullAccessActiveGrant
+                            ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
+                            : 'border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+                        }`}
+                        title={
+                          fullAccessActiveGrant
+                            ? 'Revogar Full Access temporario auditado'
+                            : 'Ativar Full Access temporario auditado'
+                        }
+                      >
+                        {fullAccessBusy
+                          ? '...'
+                          : fullAccessActiveGrant
+                            ? 'Revogar Full Access'
+                            : 'Full Access'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
-            {activeFile && (
-              <div className="h-7 border-t border-zinc-800 bg-zinc-950 px-3 flex items-center justify-between text-xs text-zinc-400">
-                <span>
-                  {isSavingFile
-                    ? "Saving..."
-                    : lastSavedAt
-                      ? `Saved at ${lastSavedAt.toLocaleTimeString()}`
-                      : "Ready"}
-                </span>
-                <div className="flex items-center gap-2">
-                  {lastAiApply?.rollbackToken && (
-                    <button
-                      type="button"
-                      onClick={handleRollbackLastAiApply}
-                      disabled={rollbackBusy}
-                      className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] disabled:opacity-60"
-                      title="Rollback da ultima aplicacao inline da IA"
-                    >
-                      {rollbackBusy ? 'Rolling back...' : 'Rollback AI'}
-                    </button>
-                  )}
-                  {fullAccessActiveGrant && (
-                    <span className="rounded border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] text-cyan-200">
-                      Full Access ON{fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}
-                    </span>
-                  )}
-                  {hasToken && (
-                    <button
-                      type="button"
-                      onClick={handleToggleFullAccess}
-                      disabled={fullAccessBusy}
-                      className={`rounded border px-2 py-0.5 text-[10px] disabled:opacity-60 ${
-                        fullAccessActiveGrant
-                          ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20'
-                          : 'border-zinc-600 bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
-                      }`}
-                      title={
-                        fullAccessActiveGrant
-                          ? 'Revogar Full Access temporario'
-                          : 'Ativar Full Access temporario auditado'
-                      }
-                    >
-                      {fullAccessBusy
-                        ? '...'
-                        : fullAccessActiveGrant
-                          ? 'Revoke Full Access'
-                          : 'Full Access'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </IDELayout>
+          </IDELayout>
+        )}
       </TabProvider>
     </CommandPaletteProvider>
   );
@@ -891,8 +1285,10 @@ function IDEContent() {
 
 export default function FullscreenIDE() {
   return (
-    <Suspense fallback={<div>Loading workspace context...</div>}>
+    <Suspense fallback={<div>Carregando contexto do workspace...</div>}>
       <IDEContent />
     </Suspense>
   );
 }
+
+

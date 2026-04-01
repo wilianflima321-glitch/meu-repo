@@ -38,10 +38,13 @@ export type PreviewRuntimeDiscoveryResponse = {
 
 export type PreviewRuntimeProvisionResponse = {
   runtimeUrl?: string | null;
+  strategy?: 'managed' | 'local' | 'browser-side' | string;
+  provider?: string | null;
   error?: string;
   message?: string;
   metadata?: {
     mode?: string;
+    strategy?: 'managed' | 'local' | 'browser-side' | string;
     provider?: string;
     endpoint?: string;
     sandboxId?: string;
@@ -82,6 +85,9 @@ export function normalizeRuntimeUrl(input: string | null): string | null {
   const value = input.trim();
   if (!value) return null;
   if (/^https?:\/\//i.test(value)) return value;
+  if (/^[\w.-]+(:\d+)?(\/.*)?$/.test(value)) {
+    return `http://${value}`;
+  }
   return null;
 }
 
@@ -170,7 +176,7 @@ export async function syncPreviewRuntime(projectId: string | null, sandboxId: st
   };
 }> {
   if (!sandboxId) {
-    throw new Error('sandboxId is required for runtime sync.');
+    throw new Error('sandboxId e obrigatorio para sincronizar o runtime.');
   }
   const response = await fetch('/api/preview/runtime-sync', {
     method: 'POST',
@@ -201,10 +207,10 @@ export async function syncPreviewRuntimeFile(projectId: string | null, sandboxId
   };
 }> {
   if (!sandboxId) {
-    throw new Error('sandboxId is required for runtime sync.')
+    throw new Error('sandboxId e obrigatorio para sincronizar o runtime.')
   }
   if (!filePath) {
-    throw new Error('path is required for runtime sync.')
+    throw new Error('path e obrigatorio para sincronizar o runtime.')
   }
   const response = await fetch('/api/preview/runtime-sync-file', {
     method: 'POST',

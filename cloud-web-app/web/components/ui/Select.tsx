@@ -51,7 +51,7 @@ export function Select({
 
   // Filter options based on search
   const filteredOptions = searchable && searchQuery
-    ? options.filter(opt => 
+    ? options.filter(opt =>
         opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
         opt.description?.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -88,7 +88,7 @@ export function Select({
   return (
     <div ref={containerRef} className={`relative ${fullWidth ? 'w-full' : ''}`}>
       {label && (
-        <label className="block text-sm font-medium text-slate-300 mb-2">
+        <label className="block text-sm font-medium text-[var(--aethel-text-secondary)] mb-2">
           {label}
         </label>
       )}
@@ -101,22 +101,22 @@ export function Select({
         className={`
           ${sizeClasses[size]}
           w-full flex items-center justify-between gap-2
-          bg-slate-900/80 
-          border ${error ? 'border-red-500/70' : isOpen ? 'border-sky-500' : 'border-slate-700/80'}
+          bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)]
+          border ${error ? 'border-[color-mix(in_srgb,var(--aethel-error)_70%,transparent)]' : isOpen ? 'border-[var(--aethel-info)]' : 'border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]'}
           rounded-lg
           text-left
           transition-all duration-200 ease-out
-          hover:border-slate-600 hover:bg-slate-900/90
-          focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20
+          hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)]
+          focus:outline-none focus:border-[var(--aethel-info)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]
           disabled:opacity-40 disabled:cursor-not-allowed
         `}
       >
-        <span className={`flex items-center gap-2 truncate ${!selectedOption ? 'text-slate-500' : 'text-slate-100'}`}>
+        <span className={`flex items-center gap-2 truncate ${!selectedOption ? 'text-[var(--aethel-text-tertiary)]' : 'text-[var(--aethel-text-primary)]'}`}>
           {selectedOption?.icon}
           {selectedOption?.label || placeholder}
         </span>
-        <ChevronDown 
-          className={`h-4 w-4 text-slate-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+        <ChevronDown
+          className={`h-4 w-4 text-[var(--aethel-text-tertiary)] flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -125,8 +125,8 @@ export function Select({
         <div
           className={`
             absolute z-50 w-full mt-1.5
-            bg-slate-900/95 backdrop-blur-xl
-            border border-slate-700/80
+            bg-[var(--aethel-surface-primary)]/95 backdrop-blur-xl
+            border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]
             rounded-xl
             shadow-2xl shadow-black/40
             overflow-hidden
@@ -135,7 +135,7 @@ export function Select({
         >
           {/* Search Input */}
           {searchable && (
-            <div className="p-2 border-b border-slate-700/50">
+            <div className="p-2 border-b border-[var(--aethel-border-primary)]/50">
               <input
                 ref={inputRef}
                 type="text"
@@ -144,10 +144,10 @@ export function Select({
                 placeholder="Buscar..."
                 className="
                   w-full px-3 py-2
-                  bg-slate-800/80 border border-slate-700/50
+                  bg-[var(--aethel-surface-secondary)]/80 border border-[var(--aethel-border-primary)]/50
                   rounded-lg
-                  text-sm text-slate-100 placeholder-slate-500
-                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500/30
+                  text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)]
+                  focus:outline-none focus:border-[var(--aethel-info)] focus:ring-1 focus:ring-[var(--aethel-info)]/30
                 "
               />
             </div>
@@ -156,8 +156,8 @@ export function Select({
           {/* Options List */}
           <div className="max-h-60 overflow-y-auto py-1.5">
             {filteredOptions.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-slate-500 text-center">
-                Nenhuma opção encontrada
+              <div className="px-4 py-3 text-sm text-[var(--aethel-text-tertiary)] text-center">
+                Nenhuma opcao encontrada
               </div>
             ) : (
               filteredOptions.map((option) => (
@@ -170,30 +170,30 @@ export function Select({
                     w-full px-4 py-2.5 flex items-center justify-between gap-3
                     text-left text-sm
                     transition-colors duration-100
-                    ${option.value === value 
-                      ? 'bg-sky-500/15 text-sky-300' 
-                      : 'text-slate-200 hover:bg-slate-800/80'
+                    ${option.value === value
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info-light)]'
+                      : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)]/80'
                     }
                     ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
                   `}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     {option.icon && (
-                      <span className="flex-shrink-0 text-slate-400">
+                      <span className="flex-shrink-0 text-[var(--aethel-text-tertiary)]">
                         {option.icon}
                       </span>
                     )}
                     <div className="min-w-0">
                       <div className="truncate">{option.label}</div>
                       {option.description && (
-                        <div className="text-xs text-slate-500 truncate mt-0.5">
+                        <div className="text-xs text-[var(--aethel-text-tertiary)] truncate mt-0.5">
                           {option.description}
                         </div>
                       )}
                     </div>
                   </div>
                   {option.value === value && (
-                    <Check className="h-4 w-4 flex-shrink-0 text-sky-400" />
+                    <Check className="h-4 w-4 flex-shrink-0 text-[var(--aethel-info)]" />
                   )}
                 </button>
               ))
@@ -204,7 +204,7 @@ export function Select({
 
       {/* Error Message */}
       {error && (
-        <p className="mt-2 text-sm text-red-400">{error}</p>
+        <p className="mt-2 text-sm text-[var(--aethel-error)]">{error}</p>
       )}
     </div>
   )

@@ -1,9 +1,9 @@
 /**
  * DESTRUCTION EDITOR - Aethel Engine
- * 
+ *
  * Editor visual profissional para configurar destruição de meshes.
  * Integra com destruction-system.ts para fragmentação em tempo real.
- * 
+ *
  * FEATURES:
  * - Voronoi/Radial/Directional fracture patterns
  * - Health points e damage thresholds configuráveis
@@ -19,18 +19,18 @@
 
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree, ThreeEvent } from '@react-three/fiber';
-import { 
-  OrbitControls, 
-  Grid, 
-  Environment, 
+import {
+  OrbitControls,
+  Grid,
+  Environment,
   GizmoHelper,
   GizmoViewport,
   Html,
   Center,
 } from '@react-three/drei';
 import * as THREE from 'three';
-import { 
-  Hammer, 
+import {
+  Hammer,
   Crosshair,
   Layers,
   Play,
@@ -66,7 +66,7 @@ import {
 
 export type FracturePattern = 'voronoi' | 'radial' | 'directional' | 'slice' | 'shatter';
 
-export type DestructionToolType = 
+export type DestructionToolType =
   | 'view'
   | 'impact'
   | 'slice'
@@ -230,12 +230,12 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon, defaultOpen = true, children }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  
+
   return (
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] 
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -264,7 +264,7 @@ function PatternSelector({ value, onChange }: PatternSelectorProps) {
     { id: 'slice', label: 'Slice', icon: <Layers className="w-4 h-4" />, description: 'Cortes paralelos' },
     { id: 'shatter', label: 'Shatter', icon: <Sparkles className="w-4 h-4" />, description: 'Muitos fragmentos pequenos' },
   ];
-  
+
   return (
     <div className="space-y-1.5">
       <label className="text-xs text-[var(--aethel-text-secondary)] block mb-2">Fracture Pattern</label>
@@ -319,65 +319,65 @@ function DestructibleMesh3D({
   const meshRef = useRef<THREE.Mesh>(null);
   const [hoverPoint, setHoverPoint] = useState<THREE.Vector3 | null>(null);
   const [isExploded, setIsExploded] = useState(false);
-  
+
   // Original mesh geometry
   const originalGeometry = useMemo(() => {
     return new THREE.BoxGeometry(2, 2, 2);
   }, []);
-  
+
   // Generate fracture preview
   const fracturePreview = useMemo(() => {
     if (!showPreview) return null;
-    
+
     const generator = new VoronoiFractureGenerator(42);
     const bounds = new THREE.Box3(
       new THREE.Vector3(-1, -1, -1),
       new THREE.Vector3(1, 1, 1)
     );
-    
+
     const pointCount = config.fragmentCount;
     const points = generator.generatePoints(bounds, pointCount);
     const cells = generator.generateCells(points, bounds);
-    
+
     return cells.map((cell, index) => {
       const geometry = generator.cellToGeometry(cell);
       const color = new THREE.Color().setHSL(index / cells.length, 0.7, 0.5);
       return { geometry, color, center: cell.center };
     });
   }, [showPreview, config.fragmentCount]);
-  
+
   // Handle pointer events for impact point selection
   const handlePointerMove = useCallback((event: ThreeEvent<PointerEvent>) => {
     if (selectedTool !== 'impact') return;
-    
+
     const point = event.point.clone();
     setHoverPoint(point);
   }, [selectedTool]);
-  
+
   const handleClick = useCallback((event: ThreeEvent<MouseEvent>) => {
     if (selectedTool !== 'impact') return;
-    
+
     event.stopPropagation();
-    
+
     const point = event.point.clone();
     const normal = event.face?.normal?.clone() || new THREE.Vector3(0, 1, 0);
-    
+
     // Transform normal to world space
     if (meshRef.current) {
       normal.applyQuaternion(meshRef.current.quaternion);
     }
-    
+
     onImpactClick({
       position: point,
       normal: normal.normalize(),
       force: 100, // Default force
     });
   }, [selectedTool, onImpactClick]);
-  
+
   // Health bar color
   const healthPercent = health / maxHealth;
   const healthColor = healthPercent > 0.6 ? '#22c55e' : healthPercent > 0.3 ? '#eab308' : '#ef4444';
-  
+
   return (
     <group>
       {/* Original mesh or fragments */}
@@ -402,7 +402,7 @@ function DestructibleMesh3D({
           <primitive key={i} object={fragment} />
         ))
       )}
-      
+
       {/* Fracture preview overlay */}
       {showPreview && fracturePreview && fracturePreview.map((cell, index) => (
         <mesh key={index} geometry={cell.geometry} position={cell.center}>
@@ -414,7 +414,7 @@ function DestructibleMesh3D({
           />
         </mesh>
       ))}
-      
+
       {/* Hover indicator for impact tool */}
       {hoverPoint && selectedTool === 'impact' && (
         <group position={hoverPoint}>
@@ -428,7 +428,7 @@ function DestructibleMesh3D({
           </mesh>
         </group>
       )}
-      
+
       {/* Impact point marker */}
       {impactPoint && (
         <group position={impactPoint.position}>
@@ -452,7 +452,7 @@ function DestructibleMesh3D({
           </Html>
         </group>
       )}
-      
+
       {/* Health bar above mesh */}
       <Html position={[0, 1.8, 0]} center>
         <div className="flex flex-col items-center gap-1">
@@ -461,9 +461,9 @@ function DestructibleMesh3D({
             <span>{health.toFixed(0)} / {maxHealth}</span>
           </div>
           <div className="w-24 h-1.5 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full transition-all duration-300"
-              style={{ 
+              style={{
                 width: `${healthPercent * 100}%`,
                 backgroundColor: healthColor,
               }}
@@ -488,14 +488,14 @@ interface DestructionLevelsProps {
 
 function DestructionLevels({ levels, currentLevel, health, maxHealth }: DestructionLevelsProps) {
   const healthPerLevel = maxHealth / levels;
-  
+
   return (
     <div className="space-y-1.5">
       {Array.from({ length: levels }).map((_, i) => {
         const levelHealth = Math.max(0, Math.min(healthPerLevel, health - i * healthPerLevel));
         const percent = levelHealth / healthPerLevel;
         const isActive = i === currentLevel;
-        
+
         return (
           <div key={i} className="flex items-center gap-2">
             <div className={`w-6 h-6 rounded flex items-center justify-center text-xs ${
@@ -504,7 +504,7 @@ function DestructionLevels({ levels, currentLevel, health, maxHealth }: Destruct
               {levels - i}
             </div>
             <div className="flex-1 h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-gradient-to-r from-red-600 to-[var(--aethel-warning-dark)] transition-all"
                 style={{ width: `${percent * 100}%` }}
               />
@@ -536,7 +536,7 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
     { id: 'impact', icon: <Target className="w-4 h-4" />, label: 'Set Impact Point' },
     { id: 'configure', icon: <Settings className="w-4 h-4" />, label: 'Configure' },
   ];
-  
+
   return (
     <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Action buttons */}
@@ -547,7 +547,7 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
       >
         <Bomb className="w-4 h-4" />
       </button>
-      
+
       <button
         onClick={onReset}
         className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
@@ -555,9 +555,9 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
       >
         <RotateCcw className="w-4 h-4" />
       </button>
-      
+
       <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
-      
+
       {/* Tools */}
       {tools.map((tool) => (
         <button
@@ -606,7 +606,7 @@ export default function DestructionEditor({
     enableVFX: true,
     ...initialConfig,
   });
-  
+
   // Editor state
   const [pattern, setPattern] = useState<FracturePattern>('voronoi');
   const [selectedTool, setSelectedTool] = useState<DestructionToolType>('view');
@@ -616,33 +616,33 @@ export default function DestructionEditor({
   const [currentLevel, setCurrentLevel] = useState(0);
   const [fragments, setFragments] = useState<THREE.Mesh[]>([]);
   const [events, setEvents] = useState<DestructionEvent[]>([]);
-  
+
   // Apply preset
   const applyPreset = useCallback((preset: DestructionPreset) => {
     setConfig((prev) => ({ ...prev, ...preset.config }));
     setPattern(preset.pattern);
     setCurrentHealth(preset.config.maxHealth ?? config.maxHealth);
   }, [config.maxHealth]);
-  
+
   // Handle impact
   const handleImpact = useCallback((point: ImpactPoint) => {
     setImpactPoint(point);
   }, []);
-  
+
   // Apply damage
   const applyDamage = useCallback((damage: number) => {
     const newHealth = Math.max(0, currentHealth - damage);
     setCurrentHealth(newHealth);
-    
+
     const healthPerLevel = config.maxHealth / config.fractureLevels;
     const newLevel = Math.min(
       config.fractureLevels - 1,
       Math.floor((config.maxHealth - newHealth) / healthPerLevel)
     );
-    
+
     if (newLevel > currentLevel) {
       setCurrentLevel(newLevel);
-      
+
       const event: DestructionEvent = {
         type: newHealth <= 0 ? 'destroy' : 'fracture',
         targetId: meshId || 'main',
@@ -651,11 +651,11 @@ export default function DestructionEditor({
         impactNormal: impactPoint?.normal || new THREE.Vector3(0, 1, 0),
         impactForce: impactPoint?.force || damage,
       };
-      
+
       setEvents((prev) => [...prev, event]);
     }
   }, [currentHealth, currentLevel, config, impactPoint, meshId]);
-  
+
   // Preview destruction
   const previewDestruction = useCallback(() => {
     if (impactPoint) {
@@ -664,7 +664,7 @@ export default function DestructionEditor({
       applyDamage(50);
     }
   }, [impactPoint, applyDamage]);
-  
+
   // Reset
   const reset = useCallback(() => {
     setCurrentHealth(config.maxHealth);
@@ -673,17 +673,17 @@ export default function DestructionEditor({
     setImpactPoint(null);
     setEvents([]);
   }, [config.maxHealth]);
-  
+
   // Update max health when config changes
   useEffect(() => {
     setCurrentHealth(config.maxHealth);
   }, [config.maxHealth]);
-  
+
   // Export
   const handleExport = useCallback(() => {
     onExport?.({ config, pattern });
   }, [config, pattern, onExport]);
-  
+
   return (
     <div className="flex h-full w-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Toolbar */}
@@ -695,16 +695,16 @@ export default function DestructionEditor({
           onReset={reset}
         />
       </div>
-      
+
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [4, 4, 4], fov: 50 }}>
           <color attach="background" args={['#0f172a']} />
-          
+
           <ambientLight intensity={0.4} />
           <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
           <pointLight position={[-5, 5, -5]} intensity={0.5} color="#ff6600" />
-          
+
           <DestructibleMesh3D
             config={config}
             pattern={pattern}
@@ -716,7 +716,7 @@ export default function DestructionEditor({
             health={currentHealth}
             maxHealth={config.maxHealth}
           />
-          
+
           <Grid infiniteGrid fadeDistance={30} />
           <OrbitControls makeDefault />
           <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
@@ -724,7 +724,7 @@ export default function DestructionEditor({
           </GizmoHelper>
           <Environment preset="warehouse" />
         </Canvas>
-        
+
         {/* Viewport info */}
         <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-3 rounded">
           <div className="text-xs text-[var(--aethel-text-secondary)] mb-2">Destruction Status</div>
@@ -743,7 +743,7 @@ export default function DestructionEditor({
             </div>
           </div>
         </div>
-        
+
         {/* Events log */}
         {events.length > 0 && (
           <div className="absolute bottom-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-2 rounded max-w-xs max-h-32 overflow-y-auto">
@@ -761,7 +761,7 @@ export default function DestructionEditor({
           </div>
         )}
       </div>
-      
+
       {/* Settings Panel */}
       <div className="w-72 bg-[var(--aethel-surface-tertiary)] border-l border-[var(--aethel-border-secondary)] overflow-y-auto">
         <div className="p-4">
@@ -779,7 +779,7 @@ export default function DestructionEditor({
               <Download className="w-4 h-4" />
             </button>
           </div>
-          
+
           {/* Presets */}
           <CollapsibleSection title="Material Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
@@ -787,7 +787,7 @@ export default function DestructionEditor({
                 <button
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
-                  className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] 
+                  className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]
                            transition-colors text-left"
                 >
                   <div className="text-xs font-medium">{preset.name}</div>
@@ -796,11 +796,11 @@ export default function DestructionEditor({
               ))}
             </div>
           </CollapsibleSection>
-          
+
           {/* Fracture Pattern */}
           <CollapsibleSection title="Fracture Pattern" icon={<Sparkles className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <PatternSelector value={pattern} onChange={setPattern} />
-            
+
             <div className="mt-3 flex items-center justify-between">
               <label className="text-xs text-[var(--aethel-text-secondary)]">Show Preview</label>
               <input
@@ -811,7 +811,7 @@ export default function DestructionEditor({
               />
             </div>
           </CollapsibleSection>
-          
+
           {/* Health & Damage */}
           <CollapsibleSection title="Health & Damage" icon={<Shield className="w-4 h-4 text-[var(--aethel-success)]" />}>
             <Slider
@@ -824,7 +824,7 @@ export default function DestructionEditor({
               onChange={(v) => setConfig((p) => ({ ...p, maxHealth: v }))}
               icon={<Heart className="w-3 h-3 text-[var(--aethel-error)]" />}
             />
-            
+
             <Slider
               label="Fracture Levels"
               value={config.fractureLevels}
@@ -834,7 +834,7 @@ export default function DestructionEditor({
               onChange={(v) => setConfig((p) => ({ ...p, fractureLevels: v }))}
               icon={<Layers className="w-3 h-3 text-orange-400" />}
             />
-            
+
             <div className="mt-3">
               <label className="text-xs text-[var(--aethel-text-secondary)] block mb-2">Destruction Levels</label>
               <DestructionLevels
@@ -844,14 +844,14 @@ export default function DestructionEditor({
                 maxHealth={config.maxHealth}
               />
             </div>
-            
+
             {/* Quick damage buttons */}
             <div className="mt-3 grid grid-cols-4 gap-1">
               {[10, 25, 50, 100].map((dmg) => (
                 <button
                   key={dmg}
                   onClick={() => applyDamage(dmg)}
-                  className="p-1.5 text-xs bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] rounded 
+                  className="p-1.5 text-xs bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] rounded
                            text-[var(--aethel-error-light)] transition-colors"
                 >
                   -{dmg}
@@ -859,7 +859,7 @@ export default function DestructionEditor({
               ))}
             </div>
           </CollapsibleSection>
-          
+
           {/* Fragment Settings */}
           <CollapsibleSection title="Fragments" icon={<Box className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <Slider
@@ -870,7 +870,7 @@ export default function DestructionEditor({
               step={1}
               onChange={(v) => setConfig((p) => ({ ...p, fragmentCount: v }))}
             />
-            
+
             <Slider
               label="Debris Lifetime"
               value={config.debrisLifetime}
@@ -881,7 +881,7 @@ export default function DestructionEditor({
               onChange={(v) => setConfig((p) => ({ ...p, debrisLifetime: v }))}
               icon={<Timer className="w-3 h-3 text-[var(--aethel-text-secondary)]" />}
             />
-            
+
             <Slider
               label="Impact Propagation"
               value={config.impactPropagation}
@@ -891,7 +891,7 @@ export default function DestructionEditor({
               onChange={(v) => setConfig((p) => ({ ...p, impactPropagation: v }))}
             />
           </CollapsibleSection>
-          
+
           {/* Effects */}
           <CollapsibleSection title="Effects" icon={<Sparkles className="w-4 h-4 text-[var(--aethel-info)]" />} defaultOpen={false}>
             <div className="space-y-2">
@@ -906,7 +906,7 @@ export default function DestructionEditor({
                   className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-error)]"
                 />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <label className="text-xs text-[var(--aethel-text-secondary)] flex items-center gap-1.5">
                   <Volume2 className="w-3 h-3" /> Sound
@@ -918,7 +918,7 @@ export default function DestructionEditor({
                   className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-error)]"
                 />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <label className="text-xs text-[var(--aethel-text-secondary)] flex items-center gap-1.5">
                   <Sparkles className="w-3 h-3" /> VFX
@@ -932,7 +932,7 @@ export default function DestructionEditor({
               </div>
             </div>
           </CollapsibleSection>
-          
+
           {/* Impact Point */}
           {impactPoint && (
             <CollapsibleSection title="Impact Point" icon={<Target className="w-4 h-4 text-[var(--aethel-error)]" />}>

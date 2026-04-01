@@ -8,8 +8,8 @@ import { useTheme } from 'next-themes'; // Assuming you might use next-themes la
 const MonacoEditor = dynamic(() => import('./MonacoEditor'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-slate-900 text-slate-400">
-      Inicializando Editor...
+    <div className="w-full h-full flex items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]">
+      Inicializando editor...
     </div>
   ),
 });
@@ -22,7 +22,7 @@ interface CodeEditorProps {
 }
 
 export default function CodeEditor({
-  initialValue = '// Comece a digitar seu código aqui...',
+  initialValue = '// Comece a digitar seu codigo aqui...',
   language = 'typescript',
   filename = 'untitled.ts',
   onSave,
@@ -63,23 +63,24 @@ export default function CodeEditor({
   }, [handleSave]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-slate-900">
+    <div className="flex flex-col h-full w-full bg-[var(--aethel-surface-primary)]">
       {/* Editor Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-200">{filename}</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{filename}</span>
           {isDirty && (
-            <span className="w-2 h-2 rounded-full bg-yellow-500" title="Não salvo" />
+            <span className="w-2 h-2 rounded-full bg-[var(--aethel-warning)]" title="Nao salvo" />
           )}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 uppercase">{language}</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)] uppercase">{language}</span>
           <button
+            type="button"
             onClick={handleSave}
             className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
               isDirty
-                ? 'bg-sky-600 text-white hover:bg-sky-500'
-                : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110'
+                : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
             }`}
             disabled={!isDirty}
           >

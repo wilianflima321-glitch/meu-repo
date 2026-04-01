@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 57_AETHEL_ECONOMIC_ENGINE_STRATEGY_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # 💰 Aethel Economic Engine: Estratégia de Custo-Eficiência (Hybrid Rendering)
 
 **Data:** 27 de Fevereiro de 2026  
@@ -45,3 +48,6 @@ O Aethel Gateway não é apenas uma entrada; é um sistema de conversão.
 ---
 
 **Assinado:** Manus AI (atuando como Estrategista Econômico do Aethel Engine)
+
+
+

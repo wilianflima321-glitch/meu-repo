@@ -33,6 +33,10 @@ export type FirstValueSessionSummary = {
 const DEFAULT_FIRST_VALUE_TARGET_MS = 90_000
 const FIRST_VALUE_SESSION_STORAGE_KEY = 'aethel.dashboard.first-value.session-summary'
 
+function getFirstValueSloStatus(durationMs: number, targetMs: number): 'passed_slo' | 'failed_slo' {
+  return durationMs <= targetMs ? 'passed_slo' : 'failed_slo'
+}
+
 function buildInitialSummary(): FirstValueSessionSummary {
   if (typeof window === 'undefined') {
     return {
@@ -100,6 +104,7 @@ export function useFirstValueTracking({
   const firstValueProjectTrackedRef = useRef(false)
   const firstValueAiTrackedRef = useRef(false)
   const firstValueIdeTrackedRef = useRef(false)
+  const firstValueSlowPathTrackedRef = useRef(false)
   const [sessionSummary, setSessionSummary] = useState<FirstValueSessionSummary>(() => buildInitialSummary())
 
   useEffect(() => {
@@ -136,14 +141,22 @@ export function useFirstValueTracking({
       status: 'completed',
     }))
 
-    trackEvent('user', 'settings_change', {
-      section: 'first-value-guide',
-      action: 'completed',
-      durationMs,
-    })
-
     if (typeof durationMs === 'number') {
-      analytics?.trackPerformance?.('first_value_time', durationMs, 'ms', { surface: 'dashboard' })
+      const sloStatus = getFirstValueSloStatus(durationMs, DEFAULT_FIRST_VALUE_TARGET_MS)
+
+      trackEvent('onboarding', 'first_value_reached', {
+        source: 'first-value-guide',
+        durationMs,
+        targetMs: DEFAULT_FIRST_VALUE_TARGET_MS,
+        sloStatus,
+      })
+
+      analytics?.trackPerformance?.('first_value_time', durationMs, 'ms', {
+        surface: 'dashboard',
+        milestone: 'completed',
+        status: sloStatus,
+        thresholdMs: String(DEFAULT_FIRST_VALUE_TARGET_MS),
+      })
     }
   }, [projectsCount, defaultProjectsCount, firstValueAiSuccess, firstValueOpenedIde, trackEvent])
 
@@ -191,6 +204,9 @@ export function useFirstValueTracking({
     if (!firstValueOpenedIde || firstValueIdeTrackedRef.current) return
     firstValueIdeTrackedRef.current = true
     const firstIdeOpenedAt = new Date().toISOString()
+    const startedAtMs = firstValueStartedAtIsoRef.current ? Date.parse(firstValueStartedAtIsoRef.current) : NaN
+    const durationMs = Number.isFinite(startedAtMs) ? Math.max(0, Math.round(Date.now() - startedAtMs)) : null
+
     setSessionSummary((current) => ({
       ...current,
       milestones: {
@@ -201,7 +217,22 @@ export function useFirstValueTracking({
     trackEvent('engine', 'editor_open', {
       source: 'first-value-guide',
       milestone: 'first-ide-opened',
+      durationMs,
     })
+
+    if (
+      durationMs !== null &&
+      durationMs > DEFAULT_FIRST_VALUE_TARGET_MS &&
+      !firstValueSlowPathTrackedRef.current
+    ) {
+      firstValueSlowPathTrackedRef.current = true
+      analytics?.trackPerformance?.('first_value_time', durationMs, 'ms', {
+        surface: 'dashboard',
+        milestone: 'first-ide-opened',
+        status: 'failed_slo',
+        thresholdMs: String(DEFAULT_FIRST_VALUE_TARGET_MS),
+      })
+    }
   }, [firstValueOpenedIde, trackEvent])
 
   return useMemo(() => sessionSummary, [sessionSummary])

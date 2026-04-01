@@ -1,6 +1,6 @@
 /**
  * AETHEL ENGINE - Audio Preview System
- * 
+ *
  * Complete audio preview component with:
  * - Waveform visualization (Web Audio API)
  * - Play/Pause/Seek controls
@@ -12,17 +12,17 @@
 
 'use client';
 
-import React, { 
-    useState, 
-    useRef, 
-    useEffect, 
-    useCallback, 
+import React, {
+    useState,
+    useRef,
+    useEffect,
+    useCallback,
     forwardRef,
-    useImperativeHandle 
+    useImperativeHandle
 } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, 
+import {
+    Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
     Volume1, Repeat, Download, Music, Loader2, AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -72,13 +72,13 @@ interface WaveformProps {
     className?: string;
 }
 
-function Waveform({ 
-    audioBuffer, 
-    currentTime, 
-    duration, 
+function Waveform({
+    audioBuffer,
+    currentTime,
+    duration,
     isLoading,
     onSeek,
-    className 
+    className
 }: WaveformProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -118,7 +118,7 @@ function Waveform({
 
         const dpr = window.devicePixelRatio || 1;
         const rect = canvas.getBoundingClientRect();
-        
+
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
         ctx.scale(dpr, dpr);
@@ -134,10 +134,10 @@ function Waveform({
             const barHeight = value * (height * 0.8);
             const x = index * barWidth;
             const y = (height - barHeight) / 2;
-            
+
             // Determine color based on playback position
             const isPlayed = (index / waveformData.length) <= progressPercent;
-            const isHovered = hoveredTime !== null && 
+            const isHovered = hoveredTime !== null &&
                 (index / waveformData.length) <= (hoveredTime / duration);
 
             if (isPlayed) {
@@ -177,7 +177,7 @@ function Waveform({
     };
 
     return (
-        <div 
+        <div
             ref={containerRef}
             className={cn(
                 "relative w-full h-16 cursor-pointer group",
@@ -195,24 +195,24 @@ function Waveform({
                 <div className="absolute inset-0 flex items-center">
                     {/* Fallback progress bar */}
                     <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
+                        <div
                             className="h-full bg-primary transition-all"
                             style={{ width: `${(currentTime / duration) * 100}%` }}
                         />
                     </div>
                 </div>
             ) : (
-                <canvas 
-                    ref={canvasRef} 
+                <canvas
+                    ref={canvasRef}
                     className="w-full h-full"
                 />
             )}
 
             {/* Hover time indicator */}
             {hoveredTime !== null && (
-                <div 
+                <div
                     className="absolute bottom-full mb-2 px-2 py-1 text-xs bg-popover text-popover-foreground rounded shadow-lg pointer-events-none"
-                    style={{ 
+                    style={{
                         left: `${(hoveredTime / duration) * 100}%`,
                         transform: 'translateX(-50%)'
                     }}
@@ -263,7 +263,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
     // Refs
     const audioRef = useRef<HTMLAudioElement>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
-    
+
     // State
     const [isPlaying, setIsPlaying] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -290,7 +290,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                 if (!audioContextRef.current) {
                     audioContextRef.current = new AudioContext();
                 }
-                
+
                 const response = await fetch(src);
                 const arrayBuffer = await response.arrayBuffer();
                 const buffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
@@ -436,7 +436,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
         return (
             <div className={cn("flex items-center gap-2", className)}>
                 <audio ref={audioRef} src={src} preload="metadata" />
-                
+
                 <Button
                     size="icon"
                     variant="ghost"
@@ -457,14 +457,14 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                         <Play className="w-4 h-4" />
                     )}
                 </Button>
-                
+
                 <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                    <div 
+                    <div
                         className="h-full bg-primary transition-all"
                         style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                     />
                 </div>
-                
+
                 <span className="text-xs text-muted-foreground tabular-nums">
                     {formatTime(currentTime)}
                 </span>
@@ -477,12 +477,12 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
         return (
             <div className={cn("flex items-center gap-3 p-3 rounded-lg bg-muted/50", className)}>
                 <audio ref={audioRef} src={src} preload="metadata" />
-                
+
                 {/* Album art placeholder */}
                 <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
                     <Music className="w-6 h-6 text-muted-foreground" />
                 </div>
-                
+
                 {/* Info and controls */}
                 <div className="flex-1 min-w-0">
                     {title && (
@@ -491,7 +491,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                     {artist && (
                         <p className="text-xs text-muted-foreground truncate">{artist}</p>
                     )}
-                    
+
                     <div className="flex items-center gap-2 mt-1">
                         <Button
                             size="icon"
@@ -508,14 +508,14 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                                 <Play className="w-3 h-3" />
                             )}
                         </Button>
-                        
+
                         <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden cursor-pointer">
-                            <div 
+                            <div
                                 className="h-full bg-primary transition-all"
                                 style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                             />
                         </div>
-                        
+
                         <span className="text-xs text-muted-foreground tabular-nums">
                             {formatTime(currentTime)} / {formatTime(duration)}
                         </span>
@@ -529,7 +529,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
     return (
         <div className={cn("p-4 rounded-lg bg-card border", className)}>
             <audio ref={audioRef} src={src} preload="metadata" />
-            
+
             {/* Header */}
             {(title || artist) && (
                 <div className="flex items-center gap-3 mb-4">
@@ -630,7 +630,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                 </Tooltip>
 
                 {/* Volume */}
-                <div 
+                <div
                     className="relative"
                     onMouseEnter={() => setShowVolumeSlider(true)}
                     onMouseLeave={() => setShowVolumeSlider(false)}

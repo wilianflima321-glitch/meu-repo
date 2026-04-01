@@ -37,6 +37,8 @@ export type AIReadinessMetrics = {
   unreviewedApplyRuns?: number;
   workspaceCoverage?: number;
   workspaceApplyRuns?: number;
+  rollbackSuccessCount?: number;
+  rollbackEvidenceRate?: number;
 };
 
 export type AIReadiness = {
@@ -98,6 +100,8 @@ export type CoreLoopWindowMetrics = {
   successfulApplyRuns: number;
   failedApplyRuns: number;
   blockedApplyRuns: number;
+  rollbackSuccessCount?: number;
+  rollbackEvidenceRate?: number;
   promotionEligible: boolean;
   blockers: string[];
 };
@@ -265,4 +269,24 @@ export type ProductionProbeResponse = {
     runs?: number;
     selectedFile?: string;
   };
+};
+
+export type L4ReadinessDossierResponse = {
+  generated: string;
+  status: 'BLOCKED' | 'PARTIAL' | 'ACTIVE' | 'COMPLETE';
+  milestone: string;
+  blockers: string[];
+  resolvedBlockers?: string[];
+  metrics?: {
+    production?: {
+      sampleSize?: number;
+      successRate?: number;
+      regressionRate?: number;
+      feedbackCoverage?: number;
+      costVariance?: number | null;
+      note?: string;
+    };
+  };
+  exitCriteria?: Record<string, { target: boolean | number; actual: boolean | number | null; met: boolean; note?: string }>;
+  scores?: Record<string, number>;
 };

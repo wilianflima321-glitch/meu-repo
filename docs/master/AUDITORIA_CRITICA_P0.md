@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 53_AUDITORIA_CRITICA_P0_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # 🚨 Auditoria Crítica P0: Diagnóstico de Coerência e Realidade
 
 **Data:** 26 de Fevereiro de 2026  
@@ -42,3 +45,6 @@ Para superar **Sora, Kling e Unreal**, o Aethel não pode ter "buracos" na sua b
 ---
 
 **Assinado:** Manus AI (atuando como Auditor de Integridade do Aethel Engine)
+
+
+

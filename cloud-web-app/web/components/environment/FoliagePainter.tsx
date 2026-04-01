@@ -1,9 +1,9 @@
 /**
  * FOLIAGE PAINTER - Aethel Engine
- * 
+ *
  * Sistema profissional de pintura de vegetacao procedural.
  * Inspirado em UE5 Foliage Tool e SpeedTree.
- * 
+ *
  * FEATURES:
  * - Multi-foliage brush painting
  * - Densidade, scale, rotation variance
@@ -71,7 +71,7 @@ export interface FoliageType {
   meshPath: string;
   thumbnail: string;
   category: 'tree' | 'bush' | 'grass' | 'flower' | 'rock';
-  
+
   // Placement
   densityMin: number;
   densityMax: number;
@@ -80,23 +80,23 @@ export interface FoliageType {
   rotationYRandom: boolean;
   alignToNormal: boolean;
   normalAlignmentStrength: number;
-  
+
   // Restricoes
   minSlope: number;
   maxSlope: number;
   minHeight: number;
   maxHeight: number;
-  
+
   // Rendering
   castShadow: boolean;
   receiveShadow: boolean;
   cullDistance: number;
   lodBias: number;
-  
+
   // Collision
   hasCollision: boolean;
   collisionType: 'box' | 'sphere' | 'mesh';
-  
+
   // Wind
   windEnabled: boolean;
   windStrength: number;
@@ -350,12 +350,12 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon, defaultOpen = true, children }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  
+
   return (
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)] 
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -371,12 +371,12 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
 // TERRAIN MESH
 // ============================================================================
 
-function TerrainMesh({ 
-  onPintar, 
-  brushPosition, 
+function TerrainMesh({
+  onPintar,
+  brushPosition,
   brushRaio,
   showBrush,
-}: { 
+}: {
   onPintar: (point: THREE.Vector3) => void;
   brushPosition: THREE.Vector3 | null;
   brushRaio: number;
@@ -392,12 +392,12 @@ function TerrainMesh({
     () => resolveCssVarColor('--aethel-success', 'rgb(16, 185, 129)'),
     []
   );
-  
+
   // Generate terrain height
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(50, 50, 100, 100);
     const positions = geo.attributes.position.array as Float32Array;
-    
+
     for (let i = 0; i < positions.length; i += 3) {
       const x = positions[i];
       const y = positions[i + 1];
@@ -406,27 +406,27 @@ function TerrainMesh({
                      Math.sin(x * 0.1 + y * 0.1) * 1.5;
       positions[i + 2] = height;
     }
-    
+
     geo.computeVertexNormals();
     return geo;
   }, []);
-  
+
   const handlePointerDown = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     setIsPintaring(true);
     if (e.point) onPintar(e.point as THREE.Vector3);
   };
-  
+
   const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
     if (isPintaring && e.point) {
       onPintar(e.point as THREE.Vector3);
     }
   };
-  
+
   const handlePointerUp = () => {
     setIsPintaring(false);
   };
-  
+
   return (
     <group>
       <mesh
@@ -438,13 +438,13 @@ function TerrainMesh({
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        <meshStandardMaterial 
-          color={terrainColor} 
+        <meshStandardMaterial
+          color={terrainColor}
           roughness={0.9}
           metalness={0.1}
         />
       </mesh>
-      
+
       {/* Brush indicator */}
       {showBrush && brushPosition && (
         <mesh position={[brushPosition.x, brushPosition.y + 0.1, brushPosition.z]}>
@@ -487,18 +487,18 @@ function FoliageInstances3D({ instancias, types, windTime }: FoliageInstances3DP
     });
     return grouped;
   }, [instancias]);
-  
+
   return (
     <group>
       {Object.entries(instanciasByType).map(([typeId, typeInstances]) => {
         const foliageType = types.find((t) => t.id === typeId);
         if (!foliageType) return null;
-        
+
         return typeInstances.map((inst) => {
           // Simple representation based on category
           let geometry: THREE.BufferGeometry;
           let color: string;
-          
+
           switch (foliageType.category) {
             case 'tree':
               geometry = new THREE.ConeGeometry(0.5, 2, 8);
@@ -524,12 +524,12 @@ function FoliageInstances3D({ instancias, types, windTime }: FoliageInstances3DP
               geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
               color = palette.fallback;
           }
-          
+
           // Wind offset
           const windOffset = foliageType.windEnabled
             ? Math.sin(windTime * foliageType.windFrequencia + inst.position.x) * foliageType.windStrength * 0.1
             : 0;
-          
+
           return (
             <mesh
               key={inst.id}
@@ -572,7 +572,7 @@ function FoliageTypeCard({ type, isSelecionared, onSelecionar, instanceCount }: 
     flower: 'bg-[var(--aethel-primary)]',
     rock: 'bg-[var(--aethel-text-quaternary)]',
   };
-  
+
   const categoryIcons: Record<string, React.ReactNode> = {
     tree: <TreeDeciduous className="w-4 h-4" />,
     bush: <TreeDeciduous className="w-3 h-3" />,
@@ -580,13 +580,13 @@ function FoliageTypeCard({ type, isSelecionared, onSelecionar, instanceCount }: 
     flower: <Droplets className="w-4 h-4" />,
     rock: <Mountain className="w-4 h-4" />,
   };
-  
+
   return (
     <button
       onClick={onSelecionar}
       className={`w-full p-2 rounded flex items-center gap-2 text-left transition-colors ${
-        isSelecionared 
-          ? 'bg-[var(--aethel-success)]/30 border border-[var(--aethel-success)]' 
+        isSelecionared
+          ? 'bg-[var(--aethel-success)]/30 border border-[var(--aethel-success)]'
           : 'bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]/50 border border-transparent'
       }`}
     >
@@ -620,16 +620,16 @@ interface CamadaItemProps {
   onDelete: () => void;
 }
 
-function CamadaItem({ 
-  layer, 
-  isSelecionared, 
-  onSelecionar, 
+function CamadaItem({
+  layer,
+  isSelecionared,
+  onSelecionar,
   onToggleVisibility,
   onToggleLock,
   onDelete,
 }: CamadaItemProps) {
   return (
-    <div 
+    <div
       className={`flex items-center gap-2 p-2 rounded ${
         isSelecionared ? 'bg-[var(--aethel-success)]/20 border border-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-tertiary)]'
       }`}
@@ -638,13 +638,13 @@ function CamadaItem({
         {layer.name}
       </button>
       <span className="text-[10px] text-[var(--aethel-text-quaternary)]">{layer.instancias.length}</span>
-      <button 
+      <button
         onClick={onToggleVisibility}
         className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)]"
       >
         {layer.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3 text-[var(--aethel-text-quaternary)]" />}
       </button>
-      <button 
+      <button
         onClick={onDelete}
         className="p-1 rounded hover:bg-[var(--aethel-error)]/30"
       >
@@ -667,7 +667,7 @@ function FoliageStats({ layers, types }: FoliageStatsProps) {
   const stats = useMemo(() => {
     let totalInstances = 0;
     const byCategory: Record<string, number> = {};
-    
+
     layers.forEach((layer) => {
       layer.instancias.forEach((inst) => {
         totalInstances++;
@@ -677,10 +677,10 @@ function FoliageStats({ layers, types }: FoliageStatsProps) {
         }
       });
     });
-    
+
     return { totalInstances, byCategory };
   }, [layers, types]);
-  
+
   return (
     <div className="bg-[var(--aethel-surface-tertiary)] rounded p-3 text-xs">
       <div className="font-medium mb-2">Estatisticas</div>
@@ -726,7 +726,7 @@ export default function FoliagePintarer({
     { id: 'default', name: 'Camada padrao', visible: true, locked: false, types: [], instancias: [] },
   ]);
   const [activeCamadaId, setActiveCamadaId] = useState('default');
-  
+
   // Brush settings
   const [brushSettings, setBrushSettings] = useState<FoliageBrushSettings>({
     tool: 'paint',
@@ -734,18 +734,18 @@ export default function FoliagePintarer({
     density: 0.5,
     falloff: 0.5,
   });
-  
+
   // Simulation
   const [isSimulating, setIsSimulating] = useState(false);
   const [windTime, setWindTime] = useState(0);
   const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
-  
+
   // Get active layer
-  const activeCamada = useMemo(() => 
+  const activeCamada = useMemo(() =>
     layers.find((l) => l.id === activeCamadaId),
     [layers, activeCamadaId]
   );
-  
+
   // Count instancias per type
   const instanceCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -756,36 +756,36 @@ export default function FoliagePintarer({
     });
     return counts;
   }, [layers]);
-  
+
   // All visible instancias
-  const visibleInstances = useMemo(() => 
+  const visibleInstances = useMemo(() =>
     layers.filter((l) => l.visible).flatMap((l) => l.instancias),
     [layers]
   );
-  
+
   // Pintar handler
   const handlePintar = useCallback((point: THREE.Vector3) => {
     if (!activeCamada || activeCamada.locked || selectedTypes.length === 0) return;
-    
+
     if (brushSettings.tool === 'paint') {
       // Generate instancias
       const newInstances: FoliageInstance[] = [];
       const instanciasPerStroke = Math.floor(brushSettings.density * 10);
-      
+
       for (let i = 0; i < instanciasPerStroke; i++) {
         const typeId = selectedTypes[Math.floor(Math.random() * selectedTypes.length)];
         const type = foliageTypes.find((t) => t.id === typeId);
         if (!type) continue;
-        
+
         // Random position within brush radius
         const angle = Math.random() * Math.PI * 2;
         const radius = Math.random() * brushSettings.radius;
         const x = point.x + Math.cos(angle) * radius;
         const z = point.z + Math.sin(angle) * radius;
-        
+
         // Scale variation
         const scaleValue = type.scaleMin + Math.random() * (type.scaleMax - type.scaleMin);
-        
+
         newInstances.push({
           id: `inst_${Date.now()}_${i}`,
           typeId,
@@ -794,19 +794,19 @@ export default function FoliagePintarer({
           scale: new THREE.Vector3(scaleValue, scaleValue, scaleValue),
         });
       }
-      
-      setLayers((prev) => prev.map((l) => 
-        l.id === activeCamadaId 
+
+      setLayers((prev) => prev.map((l) =>
+        l.id === activeCamadaId
           ? { ...l, instancias: [...l.instancias, ...newInstances] }
           : l
       ));
     } else if (brushSettings.tool === 'erase') {
       // Remove instancias within radius
-      setLayers((prev) => prev.map((l) => 
-        l.id === activeCamadaId 
+      setLayers((prev) => prev.map((l) =>
+        l.id === activeCamadaId
           ? {
               ...l,
-              instancias: l.instancias.filter((inst) => 
+              instancias: l.instancias.filter((inst) =>
                 inst.position.distanceTo(point) > brushSettings.radius
               ),
             }
@@ -814,16 +814,16 @@ export default function FoliagePintarer({
       ));
     }
   }, [activeCamada, activeCamadaId, selectedTypes, brushSettings, foliageTypes]);
-  
+
   // Toggle type selection
   const toggleTypeSelecionarion = useCallback((typeId: string) => {
-    setSelecionaredTypes((prev) => 
-      prev.includes(typeId) 
+    setSelecionaredTypes((prev) =>
+      prev.includes(typeId)
         ? prev.filter((id) => id !== typeId)
         : [...prev, typeId]
     );
   }, []);
-  
+
   // Add layer
   const addCamada = useCallback(() => {
     const newCamada: FoliageCamada = {
@@ -837,7 +837,7 @@ export default function FoliagePintarer({
     setLayers((prev) => [...prev, newCamada]);
     setActiveCamadaId(newCamada.id);
   }, [layers.length]);
-  
+
   // Delete layer
   const deleteCamada = useCallback((layerId: string) => {
     if (layers.length <= 1) return;
@@ -846,23 +846,23 @@ export default function FoliagePintarer({
       setActiveCamadaId(layers[0].id);
     }
   }, [layers, activeCamadaId]);
-  
+
   // Wind animation
   useEffect(() => {
     if (!isSimulating) return;
-    
+
     const interval = setInterval(() => {
       setWindTime((t) => t + 0.05);
     }, 16);
-    
+
     return () => clearInterval(interval);
   }, [isSimulating]);
-  
+
   // Clear all
   const clearAll = useCallback(() => {
     setLayers((prev) => prev.map((l) => ({ ...l, instancias: [] })));
   }, []);
-  
+
   return (
     <div className="flex h-full w-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       {/* Left Panel - Tipos de foliage */}
@@ -873,7 +873,7 @@ export default function FoliagePintarer({
             Tipos de foliage
           </h3>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {foliageTypes.map((type) => (
             <FoliageTypeCard
@@ -885,7 +885,7 @@ export default function FoliagePintarer({
             />
           ))}
         </div>
-        
+
         {/* Layers */}
         <div className="border-t border-[var(--aethel-border-primary)] p-3">
           <div className="flex items-center justify-between mb-2">
@@ -905,12 +905,12 @@ export default function FoliagePintarer({
                 isSelecionared={activeCamadaId === layer.id}
                 onSelecionar={() => setActiveCamadaId(layer.id)}
                 onToggleVisibility={() => {
-                  setLayers((prev) => prev.map((l) => 
+                  setLayers((prev) => prev.map((l) =>
                     l.id === layer.id ? { ...l, visible: !l.visible } : l
                   ));
                 }}
                 onToggleLock={() => {
-                  setLayers((prev) => prev.map((l) => 
+                  setLayers((prev) => prev.map((l) =>
                     l.id === layer.id ? { ...l, locked: !l.locked } : l
                   ));
                 }}
@@ -920,39 +920,39 @@ export default function FoliagePintarer({
           </div>
         </div>
       </div>
-      
+
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [20, 20, 20], fov: 50 }} shadows>
           <color attach="background" args={[backgroundColor]} />
-          
+
           <ambientLight intensity={0.4} />
-          <directionalLight 
-            position={[20, 30, 10]} 
-            intensity={1} 
+          <directionalLight
+            position={[20, 30, 10]}
+            intensity={1}
             castShadow
             shadow-mapSize={[2048, 2048]}
           />
-          
+
           <TerrainMesh
             onPintar={handlePintar}
             brushPosition={brushPosition}
             brushRaio={brushSettings.radius}
             showBrush={brushSettings.tool === 'paint' || brushSettings.tool === 'erase'}
           />
-          
+
           <FoliageInstances3D
             instancias={visibleInstances}
             types={foliageTypes}
             windTime={windTime}
           />
-          
+
           <OrbitControls makeDefault />
           <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
             <GizmoViewport />
           </GizmoHelper>
         </Canvas>
-        
+
         {/* Toolbar */}
         <div className="absolute top-4 left-4 flex gap-2">
           <div className="flex bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] rounded overflow-hidden">
@@ -978,7 +978,7 @@ export default function FoliagePintarer({
               <Move className="w-4 h-4" />
             </button>
           </div>
-          
+
           <button
             onClick={() => setIsSimulating(!isSimulating)}
             className={`p-2 rounded ${isSimulating ? 'bg-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)]'}`}
@@ -986,7 +986,7 @@ export default function FoliagePintarer({
           >
             <Wind className="w-4 h-4" />
           </button>
-          
+
           <button
             onClick={clearAll}
             className="p-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] hover:bg-[var(--aethel-error)]/50"
@@ -994,7 +994,7 @@ export default function FoliagePintarer({
           >
             <RotateCcw className="w-4 h-4" />
           </button>
-          
+
           <button
             onClick={() => onExportar?.({ layers, types: foliageTypes })}
             className="p-2 rounded bg-[var(--aethel-success)] hover:bg-[var(--aethel-success)]"
@@ -1003,13 +1003,13 @@ export default function FoliagePintarer({
             <Download className="w-4 h-4" />
           </button>
         </div>
-        
+
         {/* Stats */}
         <div className="absolute bottom-4 left-4">
           <FoliageStats layers={layers} types={foliageTypes} />
         </div>
       </div>
-      
+
       {/* Right Panel - Configuracoes do brush */}
       <div className="w-72 border-l border-[var(--aethel-border-primary)] overflow-y-auto">
         <div className="p-4">
@@ -1017,7 +1017,7 @@ export default function FoliagePintarer({
             <Settings className="w-5 h-5 text-[var(--aethel-success)]" />
             Configuracoes do brush
           </h2>
-          
+
           <CollapsibleSection title="Brush" icon={<Brush className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <Slider
               label="Raio"
@@ -1043,21 +1043,21 @@ export default function FoliagePintarer({
               onChange={(v) => setBrushSettings((s) => ({ ...s, falloff: v }))}
             />
           </CollapsibleSection>
-          
+
           {/* Selecionared type settings */}
           {selectedTypes.length === 1 && (
-            <CollapsibleSection 
-              title="Configuracoes do tipo" 
+            <CollapsibleSection
+              title="Configuracoes do tipo"
               icon={<TreeDeciduous className="w-4 h-4 text-[var(--aethel-success)]" />}
             >
               {(() => {
                 const type = foliageTypes.find((t) => t.id === selectedTypes[0]);
                 if (!type) return null;
-                
+
                 return (
                   <>
                     <div className="text-sm font-medium mb-3">{type.name}</div>
-                    
+
                     <Slider
                       label="Min Scale"
                       value={type.scaleMin}
@@ -1072,7 +1072,7 @@ export default function FoliagePintarer({
                       max={3}
                       onChange={() => {}}
                     />
-                    
+
                     <div className="flex items-center gap-2 mb-2">
                       <input
                         type="checkbox"
@@ -1082,7 +1082,7 @@ export default function FoliagePintarer({
                       />
                       <span className="text-xs">Rotacao Y aleatoria</span>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -1097,9 +1097,9 @@ export default function FoliagePintarer({
               })()}
             </CollapsibleSection>
           )}
-          
-          <CollapsibleSection 
-            title="Restricoes" 
+
+          <CollapsibleSection
+            title="Restricoes"
             icon={<Mountain className="w-4 h-4 text-[var(--aethel-warning)]" />}
             defaultOpen={false}
           >
@@ -1140,9 +1140,9 @@ export default function FoliagePintarer({
               onChange={() => {}}
             />
           </CollapsibleSection>
-          
-          <CollapsibleSection 
-            title="Wind" 
+
+          <CollapsibleSection
+            title="Wind"
             icon={<Wind className="w-4 h-4 text-[var(--aethel-primary)]" />}
             defaultOpen={false}
           >

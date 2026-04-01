@@ -107,7 +107,7 @@ export default function RealTimePage() {
           {error}
         </div>
       )}
-      
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[0, 1, 2, 3].map((index) => (
           <div key={index} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow text-center">

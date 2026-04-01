@@ -4,6 +4,7 @@ import { AethelAPIClient, APIError } from '@/lib/api';
 import { isAuthenticated } from '@/lib/auth';
 import type { ChatMessage, ChatThreadSummary, CopilotWorkflowSummary } from '@/lib/api';
 import { openConfirmDialog, openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
+import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models';
 
 const STORAGE_KEYS_BASE = {
   activeThreadId: 'chat::activeThreadId',
@@ -38,7 +39,7 @@ const ChatComponent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
-  const [selectedModel, setSelectedModel] = useState('openrouter:google/gemini-3.1-flash-lite-preview');
+  const [selectedModel, setSelectedModel] = useState(`openrouter:${DEFAULT_OPENROUTER_MODEL_ID}`);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -595,9 +596,9 @@ const ChatComponent: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-white">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Header */}
-      <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+      <div className="p-4 border-b border-[var(--aethel-border-primary)] flex items-center justify-between">
         <h1 className="text-xl font-bold">Aethel Chat</h1>
         <div className="flex items-center gap-2">
           <select
@@ -610,7 +611,7 @@ const ChatComponent: React.FC = () => {
               }
               if (v) void switchWorkflow(v);
             }}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-sm"
+            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm"
             disabled={isLoading || isStreaming || workflowsLoading || connectBusy}
             title="Trabalho (workflow)"
           >
@@ -625,14 +626,14 @@ const ChatComponent: React.FC = () => {
           <button
             onClick={() => void renameWorkflow()}
             disabled={!activeWorkflowId || isLoading || isStreaming}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-sm hover:bg-gray-700 disabled:opacity-50"
+            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
           >
             Renomear
           </button>
           <button
             onClick={() => void archiveWorkflow()}
             disabled={!activeWorkflowId || isLoading || isStreaming}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-sm hover:bg-gray-700 disabled:opacity-50"
+            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
           >
             Arquivar
           </button>
@@ -640,7 +641,7 @@ const ChatComponent: React.FC = () => {
           <select
             value={connectFromWorkflowId}
             onChange={(e) => setConnectFromWorkflowId(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-sm"
+            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm"
             disabled={isLoading || isStreaming || workflowsLoading || connectBusy}
             title="Conectar trabalhos: escolha uma origem"
           >
@@ -657,7 +658,7 @@ const ChatComponent: React.FC = () => {
           <button
             onClick={() => void copyHistoryFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-sm hover:bg-gray-700 disabled:opacity-50"
+            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
             title="Copia o histórico do trabalho selecionado para o trabalho atual (clona a thread)"
           >
             {connectBusy ? 'Processando…' : 'Copiar histórico'}
@@ -666,7 +667,7 @@ const ChatComponent: React.FC = () => {
           <button
             onClick={() => void importContextFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-sm hover:bg-gray-700 disabled:opacity-50"
+            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
             title="Importa contexto (livePreview/editor/openFiles) do trabalho selecionado"
           >
             {connectBusy ? 'Processando…' : 'Importar contexto'}
@@ -675,7 +676,7 @@ const ChatComponent: React.FC = () => {
           <button
             onClick={() => void mergeFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-sm hover:bg-gray-700 disabled:opacity-50"
+            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
             title="Mescla histórico + contexto do trabalho selecionado e arquiva o trabalho de origem"
           >
             {connectBusy ? 'Processando…' : 'Mesclar'}
@@ -684,16 +685,15 @@ const ChatComponent: React.FC = () => {
           <select
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1 text-sm"
+            className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm"
             disabled={isLoading || isStreaming}
             title="Modelo"
           >
-            <option value="openrouter:google/gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (OpenRouter)</option>
-            <option value="openrouter:openai/gpt-4o-mini">GPT-4o Mini (OpenRouter)</option>
-            <option value="openrouter:anthropic/claude-3.5-haiku">Claude 3.5 Haiku (OpenRouter)</option>
-            <option value="openai:gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
-            <option value="openai:gpt-4o">GPT-4o (OpenAI)</option>
-            <option value="ollama:llama3">Llama 3 (Local)</option>
+            {OPENROUTER_MODEL_OPTIONS.map((option) => (
+              <option key={option.value} value={`openrouter:${option.value}`}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -708,12 +708,12 @@ const ChatComponent: React.FC = () => {
             <div
               className={`max-w-[80%] rounded-lg px-4 py-2 ${
                 msg.role === 'user'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
                   : msg.role === 'error'
-                  ? 'bg-red-600 text-white'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)]'
                   : msg.role === 'system'
-                  ? 'bg-gray-700 text-gray-300 italic'
-                  : 'bg-gray-800 text-white'
+                  ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] italic'
+                  : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]'
               }`}
             >
               <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -727,7 +727,7 @@ const ChatComponent: React.FC = () => {
         {/* Streaming message */}
         {isStreaming && streamingContent && (
           <div className="flex justify-start">
-            <div className="max-w-[80%] rounded-lg px-4 py-2 bg-gray-800 text-white">
+            <div className="max-w-[80%] rounded-lg px-4 py-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
               <p className="whitespace-pre-wrap">{streamingContent}</p>
               <span className="text-xs opacity-70 mt-1 block animate-pulse">
                 Transmitindo...
@@ -740,14 +740,14 @@ const ChatComponent: React.FC = () => {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-[var(--aethel-border-primary)]">
         <div className="flex gap-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
-            className="flex-1 bg-gray-800 border border-gray-700 rounded px-4 py-2 text-white resize-none focus:outline-none focus:border-blue-500"
+            className="flex-1 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-4 py-2 text-[var(--aethel-text-primary)] resize-none focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]"
             rows={2}
             disabled={isLoading || isStreaming}
           />
@@ -755,14 +755,14 @@ const ChatComponent: React.FC = () => {
             <button
               onClick={handleStreamMessage}
               disabled={isLoading || isStreaming || !input.trim()}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
+              className="bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
             >
               {isStreaming ? 'Pausar' : 'Transmitir'}
             </button>
             <button
               onClick={handleSendMessage}
               disabled={isLoading || isStreaming || !input.trim()}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
+              className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
             >
               {isLoading ? 'Enviando...' : 'Enviar'}
             </button>

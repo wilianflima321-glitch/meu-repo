@@ -25,19 +25,19 @@ const sizeClasses = {
 
 const variantClasses = {
   default: `
-    bg-slate-900/80 border border-slate-700/80 rounded-lg
-    hover:border-slate-600 hover:bg-slate-900/90
-    focus:bg-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20
+    bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] rounded-lg
+    hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)]
+    focus:bg-[var(--aethel-surface-primary)] focus:border-[var(--aethel-info)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]
   `,
   filled: `
-    bg-slate-800/90 border border-transparent rounded-lg
-    hover:bg-slate-800
-    focus:bg-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20
+    bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] border border-transparent rounded-lg
+    hover:bg-[var(--aethel-surface-secondary)]
+    focus:bg-[var(--aethel-surface-primary)] focus:border-[var(--aethel-info)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]
   `,
   flushed: `
-    bg-transparent border-0 border-b-2 border-slate-700 rounded-none px-0
-    hover:border-slate-500
-    focus:border-sky-500 focus:ring-0
+    bg-transparent border-0 border-b-2 border-[var(--aethel-border-primary)] rounded-none px-0
+    hover:border-[var(--aethel-border-secondary)]
+    focus:border-[var(--aethel-info)] focus:ring-0
   `,
 }
 
@@ -67,9 +67,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const hasSuccess = Boolean(success) && !hasError
 
     const stateClasses = hasError
-      ? 'border-red-500/70 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5'
+      ? 'border-[color-mix(in_srgb,var(--aethel-error)_70%,transparent)] focus:border-[var(--aethel-error)] focus:ring-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)]'
       : hasSuccess
-      ? 'border-emerald-500/70 focus:border-emerald-500 focus:ring-emerald-500/20 bg-emerald-500/5'
+      ? 'border-[color-mix(in_srgb,var(--aethel-success)_70%,transparent)] focus:border-[var(--aethel-success)] focus:ring-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_8%,transparent)]'
       : ''
 
     return (
@@ -77,31 +77,31 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2 transition-colors group-focus-within:text-slate-100"
+            className="flex items-center gap-2 text-sm font-medium text-[var(--aethel-text-secondary)] mb-2 transition-colors group-focus-within:text-[var(--aethel-text-primary)]"
           >
             {label}
-            {required && <span className="text-red-400 text-xs">*</span>}
-            {optional && <span className="text-slate-500 text-xs font-normal">(opcional)</span>}
+            {required && <span className="text-[var(--aethel-error)] text-xs">*</span>}
+            {optional && <span className="text-[var(--aethel-text-tertiary)] text-xs font-normal">(opcional)</span>}
           </label>
         )}
-        
+
         <div className="relative">
           {icon && iconPosition === 'left' && (
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 transition-colors group-focus-within:text-slate-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--aethel-text-tertiary)] transition-colors group-focus-within:text-[var(--aethel-text-tertiary)]">
               {icon}
             </div>
           )}
-          
+
           <input
             ref={ref}
             id={inputId}
             disabled={disabled}
             className={`
               block w-full
-              text-slate-100 placeholder-slate-500
+              text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)]
               transition-all duration-200 ease-out
               focus:outline-none
-              disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-700
+              disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[var(--aethel-border-primary)]
               ${variantClasses[variant]}
               ${sizeClasses[inputSize]}
               ${stateClasses}
@@ -111,30 +111,30 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             `}
             {...props}
           />
-          
+
           {icon && iconPosition === 'right' && !hasError && !hasSuccess && (
-            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-500 transition-colors group-focus-within:text-slate-400">
+            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-[var(--aethel-text-tertiary)] transition-colors group-focus-within:text-[var(--aethel-text-tertiary)]">
               {icon}
             </div>
           )}
-          
+
           {hasError && (
             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
-              <AlertCircle className="h-5 w-5 text-red-400" />
+              <AlertCircle className="h-5 w-5 text-[var(--aethel-error)]" />
             </div>
           )}
-          
+
           {hasSuccess && (
             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
-              <CheckCircle className="h-5 w-5 text-emerald-400" />
+              <CheckCircle className="h-5 w-5 text-[var(--aethel-success)]" />
             </div>
           )}
         </div>
-        
+
         {(error || success || hint) && (
           <div
             className={`mt-2 flex items-start gap-1.5 text-sm ${
-              hasError ? 'text-red-400' : hasSuccess ? 'text-emerald-400' : 'text-slate-500'
+              hasError ? 'text-[var(--aethel-error)]' : hasSuccess ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-text-tertiary)]'
             }`}
           >
             {hint && !hasError && !hasSuccess && (

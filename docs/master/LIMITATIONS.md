@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 46_LIMITATIONS_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # LIMITATIONS.md
 ## Limitações Técnicas, de Produto e de Negócio
 **Data:** Janeiro 2026  
@@ -255,3 +258,16 @@ The 2026-02-13 implementation pass focuses on:
 - explicit deprecation contracts
 
 Desktop-level Unreal/Premiere parity limitations remain unchanged.
+
+
+
+
+## Addendum 2026-04-01 (Observed limitations)
+- Preview runtime provisioning returns explicit failure when provider token is missing.
+  - Evidence: `cloud-web-app/web/app/api/preview/runtime-provision/route.ts` error paths.
+- AI chat depends on provider configuration; when missing, UI must stay in setup mode.
+  - Evidence: `cloud-web-app/web/components/ai/AIProviderSetupGuide.tsx`.
+- Global design tokens diverge across multiple globals.css files.
+  - Evidence: `cloud-web-app/web/app/globals.css` vs `cloud-web-app/web/styles/globals.css`.
+- English string literals remain in IDE/editor surfaces (partial localization drift).
+  - Evidence: string-literal scan across `components/ide` and `components/editor`.

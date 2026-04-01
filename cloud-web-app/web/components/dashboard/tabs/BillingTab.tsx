@@ -327,6 +327,13 @@ export function BillingTab({
       return
     }
 
+    if (planId === 'enterprise') {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/contact-sales?source=dashboard-billing-enterprise'
+      }
+      return
+    }
+
     setBillingActionError(null)
     setBillingActionBusy('checkout')
     try {
@@ -382,7 +389,7 @@ export function BillingTab({
             type="button"
             onClick={() => setBillingCycle('month')}
             className={`rounded-full px-4 py-1.5 transition-colors ${
-              billingCycle === 'month' ? 'bg-white text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+              billingCycle === 'month' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Mensal
@@ -391,7 +398,7 @@ export function BillingTab({
             type="button"
             onClick={() => setBillingCycle('year')}
             className={`rounded-full px-4 py-1.5 transition-colors ${
-              billingCycle === 'year' ? 'bg-white text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+              billingCycle === 'year' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Anual (-20%)
@@ -563,10 +570,13 @@ export function BillingTab({
         ) : (
           resolvedPlans.map((plan) => {
             const isCurrent = effectiveCurrentPlan === plan.id
-            const isCheckoutBlocked = billingReadiness?.checkoutReady === false
-            const actionLabel = isCheckoutBlocked
-              ? 'Checkout indisponivel'
-              : plan.price === 0
+            const isEnterprisePlan = plan.id === 'enterprise'
+            const isCheckoutBlocked = billingReadiness?.checkoutReady === false && !isEnterprisePlan
+            const actionLabel = isEnterprisePlan
+              ? 'Falar com vendas'
+              : isCheckoutBlocked
+                ? 'Checkout indisponivel'
+                : plan.price === 0
                 ? 'Comecar gratis'
                 : 'Assinar'
             const displayPrice =

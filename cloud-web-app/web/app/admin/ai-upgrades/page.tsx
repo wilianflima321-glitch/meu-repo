@@ -132,7 +132,7 @@ export default function AIUpgrades() {
                   </div>
                   <button
                     onClick={() => applyUpgrade(upgrade)}
-                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-gray-600 hover:bg-gray-700 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'}`}
+                    className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'}`}
                   >
                     {upgrade.applied ? 'Reverter' : 'Aplicar melhoria'}
                   </button>

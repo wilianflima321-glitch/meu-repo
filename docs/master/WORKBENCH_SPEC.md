@@ -1,3 +1,6 @@
+> **DEPRECADO (2026-03-22):** este arquivo foi migrado para 48_WORKBENCH_SPEC_2026-03-22.md. Use o arquivo numerado can�nico.
+
+
 # WORKBENCH_SPEC.md
 ## Especificação Técnica do Workbench IDE
 **Data:** Janeiro 2026  
@@ -808,3 +811,11 @@ This section records implemented UI contracts aligned with the canonical executi
 - `/ide` provides explicit panel content for:
   - Search, Source Control, Output, Problems, Debug, Ports
 - Generic fallback panel is no longer the primary user path for those tabs.
+
+
+
+
+## Addendum 2026-04-01 (Workbench UX hardening)
+- Core UX surfaces (IDE, chat, preview, git, editor primitives) were hardened for Aethel tokens and PT-BR copy.
+- Explicit runtime states (managed/local/inline) are now surfaced instead of implying healthy state.
+- This spec remains authoritative; new UI work must align with `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md` and `docs/master/68_L5_UX_HARDENING_DELTA_2026-04-01.md`.

@@ -18,6 +18,7 @@ import {
   requestAdvancedChat,
 } from '@/lib/ai-chat-advanced-client'
 import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
+import { DEFAULT_MODELS } from '@/components/ide/AIChatPanelPro.types'
 
 type ChatMessage = {
   id: string
@@ -35,62 +36,57 @@ type ProviderGateState = {
   setupUrl?: string
 }
 
-const MODELS = [
+const MODELS = DEFAULT_MODELS
+
+function formatAiErrorForUser(err: unknown): string {
+  if (err instanceof AdvancedChatRequestError) {
+    switch (err.code) {
+      case 'AI_PROVIDER_NOT_CONFIGURED':
+        return 'IA nao configurada. Conecte um provedor para continuar.'
+      case 'DEMO_LIMIT_REACHED':
+        return 'Limite da demo atingido. Ative um provedor para continuar.'
+      case 'MENTION_NOT_SUPPORTED':
+        return 'Esse tipo de mention ainda nao e suportado.'
+      case 'MODEL_NOT_AVAILABLE':
+        return 'Modelo indisponivel no momento. Tente outro perfil.'
+      default:
+        return err.message || 'Falha na requisicao de IA.'
+    }
+  }
+  if (err instanceof Error) return err.message
+  return 'Falha na requisicao de IA.'
+}
+
+const IDE_CHAT_INTENTS = [
   {
-    id: 'google/gemini-3.1-flash-lite-preview',
-    name: 'Gemini 3.1 Flash Lite',
-    provider: 'OpenRouter',
-    description: 'Low-cost routed model for first-value and broad usage',
-    maxTokens: 1000000,
-    supportsVision: false,
-    supportsVoice: false,
+    id: 'implement',
+    label: 'Implementar no editor',
+    description: 'Traduzir a missao atual em passos e alteracoes concretas.',
+    buildPrompt: (mission?: string | null) =>
+      mission
+        ? `${mission}\n\nConverta isso em um plano de implementacao no editor, com arquivos, passos e risco principal.`
+        : 'Converta a tarefa atual em um plano de implementacao no editor, com arquivos, passos e risco principal.',
   },
   {
-    id: 'openai/gpt-4o-mini',
-    name: 'GPT-4o Mini (Routed)',
-    provider: 'OpenRouter',
-    description: 'OpenAI-compatible routed option with centralized provider control',
-    maxTokens: 128000,
-    supportsVision: false,
-    supportsVoice: false,
+    id: 'review',
+    label: 'Criticar e revisar',
+    description: 'Fazer review do que ja existe e apontar a proxima melhoria.',
+    buildPrompt: (mission?: string | null) =>
+      mission
+        ? `${mission}\n\nRevise o estado atual, critique as lacunas e proponha a proxima melhoria com maior impacto.`
+        : 'Revise o estado atual, critique as lacunas e proponha a proxima melhoria com maior impacto.',
   },
   {
-    id: 'anthropic/claude-3.5-haiku',
-    name: 'Claude 3.5 Haiku (Routed)',
-    provider: 'OpenRouter',
-    description: 'Anthropic-quality low-cost routed option',
-    maxTokens: 200000,
-    supportsVision: false,
-    supportsVoice: false,
+    id: 'runtime',
+    label: 'Preparar preview/runtime',
+    description: 'Sair com checklist de validacao para preview, runtime e handoff.',
+    buildPrompt: (mission?: string | null) =>
+      mission
+        ? `${mission}\n\nPrepare um checklist de runtime, preview e validacao final para esta missao.`
+        : 'Prepare um checklist de runtime, preview e validacao final para a tarefa atual.',
   },
-  {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o Mini',
-    provider: 'OpenAI',
-    description: 'Fast, cost-efficient model for P0',
-    maxTokens: 128000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
-  {
-    id: 'claude-3-5-haiku-20241022',
-    name: 'Claude 3.5 Haiku',
-    provider: 'Anthropic',
-    description: 'Fast critic/reviewer profile',
-    maxTokens: 200000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
-  {
-    id: 'gemini-1.5-flash',
-    name: 'Gemini 1.5 Flash',
-    provider: 'Google',
-    description: 'Large context for broad analysis',
-    maxTokens: 1000000,
-    supportsVision: false,
-    supportsVoice: false,
-  },
-]
+] as const
+
 
 function extractContent(raw: string): string {
   try {
@@ -201,13 +197,23 @@ export default function AIChatPanelContainer() {
   const [isLoading, setIsLoading] = useState(false)
   const requestAbortRef = useRef<AbortController | null>(null)
   const [projectId, setProjectId] = useState<string | undefined>(undefined)
+  const [mission, setMission] = useState<string | null>(null)
+  const [source, setSource] = useState<string | null>(null)
   const [providerGate, setProviderGate] = useState<ProviderGateState | null>(null)
   const [providerStatus, setProviderStatus] = useState<AiProviderStatusResponse | null>(null)
+  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
 
   const modelOptions = useMemo(() => MODELS, [])
 
   useEffect(() => {
     setProjectId(getProjectIdFromLocation())
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const missionParam = params.get('mission')
+      const sourceParam = params.get('source')
+      setMission(missionParam && missionParam.trim() ? missionParam.trim() : null)
+      setSource(sourceParam && sourceParam.trim() ? sourceParam.trim() : null)
+    }
   }, [])
 
   useEffect(() => {
@@ -221,14 +227,14 @@ export default function AIChatPanelContainer() {
         {
           id: `system-research-${Date.now()}`,
           role: 'system',
-          content: `Research context imported from Nexus.\n\n${contextPrompt}`,
+          content: `Contexto de pesquisa importado do Nexus.\n\n${contextPrompt}`,
           timestamp: new Date(),
         },
         {
           id: `assistant-research-${Date.now() + 1}`,
           role: 'assistant',
           content:
-            'Research handoff loaded. Send your next message to transform this into implementation steps. Tip: use @studio @web for deep multi-agent analysis.',
+            'Handoff de pesquisa carregado. Envie sua proxima mensagem para transformar isso em passos de implementacao. Dica: use @studio @web para uma analise multiagente mais profunda.',
           timestamp: new Date(),
           model: currentModel,
         },
@@ -285,7 +291,7 @@ export default function AIChatPanelContainer() {
 
       const usage = consumeLocalDemoUsage(providerStatus?.demoDailyLimit)
       if (!usage.allowed) {
-        const limitMessage = `DEMO_LIMIT_REACHED: local demo daily limit reached (${usage.used}/${usage.limit}). Configure a provider in /settings?tab=api or retry after ${usage.resetAt}.`
+        const limitMessage = `DEMO_LIMIT_REACHED: limite diario do demo local atingido (${usage.used}/${usage.limit}). Configure um provider em /settings?tab=api ou tente novamente em ${usage.resetAt}.`
         setMessages((prev) => [
           ...prev,
           {
@@ -354,6 +360,7 @@ export default function AIChatPanelContainer() {
   const handleSendMessage = useCallback(
     async (message: string, context?: { attachments?: unknown[] }) => {
       if (!message.trim() || isLoading) return
+      setLastFailedMessage(null)
 
       const fallbackProfile = inferAdvancedProfile(message)
       const profileResolution = resolveProfileFromMentions(message, fallbackProfile)
@@ -377,8 +384,8 @@ export default function AIChatPanelContainer() {
             id: `assistant-${Date.now()}`,
             role: 'assistant',
             content:
-              `MENTION_NOT_SUPPORTED: ${unsupportedList} ainda nao esta suportado nesta superficie.\n` +
-              'Suportado no momento: @studio, @delivery, @fast, @web e @agents:1|2|3.',
+              `${unsupportedList} ainda nao e suportado nesta superficie.\n` +
+              'Disponivel no momento: @studio, @delivery, @fast, @web e @agents:1|2|3.',
             timestamp: new Date(),
             model: currentModel,
           },
@@ -405,7 +412,7 @@ export default function AIChatPanelContainer() {
           {
             id: `assistant-${Date.now()}`,
             role: 'assistant',
-            content: 'Attachments are gated in this release phase. Use text-only prompts in P0.',
+            content: 'Anexos ainda nao estao disponiveis nesta superficie. Use prompts apenas de texto por enquanto.',
             timestamp: new Date(),
             model: currentModel,
           },
@@ -485,7 +492,7 @@ export default function AIChatPanelContainer() {
             {
               id: `assistant-${Date.now()}`,
               role: 'assistant',
-              content: 'Request interrupted by user.',
+              content: 'Solicitacao interrompida pelo usuario.',
               timestamp: new Date(),
               model: currentModel,
             },
@@ -511,12 +518,13 @@ export default function AIChatPanelContainer() {
           }
         }
 
-        const errorMessage =
+        const rawErrorMessage =
           err instanceof AdvancedChatRequestError
             ? `${err.code}: ${err.message}`.trim()
             : err instanceof Error
               ? err.message
               : 'AI_REQUEST_FAILED: AI request failed.'
+        const errorMessage = formatAiErrorForUser(err)
         const latencyMs = Math.max(
           0,
           Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
@@ -527,7 +535,7 @@ export default function AIChatPanelContainer() {
             source: 'ide-panel',
             model: currentModel,
             projectId,
-            error: errorMessage,
+            error: rawErrorMessage,
             latencyMs,
           },
         })
@@ -547,6 +555,7 @@ export default function AIChatPanelContainer() {
             model: currentModel,
           },
         ])
+        setLastFailedMessage(normalizedMessage)
       } finally {
         requestAbortRef.current = null
         setIsLoading(false)
@@ -565,6 +574,41 @@ export default function AIChatPanelContainer() {
 
   return (
     <div className="flex h-full flex-col">
+      {(mission || source || projectId) && (
+        <div className="mx-3 mt-3 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_14%,transparent),color-mix(in_srgb,var(--aethel-info)_10%,transparent),rgba(15,23,42,0.78))] p-4">
+          <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
+              Sessao de trabalho
+            </span>
+            {source ? (
+              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+                origem {source}
+              </span>
+            ) : null}
+            {projectId ? (
+              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+                projeto {projectId}
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-2 text-sm font-medium text-[var(--aethel-text-primary)]">
+            {mission || 'Continue a partir do contexto do studio sem perder o handoff atual.'}
+          </div>
+          <div className="mt-3 grid gap-2">
+            {IDE_CHAT_INTENTS.map((intent) => (
+              <button
+                key={intent.id}
+                type="button"
+                onClick={() => void handleSendMessage(intent.buildPrompt(mission))}
+                className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-4 py-3 text-left transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)]"
+              >
+                <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{intent.label}</p>
+                <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{intent.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {providerGate && (
         <div className="mx-3 mt-3 space-y-2">
           <AIProviderSetupGuide
@@ -575,7 +619,7 @@ export default function AIChatPanelContainer() {
             settingsHref={providerGate.setupUrl}
           />
           {!providerStatus?.configured && !providerStatus?.demoModeEnabled && (
-            <div className="rounded border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-[11px] text-sky-100">
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-info-light)]">
               Demo local disponivel: voce pode enviar ate{' '}
               {typeof providerStatus?.demoDailyLimit === 'number' ? providerStatus.demoDailyLimit : 5} mensagens por dia
               com resposta guiada sem provider real.
@@ -583,14 +627,26 @@ export default function AIChatPanelContainer() {
           )}
         </div>
       )}
+      {lastFailedMessage && !isLoading && (
+        <div className="mx-3 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-error-light)]">
+          <span>Falha ao processar a ultima mensagem.</span>
+          <button
+            type="button"
+            onClick={() => void handleSendMessage(lastFailedMessage)}
+            className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-error-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)]"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      )}
       {isLoading && (
         <div className="mx-3 mt-3 flex justify-end">
           <button
             type="button"
             onClick={handleStopGenerating}
-            className="aethel-button aethel-button-ghost text-[11px] border border-rose-500/40 text-rose-200 hover:bg-rose-500/20"
+            className="aethel-button aethel-button-ghost text-[11px] border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]"
           >
-            Stop generating
+            Parar resposta
           </button>
         </div>
       )}

@@ -1,9 +1,9 @@
 /**
  * WATER EDITOR - Aethel Engine
- * 
+ *
  * Editor profissional de corpos d'agua com simulacao fisica.
  * Inspirado em UE5 Water System e Unity HDRP Water.
- * 
+ *
  * FEATURES:
  * - Ocean, lake, river, pond types
  * - Wave simulation (Gerstner waves)
@@ -77,47 +77,47 @@ export interface WaveParams {
 
 export interface WaterParams {
   type: WaterType;
-  
+
   // Appearance
   shallowColor: string;
   deepColor: string;
   colorDepthFade: number;
   transparency: number;
-  
+
   // Waves
   waves: WaveParams[];
   waveScale: number;
-  
+
   // Foam
   foamEnabled: boolean;
   foamColor: string;
   foamIntensity: number;
   foamScale: number;
   shorelineFoam: number;
-  
+
   // Caustics
   causticsEnabled: boolean;
   causticsIntensity: number;
   causticsScale: number;
   causticsVelocidade: number;
-  
+
   // Refracao
   refractionEnabled: boolean;
   refractionStrength: number;
-  
+
   // Reflexao
   reflectionEnabled: boolean;
   reflectionIntensity: number;
-  
+
   // Flow (for rivers)
   flowEnabled: boolean;
   flowVelocidade: number;
   flowDirecao: number;
-  
+
   // Underwater
   underwaterFogColor: string;
   underwaterFogDensity: number;
-  
+
   // Buoyancy
   buoyancyEnabled: boolean;
   buoyancyStrength: number;
@@ -308,12 +308,12 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon, defaultOpen = true, children }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  
+
   return (
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)] 
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -344,56 +344,56 @@ function WaterSurface({ params }: WaterSurfaceProps) {
     () => resolveCssVarValue(params.deepColor, 'rgb(8, 145, 178)'),
     [params.deepColor]
   );
-  
+
   // Create water geometry
   const geometry = useMemo(() => {
     return new THREE.PlaneGeometry(100, 100, 128, 128);
   }, []);
-  
+
   // Animate waves
   useFrame((_, delta) => {
     if (!meshRef.current) return;
-    
+
     timeRef.current += delta;
     const positions = geometry.attributes.position.array as Float32Array;
     const originalPositions = geometry.attributes.position.clone().array as Float32Array;
-    
+
     for (let i = 0; i < positions.length; i += 3) {
       const x = originalPositions[i];
       const y = originalPositions[i + 1];
-      
+
       let height = 0;
-      
+
       // Gerstner waves
       params.waves.forEach((wave) => {
         const dirRad = (wave.direction * Math.PI) / 180;
         const dirX = Math.cos(dirRad);
         const dirY = Math.sin(dirRad);
-        
+
         const dotProduct = x * dirX + y * dirY;
         const phase = dotProduct * wave.frequency - timeRef.current * wave.speed;
-        
+
         height += wave.amplitude * params.waveScale * Math.sin(phase);
       });
-      
+
       // Flow for rivers
       if (params.flowEnabled && params.type === 'river') {
         const flowDir = (params.flowDirecao * Math.PI) / 180;
         const flowOffset = timeRef.current * params.flowVelocidade;
         height += Math.sin(x * 0.5 + flowOffset) * 0.1;
       }
-      
+
       positions[i + 2] = height;
     }
-    
+
     geometry.attributes.position.needsUpdate = true;
     geometry.computeVertexNormals();
   });
-  
+
   // Water material
   const shallowColor = new THREE.Color(shallowColorValue);
   const deepColor = new THREE.Color(deepColorValue);
-  
+
   return (
     <mesh
       ref={meshRef}
@@ -431,19 +431,19 @@ function FoamOverlay({ params }: FoamOverlayProps) {
     () => resolveCssVarValue(params.foamColor, 'rgb(248, 250, 252)'),
     [params.foamColor]
   );
-  
+
   // useFrame must be called before any conditional return
   useFrame((_, delta) => {
     if (!params.foamEnabled) return;
     timeRef.current += delta;
     if (meshRef.current) {
-      (meshRef.current.material as THREE.MeshBasicMaterial).opacity = 
+      (meshRef.current.material as THREE.MeshBasicMaterial).opacity =
         params.foamIntensity * 0.3 * (0.5 + 0.5 * Math.sin(timeRef.current * 2));
     }
   });
-  
+
   if (!params.foamEnabled) return null;
-  
+
   return (
     <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
       <planeGeometry args={[100, 100]} />
@@ -472,7 +472,7 @@ function CausticsProjector({ params }: CausticsProjectorProps) {
     () => resolveCssVarColor('--aethel-info-light', 'rgb(34, 211, 238)'),
     []
   );
-  
+
   // useFrame must be called before any conditional return
   useFrame((_, delta) => {
     if (!params.causticsEnabled) return;
@@ -483,9 +483,9 @@ function CausticsProjector({ params }: CausticsProjectorProps) {
       lightRef.current.position.z = Math.cos(timeRef.current * 0.5) * 2;
     }
   });
-  
+
   if (!params.causticsEnabled) return null;
-  
+
   return (
     <spotLight
       ref={lightRef}
@@ -514,13 +514,13 @@ function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
     newWaves[index] = { ...newWaves[index], ...updates };
     onUpdate(newWaves);
   };
-  
+
   return (
     <div className="space-y-3">
       {waves.map((wave, i) => (
         <div key={i} className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
           <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Wave {i + 1}</div>
-          
+
           <Slider
             label="Amplitude"
             value={wave.amplitude}
@@ -528,7 +528,7 @@ function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
             max={2}
             onChange={(v) => updateWave(i, { amplitude: v })}
           />
-          
+
           <Slider
             label="Frequencia"
             value={wave.frequency}
@@ -536,7 +536,7 @@ function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
             max={5}
             onChange={(v) => updateWave(i, { frequency: v })}
           />
-          
+
           <Slider
             label="Velocidade"
             value={wave.speed}
@@ -544,7 +544,7 @@ function WaveSettingsPanel({ waves, onUpdate }: WaveSettingsPanelProps) {
             max={5}
             onChange={(v) => updateWave(i, { speed: v })}
           />
-          
+
           <Slider
             label="Direcao"
             value={wave.direction}
@@ -586,13 +586,13 @@ export default function WaterEditor({
     () => resolveCssVarColor('--aethel-warning-dark', 'rgb(217, 119, 6)'),
     []
   );
-  
+
   // Apply preset
   const applyPreset = useCallback((preset: WaterPreset) => {
     setParams((prev) => ({ ...prev, ...preset.params, type: preset.type }));
     setSelectedPreset(preset.id);
   }, []);
-  
+
   // Update parameter
   const updateParam = useCallback(<K extends keyof WaterParams>(
     key: K,
@@ -604,7 +604,7 @@ export default function WaterEditor({
       return updated;
     });
   }, [onWaterUpdate]);
-  
+
   // Type icons
   const typeIcons: Record<WaterType, React.ReactNode> = {
     ocean: <Waves className="w-4 h-4" />,
@@ -613,30 +613,30 @@ export default function WaterEditor({
     pond: <Droplets className="w-4 h-4" />,
     pool: <Sparkles className="w-4 h-4" />,
   };
-  
+
   return (
     <div className="flex h-full w-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [30, 20, 30], fov: 50 }}>
           <color attach="background" args={[backgroundColor]} />
-          
+
           <ambientLight intensity={0.3} />
           <directionalLight position={[20, 30, 10]} intensity={1} />
-          
+
           <WaterSurface params={params} />
           <FoamOverlay params={params} />
           {showCaustics && <CausticsProjector params={params} />}
-          
+
           {/* Underwater plane */}
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -5, 0]}>
             <planeGeometry args={[100, 100]} />
-            <meshStandardMaterial 
-              color={underwaterColor} 
+            <meshStandardMaterial
+              color={underwaterColor}
               roughness={0.9}
             />
           </mesh>
-          
+
           <Sky sunPosition={[100, 50, 100]} />
           <OrbitControls makeDefault />
           <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
@@ -644,7 +644,7 @@ export default function WaterEditor({
           </GizmoHelper>
           <Environment preset="sunset" />
         </Canvas>
-        
+
         {/* Overlay info */}
         <div className="absolute top-4 left-4 bg-[var(--aethel-surface-primary)]/90 p-3 rounded">
           <div className="flex items-center gap-2 mb-2">
@@ -657,7 +657,7 @@ export default function WaterEditor({
             <div>Transparencia: {(params.transparency * 100).toFixed(0)}%</div>
           </div>
         </div>
-        
+
         {/* Export button */}
         <div className="absolute top-4 right-4">
           <button
@@ -669,7 +669,7 @@ export default function WaterEditor({
           </button>
         </div>
       </div>
-      
+
       {/* Settings Panel */}
       <div className="w-80 border-l border-[var(--aethel-border-primary)] overflow-y-auto">
         <div className="p-4">
@@ -677,7 +677,7 @@ export default function WaterEditor({
             <Waves className="w-5 h-5 text-[var(--aethel-primary)]" />
             Water Editor
           </h2>
-          
+
           {/* Type selector */}
           <div className="mb-4">
             <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-2">Water Type</label>
@@ -698,7 +698,7 @@ export default function WaterEditor({
               ))}
             </div>
           </div>
-          
+
           {/* Presets */}
           <CollapsibleSection title="Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
@@ -718,7 +718,7 @@ export default function WaterEditor({
               ))}
             </div>
           </CollapsibleSection>
-          
+
           {/* Colors */}
           <CollapsibleSection title="Colors" icon={<Palette className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <div className="grid grid-cols-2 gap-2 mb-3">
@@ -741,7 +741,7 @@ export default function WaterEditor({
                 />
               </div>
             </div>
-            
+
             <Slider
               label="Transparencia"
               value={params.transparency}
@@ -749,7 +749,7 @@ export default function WaterEditor({
               max={1}
               onChange={(v) => updateParam('transparency', v)}
             />
-            
+
             <Slider
               label="Depth fade"
               value={params.colorDepthFade}
@@ -760,7 +760,7 @@ export default function WaterEditor({
               onChange={(v) => updateParam('colorDepthFade', v)}
             />
           </CollapsibleSection>
-          
+
           {/* Waves */}
           <CollapsibleSection title="Waves" icon={<Waves className="w-4 h-4 text-[var(--aethel-primary)]" />}>
             <Slider
@@ -770,13 +770,13 @@ export default function WaterEditor({
               max={5}
               onChange={(v) => updateParam('waveScale', v)}
             />
-            
+
             <WaveSettingsPanel
               waves={params.waves}
               onUpdate={(waves) => updateParam('waves', waves)}
             />
           </CollapsibleSection>
-          
+
           {/* Foam */}
           <CollapsibleSection title="Foam" icon={<Sparkles className="w-4 h-4 text-[var(--aethel-text-primary)]" />}>
             <div className="flex items-center gap-2 mb-3">
@@ -788,7 +788,7 @@ export default function WaterEditor({
               />
               <span className="text-sm">Ativar foam</span>
             </div>
-            
+
             {params.foamEnabled && (
               <>
                 <div className="mb-3">
@@ -800,7 +800,7 @@ export default function WaterEditor({
                     className="w-full h-8 rounded cursor-pointer bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-border-secondary)]"
                   />
                 </div>
-                
+
                 <Slider
                   label="Intensity"
                   value={params.foamIntensity}
@@ -808,7 +808,7 @@ export default function WaterEditor({
                   max={1}
                   onChange={(v) => updateParam('foamIntensity', v)}
                 />
-                
+
                 <Slider
                   label="Shoreline Foam"
                   value={params.shorelineFoam}
@@ -819,7 +819,7 @@ export default function WaterEditor({
               </>
             )}
           </CollapsibleSection>
-          
+
           {/* Caustics */}
           <CollapsibleSection title="Caustics" icon={<Sun className="w-4 h-4 text-[var(--aethel-warning)]" />} defaultOpen={false}>
             <div className="flex items-center gap-2 mb-3">
@@ -831,7 +831,7 @@ export default function WaterEditor({
               />
               <span className="text-sm">Ativar caustics</span>
             </div>
-            
+
             {params.causticsEnabled && (
               <>
                 <Slider
@@ -841,7 +841,7 @@ export default function WaterEditor({
                   max={1}
                   onChange={(v) => updateParam('causticsIntensity', v)}
                 />
-                
+
                 <Slider
                   label="Scale"
                   value={params.causticsScale}
@@ -849,7 +849,7 @@ export default function WaterEditor({
                   max={5}
                   onChange={(v) => updateParam('causticsScale', v)}
                 />
-                
+
                 <Slider
                   label="Velocidade"
                   value={params.causticsVelocidade}
@@ -860,7 +860,7 @@ export default function WaterEditor({
               </>
             )}
           </CollapsibleSection>
-          
+
           {/* Reflexao/Refracao */}
           <CollapsibleSection title="Optics" icon={<Eye className="w-4 h-4 text-[var(--aethel-info)]" />} defaultOpen={false}>
             <div className="flex items-center gap-2 mb-3">
@@ -872,7 +872,7 @@ export default function WaterEditor({
               />
               <span className="text-sm">Reflexao</span>
             </div>
-            
+
             {params.reflectionEnabled && (
               <Slider
                 label="Reflexao Intensity"
@@ -882,7 +882,7 @@ export default function WaterEditor({
                 onChange={(v) => updateParam('reflectionIntensity', v)}
               />
             )}
-            
+
             <div className="flex items-center gap-2 mb-3 mt-4">
               <input
                 type="checkbox"
@@ -892,7 +892,7 @@ export default function WaterEditor({
               />
               <span className="text-sm">Refracao</span>
             </div>
-            
+
             {params.refractionEnabled && (
               <Slider
                 label="Refracao Strength"
@@ -903,7 +903,7 @@ export default function WaterEditor({
               />
             )}
           </CollapsibleSection>
-          
+
           {/* Flow (River) */}
           {params.type === 'river' && (
             <CollapsibleSection title="Flow" icon={<Wind className="w-4 h-4 text-[var(--aethel-accent)]" />}>
@@ -916,7 +916,7 @@ export default function WaterEditor({
                 />
                 <span className="text-sm">Ativar flow</span>
               </div>
-              
+
               {params.flowEnabled && (
                 <>
                   <Slider
@@ -926,7 +926,7 @@ export default function WaterEditor({
                     max={5}
                     onChange={(v) => updateParam('flowVelocidade', v)}
                   />
-                  
+
                   <Slider
                     label="Direcao do flow"
                     value={params.flowDirecao}
@@ -940,7 +940,7 @@ export default function WaterEditor({
               )}
             </CollapsibleSection>
           )}
-          
+
           {/* Buoyancy */}
           <CollapsibleSection title="Buoyancy" icon={<Anchor className="w-4 h-4 text-[var(--aethel-warning)]" />} defaultOpen={false}>
             <div className="flex items-center gap-2 mb-3">
@@ -952,7 +952,7 @@ export default function WaterEditor({
               />
               <span className="text-sm">Ativar buoyancy</span>
             </div>
-            
+
             {params.buoyancyEnabled && (
               <>
                 <Slider
@@ -962,7 +962,7 @@ export default function WaterEditor({
                   max={2}
                   onChange={(v) => updateParam('buoyancyStrength', v)}
                 />
-                
+
                 <Slider
                   label="Densidade da agua"
                   value={params.waterDensity}
@@ -975,7 +975,7 @@ export default function WaterEditor({
               </>
             )}
           </CollapsibleSection>
-          
+
           {/* Underwater */}
           <CollapsibleSection title="Underwater" icon={<Droplets className="w-4 h-4 text-[var(--aethel-info)]" />} defaultOpen={false}>
             <div className="mb-3">
@@ -987,7 +987,7 @@ export default function WaterEditor({
                 className="w-full h-8 rounded cursor-pointer bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-border-secondary)]"
               />
             </div>
-            
+
             <Slider
               label="Densidade do fog"
               value={params.underwaterFogDensity}

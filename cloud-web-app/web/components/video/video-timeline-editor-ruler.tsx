@@ -27,17 +27,17 @@ export function TimelineRuler({
   onMarkerClick,
 }: TimelineRulerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     const frames = Math.floor((seconds % 1) * frameRate);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
   };
-  
+
   const pixelsPerSecond = 100 * zoom;
   const tickInterval = zoom < 0.5 ? 5 : zoom < 1 ? 2 : zoom < 2 ? 1 : 0.5;
-  
+
   const handleClick = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -45,21 +45,21 @@ export function TimelineRuler({
     const time = x / pixelsPerSecond;
     onSeek(Math.max(0, Math.min(duration, time)));
   };
-  
+
   const visibleStart = scrollX / pixelsPerSecond;
   const visibleEnd = visibleStart + (containerRef.current?.clientWidth ?? 1000) / pixelsPerSecond;
-  
+
   const ticks = useMemo(() => {
     const result: number[] = [];
     const start = Math.floor(visibleStart / tickInterval) * tickInterval;
-    
+
     for (let time = start; time <= Math.min(visibleEnd + tickInterval, duration); time += tickInterval) {
       result.push(time);
     }
-    
+
     return result;
   }, [visibleStart, visibleEnd, tickInterval, duration]);
-  
+
   return (
     <div
       ref={containerRef}
@@ -85,7 +85,7 @@ export function TimelineRuler({
           borderRight: '2px solid var(--aethel-primary)',
         }}
       />
-      
+
       {/* Ticks */}
       {ticks.map((time) => (
         <div
@@ -113,7 +113,7 @@ export function TimelineRuler({
           )}
         </div>
       ))}
-      
+
       {/* Markers */}
       {markers.map((marker) => (
         <div
@@ -132,7 +132,7 @@ export function TimelineRuler({
           title={marker.name}
         />
       ))}
-      
+
       {/* Playhead */}
       <div
         style={{

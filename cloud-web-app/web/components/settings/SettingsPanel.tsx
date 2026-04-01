@@ -2,7 +2,7 @@
 
 /**
  * Settings Panel Component
- * 
+ *
  * Interface completa para configurações com busca,
  * categorias, profiles e sync.
  */
@@ -82,7 +82,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
   isModified,
 }) => {
   const type = definition?.type || 'string';
-  
+
   const renderInput = () => {
     switch (type) {
       case 'boolean':
@@ -110,7 +110,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
             </span>
           </label>
         );
-      
+
       case 'number':
         return (
           <input
@@ -130,7 +130,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
             }}
           />
         );
-      
+
       case 'enum':
         return (
           <select
@@ -154,7 +154,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
             ))}
           </select>
         );
-      
+
       case 'object':
         return (
           <textarea
@@ -178,7 +178,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
             }}
           />
         );
-      
+
       default:
         return (
           <input
@@ -199,7 +199,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
         );
     }
   };
-  
+
   return (
     <div
       style={{
@@ -227,7 +227,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
             {definition?.description || 'Sem descrição'}
           </p>
         </div>
-        
+
         {isModified && (
           <button
             onClick={onReset}
@@ -249,7 +249,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
           </button>
         )}
       </div>
-      
+
       <div style={{ marginTop: '8px' }}>
         {renderInput()}
       </div>
@@ -304,7 +304,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onActivate
             </div>
           </div>
         </div>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isActive && (
             <span style={{
@@ -317,7 +317,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onActivate
               Ativo
             </span>
           )}
-          
+
           {profile.id !== 'default' && (
             <button
               onClick={(e) => {
@@ -359,13 +359,13 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
   const [profiles, setProfiles] = useState<UserProfile[]>(settingsService.getAllProfiles());
   const [syncState, setSyncState] = useState<SyncState>(settingsService.getSyncState());
   const [newProfileName, setNewProfileName] = useState('');
-  
+
   // Filtered settings based on search
   const filteredSettings = useMemo(() => {
     if (!searchQuery) {
       return SETTING_CATEGORIES;
     }
-    
+
     const results = settingsService.search(searchQuery);
     return [{
       id: 'search-results',
@@ -375,49 +375,49 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
       settings: results.map(r => r.key),
     }];
   }, [searchQuery, settingsService]);
-  
+
   const handleSettingChange = useCallback(async (key: string, value: any) => {
     await settingsService.set(key, value);
     setSettings(settingsService.getAll());
   }, [settingsService]);
-  
+
   const handleResetSetting = useCallback(async (key: string) => {
     await settingsService.reset(key);
     setSettings(settingsService.getAll());
   }, [settingsService]);
-  
+
   const handleCreateProfile = useCallback(async () => {
     if (!newProfileName.trim()) return;
     await settingsService.createProfile(newProfileName);
     setProfiles(settingsService.getAllProfiles());
     setNewProfileName('');
   }, [settingsService, newProfileName]);
-  
+
   const handleSwitchProfile = useCallback(async (id: string) => {
     await settingsService.switchProfile(id);
     setSettings(settingsService.getAll());
   }, [settingsService]);
-  
+
   const handleDeleteProfile = useCallback(async (id: string) => {
     await settingsService.deleteProfile(id);
     setProfiles(settingsService.getAllProfiles());
   }, [settingsService]);
-  
+
   const handleEnableSync = useCallback(async () => {
     await settingsService.enableSync(['settings', 'extensions', 'keybindings']);
     setSyncState(settingsService.getSyncState());
   }, [settingsService]);
-  
+
   const handleDisableSync = useCallback(async () => {
     await settingsService.disableSync();
     setSyncState(settingsService.getSyncState());
   }, [settingsService]);
-  
+
   const handleSync = useCallback(async () => {
     await settingsService.sync();
     setSyncState(settingsService.getSyncState());
   }, [settingsService]);
-  
+
   const handleExport = useCallback(async () => {
     const json = await settingsService.exportSettings();
     const blob = new Blob([json], { type: 'application/json' });
@@ -428,7 +428,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
     a.click();
     URL.revokeObjectURL(url);
   }, [settingsService]);
-  
+
   const handleImport = useCallback(async () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -444,7 +444,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
     };
     input.click();
   }, [settingsService]);
-  
+
   const toggleCategory = (id: string) => {
     setExpandedCategories(prev => {
       const next = new Set(prev);
@@ -456,7 +456,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
       return next;
     });
   };
-  
+
   return (
     <div
       style={{
@@ -478,7 +478,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           <Settings size={24} color={colors.blue} />
           <h2 style={{ margin: 0, fontSize: '18px' }}>Configurações</h2>
         </div>
-        
+
         {/* Search */}
         <div
           style={{
@@ -519,7 +519,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
             </button>
           )}
         </div>
-        
+
         {/* Tabs */}
         <div
           style={{
@@ -555,7 +555,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           ))}
         </div>
       </div>
-      
+
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
         <AnimatePresence mode="wait">
@@ -603,7 +603,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   </div>
                 ))}
               </div>
-              
+
               {/* Settings list */}
               <div style={{ flex: 1, overflow: 'auto' }}>
                 {filteredSettings.map((category) => (
@@ -637,7 +637,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
               </div>
             </motion.div>
           )}
-          
+
           {activeTab === 'profiles' && (
             <motion.div
               key="profiles"
@@ -686,7 +686,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   </button>
                 </div>
               </div>
-              
+
               <div>
                 <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: colors.subtext0 }}>
                   Seus Perfis
@@ -722,7 +722,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
               </div>
             </motion.div>
           )}
-          
+
           {activeTab === 'sync' && (
             <motion.div
               key="sync"
@@ -758,7 +758,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                       </div>
                     </div>
                   </div>
-                  
+
                   <div style={{ display: 'flex', gap: '8px' }}>
                     {syncState.enabled ? (
                       <>
@@ -817,7 +817,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     )}
                   </div>
                 </div>
-                
+
                 {syncState.error && (
                   <div
                     style={{
@@ -836,7 +836,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   </div>
                 )}
               </div>
-              
+
               {/* Itens Sincronizados */}
               {syncState.enabled && (
                 <div style={{ marginBottom: '24px' }}>
@@ -872,7 +872,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   </div>
                 </div>
               )}
-              
+
               {/* Importar / Exportar */}
               <div>
                 <h3 style={{ margin: '0 0 12px', fontSize: '14px', color: colors.subtext0 }}>
@@ -922,7 +922,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           )}
         </AnimatePresence>
       </div>
-      
+
       <style>{`
         @keyframes spin {
           from { transform: rotate(0deg); }

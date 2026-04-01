@@ -42,6 +42,7 @@ import {
   Info,
   X,
 } from 'lucide-react'
+import { OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models'
 
 // ============= Types =============
 
@@ -88,12 +89,12 @@ interface AgentMetrics {
   tokensUsed: number
 }
 
-type AgentType = 
-  | 'architect' 
-  | 'coder' 
-  | 'researcher' 
-  | 'debugger' 
-  | 'reviewer' 
+type AgentType =
+  | 'architect'
+  | 'coder'
+  | 'researcher'
+  | 'debugger'
+  | 'reviewer'
   | 'tester'
   | 'orchestrator'
   | 'dreamer'
@@ -111,76 +112,76 @@ interface AgentSession {
 
 const AGENT_TEMPLATES: Omit<Agent, 'id' | 'taskHistory' | 'metrics'>[] = [
   {
-    name: 'Architect',
+    name: 'Arquiteto',
     type: 'architect',
-    description: 'Designs system architecture, plans implementation strategies, and creates technical specifications.',
+    description: 'Desenha arquitetura do sistema, planeja a implementacao e cria especificacoes tecnicas.',
     status: 'idle',
     icon: '🏗️',
     color: 'blue',
-    capabilities: ['System Design', 'API Planning', 'Database Schema', 'Component Structure'],
+    capabilities: ['Design de sistema', 'Planejamento de API', 'Esquema de dados', 'Estrutura de componentes'],
   },
   {
-    name: 'Coder',
+    name: 'Dev',
     type: 'coder',
-    description: 'Implements features, writes clean code, and follows best practices for the chosen language.',
+    description: 'Implementa features, escreve codigo limpo e segue boas praticas.',
     status: 'idle',
     icon: '💻',
     color: 'emerald',
-    capabilities: ['Code Generation', 'Refactoring', 'Optimization', 'Documentation'],
+    capabilities: ['Geracao de codigo', 'Refatoracao', 'Otimizacao', 'Documentacao'],
   },
   {
-    name: 'Researcher',
+    name: 'Pesquisador',
     type: 'researcher',
-    description: 'Searches documentation, finds solutions, and gathers relevant information for tasks.',
+    description: 'Pesquisa documentacao, encontra solucoes e coleta informacoes relevantes.',
     status: 'idle',
     icon: '🔬',
     color: 'cyan',
-    capabilities: ['Web Search', 'Doc Analysis', 'API Research', 'Dependency Check'],
+    capabilities: ['Busca web', 'Analise de docs', 'Pesquisa de API', 'Checagem de dependencias'],
   },
   {
-    name: 'Debugger',
+    name: 'Depurador',
     type: 'debugger',
-    description: 'Identifies and fixes bugs, analyzes error logs, and improves code reliability.',
+    description: 'Identifica e corrige bugs, analisa logs de erro e melhora a confiabilidade.',
     status: 'idle',
     icon: '🐛',
     color: 'red',
-    capabilities: ['Error Analysis', 'Stack Trace', 'Memory Profiling', 'Performance'],
+    capabilities: ['Analise de erros', 'Stack trace', 'Profiling de memoria', 'Performance'],
   },
   {
-    name: 'Reviewer',
+    name: 'Revisor',
     type: 'reviewer',
-    description: 'Reviews code quality, suggests improvements, and ensures best practices are followed.',
+    description: 'Revisa a qualidade do codigo, sugere melhorias e garante boas praticas.',
     status: 'idle',
     icon: '👁️',
     color: 'amber',
-    capabilities: ['Code Review', 'Security Audit', 'Style Check', 'Type Safety'],
+    capabilities: ['Revisao de codigo', 'Auditoria de seguranca', 'Checagem de estilo', 'Seguranca de tipos'],
   },
   {
-    name: 'Tester',
+    name: 'QA',
     type: 'tester',
-    description: 'Creates and runs tests, ensures code coverage, and validates functionality.',
+    description: 'Cria e executa testes, garante cobertura e valida a funcionalidade.',
     status: 'idle',
     icon: '🧪',
     color: 'cyan',
-    capabilities: ['Unit Tests', 'Integration Tests', 'E2E Tests', 'Coverage'],
+    capabilities: ['Testes unitarios', 'Testes de integracao', 'Testes E2E', 'Cobertura'],
   },
   {
-    name: 'Orchestrator',
+    name: 'Orquestrador',
     type: 'orchestrator',
-    description: 'Coordinates multiple agents, manages workflows, and ensures task completion.',
+    description: 'Coordena varios agentes, gerencia fluxos e garante conclusao de tarefas.',
     status: 'idle',
     icon: '🎭',
     color: 'cyan',
-    capabilities: ['Task Routing', 'Agent Coordination', 'Priority Management', 'Workflow'],
+    capabilities: ['Roteamento de tarefas', 'Coordenacao de agentes', 'Priorizacao', 'Workflow'],
   },
   {
-    name: 'AI Dream',
+    name: 'Visionario',
     type: 'dreamer',
-    description: 'Creative ideation agent that explores innovative solutions and generates new concepts.',
+    description: 'Agente criativo que explora solucoes inovadoras e gera novos conceitos.',
     status: 'idle',
     icon: '✨',
     color: 'blue',
-    capabilities: ['Creative Ideas', 'UI/UX Concepts', 'Innovation', 'Brainstorming'],
+    capabilities: ['Ideias criativas', 'Conceitos de UI/UX', 'Inovacao', 'Brainstorm'],
   },
 ]
 
@@ -188,12 +189,31 @@ const AGENT_TEMPLATES: Omit<Agent, 'id' | 'taskHistory' | 'metrics'>[] = [
 
 function getStatusColor(status: AgentStatus): string {
   switch (status) {
-    case 'running': return 'text-emerald-400'
-    case 'paused': return 'text-[var(--aethel-warning-light)]'
-    case 'completed': return 'text-blue-400'
-    case 'failed': return 'text-red-400'
-    case 'waiting': return 'text-cyan-400'
-    default: return 'text-slate-400'
+    case 'running': return 'text-[var(--aethel-success)]'
+    case 'paused': return 'text-[var(--aethel-warning)]'
+    case 'completed': return 'text-[var(--aethel-info-light)]'
+    case 'failed': return 'text-[var(--aethel-error)]'
+    case 'waiting': return 'text-[var(--aethel-info-light)]'
+    default: return 'text-[var(--aethel-text-tertiary)]'
+  }
+}
+
+function formatStatusLabel(status: AgentStatus): string {
+  switch (status) {
+    case 'idle':
+      return 'ocioso'
+    case 'running':
+      return 'executando'
+    case 'paused':
+      return 'pausado'
+    case 'completed':
+      return 'concluido'
+    case 'failed':
+      return 'falhou'
+    case 'waiting':
+      return 'aguardando'
+    default:
+      return status
   }
 }
 
@@ -216,10 +236,10 @@ function formatDuration(ms: number): string {
 
 function getAgentColorClasses(color: string): { bg: string; border: string; text: string } {
   const colors: Record<string, { bg: string; border: string; text: string }> = {
-    blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
-    emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400' },
-    cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400' },
-    red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400' },
+    blue: { bg: 'bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]', text: 'text-[var(--aethel-primary-light)]' },
+    emerald: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]', text: 'text-[var(--aethel-success)]' },
+    cyan: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]', text: 'text-[var(--aethel-info-light)]' },
+    red: { bg: 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]', text: 'text-[var(--aethel-error)]' },
     amber: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]', border: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]', text: 'text-[var(--aethel-warning-light)]' },
   }
   return colors[color] || colors.blue
@@ -239,34 +259,34 @@ interface AgentCardProps {
 
 function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop, onConfigure }: AgentCardProps) {
   const colors = getAgentColorClasses(agent.color)
-  
+
   return (
     <div className={`rounded-lg border ${colors.border} ${colors.bg} overflow-hidden`}>
       {/* Header */}
-      <div 
-        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/5"
+      <div
+        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
         onClick={onToggleExpand}
       >
         <span className="text-2xl">{agent.icon}</span>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-white">{agent.name}</span>
+            <span className="font-medium text-[var(--aethel-text-primary)]">{agent.name}</span>
             <span className={`flex items-center gap-1 text-xs ${getStatusColor(agent.status)}`}>
               {getStatusIcon(agent.status)}
-              {agent.status}
+              {formatStatusLabel(agent.status)}
             </span>
           </div>
-          <p className="text-xs text-slate-400 truncate">{agent.description}</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)] truncate">{agent.description}</p>
         </div>
-        
+
         {/* Quick Actions */}
         <div className="flex items-center gap-1">
           {agent.status === 'idle' && (
             <button
               onClick={(e) => { e.stopPropagation(); onStart() }}
-              className="p-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white"
-              title="Start Agent"
+              className="p-1.5 rounded bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]"
+              title="Iniciar agente"
             >
               <Play className="w-3 h-3" />
             </button>
@@ -275,15 +295,15 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); onPause() }}
-                className="p-1.5 rounded bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] text-white"
-                title="Pause Agent"
+                className="p-1.5 rounded bg-[var(--aethel-warning)] hover:brightness-110 text-[var(--aethel-text-primary)]"
+                title="Pausar agente"
               >
                 <Pause className="w-3 h-3" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onStop() }}
-                className="p-1.5 rounded bg-red-600 hover:bg-red-500 text-white"
-                title="Stop Agent"
+                className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
+                title="Parar agente"
               >
                 <Square className="w-3 h-3" />
               </button>
@@ -293,15 +313,15 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); onStart() }}
-                className="p-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white"
-                title="Resume Agent"
+                className="p-1.5 rounded bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]"
+                title="Retomar agente"
               >
                 <Play className="w-3 h-3" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onStop() }}
-                className="p-1.5 rounded bg-red-600 hover:bg-red-500 text-white"
-                title="Stop Agent"
+                className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
+                title="Parar agente"
               >
                 <Square className="w-3 h-3" />
               </button>
@@ -309,21 +329,21 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
           )}
           <button
             onClick={(e) => { e.stopPropagation(); onConfigure() }}
-            className="p-1.5 rounded hover:bg-white/10 text-slate-400"
-            title="Configure"
+            className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)]"
+            title="Configurar"
           >
             <Settings className="w-3 h-3" />
           </button>
-          {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
+          {isExpanded ? <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" /> : <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />}
         </div>
       </div>
-      
+
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="border-t border-white/10">
+        <div className="border-t border-[var(--aethel-border-primary)]">
           {/* Capabilities */}
-          <div className="p-3 border-b border-white/5">
-            <div className="text-xs text-slate-500 mb-2">Capabilities</div>
+          <div className="p-3 border-b border-[var(--aethel-border-primary)]">
+            <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Capacidades</div>
             <div className="flex flex-wrap gap-1">
               {agent.capabilities.map(cap => (
                 <span
@@ -335,21 +355,21 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               ))}
             </div>
           </div>
-          
+
           {/* Current Task */}
           {agent.currentTask && (
-            <div className="p-3 border-b border-white/5">
-              <div className="text-xs text-slate-500 mb-2">Current Task</div>
-              <div className="p-2 bg-slate-800/50 rounded">
-                <p className="text-sm text-white mb-1">{agent.currentTask.description}</p>
+            <div className="p-3 border-b border-[var(--aethel-border-primary)]">
+              <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Tarefa atual</div>
+              <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded">
+                <p className="text-sm text-[var(--aethel-text-primary)] mb-1">{agent.currentTask.description}</p>
                 {agent.currentTask.progress !== undefined && (
                   <div className="mt-2">
-                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                      <span>Progress</span>
+                    <div className="flex justify-between text-xs text-[var(--aethel-text-tertiary)] mb-1">
+                      <span>Progresso</span>
                       <span>{agent.currentTask.progress}%</span>
                     </div>
-                    <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                      <div 
+                    <div className="h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
+                      <div
                         className={`h-full ${colors.bg.replace('/10', '')} transition-all`}
                         style={{ width: `${agent.currentTask.progress}%` }}
                       />
@@ -363,9 +383,9 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
                         <span className={getStatusColor(sub.status)}>
                           {getStatusIcon(sub.status)}
                         </span>
-                        <span className="text-slate-300">{sub.name}</span>
+                        <span className="text-[var(--aethel-text-secondary)]">{sub.name}</span>
                         {sub.duration && (
-                          <span className="text-slate-500 ml-auto">{formatDuration(sub.duration)}</span>
+                          <span className="text-[var(--aethel-text-tertiary)] ml-auto">{formatDuration(sub.duration)}</span>
                         )}
                       </div>
                     ))}
@@ -374,26 +394,26 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               </div>
             </div>
           )}
-          
+
           {/* Metrics */}
           <div className="p-3">
-            <div className="text-xs text-slate-500 mb-2">Metrics</div>
+            <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Metricas</div>
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-2 bg-slate-800/50 rounded text-center">
-                <div className="text-lg font-semibold text-white">{agent.metrics.tasksCompleted}</div>
-                <div className="text-xs text-slate-400">Tasks Done</div>
+              <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
+                <div className="text-lg font-semibold text-[var(--aethel-text-primary)]">{agent.metrics.tasksCompleted}</div>
+                <div className="text-xs text-[var(--aethel-text-tertiary)]">Tarefas concluidas</div>
               </div>
-              <div className="p-2 bg-slate-800/50 rounded text-center">
-                <div className="text-lg font-semibold text-emerald-400">{agent.metrics.successRate}%</div>
-                <div className="text-xs text-slate-400">Success Rate</div>
+              <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
+                <div className="text-lg font-semibold text-[var(--aethel-success)]">{agent.metrics.successRate}%</div>
+                <div className="text-xs text-[var(--aethel-text-tertiary)]">Taxa de sucesso</div>
               </div>
-              <div className="p-2 bg-slate-800/50 rounded text-center">
+              <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
                 <div className="text-lg font-semibold text-[var(--aethel-warning-light)]">{formatDuration(agent.metrics.avgDuration)}</div>
-                <div className="text-xs text-slate-400">Avg Duration</div>
+                <div className="text-xs text-[var(--aethel-text-tertiary)]">Duracao media</div>
               </div>
-              <div className="p-2 bg-slate-800/50 rounded text-center">
-                <div className="text-lg font-semibold text-cyan-400">{(agent.metrics.tokensUsed / 1000).toFixed(1)}k</div>
-                <div className="text-xs text-slate-400">Tokens Used</div>
+              <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-center">
+                <div className="text-lg font-semibold text-[var(--aethel-info-light)]">{(agent.metrics.tokensUsed / 1000).toFixed(1)}k</div>
+                <div className="text-xs text-[var(--aethel-text-tertiary)]">Tokens usados</div>
               </div>
             </div>
           </div>
@@ -412,46 +432,46 @@ interface TaskTimelineProps {
 function TaskTimeline({ tasks }: TaskTimelineProps) {
   if (tasks.length === 0) {
     return (
-      <div className="p-4 text-center text-slate-500 text-sm">
-        No tasks in history yet.
+      <div className="p-4 text-center text-[var(--aethel-text-tertiary)] text-sm">
+        Nenhuma tarefa no historico ainda.
       </div>
     )
   }
-  
+
   return (
     <div className="space-y-2 p-2">
       {tasks.map((task, index) => (
         <div key={task.id} className="flex gap-3">
           <div className="flex flex-col items-center">
             <div className={`w-2 h-2 rounded-full ${
-              task.status === 'completed' ? 'bg-emerald-500' :
-              task.status === 'failed' ? 'bg-red-500' :
-              'bg-slate-600'
+              task.status === 'completed' ? 'bg-[var(--aethel-success)]' :
+              task.status === 'failed' ? 'bg-[var(--aethel-error)]' :
+              'bg-[var(--aethel-surface-quaternary)]'
             }`} />
             {index < tasks.length - 1 && (
-              <div className="w-0.5 flex-1 bg-slate-700 my-1" />
+              <div className="w-0.5 flex-1 bg-[var(--aethel-surface-quaternary)] my-1" />
             )}
           </div>
           <div className="flex-1 pb-3">
             <div className="flex items-center gap-2">
               <span className={`text-sm ${
-                task.status === 'completed' ? 'text-white' :
-                task.status === 'failed' ? 'text-red-400' :
-                'text-slate-400'
+                task.status === 'completed' ? 'text-[var(--aethel-text-primary)]' :
+                task.status === 'failed' ? 'text-[var(--aethel-error)]' :
+                'text-[var(--aethel-text-tertiary)]'
               }`}>
                 {task.description}
               </span>
             </div>
-            <div className="text-xs text-slate-500 mt-0.5">
-              {task.completedAt 
-                ? `Completed ${formatDuration(task.completedAt.getTime() - (task.startedAt?.getTime() || 0))}`
-                : task.startedAt 
-                  ? 'In progress...'
-                  : 'Pending'
+            <div className="text-xs text-[var(--aethel-text-tertiary)] mt-0.5">
+              {task.completedAt
+                ? `Concluida em ${formatDuration(task.completedAt.getTime() - (task.startedAt?.getTime() || 0))}`
+                : task.startedAt
+                  ? 'Em andamento...'
+                  : 'Pendente'
               }
             </div>
             {task.error && (
-              <div className="mt-1 text-xs text-red-400 bg-red-500/10 p-2 rounded">
+              <div className="mt-1 text-xs text-[var(--aethel-error)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] p-2 rounded">
                 {task.error}
               </div>
             )}
@@ -479,62 +499,62 @@ function WorkflowBuilder({
 }) {
   const [steps, setSteps] = useState<WorkflowStepConfig[]>([])
   const [objective, setObjective] = useState('')
-  
+
   const addStep = () => {
     if (agents.length === 0) return
     setSteps([...steps, { agent: agents[0], prompt: '' }])
   }
-  
+
   const removeStep = (index: number) => {
     setSteps(steps.filter((_, i) => i !== index))
   }
-  
+
   const updateStep = (index: number, updates: Partial<WorkflowStepConfig>) => {
     setSteps(steps.map((s, i) => i === index ? { ...s, ...updates } : s))
   }
-  
+
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-xs text-slate-400 mb-1">Objective</label>
+        <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Objetivo</label>
         <textarea
           value={objective}
           onChange={(e) => setObjective(e.target.value)}
-          placeholder="Describe what you want to accomplish..."
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder-slate-500 resize-none"
+          placeholder="Descreva o que voce quer concluir..."
+          className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] resize-none"
           rows={2}
         />
       </div>
-      
+
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">Workflow Steps</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Etapas do workflow</span>
           <button
             onClick={addStep}
-            className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded"
+            className="flex items-center gap-1 px-2 py-1 text-xs bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded"
           >
             <Plus className="w-3 h-3" />
-            Add Step
+            Adicionar etapa
           </button>
         </div>
-        
+
         {steps.length === 0 ? (
-          <div className="p-4 text-center text-slate-500 text-sm border border-dashed border-slate-700 rounded">
-            Add steps to build your workflow
+          <div className="p-4 text-center text-[var(--aethel-text-tertiary)] text-sm border border-dashed border-[var(--aethel-border-secondary)] rounded">
+            Adicione etapas para montar o workflow
           </div>
         ) : (
           <div className="space-y-2">
             {steps.map((step, index) => (
-              <div key={index} className="p-3 bg-slate-800/50 border border-slate-700 rounded">
+              <div key={index} className="p-3 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] border border-[var(--aethel-border-secondary)] rounded">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-slate-500">Step {index + 1}</span>
+                  <span className="text-xs text-[var(--aethel-text-tertiary)]">Etapa {index + 1}</span>
                   <select
                     value={step.agent.id}
                     onChange={(e) => {
                       const agent = agents.find(a => a.id === e.target.value)
                       if (agent) updateStep(index, { agent })
                     }}
-                    className="flex-1 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white"
+                    className="flex-1 px-2 py-1 bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-border-secondary)] rounded text-xs text-[var(--aethel-text-primary)]"
                   >
                     {agents.map(a => (
                       <option key={a.id} value={a.id}>{a.icon} {a.name}</option>
@@ -542,7 +562,7 @@ function WorkflowBuilder({
                   </select>
                   <button
                     onClick={() => removeStep(index)}
-                    className="p-1 text-slate-400 hover:text-red-400"
+                    className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)]"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -551,27 +571,27 @@ function WorkflowBuilder({
                   type="text"
                   value={step.prompt}
                   onChange={(e) => updateStep(index, { prompt: e.target.value })}
-                  placeholder={`Instructions for ${step.agent.name}...`}
-                  className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-xs text-white placeholder-slate-500"
+                  placeholder={`Instrucoes para ${step.agent.name}...`}
+                  className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] border border-[var(--aethel-border-secondary)] rounded text-xs text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)]"
                 />
               </div>
             ))}
           </div>
         )}
       </div>
-      
+
       <button
         onClick={() => onCreateWorkflow(steps)}
         disabled={steps.length === 0 || !objective}
         className={`
           w-full py-2 rounded font-medium text-sm
           ${steps.length > 0 && objective
-            ? 'bg-blue-600 hover:bg-blue-500 text-white'
-            : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+            ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
           }
         `}
       >
-        Start Workflow
+        Iniciar workflow
       </button>
     </div>
   )
@@ -585,7 +605,7 @@ interface AIAgentsPanelProProps {
 }
 
 export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAgentsPanelProProps) {
-  const [agents, setAgents] = useState<Agent[]>(() => 
+  const [agents, setAgents] = useState<Agent[]>(() =>
     AGENT_TEMPLATES.map((template, i) => ({
       ...template,
       id: `agent-${i}`,
@@ -598,12 +618,12 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       },
     }))
   )
-  
+
   const [expandedAgents, setExpandedAgents] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<'agents' | 'workflow' | 'history'>('agents')
   const [sessions, setSessions] = useState<AgentSession[]>([])
   const [showAgentConfig, setShowAgentConfig] = useState<string | null>(null)
-  
+
   // Toggle agent expansion
   const toggleAgentExpand = useCallback((id: string) => {
     setExpandedAgents(prev => {
@@ -613,63 +633,63 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       return next
     })
   }, [])
-  
+
   // Agent controls
   const startAgent = useCallback((id: string) => {
-    setAgents(prev => prev.map(a => 
+    setAgents(prev => prev.map(a =>
       a.id === id ? { ...a, status: 'running' as const } : a
     ))
   }, [])
-  
+
   const pauseAgent = useCallback((id: string) => {
-    setAgents(prev => prev.map(a => 
+    setAgents(prev => prev.map(a =>
       a.id === id ? { ...a, status: 'paused' as const } : a
     ))
   }, [])
-  
+
   const stopAgent = useCallback((id: string) => {
-    setAgents(prev => prev.map(a => 
+    setAgents(prev => prev.map(a =>
       a.id === id ? { ...a, status: 'idle' as const, currentTask: undefined } : a
     ))
   }, [])
-  
+
   const configureAgent = useCallback((id: string) => {
     setShowAgentConfig(id)
   }, [])
-  
+
   // Start all agents
   const startAllAgents = useCallback(() => {
     setAgents(prev => prev.map(a => ({ ...a, status: 'running' as const })))
   }, [])
-  
+
   // Stop all agents
   const stopAllAgents = useCallback(() => {
     setAgents(prev => prev.map(a => ({ ...a, status: 'idle' as const, currentTask: undefined })))
   }, [])
-  
+
   // Create workflow
   const handleCreateWorkflow = useCallback((steps: WorkflowStepConfig[]) => {
     const workflowSummary = steps
       .map((step, index) => `${index + 1}. ${step.agent.name}: ${step.prompt}`)
       .join('\n')
     onSendToChat?.(
-      `Workflow request captured (${steps.length} steps).\n${workflowSummary}\n\nStatus: WORKFLOW_EXECUTION_GATED (P1).`
+      `Workflow solicitado (${steps.length} etapas).\n${workflowSummary}\n\nStatus: WORKFLOW_EXECUTION_GATED (P1).`
     )
   }, [onSendToChat])
-  
+
   const runningAgents = agents.filter(a => a.status === 'running').length
   const allHistory = agents.flatMap(a => a.taskHistory)
-  
+
   return (
-    <div className={`h-full flex flex-col bg-slate-900 ${className}`}>
+    <div className={`h-full flex flex-col bg-[var(--aethel-surface-secondary)] ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-slate-800">
+      <div className="flex items-center justify-between p-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
-          <Bot className="w-5 h-5 text-blue-400" />
-          <span className="font-semibold text-white">AI Agents</span>
+          <Bot className="w-5 h-5 text-[var(--aethel-info-light)]" />
+          <span className="font-semibold text-[var(--aethel-text-primary)]">Agentes de IA</span>
           {runningAgents > 0 && (
-            <span className="px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 rounded-full">
-              {runningAgents} active
+            <span className="px-2 py-0.5 text-xs bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success)] rounded-full">
+              {runningAgents} ativos
             </span>
           )}
         </div>
@@ -677,25 +697,25 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
           {runningAgents === 0 ? (
             <button
               onClick={startAllAgents}
-              className="p-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white"
-              title="Start All"
+              className="p-1.5 rounded bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]"
+              title="Iniciar todos"
             >
               <Play className="w-4 h-4" />
             </button>
           ) : (
             <button
               onClick={stopAllAgents}
-              className="p-1.5 rounded bg-red-600 hover:bg-red-500 text-white"
-              title="Stop All"
+              className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
+              title="Parar todos"
             >
               <Square className="w-4 h-4" />
             </button>
           )}
         </div>
       </div>
-      
+
       {/* Tabs */}
-      <div className="flex gap-1 p-2 border-b border-slate-800">
+      <div className="flex gap-1 p-2 border-b border-[var(--aethel-border-primary)]">
         {(['agents', 'workflow', 'history'] as const).map(tab => (
           <button
             key={tab}
@@ -703,19 +723,19 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             className={`
               flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors capitalize
               ${activeTab === tab
-                ? 'bg-blue-600 text-white'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
               }
             `}
           >
             {tab === 'agents' && <Bot className="w-3 h-3 inline-block mr-1" />}
             {tab === 'workflow' && <Workflow className="w-3 h-3 inline-block mr-1" />}
             {tab === 'history' && <Clock className="w-3 h-3 inline-block mr-1" />}
-            {tab}
+            {tab === 'agents' ? 'Agentes' : tab === 'workflow' ? 'Workflow' : 'Historico'}
           </button>
         ))}
       </div>
-      
+
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'agents' && (
@@ -734,7 +754,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             ))}
           </div>
         )}
-        
+
         {activeTab === 'workflow' && (
           <div className="p-3">
             <WorkflowBuilder
@@ -743,61 +763,61 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             />
           </div>
         )}
-        
+
         {activeTab === 'history' && (
           <TaskTimeline tasks={allHistory} />
         )}
       </div>
-      
+
       {/* Quick Actions Footer */}
-      <div className="p-3 border-t border-slate-800">
+      <div className="p-3 border-t border-[var(--aethel-border-primary)]">
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => onSendToChat?.('Criar uma nova feature usando agentes de IA')}
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm text-slate-300"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm text-[var(--aethel-text-secondary)]"
           >
             <MessageSquare className="w-4 h-4" />
-            Chat with Agents
+            Conversar com agentes
           </button>
           <button
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm text-white"
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm text-[var(--aethel-text-primary)]"
           >
             <Zap className="w-4 h-4" />
-            Quick Task
+            Tarefa rapida
           </button>
         </div>
       </div>
-      
+
       {/* Agent Config Modal */}
       {showAgentConfig && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-slate-900 border border-slate-700 rounded-lg w-full max-w-md p-4">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] flex items-center justify-center z-50">
+          <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg w-full max-w-md p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-white">
-                Configure {agents.find(a => a.id === showAgentConfig)?.name}
+              <h3 className="font-semibold text-[var(--aethel-text-primary)]">
+                Configurar {agents.find(a => a.id === showAgentConfig)?.name}
               </h3>
               <button
                 onClick={() => setShowAgentConfig(null)}
-                className="p-1 hover:bg-slate-800 rounded"
+                className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
               >
-                <X className="w-4 h-4 text-slate-400" />
+                <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Model</label>
-                <select className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white">
-                  <option>GPT-4o (recommended)</option>
-                  <option>GPT-4o mini</option>
-                  <option>Claude Sonnet 4</option>
-                  <option>Gemini 2.0 Flash</option>
-                  <option>DeepSeek R1</option>
+                <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Modelo</label>
+                <select className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)]">
+                  {OPENROUTER_MODEL_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Temperature</label>
+                <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Temperatura</label>
                 <input
                   type="range"
                   min="0"
@@ -807,36 +827,36 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
                   className="w-full"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Max Tokens</label>
+                <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Maximo de tokens</label>
                 <input
                   type="number"
                   defaultValue="4096"
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white"
+                  className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)]"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-xs text-slate-400 mb-1">System Prompt</label>
+                <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Prompt do sistema</label>
                 <textarea
                   rows={3}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white resize-none"
-                  placeholder="Custom instructions for this agent..."
+                  className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)] resize-none"
+                  placeholder="Instrucoes personalizadas para este agente..."
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => setShowAgentConfig(null)}
-                className="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm text-slate-300"
+                className="flex-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm text-[var(--aethel-text-secondary)]"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => setShowAgentConfig(null)}
-                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm text-white"
+                className="flex-1 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm text-[var(--aethel-text-primary)]"
               >
                 Salvar alteracoes
               </button>

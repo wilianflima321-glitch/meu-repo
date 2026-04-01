@@ -65,7 +65,7 @@ export function Modal({
     <Fragment>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+        className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm animate-in fade-in duration-200"
         onClick={closeOnOverlayClick ? onClose : undefined}
         aria-hidden="true"
       />
@@ -80,9 +80,9 @@ export function Modal({
           onClick={(e) => e.stopPropagation()}
           className={`
             ${sizeClasses[size]} w-full
-            bg-gradient-to-b from-slate-800/95 to-slate-900/95
+            bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-secondary)_95%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)]
             backdrop-blur-xl
-            border border-slate-700/50
+            border border-[var(--aethel-border-primary)]/50
             rounded-2xl
             shadow-2xl shadow-black/50
             animate-in fade-in zoom-in-95 duration-200
@@ -96,7 +96,7 @@ export function Modal({
                 {title && (
                   <h2
                     id="modal-title"
-                    className="text-xl font-semibold text-slate-100 leading-tight"
+                    className="text-xl font-semibold text-[var(--aethel-text-primary)] leading-tight"
                   >
                     {title}
                   </h2>
@@ -104,7 +104,7 @@ export function Modal({
                 {description && (
                   <p
                     id="modal-description"
-                    className="mt-1.5 text-sm text-slate-400"
+                    className="mt-1.5 text-sm text-[var(--aethel-text-tertiary)]"
                   >
                     {description}
                   </p>
@@ -115,10 +115,10 @@ export function Modal({
                   onClick={onClose}
                   className="
                     flex-shrink-0 p-2 rounded-lg
-                    text-slate-400 hover:text-slate-200
-                    bg-transparent hover:bg-slate-700/50
+                    text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
+                    bg-transparent hover:bg-[var(--aethel-surface-quaternary)]/50
                     transition-all duration-200
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)]
                   "
                   aria-label="Fechar modal"
                 >
@@ -130,7 +130,7 @@ export function Modal({
 
           {/* Divider */}
           {title && (
-            <div className="mx-6 border-t border-slate-700/50" />
+            <div className="mx-6 border-t border-[var(--aethel-border-primary)]/50" />
           )}
 
           {/* Content */}
@@ -141,7 +141,7 @@ export function Modal({
           {/* Footer */}
           {footer && (
             <>
-              <div className="mx-6 border-t border-slate-700/50" />
+              <div className="mx-6 border-t border-[var(--aethel-border-primary)]/50" />
               <div className="px-6 py-4 flex items-center justify-end gap-3">
                 {footer}
               </div>
@@ -200,7 +200,7 @@ export function ConfirmModal({
         </>
       }
     >
-      <p className="text-slate-300">{message}</p>
+      <p className="text-[var(--aethel-text-secondary)]">{message}</p>
     </Modal>
   )
 }

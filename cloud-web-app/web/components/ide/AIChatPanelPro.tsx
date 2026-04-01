@@ -10,6 +10,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   RefreshCw,
+  AlertTriangle,
   Code,
   Lightbulb,
   Bug,
@@ -52,6 +53,7 @@ import {
   type SpeechRecognitionInstance,
   type ToolCall,
 } from './AIChatPanelPro.types'
+import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models'
 import { CodebaseContextPanel, MentionContextPanel } from './AIChatContextPanels'
 import {
   AttachmentPreview,
@@ -63,14 +65,14 @@ import {
 import { MentionChip, SuggestionList, useMentions } from '@/lib/copilot/mention-parser'
 
 const QUICK_PROMPTS = [
-  { icon: Code, label: 'Explain Code', prompt: 'Explain this code:' },
-  { icon: Bug, label: 'Find Bugs', prompt: 'Find bugs in this code:' },
-  { icon: Zap, label: 'Optimize', prompt: 'Optimize this code for performance:' },
-  { icon: Lightbulb, label: 'Suggest', prompt: 'Suggest improvements for:' },
-  { icon: Terminal, label: 'Generate', prompt: 'Generate code for:' },
-  { icon: Wand2, label: 'Refactor', prompt: 'Refactor this code:' },
-  { icon: Brain, label: 'Explain Error', prompt: 'Explain this error and how to fix it:' },
-  { icon: Layers, label: 'Add Tests', prompt: 'Generate unit tests for:' },
+  { icon: Brain, label: 'Explicar erro', prompt: 'Explique este erro e como corrigir:' },
+  { icon: Bug, label: 'Corrigir arquivo', prompt: 'Corrija problemas neste arquivo:' },
+  { icon: Zap, label: 'Otimizar', prompt: 'Otimize este codigo para desempenho:' },
+  { icon: Wand2, label: 'Refatorar', prompt: 'Refatore este codigo:' },
+  { icon: Layers, label: 'Gerar testes', prompt: 'Gere testes unitarios para:' },
+  { icon: Code, label: 'Explicar codigo', prompt: 'Explique este codigo:' },
+  { icon: Lightbulb, label: 'Melhorar UX', prompt: 'Sugira melhorias de UX para:' },
+  { icon: Terminal, label: 'Gerar modulo', prompt: 'Gere um modulo para:' },
 ]
 
 const QUICK_MENTIONS = [
@@ -79,16 +81,25 @@ const QUICK_MENTIONS = [
   { label: '@git:diff', value: '@git:diff ' },
   { label: '@diagnostics', value: '@diagnostics ' },
 ]
+
+const formatCost = (value?: number) => {
+  if (value === undefined || Number.isNaN(value)) return null
+  if (value >= 10) return `$${value.toFixed(0)}`
+  if (value >= 1) return `$${value.toFixed(2)}`
+  return `$${value.toFixed(4)}`
+}
 function useVoiceRecording() {
   const [isRecording, setIsRecording] = useState(false)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [transcript, setTranscript] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
+  const [voiceError, setVoiceError] = useState<string | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const startRecording = useCallback(async () => {
     try {
+      setVoiceError(null)
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
         recognitionRef.current = new SpeechRecognitionAPI() as SpeechRecognitionInstance
@@ -107,6 +118,9 @@ function useVoiceRecording() {
             }
           }
           setTranscript(finalTranscript || interimTranscript)
+        }
+        recognitionRef.current.onerror = () => {
+          setVoiceError('Falha ao transcrever. Verifique permissao do microfone.')
         }
         recognitionRef.current.start()
       }
@@ -127,6 +141,7 @@ function useVoiceRecording() {
       setIsRecording(true)
     } catch (error) {
       console.error('Error starting recording:', error)
+      setVoiceError('Nao foi possivel iniciar a captura de voz. Verifique as permissoes do navegador.')
     }
   }, [])
   const stopRecording = useCallback(() => {
@@ -142,23 +157,28 @@ function useVoiceRecording() {
     setAudioBlob(null)
     setTranscript('')
   }, [])
+  const clearVoiceError = useCallback(() => {
+    setVoiceError(null)
+  }, [])
   return {
     isRecording,
     audioBlob,
     transcript,
     isTranscribing,
+    voiceError,
     startRecording,
     stopRecording,
     clearRecording,
+    clearVoiceError,
   }
 }
 const DEMO_MESSAGES: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Hello! I\'m your AI assistant. I can help you with:\n\n- **Code explanation** - Understand complex code\n- **Bug detection** - Find issues in your code\n- **Optimization** - Improve performance\n- **Code generation** - Write new code\n\nHow can I help you today?',
+    content: 'Ola! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explicacao de codigo** - entender trechos complexos\n- **Deteccao de bugs** - encontrar problemas no seu codigo\n- **Otimizacao** - melhorar performance\n- **Geracao de codigo** - escrever codigo novo\n\nComo posso ajudar voce hoje?',
     timestamp: new Date(Date.now() - 60000),
-    model: 'gpt-4o',
+    model: DEFAULT_OPENROUTER_MODEL_ID,
   },
 ]
 interface MessageBubbleProps {
@@ -184,19 +204,60 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
         if (match) {
           const [, language = 'text', code] = match
           return (
-            <div key={i} className="my-3 rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
-              <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800 border-b border-slate-700">
-                <span className="text-xs text-slate-400">{language}</span>
+            <div key={i} className="my-3 overflow-hidden rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))]">
+              <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-1.5">
+                <span className="text-xs text-[var(--aethel-text-tertiary)]">{language}</span>
                 <button
                   onClick={() => onCopy(code)}
-                  className="p-1 rounded hover:bg-slate-700 text-slate-400"
+                  className="rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
                   <Copy className="w-3.5 h-3.5" />
                 </button>
               </div>
               <pre className="p-3 overflow-x-auto text-sm">
-                <code className="text-slate-300">{code}</code>
+                <code className="text-[var(--aethel-text-secondary)]">{code}</code>
               </pre>
+              <div className="flex flex-wrap items-center gap-2 border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-tertiary)]">
+                <button
+                  type="button"
+                  disabled
+                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
+                  title="Requer integracao com o editor"
+                  aria-disabled="true"
+                >
+                  Aplicar no editor
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
+                  title="Requer integracao com o editor"
+                  aria-disabled="true"
+                >
+                  Abrir diff
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
+                  title="Requer integracao com o editor"
+                  aria-disabled="true"
+                >
+                  Criar arquivo
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
+                  title="Requer integracao com o editor"
+                  aria-disabled="true"
+                >
+                  Inserir selecao
+                </button>
+                <span className="ml-auto text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
+                  Integracao do editor pendente
+                </span>
+              </div>
             </div>
           )
         }
@@ -206,7 +267,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
           {part.split('\n').map((line, j) => (
             <span key={j}>
               {line.startsWith('- ') ? (
-                <span className="block pl-4 before:content-['•'] before:absolute before:left-0 before:text-slate-500 relative">
+                <span className="relative block pl-4 before:absolute before:left-0 before:text-[var(--aethel-text-quaternary)] before:content-['-']">
                   {line.slice(2)}
                 </span>
               ) : line.startsWith('**') && line.endsWith('**') ? (
@@ -226,24 +287,24 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
       {/* Avatar */}
       <div className={`
         w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-        ${isUser ? 'bg-blue-600' : 'bg-gradient-to-br from-emerald-500 to-cyan-500'}
+        ${isUser ? 'bg-[var(--aethel-primary)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}
       `}>
-        {isUser ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
+        {isUser ? <User className="w-4 h-4 text-[var(--aethel-text-primary)]" /> : <Bot className="w-4 h-4 text-[var(--aethel-text-primary)]" />}
       </div>
       {/* Content */}
       <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : ''}`}>
         {/* Voice indicator */}
         {message.isVoice && (
-          <div className="flex items-center gap-1 mb-1 text-xs text-blue-400">
+          <div className="flex items-center gap-1 mb-1 text-xs text-[var(--aethel-info-light)]">
             <Mic className="w-3 h-3" />
-            Voice message
+            Mensagem de voz
           </div>
         )}
         {/* Attachments */}
         {message.attachments && message.attachments.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
             {message.attachments.map(att => (
-              <div key={att.id} className="flex items-center gap-2 px-2 py-1 bg-slate-700/50 rounded text-xs text-slate-300">
+              <div key={att.id} className="flex items-center gap-2 rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_48%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
                 {att.type === 'image' ? <ImageIcon className="w-3 h-3" /> : <File className="w-3 h-3" />}
                 {att.name}
               </div>
@@ -269,14 +330,14 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
         <div className={`
           inline-block max-w-full text-left px-4 py-2.5 rounded-2xl
           ${isUser
-            ? 'bg-blue-600 text-white rounded-tr-sm'
-            : 'bg-slate-800 text-slate-200 rounded-tl-sm'
+            ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] rounded-tr-sm'
+            : 'rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] text-[var(--aethel-text-secondary)]'
           }
         `}>
           <div className="text-sm">{renderContent(message.content)}</div>
         </div>
         {/* Meta & Actions */}
-        <div className={`flex items-center gap-2 mt-1 text-xs text-slate-500 ${isUser ? 'justify-end' : ''}`}>
+        <div className={`mt-1 flex items-center gap-2 text-xs text-[var(--aethel-text-quaternary)] ${isUser ? 'justify-end' : ''}`}>
           {message.model && (
             <span className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
@@ -294,29 +355,33 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             <div className="flex items-center gap-1 ml-2">
               <button
                 onClick={handleCopy}
-                className="p-1 rounded hover:bg-slate-800"
-                title="Copy"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Copiar resposta"
+                aria-label="Copiar resposta"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-[var(--aethel-success)]" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <button
                 onClick={onRegenerate}
-                className="p-1 rounded hover:bg-slate-800"
-                title="Regenerate"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Regerar resposta"
+                aria-label="Regerar resposta"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onRate('up')}
-                className="p-1 rounded hover:bg-slate-800"
-                title="Good response"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Marcar resposta como util"
+                aria-label="Marcar resposta como util"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onRate('down')}
-                className="p-1 rounded hover:bg-slate-800"
-                title="Bad response"
+                className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Marcar resposta como insuficiente"
+                aria-label="Marcar resposta como insuficiente"
               >
                 <ThumbsDown className="w-3.5 h-3.5" />
               </button>
@@ -333,7 +398,7 @@ export default function AIChatPanelPro({
   onRegenerateResponse,
   onRateResponse,
   onClearChat,
-  currentModel = 'gpt-4o',
+  currentModel = DEFAULT_OPENROUTER_MODEL_ID,
   models = DEFAULT_MODELS,
   onModelChange,
   isLoading = false,
@@ -355,12 +420,14 @@ export default function AIChatPanelPro({
   codebaseContextPreview,
 }: AIChatPanelProps) {
   const [showModelSelector, setShowModelSelector] = useState(false)
+  const [showAdvancedControls, setShowAdvancedControls] = useState(false)
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [showHistorySidebar, setShowHistorySidebar] = useState(showHistory)
+  const [agentCount, setAgentCount] = useState(1)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const { isRecording, transcript, startRecording, stopRecording, clearRecording } = useVoiceRecording()
+  const { isRecording, transcript, voiceError, startRecording, stopRecording, clearRecording, clearVoiceError } = useVoiceRecording()
   const [isSpeaking, setIsSpeaking] = useState(false)
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null)
   const mentionState = useMentions('')
@@ -557,14 +624,19 @@ export default function AIChatPanelPro({
   }, [])
   const handleSend = useCallback((e?: FormEvent) => {
     e?.preventDefault()
-    if (!input.trim() || isLoading) return
-    onSendMessage?.(input, {
+    const normalizedInput = input.trim()
+    if (!normalizedInput || isLoading) return
+    const hasAgentTag = /@agents:[123]/i.test(normalizedInput)
+    const messageWithAgents = agentCount > 1 && !hasAgentTag
+      ? `@agents:${agentCount} ${normalizedInput}`
+      : normalizedInput
+    onSendMessage?.(messageWithAgents, {
       attachments: allowAttachments && attachments.length > 0 ? attachments : undefined,
     })
     mentionState.replaceText('')
     setAttachments([])
     clearRecording()
-  }, [input, isLoading, attachments, onSendMessage, clearRecording, allowAttachments, mentionState])
+  }, [agentCount, input, isLoading, attachments, onSendMessage, clearRecording, allowAttachments, mentionState])
   const handleComposerKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     mentionState.handleKeyDown(e)
     if (e.defaultPrevented) return
@@ -655,6 +727,9 @@ export default function AIChatPanelPro({
     }
   }
   const selectedModel = models.find(m => m.id === currentModel) || models[0]
+  const inputCostLabel = formatCost(selectedModel?.inputCost)
+  const outputCostLabel = formatCost(selectedModel?.outputCost)
+  const modelTierLabel = selectedModel?.tier?.toUpperCase() ?? 'BUDGET'
   const visibleCodebaseContextPreview = codebaseContextPreview ?? localCodebaseContextPreview
   return (
     <div className={`h-full flex ${className}`}>
@@ -677,101 +752,161 @@ export default function AIChatPanelPro({
           <LiveModeIndicator status={liveStatus} onEnd={onToggleLiveMode} />
         )}
         {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+        <div className="flex items-center justify-between border-b border-[var(--aethel-border-secondary)] px-3 py-2">
           {/* Left: History + Model */}
           <div className="flex items-center gap-2">
             {threads.length > 0 && (
               <button
                 onClick={() => setShowHistorySidebar(!showHistorySidebar)}
-                className={`p-1.5 rounded hover:bg-slate-800 ${showHistorySidebar ? 'bg-slate-800 text-blue-400' : 'text-slate-400'}`}
-                title="Chat History"
+                className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showHistorySidebar ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}
+                title="Historico do chat"
+                aria-label="Alternar historico do chat"
               >
                 <History className="w-4 h-4" />
               </button>
             )}
             {/* Model Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setShowModelSelector(!showModelSelector)}
-                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-slate-800 text-sm"
-              >
-                <Sparkles className="w-4 h-4 text-blue-400" />
-                <span>{selectedModel.name}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              </button>
-              {showModelSelector && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
-                  <div className="absolute left-0 top-full mt-1 z-50 min-w-72 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl">
-                    {models.map(model => (
-                      <button
-                        key={model.id}
-                        onClick={() => {
-                          onModelChange?.(model.id)
-                          setShowModelSelector(false)
-                        }}
-                        className={`
-                          w-full flex items-start gap-3 px-3 py-2 text-left
-                          ${model.id === currentModel ? 'bg-blue-500/20' : 'hover:bg-slate-700'}
-                        `}
-                      >
-                        <Sparkles className={`w-4 h-4 mt-0.5 ${model.id === currentModel ? 'text-blue-400' : 'text-slate-500'}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-medium text-white">{model.name}</span>
-                            <span className="text-xs text-slate-500">{model.provider}</span>
-                            {model.supportsVision && (
-                              <span className="px-1.5 py-0.5 text-[10px] bg-cyan-500/20 text-cyan-400 rounded">Vision</span>
-                            )}
-                            {model.supportsVoice && (
-                              <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded">Voice</span>
-                            )}
-                          </div>
-                          {model.description && (
-                            <span className="text-xs text-slate-400">{model.description}</span>
-                          )}
-                        </div>
-                        {model.id === currentModel && <Check className="w-4 h-4 text-blue-400" />}
-                      </button>
-                    ))}
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowModelSelector(!showModelSelector)}
+                    aria-label="Abrir seletor de modelo de IA"
+                    aria-expanded={showModelSelector}
+                    className="flex items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                  >
+                    <Sparkles className="w-4 h-4 text-[var(--aethel-info-light)]" />
+                    <span>{selectedModel.name}</span>
+                    <ChevronDown className="h-3.5 w-3.5 text-[var(--aethel-text-tertiary)]" />
+                  </button>
+                  {showModelSelector && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
+                      <div className="absolute left-0 top-full z-50 mt-1 min-w-72 rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.98),rgba(10,14,24,0.94))] py-1 shadow-[0_24px_80px_rgba(2,6,23,0.48)]">
+                        {models.map(model => (
+                          <button
+                            key={model.id}
+                            onClick={() => {
+                              onModelChange?.(model.id)
+                              setShowModelSelector(false)
+                            }}
+                            className={`
+                              w-full flex items-start gap-3 px-3 py-2 text-left
+                              ${model.id === currentModel ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)]'}
+                            `}
+                          >
+                            <Sparkles className={`mt-0.5 h-4 w-4 ${model.id === currentModel ? 'text-[var(--aethel-info)]' : 'text-[var(--aethel-text-quaternary)]'}`} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{model.name}</span>
+                                <span className="text-xs text-[var(--aethel-text-quaternary)]">{model.provider}</span>
+                                {model.tier && (
+                                  <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_68%,transparent)] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[var(--aethel-text-secondary)]">
+                                    {model.tier}
+                                  </span>
+                                )}
+                                {model.supportsVision && (
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)] rounded">Visao</span>
+                                )}
+                                {model.supportsVoice && (
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success)] rounded">Voz</span>
+                                )}
+                              </div>
+                              {model.description && (
+                                <span className="text-xs text-[var(--aethel-text-tertiary)]">{model.description}</span>
+                              )}
+                              {model.inputCost !== undefined && model.outputCost !== undefined && (
+                                <span className="text-[11px] text-[var(--aethel-text-quaternary)]">
+                                  {formatCost(model.inputCost)}/{formatCost(model.outputCost)} por 1M
+                                </span>
+                              )}
+                            </div>
+                            {model.id === currentModel && <Check className="w-4 h-4 text-[var(--aethel-info-light)]" />}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                {showAdvancedControls ? (
+                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--aethel-text-tertiary)]">
+                    <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-1.5 py-0.5 uppercase tracking-wide text-[var(--aethel-text-secondary)]">
+                      {modelTierLabel}
+                    </span>
+                    {inputCostLabel && outputCostLabel && (
+                      <span>{inputCostLabel}/{outputCostLabel} por 1M</span>
+                    )}
+                    {agentCount > 1 && (
+                      <span className="text-[var(--aethel-text-quaternary)]">x{agentCount} agentes</span>
+                    )}
                   </div>
-                </>
+                ) : (
+                  <div className="mt-0.5 text-[11px] text-[var(--aethel-text-quaternary)]">Modo basico</div>
+                )}
+              </div>
+              {showAdvancedControls && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[11px] text-[var(--aethel-text-quaternary)]">Agentes</span>
+                  {[1, 2, 3].map((count) => (
+                    <button
+                      key={count}
+                      onClick={() => setAgentCount(count)}
+                      className={`px-2 py-0.5 text-[11px] rounded border ${
+                        agentCount === count
+                          ? 'border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
+                          : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
+                      }`}
+                    >
+                      {count}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </div>
           {/* Actions */}
           <div className="flex items-center gap-1">
-            {/* Live Mode Toggle */}
-            {selectedModel.supportsVoice && onToggleLiveMode && (
-              <button
-                onClick={onToggleLiveMode}
-                className={`p-1.5 rounded ${isLiveMode ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
-                title={isLiveMode ? 'Exit Live Mode' : 'Enter Live Mode (Gemini Live style)'}
-              >
-                <Radio className="w-4 h-4" />
-              </button>
+            {showAdvancedControls && (
+              <>
+                {/* Live Mode Toggle */}
+                {selectedModel.supportsVoice && onToggleLiveMode && (
+                  <button
+                    onClick={onToggleLiveMode}
+                    className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isLiveMode ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+                    title={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo (voz em tempo real)'}
+                    aria-label={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo'}
+                  >
+                    <Radio className="w-4 h-4" />
+                  </button>
+                )}
+                {/* TTS Toggle */}
+                <button
+                  onClick={isSpeaking ? stopSpeaking : () => {
+                    const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
+                    if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
+                  }}
+                  className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isSpeaking ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+                  title={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
+                  aria-label={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
+                >
+                  {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+              </>
             )}
-            {/* TTS Toggle */}
-            <button
-              onClick={isSpeaking ? stopSpeaking : () => {
-                const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
-                if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
-              }}
-              className={`p-1.5 rounded ${isSpeaking ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
-              title={isSpeaking ? 'Stop speaking' : 'Read last response'}
-            >
-              {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
             <button
               onClick={onClearChat}
-              className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-              title="Clear chat"
+              className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              title="Limpar chat"
+              aria-label="Limpar chat"
             >
               <Trash2 className="w-4 h-4" />
             </button>
             <button
-              className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-              title="Ajustes"
+              onClick={() => setShowAdvancedControls((prev) => !prev)}
+              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showAdvancedControls ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+              title={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
+              aria-pressed={showAdvancedControls}
+              aria-label={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
             >
               <Settings className="w-4 h-4" />
             </button>
@@ -781,31 +916,42 @@ export default function AIChatPanelPro({
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4">
-                <Bot className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] flex items-center justify-center mb-4">
+                <Bot className="w-8 h-8 text-[var(--aethel-text-primary)]" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">AI Assistant</h3>
-              <p className="text-sm text-slate-400 max-w-sm mb-6">
-                Ask me anything about your code. I can explain, debug, optimize, and generate code.
+              <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-2">Assistente de IA</h3>
+              <p className="mb-6 max-w-sm text-sm text-[var(--aethel-text-tertiary)]">
+                Selecione um arquivo, cole um erro ou use @codebase para iniciar. Eu explico, depuro e gero trechos sob demanda.
               </p>
               {selectedModel.supportsVoice && (
-                <p className="text-xs text-blue-400 mb-4 flex items-center gap-1">
+                <p className="text-xs text-[var(--aethel-info-light)] mb-4 flex items-center gap-1">
                   <Radio className="w-3 h-3" />
-                  This model supports Live Mode for real-time voice chat
+                  Este modelo suporta modo ao vivo para voz em tempo real
                 </p>
               )}
-              <div className="flex flex-wrap gap-2 justify-center">
-                {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
-                  <button
-                    key={label}
-                    onClick={() => handleQuickPrompt(prompt)}
-                    className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-slate-300"
-                  >
-                    <Icon className="w-4 h-4" />
-                    {label}
-                  </button>
-                ))}
-              </div>
+              {showAdvancedControls ? (
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
+                    <button
+                      key={label}
+                      onClick={() => handleQuickPrompt(prompt)}
+                      aria-label={`Aplicar prompt rapido: ${label}`}
+                      className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedControls(true)}
+                  className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
+                >
+                  Mostrar atalhos avancados
+                </button>
+              )}
             </div>
         )}
         {messages.map(message => (
@@ -820,49 +966,52 @@ export default function AIChatPanelPro({
         {/* Streaming response */}
         {streamingContent && (
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-white animate-pulse" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] flex items-center justify-center flex-shrink-0">
+              <Bot className="w-4 h-4 text-[var(--aethel-text-primary)] animate-pulse" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="inline-block max-w-full text-left px-4 py-2.5 rounded-2xl rounded-tl-sm bg-slate-800 text-slate-200">
+              <div className="inline-block max-w-full rounded-2xl rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] px-4 py-2.5 text-left text-[var(--aethel-text-secondary)]">
                 <div className="text-sm whitespace-pre-wrap">{streamingContent}</div>
-                <span className="inline-block w-2 h-4 bg-blue-400 animate-pulse ml-1" />
+                <span className="inline-block w-2 h-4 bg-[var(--aethel-info-light)] animate-pulse ml-1" />
               </div>
             </div>
           </div>
         )}
         {/* Loading indicator */}
         {isLoading && !streamingContent && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-white animate-pulse" />
+          <div className="flex gap-3" role="status" aria-live="polite" aria-label="Gerando resposta">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] flex items-center justify-center flex-shrink-0">
+              <Bot className="w-4 h-4 text-[var(--aethel-text-primary)] animate-pulse" />
             </div>
-            <div className="flex items-center gap-1 px-4 py-3 bg-slate-800 rounded-2xl rounded-tl-sm">
-              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] px-4 py-3">
+              <div className="h-2 w-2 animate-bounce rounded-full bg-[var(--aethel-text-quaternary)]" style={{ animationDelay: '0ms' }} />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-[var(--aethel-text-quaternary)]" style={{ animationDelay: '150ms' }} />
+              <div className="h-2 w-2 animate-bounce rounded-full bg-[var(--aethel-text-quaternary)]" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
       {/* Quick prompts bar */}
-      <div className="px-3 py-2 border-t border-slate-800">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
-            <button
-              key={label}
-              onClick={() => handleQuickPrompt(prompt)}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-full text-xs text-slate-300 whitespace-nowrap"
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
+      {showAdvancedControls && (
+        <div className="border-t border-[var(--aethel-border-secondary)] px-3 py-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
+              <button
+                key={label}
+                onClick={() => handleQuickPrompt(prompt)}
+                aria-label={`Aplicar prompt rapido: ${label}`}
+                className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] px-2.5 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
         {/* Input area */}
-      <form onSubmit={handleSend} className="p-3 border-t border-slate-800">
+      <form onSubmit={handleSend} className="border-t border-[var(--aethel-border-secondary)] p-3">
         {mentionState.parsed.mentions.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
             {mentionState.parsed.mentions.map((mention, index) => (
@@ -884,15 +1033,29 @@ export default function AIChatPanelPro({
         )}
         {/* Voice recording indicator */}
         {isRecording && (
-          <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            <span className="flex-1 text-sm text-red-400">Recording... {transcript && `"${transcript}"`}</span>
+          <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg" role="status" aria-live="polite">
+            <div className="w-2 h-2 bg-[var(--aethel-error)] rounded-full animate-pulse" />
+            <span className="flex-1 text-sm text-[var(--aethel-error)]">Gravando... {transcript && `"${transcript}"`}</span>
             <button
               type="button"
               onClick={stopRecording}
-              className="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 rounded text-xs text-red-400"
+              className="rounded px-2 py-1 text-xs text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              aria-label="Parar gravacao de voz"
             >
-              Stop
+              Parar
+            </button>
+          </div>
+        )}
+        {voiceError && (
+          <div className="mb-3 flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-warning)]" role="alert" aria-live="polite">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            <span className="flex-1">{voiceError}</span>
+            <button
+              type="button"
+              onClick={clearVoiceError}
+              className="rounded px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
+            >
+              Fechar
             </button>
           </div>
         )}
@@ -903,8 +1066,9 @@ export default function AIChatPanelPro({
               <button
                 type="button"
                 onClick={handleFileAttach}
-                className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-                title="Attach file"
+                className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Anexar arquivo"
+                aria-label="Anexar arquivo"
               >
                 <Paperclip className="w-4 h-4" />
               </button>
@@ -913,8 +1077,9 @@ export default function AIChatPanelPro({
               <button
                 type="button"
                 onClick={handleImageAttach}
-                className="p-1.5 rounded hover:bg-slate-800 text-slate-400"
-                title="Attach image"
+                className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                title="Anexar imagem"
+                aria-label="Anexar imagem"
               >
                 <ImageIcon className="w-4 h-4" />
               </button>
@@ -922,8 +1087,9 @@ export default function AIChatPanelPro({
             <button
               type="button"
               onClick={handleVoiceToggle}
-              className={`p-1.5 rounded ${isRecording ? 'bg-red-500 text-white' : 'hover:bg-slate-800 text-slate-400'}`}
-              title={isRecording ? 'Stop recording' : 'Voice input'}
+              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isRecording ? 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+              title={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
+              aria-label={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
             >
               {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
@@ -936,6 +1102,7 @@ export default function AIChatPanelPro({
                 activeIndex={mentionState.activeSuggestionIndex}
                 onSelect={mentionState.applySuggestion}
                 onHover={mentionState.setActiveSuggestionIndex}
+                listboxId="mention-suggestions-list"
               />
             )}
             <textarea
@@ -943,21 +1110,25 @@ export default function AIChatPanelPro({
               value={input}
               onChange={(e) => mentionState.setText(e.target.value, e.target.selectionStart ?? e.target.value.length)}
               onKeyDown={handleComposerKeyDown}
-              placeholder={isRecording ? 'Listening...' : 'Ask AI...'}
+              placeholder={isRecording ? 'Ouvindo...' : 'Pergunte para a IA sobre o seu codigo...'}
               disabled={isLoading}
-              className="w-full px-4 py-2.5 pr-12 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none min-h-[44px] max-h-[200px]"
+              aria-controls="mention-suggestions-list"
+              aria-label="Mensagem do chat"
+              className="min-h-[44px] max-h-[200px] w-full resize-none rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-4 py-2.5 pr-12 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               rows={1}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
               className={`
-                absolute right-2 bottom-2 p-1.5 rounded-lg transition-colors
+                absolute right-2 bottom-2 rounded-lg p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
                 ${input.trim() && !isLoading
-                  ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                  : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                  ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+                  : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
                 }
               `}
+              aria-label={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
+              title={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
             >
               {isLoading ? (
                 <StopCircle className="w-4 h-4" />
@@ -967,18 +1138,20 @@ export default function AIChatPanelPro({
             </button>
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {QUICK_MENTIONS.map((mention) => (
-            <button
-              key={mention.label}
-              type="button"
-              onClick={() => insertQuickMention(mention.value)}
-              className="rounded-full border border-slate-700 bg-slate-800/70 px-2.5 py-1 text-[11px] text-slate-300 transition-colors hover:border-sky-500/50 hover:text-white"
-            >
-              {mention.label}
-            </button>
-          ))}
-        </div>
+        {showAdvancedControls && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {QUICK_MENTIONS.map((mention) => (
+              <button
+                key={mention.label}
+                type="button"
+                onClick={() => insertQuickMention(mention.value)}
+                className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              >
+                {mention.label}
+              </button>
+            ))}
+          </div>
+        )}
         <CodebaseContextPanel
           input={input}
           preview={visibleCodebaseContextPreview}
@@ -1016,9 +1189,8 @@ export default function AIChatPanelPro({
   )
 }
 function formatTime(date: Date): string {
-  return date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
+  return date.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
     minute: '2-digit',
-    hour12: true,
   })
 }

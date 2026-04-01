@@ -208,7 +208,7 @@ export function WelcomeModal() {
     {
       title: 'Conecte sua IA',
       description: 'Configure seu provider para respostas reais e rastreaveis. Nada e simulado.',
-      icon: <Target className="w-12 h-12 text-emerald-400" />,
+      icon: <Target className="w-12 h-12 text-[var(--aethel-success-light)]" />,
     },
     {
       title: 'Colabore com sua equipe',
@@ -232,14 +232,14 @@ export function WelcomeModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)]">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)] shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
         {/* Header */}
         <div className="relative h-40 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary-dark)_90%,transparent)] via-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-primary)_80%,transparent)] flex items-center justify-center">
           {currentWelcomeStep.icon}
           <button
             onClick={skipOnboarding}
-            className="absolute top-4 right-4 rounded-full border border-white/10 bg-white/10 p-2 text-white/70 transition-colors hover:text-white"
+            className="absolute top-4 right-4 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-2 text-[var(--aethel-text-secondary)] transition-colors hover:text-[var(--aethel-text-primary)]"
           >
             <X className="w-5 h-5" />
           </button>
@@ -247,7 +247,7 @@ export function WelcomeModal() {
 
         {/* Content */}
         <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold text-white mb-3">
+          <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)] mb-3">
             {currentWelcomeStep.title}
           </h2>
           <p className="text-neutral-300 mb-6">
@@ -260,7 +260,7 @@ export function WelcomeModal() {
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  i === step ? 'bg-sky-400' : 'bg-white/20'
+                  i === step ? 'bg-sky-400' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                 }`}
               />
             ))}
@@ -418,20 +418,20 @@ export function OnboardingChecklist() {
   return (
     <div className="fixed bottom-4 right-4 z-40">
       {isOpen ? (
-        <div className="w-80 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+        <div className="w-80 overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)] shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] border-b border-white/10">
+          <div className="p-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-white">Primeiros passos</h3>
+              <h3 className="font-semibold text-[var(--aethel-text-primary)]">Primeiros passos</h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-neutral-400 hover:text-white"
+                className="text-neutral-400 hover:text-[var(--aethel-text-primary)]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             {/* Progress bar */}
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] transition-all duration-500"
                 style={{ width: `${progress}%` }}
@@ -449,13 +449,13 @@ export function OnboardingChecklist() {
                 <span>Dependencias do sistema</span>
                 <button
                   onClick={fetchHealth}
-                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                  className="text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)] transition-colors"
                 >
                   {healthLoading ? 'Verificando...' : 'Reverificar'}
                 </button>
               </div>
               {healthError && (
-                <div className="mt-2 text-xs text-red-400">
+                <div className="mt-2 text-xs text-[var(--aethel-error-light)]">
                   {healthError}
                 </div>
               )}
@@ -465,16 +465,16 @@ export function OnboardingChecklist() {
                     <span>Status geral</span>
                     <span className={
                       health.overall === 'healthy'
-                        ? 'text-emerald-400'
+                        ? 'text-[var(--aethel-success-light)]'
                         : health.overall === 'degraded'
                         ? 'text-[var(--aethel-warning-light)]'
-                        : 'text-rose-400'
+                        : 'text-[var(--aethel-error-light)]'
                     }>
                       {healthLabel(health.overall)}
                     </span>
                   </div>
                   {health.missingRequired && health.missingRequired.length > 0 && (
-                    <div className="text-red-400">
+                    <div className="text-[var(--aethel-error-light)]">
                       Criticas: {health.missingRequired.join(', ')}
                     </div>
                   )}
@@ -490,7 +490,7 @@ export function OnboardingChecklist() {
                         .slice(0, 6)
                         .map(dep => (
                           <div key={dep.name} className="text-xs text-neutral-400">
-                            <span className={dep.status === 'unhealthy' ? 'text-rose-400' : 'text-[var(--aethel-warning-light)]'}>
+                            <span className={dep.status === 'unhealthy' ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-warning-light)]'}>
                               {dep.name}
                             </span>
                             {dep.installCommand && (
@@ -514,19 +514,19 @@ export function OnboardingChecklist() {
                 className={`w-full p-3 rounded-xl text-left transition-colors ${
                   item.completed
                     ? 'opacity-60'
-                    : 'hover:bg-white/[0.06]'
+                    : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
                     item.completed
-                      ? 'bg-emerald-500 border-emerald-500'
-                      : 'border-white/20'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
+                      : 'border-[var(--aethel-border-primary)]'
                   }`}>
-                    {item.completed && <Check className="w-3 h-3 text-white" />}
+                    {item.completed && <Check className="w-3 h-3 text-[var(--aethel-text-primary)]" />}
                   </div>
                   <div>
-                    <div className={`font-medium ${item.completed ? 'text-neutral-500 line-through' : 'text-white'}`}>
+                    <div className={`font-medium ${item.completed ? 'text-neutral-500 line-through' : 'text-[var(--aethel-text-primary)]'}`}>
                       {item.title}
                     </div>
                     <div className="text-xs text-neutral-400">
@@ -568,7 +568,7 @@ export function AchievementBadge({ achievement }: { achievement: Achievement }) 
     <div className="flex items-center gap-3 p-3 bg-neutral-800 rounded-lg">
       <div className="text-3xl">{achievement.icon}</div>
       <div>
-        <div className="font-medium text-white">{achievement.name}</div>
+        <div className="font-medium text-[var(--aethel-text-primary)]">{achievement.name}</div>
         <div className="text-xs text-neutral-400">{achievement.description}</div>
       </div>
     </div>
@@ -583,14 +583,14 @@ export function AchievementToast({ achievement, onClose }: { achievement: Achiev
 
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-      <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-600/20 to-[color-mix(in_srgb,var(--aethel-warning-dark)_20%,transparent)] border border-yellow-500/30 rounded-lg shadow-2xl">
-        <Award className="w-8 h-8 text-yellow-400" />
+      <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-600/20 to-[color-mix(in_srgb,var(--aethel-warning-dark)_20%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] rounded-lg shadow-2xl">
+        <Award className="w-8 h-8 text-[var(--aethel-warning-light)]" />
         <div>
-          <div className="text-xs text-yellow-400 font-medium">Conquista desbloqueada</div>
-          <div className="text-white font-semibold">{achievement.name}</div>
+          <div className="text-xs text-[var(--aethel-warning-light)] font-medium">Conquista desbloqueada</div>
+          <div className="text-[var(--aethel-text-primary)] font-semibold">{achievement.name}</div>
           <div className="text-sm text-neutral-300">{achievement.description}</div>
         </div>
-        <button onClick={onClose} className="text-neutral-400 hover:text-white">
+        <button onClick={onClose} className="text-neutral-400 hover:text-[var(--aethel-text-primary)]">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -611,8 +611,8 @@ export function AchievementsPanel() {
 
   return (
     <div className="p-4">
-      <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-        <Award className="w-5 h-5 text-yellow-400" />
+      <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
+        <Award className="w-5 h-5 text-[var(--aethel-warning-light)]" />
         Conquistas
       </h2>
 
@@ -622,17 +622,17 @@ export function AchievementsPanel() {
             key={achievement.id}
             className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
               achievement.unlocked
-                ? 'bg-gradient-to-r from-yellow-600/10 to-orange-600/10 border border-yellow-500/20'
+                ? 'bg-gradient-to-r from-yellow-600/10 to-orange-600/10 border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
                 : 'bg-neutral-800 opacity-50 grayscale'
             }`}
           >
             <div className="text-2xl">{achievement.icon}</div>
             <div className="flex-1">
-              <div className="font-medium text-white">{achievement.name}</div>
+              <div className="font-medium text-[var(--aethel-text-primary)]">{achievement.name}</div>
               <div className="text-xs text-neutral-400">{achievement.description}</div>
             </div>
             {achievement.unlocked && (
-              <Check className="w-5 h-5 text-yellow-400" />
+              <Check className="w-5 h-5 text-[var(--aethel-warning-light)]" />
             )}
           </div>
         ))}

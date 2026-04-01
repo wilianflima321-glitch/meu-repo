@@ -25,7 +25,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   const [value, setValue] = useState<string>(initialValue || '');
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  
+
   // Resolve file path from either path or filePath prop
   const resolvedPath = path || filePath;
 
@@ -38,7 +38,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
     if (fromStorage && fromStorage.trim()) return fromStorage.trim();
     return 'default';
   };
-  
+
   // Load file content when path changes
   useEffect(() => {
     if (resolvedPath && !initialValue) {
@@ -79,9 +79,9 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       setLoadError(null);
     }
   }, [resolvedPath, initialValue]);
-  
+
   // Infer language from file path
-  const inferredLanguage = resolvedPath 
+  const inferredLanguage = resolvedPath
     ? getLanguageFromPath(resolvedPath)
     : language;
 
@@ -105,9 +105,9 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   };
 
   return (
-    <div className="w-full h-full overflow-hidden rounded-md border border-slate-700">
+    <div className="w-full h-full overflow-hidden rounded-md border border-[var(--aethel-border-primary)]">
       {loading ? (
-        <div className="flex items-center justify-center h-full text-slate-400">
+        <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
           Carregando arquivo...
         </div>
       ) : loadError ? (
@@ -129,7 +129,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
             padding: { top: 16, bottom: 16 },
           }}
           loading={
-            <div className="flex items-center justify-center h-full text-slate-400">
+            <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               Carregando Editor...
             </div>
           }

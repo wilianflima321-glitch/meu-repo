@@ -1,6 +1,6 @@
 /**
  * Image Editor - Editor de imagem REAL com Canvas
- * 
+ *
  * Suporta layers, blend modes, brushes basicos.
  */
 
@@ -22,12 +22,12 @@ export interface Layer {
   locked: boolean;
 }
 
-export type BlendMode = 
-  | 'normal' 
-  | 'multiply' 
-  | 'screen' 
-  | 'overlay' 
-  | 'darken' 
+export type BlendMode =
+  | 'normal'
+  | 'multiply'
+  | 'screen'
+  | 'overlay'
+  | 'darken'
   | 'lighten'
   | 'color-dodge'
   | 'color-burn'
@@ -99,7 +99,7 @@ export function ImageEditor({
       ctx.fillStyle = 'var(--aethel-text-primary)';
       ctx.fillRect(0, 0, width, height);
     }
-    
+
     setLayers([bgLayer]);
     setActiveLayerId(bgLayer.id);
 
@@ -131,7 +131,7 @@ export function ImageEditor({
     // Limpar com padrao xadrez (transparencia)
     ctx.fillStyle = 'var(--aethel-surface-secondary)';
     ctx.fillRect(0, 0, width, height);
-    
+
     // Desenhar padrao de transparencia
     const checkSize = 10;
     ctx.fillStyle = 'var(--aethel-surface-tertiary)';
@@ -216,7 +216,7 @@ export function ImageEditor({
 
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
-    
+
     renderAllLayers();
   }, [activeLayerId, layers, tool, brush, lastPos, renderAllLayers]);
 
@@ -329,7 +329,7 @@ export function ImageEditor({
 
   const hexToRgb = (hex: string): number[] => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result 
+    return result
       ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
       : [0, 0, 0];
   };
@@ -374,15 +374,15 @@ export function ImageEditor({
   };
 
   return (
-    <div className="flex h-full bg-slate-900">
+    <div className="flex h-full bg-[var(--aethel-surface-primary)]">
       {/* Toolbar */}
-      <div className="w-12 bg-slate-800 border-r border-slate-700 flex flex-col items-center py-2 gap-1">
+      <div className="w-12 bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)] flex flex-col items-center py-2 gap-1">
         {(['brush', 'eraser', 'fill', 'eyedropper', 'move'] as Tool[]).map(t => (
           <button
             key={t}
             onClick={() => setTool(t)}
             className={`w-10 h-10 rounded flex items-center justify-center text-lg ${
-              tool === t ? 'bg-blue-600' : 'hover:bg-slate-700'
+              tool === t ? 'bg-[var(--aethel-primary)]' : 'hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
             title={t.charAt(0).toUpperCase() + t.slice(1)}
           >
@@ -393,7 +393,7 @@ export function ImageEditor({
             {t === 'move' && ''}
           </button>
         ))}
-        
+
         <div className="mt-4 flex flex-col items-center gap-2">
           <input
             type="color"
@@ -401,7 +401,7 @@ export function ImageEditor({
             onChange={(e) => setBrush(prev => ({ ...prev, color: e.target.value }))}
             className="w-8 h-8 cursor-pointer"
           />
-          <span className="text-xs text-slate-400">Color</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Color</span>
         </div>
       </div>
 
@@ -415,22 +415,22 @@ export function ImageEditor({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          className="border border-slate-600 cursor-crosshair"
-          style={{ 
-            cursor: tool === 'eyedropper' ? 'crosshair' : 
-                   tool === 'move' ? 'grab' : 
-                   'crosshair' 
+          className="border border-[var(--aethel-border-secondary)] cursor-crosshair"
+          style={{
+            cursor: tool === 'eyedropper' ? 'crosshair' :
+                   tool === 'move' ? 'grab' :
+                   'crosshair'
           }}
         />
       </div>
 
       {/* Brush Settings */}
-      <div className="w-48 bg-slate-800 border-l border-slate-700 p-3">
-        <h3 className="text-sm font-semibold text-white mb-3">Brush</h3>
-        
+      <div className="w-48 bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)] p-3">
+        <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] mb-3">Brush</h3>
+
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-slate-400">Size: {brush.size}px</label>
+            <label className="text-xs text-[var(--aethel-text-tertiary)]">Size: {brush.size}px</label>
             <input
               type="range"
               min="1"
@@ -440,9 +440,9 @@ export function ImageEditor({
               className="w-full"
             />
           </div>
-          
+
           <div>
-            <label className="text-xs text-slate-400">Opacity: {brush.opacity}%</label>
+            <label className="text-xs text-[var(--aethel-text-tertiary)]">Opacity: {brush.opacity}%</label>
             <input
               type="range"
               min="1"
@@ -454,11 +454,11 @@ export function ImageEditor({
           </div>
         </div>
 
-        <h3 className="text-sm font-semibold text-white mt-6 mb-3">Layers</h3>
-        
+        <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] mt-6 mb-3">Layers</h3>
+
         <button
           onClick={addLayer}
-          className="w-full py-1 bg-blue-600 rounded text-sm mb-2 hover:bg-blue-500"
+          className="w-full py-1 bg-[var(--aethel-primary)] rounded text-sm mb-2 hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
         >
           + Add Layer
         </button>
@@ -469,7 +469,7 @@ export function ImageEditor({
               key={layer.id}
               onClick={() => setActiveLayerId(layer.id)}
               className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
-                activeLayerId === layer.id ? 'bg-slate-600' : 'hover:bg-slate-700'
+                activeLayerId === layer.id ? 'bg-[var(--aethel-surface-quaternary)]' : 'hover:bg-[var(--aethel-surface-tertiary)]'
               }`}
             >
               <input
@@ -477,22 +477,22 @@ export function ImageEditor({
                 checked={layer.visible}
                 onChange={(e) => {
                   e.stopPropagation();
-                  setLayers(prev => prev.map(l => 
+                  setLayers(prev => prev.map(l =>
                     l.id === layer.id ? { ...l, visible: !l.visible } : l
                   ));
                 }}
                 className="w-4 h-4"
               />
-              <span className="text-sm text-white flex-1 truncate">{layer.name}</span>
+              <span className="text-sm text-[var(--aethel-text-primary)] flex-1 truncate">{layer.name}</span>
               {layers.length > 1 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteLayer(layer.id);
                   }}
-                  className="text-red-400 hover:text-red-300"
+                  className="text-[var(--aethel-error-light)] hover:text-[var(--aethel-error-light)]"
                 >
-                  
+
                 </button>
               )}
             </div>
@@ -501,7 +501,7 @@ export function ImageEditor({
 
         <button
           onClick={handleSave}
-          className="w-full py-2 bg-green-600 rounded text-sm mt-4 hover:bg-green-500"
+          className="w-full py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-sm mt-4 hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]"
         >
            Export PNG
         </button>
@@ -511,3 +511,5 @@ export function ImageEditor({
 }
 
 export default ImageEditor;
+
+

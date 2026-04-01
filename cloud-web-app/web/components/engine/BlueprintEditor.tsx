@@ -2,10 +2,10 @@
 
 /**
  * Blueprint Editor - Editor Visual de Blueprints
- * 
+ *
  * Editor completo estilo Unreal Engine para criar e editar
  * blueprints com sistema de nós visuais.
- * 
+ *
  * NÃO É MOCK - Editor real e funcional!
  */
 
@@ -66,13 +66,13 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
   const definition = data.definition;
   const isEvent = definition?.isEvent;
   const isPure = definition?.isPure;
-  
+
   return (
     <div
       className={`
         min-w-[180px] rounded-lg shadow-lg border-2
         ${selected ? 'ring-2 ring-blue-500' : ''}
-        ${isEvent ? 'border-red-600' : 'border-[var(--aethel-border-secondary)]'}
+        ${isEvent ? 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : 'border-[var(--aethel-border-secondary)]'}
       `}
       style={{ backgroundColor: 'var(--aethel-surface-primary)' }}
     >
@@ -85,7 +85,7 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
         {isPure && <span className="text-xs">ƒ</span>}
         {definition?.displayName || data.label || 'Node'}
       </div>
-      
+
       {/* Body with pins */}
       <div className="flex">
         {/* Input pins */}
@@ -97,10 +97,10 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
                 position={Position.Left}
                 id={input.id}
                 className={`
-                  w-3 h-3 rounded-full border-2 
-                  ${input.type === 'exec' 
-                    ? 'border-white bg-transparent' 
-                    : 'border-cyan-400 bg-cyan-400/30'}
+                  w-3 h-3 rounded-full border-2
+                  ${input.type === 'exec'
+                    ? 'border-[var(--aethel-border-primary)] bg-transparent'
+                    : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'}
                 `}
                 style={{ left: -6 }}
               />
@@ -108,7 +108,7 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
             </div>
           ))}
         </div>
-        
+
         {/* Output pins */}
         <div className="flex flex-col py-2 px-1 min-w-[80px] items-end ml-auto">
           {definition?.outputs.map((output, i) => (
@@ -120,9 +120,9 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
                 id={output.id}
                 className={`
                   w-3 h-3 rounded-full border-2
-                  ${output.type === 'exec' 
-                    ? 'border-white bg-transparent' 
-                    : 'border-cyan-400 bg-cyan-400/30'}
+                  ${output.type === 'exec'
+                    ? 'border-[var(--aethel-border-primary)] bg-transparent'
+                    : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'}
                 `}
                 style={{ right: -6 }}
               />
@@ -156,13 +156,13 @@ const NodePalette: React.FC<{
     }
     return cats;
   }, []);
-  
+
   const filteredCategories = useMemo(() => {
     if (!searchTerm) return categories;
-    
+
     const filtered = new Map<string, NodeDefinition[]>();
     for (const [cat, nodes] of categories) {
-      const matchingNodes = nodes.filter(n => 
+      const matchingNodes = nodes.filter(n =>
         n.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         n.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -172,9 +172,9 @@ const NodePalette: React.FC<{
     }
     return filtered;
   }, [categories, searchTerm]);
-  
+
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set(['Events', 'Flow Control']));
-  
+
   const toggleCategory = (cat: string) => {
     setExpandedCats(prev => {
       const next = new Set(prev);
@@ -183,7 +183,7 @@ const NodePalette: React.FC<{
       return next;
     });
   };
-  
+
   return (
     <div className="w-64 bg-[var(--aethel-surface-primary)] border-r border-[var(--aethel-border-primary)] flex flex-col">
       <div className="p-3 border-b border-[var(--aethel-border-primary)]">
@@ -195,7 +195,7 @@ const NodePalette: React.FC<{
           className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:border-[var(--aethel-primary)] focus:outline-none"
         />
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {Array.from(filteredCategories).map(([category, nodes]) => (
           <div key={category}>
@@ -206,7 +206,7 @@ const NodePalette: React.FC<{
               <span>{category}</span>
               <span>{expandedCats.has(category) ? '▼' : '▶'}</span>
             </button>
-            
+
             {expandedCats.has(category) && (
               <div className="py-1">
                 {nodes.map(node => (
@@ -248,15 +248,15 @@ const VariablesPanel: React.FC<{
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Variables</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
+          className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
       </div>
-      
+
       <div className="space-y-1 max-h-40 overflow-y-auto">
         {variables.length === 0 ? (
-          <div className="text-xs text-gray-500 italic">No variables</div>
+          <div className="text-xs text-[var(--aethel-text-secondary)] italic">No variables</div>
         ) : (
           variables.map(v => (
             <div
@@ -264,13 +264,13 @@ const VariablesPanel: React.FC<{
               className="flex items-center justify-between px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs"
             >
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-500" />
+                <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]" />
                 <span className="text-[var(--aethel-text-primary)]">{v.name}</span>
-                <span className="text-gray-500">({v.type})</span>
+                <span className="text-[var(--aethel-text-secondary)]">({v.type})</span>
               </div>
               <button
                 onClick={() => onDelete(v.id)}
-                className="text-red-500 hover:text-red-400"
+                className="text-[var(--aethel-error-light)] hover:text-[var(--aethel-error)]"
               >
                 ×
               </button>
@@ -296,10 +296,10 @@ const ComponentsPanel: React.FC<{
   const buildTree = (parentId?: string) => {
     return components.filter(c => c.parentId === parentId);
   };
-  
+
   const renderComponent = (comp: BlueprintComponent, depth: number = 0) => {
     const children = buildTree(comp.id);
-    
+
     return (
       <div key={comp.id}>
         <div
@@ -312,30 +312,30 @@ const ComponentsPanel: React.FC<{
         >
           <span>{comp.isRootComponent ? '📦' : '🔧'}</span>
           <span>{comp.name}</span>
-          <span className="text-gray-500 ml-auto">{comp.type}</span>
+          <span className="text-[var(--aethel-text-secondary)] ml-auto">{comp.type}</span>
         </div>
         {children.map(child => renderComponent(child, depth + 1))}
       </div>
     );
   };
-  
+
   const rootComponents = buildTree(undefined);
-  
+
   return (
     <div className="p-3 border-b border-[var(--aethel-border-primary)]">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Components</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
+          className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
       </div>
-      
+
       <div className="space-y-0.5 max-h-48 overflow-y-auto bg-[var(--aethel-surface-primary)] rounded p-1">
         {rootComponents.length === 0 ? (
-          <div className="text-xs text-gray-500 italic p-2">No components</div>
+          <div className="text-xs text-[var(--aethel-text-secondary)] italic p-2">No components</div>
         ) : (
           rootComponents.map(c => renderComponent(c))
         )}
@@ -361,15 +361,15 @@ const FunctionsPanel: React.FC<{
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Functions</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
+          className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
       </div>
-      
+
       <div className="space-y-1 max-h-40 overflow-y-auto">
         {functions.length === 0 ? (
-          <div className="text-xs text-gray-500 italic">No functions</div>
+          <div className="text-xs text-[var(--aethel-text-secondary)] italic">No functions</div>
         ) : (
           functions.map(f => (
             <div
@@ -386,7 +386,7 @@ const FunctionsPanel: React.FC<{
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(f.id); }}
-                className="text-red-500 hover:text-red-400"
+                className="text-[var(--aethel-error-light)] hover:text-[var(--aethel-error)]"
               >
                 ×
               </button>
@@ -408,38 +408,38 @@ const DetailsPanel: React.FC<{
 }> = ({ selectedNode, onUpdate }) => {
   if (!selectedNode) {
     return (
-      <div className="p-4 text-gray-500 text-sm">
+      <div className="p-4 text-[var(--aethel-text-secondary)] text-sm">
         Select a node to view details
       </div>
     );
   }
-  
+
   const definition = selectedNode.data?.definition as NodeDefinition | undefined;
-  
+
   return (
     <div className="p-4">
       <h3 className="text-[var(--aethel-text-primary)] font-semibold mb-3">
         {definition?.displayName || 'Node Details'}
       </h3>
-      
+
       <div className="space-y-3 text-sm">
         <div>
           <label className="text-[var(--aethel-text-tertiary)] text-xs">Type</label>
           <div className="text-[var(--aethel-text-primary)]">{selectedNode.type}</div>
         </div>
-        
+
         <div>
           <label className="text-[var(--aethel-text-tertiary)] text-xs">Category</label>
           <div className="text-[var(--aethel-text-primary)]">{definition?.category || 'Unknown'}</div>
         </div>
-        
+
         {definition?.description && (
           <div>
             <label className="text-[var(--aethel-text-tertiary)] text-xs">Description</label>
             <div className="text-[var(--aethel-text-secondary)] text-xs">{definition.description}</div>
           </div>
         )}
-        
+
         <div>
           <label className="text-[var(--aethel-text-tertiary)] text-xs">Position</label>
           <div className="flex gap-2 text-[var(--aethel-text-primary)]">
@@ -447,7 +447,7 @@ const DetailsPanel: React.FC<{
             <span>Y: {Math.round(selectedNode.position.y)}</span>
           </div>
         </div>
-        
+
         {/* Input default values */}
         {definition?.inputs.filter(i => i.type === 'data').map(input => (
           <div key={input.id}>
@@ -471,7 +471,7 @@ const DetailsPanel: React.FC<{
 export default function BlueprintEditor({ blueprintId, onSave, onClose }: BlueprintEditorProps) {
   const toast = useToast();
   const manager = getBlueprintManager();
-  
+
   // Blueprint state
   const [blueprint, setBlueprint] = useState<Blueprint>(() => {
     if (blueprintId) {
@@ -480,23 +480,23 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
     }
     return manager.createBlueprint('NewBlueprint', 'Actor');
   });
-  
+
   // Graph state
   const [nodes, setNodes, onNodesChange] = useNodesState<BlueprintFlowNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-  
+
   // UI state
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'eventGraph' | 'constructionScript'>('eventGraph');
   const [selectedNode, setSelectedNode] = useState<BlueprintFlowNode | null>(null);
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
   const [selectedFunctionId, setSelectedFunctionId] = useState<string | null>(null);
-  
+
   // Add node to graph
   const handleAddNode = useCallback((type: string) => {
     const definition = StandardNodes.find(n => n.type === type);
     if (!definition) return;
-    
+
     const newNode: BlueprintFlowNode = {
       id: `node_${Date.now()}`,
       type: 'blueprintNode',
@@ -506,40 +506,40 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
         definition,
       },
     };
-    
+
     setNodes(nds => [...nds, newNode]);
   }, [setNodes]);
-  
+
   // Handle connections
   const onConnect = useCallback((connection: Connection) => {
     // Validate connection types match
     const sourceNode = nodes.find(n => n.id === connection.source);
     const targetNode = nodes.find(n => n.id === connection.target);
-    
+
     if (!sourceNode || !targetNode) return;
-    
+
     const sourceDef = sourceNode.data?.definition as NodeDefinition | undefined;
     const targetDef = targetNode.data?.definition as NodeDefinition | undefined;
-    
+
     if (!sourceDef || !targetDef) return;
-    
+
     const sourcePin = sourceDef.outputs.find(o => o.id === connection.sourceHandle);
     const targetPin = targetDef.inputs.find(i => i.id === connection.targetHandle);
-    
+
     if (!sourcePin || !targetPin) return;
-    
+
     // Check type compatibility
     if (sourcePin.type !== targetPin.type) {
       console.warn('Incompatible pin types');
       return;
     }
-    
+
     const newEdge: Edge = {
       ...connection,
       id: `edge_${Date.now()}`,
       type: 'smoothstep',
       animated: sourcePin.type === 'exec',
-      style: { 
+      style: {
         stroke: sourcePin.type === 'exec' ? 'var(--aethel-text-primary)' : 'var(--aethel-info)',
         strokeWidth: 2,
       },
@@ -548,15 +548,15 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
         color: sourcePin.type === 'exec' ? 'var(--aethel-text-primary)' : 'var(--aethel-info)',
       },
     } as Edge;
-    
+
     setEdges(eds => addEdge(newEdge, eds));
   }, [nodes, setEdges]);
-  
+
   // Node selection
   const onNodeClick = useCallback((_: React.MouseEvent, node: BlueprintFlowNode) => {
     setSelectedNode(node);
   }, []);
-  
+
   // Add variable
   const handleAddVariable = useCallback(() => {
     const newVar: BlueprintVariable = {
@@ -567,13 +567,13 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       isPublic: true,
       isReadOnly: false,
     };
-    
+
     setBlueprint(prev => ({
       ...prev,
       variables: [...prev.variables, newVar],
     }));
   }, [blueprint.variables.length]);
-  
+
   // Delete variable
   const handleDeleteVariable = useCallback((id: string) => {
     setBlueprint(prev => ({
@@ -581,7 +581,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       variables: prev.variables.filter(v => v.id !== id),
     }));
   }, []);
-  
+
   // Add component
   const handleAddComponent = useCallback(() => {
     const newComp: BlueprintComponent = {
@@ -591,13 +591,13 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       parentId: blueprint.defaultSceneRoot,
       properties: {},
     };
-    
+
     setBlueprint(prev => ({
       ...prev,
       components: [...prev.components, newComp],
     }));
   }, [blueprint.components.length, blueprint.defaultSceneRoot]);
-  
+
   // Delete component
   const handleDeleteComponent = useCallback((id: string) => {
     setBlueprint(prev => ({
@@ -605,7 +605,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       components: prev.components.filter(c => c.id !== id),
     }));
   }, []);
-  
+
   // Add function
   const handleAddFunction = useCallback(() => {
     const newFunc: BlueprintFunction = {
@@ -620,13 +620,13 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       nodes: [],
       connections: [],
     };
-    
+
     setBlueprint(prev => ({
       ...prev,
       functions: [...prev.functions, newFunc],
     }));
   }, [blueprint.functions.length]);
-  
+
   // Delete function
   const handleDeleteFunction = useCallback((id: string) => {
     setBlueprint(prev => ({
@@ -634,7 +634,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       functions: prev.functions.filter(f => f.id !== id),
     }));
   }, []);
-  
+
   // Compile blueprint
   const handleCompile = useCallback(() => {
     // Save nodes and edges to blueprint
@@ -657,20 +657,20 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
       },
       modifiedAt: new Date(),
     };
-    
+
     setBlueprint(updatedBlueprint);
     manager.updateBlueprint(blueprint.id, updatedBlueprint);
-    
+
     console.log('✅ Blueprint compiled successfully!');
     toast.success('Blueprint compiled successfully!');
   }, [blueprint, nodes, edges, manager, toast]);
-  
+
   // Save blueprint
   const handleSave = useCallback(() => {
     handleCompile();
     onSave?.(blueprint);
   }, [handleCompile, onSave, blueprint]);
-  
+
   return (
     <div className="flex h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Left Sidebar - Node Palette */}
@@ -679,13 +679,13 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
       />
-      
+
       {/* Main Graph Area */}
       <div className="flex-1 flex flex-col">
         {/* Toolbar */}
         <div className="h-12 border-b border-[var(--aethel-border-primary)] flex items-center px-4 gap-4 bg-[var(--aethel-surface-tertiary)]">
           <div className="flex items-center gap-2">
-            <span className="text-blue-400">📘</span>
+            <span className="text-[var(--aethel-info-light)]">📘</span>
             <input
               type="text"
               value={blueprint.name}
@@ -693,7 +693,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
               className="bg-transparent border-b border-transparent hover:border-[var(--aethel-border-secondary)] focus:border-[var(--aethel-primary)] outline-none px-1 text-[var(--aethel-text-primary)] font-semibold"
             />
           </div>
-          
+
           <select
             value={blueprint.type}
             onChange={(e) => setBlueprint(prev => ({ ...prev, type: e.target.value as BlueprintType }))}
@@ -710,40 +710,40 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
             <option value="AnimInstance">Anim Instance</option>
             <option value="Object">Object</option>
           </select>
-          
+
           <div className="flex-1" />
-          
+
           <div className="flex items-center gap-2">
             <button
               onClick={handleCompile}
-              className="px-4 py-1.5 bg-green-600 hover:bg-green-700 rounded text-sm font-medium"
+              className="px-4 py-1.5 bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-sm font-medium"
             >
               Compile
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-blue-700 rounded text-sm font-medium"
+              className="px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded text-sm font-medium"
             >
               Save
             </button>
             {onClose && (
               <button
                 onClick={onClose}
-                className="px-4 py-1.5 bg-gray-600 hover:bg-gray-700 rounded text-sm font-medium"
+                className="px-4 py-1.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded text-sm font-medium"
               >
                 Close
               </button>
             )}
           </div>
         </div>
-        
+
         {/* Tab Bar */}
         <div className="h-8 border-b border-[var(--aethel-border-primary)] flex items-center px-2 gap-1 bg-[var(--aethel-surface-tertiary)]">
           <button
             onClick={() => setActiveTab('eventGraph')}
             className={`px-3 py-1 text-xs rounded ${
-              activeTab === 'eventGraph' 
-                ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]' 
+              activeTab === 'eventGraph'
+                ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
@@ -752,15 +752,15 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           <button
             onClick={() => setActiveTab('constructionScript')}
             className={`px-3 py-1 text-xs rounded ${
-              activeTab === 'constructionScript' 
-                ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]' 
+              activeTab === 'constructionScript'
+                ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Construction Script
           </button>
         </div>
-        
+
         {/* Graph Canvas */}
         <div className="flex-1 relative">
           <ReactFlow
@@ -781,18 +781,18 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           >
             <Background color="var(--aethel-border-primary)" gap={16} />
             <Controls className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded" />
-            <MiniMap 
+            <MiniMap
               className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded"
               nodeColor="var(--aethel-primary)"
             />
-            
+
             <Panel position="top-right" className="bg-[var(--aethel-surface-tertiary)] p-2 rounded border border-[var(--aethel-border-secondary)] text-xs text-[var(--aethel-text-tertiary)]">
               Right-click for context menu • Drag to pan • Scroll to zoom
             </Panel>
           </ReactFlow>
         </div>
       </div>
-      
+
       {/* Right Sidebar */}
       <div className="w-72 border-l border-[var(--aethel-border-primary)] flex flex-col bg-[var(--aethel-surface-tertiary)]">
         {/* Blueprint Info */}
@@ -803,7 +803,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
             <div>Parent: {blueprint.parentClass || 'None'}</div>
           </div>
         </div>
-        
+
         {/* Variables */}
         <VariablesPanel
           variables={blueprint.variables}
@@ -811,7 +811,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           onDelete={handleDeleteVariable}
           onUpdate={() => {}}
         />
-        
+
         {/* Components */}
         <ComponentsPanel
           components={blueprint.components}
@@ -820,7 +820,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           selectedId={selectedComponentId}
           onSelect={setSelectedComponentId}
         />
-        
+
         {/* Functions */}
         <FunctionsPanel
           functions={blueprint.functions}
@@ -829,7 +829,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           onSelect={setSelectedFunctionId}
           selectedId={selectedFunctionId}
         />
-        
+
         {/* Details */}
         <div className="flex-1 border-t border-[var(--aethel-border-primary)] overflow-y-auto">
           <DetailsPanel

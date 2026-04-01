@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { Sparkles, ChevronRight, X } from 'lucide-react'
@@ -41,14 +41,14 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_82%,transparent)] backdrop-blur-sm" role="dialog" aria-modal="true">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_94%,transparent)] shadow-[0_24px_60px_rgba(2,6,23,0.55)]">
         <div className="flex h-40 items-center justify-center bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary-dark)_90%,transparent)] via-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-primary)_80%,transparent)]">
-          <Sparkles className="h-12 w-12 text-white" />
+          <Sparkles className="h-12 w-12 text-[var(--aethel-text-primary)]" />
           <button
             type="button"
             onClick={() => onSkip?.()}
-            className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/10 p-2 text-white/70 transition-colors hover:text-white"
+            className="absolute right-4 top-4 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]"
             aria-label="Fechar"
           >
             <X className="h-4 w-4" />
@@ -56,14 +56,14 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
         </div>
 
         <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold text-white">{current.title}</h2>
-          <p className="mt-3 text-sm text-slate-300">{current.description}</p>
+          <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">{current.title}</h2>
+          <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">{current.description}</p>
 
           <div className="mt-6 flex justify-center gap-2">
             {STEPS.map((_, index) => (
               <span
                 key={index}
-                className={`h-2 w-2 rounded-full ${index === step ? 'bg-[var(--aethel-info-light)]' : 'bg-white/20'}`}
+                className={`h-2 w-2 rounded-full ${index === step ? 'bg-[var(--aethel-info-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-border-primary)_40%,transparent)]'}`}
               />
             ))}
           </div>
@@ -92,3 +92,4 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
 }
 
 export default WelcomeWizard
+

@@ -1,9 +1,9 @@
 /**
  * Material Editor - Sistema de Materiais PBR Completo
- * 
+ *
  * Editor visual de materiais com node graph para criar
  * shaders e materiais PBR estilo Unreal/Unity.
- * 
+ *
  * NÃO É MOCK - Funciona de verdade com Three.js!
  */
 
@@ -91,7 +91,7 @@ export class PBRMaterial {
   alphaMap: THREE.Texture | null = null;
   transparent: boolean = false;
   doubleSided: boolean = false;
-  
+
   // Advanced
   clearcoat: number = 0;
   clearcoatRoughness: number = 0;
@@ -100,7 +100,7 @@ export class PBRMaterial {
   transmission: number = 0;
   ior: number = 1.5;
   thickness: number = 0;
-  
+
   toThreeMaterial(): THREE.MeshPhysicalMaterial {
     const material = new THREE.MeshPhysicalMaterial({
       color: this.albedo,
@@ -130,7 +130,7 @@ export class PBRMaterial {
       ior: this.ior,
       thickness: this.thickness,
     });
-    
+
     return material;
   }
 
@@ -188,7 +188,7 @@ const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
     outputs: [],
     defaultProperties: [],
   },
-  
+
   // CONSTANTS
   'constant_color': {
     label: 'Color',
@@ -219,7 +219,7 @@ const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
       { name: 'Z', type: 'float', value: 1 },
     ],
   },
-  
+
   // TEXTURES
   'texture_sample': {
     label: 'Texture Sample',
@@ -267,7 +267,7 @@ const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
       { name: 'Strength', type: 'float', value: 1, min: 0, max: 2 },
     ],
   },
-  
+
   // MATH
   'math_add': {
     label: 'Add',
@@ -330,7 +330,7 @@ const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
     outputs: [{ name: 'Result', type: 'float' }],
     defaultProperties: [],
   },
-  
+
   // COLOR
   'color_blend': {
     label: 'Color Blend',
@@ -369,7 +369,7 @@ const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
     ],
     defaultProperties: [],
   },
-  
+
   // UTILITY
   'fresnel': {
     label: 'Fresnel',
@@ -438,17 +438,17 @@ const NODE_DEFINITIONS: Record<string, MaterialNodeDefinition> = {
 
 export class ShaderCompiler {
   private graph: MaterialGraph;
-  
+
   constructor(graph: MaterialGraph) {
     this.graph = graph;
   }
-  
+
   compile(): { vertexShader: string; fragmentShader: string } {
     const vertexShader = this.generateVertexShader();
     const fragmentShader = this.generateFragmentShader();
     return { vertexShader, fragmentShader };
   }
-  
+
   private generateVertexShader(): string {
     return `
 varying vec2 vUv;
@@ -466,21 +466,21 @@ void main() {
 }
     `.trim();
   }
-  
+
   private generateFragmentShader(): string {
     // Find output node
     const outputNode = this.graph.nodes.find(n => n.data.type === 'output');
     if (!outputNode) {
       return this.getDefaultFragmentShader();
     }
-    
+
     // Trace connections back from output
     const uniforms = new Set<string>();
     const code: string[] = [];
-    
+
     // Generate code for each input to output
     const inputConnections = this.graph.edges.filter(e => e.target === outputNode.id);
-    
+
     let albedoCode = 'vec3(1.0)';
     let metallicCode = '0.0';
     let roughnessCode = '0.5';
@@ -488,13 +488,13 @@ void main() {
     let aoCode = '1.0';
     let emissionCode = 'vec3(0.0)';
     let opacityCode = '1.0';
-    
+
     for (const conn of inputConnections) {
       const sourceNode = this.graph.nodes.find(n => n.id === conn.source);
       if (!sourceNode) continue;
-      
+
       const nodeCode = this.generateNodeCode(sourceNode, uniforms);
-      
+
       const targetHandle = conn.targetHandle || '';
       if (targetHandle.includes('Albedo')) albedoCode = nodeCode.output;
       else if (targetHandle.includes('Metallic')) metallicCode = nodeCode.output;
@@ -503,10 +503,10 @@ void main() {
       else if (targetHandle.includes('AO')) aoCode = nodeCode.output;
       else if (targetHandle.includes('Emission')) emissionCode = nodeCode.output;
       else if (targetHandle.includes('Opacity')) opacityCode = nodeCode.output;
-      
+
       code.push(nodeCode.code);
     }
-    
+
     return `
 ${Array.from(uniforms).map(u => `uniform ${u};`).join('\n')}
 
@@ -549,7 +549,7 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
 
 void main() {
   ${code.join('\n  ')}
-  
+
   vec3 albedo = ${albedoCode};
   float metallic = ${metallicCode};
   float roughness = ${roughnessCode};
@@ -557,52 +557,52 @@ void main() {
   float ao = ${aoCode};
   vec3 emission = ${emissionCode};
   float opacity = ${opacityCode};
-  
+
   // View direction
   vec3 V = normalize(vViewPosition);
-  
+
   // Simple lighting
   vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
   vec3 lightColor = vec3(1.0);
-  
+
   // PBR calculation
   vec3 F0 = vec3(0.04);
   F0 = mix(F0, albedo, metallic);
-  
+
   vec3 L = lightDir;
   vec3 H = normalize(V + L);
-  
+
   float NDF = distributionGGX(N, H, roughness);
   float G = geometrySmith(N, V, L, roughness);
   vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-  
+
   vec3 kS = F;
   vec3 kD = vec3(1.0) - kS;
   kD *= 1.0 - metallic;
-  
+
   vec3 numerator = NDF * G * F;
   float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
   vec3 specular = numerator / denominator;
-  
+
   float NdotL = max(dot(N, L), 0.0);
   vec3 Lo = (kD * albedo / 3.14159265 + specular) * lightColor * NdotL;
-  
+
   vec3 ambient = vec3(0.03) * albedo * ao;
   vec3 color = ambient + Lo + emission;
-  
+
   // Tone mapping
   color = color / (color + vec3(1.0));
   color = pow(color, vec3(1.0 / 2.2));
-  
+
   gl_FragColor = vec4(color, opacity);
 }
     `.trim();
   }
-  
+
   private generateNodeCode(node: Node<MaterialNodeData>, uniforms: Set<string>): { code: string; output: string } {
     const data = node.data;
     const nodeId = node.id.replace(/-/g, '_');
-    
+
     switch (data.type) {
       case 'constant': {
         if (node.data.label === 'Color') {
@@ -619,7 +619,7 @@ void main() {
         }
         return { code: '', output: 'vec3(1.0)' };
       }
-      
+
       case 'texture': {
         const texName = `tex_${nodeId}`;
         uniforms.add(`sampler2D ${texName}`);
@@ -628,7 +628,7 @@ void main() {
           output: `${nodeId}_sample.rgb`,
         };
       }
-      
+
       case 'utility': {
         if (node.data.label === 'Fresnel') {
           const powerProp = data.properties.find(p => p.name === 'Power');
@@ -640,7 +640,7 @@ void main() {
         }
         return { code: '', output: 'vUv' };
       }
-      
+
       case 'procedural': {
         if (node.data.label === 'Noise') {
           const scaleProp = data.properties.find(p => p.name === 'Scale');
@@ -654,12 +654,12 @@ float ${nodeId}_noise = fract(sin(dot(vUv * ${scale.toFixed(2)}, vec2(12.9898, 7
         }
         return { code: '', output: '0.5' };
       }
-      
+
       default:
         return { code: '', output: 'vec3(1.0)' };
     }
   }
-  
+
   private getDefaultFragmentShader(): string {
     return `
 varying vec2 vUv;
@@ -703,7 +703,7 @@ function MaterialNode({ id, data, selected }: NodeProps) {
       default: return '#7f8c8d';
     }
   };
-  
+
   const getPortColor = (portType: string): string => {
     switch (portType) {
       case 'color': return '#ff0';
@@ -725,12 +725,12 @@ function MaterialNode({ id, data, selected }: NodeProps) {
     >
       {/* Header */}
       <div
-        className="px-3 py-2 rounded-t-md text-white text-sm font-medium"
+        className="px-3 py-2 rounded-t-md text-[var(--aethel-text-primary)] text-sm font-medium"
         style={{ backgroundColor: getTypeColor(data.type) }}
       >
         {data.label}
       </div>
-      
+
       {/* Body */}
       <div className="p-2">
         {/* Inputs */}
@@ -747,25 +747,25 @@ function MaterialNode({ id, data, selected }: NodeProps) {
                   height: 10,
                 }}
               />
-              <span className="text-xs text-gray-400 ml-2">{input.name}</span>
+              <span className="text-xs text-[var(--aethel-text-secondary)] ml-2">{input.name}</span>
             </div>
           ))}
         </div>
-        
+
         {/* Properties */}
         {data.properties.length > 0 && (
-          <div className="mt-2 space-y-1 border-t border-gray-700 pt-2">
+          <div className="mt-2 space-y-1 border-t border-[var(--aethel-border-primary)] pt-2">
             {data.properties.map((prop, i) => (
               <PropertyInput key={i} property={prop} />
             ))}
           </div>
         )}
-        
+
         {/* Outputs */}
         <div className="space-y-1 mt-2">
           {data.outputs.map((output, i) => (
             <div key={i} className="flex items-center justify-end">
-              <span className="text-xs text-gray-400 mr-2">{output.name}</span>
+              <span className="text-xs text-[var(--aethel-text-secondary)] mr-2">{output.name}</span>
               <Handle
                 type="source"
                 position={Position.Right}
@@ -791,7 +791,7 @@ function PropertyInput({ property }: { property: MaterialProperty }) {
     case 'color':
       return (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">{property.name}</span>
+          <span className="text-xs text-[var(--aethel-text-secondary)]">{property.name}</span>
           <input
             type="color"
             value={value as string}
@@ -800,11 +800,11 @@ function PropertyInput({ property }: { property: MaterialProperty }) {
           />
         </div>
       );
-    
+
     case 'float':
       return (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400 w-12">{property.name}</span>
+          <span className="text-xs text-[var(--aethel-text-secondary)] w-12">{property.name}</span>
           <input
             type="range"
             min={property.min ?? 0}
@@ -814,22 +814,22 @@ function PropertyInput({ property }: { property: MaterialProperty }) {
             onChange={(e) => setValue(parseFloat(e.target.value))}
             className="flex-1 h-1"
           />
-          <span className="text-xs text-gray-500 w-8">
+          <span className="text-xs text-[var(--aethel-text-secondary)] w-8">
             {(value as number).toFixed(2)}
           </span>
         </div>
       );
-    
+
     case 'texture':
       return (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">{property.name}</span>
-          <button className="px-2 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600">
+          <span className="text-xs text-[var(--aethel-text-secondary)]">{property.name}</span>
+          <button className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)]">
             Select...
           </button>
         </div>
       );
-    
+
     default:
       return null;
   }
@@ -850,11 +850,11 @@ function NodePalette({ onAddNode }: { onAddNode: (type: string) => void }) {
   };
 
   return (
-    <div className="absolute left-4 top-20 w-56 bg-gray-900 rounded-lg p-3 shadow-xl max-h-[calc(100vh-200px)] overflow-y-auto">
-      <h3 className="text-white font-medium mb-3">Add Node</h3>
+    <div className="absolute left-4 top-20 w-56 bg-[var(--aethel-surface-secondary)] rounded-lg p-3 shadow-xl max-h-[calc(100vh-200px)] overflow-y-auto">
+      <h3 className="text-[var(--aethel-text-primary)] font-medium mb-3">Add Node</h3>
       {Object.entries(categories).map(([category, nodeTypes]) => (
         <div key={category} className="mb-3">
-          <h4 className="text-gray-400 text-sm font-medium mb-1">{category}</h4>
+          <h4 className="text-[var(--aethel-text-secondary)] text-sm font-medium mb-1">{category}</h4>
           <div className="space-y-1">
             {nodeTypes.map(type => {
               const def = NODE_DEFINITIONS[type];
@@ -863,7 +863,7 @@ function NodePalette({ onAddNode }: { onAddNode: (type: string) => void }) {
                 <button
                   key={type}
                   onClick={() => onAddNode(type)}
-                  className="w-full text-left px-2 py-1.5 text-sm text-gray-300 hover:bg-gray-700 rounded"
+                  className="w-full text-left px-2 py-1.5 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
                 >
                   {def.label}
                 </button>
@@ -947,14 +947,14 @@ function MaterialPreview({ material }: { material: PBRMaterial }) {
   }, [material]);
 
   return (
-    <div className="absolute right-4 top-20 bg-gray-900 rounded-lg p-3 shadow-xl">
-      <h3 className="text-white font-medium mb-2">Preview</h3>
+    <div className="absolute right-4 top-20 bg-[var(--aethel-surface-secondary)] rounded-lg p-3 shadow-xl">
+      <h3 className="text-[var(--aethel-text-primary)] font-medium mb-2">Preview</h3>
       <canvas ref={canvasRef} className="rounded" />
       <div className="mt-2 space-y-1">
-        <button className="w-full px-2 py-1 text-xs text-white bg-blue-600 hover:bg-blue-700 rounded">
+        <button className="w-full px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded">
           Export GLSL
         </button>
-        <button className="w-full px-2 py-1 text-xs text-white bg-green-600 hover:bg-green-700 rounded">
+        <button className="w-full px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded">
           Save Material
         </button>
       </div>
@@ -987,11 +987,11 @@ export function MaterialEditor() {
       },
     },
   ]);
-  
+
 	const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [material] = useState(() => new PBRMaterial());
   const [showPalette, setShowPalette] = useState(true);
-  
+
   const onConnect = useCallback(
     (params: Connection) => {
 			if (!params.source || !params.target) return;
@@ -1009,7 +1009,7 @@ export function MaterialEditor() {
   const addNode = useCallback((type: string) => {
     const def = NODE_DEFINITIONS[type];
     if (!def) return;
-    
+
     const newNode: Node<MaterialNodeData> = {
       id: `${type}-${Date.now()}`,
       type: 'materialNode',
@@ -1022,7 +1022,7 @@ export function MaterialEditor() {
         outputs: [...def.outputs],
       },
     };
-    
+
     setNodes(nodes => [...nodes, newNode]);
   }, [setNodes]);
 
@@ -1040,7 +1040,7 @@ export function MaterialEditor() {
   }, [nodes, edges, toast]);
 
   return (
-    <div className="w-full h-full bg-gray-800">
+    <div className="w-full h-full bg-[var(--aethel-surface-secondary)]">
 			<ReactFlow
         nodes={nodes}
         edges={edges}
@@ -1049,30 +1049,30 @@ export function MaterialEditor() {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         fitView
-        className="bg-gray-900"
+        className="bg-[var(--aethel-surface-secondary)]"
       >
         <Background color="#333" gap={20} />
         <Controls />
         <MiniMap />
-        
+
         <Panel position="top-left">
           <div className="flex gap-2">
             <button
               onClick={() => setShowPalette(!showPalette)}
-              className="px-3 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+              className="px-3 py-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded hover:bg-[var(--aethel-surface-secondary)]"
             >
               {showPalette ? 'Hide Palette' : 'Show Palette'}
             </button>
             <button
               onClick={compileShader}
-              className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
             >
               Compile Shader
             </button>
           </div>
         </Panel>
       </ReactFlow>
-      
+
       {showPalette && <NodePalette onAddNode={addNode} />}
       <MaterialPreview material={material} />
     </div>

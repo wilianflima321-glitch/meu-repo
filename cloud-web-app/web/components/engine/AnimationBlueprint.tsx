@@ -22,7 +22,7 @@ import '@xyflow/react/dist/style.css';
 import { resolveCssVarRgba } from '@/lib/style/resolve-css-var';
 
 
-export type AnimationStateType = 
+export type AnimationStateType =
   | 'state'
   | 'entry'
   | 'conduit'
@@ -89,7 +89,7 @@ function StateNode({ data, selected }: { data: { label: string; type: AnimationS
       default: return 'var(--aethel-primary)';
     }
   };
-  
+
   const getNodeIcon = () => {
     switch (data.type) {
       case 'entry': return '▶️';
@@ -102,7 +102,7 @@ function StateNode({ data, selected }: { data: { label: string; type: AnimationS
       default: return '🎭';
     }
   };
-  
+
   return (
     <div style={{
       padding: '12px 16px',
@@ -126,7 +126,7 @@ function StateNode({ data, selected }: { data: { label: string; type: AnimationS
           }}
         />
       )}
-      
+
       {/* Header */}
       <div style={{
         display: 'flex',
@@ -136,15 +136,15 @@ function StateNode({ data, selected }: { data: { label: string; type: AnimationS
         marginBottom: data.animation ? '8px' : 0,
       }}>
         <span>{getNodeIcon()}</span>
-        <span style={{ 
-          fontWeight: 'bold', 
+        <span style={{
+          fontWeight: 'bold',
           color: 'var(--aethel-text-primary)',
           fontSize: '13px',
         }}>
           {data.label}
         </span>
       </div>
-      
+
       {/* Animation name */}
       {data.animation && (
         <div style={{
@@ -157,7 +157,7 @@ function StateNode({ data, selected }: { data: { label: string; type: AnimationS
           ANIM {data.animation}
         </div>
       )}
-      
+
       {/* Output handle */}
       <Handle
         type="source"
@@ -188,7 +188,7 @@ function TransitionLabel({ data }: { data: { conditions?: TransitionCondition[];
       </div>
     );
   }
-  
+
   return (
     <div style={{
       padding: '6px 10px',
@@ -231,7 +231,7 @@ function VariablesPanel({
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [newVar, setNewVar] = useState({ name: '', type: 'float' as AnimationVariable['type'], defaultValue: 0 });
-  
+
   return (
     <div style={{
       padding: '12px',
@@ -261,7 +261,7 @@ function VariablesPanel({
           + Add
         </button>
       </div>
-      
+
       {/* Add Variable Form */}
       {showAdd && (
         <div style={{
@@ -330,7 +330,7 @@ function VariablesPanel({
           </div>
         </div>
       )}
-      
+
       {/* Variable List */}
       {variables.map((variable) => (
         <div
@@ -354,7 +354,7 @@ function VariablesPanel({
           <span style={{ flex: 1, fontSize: '11px', color: 'var(--aethel-text-secondary)' }}>
             {variable.name}
           </span>
-          
+
           {variable.type === 'bool' ? (
             <label style={{ cursor: 'pointer' }}>
               <input
@@ -383,7 +383,7 @@ function VariablesPanel({
               }}
             />
           )}
-          
+
           <button
             onClick={() => onRemoveVariable(variable.name)}
             style={{
@@ -422,7 +422,7 @@ function StateInspector({
       </div>
     );
   }
-  
+
   return (
     <div style={{ padding: '12px' }}>
       <div style={{
@@ -436,7 +436,7 @@ function StateInspector({
       }}>
         🎭 {state.name}
       </div>
-      
+
       {/* Name */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
@@ -457,7 +457,7 @@ function StateInspector({
           }}
         />
       </div>
-      
+
       {/* Animation */}
       {state.type === 'state' && (
         <div style={{ marginBottom: '12px' }}>
@@ -484,7 +484,7 @@ function StateInspector({
           </select>
         </div>
       )}
-      
+
       {/* Looping */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{
@@ -503,7 +503,7 @@ function StateInspector({
           Looping
         </label>
       </div>
-      
+
       {/* Play Rate */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
@@ -519,7 +519,7 @@ function StateInspector({
           style={{ width: '100%' }}
         />
       </div>
-      
+
       {/* Blend Times */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
         <div>
@@ -579,7 +579,7 @@ function TransitionInspector({
   onUpdate: (updates: Partial<TransitionRule>) => void;
 }) {
   if (!transition) return null;
-  
+
   return (
     <div style={{ padding: '12px' }}>
       <div style={{
@@ -590,7 +590,7 @@ function TransitionInspector({
       }}>
         ➡️ Transition
       </div>
-      
+
       {/* Blend Time */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
@@ -606,7 +606,7 @@ function TransitionInspector({
           style={{ width: '100%' }}
         />
       </div>
-      
+
       {/* Blend Mode */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>
@@ -630,7 +630,7 @@ function TransitionInspector({
           <option value="custom">Custom Curve</option>
         </select>
       </div>
-      
+
       {/* Automatic */}
       <div style={{ marginBottom: '12px' }}>
         <label style={{
@@ -649,7 +649,7 @@ function TransitionInspector({
           Automatic (when animation ends)
         </label>
       </div>
-      
+
       {/* Conditions */}
       <div style={{ marginTop: '16px' }}>
         <div style={{
@@ -681,7 +681,7 @@ function TransitionInspector({
             + Add
           </button>
         </div>
-        
+
         {transition.conditions.map((cond, i) => (
           <div
             key={i}
@@ -716,7 +716,7 @@ function TransitionInspector({
                 <option key={v.name} value={v.name}>{v.name}</option>
               ))}
             </select>
-            
+
             <select
               value={cond.operator}
               onChange={(e) => {
@@ -741,7 +741,7 @@ function TransitionInspector({
               <option value="<=">&lt;=</option>
               <option value=">=">&gt;=</option>
             </select>
-            
+
             <input
               type={typeof cond.value === 'boolean' ? 'checkbox' : 'number'}
               checked={typeof cond.value === 'boolean' ? cond.value : undefined}
@@ -749,8 +749,8 @@ function TransitionInspector({
               onChange={(e) => {
                 const newConditions = [...transition.conditions];
                 const varDef = variables.find(v => v.name === cond.variable);
-                const value = varDef?.type === 'bool' 
-                  ? e.target.checked 
+                const value = varDef?.type === 'bool'
+                  ? e.target.checked
                   : parseFloat(e.target.value);
                 newConditions[i] = { ...cond, value };
                 onUpdate({ conditions: newConditions });
@@ -765,7 +765,7 @@ function TransitionInspector({
                 fontSize: '10px',
               }}
             />
-            
+
             <button
               onClick={() => {
                 const newConditions = transition.conditions.filter((_, j) => j !== i);
@@ -810,7 +810,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     'Hit_React',
     'Death',
   ];
-  
+
   const [states, setStates] = useState<AnimationState[]>([
     { id: 'entry', name: 'Entry', type: 'entry', looping: false, playRate: 1, blendIn: 0, blendOut: 0, position: { x: 100, y: 200 } },
     { id: 'idle', name: 'Idle', type: 'state', animation: 'Idle', looping: true, playRate: 1, blendIn: 0.2, blendOut: 0.2, position: { x: 300, y: 200 } },
@@ -818,7 +818,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     { id: 'run', name: 'Run', type: 'state', animation: 'Run', looping: true, playRate: 1, blendIn: 0.15, blendOut: 0.15, position: { x: 500, y: 300 } },
     { id: 'jump', name: 'Jump', type: 'state', animation: 'Jump_Start', looping: false, playRate: 1, blendIn: 0.1, blendOut: 0.1, position: { x: 700, y: 200 } },
   ]);
-  
+
   const [transitions, setTransitions] = useState<TransitionRule[]>([
     { id: 't1', from: 'entry', to: 'idle', conditions: [], blendTime: 0, blendMode: 'linear', priority: 0, automatic: true },
     { id: 't2', from: 'idle', to: 'walk', conditions: [{ variable: 'Speed', operator: '>', value: 0.1 }], blendTime: 0.2, blendMode: 'linear', priority: 1, automatic: false },
@@ -830,7 +830,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     { id: 't8', from: 'run', to: 'jump', conditions: [{ variable: 'IsJumping', operator: '==', value: true }], blendTime: 0.1, blendMode: 'linear', priority: 3, automatic: false },
     { id: 't9', from: 'jump', to: 'idle', conditions: [{ variable: 'IsJumping', operator: '==', value: false }], blendTime: 0.2, blendMode: 'linear', priority: 0, automatic: false },
   ]);
-  
+
   const [variables, setVariables] = useState<AnimationVariable[]>([
     { name: 'Speed', type: 'float', defaultValue: 0, min: 0, max: 1 },
     { name: 'Direction', type: 'float', defaultValue: 0, min: -180, max: 180 },
@@ -838,7 +838,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     { name: 'IsCrouching', type: 'bool', defaultValue: false },
     { name: 'IsAttacking', type: 'bool', defaultValue: false },
   ]);
-  
+
   const [variableValues, setVariableValues] = useState<Record<string, number | boolean>>({
     Speed: 0,
     Direction: 0,
@@ -846,15 +846,15 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     IsCrouching: false,
     IsAttacking: false,
   });
-  
+
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [selectedTransition, setSelectedTransition] = useState<string | null>(null);
   const minimapMaskColor = useMemo(
     () => resolveCssVarRgba('--aethel-surface-primary', 0.8, 'rgba(13,17,23,0.8)'),
     []
   );
-  
-  const nodes: Node[] = useMemo(() => 
+
+  const nodes: Node[] = useMemo(() =>
     states.map(state => ({
       id: state.id,
       type: 'animState',
@@ -867,7 +867,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
       selected: selectedState === state.id,
     })),
   [states, selectedState]);
-  
+
   const edges: Edge[] = useMemo(() =>
     transitions.map(t => ({
       id: t.id,
@@ -876,29 +876,29 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
       type: 'smoothstep',
       animated: true,
       markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--aethel-primary)' },
-      style: { 
+      style: {
         stroke: selectedTransition === t.id ? 'var(--aethel-warning)' : 'var(--aethel-primary)',
         strokeWidth: selectedTransition === t.id ? 3 : 2,
       },
-      label: t.conditions.length > 0 || !t.automatic 
-        ? `${t.conditions.map(c => `${c.variable}${c.operator}${c.value}`).join(', ')}` 
+      label: t.conditions.length > 0 || !t.automatic
+        ? `${t.conditions.map(c => `${c.variable}${c.operator}${c.value}`).join(', ')}`
         : 'Auto',
       labelStyle: { fill: 'var(--aethel-text-quaternary)', fontSize: 10 },
       labelBgStyle: { fill: 'var(--aethel-surface-tertiary)', fillOpacity: 0.9 },
     })),
   [transitions, selectedTransition]);
-  
+
   const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(nodes);
   const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(edges);
-  
+
   useEffect(() => {
     setFlowNodes(nodes);
   }, [nodes, setFlowNodes]);
-  
+
   useEffect(() => {
     setFlowEdges(edges);
   }, [edges, setFlowEdges]);
-  
+
   const onConnect = useCallback((connection: Connection) => {
     if (connection.source && connection.target) {
       const newTransition: TransitionRule = {
@@ -914,17 +914,17 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
       setTransitions([...transitions, newTransition]);
     }
   }, [transitions]);
-  
+
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedState(node.id);
     setSelectedTransition(null);
   }, []);
-  
+
   const onEdgeClick = useCallback((_: React.MouseEvent, edge: Edge) => {
     setSelectedTransition(edge.id);
     setSelectedState(null);
   }, []);
-  
+
   const onNodesPositionChange = useCallback((nodes: Node[]) => {
     setStates(states.map(s => {
       const node = nodes.find(n => n.id === s.id);
@@ -934,21 +934,21 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
       return s;
     }));
   }, [states]);
-  
+
   const handleStateUpdate = useCallback((updates: Partial<AnimationState>) => {
     if (!selectedState) return;
-    setStates(states.map(s => 
+    setStates(states.map(s =>
       s.id === selectedState ? { ...s, ...updates } : s
     ));
   }, [selectedState, states]);
-  
+
   const handleTransitionUpdate = useCallback((updates: Partial<TransitionRule>) => {
     if (!selectedTransition) return;
     setTransitions(transitions.map(t =>
       t.id === selectedTransition ? { ...t, ...updates } : t
     ));
   }, [selectedTransition, transitions]);
-  
+
   const handleAddState = useCallback((type: AnimationStateType) => {
     const newState: AnimationState = {
       id: `state_${Date.now()}`,
@@ -963,7 +963,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
     setStates([...states, newState]);
     setSelectedState(newState.id);
   }, [states]);
-  
+
   const handleDeleteSelected = useCallback(() => {
     if (selectedState && selectedState !== 'entry') {
       setStates(states.filter(s => s.id !== selectedState));
@@ -975,10 +975,10 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
       setSelectedTransition(null);
     }
   }, [selectedState, selectedTransition, states, transitions]);
-  
+
   const currentState = selectedState ? states.find(s => s.id === selectedState) : null;
   const currentTransition = selectedTransition ? transitions.find(t => t.id === selectedTransition) : null;
-  
+
   return (
     <div style={{
       display: 'flex',
@@ -1059,7 +1059,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
             </button>
           )}
         </div>
-        
+
         <ReactFlow
           nodes={flowNodes}
           edges={flowEdges}
@@ -1077,7 +1077,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
         >
           <Background color="var(--aethel-border-primary)" gap={20} />
           <Controls />
-          <MiniMap 
+          <MiniMap
             nodeColor={(node) => {
               switch (node.data?.type) {
                 case 'entry': return 'var(--aethel-success)';
@@ -1090,7 +1090,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           />
         </ReactFlow>
       </div>
-      
+
       {/* Side Panel */}
       <div style={{
         width: '280px',
@@ -1111,7 +1111,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
         }}>
           Animation Blueprint
         </div>
-        
+
         <div style={{ flex: 1, overflow: 'auto' }}>
           {/* Variables */}
           <VariablesPanel
@@ -1129,7 +1129,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
               setVariableValues(newValues);
             }}
           />
-          
+
           {/* State Inspector */}
           {selectedState && (
             <StateInspector
@@ -1138,7 +1138,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
               animations={animations}
             />
           )}
-          
+
           {/* Transition Inspector */}
           {selectedTransition && (
             <TransitionInspector
@@ -1147,7 +1147,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
               onUpdate={handleTransitionUpdate}
             />
           )}
-          
+
           {!selectedState && !selectedTransition && (
             <div style={{
               padding: '24px',
@@ -1159,7 +1159,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
             </div>
           )}
         </div>
-        
+
         {/* Save Button */}
         <div style={{
           padding: '12px',

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Sparkles, X, Check, Keyboard } from 'lucide-react'
+import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_BUDGET_OPTIONS } from '@/lib/ai/openrouter-models'
 
 // ============= Types =============
 
@@ -27,12 +28,12 @@ interface InlineCompletionProps {
   cursorPosition: { line: number; column: number }
   language: string
   filePath: string
-  
+
   // Callbacks
   onAccept: (suggestion: CompletionSuggestion) => void
   onReject: () => void
   onPartialAccept: (text: string) => void
-  
+
   // Config
   enabled?: boolean
   debounceMs?: number
@@ -53,40 +54,40 @@ interface GhostTextState {
 class GhostTextProvider {
   private abortController: AbortController | null = null
   private cache: Map<string, CompletionSuggestion[]> = new Map()
-  
+
   async getSuggestion(
     content: string,
     position: { line: number; column: number },
     language: string,
     filePath: string,
-    model: string = 'google/gemini-3.1-flash-lite-preview'
+    model: string = DEFAULT_OPENROUTER_MODEL_ID
   ): Promise<CompletionSuggestion | null> {
     // Cancel previous request
     if (this.abortController) {
       this.abortController.abort()
     }
     this.abortController = new AbortController()
-    
+
     // Get context around cursor
     const lines = content.split('\n')
     const currentLine = lines[position.line] || ''
     const prefix = currentLine.substring(0, position.column)
     const suffix = currentLine.substring(position.column)
-    
+
     // Get surrounding context (5 lines before and after)
     const contextBefore = lines.slice(Math.max(0, position.line - 5), position.line).join('\n')
     const contextAfter = lines.slice(position.line + 1, position.line + 6).join('\n')
-    
+
     // Build prompt
     const prompt = this.buildPrompt(contextBefore, prefix, suffix, contextAfter, language)
-    
+
     // Check cache
     const cacheKey = `${filePath}:${position.line}:${position.column}:${prefix}`
     const cached = this.cache.get(cacheKey)
     if (cached && cached.length > 0) {
       return cached[0]
     }
-    
+
     try {
       const response = await fetch('/api/ai/complete', {
         method: 'POST',
@@ -100,18 +101,18 @@ class GhostTextProvider {
         }),
         signal: this.abortController.signal,
       })
-      
+
       if (!response.ok) {
         throw new Error('Completion request failed')
       }
-      
+
       const data = await response.json()
       const completionText = data.suggestion?.trim()
-      
+
       if (!completionText) {
         return null
       }
-      
+
       const suggestion: CompletionSuggestion = {
         id: crypto.randomUUID(),
         text: completionText,
@@ -127,10 +128,10 @@ class GhostTextProvider {
         confidence: data.confidence || 0.8,
         model,
       }
-      
+
       // Cache the result
       this.cache.set(cacheKey, [suggestion])
-      
+
       return suggestion
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
@@ -140,7 +141,7 @@ class GhostTextProvider {
       return null
     }
   }
-  
+
   private buildPrompt(
     contextBefore: string,
     prefix: string,
@@ -167,16 +168,16 @@ ${contextAfter}
 
 Completion (continue from cursor):`
   }
-  
+
   private truncateForDisplay(text: string, maxLength: number = 100): string {
     if (text.length <= maxLength) return text
     return text.substring(0, maxLength) + '...'
   }
-  
+
   clearCache() {
     this.cache.clear()
   }
-  
+
   cancel() {
     if (this.abortController) {
       this.abortController.abort()
@@ -189,12 +190,12 @@ Completion (continue from cursor):`
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
-  
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedValue(value), delay)
     return () => clearTimeout(timer)
   }, [value, delay])
-  
+
   return debouncedValue
 }
 
@@ -210,10 +211,10 @@ interface GhostTextOverlayProps {
 
 function GhostTextOverlay({ text, position, onAccept, onReject, visible }: GhostTextOverlayProps) {
   if (!visible || !text) return null
-  
+
   // Split into lines for multi-line display
   const lines = text.split('\n')
-  
+
   return (
     <div
       className="absolute z-50 pointer-events-none"
@@ -225,10 +226,10 @@ function GhostTextOverlay({ text, position, onAccept, onReject, visible }: Ghost
       {/* Ghost text */}
       <div className="font-mono text-sm">
         {lines.map((line, i) => (
-          <div 
-            key={i} 
-            className="text-slate-500 opacity-60"
-            style={{ 
+          <div
+            key={i}
+            className="text-[var(--aethel-text-tertiary)] opacity-60"
+            style={{
               whiteSpace: 'pre',
               fontStyle: 'italic',
             }}
@@ -237,16 +238,16 @@ function GhostTextOverlay({ text, position, onAccept, onReject, visible }: Ghost
           </div>
         ))}
       </div>
-      
+
       {/* Hint tooltip */}
-      <div 
-        className="absolute -top-6 left-0 flex items-center gap-1 px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-xs text-slate-400 pointer-events-auto whitespace-nowrap"
+      <div
+        className="absolute -top-6 left-0 flex items-center gap-1 px-2 py-0.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-xs text-[var(--aethel-text-tertiary)] pointer-events-auto whitespace-nowrap"
       >
-        <kbd className="px-1 py-0.5 bg-slate-700 rounded text-[10px]">Tab</kbd>
-        <span>accept</span>
-        <span className="mx-1 text-slate-600">|</span>
-        <kbd className="px-1 py-0.5 bg-slate-700 rounded text-[10px]">Esc</kbd>
-        <span>dismiss</span>
+        <kbd className="px-1 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded text-[10px]">Tab</kbd>
+        <span>aceitar</span>
+        <span className="mx-1 text-[var(--aethel-text-quaternary)]">|</span>
+        <kbd className="px-1 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded text-[10px]">Esc</kbd>
+        <span>dispensar</span>
       </div>
     </div>
   )
@@ -263,8 +264,8 @@ function CompletionLoading({ position }: { position: { top: number; left: number
         left: position.left,
       }}
     >
-      <Sparkles className="w-3 h-3 text-sky-400 animate-pulse" />
-      <span className="text-xs text-slate-500">Thinking...</span>
+      <Sparkles className="w-3 h-3 text-[var(--aethel-info)] animate-pulse" />
+      <span className="text-xs text-[var(--aethel-text-tertiary)]">Analisando...</span>
     </div>
   )
 }
@@ -283,7 +284,7 @@ export default function InlineCompletion({
   debounceMs = 500,
   maxSuggestions = 1,
   showGhostText = true,
-  model = 'google/gemini-3.1-flash-lite-preview',
+  model = DEFAULT_OPENROUTER_MODEL_ID,
 }: InlineCompletionProps) {
   const [ghostText, setGhostText] = useState<GhostTextState>({
     visible: false,
@@ -291,23 +292,23 @@ export default function InlineCompletion({
     position: { top: 0, left: 0 },
     loading: false,
   })
-  
+
   const providerRef = useRef<GhostTextProvider>(new GhostTextProvider())
   const debouncedPosition = useDebounce(cursorPosition, debounceMs)
   const debouncedContent = useDebounce(content, debounceMs)
-  
+
   // Calculate ghost text position (this would need editor coordinates in real impl)
   const calculatePosition = useCallback((line: number, column: number) => {
     // In real implementation, this would use editor's coordinate system
     const lineHeight = 20 // px
     const charWidth = 8.4 // px (monospace)
-    
+
     return {
       top: line * lineHeight,
       left: column * charWidth,
     }
   }, [])
-  
+
   // Fetch completion when cursor moves (debounced)
   useEffect(() => {
     if (!enabled || !showGhostText) {
@@ -316,14 +317,14 @@ export default function InlineCompletion({
     }
 
     const provider = providerRef.current
-    
+
     const fetchCompletion = async () => {
       setGhostText(prev => ({
         ...prev,
         loading: true,
         position: calculatePosition(debouncedPosition.line, debouncedPosition.column),
       }))
-      
+
       const suggestion = await provider.getSuggestion(
         debouncedContent,
         debouncedPosition,
@@ -331,7 +332,7 @@ export default function InlineCompletion({
         filePath,
         model
       )
-      
+
       setGhostText({
         visible: !!suggestion,
         suggestion,
@@ -339,26 +340,26 @@ export default function InlineCompletion({
         loading: false,
       })
     }
-    
+
     fetchCompletion()
-    
+
     return () => {
       provider.cancel()
     }
   }, [debouncedPosition, debouncedContent, language, filePath, model, enabled, showGhostText, calculatePosition])
-  
+
   // Keyboard handlers
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!ghostText.visible || !ghostText.suggestion) return
-      
+
       // Tab - Accept full suggestion
       if (e.key === 'Tab') {
         e.preventDefault()
         onAccept(ghostText.suggestion)
         setGhostText(prev => ({ ...prev, visible: false, suggestion: null }))
       }
-      
+
       // Escape - Reject suggestion
       if (e.key === 'Escape') {
         e.preventDefault()
@@ -366,7 +367,7 @@ export default function InlineCompletion({
         setGhostText(prev => ({ ...prev, visible: false, suggestion: null }))
         providerRef.current.cancel()
       }
-      
+
       // Ctrl+Right - Accept word by word
       if (e.ctrlKey && e.key === 'ArrowRight') {
         e.preventDefault()
@@ -388,26 +389,26 @@ export default function InlineCompletion({
           }
         }
       }
-      
+
       // Any other key - dismiss
       if (!['Tab', 'Escape', 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) {
         setGhostText(prev => ({ ...prev, visible: false }))
       }
     }
-    
+
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [ghostText, onAccept, onReject, onPartialAccept])
-  
+
   if (!enabled) return null
-  
+
   return (
     <>
       {/* Loading indicator */}
       {ghostText.loading && (
         <CompletionLoading position={ghostText.position} />
       )}
-      
+
       {/* Ghost text overlay */}
       {showGhostText && ghostText.visible && ghostText.suggestion && (
         <GhostTextOverlay
@@ -452,23 +453,23 @@ export function CompletionStatusBar({
       <button
         onClick={onToggle}
         className={`flex items-center gap-1 px-2 py-1 rounded ${
-          enabled 
-            ? 'bg-sky-500/20 text-sky-400' 
-            : 'bg-slate-800 text-slate-500'
+          enabled
+            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]'
+            : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
         }`}
       >
         <Sparkles className="w-3 h-3" />
-        <span>Copilot {enabled ? 'ON' : 'OFF'}</span>
+        <span>Copilot {enabled ? 'ATIVO' : 'DESLIGADO'}</span>
       </button>
-      
+
       {enabled && (
         <>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-400">{currentModel}</span>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-400">{suggestions} suggestions</span>
-          <span className="text-slate-500">|</span>
-          <span className="text-emerald-400">{(acceptRate * 100).toFixed(0)}% accepted</span>
+          <span className="text-[var(--aethel-text-tertiary)]">|</span>
+          <span className="text-[var(--aethel-text-tertiary)]">{currentModel}</span>
+          <span className="text-[var(--aethel-text-tertiary)]">|</span>
+          <span className="text-[var(--aethel-text-tertiary)]">{suggestions} sugestoes</span>
+          <span className="text-[var(--aethel-text-tertiary)]">|</span>
+          <span className="text-[var(--aethel-success)]">{(acceptRate * 100).toFixed(0)}% aceitos</span>
         </>
       )}
     </div>
@@ -491,44 +492,43 @@ interface CompletionSettingsProps {
 export function CompletionSettings({ settings, onSettingsChange }: CompletionSettingsProps) {
   return (
     <div className="p-4 space-y-4">
-      <h3 className="text-sm font-semibold text-white">Ajustes de completacao IA</h3>
-      
+      <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Ajustes de completacao IA</h3>
+
       {/* Enable toggle */}
       <div className="flex items-center justify-between">
-        <label className="text-sm text-slate-400">Enable Inline Completions</label>
+        <label className="text-sm text-[var(--aethel-text-tertiary)]">Ativar completacao inline</label>
         <button
           onClick={() => onSettingsChange({ ...settings, enabled: !settings.enabled })}
           className={`w-10 h-5 rounded-full transition-colors ${
-            settings.enabled ? 'bg-sky-600' : 'bg-slate-700'
+            settings.enabled ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'
           }`}
         >
-          <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+          <div className={`w-4 h-4 rounded-full bg-[var(--aethel-surface-secondary)] transition-transform ${
             settings.enabled ? 'translate-x-5' : 'translate-x-1'
           }`} />
         </button>
       </div>
-      
+
       {/* Model selector */}
       <div>
-        <label className="text-sm text-slate-400 block mb-1">Model</label>
+        <label className="text-sm text-[var(--aethel-text-tertiary)] block mb-1">Modelo</label>
         <select
           value={settings.model}
           onChange={(e) => onSettingsChange({ ...settings, model: e.target.value })}
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white"
+          className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)]"
         >
-          <option value="google/gemini-3.1-flash-lite-preview">Gemini 3.1 Flash Lite (OpenRouter)</option>
-          <option value="openai/gpt-4o-mini">GPT-4o Mini (OpenRouter)</option>
-          <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku (OpenRouter)</option>
-          <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
-          <option value="gpt-4o">GPT-4o (OpenAI)</option>
-          <option value="deepseek-coder">DeepSeek Coder (Budget)</option>
+          {OPENROUTER_BUDGET_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
-      
+
       {/* Debounce */}
       <div>
-        <label className="text-sm text-slate-400 block mb-1">
-          Delay: {settings.debounceMs}ms
+        <label className="text-sm text-[var(--aethel-text-tertiary)] block mb-1">
+          Atraso: {settings.debounceMs}ms
         </label>
         <input
           type="range"
@@ -537,14 +537,14 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
           step={100}
           value={settings.debounceMs}
           onChange={(e) => onSettingsChange({ ...settings, debounceMs: parseInt(e.target.value) })}
-          className="w-full accent-sky-600"
+          className="w-full accent-[var(--aethel-info)]"
         />
       </div>
-      
+
       {/* Temperature */}
       <div>
-        <label className="text-sm text-slate-400 block mb-1">
-          Creativity: {settings.temperature.toFixed(1)}
+        <label className="text-sm text-[var(--aethel-text-tertiary)] block mb-1">
+          Criatividade: {settings.temperature.toFixed(1)}
         </label>
         <input
           type="range"
@@ -553,11 +553,11 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
           step={0.1}
           value={settings.temperature}
           onChange={(e) => onSettingsChange({ ...settings, temperature: parseFloat(e.target.value) })}
-          className="w-full accent-sky-600"
+          className="w-full accent-[var(--aethel-info)]"
         />
-        <div className="flex justify-between text-[10px] text-slate-500">
-          <span>Precise</span>
-          <span>Creative</span>
+        <div className="flex justify-between text-[10px] text-[var(--aethel-text-tertiary)]">
+          <span>Preciso</span>
+          <span>Criativo</span>
         </div>
       </div>
     </div>

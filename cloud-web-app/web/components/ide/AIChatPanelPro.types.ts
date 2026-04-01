@@ -1,3 +1,10 @@
+import {
+  OPENROUTER_BEST_MODELS_SORTED,
+  OPENROUTER_BUDGET_MODELS_SORTED,
+  OPENROUTER_FREE_MODELS_SORTED,
+  type OpenRouterModel,
+} from '@/lib/ai/openrouter-models'
+
 export interface SpeechRecognitionAlternative {
   transcript: string
   confidence: number
@@ -94,6 +101,9 @@ export interface ModelOption {
   maxTokens?: number
   supportsVision?: boolean
   supportsVoice?: boolean
+  inputCost?: number
+  outputCost?: number
+  tier?: 'free' | 'budget' | 'best'
 }
 
 export interface CodebaseContextPreviewItem {
@@ -157,78 +167,21 @@ export interface AIChatPanelProps {
   codebaseContextPreview?: CodebaseContextPreview
 }
 
+const toModelOption = (tierLabel: 'Free' | 'Budget' | 'Best') => (model: OpenRouterModel) => ({
+  id: model.id,
+  name: model.name,
+  provider: 'OpenRouter',
+  description: `${tierLabel} - ${model.description}`,
+  maxTokens: model.contextWindow,
+  supportsVision: model.supportsVision,
+  supportsVoice: false,
+  inputCost: model.inputCost,
+  outputCost: model.outputCost,
+  tier: model.tier,
+})
+
 export const DEFAULT_MODELS: ModelOption[] = [
-  {
-    id: 'google/gemini-3.1-flash-lite-preview',
-    name: 'Gemini 3.1 Flash Lite',
-    provider: 'OpenRouter',
-    description: 'Low-cost routed default for broad interactive work',
-    maxTokens: 1000000,
-    supportsVision: false,
-  },
-  {
-    id: 'openai/gpt-4o-mini',
-    name: 'GPT-4o Mini (Routed)',
-    provider: 'OpenRouter',
-    description: 'OpenAI-compatible routed model',
-    maxTokens: 128000,
-    supportsVision: false,
-  },
-  {
-    id: 'anthropic/claude-3.5-haiku',
-    name: 'Claude 3.5 Haiku (Routed)',
-    provider: 'OpenRouter',
-    description: 'Anthropic-quality routed model',
-    maxTokens: 200000,
-    supportsVision: false,
-  },
-  {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    provider: 'OpenAI',
-    description: 'Most capable model',
-    maxTokens: 128000,
-    supportsVision: true,
-    supportsVoice: true,
-  },
-  {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o Mini',
-    provider: 'OpenAI',
-    description: 'Fast and efficient',
-    maxTokens: 128000,
-    supportsVision: true,
-  },
-  {
-    id: 'claude-sonnet-4-20250514',
-    name: 'Claude Sonnet 4',
-    provider: 'Anthropic',
-    description: 'Balanced performance',
-    maxTokens: 200000,
-    supportsVision: true,
-  },
-  {
-    id: 'gemini-2.0-flash',
-    name: 'Gemini 2.0 Flash',
-    provider: 'Google',
-    description: 'Live multimodal',
-    maxTokens: 1000000,
-    supportsVision: true,
-    supportsVoice: true,
-  },
-  {
-    id: 'gemini-1.5-pro',
-    name: 'Gemini 1.5 Pro',
-    provider: 'Google',
-    description: 'Multimodal',
-    maxTokens: 1000000,
-    supportsVision: true,
-  },
-  {
-    id: 'deepseek-chat',
-    name: 'DeepSeek R1',
-    provider: 'DeepSeek',
-    description: 'Reasoning model',
-    maxTokens: 64000,
-  },
+  ...OPENROUTER_FREE_MODELS_SORTED.map(toModelOption('Free')),
+  ...OPENROUTER_BUDGET_MODELS_SORTED.map(toModelOption('Budget')),
+  ...OPENROUTER_BEST_MODELS_SORTED.map(toModelOption('Best')),
 ]

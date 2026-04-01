@@ -1,9 +1,9 @@
 /**
  * QUEST EDITOR - Aethel Engine
- * 
+ *
  * Editor profissional de quests/missões com sistema de objetivos,
  * pré-requisitos, recompensas e tracking de progresso.
- * 
+ *
  * FEATURES:
  * - Quest states (available, active, completed, failed)
  * - Objective types (collect, kill, explore, talk, escort)
@@ -75,13 +75,13 @@ import {
 
 export type QuestState = 'unavailable' | 'available' | 'active' | 'completed' | 'failed';
 
-export type ObjectiveType = 
-  | 'collect' 
-  | 'kill' 
-  | 'explore' 
-  | 'talk' 
-  | 'escort' 
-  | 'defend' 
+export type ObjectiveType =
+  | 'collect'
+  | 'kill'
+  | 'explore'
+  | 'talk'
+  | 'escort'
+  | 'defend'
   | 'craft'
   | 'deliver'
   | 'custom';
@@ -179,72 +179,72 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
   const category = QUEST_CATEGORIES.find((c) => c.id === data.category);
   const completedObjectives = data.objectives.filter((o) => o.currentCount >= o.targetCount).length;
   const totalObjectives = data.objectives.length;
-  
+
   const stateColors: Record<QuestState, string> = {
-    unavailable: 'border-slate-600 bg-slate-800/50',
-    available: 'border-yellow-500 bg-yellow-900/20',
-    active: 'border-blue-500 bg-blue-900/20',
-    completed: 'border-green-500 bg-green-900/20',
-    failed: 'border-red-500 bg-red-900/20',
+    unavailable: 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]',
+    available: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]',
+    active: 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
+    completed: 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]',
+    failed: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]',
   };
-  
+
   const stateIcons: Record<QuestState, React.ReactNode> = {
-    unavailable: <Unlink className="w-4 h-4 text-slate-500" />,
-    available: <Star className="w-4 h-4 text-yellow-400" />,
-    active: <Play className="w-4 h-4 text-blue-400" />,
-    completed: <CheckCircle2 className="w-4 h-4 text-green-400" />,
-    failed: <XCircle className="w-4 h-4 text-red-400" />,
+    unavailable: <Unlink className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />,
+    available: <Star className="w-4 h-4 text-[var(--aethel-warning-light)]" />,
+    active: <Play className="w-4 h-4 text-[var(--aethel-info-light)]" />,
+    completed: <CheckCircle2 className="w-4 h-4 text-[var(--aethel-success-light)]" />,
+    failed: <XCircle className="w-4 h-4 text-[var(--aethel-error-light)]" />,
   };
-  
+
   return (
-    <div 
+    <div
       className={`w-72 rounded-lg border-2 shadow-lg ${stateColors[data.state]} ${
         selected ? 'ring-2 ring-white' : ''
       }`}
     >
-      <Handle type="target" position={Position.Top} className="!bg-slate-400" />
-      
+      <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-text-tertiary)]" />
+
       {/* Header */}
-      <div 
+      <div
         className="px-3 py-2 rounded-t-md flex items-center gap-2"
         style={{ borderBottom: `2px solid ${category?.color || '#64748b'}` }}
       >
         <span className="text-lg">{category?.icon}</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-sm text-white truncate">{data.title}</span>
-            {data.isMainQuest && <Star className="w-3 h-3 text-yellow-400 flex-shrink-0" />}
+            <span className="font-medium text-sm text-[var(--aethel-text-primary)] truncate">{data.title}</span>
+            {data.isMainQuest && <Star className="w-3 h-3 text-[var(--aethel-warning-light)] flex-shrink-0" />}
           </div>
-          <div className="text-[10px] text-slate-400">Lvl {data.level} • {category?.name}</div>
+          <div className="text-[10px] text-[var(--aethel-text-tertiary)]">Lvl {data.level} • {category?.name}</div>
         </div>
         {stateIcons[data.state]}
       </div>
-      
+
       {/* Description */}
-      <div className="px-3 py-2 text-xs text-slate-300 line-clamp-2 border-b border-slate-700/50">
+      <div className="px-3 py-2 text-xs text-[var(--aethel-text-secondary)] line-clamp-2 border-b border-[var(--aethel-border-primary)]/50">
         {data.description}
       </div>
-      
+
       {/* Objectives preview */}
       <div className="px-3 py-2">
-        <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+        <div className="flex items-center justify-between text-[10px] text-[var(--aethel-text-tertiary)] mb-1">
           <span>Objectives</span>
           <span>{completedObjectives}/{totalObjectives}</span>
         </div>
-        <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-          <div 
+        <div className="h-1.5 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
+          <div
             className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all"
             style={{ width: `${totalObjectives > 0 ? (completedObjectives / totalObjectives) * 100 : 0}%` }}
           />
         </div>
-        
+
         {/* Show first 2 objectives */}
         <div className="mt-2 space-y-1">
           {data.objectives.slice(0, 2).map((obj) => (
-            <div 
+            <div
               key={obj.id}
               className={`flex items-center gap-1.5 text-[10px] ${
-                obj.currentCount >= obj.targetCount ? 'text-green-400' : 'text-slate-400'
+                obj.currentCount >= obj.targetCount ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-text-tertiary)]'
               }`}
             >
               {OBJECTIVE_ICONS[obj.type]}
@@ -253,34 +253,34 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
             </div>
           ))}
           {data.objectives.length > 2 && (
-            <div className="text-[10px] text-slate-500 italic">
+            <div className="text-[10px] text-[var(--aethel-text-quaternary)] italic">
               +{data.objectives.length - 2} more...
             </div>
           )}
         </div>
       </div>
-      
+
       {/* Rewards preview */}
       {data.rewards.length > 0 && (
-        <div className="px-3 py-2 border-t border-slate-700/50">
+        <div className="px-3 py-2 border-t border-[var(--aethel-border-primary)]/50">
           <div className="flex items-center gap-2 flex-wrap">
             {data.rewards.map((reward) => (
-              <div 
+              <div
                 key={reward.id}
-                className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-700/50 rounded text-[10px]"
+                className="flex items-center gap-1 px-1.5 py-0.5 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded text-[10px]"
               >
-                {reward.type === 'xp' && <Star className="w-3 h-3 text-blue-400" />}
-                {reward.type === 'gold' && <Coins className="w-3 h-3 text-yellow-400" />}
-                {reward.type === 'item' && <Package className="w-3 h-3 text-blue-400" />}
-                {reward.type === 'reputation' && <Award className="w-3 h-3 text-green-400" />}
+                {reward.type === 'xp' && <Star className="w-3 h-3 text-[var(--aethel-info-light)]" />}
+                {reward.type === 'gold' && <Coins className="w-3 h-3 text-[var(--aethel-warning-light)]" />}
+                {reward.type === 'item' && <Package className="w-3 h-3 text-[var(--aethel-info-light)]" />}
+                {reward.type === 'reputation' && <Award className="w-3 h-3 text-[var(--aethel-success-light)]" />}
                 <span>{reward.amount}</span>
               </div>
             ))}
           </div>
         </div>
       )}
-      
-      <Handle type="source" position={Position.Bottom} className="!bg-slate-400" />
+
+      <Handle type="source" position={Position.Bottom} className="!bg-[var(--aethel-text-tertiary)]" />
     </div>
   );
 }
@@ -375,10 +375,10 @@ const initialNodes: Node<QuestNodeData>[] = [
 ];
 
 const initialEdges: Edge[] = [
-  { 
-    id: 'e1', 
-    source: 'q1', 
-    target: 'q2', 
+  {
+    id: 'e1',
+    source: 'q1',
+    target: 'q2',
     markerEnd: { type: MarkerType.ArrowClosed },
     style: { stroke: '#eab308', strokeWidth: 2 },
     label: 'requires',
@@ -399,20 +399,20 @@ interface ObjectiveEditorProps {
 
 function ObjectiveEditor({ objective, onUpdate, onDelete }: ObjectiveEditorProps) {
   return (
-    <div className="bg-slate-800/50 rounded p-3 mb-2">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-3 mb-2">
       <div className="flex items-center gap-2 mb-2">
         <select
           value={objective.type}
           onChange={(e) => onUpdate({ ...objective, type: e.target.value as ObjectiveType })}
-          className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
+          className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-sm"
         >
           {Object.keys(OBJECTIVE_ICONS).map((type) => (
             <option key={type} value={type}>{type}</option>
           ))}
         </select>
-        
+
         <div className="flex-1" />
-        
+
         <label className="flex items-center gap-1 text-xs">
           <input
             type="checkbox"
@@ -422,38 +422,38 @@ function ObjectiveEditor({ objective, onUpdate, onDelete }: ObjectiveEditorProps
           />
           Optional
         </label>
-        
+
         <button
           onClick={onDelete}
-          className="p-1 rounded bg-red-600/30 hover:bg-red-600/50"
+          className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
         >
-          <Trash2 className="w-3 h-3 text-red-400" />
+          <Trash2 className="w-3 h-3 text-[var(--aethel-error-light)]" />
         </button>
       </div>
-      
+
       <input
         value={objective.description}
         onChange={(e) => onUpdate({ ...objective, description: e.target.value })}
-        className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm mb-2"
+        className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm mb-2"
         placeholder="Objective description..."
       />
-      
+
       <div className="flex gap-2">
         <div className="flex-1">
-          <label className="text-[10px] text-slate-400 block mb-1">Target ID</label>
+          <label className="text-[10px] text-[var(--aethel-text-tertiary)] block mb-1">Target ID</label>
           <input
             value={objective.targetId || ''}
             onChange={(e) => onUpdate({ ...objective, targetId: e.target.value })}
-            className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+            className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
           />
         </div>
         <div className="w-20">
-          <label className="text-[10px] text-slate-400 block mb-1">Count</label>
+          <label className="text-[10px] text-[var(--aethel-text-tertiary)] block mb-1">Count</label>
           <input
             type="number"
             value={objective.targetCount}
             onChange={(e) => onUpdate({ ...objective, targetCount: parseInt(e.target.value) || 1 })}
-            className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+            className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
             min={1}
           />
         </div>
@@ -474,11 +474,11 @@ interface RewardEditorProps {
 
 function RewardEditor({ reward, onUpdate, onDelete }: RewardEditorProps) {
   return (
-    <div className="flex items-center gap-2 bg-slate-800/50 rounded p-2 mb-2">
+    <div className="flex items-center gap-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-2 mb-2">
       <select
         value={reward.type}
         onChange={(e) => onUpdate({ ...reward, type: e.target.value as RewardType })}
-        className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+        className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
       >
         <option value="xp">XP</option>
         <option value="gold">Gold</option>
@@ -487,29 +487,29 @@ function RewardEditor({ reward, onUpdate, onDelete }: RewardEditorProps) {
         <option value="skill">Skill</option>
         <option value="unlock">Unlock</option>
       </select>
-      
+
       {reward.type === 'item' && (
         <input
           value={reward.itemId || ''}
           onChange={(e) => onUpdate({ ...reward, itemId: e.target.value })}
-          className="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+          className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
           placeholder="Item ID"
         />
       )}
-      
+
       <input
         type="number"
         value={reward.amount}
         onChange={(e) => onUpdate({ ...reward, amount: parseInt(e.target.value) || 0 })}
-        className="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+        className="w-20 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
         min={0}
       />
-      
+
       <button
         onClick={onDelete}
-        className="p-1 rounded bg-red-600/30 hover:bg-red-600/50"
+        className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
       >
-        <Trash2 className="w-3 h-3 text-red-400" />
+        <Trash2 className="w-3 h-3 text-[var(--aethel-error-light)]" />
       </button>
     </div>
   );
@@ -533,26 +533,26 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
     prerequisites: false,
     advanced: false,
   });
-  
+
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
-  
+
   if (!node) {
     return (
-      <div className="p-4 text-center text-slate-500">
+      <div className="p-4 text-center text-[var(--aethel-text-quaternary)]">
         <Scroll className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-sm">Select a quest to edit</p>
       </div>
     );
   }
-  
+
   const data = node.data;
-  
+
   const updateData = (updates: Partial<QuestNodeData>) => {
     onUpdate(node.id, { ...data, ...updates });
   };
-  
+
   return (
     <div className="p-4 space-y-4">
       {/* Basic Info */}
@@ -562,64 +562,64 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.basic ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <Scroll className="w-4 h-4 text-blue-400" />
+          <Scroll className="w-4 h-4 text-[var(--aethel-info-light)]" />
           Basic Info
         </button>
-        
+
         {openSections.basic && (
           <div className="pl-6 space-y-3">
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Title</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Title</label>
               <input
                 value={data.title}
                 onChange={(e) => updateData({ title: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm"
               />
             </div>
-            
+
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Description</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Description</label>
               <textarea
                 value={data.description}
                 onChange={(e) => updateData({ description: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm resize-none"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm resize-none"
                 rows={3}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Category</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Category</label>
                 <select
                   value={data.category}
                   onChange={(e) => updateData({ category: e.target.value })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 >
                   {QUEST_CATEGORIES.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Level</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Level</label>
                 <input
                   type="number"
                   value={data.level}
                   onChange={(e) => updateData({ level: parseInt(e.target.value) || 1 })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                   min={1}
                 />
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">State</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">State</label>
                 <select
                   value={data.state}
                   onChange={(e) => updateData({ state: e.target.value as QuestState })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 >
                   <option value="unavailable">Unavailable</option>
                   <option value="available">Available</option>
@@ -628,7 +628,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                   <option value="failed">Failed</option>
                 </select>
               </div>
-              
+
               <div className="flex items-end pb-1">
                 <label className="flex items-center gap-2 text-sm">
                   <input
@@ -641,30 +641,30 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                 </label>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Quest Giver</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Quest Giver</label>
                 <input
                   value={data.giver || ''}
                   onChange={(e) => updateData({ giver: e.target.value })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 />
               </div>
-              
+
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Location</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Location</label>
                 <input
                   value={data.location || ''}
                   onChange={(e) => updateData({ location: e.target.value })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 />
               </div>
             </div>
           </div>
         )}
       </div>
-      
+
       {/* Objectives */}
       <div>
         <button
@@ -672,10 +672,10 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.objectives ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <Target className="w-4 h-4 text-green-400" />
+          <Target className="w-4 h-4 text-[var(--aethel-success-light)]" />
           Objectives ({data.objectives.length})
         </button>
-        
+
         {openSections.objectives && (
           <div className="pl-6">
             {data.objectives.map((obj, i) => (
@@ -694,7 +694,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                 }}
               />
             ))}
-            
+
             <button
               onClick={() => {
                 const newObj: QuestObjective = {
@@ -709,7 +709,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                 };
                 updateData({ objectives: [...data.objectives, newObj] });
               }}
-              className="flex items-center gap-1 w-full p-2 bg-green-600/20 hover:bg-green-600/30 rounded text-xs"
+              className="flex items-center gap-1 w-full p-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-xs"
             >
               <Plus className="w-3 h-3" />
               Add Objective
@@ -717,7 +717,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           </div>
         )}
       </div>
-      
+
       {/* Rewards */}
       <div>
         <button
@@ -725,10 +725,10 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.rewards ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <Gift className="w-4 h-4 text-yellow-400" />
+          <Gift className="w-4 h-4 text-[var(--aethel-warning-light)]" />
           Rewards ({data.rewards.length})
         </button>
-        
+
         {openSections.rewards && (
           <div className="pl-6">
             {data.rewards.map((reward, i) => (
@@ -747,7 +747,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                 }}
               />
             ))}
-            
+
             <button
               onClick={() => {
                 const newReward: QuestReward = {
@@ -758,7 +758,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                 };
                 updateData({ rewards: [...data.rewards, newReward] });
               }}
-              className="flex items-center gap-1 w-full p-2 bg-yellow-600/20 hover:bg-yellow-600/30 rounded text-xs"
+              className="flex items-center gap-1 w-full p-2 bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] rounded text-xs"
             >
               <Plus className="w-3 h-3" />
               Add Reward
@@ -766,7 +766,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           </div>
         )}
       </div>
-      
+
       {/* Prerequisites */}
       <div>
         <button
@@ -774,14 +774,14 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.prerequisites ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <Link className="w-4 h-4 text-blue-400" />
+          <Link className="w-4 h-4 text-[var(--aethel-info-light)]" />
           Prerequisites ({data.prerequisites.length})
         </button>
-        
+
         {openSections.prerequisites && (
           <div className="pl-6">
             {data.prerequisites.map((prereq, i) => (
-              <div key={i} className="flex items-center gap-2 bg-slate-800/50 rounded p-2 mb-2">
+              <div key={i} className="flex items-center gap-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-2 mb-2">
                 <select
                   value={prereq.type}
                   onChange={(e) => {
@@ -789,7 +789,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                     prerequisites[i] = { ...prereq, type: e.target.value as QuestPrerequisite['type'] };
                     updateData({ prerequisites });
                   }}
-                  className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+                  className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
                 >
                   <option value="quest">Quest</option>
                   <option value="level">Level</option>
@@ -797,7 +797,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                   <option value="item">Item</option>
                   <option value="variable">Variable</option>
                 </select>
-                
+
                 {prereq.type === 'quest' && (
                   <input
                     value={prereq.questId || ''}
@@ -806,11 +806,11 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                       prerequisites[i] = { ...prereq, questId: e.target.value };
                       updateData({ prerequisites });
                     }}
-                    className="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+                    className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
                     placeholder="Quest ID"
                   />
                 )}
-                
+
                 {prereq.type === 'level' && (
                   <input
                     type="number"
@@ -820,30 +820,30 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                       prerequisites[i] = { ...prereq, level: parseInt(e.target.value) || 1 };
                       updateData({ prerequisites });
                     }}
-                    className="w-16 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+                    className="w-16 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
                     min={1}
                   />
                 )}
-                
+
                 <button
                   onClick={() => {
                     const prerequisites = [...data.prerequisites];
                     prerequisites.splice(i, 1);
                     updateData({ prerequisites });
                   }}
-                  className="p-1 rounded bg-red-600/30 hover:bg-red-600/50"
+                  className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
                 >
-                  <Trash2 className="w-3 h-3 text-red-400" />
+                  <Trash2 className="w-3 h-3 text-[var(--aethel-error-light)]" />
                 </button>
               </div>
             ))}
-            
+
             <button
               onClick={() => {
                 const newPrereq: QuestPrerequisite = { type: 'quest', questId: '' };
                 updateData({ prerequisites: [...data.prerequisites, newPrereq] });
               }}
-              className="flex items-center gap-1 w-full p-2 bg-blue-600/20 hover:bg-blue-600/30 rounded text-xs"
+              className="flex items-center gap-1 w-full p-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded text-xs"
             >
               <Plus className="w-3 h-3" />
               Add Prerequisite
@@ -851,7 +851,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           </div>
         )}
       </div>
-      
+
       {/* Advanced */}
       <div>
         <button
@@ -859,42 +859,42 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.advanced ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <Settings className="w-4 h-4 text-slate-400" />
+          <Settings className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           Advanced
         </button>
-        
+
         {openSections.advanced && (
           <div className="pl-6 space-y-3">
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Time Limit (seconds)</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Time Limit (seconds)</label>
               <input
                 type="number"
                 value={data.timeLimit || ''}
                 onChange={(e) => updateData({ timeLimit: parseInt(e.target.value) || undefined })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 placeholder="No limit"
                 min={0}
               />
             </div>
-            
+
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Repeatable After (seconds)</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Repeatable After (seconds)</label>
               <input
                 type="number"
                 value={data.repeatableAfter || ''}
                 onChange={(e) => updateData({ repeatableAfter: parseInt(e.target.value) || undefined })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 placeholder="Not repeatable"
                 min={0}
               />
             </div>
-            
+
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Journal Entry</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Journal Entry</label>
               <textarea
                 value={data.journalEntry || ''}
                 onChange={(e) => updateData({ journalEntry: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm resize-none"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm resize-none"
                 rows={3}
                 placeholder="Extended journal entry..."
               />
@@ -902,11 +902,11 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           </div>
         )}
       </div>
-      
+
       {/* Delete */}
       <button
         onClick={() => onDelete(node.id)}
-        className="flex items-center justify-center gap-2 w-full p-2 bg-red-600/20 hover:bg-red-600/30 rounded text-red-400 text-sm"
+        className="flex items-center justify-center gap-2 w-full p-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded text-[var(--aethel-error-light)] text-sm"
       >
         <Trash2 className="w-4 h-4" />
         Delete Quest
@@ -932,11 +932,11 @@ function QuestStats({ nodes }: QuestStatsProps) {
       completed: 0,
       failed: 0,
     };
-    
+
     const byCategory: Record<string, number> = {};
     let mainQuests = 0;
     let totalObjectives = 0;
-    
+
     nodes.forEach((node) => {
       const data = node.data;
       byState[data.state]++;
@@ -944,46 +944,46 @@ function QuestStats({ nodes }: QuestStatsProps) {
       if (data.isMainQuest) mainQuests++;
       totalObjectives += data.objectives.length;
     });
-    
+
     return { byState, byCategory, mainQuests, totalObjectives, total: nodes.length };
   }, [nodes]);
-  
+
   return (
-    <div className="bg-slate-800/50 rounded p-3 text-xs space-y-2">
-      <div className="font-medium text-slate-300 mb-2">Quest Statistics</div>
-      
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-3 text-xs space-y-2">
+      <div className="font-medium text-[var(--aethel-text-secondary)] mb-2">Quest Statistics</div>
+
       <div className="flex justify-between">
-        <span className="text-slate-400">Total Quests:</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Total Quests:</span>
         <span>{stats.total}</span>
       </div>
-      
+
       <div className="flex justify-between">
-        <span className="text-slate-400">Main Quests:</span>
-        <span className="text-yellow-400">{stats.mainQuests}</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Main Quests:</span>
+        <span className="text-[var(--aethel-warning-light)]">{stats.mainQuests}</span>
       </div>
-      
+
       <div className="flex justify-between">
-        <span className="text-slate-400">Total Objectives:</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Total Objectives:</span>
         <span>{stats.totalObjectives}</span>
       </div>
-      
-      <div className="h-px bg-slate-700 my-2" />
-      
+
+      <div className="h-px bg-[var(--aethel-surface-tertiary)] my-2" />
+
       <div className="flex items-center gap-1">
-        <span className="w-2 h-2 rounded-full bg-yellow-400" />
-        <span className="text-slate-400">Available:</span>
+        <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]" />
+        <span className="text-[var(--aethel-text-tertiary)]">Available:</span>
         <span className="ml-auto">{stats.byState.available}</span>
       </div>
-      
+
       <div className="flex items-center gap-1">
-        <span className="w-2 h-2 rounded-full bg-blue-400" />
-        <span className="text-slate-400">Active:</span>
+        <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]" />
+        <span className="text-[var(--aethel-text-tertiary)]">Active:</span>
         <span className="ml-auto">{stats.byState.active}</span>
       </div>
-      
+
       <div className="flex items-center gap-1">
-        <span className="w-2 h-2 rounded-full bg-green-400" />
-        <span className="text-slate-400">Completed:</span>
+        <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]" />
+        <span className="text-[var(--aethel-text-tertiary)]">Completed:</span>
         <span className="ml-auto">{stats.byState.completed}</span>
       </div>
     </div>
@@ -1008,14 +1008,14 @@ export default function QuestEditor({
   // Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  
+
   // Selection
   const [selectedNodes, setSelectedNodes] = useState<string[]>([]);
-  const selectedNode = useMemo(() => 
+  const selectedNode = useMemo(() =>
     nodes.find((n) => selectedNodes.includes(n.id)),
     [nodes, selectedNodes]
   );
-  
+
   // Connection handler
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -1030,28 +1030,28 @@ export default function QuestEditor({
     },
     [setEdges]
   );
-  
+
   // Selection handler
   const onSelectionChange = useCallback(({ nodes }: { nodes: Node[] }) => {
     setSelectedNodes(nodes.map((n) => n.id));
   }, []);
-  
+
   // Update node data
   const updateNodeData = useCallback((id: string, data: QuestNodeData) => {
     setNodes((nds) => nds.map((n) => (n.id === id ? { ...n, data } : n)));
   }, [setNodes]);
-  
+
   // Delete node
   const deleteNode = useCallback((id: string) => {
     setNodes((nds) => nds.filter((n) => n.id !== id));
     setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
   }, [setNodes, setEdges]);
-  
+
   // Add quest
   const addQuest = useCallback((category: string) => {
     const id = `quest_${Date.now()}`;
     const categoryData = QUEST_CATEGORIES.find((c) => c.id === category);
-    
+
     const newNode: Node<QuestNodeData> = {
       id,
       type: 'quest',
@@ -1069,12 +1069,12 @@ export default function QuestEditor({
         prerequisites: [],
       },
     };
-    
+
     setNodes((nds) => [...nds, newNode]);
   }, [setNodes]);
-  
+
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-200">
+    <div className="flex h-full w-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Main Flow */}
       <div className="flex-1 relative">
         <ReactFlow
@@ -1090,15 +1090,15 @@ export default function QuestEditor({
           snapGrid={[20, 20]}
         >
           <Background color="#334155" gap={20} />
-          <Controls className="!bg-slate-800 !border-slate-700" />
-          <MiniMap 
-            className="!bg-slate-800 !border-slate-700"
+          <Controls className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]" />
+          <MiniMap
+            className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]"
             nodeColor={(node) => {
               const data = node.data as QuestNodeData;
               return QUEST_CATEGORIES.find((c) => c.id === data.category)?.color || '#64748b';
             }}
           />
-          
+
           {/* Add Quest Buttons */}
           <Panel position="top-left" className="flex gap-2 flex-wrap">
             {QUEST_CATEGORIES.map((cat) => (
@@ -1113,40 +1113,40 @@ export default function QuestEditor({
               </button>
             ))}
           </Panel>
-          
+
           {/* Actions */}
           <Panel position="top-right" className="flex gap-2">
             <button
               onClick={() => onExport?.('json')}
-              className="flex items-center gap-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Download className="w-4 h-4" />
               Export
             </button>
             <button
-              className="flex items-center gap-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Upload className="w-4 h-4" />
               Import
             </button>
           </Panel>
-          
+
           {/* Stats */}
           <Panel position="bottom-left">
             <QuestStats nodes={nodes} />
           </Panel>
         </ReactFlow>
       </div>
-      
+
       {/* Right Panel - Inspector */}
-      <div className="w-80 border-l border-slate-700 flex flex-col">
-        <div className="p-3 border-b border-slate-700">
+      <div className="w-80 border-l border-[var(--aethel-border-primary)] flex flex-col">
+        <div className="p-3 border-b border-[var(--aethel-border-primary)]">
           <h2 className="text-sm font-semibold flex items-center gap-2">
-            <Settings className="w-4 h-4 text-slate-400" />
+            <Settings className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             Quest Inspector
           </h2>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto">
           <QuestInspector
             node={selectedNode ?? null}
@@ -1154,29 +1154,29 @@ export default function QuestEditor({
             onDelete={deleteNode}
           />
         </div>
-        
+
         {/* Legend */}
-        <div className="border-t border-slate-700 p-3">
-          <div className="text-xs text-slate-400 mb-2">Legend</div>
+        <div className="border-t border-[var(--aethel-border-primary)] p-3">
+          <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Legend</div>
           <div className="grid grid-cols-2 gap-1 text-[10px]">
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-slate-500" />
+              <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]" />
               Unavailable
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-yellow-500" />
+              <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]" />
               Available
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]" />
               Active
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]" />
               Completed
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red-500" />
+              <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]" />
               Failed
             </div>
           </div>
@@ -1185,3 +1185,4 @@ export default function QuestEditor({
     </div>
   );
 }
+

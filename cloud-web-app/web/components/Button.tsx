@@ -9,11 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-sky-600 text-white hover:bg-sky-700 focus-visible:ring-sky-500 shadow-sm',
-        secondary: 'bg-slate-700 text-slate-100 hover:bg-slate-600 focus-visible:ring-slate-500 border border-slate-600',
-        ghost: 'text-slate-300 hover:text-white hover:bg-slate-700 focus-visible:ring-slate-500',
-        danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500 shadow-sm',
-        success: 'bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-500 shadow-sm',
+        primary: 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:ring-[var(--aethel-primary)] shadow-sm',
+        secondary: 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] focus-visible:ring-[var(--aethel-primary)] border border-[var(--aethel-border-secondary)]',
+        ghost: 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] focus-visible:ring-[var(--aethel-primary)]',
+        danger: 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:ring-[var(--aethel-error)] shadow-sm',
+        success: 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:ring-[var(--aethel-success)] shadow-sm',
       },
       size: {
         sm: 'h-8 px-3 text-xs',

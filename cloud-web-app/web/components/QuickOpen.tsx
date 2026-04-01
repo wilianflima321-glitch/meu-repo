@@ -34,7 +34,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
 
   const openFile = useCallback((file: FileItem | undefined) => {
     if (!file) return;
-    
+
     if (file.type === 'file') {
       const projectId = resolveProjectIdFromClient();
       router.push(`/ide?projectId=${encodeURIComponent(projectId)}&file=${encodeURIComponent(file.path)}`);
@@ -45,17 +45,17 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
   const fuzzyMatch = useCallback((str: string, pattern: string): boolean => {
     const patternLower = pattern.toLowerCase();
     const strLower = str.toLowerCase();
-    
+
     let patternIdx = 0;
     let strIdx = 0;
-    
+
     while (patternIdx < patternLower.length && strIdx < strLower.length) {
       if (patternLower[patternIdx] === strLower[strIdx]) {
         patternIdx++;
       }
       strIdx++;
     }
-    
+
     return patternIdx === patternLower.length;
   }, []);
 
@@ -197,45 +197,45 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
 
   const highlightMatch = (text: string, query: string): JSX.Element => {
     if (!query) return <>{text}</>;
-    
+
     const parts: JSX.Element[] = [];
     let lastIndex = 0;
     const lowerText = text.toLowerCase();
     const lowerQuery = query.toLowerCase();
-    
+
     for (let i = 0; i < lowerQuery.length; i++) {
       const char = lowerQuery[i];
       const index = lowerText.indexOf(char, lastIndex);
-      
+
       if (index !== -1) {
         if (index > lastIndex) {
           parts.push(<span key={`text-${i}`}>{text.substring(lastIndex, index)}</span>);
         }
         parts.push(
-          <span key={`match-${i}`} className="text-blue-400 font-semibold">
+          <span key={`match-${i}`} className="text-[var(--aethel-info-light)] font-semibold">
             {text[index]}
           </span>
         );
         lastIndex = index + 1;
       }
     }
-    
+
     if (lastIndex < text.length) {
       parts.push(<span key="text-end">{text.substring(lastIndex)}</span>);
     }
-    
+
     return <>{parts}</>;
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4 pt-20">
-      <div className="bg-slate-800 rounded-lg shadow-2xl w-full max-w-3xl max-h-[600px] overflow-hidden">
+    <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm flex items-start justify-center z-50 p-4 pt-20">
+      <div className="bg-[var(--aethel-surface-secondary)] rounded-lg shadow-2xl w-full max-w-3xl max-h-[600px] overflow-hidden">
         {/* Search Input */}
-        <div className="p-4 border-b border-slate-700">
+        <div className="p-4 border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-slate-400 w-10 text-center">FIND</span>
+            <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">FIND</span>
             <input
               ref={inputRef}
               type="text"
@@ -245,7 +245,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
                 setSelectedIndex(0);
               }}
               placeholder="Search files by name..."
-              className="flex-1 px-4 py-3 bg-slate-900 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="flex-1 px-4 py-3 bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--aethel-info)]"
             />
           </div>
         </div>
@@ -255,14 +255,14 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
           {loading ? (
             <div className="p-8 text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--aethel-primary)]"></div>
-              <p className="text-slate-400 mt-2">Loading files...</p>
+              <p className="text-[var(--aethel-text-tertiary)] mt-2">Loading files...</p>
             </div>
           ) : errorMessage ? (
-            <div className="p-8 text-center text-slate-400">
+            <div className="p-8 text-center text-[var(--aethel-text-tertiary)]">
               {errorMessage}
             </div>
           ) : filteredFiles.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">
+            <div className="p-8 text-center text-[var(--aethel-text-tertiary)]">
               Nenhum arquivo encontrado
             </div>
           ) : (
@@ -277,23 +277,23 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full px-4 py-3 flex items-center justify-between rounded-lg transition-colors ${
                       isSelected
-                        ? 'bg-blue-600 text-white'
-                        : 'text-slate-300 hover:bg-slate-700'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
+                        : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
                     }`}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className={`text-xs font-semibold w-10 text-center flex-shrink-0 ${isSelected ? 'text-white' : 'text-slate-400'}`}>{getFileIcon(file.name)}</span>
+                      <span className={`text-xs font-semibold w-10 text-center flex-shrink-0 ${isSelected ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)]'}`}>{getFileIcon(file.name)}</span>
                       <div className="flex-1 min-w-0 text-left">
                         <div className="font-medium truncate">
                           {highlightMatch(file.name, query)}
                         </div>
-                        <div className={`text-xs truncate ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>
+                        <div className={`text-xs truncate ${isSelected ? 'text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}>
                           {file.path}
                         </div>
                       </div>
                     </div>
                     {file.size && (
-                      <span className={`text-xs ml-4 flex-shrink-0 ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>
+                      <span className={`text-xs ml-4 flex-shrink-0 ${isSelected ? 'text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}>
                         {formatSize(file.size)}
                       </span>
                     )}
@@ -305,7 +305,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-slate-700 flex items-center justify-between text-xs text-slate-400">
+        <div className="p-3 border-t border-[var(--aethel-border-primary)] flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
           <div className="flex gap-4">
             <span>Setas: navegar</span>
             <span>Enter: abrir</span>

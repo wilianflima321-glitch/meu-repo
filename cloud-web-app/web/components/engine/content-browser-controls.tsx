@@ -4,15 +4,15 @@ import React, { useState } from 'react';
 import { ASSET_CONFIG, type AssetFilter, type AssetType } from './content-browser-core';
 
 // Breadcrumb Navigation
-export function BreadcrumbNav({ 
-  path, 
-  onNavigate 
-}: { 
-  path: string; 
+export function BreadcrumbNav({
+  path,
+  onNavigate
+}: {
+  path: string;
   onNavigate: (path: string) => void;
 }) {
   const parts = path.split('/').filter(Boolean);
-  
+
   return (
     <div style={{
       display: 'flex',
@@ -38,7 +38,7 @@ export function BreadcrumbNav({
       >
         📁 Content
       </button>
-      
+
       {parts.map((part, i) => {
         const fullPath = '/' + parts.slice(0, i + 1).join('/');
         return (
@@ -85,7 +85,7 @@ export function FilterBar({
   onSortChange: (by: string, order: 'asc' | 'desc') => void;
 }) {
   const [showTypeFilter, setShowTypeFilter] = useState(false);
-  
+
   return (
     <div style={{
       display: 'flex',
@@ -113,7 +113,7 @@ export function FilterBar({
           }}
         />
       </div>
-      
+
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
         <button
@@ -130,7 +130,7 @@ export function FilterBar({
         >
           📋 Type {filter.type?.length ? `(${filter.type.length})` : ''}
         </button>
-        
+
         {showTypeFilter && (
           <div style={{
             position: 'absolute',
@@ -173,7 +173,7 @@ export function FilterBar({
           </div>
         )}
       </div>
-      
+
       {/* Starred Filter */}
       <button
         onClick={() => onFilterChange({ ...filter, starred: !filter.starred })}
@@ -189,9 +189,9 @@ export function FilterBar({
       >
         ⭐ Starred
       </button>
-      
+
       <div style={{ flex: 1 }} />
-      
+
       {/* Sort */}
       <select
         value={`${sortBy}-${sortOrder}`}
@@ -216,7 +216,7 @@ export function FilterBar({
         <option value="size-desc">Largest First</option>
         <option value="size-asc">Smallest First</option>
       </select>
-      
+
       {/* View Mode */}
       <div style={{ display: 'flex', gap: '2px' }}>
         {(['grid', 'list', 'columns'] as const).map((mode) => (

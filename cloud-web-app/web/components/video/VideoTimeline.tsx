@@ -1,10 +1,10 @@
 /**
  * Video Timeline - Timeline PROFISSIONAL de edicao de video
- * 
+ *
  * Features: Snapping, Markers, Razor Tool, Ripple Edit, Multi-select
  * Usa Canvas para renderizar tracks e clips.
  * Integra com HTMLVideoElement para preview.
- * 
+ *
  * Nivel: Adobe Premiere Pro / DaVinci Resolve
  */
 
@@ -126,32 +126,32 @@ export function VideoTimeline({
   const snapPoints = useMemo(() => {
     if (!snapEnabled) return [];
     const points: number[] = [0, duration];
-    
+
     // Clip edges
     for (const clip of clips) {
       points.push(clip.startTime);
       points.push(clip.startTime + clip.duration);
     }
-    
+
     // Markers
     for (const marker of markers) {
       points.push(marker.time);
     }
-    
+
     // Playhead
     points.push(currentTime);
-    
+
     return [...new Set(points)].sort((a, b) => a - b);
   }, [clips, markers, currentTime, duration, snapEnabled]);
 
   // Snap helper
   const snapToPoint = useCallback((time: number): number => {
     if (!snapEnabled || snapPoints.length === 0) return time;
-    
+
     const pixelThreshold = snapThreshold / zoom;
     let closest = time;
     let minDist = Infinity;
-    
+
     for (const point of snapPoints) {
       const dist = Math.abs(point - time);
       if (dist < minDist && dist < pixelThreshold) {
@@ -159,7 +159,7 @@ export function VideoTimeline({
         closest = point;
       }
     }
-    
+
     return closest;
   }, [snapEnabled, snapPoints, snapThreshold, zoom]);
 
@@ -187,7 +187,7 @@ export function VideoTimeline({
     const secondsPerMarker = zoom > 100 ? 0.5 : zoom > 50 ? 1 : zoom > 25 ? 2 : 5;
     for (let t = 0; t <= duration; t += secondsPerMarker) {
       const x = t * zoom;
-      
+
       // Major tick
       if (t % (secondsPerMarker * 2) === 0) {
         ctx.strokeStyle = 'var(--aethel-text-tertiary)';
@@ -195,7 +195,7 @@ export function VideoTimeline({
         ctx.moveTo(x, RULER_HEIGHT - 15);
         ctx.lineTo(x, RULER_HEIGHT);
         ctx.stroke();
-        
+
         ctx.fillText(formatTime(t), x, RULER_HEIGHT - 18);
       } else {
         // Minor tick
@@ -210,11 +210,11 @@ export function VideoTimeline({
     // Tracks
     tracks.forEach((track, i) => {
       const y = RULER_HEIGHT + i * TRACK_HEIGHT;
-      
+
       // Track background
       ctx.fillStyle = i % 2 === 0 ? 'var(--aethel-surface-tertiary)' : 'var(--aethel-surface-secondary)';
       ctx.fillRect(0, y, canvasWidth, TRACK_HEIGHT);
-      
+
       // Track separator
       ctx.strokeStyle = 'var(--aethel-border-primary)';
       ctx.beginPath();
@@ -243,7 +243,7 @@ export function VideoTimeline({
       const isHovered = clip.id === hoveredClipId;
       const baseColor = clip.color || (clip.type === 'video' ? 'var(--aethel-primary)' : clip.type === 'audio' ? 'var(--aethel-success)' : 'var(--aethel-warning)');
       ctx.fillStyle = baseColor;
-      
+
       // Rounded corners
       const radius = 4;
       ctx.beginPath();
@@ -271,7 +271,7 @@ export function VideoTimeline({
         ctx.beginPath();
         ctx.roundRect(x, y, width, height, radius);
         ctx.fill();
-        
+
         // Lock icon
         ctx.fillStyle = 'var(--aethel-text-primary)';
         ctx.font = '14px sans-serif';
@@ -290,13 +290,13 @@ export function VideoTimeline({
         ctx.beginPath();
         ctx.rect(x, y, width, height);
         ctx.clip();
-        
+
         // Text shadow for readability
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 2;
         ctx.fillText(clip.name, textX, y + 15);
         ctx.shadowBlur = 0;
-        
+
         // Duration indicator
         ctx.font = '9px monospace';
         ctx.fillStyle = 'rgba(255,255,255,0.7)';
@@ -312,7 +312,7 @@ export function VideoTimeline({
         handleGradient.addColorStop(1, 'rgba(255,255,255,0.3)');
         ctx.fillStyle = handleGradient;
         ctx.fillRect(x, y, 8, height);
-        
+
         // Right handle
         const handleGradientR = ctx.createLinearGradient(x + width - 8, y, x + width, y);
         handleGradientR.addColorStop(0, 'rgba(255,255,255,0.3)');
@@ -337,10 +337,10 @@ export function VideoTimeline({
           waveGradient.addColorStop(0.5, 'rgba(255,255,255,0.25)');
           waveGradient.addColorStop(1, 'rgba(255,255,255,0.45)');
           ctx.fillStyle = waveGradient;
-          
+
           ctx.beginPath();
           ctx.moveTo(left, centerY);
-          
+
           // Top half
           for (let px = left; px < right; px += 1) {
             const normX = (px - left) / Math.max(1, right - left);
@@ -348,7 +348,7 @@ export function VideoTimeline({
             const peak = Math.max(0, Math.min(1, clip.peaks[idx] ?? 0));
             ctx.lineTo(px, centerY - peak * maxAmp);
           }
-          
+
           // Bottom half (mirror)
           for (let px = right - 1; px >= left; px -= 1) {
             const normX = (px - left) / Math.max(1, right - left);
@@ -356,7 +356,7 @@ export function VideoTimeline({
             const peak = Math.max(0, Math.min(1, clip.peaks[idx] ?? 0));
             ctx.lineTo(px, centerY + peak * maxAmp);
           }
-          
+
           ctx.closePath();
           ctx.fill();
         }
@@ -376,7 +376,7 @@ export function VideoTimeline({
     // Markers
     for (const marker of markers) {
       const mx = marker.time * zoom;
-      
+
       // Marker line
       ctx.strokeStyle = marker.color || 'var(--aethel-warning)';
       ctx.lineWidth = 2;
@@ -386,7 +386,7 @@ export function VideoTimeline({
       ctx.lineTo(mx, canvasHeight);
       ctx.stroke();
       ctx.setLineDash([]);
-      
+
       // Marker flag
       ctx.fillStyle = marker.color || 'var(--aethel-warning)';
       ctx.beginPath();
@@ -397,7 +397,7 @@ export function VideoTimeline({
       ctx.lineTo(mx - 6, 16);
       ctx.closePath();
       ctx.fill();
-      
+
       // Marker type icon
       ctx.fillStyle = 'var(--aethel-surface-primary)';
       ctx.font = '8px sans-serif';
@@ -412,7 +412,7 @@ export function VideoTimeline({
       const sy = Math.min(multiSelectStart.y, multiSelectEnd.y);
       const sw = Math.abs(multiSelectEnd.x - multiSelectStart.x);
       const sh = Math.abs(multiSelectEnd.y - multiSelectStart.y);
-      
+
       ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
       ctx.fillRect(sx, sy, sw, sh);
       ctx.strokeStyle = 'var(--aethel-primary)';
@@ -428,7 +428,7 @@ export function VideoTimeline({
           const snapX = snapPoint * zoom;
           const clipStart = draggedClip.startTime * zoom;
           const clipEnd = (draggedClip.startTime + draggedClip.duration) * zoom;
-          
+
           if (Math.abs(snapX - clipStart) < snapThreshold || Math.abs(snapX - clipEnd) < snapThreshold) {
             ctx.strokeStyle = 'var(--aethel-success)';
             ctx.lineWidth = 1;
@@ -504,7 +504,7 @@ export function VideoTimeline({
         });
         return;
       }
-      
+
       setIsDragging(true);
       setDragType('playhead');
       const time = snapToPoint(Math.max(0, Math.min(duration, x / zoom)));
@@ -540,9 +540,9 @@ export function VideoTimeline({
           // Would need onMultiSelect callback
         }
       }
-      
+
       onClipSelect?.(clickedClip.id);
-      
+
       const clipX = clickedClip.startTime * zoom;
       const clipWidth = clickedClip.duration * zoom;
 
@@ -562,7 +562,7 @@ export function VideoTimeline({
       setDragClipId(clickedClip.id);
     } else {
       onClipSelect?.(null);
-      
+
       // Start multi-select rectangle
       if (y > RULER_HEIGHT) {
         setMultiSelectStart({ x, y });
@@ -591,7 +591,7 @@ export function VideoTimeline({
         return x >= clipX && x <= clipX + clipWidth && y >= clipY && y <= clipY + clipHeight;
       });
       setHoveredClipId(hovered?.id ?? null);
-      
+
       // Update cursor based on position
       if (hovered && !hovered.locked) {
         const clipX = hovered.startTime * zoom;
@@ -616,7 +616,7 @@ export function VideoTimeline({
     } else if (dragType === 'clip' && dragClipId && onClipMove) {
       let time = Math.max(0, x / zoom);
       time = snapToPoint(time);
-      const trackIndex = Math.max(0, Math.min(tracks.length - 1, 
+      const trackIndex = Math.max(0, Math.min(tracks.length - 1,
         Math.floor((y - RULER_HEIGHT) / TRACK_HEIGHT)));
       onClipMove(dragClipId, time, trackIndex);
     } else if ((dragType === 'trim-left' || dragType === 'trim-right') && dragClipId && onClipTrim) {
@@ -656,7 +656,7 @@ export function VideoTimeline({
       // Find clips within selection rectangle
       // This would need additional callback to set selectedClipIds
     }
-    
+
     setIsDragging(false);
     setDragType(null);
     setDragClipId(null);
@@ -677,7 +677,7 @@ export function VideoTimeline({
         if (e.key === 'b' || e.key === 'B') onToolChange('ripple');
         if (e.key === 'n' || e.key === 'N') onToolChange('roll');
       }
-      
+
       // Delete selected clip
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedClipId) {
         if (e.shiftKey && onRippleDelete) {
@@ -686,11 +686,11 @@ export function VideoTimeline({
           onClipDelete(selectedClipId);
         }
       }
-      
+
       // Navigation
       if (e.key === 'Home') onTimeChange(0);
       if (e.key === 'End') onTimeChange(duration);
-      
+
       // Frame stepping
       if (e.key === 'ArrowLeft' && !e.shiftKey) {
         onTimeChange(Math.max(0, currentTime - 1/30));
@@ -698,12 +698,12 @@ export function VideoTimeline({
       if (e.key === 'ArrowRight' && !e.shiftKey) {
         onTimeChange(Math.min(duration, currentTime + 1/30));
       }
-      
+
       // Jump to next/prev clip
       if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         const sortedEdges = [...new Set(clips.flatMap(c => [c.startTime, c.startTime + c.duration]))]
           .sort((a, b) => a - b);
-        
+
         if (e.key === 'ArrowUp') {
           // Previous edge
           const prev = sortedEdges.filter(t => t < currentTime - 0.001).pop();
@@ -714,7 +714,7 @@ export function VideoTimeline({
           if (next !== undefined) onTimeChange(next);
         }
       }
-      
+
       // Add marker at playhead
       if (e.key === 'm' || e.key === 'M') {
         if (onMarkerAdd) {
@@ -734,131 +734,131 @@ export function VideoTimeline({
   }, [onToolChange, selectedClipId, onClipDelete, onRippleDelete, onTimeChange, duration, currentTime, clips, onMarkerAdd, markers.length]);
 
   return (
-    <div className="flex flex-col bg-slate-900 rounded-lg overflow-hidden">
+    <div className="flex flex-col bg-[var(--aethel-surface-primary)] rounded-lg overflow-hidden">
       {/* Professional Toolbar */}
-      <div className="flex items-center gap-1 p-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         {/* Transport controls */}
-        <div className="flex items-center gap-1 pr-2 border-r border-slate-600">
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Go to Start (Home)">
-            
+        <div className="flex items-center gap-1 pr-2 border-r border-[var(--aethel-border-secondary)]">
+          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Go to Start (Home)">
+
           </button>
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Previous Frame ()">
-            
+          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Previous Frame ()">
+
           </button>
-          <button className="p-1.5 bg-red-600 rounded text-sm hover:bg-red-500" title="Play/Pause (Space)">
-            
+          <button className="p-1.5 bg-[var(--aethel-error)] rounded text-sm hover:brightness-110" title="Play/Pause (Space)">
+
           </button>
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Next Frame ()">
-            
+          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Next Frame ()">
+
           </button>
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Go to End (End)">
-            
+          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Go to End (End)">
+
           </button>
         </div>
-        
+
         {/* Tool buttons */}
-        <div className="flex items-center gap-1 px-2 border-r border-slate-600">
-          <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'select' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+        <div className="flex items-center gap-1 px-2 border-r border-[var(--aethel-border-secondary)]">
+          <button
+            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'select' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('select')}
             title="Selection Tool (V)"
           >
-            
+
           </button>
-          <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'razor' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+          <button
+            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'razor' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('razor')}
             title="Razor Tool (C)"
           >
-            
+
           </button>
-          <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'ripple' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+          <button
+            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'ripple' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('ripple')}
             title="Ripple Edit (B)"
           >
-            
+
           </button>
-          <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'slip' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+          <button
+            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'slip' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('slip')}
             title="Slip Tool (Y)"
           >
-            
+
           </button>
         </div>
-        
+
         {/* Snap toggle */}
-        <div className="flex items-center gap-1 px-2 border-r border-slate-600">
-          <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${snapEnabled ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+        <div className="flex items-center gap-1 px-2 border-r border-[var(--aethel-border-secondary)]">
+          <button
+            className={`px-2 py-1 rounded text-xs font-medium ${snapEnabled ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             title="Snapping (S)"
           >
-            
+
           </button>
         </div>
-        
+
         {/* Timecode */}
-        <span className="px-2 text-sm text-slate-300 font-mono bg-slate-900 rounded">
+        <span className="px-2 text-sm text-[var(--aethel-text-secondary)] font-mono bg-[var(--aethel-surface-primary)] rounded">
           {formatTimecode(currentTime)}
         </span>
-        <span className="text-slate-500">/</span>
-        <span className="text-sm text-slate-400 font-mono">
+        <span className="text-[var(--aethel-text-tertiary)]">/</span>
+        <span className="text-sm text-[var(--aethel-text-tertiary)] font-mono">
           {formatTimecode(duration)}
         </span>
-        
+
         {/* Zoom */}
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-slate-400">Zoom:</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Zoom:</span>
           <input
             type="range"
             min="10"
             max="200"
             value={zoom}
-            className="w-24 accent-blue-500"
+            className="w-24 accent-[var(--aethel-info)]"
             readOnly
           />
-          <span className="text-xs text-slate-400 w-8">{zoom}%</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)] w-8">{zoom}%</span>
         </div>
       </div>
 
       {/* Track headers + Timeline */}
       <div className="flex">
         {/* Track Headers */}
-        <div className="w-36 flex-shrink-0 bg-slate-800">
-          <div className="h-[25px] border-b border-slate-700 flex items-center px-2">
-            <span className="text-[10px] text-slate-500">TRACKS</span>
+        <div className="w-36 flex-shrink-0 bg-[var(--aethel-surface-secondary)]">
+          <div className="h-[25px] border-b border-[var(--aethel-border-primary)] flex items-center px-2">
+            <span className="text-[10px] text-[var(--aethel-text-tertiary)]">TRACKS</span>
           </div>
           {tracks.map((track) => (
-            <div 
+            <div
               key={track.id}
-              className="h-[60px] flex items-center gap-1 px-2 border-b border-slate-700 group"
+              className="h-[60px] flex items-center gap-1 px-2 border-b border-[var(--aethel-border-primary)] group"
             >
-              <button 
-                className={`w-5 h-5 rounded text-[10px] ${track.muted ? 'bg-red-600' : 'bg-slate-600 hover:bg-slate-500'}`}
+              <button
+                className={`w-5 h-5 rounded text-[10px] ${track.muted ? 'bg-[var(--aethel-error)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 title="Mute"
               >
                 M
               </button>
-              <button 
-                className={`w-5 h-5 rounded text-[10px] ${track.solo ? 'bg-yellow-600' : 'bg-slate-600 hover:bg-slate-500'}`}
+              <button
+                className={`w-5 h-5 rounded text-[10px] ${track.solo ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 title="Solo"
               >
                 S
               </button>
-              <button 
-                className={`w-5 h-5 rounded text-[10px] ${track.locked ? 'bg-orange-600' : 'bg-slate-600 hover:bg-slate-500'}`}
+              <button
+                className={`w-5 h-5 rounded text-[10px] ${track.locked ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 title="Lock"
               >
-                
+
               </button>
-              <span className="text-sm text-slate-300 truncate flex-1">{track.name}</span>
+              <span className="text-sm text-[var(--aethel-text-secondary)] truncate flex-1">{track.name}</span>
             </div>
           ))}
         </div>
 
         {/* Timeline Canvas */}
-        <div 
+        <div
           ref={containerRef}
           className="flex-1 overflow-x-auto"
         >
@@ -894,7 +894,7 @@ function formatTimecode(seconds: number, fps: number = 30): string {
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
   const f = Math.floor((seconds % 1) * fps);
-  
+
   if (h > 0) {
     return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}:${f.toString().padStart(2, '0')}`;
   }
@@ -953,7 +953,7 @@ export function VideoPreview({
   };
 
   return (
-    <div className="relative bg-black aspect-video rounded-lg overflow-hidden">
+    <div className="relative bg-[var(--aethel-surface-primary)] aspect-video rounded-lg overflow-hidden">
       {src ? (
         <video
           ref={videoRef}
@@ -963,13 +963,13 @@ export function VideoPreview({
           onLoadedMetadata={handleLoadedMetadata}
         />
       ) : (
-        <div className="flex items-center justify-center h-full text-slate-500">
+        <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
           Nenhum video selecionado
         </div>
       )}
-      
+
       {/* Overlay info */}
-      <div className="absolute bottom-2 left-2 bg-black/70 px-2 py-1 rounded text-xs text-white font-mono">
+      <div className="absolute bottom-2 left-2 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-2 py-1 rounded text-xs text-[var(--aethel-text-primary)] font-mono">
         {formatTime(currentTime)}
       </div>
     </div>

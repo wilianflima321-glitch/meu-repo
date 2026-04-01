@@ -22,15 +22,15 @@ type AuthResponse = {
 
 const DEFAULT_REDIRECT = '/dashboard'
 const LOGIN_HIGHLIGHTS = [
-  'Studio Home com projetos, onboarding, billing e sinais de readiness na mesma superficie.',
-  'IDE com chat, preview e loops operacionais conectados ao contexto do projeto.',
-  'Governanca explicita: o produto mostra o que esta pronto, parcial ou bloqueado.',
+  'Studio Home com projetos, onboarding e billing na mesma superficie.',
+  'IDE com chat, preview e contexto do projeto conectados.',
+  'Readiness explicita para mostrar o que esta pronto ou parcial.',
 ]
 
 const LOGIN_STATS = [
-  { value: 'Apps', label: 'foco principal' },
-  { value: 'L4', label: 'target operacional' },
-  { value: '11', label: 'quality gates' },
+  { value: 'Apps', label: 'foco atual' },
+  { value: 'IDE', label: 'workbench continuo' },
+  { value: 'L4', label: 'readiness visivel' },
 ]
 
 export default function LoginPageV2() {
@@ -110,19 +110,19 @@ export default function LoginPageV2() {
       >
         Ir para formulario de login
       </a>
-      <div className="pointer-events-none absolute inset-0 bg-grid-zinc-700/[0.12]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.22),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-grid-aethel" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-info)_22%,transparent),transparent_55%)]" />
 
       <div className="relative z-10 w-full max-w-6xl">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:items-stretch">
-          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-cyan-950/20 sm:p-8">
+          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-[0_24px_70px_rgba(2,8,23,0.35)] sm:p-8">
             <div className="mb-6 flex items-center justify-between gap-3">
               <Link href="/" className="inline-flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
                 <Codicon name="arrow-left" />
                 Voltar ao site
               </Link>
-              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-200">
-                Workspace
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)]">
+                Studio
               </span>
             </div>
 
@@ -134,14 +134,14 @@ export default function LoginPageV2() {
                   width={36}
                   height={36}
                   sizes="36px"
-                  className="rounded-lg ring-1 ring-zinc-700/70"
+                  className="rounded-lg ring-1 ring-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]"
                   priority
                 />
                 <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]/90">Aethel Studio</span>
               </div>
               <h1 className="text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Entrar no Studio</h1>
               <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                Retome seu projeto, continue no IDE e mantenha preview, billing e operacao no mesmo fluxo.
+                Retome seu projeto e siga no mesmo fluxo entre dashboard, IDE e preview.
               </p>
             </div>
 
@@ -217,7 +217,7 @@ export default function LoginPageV2() {
               >
                 <Codicon name="github-inverted" />
                 Continuar com GitHub
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   em breve
                 </span>
               </button>
@@ -229,19 +229,17 @@ export default function LoginPageV2() {
               >
                 <Codicon name="google" />
                 Continuar com Google
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   em breve
                 </span>
               </button>
             </div>
 
-            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">
-              Login social aparece aqui assim que Google e GitHub OAuth forem ligados no runtime. Enquanto isso, a entrada oficial continua por email e senha.
-            </p>
+            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">OAuth entra assim que Google e GitHub forem ligados. Por enquanto, o acesso oficial continua por email e senha.</p>
 
-            <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="mt-6 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-                Redirecionamento
+                Proximo passo
               </p>
               <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
                 Depois do login, voce segue para <span className="font-medium text-[var(--aethel-text-primary)]">{nextTarget}</span>.
@@ -258,15 +256,15 @@ export default function LoginPageV2() {
 
           <AuthExperiencePanel
             eyebrow="Acesso operacional"
-            domainLabel="Apps + research"
+            domainLabel="Apps + Pesquisa"
             title="Entre para continuar no mesmo fluxo de produto."
-            description="Aethel nao separa descoberta, execucao e validacao em ferramentas desconectadas. O login devolve voce ao fluxo real do studio."
+            description="O login devolve voce ao fluxo real do studio em vez de abrir uma area isolada."
             highlights={LOGIN_HIGHLIGHTS}
             stats={LOGIN_STATS}
             visual={{
               src: '/screenshots/dashboard.png',
               alt: 'Dashboard do Aethel Studio',
-              caption: 'A superficie principal ja entrega contexto de projeto, sinais de readiness, proximas acoes e entrada para o workbench.',
+              caption: 'A superficie principal ja entrega contexto, sinais de readiness e entrada para o workbench.',
               chips: ['Dashboard shell', 'Billing readiness', 'Onboarding guiado'],
             }}
           />

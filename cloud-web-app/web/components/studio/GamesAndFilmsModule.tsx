@@ -1,6 +1,6 @@
 ﻿/**
  * Games & Films Module - Alpha Honest
- * 
+ *
  * Módulo de criação e gerenciamento de Games e Films
  * Status: Alpha (Funcional, Configurações Básicas)
  * Padrão: L5 Design, Real Integration
@@ -156,8 +156,8 @@ export function GamesAndFilmsModule() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Games & Films</h1>
-          <p className="text-sm text-white/60 mt-1">
+          <h1 className="text-3xl font-bold text-[var(--aethel-text-primary)]">Games & Films</h1>
+          <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">
             Crie e gerencie seus projetos de jogos e filmes
           </p>
         </div>
@@ -168,13 +168,13 @@ export function GamesAndFilmsModule() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-white/10">
+      <div className="flex gap-2 border-b border-[var(--aethel-border-primary)]">
         <button
           onClick={() => setActiveTab('games')}
           className={`px-4 py-3 font-medium text-sm transition-all ${
             activeTab === 'games'
-              ? 'text-blue-400 border-b-2 border-blue-400'
-              : 'text-white/60 hover:text-white/80'
+              ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+              : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -186,8 +186,8 @@ export function GamesAndFilmsModule() {
           onClick={() => setActiveTab('films')}
           className={`px-4 py-3 font-medium text-sm transition-all ${
             activeTab === 'films'
-              ? 'text-blue-400 border-b-2 border-blue-400'
-              : 'text-white/60 hover:text-white/80'
+              ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+              : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -233,11 +233,11 @@ function GamesGrid({
     return (
       <motion.div
         {...eliteAnimations.fadeInUp}
-        className="text-center py-12 rounded-lg border border-white/10 bg-white/5"
+        className="text-center py-12 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
       >
-        <Gamepad2 size={48} className="mx-auto mb-4 text-white/40" />
-        <p className="text-white/60">Nenhum jogo criado ainda</p>
-        <p className="text-sm text-white/40 mt-1">Clique em &quot;Novo Projeto&quot; para começar</p>
+        <Gamepad2 size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
+        <p className="text-[var(--aethel-text-secondary)]">Nenhum jogo criado ainda</p>
+        <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Clique em &quot;Novo Projeto&quot; para começar</p>
       </motion.div>
     )
   }
@@ -272,11 +272,11 @@ function FilmsGrid({
     return (
       <motion.div
         {...eliteAnimations.fadeInUp}
-        className="text-center py-12 rounded-lg border border-white/10 bg-white/5"
+        className="text-center py-12 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
       >
-        <Film size={48} className="mx-auto mb-4 text-white/40" />
-        <p className="text-white/60">Nenhum filme criado ainda</p>
-        <p className="text-sm text-white/40 mt-1">Clique em &quot;Novo Projeto&quot; para começar</p>
+        <Film size={48} className="mx-auto mb-4 text-[var(--aethel-text-secondary)]" />
+        <p className="text-[var(--aethel-text-secondary)]">Nenhum filme criado ainda</p>
+        <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Clique em &quot;Novo Projeto&quot; para começar</p>
       </motion.div>
     )
   }
@@ -311,13 +311,13 @@ function GameCard({
     <GlassCard hover glow animated className="p-4 space-y-4">
       {/* Thumbnail */}
       <div className="w-full h-32 rounded-lg bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] flex items-center justify-center">
-        <Gamepad2 size={48} className="text-white/40" />
+        <Gamepad2 size={48} className="text-[var(--aethel-text-secondary)]" />
       </div>
 
       {/* Info */}
       <div>
-        <h3 className="font-semibold text-white">{game.name}</h3>
-        <p className="text-xs text-white/60 mt-1">Engine: {game.engine}</p>
+        <h3 className="font-semibold text-[var(--aethel-text-primary)]">{game.name}</h3>
+        <p className="text-xs text-[var(--aethel-text-secondary)] mt-1">Engine: {game.engine}</p>
       </div>
 
       {/* Status */}
@@ -329,18 +329,18 @@ function GameCard({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 pt-2 border-t border-white/10">
+      <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
         <button
           onClick={() => onPublish(game)}
           disabled={game.status === 'published'}
-          className="flex-1 px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 text-xs font-medium hover:bg-blue-500/30 disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
+          className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
         >
           <Play size={14} />
           Publicar
         </button>
         <button
           onClick={() => onDelete(game.id)}
-          className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+          className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
           <Trash2 size={14} />
         </button>
@@ -365,13 +365,13 @@ function FilmCard({
     <GlassCard hover glow animated className="p-4 space-y-4">
       {/* Thumbnail */}
       <div className="w-full h-32 rounded-lg bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-secondary)_20%,transparent)] flex items-center justify-center">
-        <Film size={48} className="text-white/40" />
+        <Film size={48} className="text-[var(--aethel-text-secondary)]" />
       </div>
 
       {/* Info */}
       <div>
-        <h3 className="font-semibold text-white">{film.name}</h3>
-        <p className="text-xs text-white/60 mt-1">Formato: {film.format.toUpperCase()}</p>
+        <h3 className="font-semibold text-[var(--aethel-text-primary)]">{film.name}</h3>
+        <p className="text-xs text-[var(--aethel-text-secondary)] mt-1">Formato: {film.format.toUpperCase()}</p>
       </div>
 
       {/* Status */}
@@ -383,7 +383,7 @@ function FilmCard({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 pt-2 border-t border-white/10">
+      <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
         <button
           onClick={() => onPublish(film)}
           disabled={film.status === 'published'}
@@ -394,7 +394,7 @@ function FilmCard({
         </button>
         <button
           onClick={() => onDelete(film.id)}
-          className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-300 text-xs font-medium hover:bg-red-500/30 transition-colors"
+          className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
           <Trash2 size={14} />
         </button>
@@ -427,7 +427,7 @@ function CreateProjectDialog({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-40"
           />
 
           {/* Dialog */}
@@ -438,7 +438,7 @@ function CreateProjectDialog({
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <GlassCard className="w-full max-w-md p-6 space-y-4">
-              <h2 className="text-xl font-bold text-white">Novo Projeto</h2>
+              <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Novo Projeto</h2>
 
               <div className="space-y-3">
                 <GlassButton
@@ -462,7 +462,7 @@ function CreateProjectDialog({
 
               <button
                 onClick={onClose}
-                className="w-full px-4 py-2 rounded-lg text-white/60 hover:text-white transition-colors"
+                className="w-full px-4 py-2 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
               >
                 Cancelar
               </button>

@@ -12,6 +12,8 @@ export type CoreLoopThresholds = {
   regressionRateMax: number
   sandboxCoverage: number
   feedbackCoverageMin: number
+  workspaceCoverageMin?: number
+  requireRollbackEvidence?: boolean
 }
 
 export type CoreLoopWindowReport = {
@@ -30,6 +32,8 @@ export type CoreLoopWindowReport = {
   successfulApplyRuns: number
   failedApplyRuns: number
   blockedApplyRuns: number
+  rollbackSuccessCount: number
+  rollbackEvidenceRate: number
   promotionEligible: boolean
   blockers: string[]
 }
@@ -61,6 +65,7 @@ export function computeCoreLoopReadiness(params: {
   const workspaceApplyRuns = applyRuns.filter((group) => group.executionModes.includes('workspace')).length
   const reviewedApplyRuns = applyRuns.filter((group) => group.learnFeedbackCount > 0).length
   const unreviewedApplyRuns = Math.max(0, totalApplyRuns - reviewedApplyRuns)
+  const rollup = summarizeChangeRunLedger(scopedEvents)
 
   const applySuccessRate = totalApplyRuns > 0 ? successfulApplyRuns / totalApplyRuns : 0
   const regressionRate = totalApplyRuns > 0 ? failedApplyRuns / totalApplyRuns : 0
@@ -68,6 +73,8 @@ export function computeCoreLoopReadiness(params: {
   const sandboxCoverage = totalApplyRuns > 0 ? sandboxApplyRuns / totalApplyRuns : 0
   const learnFeedbackCoverage = totalApplyRuns > 0 ? reviewedApplyRuns / totalApplyRuns : 0
   const workspaceCoverage = totalApplyRuns > 0 ? workspaceApplyRuns / totalApplyRuns : 0
+  const rollbackSuccessCount = rollup.rollbackSuccess
+  const rollbackEvidenceRate = totalApplyRuns > 0 ? rollbackSuccessCount / totalApplyRuns : 0
 
   const blockers: string[] = []
   if (!params.providerConfigured) blockers.push('AI provider not configured')
@@ -78,11 +85,17 @@ export function computeCoreLoopReadiness(params: {
   if (totalApplyRuns >= Math.min(10, params.thresholds.minSample) && learnFeedbackCoverage < params.thresholds.feedbackCoverageMin) {
     blockers.push('Learn feedback coverage below threshold')
   }
+  if (typeof params.thresholds.workspaceCoverageMin === 'number' && workspaceCoverage < params.thresholds.workspaceCoverageMin) {
+    blockers.push('Workspace coverage below threshold')
+  }
+  if (params.thresholds.requireRollbackEvidence && rollbackSuccessCount <= 0) {
+    blockers.push('Rollback evidence missing')
+  }
 
   return {
     thresholds: params.thresholds,
     providerConfigured: params.providerConfigured,
-    rollup: summarizeChangeRunLedger(scopedEvents),
+    rollup,
     runGroups,
     metrics: {
       sampleClass,
@@ -100,6 +113,8 @@ export function computeCoreLoopReadiness(params: {
       successfulApplyRuns,
       failedApplyRuns,
       blockedApplyRuns,
+      rollbackSuccessCount,
+      rollbackEvidenceRate,
       promotionEligible: blockers.length === 0,
       blockers,
     },

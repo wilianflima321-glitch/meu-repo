@@ -17,6 +17,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
+import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models'
 import {
   Code,
   Terminal,
@@ -81,7 +82,7 @@ const DEFAULT_SETTINGS: Record<string, any> = {
 
   'ai.enabled': true,
   'ai.provider': 'openai',
-  'ai.model': 'google/gemini-3.1-flash-lite-preview',
+  'ai.model': DEFAULT_OPENROUTER_MODEL_ID,
   'ai.inlineCompletion': true,
   'ai.completionDelay': 300,
   'ai.maxTokens': 2048,
@@ -428,19 +429,9 @@ const SETTING_ITEMS: SettingItem[] = [
     label: 'AI Model',
     description: 'Select the AI model to use',
     type: 'select',
-    value: 'google/gemini-3.1-flash-lite-preview',
-    defaultValue: 'google/gemini-3.1-flash-lite-preview',
-    options: [
-      { label: 'Gemini 3.1 Flash Lite (OpenRouter)', value: 'google/gemini-3.1-flash-lite-preview' },
-      { label: 'GPT-4o Mini (OpenRouter)', value: 'openai/gpt-4o-mini' },
-      { label: 'Claude 3.5 Haiku (OpenRouter)', value: 'anthropic/claude-3.5-haiku' },
-      { label: 'GPT-4o', value: 'gpt-4o' },
-      { label: 'GPT-4o Mini', value: 'gpt-4o-mini' },
-      { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022' },
-      { label: 'Claude 3 Opus', value: 'claude-3-opus-20240229' },
-      { label: 'Gemini 2.0 Flash', value: 'gemini-2.0-flash-exp' },
-      { label: 'DeepSeek V3', value: 'deepseek-chat' },
-    ],
+    value: DEFAULT_OPENROUTER_MODEL_ID,
+    defaultValue: DEFAULT_OPENROUTER_MODEL_ID,
+    options: OPENROUTER_MODEL_OPTIONS.map((option) => ({ label: option.label, value: option.value })),
     category: 'ai',
     subcategory: 'general',
   },
@@ -843,11 +834,11 @@ function SettingToggle({ setting, value, onChange }: SettingInputProps) {
     <button
       onClick={() => onChange(!value)}
       className={`relative w-11 h-6 rounded-full transition-colors ${
-        value ? 'bg-sky-600' : 'bg-slate-600'
+        value ? 'bg-sky-600' : 'bg-[var(--aethel-surface-quaternary)]'
       }`}
     >
       <span
-        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-[var(--aethel-surface-secondary)] rounded-full transition-transform ${
           value ? 'translate-x-5' : 'translate-x-0'
         }`}
       />
@@ -860,7 +851,7 @@ function SettingSelect({ setting, value, onChange }: SettingInputProps) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white min-w-[200px]"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-[var(--aethel-text-primary)] min-w-[200px]"
     >
       {setting.options?.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -880,7 +871,7 @@ function SettingNumber({ setting, value, onChange }: SettingInputProps) {
       min={setting.min}
       max={setting.max}
       step={setting.step || 1}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white w-24"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-[var(--aethel-text-primary)] w-24"
     />
   )
 }
@@ -891,7 +882,7 @@ function SettingText({ setting, value, onChange }: SettingInputProps) {
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white min-w-[300px]"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-[var(--aethel-text-primary)] min-w-[300px]"
     />
   )
 }
@@ -908,7 +899,7 @@ function SettingSlider({ setting, value, onChange }: SettingInputProps) {
         step={setting.step || 1}
         className="w-32 accent-sky-500"
       />
-      <span className="text-sm text-slate-400 w-12">{value}</span>
+      <span className="text-sm text-[var(--aethel-text-tertiary)] w-12">{value}</span>
     </div>
   )
 }
@@ -931,23 +922,23 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
   }[setting.type] || SettingText
 
   return (
-    <div className="flex items-start justify-between py-4 border-b border-slate-800 group">
+    <div className="flex items-start justify-between py-4 border-b border-[var(--aethel-border-primary)] group">
       <div className="flex-1 pr-8">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-white">{setting.label}</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{setting.label}</span>
           {isModified && (
             <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] rounded">
               Modified
             </span>
           )}
           {setting.requiresReload && (
-            <span className="px-1.5 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded">
+            <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] rounded">
               Requires Reload
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-500 mt-0.5">{setting.description}</p>
-        <p className="text-[10px] text-slate-600 font-mono mt-1">{setting.id}</p>
+        <p className="text-xs text-[var(--aethel-text-quaternary)] mt-0.5">{setting.description}</p>
+        <p className="text-[10px] text-[var(--aethel-text-quaternary)] font-mono mt-1">{setting.id}</p>
       </div>
 
       <div className="flex items-center gap-2">
@@ -959,7 +950,7 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
         {isModified && (
           <button
             onClick={onReset}
-            className="p-1 text-slate-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="p-1 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] opacity-0 group-hover:opacity-100 transition-opacity"
             title="Reset to default"
           >
             <RotateCcw className="w-4 h-4" />
@@ -1051,7 +1042,7 @@ export default function SettingsPage() {
   }, [settings])
 
   return (
-    <div className="flex h-full bg-slate-900">
+    <div className="flex h-full bg-[var(--aethel-surface-primary)]">
       <SettingsSidebar
         categories={CATEGORIES}
         modifiedCount={modifiedCount}
@@ -1090,3 +1081,4 @@ export default function SettingsPage() {
     </div>
   )
 }
+

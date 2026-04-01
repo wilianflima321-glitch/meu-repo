@@ -2,7 +2,7 @@
 
 /**
  * Git Panel Component
- * 
+ *
  * Interface completa para Git com staging, commits,
  * branches, diff viewer e mais.
  */
@@ -106,7 +106,7 @@ const FileItem: React.FC<FileItemProps> = ({
   const path = typeof file === 'string' ? file : file.path;
   const status = typeof file === 'string' ? 'untracked' : file.status;
   const staged = typeof file === 'string' ? false : file.staged;
-  
+
   const getStatusColor = () => {
     switch (status) {
       case 'added': return colors.green;
@@ -117,7 +117,7 @@ const FileItem: React.FC<FileItemProps> = ({
       default: return colors.text;
     }
   };
-  
+
   const getStatusIcon = () => {
     switch (status) {
       case 'added': return <FilePlus size={14} color={colors.green} />;
@@ -127,7 +127,7 @@ const FileItem: React.FC<FileItemProps> = ({
       default: return <File size={14} color={colors.subtext0} />;
     }
   };
-  
+
   return (
     <div
       onClick={onSelect}
@@ -145,7 +145,7 @@ const FileItem: React.FC<FileItemProps> = ({
       <span style={{ flex: 1, color: getStatusColor(), fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {path}
       </span>
-      
+
       <div style={{ display: 'flex', gap: '2px' }} onClick={(e) => e.stopPropagation()}>
         {onView && (
           <button
@@ -163,7 +163,7 @@ const FileItem: React.FC<FileItemProps> = ({
             <Eye size={14} />
           </button>
         )}
-        
+
         {staged && onUnstage && (
           <button
             onClick={onUnstage}
@@ -180,7 +180,7 @@ const FileItem: React.FC<FileItemProps> = ({
             <Minus size={14} />
           </button>
         )}
-        
+
         {!staged && onStage && (
           <button
             onClick={onStage}
@@ -197,7 +197,7 @@ const FileItem: React.FC<FileItemProps> = ({
             <Plus size={14} />
           </button>
         )}
-        
+
         {!staged && onDiscard && (
           <button
             onClick={onDiscard}
@@ -264,11 +264,11 @@ const CommitItem: React.FC<CommitItemProps> = ({ commit, onSelect, isSelected })
           </div>
         )}
       </div>
-      
+
       <div style={{ color: colors.text, fontSize: '13px', marginBottom: '4px', lineHeight: 1.4 }}>
         {commit.message}
       </div>
-      
+
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: colors.subtext0, fontSize: '12px' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <User size={12} />
@@ -306,12 +306,12 @@ const BranchItem: React.FC<BranchItemProps> = ({ branch, onCheckout, onDelete })
       }}
     >
       <GitBranch size={14} color={branch.isHead ? colors.green : colors.subtext0} />
-      
+
       <span style={{ flex: 1, color: branch.isHead ? colors.green : colors.text }}>
         {branch.name}
         {branch.isHead && ' (current)'}
       </span>
-      
+
       {(branch.ahead > 0 || branch.behind > 0) && (
         <div style={{ display: 'flex', gap: '6px', fontSize: '12px' }}>
           {branch.ahead > 0 && (
@@ -328,7 +328,7 @@ const BranchItem: React.FC<BranchItemProps> = ({ branch, onCheckout, onDelete })
           )}
         </div>
       )}
-      
+
       {!branch.isHead && !branch.isRemote && (
         <div style={{ display: 'flex', gap: '4px' }}>
           <button
@@ -390,7 +390,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
   const [selectedCommit, setSelectedCommit] = useState<GitCommitType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['staged', 'changes', 'untracked']));
-  
+
   const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -401,32 +401,32 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
         gitService.getStashes(),
         gitService.getCurrentBranch(),
       ]);
-      
+
       setStatus(newStatus);
       setCommits(newCommits);
       setBranches(newBranches);
       setStashes(newStashes);
       setCurrentBranch(branch);
     } catch (error) {
-      console.error('Git refresh failed:', error);
+        console.error('Falha ao atualizar Git:', error);
     }
     setIsLoading(false);
   }, [gitService]);
-  
+
   useEffect(() => {
     refresh();
   }, [refresh]);
-  
+
   const handleStage = useCallback(async (path: string) => {
     await gitService.stage(path);
     refresh();
   }, [gitService, refresh]);
-  
+
   const handleUnstage = useCallback(async (path: string) => {
     await gitService.unstage(path);
     refresh();
   }, [gitService, refresh]);
-  
+
   const handleDiscard = useCallback(async (path: string) => {
     const shouldDiscard = await openConfirmDialog({
       title: 'Discard changes',
@@ -438,45 +438,45 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
     await gitService.discard(path);
     refresh();
   }, [gitService, refresh]);
-  
+
   const handleStageAll = useCallback(async () => {
     await gitService.stageAll();
     refresh();
   }, [gitService, refresh]);
-  
+
   const handleUnstageAll = useCallback(async () => {
     await gitService.unstageAll();
     refresh();
   }, [gitService, refresh]);
-  
+
   const handleCommit = useCallback(async () => {
     if (!commitMessage.trim()) return;
-    
+
     await gitService.commit(commitMessage);
     setCommitMessage('');
     refresh();
   }, [gitService, commitMessage, refresh]);
-  
+
   const handlePush = useCallback(async () => {
     await gitService.push();
     refresh();
   }, [gitService, refresh]);
-  
+
   const handlePull = useCallback(async () => {
     await gitService.pull();
     refresh();
   }, [gitService, refresh]);
-  
+
   const handleFetch = useCallback(async () => {
     await gitService.fetch(undefined, { all: true });
     refresh();
   }, [gitService, refresh]);
-  
+
   const handleCheckout = useCallback(async (branchName: string) => {
     await gitService.checkout(branchName);
     refresh();
   }, [gitService, refresh]);
-  
+
   const handleDeleteBranch = useCallback(async (branchName: string) => {
     const shouldDelete = await openConfirmDialog({
       title: 'Excluir branch',
@@ -488,7 +488,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
     await gitService.deleteBranch(branchName);
     refresh();
   }, [gitService, refresh]);
-  
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
       const next = new Set(prev);
@@ -497,9 +497,9 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
       return next;
     });
   };
-  
+
   const totalChanges = (status?.staged.length || 0) + (status?.unstaged.length || 0) + (status?.untracked.length || 0);
-  
+
   return (
     <div
       style={{
@@ -517,7 +517,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             <FolderGit size={20} color={colors.peach} />
             <span style={{ fontWeight: 600 }}>Source Control</span>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '4px' }}>
             <button
               onClick={refresh}
@@ -529,7 +529,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                 color: colors.subtext0,
                 cursor: 'pointer',
               }}
-              title="Refresh"
+              title="Atualizar"
             >
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
             </button>
@@ -577,7 +577,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             </button>
           </div>
         </div>
-        
+
         {/* Current branch */}
         <div
           style={{
@@ -592,7 +592,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
           <GitBranch size={14} color={colors.green} />
           <span style={{ color: colors.text, fontSize: '13px' }}>{currentBranch}</span>
         </div>
-        
+
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '4px', marginTop: '12px' }}>
           {[
@@ -620,7 +620,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
           ))}
         </div>
       </div>
-      
+
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
         <AnimatePresence mode="wait">
@@ -669,7 +669,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                   Commit ({status.staged.length} staged)
                 </button>
               </div>
-              
+
               {/* Staged Changes */}
               <div style={{ marginBottom: '16px' }}>
                 <div
@@ -718,7 +718,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                   </div>
                 )}
               </div>
-              
+
               {/* Changes */}
               <div style={{ marginBottom: '16px' }}>
                 <div
@@ -768,7 +768,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                   </div>
                 )}
               </div>
-              
+
               {/* Untracked */}
               <div>
                 <div
@@ -801,7 +801,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
               </div>
             </motion.div>
           )}
-          
+
           {activeTab === 'commits' && (
             <motion.div
               key="commits"
@@ -822,7 +822,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
               </div>
             </motion.div>
           )}
-          
+
           {activeTab === 'branches' && (
             <motion.div
               key="branches"
@@ -840,7 +840,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                     onDelete={() => handleDeleteBranch(branch.name)}
                   />
                 ))}
-                
+
                 {branches.filter(b => b.isRemote).length > 0 && (
                   <>
                     <div style={{ padding: '12px 0 8px', color: colors.subtext0, fontSize: '12px', fontWeight: 500 }}>
@@ -859,7 +859,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
               </div>
             </motion.div>
           )}
-          
+
           {activeTab === 'stashes' && (
             <motion.div
               key="stashes"

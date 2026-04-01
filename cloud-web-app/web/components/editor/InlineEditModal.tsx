@@ -2,11 +2,11 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Sparkles, 
-  X, 
-  Send, 
-  Loader2, 
+import {
+  Sparkles,
+  X,
+  Send,
+  Loader2,
   Check,
   AlertCircle,
   Wand2,
@@ -19,7 +19,7 @@ import { Textarea } from '@/components/ui/Textarea';
 
 /**
  * InlineEditModal - Componente de edição inline estilo Cursor AI
- * 
+ *
  * Features:
  * - Cmd+K para abrir em qualquer seleção de código
  * - Input de instrução com autocomplete
@@ -163,7 +163,7 @@ export function InlineEditModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm pt-20"
+        className="fixed inset-0 z-50 flex items-start justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm pt-20"
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         <motion.div
@@ -463,10 +463,10 @@ export function useInlineEdit() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        
+
         // Get current selection from Monaco or textarea
         const selection = window.getSelection()?.toString() || '';
-        
+
         if (selection) {
           openInlineEdit(selection);
         } else {

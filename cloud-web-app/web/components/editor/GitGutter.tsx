@@ -2,10 +2,10 @@
 
 /**
  * Aethel Engine - Git Gutter Decorations
- * 
+ *
  * Monaco editor decorations showing git diff status:
  * - Green: Added lines
- * - Blue: Modified lines  
+ * - Blue: Modified lines
  * - Red: Deleted lines indicator
  * - Hover preview with diff
  * - Click to view full diff
@@ -169,7 +169,7 @@ export function useGitGutter({
 
     changes.forEach(change => {
       const className = DECORATION_CLASSES[change.type];
-      const lineClassName = change.type === 'added' 
+      const lineClassName = change.type === 'added'
         ? 'git-line-added'
         : change.type === 'modified'
           ? 'git-line-modified'
@@ -189,7 +189,7 @@ export function useGitGutter({
             linesDecorationsClassName: className,
             glyphMarginClassName: 'git-deleted-glyph',
             glyphMarginHoverMessage: {
-              value: `**${change.originalContent?.length || 0} line(s) deleted**\n\n\`\`\`\n${change.originalContent?.join('\n') || ''}\n\`\`\``,
+              value: `**${change.originalContent?.length || 0} linha(s) removida(s)**\n\n\`\`\`\n${change.originalContent?.join('\n') || ''}\n\`\`\``,
             },
           },
         });
@@ -338,26 +338,26 @@ export function DiffHunkPreview({
   const getTitle = () => {
     switch (change.type) {
       case 'added':
-        return `${change.endLine - change.startLine + 1} line(s) added`;
+        return `${change.endLine - change.startLine + 1} linha(s) adicionada(s)`;
       case 'modified':
-        return `${change.endLine - change.startLine + 1} line(s) modified`;
+        return `${change.endLine - change.startLine + 1} linha(s) modificada(s)`;
       case 'deleted':
-        return `${change.originalContent?.length || 0} line(s) deleted`;
+        return `${change.originalContent?.length || 0} linha(s) removida(s)`;
     }
   };
 
   const getColor = () => {
     switch (change.type) {
-      case 'added': return 'border-green-500';
-      case 'modified': return 'border-blue-500';
-      case 'deleted': return 'border-red-500';
+      case 'added': return 'border-[var(--aethel-success)]';
+      case 'modified': return 'border-[var(--aethel-info)]';
+      case 'deleted': return 'border-[var(--aethel-error)]';
     }
   };
 
   return (
     <div
       ref={previewRef}
-      className={`fixed z-50 w-96 bg-slate-900 border-l-4 ${getColor()} rounded-r-lg shadow-2xl overflow-hidden transition-all duration-150 ${
+      className={`fixed z-50 w-96 bg-[var(--aethel-surface-primary)] border-l-4 ${getColor()} rounded-r-lg shadow-2xl overflow-hidden transition-all duration-150 ${
         isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
       }`}
       style={{
@@ -366,13 +366,13 @@ export function DiffHunkPreview({
       }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-800 border-b border-slate-700">
-        <span className="text-sm font-medium text-white">{getTitle()}</span>
+      <div className="flex items-center justify-between px-3 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
+        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{getTitle()}</span>
         <div className="flex items-center gap-1">
           {onViewFullDiff && (
             <button
               onClick={onViewFullDiff}
-              className="px-2 py-1 text-xs text-slate-300 hover:text-white hover:bg-slate-700 rounded"
+              className="px-2 py-1 text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
             >
               Ver diff
             </button>
@@ -380,9 +380,9 @@ export function DiffHunkPreview({
           {onRevertChange && change.type !== 'added' && (
             <button
               onClick={onRevertChange}
-              className="px-2 py-1 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded"
+              className="px-2 py-1 text-xs text-[var(--aethel-error)] hover:text-[color-mix(in_srgb,var(--aethel-error)_80%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] rounded"
             >
-              Revert
+              Reverter
             </button>
           )}
         </div>
@@ -392,13 +392,13 @@ export function DiffHunkPreview({
       <div className="max-h-60 overflow-y-auto">
         {change.type === 'deleted' && change.originalContent && (
           <div className="p-2 font-mono text-xs">
-            <div className="text-slate-500 mb-1">Deleted content:</div>
+            <div className="text-[var(--aethel-text-tertiary)] mb-1">Conteudo removido:</div>
             {change.originalContent.map((line, i) => (
               <div
                 key={i}
-                className="px-2 py-0.5 bg-red-900/20 text-red-300 border-l-2 border-red-500"
+                className="px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)] text-[var(--aethel-error)] border-l-2 border-[var(--aethel-error)]"
               >
-                <span className="text-red-500 mr-2">-</span>
+                <span className="text-[var(--aethel-error)] mr-2">-</span>
                 {line || ' '}
               </div>
             ))}
@@ -409,13 +409,13 @@ export function DiffHunkPreview({
           <div className="p-2 font-mono text-xs">
             {change.originalContent && (
               <>
-                <div className="text-slate-500 mb-1">Original:</div>
+                <div className="text-[var(--aethel-text-tertiary)] mb-1">Original:</div>
                 {change.originalContent.map((line, i) => (
                   <div
                     key={`orig-${i}`}
-                    className="px-2 py-0.5 bg-red-900/20 text-red-300 border-l-2 border-red-500"
+                    className="px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)] text-[var(--aethel-error)] border-l-2 border-[var(--aethel-error)]"
                   >
-                    <span className="text-red-500 mr-2">-</span>
+                    <span className="text-[var(--aethel-error)] mr-2">-</span>
                     {line || ' '}
                   </div>
                 ))}
@@ -423,13 +423,13 @@ export function DiffHunkPreview({
             )}
             {change.modifiedContent && (
               <>
-                <div className="text-slate-500 mt-2 mb-1">Modified:</div>
+                <div className="text-[var(--aethel-text-tertiary)] mt-2 mb-1">Modificado:</div>
                 {change.modifiedContent.map((line, i) => (
                   <div
                     key={`mod-${i}`}
-                    className="px-2 py-0.5 bg-green-900/20 text-green-300 border-l-2 border-green-500"
+                    className="px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] text-[var(--aethel-success)] border-l-2 border-[var(--aethel-success)]"
                   >
-                    <span className="text-green-500 mr-2">+</span>
+                    <span className="text-[var(--aethel-success)] mr-2">+</span>
                     {line || ' '}
                   </div>
                 ))}
@@ -440,13 +440,13 @@ export function DiffHunkPreview({
 
         {change.type === 'added' && change.modifiedContent && (
           <div className="p-2 font-mono text-xs">
-            <div className="text-slate-500 mb-1">Added content:</div>
+            <div className="text-[var(--aethel-text-tertiary)] mb-1">Conteudo adicionado:</div>
             {change.modifiedContent.map((line, i) => (
               <div
                 key={i}
-                className="px-2 py-0.5 bg-green-900/20 text-green-300 border-l-2 border-green-500"
+                className="px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] text-[var(--aethel-success)] border-l-2 border-[var(--aethel-success)]"
               >
-                <span className="text-green-500 mr-2">+</span>
+                <span className="text-[var(--aethel-success)] mr-2">+</span>
                 {line || ' '}
               </div>
             ))}
@@ -455,8 +455,8 @@ export function DiffHunkPreview({
       </div>
 
       {/* Footer */}
-      <div className="px-3 py-1.5 bg-slate-800 border-t border-slate-700 text-xs text-slate-500">
-        Lines {change.startLine}
+      <div className="px-3 py-1.5 bg-[var(--aethel-surface-secondary)] border-t border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-tertiary)]">
+        Linhas {change.startLine}
         {change.endLine !== change.startLine && `-${change.endLine}`}
       </div>
     </div>
@@ -491,17 +491,17 @@ export function GitStatusIndicator({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 px-2 py-1 text-xs hover:bg-slate-800 rounded transition-colors"
+      className="flex items-center gap-2 px-2 py-1 text-xs hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
       title="Git changes - Click to view diff"
     >
       {added > 0 && (
-        <span className="text-green-400">+{added}</span>
+        <span className="text-[var(--aethel-success)]">+{added}</span>
       )}
       {modified > 0 && (
-        <span className="text-blue-400">~{modified}</span>
+        <span className="text-[var(--aethel-info)]">~{modified}</span>
       )}
       {deleted > 0 && (
-        <span className="text-red-400">-{deleted}</span>
+        <span className="text-[var(--aethel-error)]">-{deleted}</span>
       )}
     </button>
   );
@@ -514,7 +514,7 @@ export function GitStatusIndicator({
 export function parseGitDiff(diff: string): LineChange[] {
   const changes: LineChange[] = [];
   const lines = diff.split('\n');
-  
+
   let currentHunk: {
     oldStart: number;
     oldCount: number;
@@ -532,7 +532,7 @@ export function parseGitDiff(diff: string): LineChange[] {
       if (currentHunk) {
         processHunk(currentHunk, changes);
       }
-      
+
       currentHunk = {
         oldStart: parseInt(hunkMatch[1], 10),
         oldCount: parseInt(hunkMatch[2] || '1', 10),
@@ -609,3 +609,4 @@ function processHunk(
 // ============================================================================
 
 export default useGitGutter;
+
