@@ -486,7 +486,7 @@ export default function GodViewPage() {
               placeholder="Buscar usuarios, projetos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder-gray-500 w-64"
+              className="pl-9 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] w-64"
             />
           </div>
 

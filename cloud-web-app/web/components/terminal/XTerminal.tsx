@@ -571,7 +571,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         onChange={(e) => setSearchTerm(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Search..."
-        className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-strong)] rounded px-2 py-1 text-sm text-[var(--aethel-text-primary)] placeholder-gray-500 outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]"
+        className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-strong)] rounded px-2 py-1 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]"
       />
       {searchTerm && (
         <span className="text-xs text-[var(--aethel-text-secondary)]">
