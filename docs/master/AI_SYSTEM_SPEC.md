@@ -70,3 +70,8 @@ Eventos usados no ciclo principal:
 ## 7. Regras de atualizacao
 - Atualizar este documento junto com mudancas em `advanced-ai-provider.ts`, `openrouter-models.ts` ou `plan-limits.ts`.
 - Nao promover L4/L5 por inferencia: somente com evidencias de runtime real.
+
+## Addendum 2026-04-01 (AI UX hardening)
+- IDE chat and inline assistant surfaces are now localized and use Aethel tokens.
+- Provider readiness remains a hard gate; missing provider keeps chat in setup mode.
+- Mention and context surfaces now show explicit preview of retrieval results in the IDE composer.

@@ -207,3 +207,14 @@ Keep one factual map of duplication/conflict risk that still affects delivery sp
 
 
 
+
+## Addendum 2026-04-01 (Active duplications)
+| ID | Conflict | Evidence | Impact | Decision | Owner |
+|---|---|---|---|---|---|
+| D-13 | Multiple toast systems | ui/Toast.tsx + ui/toast-system.tsx + DashboardToast.tsx + NotificationToast.tsx + sonner usage in marketplace | UX inconsistency, duplicated code | Unify on `components/ui/toast-system.tsx` and migrate all callers | Frontend |
+| D-14 | Skeleton variants | Skeleton.tsx + SkeletonLoading.tsx + SkeletonStates.tsx + PremiumSkeleton.tsx | Visual drift, inconsistent loading UX | Unify into one canonical skeleton API | Frontend |
+| D-15 | Multiple globals.css | app/globals.css vs styles/globals.css (different tokens) | Token drift, inconsistent theming | Remove/merge legacy globals.css and keep one source of truth | Frontend |
+| D-16 | Deprecated UI shells still present | `_deprecated/*` folder with 11 files | Confusion for new work, drift risk | Remove or archive after migration checkpoint | Frontend |
+
+Notes:
+- Evidence gathered from file scans on 2026-04-01. This addendum complements the canonical numbered doc.

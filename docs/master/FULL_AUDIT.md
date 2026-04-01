@@ -300,3 +300,44 @@ Ver documentos:
 
 
 
+
+## Addendum 2026-04-01 (Evidence-based)
+This addendum reflects repo scans performed on 2026-04-01.
+
+### Verified structural findings
+- Deprecated components present under `cloud-web-app/web/components/_deprecated/` (11 files):
+  - AethelHeader.tsx
+  - FileExplorer.tsx
+  - FileTreeExplorer.tsx
+  - Settings.tsx
+  - StatusBar.tsx
+  - Terminal.tsx
+  - command-palette/CommandPalette.tsx
+  - git/GitPanel.tsx
+  - layout/IDELayout.tsx
+  - status-bar/StatusBar.tsx
+  - README.md
+- Multiple toast systems still exist (needs unification):
+  - `cloud-web-app/web/components/ui/Toast.tsx` (legacy)
+  - `cloud-web-app/web/components/ui/toast-system.tsx` (new)
+  - `cloud-web-app/web/components/dashboard/DashboardToast.tsx`
+  - `cloud-web-app/web/components/notifications/NotificationToast.tsx`
+  - Marketplace uses `sonner` (e.g. AssetDetailPanel.tsx, MarketplaceBrowser.tsx, UserLibrary.tsx)
+- Skeleton variants (4 files):
+  - `cloud-web-app/web/components/ui/Skeleton.tsx`
+  - `cloud-web-app/web/components/ui/SkeletonLoading.tsx`
+  - `cloud-web-app/web/components/ui/SkeletonStates.tsx`
+  - `cloud-web-app/web/components/ui/PremiumSkeleton.tsx`
+- Multiple globals.css sources (token divergence risk):
+  - `cloud-web-app/web/app/globals.css` (Aethel L5 tokens)
+  - `cloud-web-app/web/styles/globals.css` (legacy indigo/pink palette)
+  - `shared/tools/aethel_agi_tools/.../globals.css` (tooling scope)
+
+### Localization drift (IDE/editor)
+- 27 files in `components/ide` + `components/editor` still contain English string literals.
+- Some are internal IDs; manual review required for user-facing copy.
+- Examples include `CommandPalette.tsx`, `InlineCompletion.tsx`, `PreviewPanel.tsx`, `TabBar.tsx`.
+
+### UX hardening applied
+- L5 UX hardening tracked in `docs/master/68_L5_UX_HARDENING_DELTA_2026-04-01.md`.
+- Tokens Aethel enforced in core UI primitives; preview/chat/git states now explicit.

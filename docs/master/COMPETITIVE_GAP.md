@@ -497,3 +497,12 @@ Análise honesta de onde estamos vs concorrentes, identificando gaps reais e opo
 
 
 
+
+## Addendum 2026-04-01 (Competitive gaps grounded in repo evidence)
+- UX consistency gap vs Linear/Cursor: multiple toast systems and skeleton variants still coexist, which would be unified in best-in-class tools.
+- Design-system drift gap vs Vercel/Figma: multiple globals.css definitions create token divergence risk.
+- Localization gap vs premium tooling: IDE/editor still contain English string literals (partial PT-BR).
+- Preview/runtime parity gap vs Vercel/Replit: runtime provisioning is explicit but still depends on provider tokens and may degrade to fallback.
+
+Notes:
+- This addendum is evidence-based from file scans and runtime API behavior; it avoids speculative claims.
