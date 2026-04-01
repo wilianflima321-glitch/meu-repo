@@ -19,25 +19,25 @@ export function CodebaseContextPanel({
   if (!input.toLowerCase().includes('@codebase')) return null
 
   return (
-    <div className="mt-3 rounded-xl border border-sky-500/20 bg-slate-900/70 p-3">
+    <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))] p-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
-          <div className="text-xs font-medium uppercase tracking-[0.22em] text-sky-300">
-            Codebase Context
+          <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
+            Contexto de codebase
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-[var(--aethel-text-tertiary)]">
             {preview.loading
-              ? 'Analyzing current scope...'
-              : `Source: ${preview.source || 'local-persistent-cache'}${preview.scope ? ` | scope=${preview.scope}` : ''}`}
+              ? 'Analisando o escopo atual...'
+              : `Fonte: ${preview.source || 'cache-local-persistente'}${preview.scope ? ` | escopo=${preview.scope}` : ''}`}
           </div>
           {preview.stats && (
-            <div className="mt-1 text-[10px] text-slate-500">
-              {preview.stats.filesIndexed} files | {preview.stats.chunksIndexed} chunks | reused {preview.stats.reusedFiles} | changed {preview.stats.changedFiles} | indexed {new Date(preview.stats.indexedAt).toLocaleTimeString()}
+            <div className="mt-1 text-[10px] text-[var(--aethel-text-quaternary)]">
+              {preview.stats.filesIndexed} arquivos | {preview.stats.chunksIndexed} chunks | reaproveitados {preview.stats.reusedFiles} | alterados {preview.stats.changedFiles} | indexado {new Date(preview.stats.indexedAt).toLocaleTimeString()}
             </div>
           )}
           {preview.incrementalReindex && (
             <div className="mt-1 text-[10px] text-emerald-300">
-              incremental local reindex active
+              reindexacao incremental local ativa
             </div>
           )}
         </div>
@@ -51,9 +51,9 @@ export function CodebaseContextPanel({
             type="button"
             onClick={onRefresh}
             disabled={preview.loading}
-            className="rounded border border-slate-700 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {preview.loading ? 'Refreshing...' : 'Refresh context'}
+            {preview.loading ? 'Atualizando...' : 'Atualizar contexto'}
           </button>
         </div>
       </div>
@@ -63,23 +63,23 @@ export function CodebaseContextPanel({
         </div>
       )}
       {!preview.error && preview.results.length === 0 && !preview.loading && (
-        <div className="rounded-lg border border-slate-700 bg-slate-800/60 px-3 py-2 text-[11px] text-slate-400">
-          No semantic matches found yet for this prompt.
+        <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-tertiary)]">
+          Nenhum trecho semantico relevante apareceu para este prompt ainda.
         </div>
       )}
       <div className="space-y-2">
         {preview.results.map((result) => (
-          <div key={result.id} className="rounded-lg border border-slate-700 bg-slate-800/60 p-2.5">
+          <div key={result.id} className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] p-2.5">
             <div className="mb-1 flex items-center justify-between gap-2 text-[11px]">
-              <span className="font-mono text-slate-200">{result.filePath}:{result.startLine}-{result.endLine}</span>
+              <span className="font-mono text-[var(--aethel-text-secondary)]">{result.filePath}:{result.startLine}-{result.endLine}</span>
               <div className="flex items-center gap-2">
-                <span className="text-sky-300">score {result.score}</span>
+                <span className="text-[var(--aethel-info-light)]">score {result.score}</span>
                 <button
                   type="button"
                   onClick={() => onCopy(result.filePath)}
-                  className="rounded border border-slate-700 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
+                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-white"
                 >
-                  Copy path
+                  Copiar caminho
                 </button>
                 <button
                   type="button"
@@ -90,16 +90,16 @@ export function CodebaseContextPanel({
                 </button>
               </div>
             </div>
-            <pre className="overflow-x-auto whitespace-pre-wrap text-[11px] leading-5 text-slate-400">
+            <pre className="overflow-x-auto whitespace-pre-wrap text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
               {result.excerpt}
             </pre>
             <div className="mt-2 flex justify-end">
               <button
                 type="button"
                 onClick={() => onCopy(result.excerpt)}
-                className="rounded border border-slate-700 px-2 py-0.5 text-[10px] text-slate-400 transition-colors hover:border-slate-500 hover:text-slate-200"
+                className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-tertiary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-secondary)]"
               >
-                Copy excerpt
+                Copiar trecho
               </button>
             </div>
           </div>
@@ -125,14 +125,14 @@ export function MentionContextPanel({
   if (!(preview.blocks.length > 0 || preview.loading || preview.error)) return null
 
   return (
-    <div className="mt-3 rounded-xl border border-violet-500/20 bg-slate-900/70 p-3">
+    <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-accent)_24%,transparent)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))] p-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
-          <div className="text-xs font-medium uppercase tracking-[0.22em] text-violet-300">
-            Mention Context
+          <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-accent-light)]">
+            Contexto de mentions
           </div>
-          <div className="text-[11px] text-slate-400">
-            {preview.loading ? 'Resolving explicit mention context...' : 'Preview of non-codebase context that will be sent.'}
+          <div className="text-[11px] text-[var(--aethel-text-tertiary)]">
+            {preview.loading ? 'Resolvendo o contexto explicito das mentions...' : 'Previa do contexto nao-codebase que sera enviado junto.'}
           </div>
         </div>
       </div>
@@ -143,7 +143,7 @@ export function MentionContextPanel({
       ) : null}
       <div className="space-y-2">
         {preview.blocks.map((block) => (
-          <div key={block.tag} className="rounded-lg border border-slate-700 bg-slate-800/60 p-2.5">
+          <div key={block.tag} className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] p-2.5">
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-violet-200">
                 {block.tag}
@@ -161,13 +161,13 @@ export function MentionContextPanel({
                 <button
                   type="button"
                   onClick={() => onCopy(block.content)}
-                  className="rounded border border-slate-700 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:border-slate-500 hover:text-white"
+                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-accent)_35%,transparent)] hover:text-white"
                 >
-                  Copy
+                  Copiar
                 </button>
               </div>
             </div>
-            <pre className="overflow-x-auto whitespace-pre-wrap text-[11px] leading-5 text-slate-400">
+            <pre className="overflow-x-auto whitespace-pre-wrap text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
               {block.content}
             </pre>
           </div>

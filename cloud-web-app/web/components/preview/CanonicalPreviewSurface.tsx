@@ -48,7 +48,7 @@ const STRATEGY_LABELS: Record<PreviewStrategy, string> = {
   e2b: 'sandbox gerenciado',
   webcontainer: 'webcontainer',
   iframe: 'runtime externo',
-  inline: 'inline',
+  inline: 'fallback inline',
   none: 'sem runtime',
 };
 
@@ -58,7 +58,7 @@ const LIFECYCLE_COLORS: Record<PreviewLifecycleState, string> = {
   warming: 'bg-[var(--aethel-warning-light)] animate-pulse',
   syncing: 'bg-[var(--aethel-primary)] animate-pulse',
   healthy: 'bg-[var(--aethel-success)]',
-  degraded: 'bg-orange-500',
+  degraded: 'bg-[var(--aethel-warning)]',
   failed: 'bg-[var(--aethel-error)]',
   offline: 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)]',
 };
@@ -87,7 +87,7 @@ function PreviewSkeleton() {
   return (
     <div className="flex items-center justify-center h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--aethel-info)] border-t-transparent" />
         <div className="text-center">
           <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Carregando preview...</p>
           <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
@@ -104,11 +104,15 @@ function LifecycleIndicator({
   latencyMs,
   hmrConnected,
   strategy,
+  filesInSync,
+  lastSyncAt,
 }: {
   state: PreviewLifecycleState;
   latencyMs: number | null;
   hmrConnected: boolean;
   strategy?: PreviewStrategy;
+  filesInSync?: number;
+  lastSyncAt?: number | null;
 }) {
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur-sm border-b border-[var(--aethel-border-secondary)]/50 text-xs">
@@ -122,6 +126,16 @@ function LifecycleIndicator({
       {latencyMs !== null && state === 'healthy' && (
         <span className="text-[var(--aethel-text-tertiary)]">{latencyMs}ms</span>
       )}
+      {filesInSync !== undefined && filesInSync > 0 && (
+        <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+          sync {filesInSync}
+        </span>
+      )}
+      {lastSyncAt ? (
+        <span className="text-[var(--aethel-text-quaternary)]">
+          atual. {new Date(lastSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      ) : null}
       {hmrConnected && (
         <span className="ml-auto flex items-center gap-1 text-[var(--aethel-success)]">
           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
@@ -167,7 +181,7 @@ function PreviewFailedState({
       <div className="flex gap-2">
         <button
           onClick={onRetry}
-          className="px-3 py-1.5 text-xs bg-violet-600 hover:bg-violet-500 text-[var(--aethel-text-primary)] rounded-md transition-colors"
+          className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs text-[var(--aethel-text-primary)] transition-colors hover:brightness-110"
         >
           Tentar novamente
         </button>
@@ -205,6 +219,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const bridgeRef = useRef<HMRBridge | null>(null);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
   const warmupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const syncResetRef = useRef<NodeJS.Timeout | null>(null);
 
   const startHealthPolling = useCallback((url: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
@@ -275,7 +290,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
         setRuntime((prev) => ({
           ...prev,
           state: 'failed',
-          error: 'No preview runtime available. Start a local dev server or configure E2B.',
+          error: 'Nenhum runtime de preview disponivel. Inicie um servidor local ou configure o sandbox gerenciado.',
         }));
       }
     } catch (err) {
@@ -299,7 +314,20 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
         },
         onUpdate: (message) => {
           if (message.type === 'full-reload' || message.type === 'update') {
-            setRuntime((prev) => ({ ...prev, lastSyncAt: Date.now() }));
+            if (syncResetRef.current) clearTimeout(syncResetRef.current);
+            const syncedAt = Date.now();
+            setRuntime((prev) => ({
+              ...prev,
+              state: prev.strategy === 'inline' ? 'degraded' : 'syncing',
+              filesInSync: prev.filesInSync + 1,
+              lastSyncAt: syncedAt,
+            }));
+            syncResetRef.current = setTimeout(() => {
+              setRuntime((prev) => ({
+                ...prev,
+                state: prev.strategy === 'inline' ? 'degraded' : 'healthy',
+              }));
+            }, 900);
           }
         },
         onError: () => {
@@ -314,7 +342,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const switchToInline = useCallback(() => {
     setRuntime((prev) => ({
       ...prev,
-      state: 'healthy',
+      state: 'degraded',
       strategy: 'inline',
       runtimeUrl: null,
       sandboxId: null,
@@ -339,6 +367,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
       bridgeRef.current?.disconnect();
       if (pollRef.current) clearInterval(pollRef.current);
       if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
+      if (syncResetRef.current) clearTimeout(syncResetRef.current);
     };
   }, []);
 
@@ -516,6 +545,8 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           latencyMs={runtime.latencyMs}
           hmrConnected={runtime.hmrConnected}
           strategy={runtime.strategy}
+          filesInSync={runtime.filesInSync}
+          lastSyncAt={runtime.lastSyncAt}
         />
       )}
       <div className="flex-1 relative">

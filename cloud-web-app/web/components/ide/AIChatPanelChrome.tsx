@@ -10,13 +10,13 @@ type AttachmentPreviewProps = {
 
 export function AttachmentPreview({ attachment, onRemove }: AttachmentPreviewProps) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-900/60 px-2 py-1 text-xs text-slate-300">
+    <div className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
       <span className="truncate">{attachment.name}</span>
       {onRemove && (
         <button
           type="button"
           onClick={onRemove}
-          className="ml-1 rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+          className="ml-1 rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)]"
           aria-label="Remover anexo"
         >
           <X className="h-3 w-3" />
@@ -46,9 +46,9 @@ export function ChatHistorySidebar({
   onClose,
 }: ChatHistorySidebarProps) {
   return (
-    <aside className="w-72 shrink-0 border-r border-slate-800 bg-slate-950/60">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
-        <div className="flex items-center gap-2 text-sm text-slate-200">
+    <aside className="w-72 shrink-0 border-r border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.98),rgba(16,22,34,0.92))]">
+      <div className="flex items-center justify-between border-b border-[var(--aethel-border-secondary)] px-3 py-2">
+        <div className="flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)]">
           <History className="h-4 w-4" />
           Historico
         </div>
@@ -57,7 +57,7 @@ export function ChatHistorySidebar({
             <button
               type="button"
               onClick={onCreateThread}
-              className="rounded px-2 py-1 text-xs text-slate-300 hover:bg-slate-800"
+              className="rounded px-2 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)]"
             >
               Novo
             </button>
@@ -66,7 +66,7 @@ export function ChatHistorySidebar({
             <button
               type="button"
               onClick={onClose}
-              className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+              className="rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-secondary)]"
               aria-label="Fechar historico"
             >
               <X className="h-3 w-3" />
@@ -81,7 +81,7 @@ export function ChatHistorySidebar({
             className={`mb-2 rounded-lg border px-3 py-2 text-xs ${
               thread.id === activeThreadId
                 ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200'
-                : 'border-slate-800 bg-slate-900/40 text-slate-300'
+                : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] text-[var(--aethel-text-secondary)]'
             }`}
           >
             <button
@@ -90,14 +90,14 @@ export function ChatHistorySidebar({
               className="w-full text-left"
             >
               <div className="truncate font-medium">{thread.title}</div>
-              <div className="mt-1 truncate text-[11px] text-slate-400">{thread.lastMessage}</div>
+              <div className="mt-1 truncate text-[11px] text-[var(--aethel-text-tertiary)]">{thread.lastMessage}</div>
             </button>
             <div className="mt-2 flex items-center gap-2">
               {onArchiveThread && (
                 <button
                   type="button"
                   onClick={() => onArchiveThread(thread.id)}
-                  className="text-[11px] text-slate-400 hover:text-slate-200"
+                  className="text-[11px] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
                 >
                   Arquivar
                 </button>
@@ -134,16 +134,16 @@ export function LiveModeIndicator({ status = 'idle', onEnd }: LiveModeIndicatorP
           ? 'Falando'
           : 'Pronto'
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950/70 px-3 py-2 text-xs text-slate-300">
+    <div className="flex items-center justify-between gap-3 border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.86))] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">
         <Zap className="h-3.5 w-3.5 text-cyan-400" />
-        <span>Live mode: {label}</span>
+        <span>Modo live: {label}</span>
       </div>
       {onEnd && (
         <button
           type="button"
           onClick={onEnd}
-          className="rounded bg-slate-800 px-2 py-1 text-[11px] text-slate-200 hover:bg-slate-700"
+          className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)]"
         >
           Encerrar
         </button>
@@ -163,13 +163,13 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle }: ThinkingDisp
     <button
       type="button"
       onClick={onToggle}
-      className="mb-2 w-full rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-2 text-left text-xs text-slate-300"
+      className="mb-2 w-full rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-left text-xs text-[var(--aethel-text-secondary)]"
     >
       <div className="flex items-center gap-2">
-        <Loader2 className="h-3 w-3 animate-spin text-slate-400" />
+        <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-text-tertiary)]" />
         <span>Raciocinio {isExpanded ? 'expandido' : 'resumido'}</span>
       </div>
-      {isExpanded && <div className="mt-2 text-[11px] text-slate-400">{thinking}</div>}
+      {isExpanded && <div className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">{thinking}</div>}
     </button>
   )
 }
@@ -186,14 +186,20 @@ export function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
         ? AlertTriangle
         : Loader2
   const Icon = icon
+  const statusLabel =
+    toolCall.status === 'completed'
+      ? 'concluido'
+      : toolCall.status === 'failed'
+        ? 'falhou'
+        : 'executando'
   return (
-    <div className="mb-2 rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-300">
+    <div className="mb-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">
-        <Icon className={`h-3.5 w-3.5 ${toolCall.status === 'failed' ? 'text-red-400' : 'text-slate-400'}`} />
+        <Icon className={`h-3.5 w-3.5 ${toolCall.status === 'failed' ? 'text-red-400' : 'text-[var(--aethel-text-tertiary)]'}`} />
         <span className="font-medium">{toolCall.name}</span>
-        <span className="text-[11px] text-slate-500">{toolCall.status}</span>
+        <span className="text-[11px] text-[var(--aethel-text-quaternary)]">{statusLabel}</span>
       </div>
-      {toolCall.result && <div className="mt-2 text-[11px] text-slate-400">{toolCall.result}</div>}
+      {toolCall.result && <div className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">{toolCall.result}</div>}
     </div>
   )
 }

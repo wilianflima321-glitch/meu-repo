@@ -313,44 +313,44 @@ export default function PreviewPanel({
   }, [canUseDevRuntime, filePath, mode, showIframeRuntime])
 
   return (
-    <div className="h-full flex flex-col bg-slate-950">
-      <div className="density-header flex items-center justify-between px-2 border-b border-slate-800 text-[10px] text-slate-400 uppercase tracking-wide">
+    <div className="flex h-full flex-col bg-[var(--aethel-surface-primary)]">
+      <div className="density-header flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-2 text-[10px] uppercase tracking-wide text-[var(--aethel-text-tertiary)]">
         <div className="flex items-center gap-2">
           <span>{title}</span>
           {filePath && (
-            <span className="text-[10px] text-slate-500 normal-case truncate max-w-[220px]" title={filePath}>
+            <span className="max-w-[220px] truncate text-[10px] normal-case text-[var(--aethel-text-quaternary)]" title={filePath}>
               {filePath}
             </span>
           )}
           {projectId && (
-            <span className="text-[10px] text-cyan-300 normal-case px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+            <span className="rounded px-1.5 py-0.5 text-[10px] normal-case text-[var(--aethel-info-light)] border border-[color-mix(in_srgb,var(--aethel-info)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]">
               project:{projectId}
             </span>
           )}
-          <span className="text-[10px] text-slate-500 normal-case">
+          <span className="text-[10px] normal-case text-[var(--aethel-text-quaternary)]">
             mode:{mode}
           </span>
           {canUseDevRuntime && (
-            <span className="text-[10px] text-emerald-300 normal-case px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+            <span className="rounded border border-[color-mix(in_srgb,var(--aethel-success)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-1.5 py-0.5 text-[10px] normal-case text-[var(--aethel-success-light)]">
               runtime:dev-server
             </span>
           )}
           {!canUseDevRuntime && showIframeRuntime && (
-            <span className="text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] normal-case px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]">
+            <span className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-1.5 py-0.5 text-[10px] normal-case text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
               runtime:inline-fallback
             </span>
           )}
           {forceInlineFallback && runtimeUrl && (
             <span
-              className="text-[10px] text-rose-300 normal-case px-1.5 py-0.5 rounded bg-rose-500/10 border border-rose-500/20"
-              title={runtimeUnavailableReason || 'Runtime unavailable'}
+              className="rounded border border-[color-mix(in_srgb,var(--aethel-error)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-1.5 py-0.5 text-[10px] normal-case text-[var(--aethel-error-light)]"
+              title={runtimeUnavailableReason || 'Runtime indisponivel'}
             >
               runtime:unavailable
             </span>
           )}
           {isStale && (
             <span className="ml-2 px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] text-[10px] normal-case">
-              Preview out of date
+              Preview desatualizado
             </span>
           )}
         </div>
@@ -360,27 +360,27 @@ export default function PreviewPanel({
             onRefresh?.()
           }}
           disabled={!onRefresh && !canUseDevRuntime}
-          aria-label="Refresh preview panel"
-          className="flex items-center gap-1 px-2 py-1 rounded text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/5 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
-          title="Refresh preview"
+          aria-label="Atualizar painel de preview"
+          className="flex items-center gap-1 rounded px-2 py-1 text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)]"
+          title="Atualizar preview"
         >
           <Codicon name="refresh" />
-          Refresh
+          Atualizar
         </button>
       </div>
 
-      <div className="flex-1 bg-slate-900">
+      <div className="flex-1 bg-[var(--aethel-surface-secondary)]">
         {forceInlineFallback && runtimeUrl && (
-          <div className="aethel-state aethel-state-loading rounded-none border-x-0 border-t-0 text-[11px]">
-            External runtime unavailable. Inline fallback active.
-            {runtimeUnavailableReason ? ` reason: ${runtimeUnavailableReason}.` : ''}
+          <div className="aethel-state aethel-state-loading rounded-none border-x-0 border-t-0 text-[11px]" role="status" aria-live="polite">
+            Runtime externo indisponivel. Fallback inline ativo.
+            {runtimeUnavailableReason ? ` Motivo: ${runtimeUnavailableReason}.` : ''}
           </div>
         )}
         {canUseDevRuntime && (
           <iframe
             title="Aethel Preview Runtime Server"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-            className="w-full h-full bg-slate-950"
+            className="h-full w-full bg-[var(--aethel-surface-primary)]"
             src={runtimeSrc}
           />
         )}
@@ -389,13 +389,13 @@ export default function PreviewPanel({
           <iframe
             title="Aethel Preview Runtime"
             sandbox="allow-scripts"
-            className="w-full h-full bg-slate-950"
+            className="h-full w-full bg-[var(--aethel-surface-primary)]"
             srcDoc={runtimeDoc}
           />
         )}
 
         {showText && hasText && (
-          <pre className="h-full m-0 p-4 overflow-auto text-xs leading-5 text-slate-200 font-mono whitespace-pre-wrap">
+          <pre className="m-0 h-full overflow-auto whitespace-pre-wrap p-4 font-mono text-xs leading-5 text-[var(--aethel-text-secondary)]">
             {mode === 'json' ? buildJsonPreview(textContent) : textContent}
           </pre>
         )}
@@ -410,7 +410,7 @@ export default function PreviewPanel({
                   fill
                   unoptimized
                   className="object-contain"
-                  onError={() => setMediaLoadError('Unable to render image preview from file runtime endpoint.')}
+                  onError={() => setMediaLoadError('Nao foi possivel renderizar a imagem a partir do endpoint de arquivos do runtime.')}
                 />
               </div>
             )}
@@ -419,7 +419,7 @@ export default function PreviewPanel({
                 controls
                 src={rawAssetUrl}
                 className="w-full max-w-xl"
-                onError={() => setMediaLoadError('Audio preview failed (unsupported codec or missing runtime source).')}
+                onError={() => setMediaLoadError('Falha no preview de audio: codec nao suportado ou origem do runtime ausente.')}
               />
             )}
             {mode === 'video' && (
@@ -427,53 +427,53 @@ export default function PreviewPanel({
                 controls
                 src={rawAssetUrl}
                 className="max-w-full max-h-full bg-black"
-                onError={() => setMediaLoadError('Video preview failed (unsupported codec or missing runtime source).')}
+                onError={() => setMediaLoadError('Falha no preview de video: codec nao suportado ou origem do runtime ausente.')}
               />
             )}
           </div>
         )}
 
         {showMedia && mediaLoadError && (
-          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className="aethel-state aethel-state-error max-w-lg">
-              <div className="aethel-state-title mb-2">Media preview unavailable</div>
+              <div className="aethel-state-title mb-2">Preview de midia indisponivel</div>
               <div className="text-xs">{mediaLoadError}</div>
               <div className="mt-2 text-xs">
-                Capability status: PARTIAL. Validate media codec/runtime support in final target environment.
+                Capacidade em estado parcial. Valide codecs e suporte do runtime no ambiente final.
               </div>
             </div>
           </div>
         )}
 
         {mode === 'unsupported' && (
-          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className="aethel-state aethel-state-empty max-w-md">
-              <div className="aethel-state-title mb-2">Preview unsupported for this file type</div>
+              <div className="aethel-state-title mb-2">Preview ainda nao suportado para este tipo de arquivo</div>
               <div className="text-xs">
-                Extension &quot;{ext || 'unknown'}&quot; is outside the validated runtime preview scope.
+                A extensao &quot;{ext || 'desconhecida'}&quot; ainda esta fora do escopo validado de preview.
               </div>
             </div>
           </div>
         )}
 
         {isLargeTextPreview && (
-          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className="aethel-state aethel-state-loading max-w-lg">
-              <div className="aethel-state-title mb-2">Preview gated for large payload</div>
+              <div className="aethel-state-title mb-2">Preview bloqueado para payload grande</div>
               <div className="text-xs">
-                This file exceeds the validated inline preview limit ({MAX_INLINE_PREVIEW_CHARS.toLocaleString()} chars).
+                Este arquivo excede o limite validado de preview inline ({MAX_INLINE_PREVIEW_CHARS.toLocaleString()} chars).
               </div>
               <div className="mt-2 text-xs">
-                Capability status: PARTIAL. Use runtime execution or open a smaller scoped file.
+                Capacidade em estado parcial. Use execucao em runtime ou abra um arquivo menor e mais focado.
               </div>
             </div>
           </div>
         )}
 
         {!hasText && !showMedia && mode !== 'unsupported' && (
-          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className="aethel-state aethel-state-empty">
-              <div className="aethel-state-title mb-2">Preview not available</div>
+              <div className="aethel-state-title mb-2">Preview ainda nao disponivel</div>
                 <div className="text-xs">
                   Abra um arquivo no Explorer para renderizar o preview.
                 </div>
@@ -482,10 +482,10 @@ export default function PreviewPanel({
         )}
 
         {showMedia && !rawAssetUrl && (
-          <div className="h-full flex items-center justify-center text-center px-6 text-slate-400 text-sm">
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
             <div className="aethel-state aethel-state-empty">
-              <div className="aethel-state-title mb-2">Media preview unavailable</div>
-              <div className="text-xs">Missing media source path for this preview context.</div>
+              <div className="aethel-state-title mb-2">Preview de midia indisponivel</div>
+              <div className="text-xs">Faltou o caminho da midia para este contexto de preview.</div>
             </div>
           </div>
         )}

@@ -50,7 +50,7 @@ export default function PublicHeader() {
                 </span>
               </div>
             </Link>
-            <div className="hidden xl:flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-300">
+            <div className="hidden xl:flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
               <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
               {isStudioSurface ? 'Surface ativa' : 'Apps + Research'}
             </div>
@@ -79,7 +79,7 @@ export default function PublicHeader() {
           <div className="hidden items-center gap-3 md:flex">
             <Link
               href="/contact-sales"
-              className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+              className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-white"
             >
               Falar com vendas
             </Link>

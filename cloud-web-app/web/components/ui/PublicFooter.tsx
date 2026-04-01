@@ -39,11 +39,11 @@ export default function PublicFooter() {
         <div className="mb-12 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02),rgba(14,165,233,0.06))] px-6 py-6 shadow-[0_24px_70px_rgba(2,6,23,0.24)] lg:px-8">
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Studio-grade platform</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Studio-grade platform</p>
               <h2 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">
                 Do briefing ao preview no mesmo sistema de trabalho.
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-300">
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)]">
                 Apps + Research continuam no centro do produto, com IA, preview e readiness no mesmo fluxo.
               </p>
             </div>
@@ -57,7 +57,7 @@ export default function PublicFooter() {
                   key={item.label}
                   className="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-4"
                 >
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-zinc-500">{item.label}</div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">{item.label}</div>
                   <div className="mt-2 text-sm font-semibold text-white">{item.value}</div>
                 </div>
               ))}
@@ -72,14 +72,14 @@ export default function PublicFooter() {
               <Image src="/branding/aethel-icon-source.png" alt="" width={28} height={28} sizes="28px" className="rounded-lg" />
               <span className="text-lg font-bold text-white">Aethel Studio</span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-6 text-zinc-400">
+            <p className="mt-4 max-w-xs text-sm leading-6 text-[var(--aethel-text-tertiary)]">
               Studio multi-agent para sair da ideia e chegar em software validavel com mais rapidez e controle.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
               {['Apps', 'Research', 'Preview', 'Governanca'].map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-300"
+                  className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]"
                 >
                   {item}
                 </span>
@@ -90,7 +90,7 @@ export default function PublicFooter() {
                 href="https://github.com/wilianflima321-glitch/meu-repo"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.05] text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.05] text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-white"
                 aria-label="GitHub"
               >
                 <svg className="h-4.5 w-4.5" fill="currentColor" viewBox="0 0 24 24">
@@ -99,13 +99,13 @@ export default function PublicFooter() {
               </a>
               <Link
                 href="/docs"
-                className="flex h-9 min-w-[72px] items-center justify-center rounded-xl bg-white/[0.05] px-3 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 min-w-[72px] items-center justify-center rounded-xl bg-white/[0.05] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-white"
               >
                 Docs
               </Link>
               <Link
                 href="/status"
-                className="flex h-9 min-w-[72px] items-center justify-center rounded-xl bg-white/[0.05] px-3 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                className="flex h-9 min-w-[72px] items-center justify-center rounded-xl bg-white/[0.05] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-white"
               >
                 Status
               </Link>
@@ -115,11 +115,11 @@ export default function PublicFooter() {
           {/* Link columns */}
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{section.title}</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">{section.title}</h3>
               <ul className="mt-4 space-y-3">
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-zinc-300 transition-colors hover:text-white">
+                    <Link href={link.href} className="text-sm text-[var(--aethel-text-secondary)] transition-colors hover:text-white">
                       {link.label}
                     </Link>
                   </li>
@@ -130,13 +130,13 @@ export default function PublicFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.06] pt-8 sm:flex-row">
-          <p className="text-xs text-zinc-400">&copy; {COPYRIGHT_YEAR} Aethel Engine. Todos os direitos reservados.</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">&copy; {COPYRIGHT_YEAR} Aethel Engine. Todos os direitos reservados.</p>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-xs text-zinc-400">Studio-grade workflow, atualizado continuamente</span>
+              <span className="text-xs text-[var(--aethel-text-tertiary)]">Studio-grade workflow, atualizado continuamente</span>
             </div>
-            <Link href="/status" className="text-xs text-zinc-400 transition-colors hover:text-white">
+            <Link href="/status" className="text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:text-white">
               Ver status operacional
             </Link>
           </div>
