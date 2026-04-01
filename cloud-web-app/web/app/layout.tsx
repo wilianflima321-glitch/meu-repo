@@ -31,8 +31,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Aethel Engine - Multi-agent software studio',
-  description: 'Multi-agent software studio for apps, research and operationally explicit AI-assisted building.',
+  title: 'Aethel Engine - Studio multiagente para apps e pesquisa',
+  description: 'Studio multiagente para apps, pesquisa e execucao assistida por IA com estado operacional explicito.',
   metadataBase: new URL('https://aethel.dev'),
   keywords: ['multi-agent IDE', 'AI software studio', 'research to code', 'apps IDE', 'Aethel Engine', 'anti-fake-success'],
   authors: [{ name: 'Aethel Engine Team' }],
@@ -52,8 +52,8 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     url: 'https://aethel.dev',
     siteName: 'Aethel Engine',
-    title: 'Aethel Engine - Multi-agent software studio',
-    description: 'Research, planning, code, preview and readiness in one AI-assisted studio.',
+    title: 'Aethel Engine - Studio multiagente para apps e pesquisa',
+    description: 'Pesquisa, planejamento, codigo, preview e readiness no mesmo studio assistido por IA.',
     images: [
       {
         url: '/og-image.png',
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Aethel Engine',
-    description: 'Multi-agent software studio for apps and research',
+    description: 'Studio multiagente para apps e pesquisa',
     images: ['/twitter-image.png'],
   },
   icons: {
@@ -97,7 +97,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-[var(--aethel-primary-dark)] focus:px-4 focus:py-2 focus:text-white focus:outline-none"
         >
-          Skip to main content
+          Ir para o conteudo principal
         </a>
         <ServiceWorkerProvider>
           <ToastProvider>

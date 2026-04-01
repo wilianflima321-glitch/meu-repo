@@ -17,9 +17,12 @@
 - Retoques PT-BR e UX fina em paineis de sistema (SecurityDashboard, GitPanel, OutlinePanel, FileTree, Pixel Stream).
 - Prompt v0 para melhorias incrementais do Studio (sem reinventar backend).
 - Chat/IA com estados mais operacionais (timeline de raciocinio, tool calls enriquecidas, erro de voz visivel).
+- AIChatContextPanels com contexto PT-BR e acoes claras.
 - Preview com indicador de HMR indisponivel e normalizacao automatica de URL local.
+- PreviewRuntimeToolbar e CanonicalPreviewSurface com estados PT-BR e fallback explicito.
 - AICommandCenter com composer multiline e descricao contextual do agente.
 - Landing com microcopy ajustada para evitar promessas falsas de preview/checkout.
+- Metadata global e skip link do layout em PT-BR.
 
 ---
 

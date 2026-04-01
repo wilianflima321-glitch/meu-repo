@@ -88,16 +88,12 @@ export default function PreviewRuntimeToolbar({
           : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
   const runtimeStateLabel =
     runtimeHealthStatus === 'checking'
-      ? 'Validando'
+      ? 'Verificando'
       : runtimeHealthStatus === 'reachable'
-        ? `Pronto${typeof runtimeHealthLatencyMs === 'number' ? ` ${runtimeHealthLatencyMs}ms` : ''}`
+        ? `Acessivel${typeof runtimeHealthLatencyMs === 'number' ? ` · ${runtimeHealthLatencyMs}ms` : ''}`
         : runtimeHealthStatus === 'idle'
-          ? 'Modo inline'
-          : runtimeHealthStatus === 'unhealthy'
-            ? 'Com erro'
-            : runtimeHealthStatus === 'invalid'
-              ? 'Invalido'
-              : 'Inacessivel'
+          ? 'Sem verificacao'
+          : 'Indisponivel'
   const readinessLabel =
     runtimeReadiness?.status === 'ready'
       ? 'Pronto'
@@ -139,7 +135,7 @@ export default function PreviewRuntimeToolbar({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Runtime de preview</span>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${previewRuntimeUrl ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'}`}>
-              {previewRuntimeUrl ? 'Runtime externo' : 'Fallback inline'}
+              {previewRuntimeUrl ? 'Servidor externo' : 'Fallback inline'}
             </span>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${readinessToneClass}`}>
               Readiness: {readinessLabel}
@@ -149,7 +145,7 @@ export default function PreviewRuntimeToolbar({
             </span>
             {runtimeHealthCheckedAt && (
               <span className="text-[10px] text-[var(--aethel-text-tertiary)]">
-                verificado {runtimeHealthCheckedAt.toLocaleTimeString()}
+                verificado as {runtimeHealthCheckedAt.toLocaleTimeString()}
               </span>
             )}
           </div>

@@ -28,16 +28,16 @@ export function CodebaseContextPanel({
           <div className="text-[11px] text-[var(--aethel-text-tertiary)]">
             {preview.loading
               ? 'Analisando o escopo atual...'
-              : `Fonte: ${preview.source || 'cache-local-persistente'}${preview.scope ? ` | escopo=${preview.scope}` : ''}`}
+              : `Origem: ${preview.source || 'cache-local-persistente'}${preview.scope ? ` | escopo=${preview.scope}` : ''}`}
           </div>
           {preview.stats && (
             <div className="mt-1 text-[10px] text-[var(--aethel-text-quaternary)]">
-              {preview.stats.filesIndexed} arquivos | {preview.stats.chunksIndexed} chunks | reaproveitados {preview.stats.reusedFiles} | alterados {preview.stats.changedFiles} | indexado {new Date(preview.stats.indexedAt).toLocaleTimeString()}
+              {preview.stats.filesIndexed} arquivos | {preview.stats.chunksIndexed} blocos | reutilizados {preview.stats.reusedFiles} | alterados {preview.stats.changedFiles} | indexado as {new Date(preview.stats.indexedAt).toLocaleTimeString()}
             </div>
           )}
           {preview.incrementalReindex && (
             <div className="mt-1 text-[10px] text-[var(--aethel-success)]">
-              reindexacao incremental local ativa
+              reindexacao local incremental ativa
             </div>
           )}
         </div>
@@ -64,7 +64,7 @@ export function CodebaseContextPanel({
       )}
       {!preview.error && preview.results.length === 0 && !preview.loading && (
         <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-tertiary)]">
-          Nenhum trecho semantico relevante apareceu para este prompt ainda.
+          Nenhuma correspondencia semantica encontrada para este prompt ate agora.
         </div>
       )}
       <div className="space-y-2">
@@ -73,7 +73,7 @@ export function CodebaseContextPanel({
             <div className="mb-1 flex items-center justify-between gap-2 text-[11px]">
               <span className="font-mono text-[var(--aethel-text-secondary)]">{result.filePath}:{result.startLine}-{result.endLine}</span>
               <div className="flex items-center gap-2">
-                <span className="text-[var(--aethel-info-light)]">score {result.score}</span>
+                <span className="text-[var(--aethel-info-light)]">relevancia {result.score}</span>
                 <button
                   type="button"
                   onClick={() => onCopy(result.filePath)}
@@ -129,10 +129,10 @@ export function MentionContextPanel({
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
-            Contexto de mentions
+            Contexto por mencoes
           </div>
           <div className="text-[11px] text-[var(--aethel-text-tertiary)]">
-            {preview.loading ? 'Resolvendo o contexto explicito das mentions...' : 'Previa do contexto nao-codebase que sera enviado junto.'}
+            {preview.loading ? 'Resolvendo o contexto explicito das mencoes...' : 'Previa do contexto fora do codebase que sera enviado.'}
           </div>
         </div>
       </div>

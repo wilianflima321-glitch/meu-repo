@@ -31,9 +31,13 @@
   - Blocos de codigo com acoes (aplicar/diff/criar arquivo) marcadas como pendentes de integracao.
   - ThinkingDisplay com timeline resumida e ToolCallDisplay com params/duracao.
   - AICommandCenter com input multiline, hint de atalho e descricao do agente ativo.
+  - AIChatContextPanels com copy PT-BR em contexto de codebase e mencoes.
 - Preview:
   - Indicador de HMR explicita indisponibilidade quando o runtime esta ativo sem hot reload.
   - Normalizacao de URL aceita `localhost:porta` automaticamente.
+  - PreviewRuntimeToolbar e CanonicalPreviewSurface com estados e mensagens PT-BR.
+- Shell publica:
+  - Metadata global em PT-BR e skip link com copy local.
 - Prompt v0:
   - Novo prompt de melhoria incremental para v0, focado em refino do que ja existe, sem reinventar backend.
 - Landing:

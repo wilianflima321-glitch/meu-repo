@@ -176,7 +176,7 @@ const DEMO_MESSAGES: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Ola! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explicacao de codigo** - entender trechos complexos\n- **Deteccao de bugs** - encontrar problemas no seu projeto\n- **Otimizacao** - melhorar desempenho\n- **Geracao de codigo** - criar novas rotinas\n\nComo posso ajudar hoje?',
+    content: 'Ola! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explicacao de codigo** - entender trechos complexos\n- **Deteccao de bugs** - encontrar problemas no seu codigo\n- **Otimizacao** - melhorar performance\n- **Geracao de codigo** - escrever codigo novo\n\nComo posso ajudar voce hoje?',
     timestamp: new Date(Date.now() - 60000),
     model: DEFAULT_OPENROUTER_MODEL_ID,
   },

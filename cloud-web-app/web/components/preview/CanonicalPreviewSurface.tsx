@@ -34,13 +34,13 @@ export interface PreviewRuntimeInfo {
 }
 
 const LIFECYCLE_LABELS: Record<PreviewLifecycleState, string> = {
-  idle: 'Preview aguardando inicializacao',
+  idle: 'Aguardando preview',
   provisioning: 'Iniciando sandbox...',
   warming: 'Aquecendo runtime...',
-  syncing: 'Sincronizando arquivos...',
-  healthy: 'Preview ativo',
-  degraded: 'Preview em fallback',
-  failed: 'Preview indisponivel',
+  syncing: 'Sincronizando arquivos do projeto...',
+  healthy: 'Preview em execucao',
+  degraded: 'Preview degradado',
+  failed: 'Falha no preview',
   offline: 'Preview offline',
 };
 
@@ -177,9 +177,9 @@ function PreviewFailedState({
         </svg>
       </div>
       <div className="text-center">
-        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-1">Preview indisponivel</h3>
+        <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-1">Falha no preview</h3>
         <p className="text-xs text-[var(--aethel-text-tertiary)] max-w-xs">
-          {error || 'Nao foi possivel conectar o preview ao runtime atual.'}
+          {error || 'Nao foi possivel conectar ao runtime de preview.'}
         </p>
         {strategy && (
           <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
@@ -319,7 +319,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
         setRuntime((prev) => ({
           ...prev,
           state: 'failed',
-          error: 'Nenhum runtime de preview disponivel. Inicie um servidor local ou configure o sandbox gerenciado.',
+          error: 'Nenhum runtime de preview disponivel. Inicie um servidor local de desenvolvimento ou configure o E2B.',
         }));
       }
     } catch (err) {
