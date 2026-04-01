@@ -130,7 +130,7 @@ export function OnboardingProvider({
         setState(data.onboarding);
       }
     } catch (error) {
-      console.error('Failed to complete step:', error);
+      console.error('Falha ao concluir etapa:', error);
     }
   };
 
@@ -146,7 +146,7 @@ export function OnboardingProvider({
         setState(data.onboarding);
       }
     } catch (error) {
-      console.error('Failed to complete tour:', error);
+      console.error('Falha ao concluir tour:', error);
     }
   };
 
@@ -163,7 +163,7 @@ export function OnboardingProvider({
         setShowWelcome(false);
       }
     } catch (error) {
-      console.error('Failed to skip onboarding:', error);
+      console.error('Falha ao pular onboarding:', error);
     }
   };
 
@@ -197,22 +197,22 @@ export function WelcomeModal() {
   const welcomeSteps = [
     {
       title: 'Bem-vindo ao Aethel Engine',
-      description: 'Studio focado em Apps e Research com governanca rigorosa. Games e Films seguem em roadmap.',
+      description: 'Studio focado em Apps e Research com governança rigorosa. Games e Films seguem em roadmap.',
       icon: <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)]" />,
     },
     {
       title: 'Crie seu primeiro projeto',
-      description: 'Escolha um template e defina o objetivo. O sistema cria a base e voce valida cada passo.',
-      icon: <Rocket className="w-12 h-12 text-sky-400" />,
+      description: 'Escolha um template e defina o objetivo. O sistema cria a base e você valida cada passo.',
+      icon: <Rocket className="w-12 h-12 text-[var(--aethel-info-light)]" />,
     },
     {
       title: 'Conecte sua IA',
-      description: 'Configure seu provider para respostas reais e rastreaveis. Nada e simulado.',
+      description: 'Configure seu provider para respostas reais e rastreáveis. Nada é simulado.',
       icon: <Target className="w-12 h-12 text-[var(--aethel-success-light)]" />,
     },
     {
       title: 'Colabore com sua equipe',
-      description: 'Convide colegas, revise mudancas e mantenha rastreabilidade nas entregas.',
+      description: 'Convide colegas, revise mudanças e mantenha rastreabilidade nas entregas.',
       icon: <Users className="w-12 h-12 text-[var(--aethel-warning-light)]" />,
     },
   ];
@@ -238,6 +238,7 @@ export function WelcomeModal() {
         <div className="relative h-40 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary-dark)_90%,transparent)] via-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-primary)_80%,transparent)] flex items-center justify-center">
           {currentWelcomeStep.icon}
           <button
+            type="button"
             onClick={skipOnboarding}
             className="absolute top-4 right-4 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-2 text-[var(--aethel-text-secondary)] transition-colors hover:text-[var(--aethel-text-primary)]"
           >
@@ -250,7 +251,7 @@ export function WelcomeModal() {
           <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)] mb-3">
             {currentWelcomeStep.title}
           </h2>
-          <p className="text-neutral-300 mb-6">
+          <p className="text-[var(--aethel-text-secondary)] mb-6">
             {currentWelcomeStep.description}
           </p>
 
@@ -260,7 +261,7 @@ export function WelcomeModal() {
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  i === step ? 'bg-sky-400' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
+                  i === step ? 'bg-[var(--aethel-info)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                 }`}
               />
             ))}
@@ -268,13 +269,13 @@ export function WelcomeModal() {
 
           {/* Actions */}
           <div className="flex gap-3 justify-center">
-            <button
+            <button type="button"
               onClick={skipOnboarding}
               className="aethel-button aethel-button-ghost rounded-xl px-4 py-2 text-sm font-medium"
             >
               Pular
             </button>
-            <button
+            <button type="button"
               onClick={handleNext}
               className="aethel-button aethel-button-primary rounded-xl px-6 py-2 text-sm font-semibold flex items-center gap-2"
             >
@@ -295,14 +296,14 @@ export function WelcomeModal() {
 const CHECKLIST_ITEMS: OnboardingStep[] = [
   {
     id: 'dependency_check',
-    title: 'Checar runtime e integracoes',
+    title: 'Checar runtime e integrações',
     description: 'Preview, storage, billing e provedores de IA',
     completed: false,
   },
   {
     id: 'profile_setup',
     title: 'Ajuste seu perfil',
-    description: 'Nome, time e preferencias do studio',
+    description: 'Nome, time e preferências do studio',
     completed: false,
   },
   {
@@ -314,13 +315,13 @@ const CHECKLIST_ITEMS: OnboardingStep[] = [
   {
     id: 'explore_editor',
     title: 'Explore o editor',
-    description: 'Conheca o IDE, preview e painel de status',
+    description: 'Conheça o IDE, preview e painel de status',
     completed: false,
   },
   {
     id: 'try_ai',
     title: 'Use a IA',
-    description: 'Peca uma mudanca pequena e valide o resultado',
+    description: 'Peça uma mudança pequena e valide o resultado',
     completed: false,
   },
   {
@@ -355,7 +356,7 @@ export function OnboardingChecklist() {
       const data = (await res.json()) as SystemHealthReport;
       setHealth(data);
     } catch (error) {
-      setHealthError(error instanceof Error ? error.message : 'Falha ao checar dependencias');
+      setHealthError(error instanceof Error ? error.message : 'Falha ao checar dependências');
     } finally {
       setHealthLoading(false);
     }
@@ -375,14 +376,14 @@ export function OnboardingChecklist() {
   if (!state || state.currentStep === 'completed') return null;
 
   const dependencySummary = (() => {
-    if (!health) return 'Aguardando verificacao de dependencias...';
+    if (!health) return 'Aguardando verificação de dependências...';
     const total = health.dependencies?.length || 0;
     const ok = health.dependencies?.filter(dep => dep.status === 'healthy').length || 0;
     const requiredMissing = health.missingRequired?.length || 0;
     if (requiredMissing > 0) {
-      return `Faltam ${requiredMissing} dependencias criticas`;
+      return `Faltam ${requiredMissing} dependências críticas`;
     }
-    return `${ok}/${total} dependencias ok`;
+    return `${ok}/${total} dependências ok`;
   })();
 
   const items = CHECKLIST_ITEMS.map(item => {
@@ -405,11 +406,11 @@ export function OnboardingChecklist() {
   const healthLabel = (value: SystemHealthReport['overall']) => {
     switch (value) {
       case 'healthy':
-        return 'Saudavel';
+        return 'Saudável';
       case 'degraded':
         return 'Parcial';
       case 'unhealthy':
-        return 'Indisponivel';
+        return 'Indisponível';
       default:
         return 'Desconhecido';
     }
@@ -423,9 +424,9 @@ export function OnboardingChecklist() {
           <div className="p-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-[var(--aethel-text-primary)]">Primeiros passos</h3>
-              <button
+              <button type="button"
                 onClick={() => setIsOpen(false)}
-                className="text-neutral-400 hover:text-[var(--aethel-text-primary)]"
+                className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -437,7 +438,7 @@ export function OnboardingChecklist() {
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="text-xs text-neutral-400 mt-1">
+            <div className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
               {completedCount} de {items.length} concluidos
             </div>
           </div>
@@ -445,9 +446,9 @@ export function OnboardingChecklist() {
           {/* Items */}
           <div className="p-2 max-h-64 overflow-y-auto">
             <div className="px-2 pb-3">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
-                <span>Dependencias do sistema</span>
-                <button
+              <div className="flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
+                <span>Dependências do sistema</span>
+                <button type="button"
                   onClick={fetchHealth}
                   className="text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)] transition-colors"
                 >
@@ -460,7 +461,7 @@ export function OnboardingChecklist() {
                 </div>
               )}
               {health && (
-                <div className="mt-2 space-y-1 text-xs text-neutral-300">
+                <div className="mt-2 space-y-1 text-xs text-[var(--aethel-text-secondary)]">
                   <div className="flex items-center justify-between">
                     <span>Status geral</span>
                     <span className={
@@ -475,11 +476,11 @@ export function OnboardingChecklist() {
                   </div>
                   {health.missingRequired && health.missingRequired.length > 0 && (
                     <div className="text-[var(--aethel-error-light)]">
-                      Criticas: {health.missingRequired.join(', ')}
+                      Críticas: {health.missingRequired.join(', ')}
                     </div>
                   )}
                   {health.missingOptional && health.missingOptional.length > 0 && (
-                    <div className="text-neutral-400">
+                    <div className="text-[var(--aethel-text-tertiary)]">
                       Opcionais: {health.missingOptional.join(', ')}
                     </div>
                   )}
@@ -489,15 +490,15 @@ export function OnboardingChecklist() {
                         .filter(dep => dep.status === 'unhealthy' || dep.status === 'degraded')
                         .slice(0, 6)
                         .map(dep => (
-                          <div key={dep.name} className="text-xs text-neutral-400">
+                          <div key={dep.name} className="text-xs text-[var(--aethel-text-tertiary)]">
                             <span className={dep.status === 'unhealthy' ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-warning-light)]'}>
                               {dep.name}
                             </span>
                             {dep.installCommand && (
-                              <span className="text-neutral-500"> - {dep.installCommand}</span>
+                              <span className="text-[var(--aethel-text-quaternary)]"> - {dep.installCommand}</span>
                             )}
                             {dep.installUrl && !dep.installCommand && (
-                              <span className="text-neutral-500"> - {dep.installUrl}</span>
+                              <span className="text-[var(--aethel-text-quaternary)]"> - {dep.installUrl}</span>
                             )}
                           </div>
                         ))}
@@ -507,7 +508,7 @@ export function OnboardingChecklist() {
               )}
             </div>
             {items.map(item => (
-              <button
+              <button type="button"
                 key={item.id}
                 onClick={() => !item.completed && completeStep(item.id)}
                 disabled={item.completed}
@@ -526,10 +527,10 @@ export function OnboardingChecklist() {
                     {item.completed && <Check className="w-3 h-3 text-[var(--aethel-text-primary)]" />}
                   </div>
                   <div>
-                    <div className={`font-medium ${item.completed ? 'text-neutral-500 line-through' : 'text-[var(--aethel-text-primary)]'}`}>
+                    <div className={`font-medium ${item.completed ? 'text-[var(--aethel-text-quaternary)] line-through' : 'text-[var(--aethel-text-primary)]'}`}>
                       {item.title}
                     </div>
-                    <div className="text-xs text-neutral-400">
+                    <div className="text-xs text-[var(--aethel-text-tertiary)]">
                       {item.description}
                     </div>
                   </div>
@@ -539,7 +540,7 @@ export function OnboardingChecklist() {
           </div>
         </div>
       ) : (
-        <button
+        <button type="button"
           onClick={() => setIsOpen(true)}
           className="aethel-button aethel-button-primary rounded-xl px-4 py-2 text-xs font-semibold shadow-lg flex items-center gap-2"
         >
@@ -557,19 +558,19 @@ export function OnboardingChecklist() {
 
 const ACHIEVEMENTS: Achievement[] = [
   { id: 'first_project', name: 'Primeiro projeto', description: 'Criou o primeiro projeto', icon: 'P1', category: 'beginner' },
-  { id: 'ai_master', name: 'Fluxo de IA', description: 'Executou 10 mudancas com IA', icon: 'AI', category: 'ai' },
-  { id: 'collaborator', name: 'Colaboracao', description: 'Convidou uma pessoa do time', icon: 'TEAM', category: 'social' },
-  { id: 'publisher', name: 'Entrega pronta', description: 'Gerou uma entrega valida', icon: 'DEP', category: 'delivery' },
+  { id: 'ai_master', name: 'Fluxo de IA', description: 'Executou 10 mudanças com IA', icon: 'AI', category: 'ai' },
+  { id: 'collaborator', name: 'Colaboração', description: 'Convidou uma pessoa do time', icon: 'TEAM', category: 'social' },
+  { id: 'publisher', name: 'Entrega pronta', description: 'Gerou uma entrega válida', icon: 'DEP', category: 'delivery' },
   { id: 'week_streak', name: 'Ritmo semanal', description: 'Ativo por 7 dias', icon: '7D', category: 'engagement' },
 ];
 
 export function AchievementBadge({ achievement }: { achievement: Achievement }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-neutral-800 rounded-lg">
+    <div className="flex items-center gap-3 p-3 bg-[var(--aethel-surface-tertiary)] rounded-lg">
       <div className="text-3xl">{achievement.icon}</div>
       <div>
         <div className="font-medium text-[var(--aethel-text-primary)]">{achievement.name}</div>
-        <div className="text-xs text-neutral-400">{achievement.description}</div>
+        <div className="text-xs text-[var(--aethel-text-tertiary)]">{achievement.description}</div>
       </div>
     </div>
   );
@@ -583,14 +584,14 @@ export function AchievementToast({ achievement, onClose }: { achievement: Achiev
 
   return (
     <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-      <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-600/20 to-[color-mix(in_srgb,var(--aethel-warning-dark)_20%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] rounded-lg shadow-2xl">
+      <div className="flex items-center gap-4 p-4 bg-[linear-gradient(90deg,color-mix(in_srgb,var(--aethel-warning)_18%,transparent),color-mix(in_srgb,var(--aethel-warning-dark)_22%,transparent))] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] rounded-lg shadow-2xl">
         <Award className="w-8 h-8 text-[var(--aethel-warning-light)]" />
         <div>
           <div className="text-xs text-[var(--aethel-warning-light)] font-medium">Conquista desbloqueada</div>
           <div className="text-[var(--aethel-text-primary)] font-semibold">{achievement.name}</div>
-          <div className="text-sm text-neutral-300">{achievement.description}</div>
+          <div className="text-sm text-[var(--aethel-text-secondary)]">{achievement.description}</div>
         </div>
-        <button onClick={onClose} className="text-neutral-400 hover:text-[var(--aethel-text-primary)]">
+        <button type="button" onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -622,14 +623,14 @@ export function AchievementsPanel() {
             key={achievement.id}
             className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
               achievement.unlocked
-                ? 'bg-gradient-to-r from-yellow-600/10 to-orange-600/10 border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
-                : 'bg-neutral-800 opacity-50 grayscale'
+                ? 'bg-[linear-gradient(90deg,color-mix(in_srgb,var(--aethel-warning)_14%,transparent),color-mix(in_srgb,var(--aethel-warning-dark)_18%,transparent))] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
+                : 'bg-[var(--aethel-surface-tertiary)] opacity-50 grayscale'
             }`}
           >
             <div className="text-2xl">{achievement.icon}</div>
             <div className="flex-1">
               <div className="font-medium text-[var(--aethel-text-primary)]">{achievement.name}</div>
-              <div className="text-xs text-neutral-400">{achievement.description}</div>
+              <div className="text-xs text-[var(--aethel-text-tertiary)]">{achievement.description}</div>
             </div>
             {achievement.unlocked && (
               <Check className="w-5 h-5 text-[var(--aethel-warning-light)]" />

@@ -293,7 +293,7 @@ function IDEContent() {
       })
       const payload = (await response.json().catch(() => ({}))) as FullAccessResponse
       if (!response.ok) {
-        throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
+        throw new Error(payload.error || payload.message || `Falha na requisição: ${response.status}`)
       }
       return payload
     },
@@ -476,7 +476,7 @@ function IDEContent() {
 
         if (!response.ok) {
           const bodyText = await response.text();
-          throw new Error(bodyText || `Read failed with HTTP ${response.status}`);
+          throw new Error(bodyText || `Falha ao ler (HTTP ${response.status})`);
         }
 
         const payload = await response.json();
@@ -489,7 +489,7 @@ function IDEContent() {
         });
         setLastSavedAt(null);
       } catch (error) {
-        setFileError(error instanceof Error ? error.message : "Unable to read file.");
+        setFileError(error instanceof Error ? error.message : "Não foi possível ler o arquivo.");
       } finally {
         setIsReadingFile(false);
       }
@@ -518,7 +518,7 @@ function IDEContent() {
         });
         if (!response.ok) {
           const bodyText = await response.text();
-          throw new Error(bodyText || `Write failed with HTTP ${response.status}`);
+          throw new Error(bodyText || `Falha ao salvar (HTTP ${response.status})`);
         }
         setLastSavedAt(new Date());
         setPreviewRefreshTick((prev) => prev + 1);
@@ -543,7 +543,7 @@ function IDEContent() {
           })
         }
       } catch (error) {
-        setFileError(error instanceof Error ? error.message : "Unable to save file.");
+        setFileError(error instanceof Error ? error.message : "Não foi possível salvar o arquivo.");
       } finally {
         setIsSavingFile(false);
       }
@@ -774,7 +774,7 @@ function IDEContent() {
           })
           const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
           if (!response.ok) {
-            throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
+            throw new Error(payload.error || payload.message || `Falha na requisição: ${response.status}`)
           }
         } else {
           const response = await fetch('/api/studio/access/full', {
@@ -792,7 +792,7 @@ function IDEContent() {
           })
           const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
           if (!response.ok) {
-            throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
+            throw new Error(payload.error || payload.message || `Falha na requisição: ${response.status}`)
           }
         }
         await mutateFullAccess()
@@ -835,7 +835,7 @@ function IDEContent() {
         })
         const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
         if (!response.ok) {
-          throw new Error(payload.error || payload.message || `Rollback failed: HTTP ${response.status}`)
+          throw new Error(payload.error || payload.message || `Falha ao desfazer (HTTP ${response.status})`)
         }
 
         const rollbackPath = rollbackFilePath
@@ -862,7 +862,7 @@ function IDEContent() {
           },
         })
       } catch (error) {
-        setFileError(error instanceof Error ? error.message : 'Unable to rollback latest AI apply.')
+        setFileError(error instanceof Error ? error.message : 'Não foi possível desfazer a última aplicação de IA.')
       } finally {
         setRollbackBusy(false)
       }
@@ -887,7 +887,7 @@ function IDEContent() {
       <TabProvider>
         {useModernShell ? (
           <ModernIDEShell
-            projectName={`Project ${projectId}`}
+            projectName={`Projeto ${projectId}`}
             activeFileName={activeFile?.path}
             panelState={modernPanelState}
             onToggleSidebar={() => {
@@ -923,7 +923,7 @@ function IDEContent() {
                 <div className="h-full flex flex-col">
                   {isCompactViewport && (
                     <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
-                      Viewport compacto detectado. Para melhor experiencia use desktop {'>='} 1024px.
+                      Viewport compacto detectado. Para melhor experiência use desktop com {'>='} 1024px.
                     </div>
                   )}
                   <TabBar />
@@ -965,7 +965,7 @@ function IDEContent() {
                       </div>
                     )}
                     {!isReadingFile && !fileError && !activeFile && (
-                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para comecar a editar.</div>
+                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para começar a editar.</div>
                     )}
                   </div>
                 </div>
@@ -1036,7 +1036,7 @@ function IDEContent() {
                       <CanonicalPreviewSurface
                         key={`${activeFile.path}:${previewRefreshTick}`}
                         variant="runtime"
-                        title="Preview ao vivo"
+                        title="Prévia ao vivo"
                         filePath={activeFile.path}
                         content={activeFile.content}
                         projectId={projectId}
@@ -1048,7 +1048,7 @@ function IDEContent() {
                       />
                     </div>
                   ) : (
-                    <div className="flex-1 flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para visualizar o preview.</div>
+                    <div className="flex-1 flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para visualizar a prévia.</div>
                   )}
                 </div>
               ),
@@ -1058,7 +1058,7 @@ function IDEContent() {
           <IDELayout
             showStudioNav
             studioTitle="Workbench"
-            studioSubtitle="Editor, preview e runtime no mesmo fluxo."
+            studioSubtitle="Editor, prévia e runtime no mesmo fluxo."
             onCommandPalette={() => openCommandPalette('commands')}
             workbenchBanner={
               <WorkbenchMissionBar
@@ -1089,7 +1089,7 @@ function IDEContent() {
             <div className="h-full flex flex-col">
               {isCompactViewport && (
                 <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
-                  Viewport compacto detectado. Para melhor experiencia use desktop {'>='} 1024px.
+                  Viewport compacto detectado. Para melhor experiência use desktop com {'>='} 1024px.
                 </div>
               )}
               <TabBar />
@@ -1202,7 +1202,7 @@ function IDEContent() {
                         <CanonicalPreviewSurface
                           key={`${activeFile.path}:${previewRefreshTick}`}
                           variant="runtime"
-                          title="Preview ao vivo"
+                          title="Prévia ao vivo"
                           filePath={activeFile.path}
                           content={activeFile.content}
                           projectId={projectId}
@@ -1219,7 +1219,7 @@ function IDEContent() {
 
                 {!isReadingFile && !fileError && !activeFile && (
                   <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
-                    Selecione um arquivo para comecar a editar.
+                    Selecione um arquivo para começar a editar.
                   </div>
                 )}
               </div>
@@ -1229,7 +1229,7 @@ function IDEContent() {
                     {isSavingFile
                       ? "Salvando..."
                       : lastSavedAt
-                        ? `Salvo as ${lastSavedAt.toLocaleTimeString()}`
+                        ? `Salvo às ${lastSavedAt.toLocaleTimeString()}`
                         : "Pronto"}
                   </span>
                   <div className="flex items-center gap-2">
@@ -1239,14 +1239,14 @@ function IDEContent() {
                         onClick={handleRollbackLastAiApply}
                         disabled={rollbackBusy}
                         className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] disabled:opacity-60"
-                        title="Rollback da ultima aplicacao inline da IA"
+                        title="Desfazer a última aplicação inline da IA"
                       >
                         {rollbackBusy ? 'Desfazendo...' : 'Desfazer IA'}
                       </button>
                     )}
                     {fullAccessActiveGrant && (
                       <span className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-info-light)]">
-                        Full Access ativo{fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}
+                        Acesso total ativo{fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}
                       </span>
                     )}
                     {hasToken && (
@@ -1261,15 +1261,15 @@ function IDEContent() {
                         }`}
                         title={
                           fullAccessActiveGrant
-                            ? 'Revogar Full Access temporario auditado'
-                            : 'Ativar Full Access temporario auditado'
+                            ? 'Revogar acesso total temporário auditado'
+                            : 'Ativar acesso total temporário auditado'
                         }
                       >
                         {fullAccessBusy
                           ? '...'
                           : fullAccessActiveGrant
-                            ? 'Revogar Full Access'
-                            : 'Full Access'}
+                            ? 'Revogar acesso total'
+                            : 'Acesso total'}
                       </button>
                     )}
                   </div>

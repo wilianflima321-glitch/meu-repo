@@ -11,10 +11,10 @@ const DOMAIN_TEMPLATES = [
     id: 'app-saas',
     domain: 'app',
     icon: 'globe',
-    name: 'SaaS App',
+    name: 'App SaaS',
     description: 'Dashboard com auth, billing, CRUD e deploy',
     stack: ['Next.js', 'Prisma', 'Stripe', 'Tailwind'],
-    color: 'from-blue-500 to-cyan-500',
+    color: 'from-[var(--aethel-primary)] to-[var(--aethel-info)]',
     mission: 'Criar app SaaS completo com auth, dashboard e billing',
   },
   {
@@ -24,17 +24,17 @@ const DOMAIN_TEMPLATES = [
     name: 'REST API',
     description: 'API robusta com TypeScript, ORM e testes',
     stack: ['Express', 'Prisma', 'Jest', 'Swagger'],
-    color: 'from-emerald-500 to-teal-500',
-    mission: 'Criar API REST com TypeScript, validacao e documentacao',
+    color: 'from-[var(--aethel-success)] to-[var(--aethel-info)]',
+    mission: 'Criar API REST com TypeScript, validação e documentação',
   },
   {
     id: 'app-landing',
     domain: 'app',
     icon: 'browser',
     name: 'Landing Page',
-    description: 'Landing de conversao com SEO e analytics',
+    description: 'Landing de conversão com SEO e analytics',
     stack: ['Next.js', 'Tailwind', 'Framer Motion'],
-    color: 'from-sky-500 to-blue-500',
+    color: 'from-[var(--aethel-info)] to-[var(--aethel-primary)]',
     mission: 'Criar landing page premium com SEO, CTAs e analytics',
   },
   {
@@ -42,20 +42,20 @@ const DOMAIN_TEMPLATES = [
     domain: 'research',
     icon: 'search',
     name: 'Research Workflow',
-    description: 'Pesquisa com citacoes, plano e codigo',
+    description: 'Pesquisa com citações, plano e código',
     stack: ['Nexus Research', 'Citations', 'Code Gen'],
     color: 'from-[var(--aethel-warning)] to-[var(--aethel-warning-dark)]',
-    mission: 'Pesquisar topico, gerar plano e implementar solucao',
+    mission: 'Pesquisar tópico, gerar plano e implementar solução',
   },
   {
     id: 'game-2d',
     domain: 'game',
     icon: 'play',
     name: 'Jogo 2D',
-    description: 'Jogo com sprites, fisica e leaderboard',
+    description: 'Jogo com sprites, física e leaderboard',
     stack: ['Canvas', 'Rapier', 'Sprites'],
-    color: 'from-cyan-500 to-sky-500',
-    mission: 'Criar jogo 2D com sprites, fisica e pontuacao',
+    color: 'from-[var(--aethel-info)] to-[var(--aethel-primary-light)]',
+    mission: 'Criar jogo 2D com sprites, física e pontuação',
     availability: 'experimental',
   },
   {
@@ -63,10 +63,10 @@ const DOMAIN_TEMPLATES = [
     domain: 'film',
     icon: 'device-camera-video',
     name: 'Storyboard',
-    description: 'Director de cenas com AI e timeline',
+    description: 'Diretor de cenas com IA e timeline',
     stack: ['Scenes', 'Timeline', 'AI Gen'],
-    color: 'from-blue-500 to-cyan-500',
-    mission: 'Criar storyboard com cenas, diretor AI e timeline',
+    color: 'from-[var(--aethel-primary)] to-[var(--aethel-info)]',
+    mission: 'Criar storyboard com cenas, diretor IA e timeline',
     availability: 'experimental',
   },
 ]
@@ -114,7 +114,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
 
   useEffect(() => {
     if (isOpen) {
-      analytics?.track?.('project', 'project_open', { metadata: { source: 'quick-start-wizard' } })
+      analytics?.track?.('project', 'project_open', { metadata: { source: 'quick-start-assistente' } })
     }
   }, [isOpen])
 
@@ -122,7 +122,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
     const tpl = DOMAIN_TEMPLATES.find((t) => t.id === selectedTemplate)
     analytics?.track?.('project', 'project_open', {
       metadata: {
-        source: 'quick-start-wizard-complete',
+        source: 'quick-start-assistente-complete',
         template: selectedTemplate,
         provider: selectedProvider,
       },
@@ -139,14 +139,14 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
   const filtered = domainFilter === 'all' ? DOMAIN_TEMPLATES : DOMAIN_TEMPLATES.filter((t) => t.domain === domainFilter)
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Wizard de configuracao inicial">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Assistente de configuração inicial">
       <div className="relative w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto rounded-3xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-2xl">
         {/* Close button */}
         <button
           type="button"
           onClick={onDismiss}
           className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)]"
-          aria-label="Fechar wizard"
+          aria-label="Fechar assistente"
         >
           <Codicon name="close" />
         </button>
@@ -179,9 +179,9 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
         {step === 'domain' && (
           <div className="p-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">O que voce quer criar?</h2>
+              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">O que você quer criar?</h2>
               <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">
-                Escolha um template para comecar com estrutura e contexto prontos.
+                Escolha um template para começar com estrutura e contexto prontos.
               </p>
             </div>
 
@@ -257,14 +257,14 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                 onClick={onDismiss}
                 className="text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]"
               >
-                Pular wizard
+                Pular assistente
               </button>
               <button
                 type="button"
                 onClick={() => setStep('provider')}
                 className="flex items-center gap-2 rounded-xl bg-[var(--aethel-surface-secondary)] px-5 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] transition-all hover:brightness-95 active:scale-[0.98] disabled:opacity-40"
               >
-                Proximo
+                Próximo
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -277,9 +277,9 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
         {step === 'provider' && (
           <div className="p-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Configurar AI Provider</h2>
+              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Configurar provedor de IA</h2>
               <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">
-                Escolha como a IA vai funcionar. Pode mudar depois em Settings.
+                Escolha como a IA vai funcionar. Você pode mudar depois em Configurações.
               </p>
             </div>
 
@@ -325,7 +325,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               <p className="flex items-start gap-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]">
                 <Codicon name="info" />
                 <span>
-                  Voce pode configurar a API key depois em Settings {'>'} AI Provider. O wizard nao armazena keys.
+                  Você pode configurar a API key depois em Configurações {'>'} Provedor de IA. O assistente não armazena keys.
                 </span>
               </p>
             </div>
@@ -346,7 +346,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                 onClick={() => setStep('ready')}
                 className="flex items-center gap-2 rounded-xl bg-[var(--aethel-surface-secondary)] px-5 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] transition-all hover:brightness-95 active:scale-[0.98]"
               >
-                Proximo
+                Próximo
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -359,12 +359,12 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
         {step === 'ready' && (
           <div className="p-6">
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-[var(--aethel-text-primary)] text-2xl">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--aethel-success),var(--aethel-info))] text-[var(--aethel-text-primary)] text-2xl">
                 <Codicon name="rocket" />
               </div>
               <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Tudo pronto!</h2>
               <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">
-                Seu workspace esta configurado. Voce vai ser direcionado para o dashboard.
+                Seu workspace está configurado. Você será direcionado para o dashboard.
               </p>
             </div>
 
@@ -385,11 +385,11 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               )}
               {selectedProvider && (
                 <div className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-3.5">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]">
                     <Codicon name="key" />
                   </span>
                   <div>
-                    <p className="text-xs text-[var(--aethel-text-tertiary)]">AI Provider</p>
+                    <p className="text-xs text-[var(--aethel-text-tertiary)]">Provedor de IA</p>
                     <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
                       {PROVIDER_PRESETS.find((p) => p.id === selectedProvider)?.name || 'Nenhum'}
                     </p>
@@ -400,13 +400,13 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
 
             {/* Quick tips */}
             <div className="mt-6 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Proximos passos</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Próximos passos</p>
               <ul className="mt-3 space-y-2">
                 {[
                   'Use o chat para descrever o que quer criar',
                   'Clique em @codebase para dar contexto ao agente',
-                  'Abra o IDE para ver e editar o codigo gerado',
-                  'Use Apply/Rollback para controlar as mudancas',
+                  'Abra o IDE para ver e editar o código gerado',
+                  'Use Apply/Rollback para controlar as mudanças',
                 ].map((tip) => (
                   <li key={tip} className="flex items-start gap-2 text-xs text-[var(--aethel-text-tertiary)]">
                     <span className="mt-0.5 text-[var(--aethel-success-light)]"><Codicon name="check" /></span>
@@ -430,7 +430,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               <button
                 type="button"
                 onClick={handleComplete}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-500/25 transition-all hover:from-blue-500 hover:to-cyan-500 active:scale-[0.98]"
+                className="flex items-center gap-2 rounded-xl bg-[linear-gradient(90deg,var(--aethel-primary),var(--aethel-info))] px-6 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-[0_18px_40px_color-mix(in_srgb,var(--aethel-info)_35%,transparent)] transition-all hover:brightness-110 active:scale-[0.98]"
               >
                 Abrir Dashboard
                 <Codicon name="arrow-right" />

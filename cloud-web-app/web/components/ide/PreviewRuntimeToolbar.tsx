@@ -90,10 +90,10 @@ export default function PreviewRuntimeToolbar({
     runtimeHealthStatus === 'checking'
       ? 'Verificando'
       : runtimeHealthStatus === 'reachable'
-        ? `Acessivel${typeof runtimeHealthLatencyMs === 'number' ? ` · ${runtimeHealthLatencyMs}ms` : ''}`
+        ? `Acessível${typeof runtimeHealthLatencyMs === 'number' ? ` · ${runtimeHealthLatencyMs}ms` : ''}`
         : runtimeHealthStatus === 'idle'
-          ? 'Sem verificacao'
-          : 'Indisponivel'
+          ? 'Sem verificação'
+          : 'Indisponível'
   const readinessLabel =
     runtimeReadiness?.status === 'ready'
       ? 'Pronto'
@@ -101,7 +101,7 @@ export default function PreviewRuntimeToolbar({
         ? 'Parcial'
         : runtimeReadiness?.blockers?.length
           ? 'Bloqueado'
-          : 'Em avaliacao'
+          : 'Em avaliação'
   const readinessToneClass =
     runtimeReadiness?.status === 'ready'
       ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
@@ -110,10 +110,10 @@ export default function PreviewRuntimeToolbar({
         : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
   const nextStepText =
     runtimePrimaryAction === 'provision'
-      ? 'Subir um sandbox gerenciado para reduzir friccao de preview.'
+      ? 'Subir um sandbox gerenciado para reduzir fricção de preview.'
       : runtimePrimaryAction === 'discover'
         ? 'Conectar um servidor local detectado no seu ambiente.'
-        : 'Continuar com o fallback inline enquanto o runtime externo nao esta pronto.'
+        : 'Continuar com o fallback inline enquanto o runtime externo não está pronto.'
   const primaryActionBusy =
     runtimePrimaryAction === 'provision'
       ? isProvisioningRuntime
@@ -138,14 +138,14 @@ export default function PreviewRuntimeToolbar({
               {previewRuntimeUrl ? 'Servidor externo' : 'Fallback inline'}
             </span>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${readinessToneClass}`}>
-              Readiness: {readinessLabel}
+              Prontidão: {readinessLabel}
             </span>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${runtimeStateClass}`}>
               Estado: {runtimeStateLabel}
             </span>
             {runtimeHealthCheckedAt && (
               <span className="text-[10px] text-[var(--aethel-text-tertiary)]">
-                verificado as {runtimeHealthCheckedAt.toLocaleTimeString()}
+                verificado às {runtimeHealthCheckedAt.toLocaleTimeString()}
               </span>
             )}
           </div>
@@ -160,7 +160,7 @@ export default function PreviewRuntimeToolbar({
               <div className="mt-1 text-[var(--aethel-text-tertiary)]">{runtimeStrategyHint}</div>
             </div>
             <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-secondary)]">
-              <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Proxima acao</div>
+              <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Próxima ação</div>
               <div className="mt-1 font-medium text-[var(--aethel-text-primary)]">{runtimePrimaryActionLabel}</div>
               <div className="mt-1 text-[var(--aethel-text-tertiary)]">{nextStepText}</div>
               {firstBlocker && (
@@ -176,7 +176,7 @@ export default function PreviewRuntimeToolbar({
           <button
             type="button"
             onClick={onToggleSettings}
-            aria-label={showRuntimeSettings ? 'Ocultar configuracoes do runtime de preview' : 'Abrir configuracoes do runtime de preview'}
+            aria-label={showRuntimeSettings ? 'Ocultar configurações do runtime de preview' : 'Abrir configurações do runtime de preview'}
             aria-pressed={showRuntimeSettings}
             className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           >
@@ -186,7 +186,7 @@ export default function PreviewRuntimeToolbar({
             type="button"
             onClick={onRunRecommendedAction}
             disabled={primaryActionBusy}
-            aria-label={`Executar acao recomendada para o runtime: ${runtimePrimaryActionLabel}`}
+            aria-label={`Executar ação recomendada para o runtime: ${runtimePrimaryActionLabel}`}
             className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {primaryActionBusy ? primaryActionBusyLabel : runtimePrimaryActionLabel}
@@ -238,7 +238,7 @@ export default function PreviewRuntimeToolbar({
             aria-label="Provisionar um runtime de preview gerenciado"
             className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-success-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponivel'}
+            {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponível'}
           </button>
           {canSyncRuntime && (
             <button
@@ -290,7 +290,7 @@ export default function PreviewRuntimeToolbar({
 
       <details className="mt-3 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]">
         <summary className="cursor-pointer list-none px-3 py-2 text-[11px] font-medium text-[var(--aethel-text-secondary)]">
-          Ver detalhes tecnicos do runtime
+          Ver detalhes técnicos do runtime
         </summary>
         <div className="border-t border-[var(--aethel-border-primary)] px-3 py-3">
           <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--aethel-text-tertiary)]">
@@ -308,7 +308,7 @@ export default function PreviewRuntimeToolbar({
               endpoints:{configuredEndpoints.length}
             </span>
             <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2 py-1">
-              local:{reachableCandidates}/{totalCandidates} acessiveis
+              local:{reachableCandidates}/{totalCandidates} acessíveis
             </span>
             {runtimeReadiness?.preferredRuntimeUrl && (
               <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2 py-1 text-[var(--aethel-info-light)]">
