@@ -627,7 +627,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter symbols..."
             className="w-full bg-[var(--aethel-surface-tertiary)] text-sm text-[var(--aethel-text-secondary)] rounded px-7 py-1.5
-                       placeholder-gray-500 border border-transparent
+                       placeholder:text-[var(--aethel-text-tertiary)] border border-transparent
                        focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] focus:outline-none"
             aria-label="Filter symbols"
           />

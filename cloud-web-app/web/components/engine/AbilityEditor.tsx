@@ -367,7 +367,7 @@ export function AbilityEditor({
           <input
             type="text"
             placeholder="Search abilities..."
-            className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder-gray-500"
+            className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]"
           />
         </div>
 
