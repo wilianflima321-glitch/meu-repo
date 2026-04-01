@@ -7,7 +7,7 @@ Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
 - Sweep automatizado em app/components/lib para reduzir utilitários de cor hardcoded.
 - Acessibilidade aplicada onde tocado (aria-label, type="button", foco visível).
 - Normalização PT-BR em layout global, terminal e gerenciador de workspace.
-- Ajustes adicionais em FullscreenIDE, PreviewRuntimeToolbar e ExtensionManager com microcopy operacional em PT-BR.
+- Ajustes adicionais em FullscreenIDE, PreviewRuntimeToolbar, ExtensionManager, GitPanelPro e VideoTimeline com microcopy operacional em PT-BR.
 
 ## Superfícies atualizadas (arquivo -> ajuste)
 - Layout: `cloud-web-app/web/app/layout.tsx`

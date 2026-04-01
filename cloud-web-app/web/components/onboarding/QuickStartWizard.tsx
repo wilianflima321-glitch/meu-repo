@@ -41,9 +41,9 @@ const DOMAIN_TEMPLATES = [
     id: 'research',
     domain: 'research',
     icon: 'search',
-    name: 'Research Workflow',
+    name: 'Fluxo de pesquisa',
     description: 'Pesquisa com citações, plano e código',
-    stack: ['Nexus Research', 'Citations', 'Code Gen'],
+    stack: ['Nexus Pesquisa', 'Citations', 'Code Gen'],
     color: 'from-[var(--aethel-warning)] to-[var(--aethel-warning-dark)]',
     mission: 'Pesquisar tópico, gerar plano e implementar solução',
   },
@@ -190,9 +190,9 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               {[
                 { id: 'all', label: 'Todos' },
                 { id: 'app', label: 'Apps' },
-                { id: 'research', label: 'Research' },
-                { id: 'game', label: 'Games' },
-                { id: 'film', label: 'Films' },
+                { id: 'research', label: 'Pesquisa' },
+                { id: 'game', label: 'Jogos' },
+                { id: 'film', label: 'Filmes' },
               ].map((f) => (
                 <button
                   key={f.id}

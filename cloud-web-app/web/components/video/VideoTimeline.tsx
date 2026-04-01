@@ -1,11 +1,11 @@
 /**
- * Video Timeline - Timeline PROFISSIONAL de edicao de video
+ * Video Timeline - Timeline PROFISSIONAL de edição de vídeo
  *
- * Features: Snapping, Markers, Razor Tool, Ripple Edit, Multi-select
- * Usa Canvas para renderizar tracks e clips.
- * Integra com HTMLVideoElement para preview.
+ * Recursos: Snap, marcadores, lâmina, ripple, multi-seleção
+ * Usa Canvas para renderizar trilhas e clips.
+ * Integra com HTMLVideoElement para prévia.
  *
- * Nivel: Adobe Premiere Pro / DaVinci Resolve
+ * Nível: Adobe Premiere Pro / DaVinci Resolve
  */
 
 'use client';
@@ -469,8 +469,8 @@ export function VideoTimeline({
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'right';
       const toolNames: Record<TimelineTool, string> = {
-        select: 'Select',
-        razor: 'Razor (C)',
+        select: 'Seleção',
+        razor: 'Lâmina (C)',
         slip: 'Slip (Y)',
         slide: 'Slide (U)',
         ripple: 'Ripple (B)',
@@ -498,7 +498,7 @@ export function VideoTimeline({
         onMarkerAdd({
           id: `marker-${Date.now()}`,
           time,
-          name: `Marker ${markers.length + 1}`,
+          name: `Marcador ${markers.length + 1}`,
           color: 'var(--aethel-warning)',
           type: 'marker',
         });
@@ -721,7 +721,7 @@ export function VideoTimeline({
           onMarkerAdd({
             id: `marker-${Date.now()}`,
             time: currentTime,
-            name: `Marker ${markers.length + 1}`,
+            name: `Marcador ${markers.length + 1}`,
             color: 'var(--aethel-warning)',
             type: 'marker',
           });
@@ -739,50 +739,54 @@ export function VideoTimeline({
       <div className="flex items-center gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         {/* Transport controls */}
         <div className="flex items-center gap-1 pr-2 border-r border-[var(--aethel-border-secondary)]">
-          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Go to Start (Home)">
+          <button type="button" className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Ir para o início (Home)" aria-label="Ir para o início (Home)">
 
           </button>
-          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Previous Frame ()">
+          <button type="button" className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Quadro anterior" aria-label="Quadro anterior">
 
           </button>
-          <button className="p-1.5 bg-[var(--aethel-error)] rounded text-sm hover:brightness-110" title="Play/Pause (Space)">
+          <button type="button" className="p-1.5 bg-[var(--aethel-error)] rounded text-sm hover:brightness-110" title="Reproduzir/Pausar (Espaço)" aria-label="Reproduzir ou pausar (Espaço)">
 
           </button>
-          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Next Frame ()">
+          <button type="button" className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Próximo quadro" aria-label="Próximo quadro">
 
           </button>
-          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Go to End (End)">
+          <button type="button" className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Ir para o fim (End)" aria-label="Ir para o fim (End)">
 
           </button>
         </div>
 
         {/* Tool buttons */}
         <div className="flex items-center gap-1 px-2 border-r border-[var(--aethel-border-secondary)]">
-          <button
+          <button type="button"
             className={`px-2 py-1 rounded text-xs font-medium ${tool === 'select' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('select')}
-            title="Selection Tool (V)"
+            title="Ferramenta de seleção (V)"
+            aria-label="Ferramenta de seleção (V)"
           >
 
           </button>
-          <button
+          <button type="button"
             className={`px-2 py-1 rounded text-xs font-medium ${tool === 'razor' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('razor')}
-            title="Razor Tool (C)"
+            title="Ferramenta lâmina (C)"
+            aria-label="Ferramenta lâmina (C)"
           >
 
           </button>
-          <button
+          <button type="button"
             className={`px-2 py-1 rounded text-xs font-medium ${tool === 'ripple' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('ripple')}
-            title="Ripple Edit (B)"
+            title="Edição ripple (B)"
+            aria-label="Edição ripple (B)"
           >
 
           </button>
-          <button
+          <button type="button"
             className={`px-2 py-1 rounded text-xs font-medium ${tool === 'slip' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('slip')}
-            title="Slip Tool (Y)"
+            title="Ferramenta slip (Y)"
+            aria-label="Ferramenta slip (Y)"
           >
 
           </button>
@@ -790,9 +794,10 @@ export function VideoTimeline({
 
         {/* Snap toggle */}
         <div className="flex items-center gap-1 px-2 border-r border-[var(--aethel-border-secondary)]">
-          <button
+          <button type="button"
             className={`px-2 py-1 rounded text-xs font-medium ${snapEnabled ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
-            title="Snapping (S)"
+            title="Snap (S)"
+            aria-label="Snap (S)"
           >
 
           </button>
@@ -827,28 +832,31 @@ export function VideoTimeline({
         {/* Track Headers */}
         <div className="w-36 flex-shrink-0 bg-[var(--aethel-surface-secondary)]">
           <div className="h-[25px] border-b border-[var(--aethel-border-primary)] flex items-center px-2">
-            <span className="text-[10px] text-[var(--aethel-text-tertiary)]">TRACKS</span>
+            <span className="text-[10px] text-[var(--aethel-text-tertiary)]">TRILHAS</span>
           </div>
           {tracks.map((track) => (
             <div
               key={track.id}
               className="h-[60px] flex items-center gap-1 px-2 border-b border-[var(--aethel-border-primary)] group"
             >
-              <button
+              <button type="button"
                 className={`w-5 h-5 rounded text-[10px] ${track.muted ? 'bg-[var(--aethel-error)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
-                title="Mute"
+                title="Silenciar"
+                aria-label="Silenciar trilha"
               >
                 M
               </button>
-              <button
+              <button type="button"
                 className={`w-5 h-5 rounded text-[10px] ${track.solo ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 title="Solo"
+                aria-label="Solo"
               >
                 S
               </button>
-              <button
+              <button type="button"
                 className={`w-5 h-5 rounded text-[10px] ${track.locked ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
-                title="Lock"
+                title="Bloquear"
+                aria-label="Bloquear trilha"
               >
 
               </button>

@@ -148,7 +148,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
       </span>
 
       {/* File info */}
-      <button
+      <button type="button"
         onClick={onOpenDiff}
         className="flex-1 flex items-center gap-1 text-left truncate"
       >
@@ -168,7 +168,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
 
       {/* Actions */}
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
+        <button type="button"
           onClick={onOpenDiff}
           className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
           title="Ver diff"
@@ -176,24 +176,24 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
           <Eye className="w-3.5 h-3.5" />
         </button>
         {!file.staged && file.status !== 'untracked' && (
-          <button
+          <button type="button"
             onClick={onDiscard}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
-            title="Descartar alteracoes"
+            title="Descartar alterações"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         )}
         {file.staged ? (
-          <button
+          <button type="button"
             onClick={onUnstage}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
-            title="Desfazer stage"
+            title="Remover do stage"
           >
             <Minus className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <button
+          <button type="button"
             onClick={onStage}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
             title="Adicionar ao stage"
@@ -248,7 +248,7 @@ export default function GitPanelPro({
       setBehind(status.behind)
     } catch (err) {
       setError('Falha ao carregar status do Git')
-      console.error('Git status error:', err)
+      console.error('Erro ao buscar status do Git:', err)
     } finally {
       setLoading(false)
     }
@@ -265,7 +265,7 @@ export default function GitPanelPro({
         upstream: b.upstream,
       })))
     } catch (err) {
-      console.error('Fetch branches error:', err)
+      console.error('Erro ao buscar branches:', err)
     }
   }, [gitClient])
 
@@ -280,7 +280,7 @@ export default function GitPanelPro({
         date: new Date(c.date),
       })))
     } catch (err) {
-      console.error('Fetch commits error:', err)
+      console.error('Erro ao buscar commits:', err)
     }
   }, [gitClient])
 
@@ -301,7 +301,7 @@ export default function GitPanelPro({
       await gitClient.add([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Stage file error:', err)
+      console.error('Erro ao adicionar arquivo ao stage:', err)
     }
   }
 
@@ -310,7 +310,7 @@ export default function GitPanelPro({
       await gitClient.reset([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Unstage file error:', err)
+      console.error('Erro ao remover arquivo do stage:', err)
     }
   }
 
@@ -319,7 +319,7 @@ export default function GitPanelPro({
       await gitClient.add(['.'])
       await fetchStatus()
     } catch (err) {
-      console.error('Stage all error:', err)
+      console.error('Erro ao adicionar tudo ao stage:', err)
     }
   }
 
@@ -328,7 +328,7 @@ export default function GitPanelPro({
       await gitClient.reset(['.'])
       await fetchStatus()
     } catch (err) {
-      console.error('Unstage all error:', err)
+      console.error('Erro ao remover tudo do stage:', err)
     }
   }
 
@@ -340,18 +340,18 @@ export default function GitPanelPro({
       await fetchStatus()
       await fetchCommits()
     } catch (err) {
-      console.error('Commit error:', err)
+      console.error('Erro ao commitar:', err)
     }
   }, [commitMessage, gitClient, fetchStatus, fetchCommits])
 
   const handlePush = async () => {
     // Request consent for push operation
     const request = createConsentRequest('git.push', {
-      description: `Enviar ${ahead} commits para o repositorio remoto`,
+      description: `Enviar ${ahead} commits para o repositório remoto`,
       details: [
         `Branch: ${currentBranch}`,
         `Commits pendentes: ${ahead}`,
-        'Isso vai enviar suas mudancas para o repositorio remoto'
+        'Isso vai enviar suas mudanças para o repositório remoto'
       ]
     })
 
@@ -362,7 +362,7 @@ export default function GitPanelPro({
         await gitClient.push()
         await fetchStatus()
       } catch (err) {
-        console.error('Push error:', err)
+        console.error('Erro ao enviar (push):', err)
       }
     }
   }
@@ -373,7 +373,7 @@ export default function GitPanelPro({
       await fetchStatus()
       await fetchCommits()
     } catch (err) {
-      console.error('Pull error:', err)
+      console.error('Erro ao puxar (pull):', err)
     }
   }
 
@@ -382,7 +382,7 @@ export default function GitPanelPro({
       await gitClient.fetch()
       await fetchStatus()
     } catch (err) {
-      console.error('Fetch error:', err)
+      console.error('Erro ao atualizar (fetch):', err)
     }
   }
 
@@ -393,7 +393,7 @@ export default function GitPanelPro({
       await fetchBranches()
       setShowBranches(false)
     } catch (err) {
-      console.error('Checkout error:', err)
+      console.error('Erro ao trocar de branch:', err)
     }
   }
 
@@ -402,7 +402,7 @@ export default function GitPanelPro({
       await gitClient.discardChanges([path])
       await fetchStatus()
     } catch (err) {
-      console.error('Discard changes error:', err)
+      console.error('Erro ao descartar alterações:', err)
     }
   }
 
@@ -442,7 +442,7 @@ export default function GitPanelPro({
           <div>
             <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Carregando painel Git</p>
             <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
-              Buscando branch atual, alteracoes locais e historico recente.
+              Buscando branch atual, alterações locais e histórico recente.
             </p>
           </div>
         </div>
@@ -460,13 +460,13 @@ export default function GitPanelPro({
         >
           <AlertCircle className="h-8 w-8 text-[var(--aethel-error)]" />
           <div>
-            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Nao foi possivel ler o repositorio</p>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Não foi possível ler o repositório</p>
             <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{error}</p>
           </div>
           <p className="text-[11px] text-[var(--aethel-text-quaternary)]">
             Verifique se o workspace atual possui um `.git` acessivel e tente novamente.
           </p>
-          <button
+          <button type="button"
             onClick={fetchStatus}
             className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_86%,transparent)] px-3 py-1.5 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
           >
@@ -481,7 +481,7 @@ export default function GitPanelPro({
     <div className={`h-full flex flex-col ${className}`}>
       {/* Branch Selector */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={() => setShowBranches(!showBranches)}
           className="flex items-center gap-2 text-sm transition-colors hover:text-[var(--aethel-text-primary)]"
         >
@@ -495,28 +495,28 @@ export default function GitPanelPro({
           )}
         </button>
         <div className="flex items-center gap-1">
-          <button
+          <button type="button"
             onClick={handleFetch}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
             title="Buscar atualizacoes"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-          <button
+          <button type="button"
             onClick={handlePull}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
-            title="Baixar mudancas"
+            title="Baixar mudanças"
           >
             <Download className="w-4 h-4" />
           </button>
-          <button
+          <button type="button"
             onClick={handlePush}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
-            title="Enviar mudancas"
+            title="Enviar mudanças"
           >
             <Upload className="w-4 h-4" />
           </button>
-          <button
+          <button type="button"
             onClick={() => setShowHistory(!showHistory)}
             className={`p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] ${showHistory ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Historico"
@@ -534,7 +534,7 @@ export default function GitPanelPro({
               Branches locais
             </div>
             {branches.filter(b => !b.remote).map(branch => (
-              <button
+              <button type="button"
                 key={branch.name}
                 onClick={() => handleCheckout(branch.name)}
                 className={`
@@ -551,7 +551,7 @@ export default function GitPanelPro({
               Branches remotas
             </div>
             {branches.filter(b => b.remote).map(branch => (
-              <button
+              <button type="button"
                 key={branch.name}
                 onClick={() => handleCheckout(branch.name)}
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
@@ -617,7 +617,7 @@ export default function GitPanelPro({
           <span className="text-xs text-[var(--aethel-text-tertiary)]">
             {stagedFiles.length} arquivo(s) em stage
           </span>
-          <button
+          <button type="button"
             onClick={handleCommit}
             disabled={!commitMessage.trim() || stagedFiles.length === 0}
             className={`
@@ -638,13 +638,13 @@ export default function GitPanelPro({
         {/* Staged Changes */}
         {stagedFiles.length > 0 && (
           <div>
-            <button
+            <button type="button"
               onClick={() => toggleSection('staged')}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.staged ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
               <span className="flex-1 text-left">Em stage ({stagedFiles.length})</span>
-              <button
+              <button type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleUnstageAll()
@@ -675,13 +675,13 @@ export default function GitPanelPro({
         {/* Changes */}
         {changedFiles.length > 0 && (
           <div>
-            <button
+            <button type="button"
               onClick={() => toggleSection('changes')}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.changes ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
               <span className="flex-1 text-left">Alteracoes ({changedFiles.length})</span>
-              <button
+              <button type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleStageAll()
@@ -712,7 +712,7 @@ export default function GitPanelPro({
         {/* Untracked */}
         {untrackedFiles.length > 0 && (
           <div>
-            <button
+            <button type="button"
               onClick={() => toggleSection('untracked')}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
@@ -746,7 +746,7 @@ export default function GitPanelPro({
             <p className="mt-1 max-w-xs text-xs text-[var(--aethel-text-tertiary)]">
               Nenhuma alteracao pendente para stage ou commit neste momento.
             </p>
-            <button
+            <button type="button"
               onClick={fetchStatus}
               className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_86%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >

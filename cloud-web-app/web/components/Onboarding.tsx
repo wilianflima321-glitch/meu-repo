@@ -197,7 +197,7 @@ export function WelcomeModal() {
   const welcomeSteps = [
     {
       title: 'Bem-vindo ao Aethel Engine',
-      description: 'Studio focado em Apps e Research com governança rigorosa. Games e Films seguem em roadmap.',
+      description: 'Estúdio focado em Apps e Research com governança rigorosa. Games e Films seguem em roadmap.',
       icon: <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)]" />,
     },
     {
