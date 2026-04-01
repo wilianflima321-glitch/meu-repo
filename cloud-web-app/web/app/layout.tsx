@@ -1,4 +1,4 @@
-﻿import '../styles/globals.css'
+import './globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'

@@ -15,7 +15,6 @@ import { LowBalanceModalAuto } from './billing/LowBalanceModal'
 import { AISuggestionBubbleAuto } from './ai/AISuggestionBubble'
 import { CommandRegistryProvider, useDefaultCommands } from '@/lib/commands/command-registry'
 import { DevToolsProvider } from '@/lib/debug/devtools-provider'
-import { ToastProvider } from '@/components/ui/Toast'
 
 // Hook para registrar comandos padrao no layout
 function DefaultCommandsRegistration() {
@@ -57,38 +56,36 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <ToastProvider>
-        <AuthProvider>
-          <ErrorBoundaryProvider>
-            <A11yProvider>
-              <SessionTrackerProvider>
-                <CommandRegistryProvider>
-                  <DevToolsProvider>
-                    <AethelProvider>
-                      <OnboardingProvider enabled={isStudioSurface}>
-                        <DefaultCommandsRegistration />
-                        <Suspense fallback={<LoadingFallback />}>
-                          {children}
-                          
-                          {/* Componentes globais de UI */}
-                          {isStudioSurface ? (
-                            <>
-                              <WelcomeModal />
-                              <OnboardingChecklist />
-                              <LowBalanceModalAuto />
-                              <AISuggestionBubbleAuto />
-                            </>
-                          ) : null}
-                        </Suspense>
-                      </OnboardingProvider>
-                    </AethelProvider>
-                  </DevToolsProvider>
-                </CommandRegistryProvider>
-              </SessionTrackerProvider>
-            </A11yProvider>
-          </ErrorBoundaryProvider>
-        </AuthProvider>
-      </ToastProvider>
+      <AuthProvider>
+        <ErrorBoundaryProvider>
+          <A11yProvider>
+            <SessionTrackerProvider>
+              <CommandRegistryProvider>
+                <DevToolsProvider>
+                  <AethelProvider>
+                    <OnboardingProvider enabled={isStudioSurface}>
+                      <DefaultCommandsRegistration />
+                      <Suspense fallback={<LoadingFallback />}>
+                        {children}
+                        
+                        {/* Componentes globais de UI */}
+                        {isStudioSurface ? (
+                          <>
+                            <WelcomeModal />
+                            <OnboardingChecklist />
+                            <LowBalanceModalAuto />
+                            <AISuggestionBubbleAuto />
+                          </>
+                        ) : null}
+                      </Suspense>
+                    </OnboardingProvider>
+                  </AethelProvider>
+                </DevToolsProvider>
+              </CommandRegistryProvider>
+            </SessionTrackerProvider>
+          </A11yProvider>
+        </ErrorBoundaryProvider>
+      </AuthProvider>
     </I18nextProvider>
   );
 }

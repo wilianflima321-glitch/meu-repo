@@ -929,7 +929,7 @@ function IDEContent() {
                   <TabBar />
                   <div className="flex-1 overflow-hidden">
                     {isReadingFile && (
-                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Loading file...</div>
+                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Carregando arquivo...</div>
                     )}
                     {!isReadingFile && fileError && (
                       <div className="h-full flex items-center justify-center px-6">
@@ -965,7 +965,7 @@ function IDEContent() {
                       </div>
                     )}
                     {!isReadingFile && !fileError && !activeFile && (
-                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Select a file to start editing.</div>
+                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para comecar a editar.</div>
                     )}
                   </div>
                 </div>
@@ -1036,7 +1036,7 @@ function IDEContent() {
                       <CanonicalPreviewSurface
                         key={`${activeFile.path}:${previewRefreshTick}`}
                         variant="runtime"
-                        title="Live Preview"
+                        title="Preview ao vivo"
                         filePath={activeFile.path}
                         content={activeFile.content}
                         projectId={projectId}
@@ -1048,7 +1048,7 @@ function IDEContent() {
                       />
                     </div>
                   ) : (
-                    <div className="flex-1 flex items-center justify-center text-[var(--aethel-text-tertiary)]">Select a file to preview.</div>
+                    <div className="flex-1 flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para visualizar o preview.</div>
                   )}
                 </div>
               ),
@@ -1157,7 +1157,7 @@ function IDEContent() {
               <div className="flex-1 overflow-hidden">
                 {isReadingFile && (
                   <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
-                    Loading file...
+                    Carregando arquivo...
                   </div>
                 )}
 
@@ -1202,7 +1202,7 @@ function IDEContent() {
                         <CanonicalPreviewSurface
                           key={`${activeFile.path}:${previewRefreshTick}`}
                           variant="runtime"
-                          title="Live Preview"
+                          title="Preview ao vivo"
                           filePath={activeFile.path}
                           content={activeFile.content}
                           projectId={projectId}
@@ -1219,7 +1219,7 @@ function IDEContent() {
 
                 {!isReadingFile && !fileError && !activeFile && (
                   <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
-                    Select a file to start editing.
+                    Selecione um arquivo para comecar a editar.
                   </div>
                 )}
               </div>
@@ -1227,10 +1227,10 @@ function IDEContent() {
                 <div className="h-7 border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
                   <span>
                     {isSavingFile
-                      ? "Saving..."
+                      ? "Salvando..."
                       : lastSavedAt
-                        ? `Saved at ${lastSavedAt.toLocaleTimeString()}`
-                        : "Ready"}
+                        ? `Salvo as ${lastSavedAt.toLocaleTimeString()}`
+                        : "Pronto"}
                   </span>
                   <div className="flex items-center gap-2">
                     {lastAiApply?.rollbackToken && (
@@ -1241,12 +1241,12 @@ function IDEContent() {
                         className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] disabled:opacity-60"
                         title="Rollback da ultima aplicacao inline da IA"
                       >
-                        {rollbackBusy ? 'Rolling back...' : 'Rollback AI'}
+                        {rollbackBusy ? 'Desfazendo...' : 'Desfazer IA'}
                       </button>
                     )}
                     {fullAccessActiveGrant && (
                       <span className="rounded border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] text-cyan-200">
-                        Full Access ON{fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}
+                        Full Access ativo{fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}
                       </span>
                     )}
                     {hasToken && (
@@ -1268,7 +1268,7 @@ function IDEContent() {
                         {fullAccessBusy
                           ? '...'
                           : fullAccessActiveGrant
-                            ? 'Revoke Full Access'
+                            ? 'Revogar Full Access'
                             : 'Full Access'}
                       </button>
                     )}
@@ -1285,7 +1285,7 @@ function IDEContent() {
 
 export default function FullscreenIDE() {
   return (
-    <Suspense fallback={<div>Loading workspace context...</div>}>
+    <Suspense fallback={<div>Carregando contexto do workspace...</div>}>
       <IDEContent />
     </Suspense>
   );

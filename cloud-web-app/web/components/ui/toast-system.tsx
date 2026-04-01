@@ -160,27 +160,27 @@ function ToastItem({
 
   const typeStyles = {
     success: {
-      borderColor: 'rgba(16, 185, 129, 0.4)',
-      background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))',
-      iconColor: '#10b981',
-      icon: '✓',
+      borderColor: 'color-mix(in_srgb,var(--aethel-success)_30%,transparent)',
+      background: 'linear-gradient(180deg, color-mix(in_srgb,var(--aethel-success)_18%,transparent), color-mix(in_srgb,var(--aethel-success)_8%,transparent))',
+      iconColor: 'var(--aethel-success)',
+      icon: 'OK',
     },
     error: {
-      borderColor: 'rgba(239, 68, 68, 0.4)',
-      background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05))',
-      iconColor: '#ef4444',
-      icon: '✕',
+      borderColor: 'color-mix(in_srgb,var(--aethel-error)_30%,transparent)',
+      background: 'linear-gradient(180deg, color-mix(in_srgb,var(--aethel-error)_18%,transparent), color-mix(in_srgb,var(--aethel-error)_8%,transparent))',
+      iconColor: 'var(--aethel-error)',
+      icon: 'X',
     },
     warning: {
-      borderColor: 'rgba(245, 158, 11, 0.4)',
-      background: 'linear-gradient(180deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05))',
-      iconColor: '#f59e0b',
+      borderColor: 'color-mix(in_srgb,var(--aethel-warning)_30%,transparent)',
+      background: 'linear-gradient(180deg, color-mix(in_srgb,var(--aethel-warning)_18%,transparent), color-mix(in_srgb,var(--aethel-warning)_8%,transparent))',
+      iconColor: 'var(--aethel-warning)',
       icon: '!',
     },
     info: {
-      borderColor: 'rgba(6, 182, 212, 0.4)',
-      background: 'linear-gradient(180deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05))',
-      iconColor: '#06b6d4',
+      borderColor: 'color-mix(in_srgb,var(--aethel-info)_30%,transparent)',
+      background: 'linear-gradient(180deg, color-mix(in_srgb,var(--aethel-info)_18%,transparent), color-mix(in_srgb,var(--aethel-info)_8%,transparent))',
+      iconColor: 'var(--aethel-info)',
       icon: 'i',
     },
   };
@@ -212,9 +212,11 @@ function ToastItem({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '14px',
-    fontWeight: 'bold',
+    fontSize: '11px',
+    fontWeight: 700,
+    letterSpacing: '0.04em',
     flexShrink: 0,
+    textTransform: 'uppercase',
   };
 
   const contentStyle: React.CSSProperties = {
@@ -291,9 +293,9 @@ function ToastItem({
           style={closeButtonStyle}
           onMouseEnter={(e) => (e.currentTarget.style.color = tokens.colors.text.primary)}
           onMouseLeave={(e) => (e.currentTarget.style.color = tokens.colors.text.muted)}
-          aria-label="Dismiss"
+          aria-label="Fechar notificacao"
         >
-          ×
+          x
         </button>
       </div>
       {duration !== Infinity && <div style={progressBarStyle} />}

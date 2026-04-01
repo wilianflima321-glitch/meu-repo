@@ -39,16 +39,27 @@
     --aethel-primary: #3b82f6;
     --aethel-primary-light: #93c5fd;
     --aethel-primary-dark: #1d4ed8;
+    --aethel-primary-50: #eff6ff;
+    --aethel-primary-900: #1e3a8a;
     --aethel-secondary: #14b8a6;
+    --aethel-secondary-light: #5eead4;
+    --aethel-secondary-dark: #0f766e;
     --aethel-accent: #8b5cf6;
     --aethel-accent-light: #c4b5fd;
+    --aethel-accent-dark: #7c3aed;
     --aethel-info: #38bdf8;
     --aethel-info-light: #a5f3fc;
+    --aethel-info-dark: #0ea5e9;
     --aethel-success: #22c55e;
+    --aethel-success-light: #86efac;
+    --aethel-success-dark: #16a34a;
     --aethel-warning: #f59e0b;
     --aethel-warning-light: #fcd34d;
     --aethel-warning-dark: #d97706;
     --aethel-error: #ef4444;
+    --aethel-error-light: #fca5a5;
+    --aethel-error-dark: #dc2626;
+    --aethel-text-muted: #64748b;
 
     /* Backwards-compatible aliases */
     --bg-primary: var(--aethel-surface-primary);

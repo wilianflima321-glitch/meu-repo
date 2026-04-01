@@ -10,7 +10,7 @@ export default function WorkbenchRedirect({
   return (
     <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.16),transparent_42%),linear-gradient(180deg,var(--aethel-surface-primary),color-mix(in_srgb,var(--aethel-surface-primary)_94%,black))] px-6 text-[var(--aethel-text-primary)]">
       <div className="w-full max-w-xl rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] p-8 text-center shadow-[0_24px_80px_rgba(2,6,23,0.42)] backdrop-blur-xl">
-        <div className="mb-3 text-[11px] uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">Unified Workbench</div>
+        <div className="mb-3 text-[11px] uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">Workbench unificado</div>
         <h1 className="mb-3 text-xl font-semibold">{title}</h1>
         <p className="mb-6 text-sm text-[var(--aethel-text-tertiary)]">
           {description || 'Esta capacidade fica disponivel dentro do shell do Workbench, com preview, copiloto e contexto sincronizados.'}

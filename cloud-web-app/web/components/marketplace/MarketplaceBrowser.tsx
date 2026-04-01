@@ -37,7 +37,7 @@ import {
 import { Tabs, TabContent, TabList, TabTrigger } from '@/components/ui/Tabs';
 import { ScrollArea } from '@/components/ui/ScrollArea';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { toast } from 'sonner';
+import { useToastActions } from '@/components/ui';
 
 // ============================================================================
 // Types
@@ -162,7 +162,7 @@ async function fetchAssets(
     params.set('sort', filters.sortBy);
     
     const response = await fetch(`/api/marketplace/assets?${params}`);
-    if (!response.ok) throw new Error('Failed to fetch assets');
+    if (!response.ok) throw new Error('Falha ao carregar assets');
     return response.json();
 }
 
@@ -170,14 +170,14 @@ async function addToFavorites(assetId: string): Promise<void> {
     const response = await fetch(`/api/marketplace/favorites/${assetId}`, {
         method: 'POST',
     });
-    if (!response.ok) throw new Error('Failed to add to favorites');
+    if (!response.ok) throw new Error('Falha ao adicionar aos favoritos');
 }
 
 async function removeFromFavorites(assetId: string): Promise<void> {
     const response = await fetch(`/api/marketplace/favorites/${assetId}`, {
         method: 'DELETE',
     });
-    if (!response.ok) throw new Error('Failed to remove from favorites');
+    if (!response.ok) throw new Error('Falha ao remover dos favoritos');
 }
 
 async function addToCart(assetId: string): Promise<void> {
@@ -186,7 +186,7 @@ async function addToCart(assetId: string): Promise<void> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assetId }),
     });
-    if (!response.ok) throw new Error('Failed to add to cart');
+    if (!response.ok) throw new Error('Falha ao adicionar ao carrinho');
 }
 
 // ============================================================================
@@ -255,7 +255,7 @@ function AssetCard({
                         <div>
                             <h3 className="font-semibold truncate">{asset.name}</h3>
                             <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                by {asset.creator.name}
+                                por {asset.creator.name}
                                 {asset.creator.verified && (
                                     <Check className="w-3 h-3 text-blue-500" />
                                 )}
@@ -621,6 +621,7 @@ function AssetGridSkeleton({ count = 12 }: { count?: number }) {
 
 export default function MarketplaceBrowser() {
     const queryClient = useQueryClient();
+    const toast = useToastActions();
     
     const [filters, setFilters] = useState<FilterState>({
         query: '',

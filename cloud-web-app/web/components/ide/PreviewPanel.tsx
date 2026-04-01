@@ -111,9 +111,9 @@ function buildCssPreview(css: string): string {
 <body>
   <div class="app">
     <div class="card">
-      <h2>Aethel CSS Preview</h2>
+      <h2>Preview CSS do Aethel</h2>
       <p>Arquivo CSS aplicado em um template de teste.</p>
-      <button class="btn">Test Button</button>
+      <button class="btn">Botao de teste</button>
     </div>
   </div>
 </body>
@@ -133,8 +133,8 @@ function buildJavaScriptPreview(source: string): string {
   </style>
 </head>
 <body>
-  <div id="app">JS runtime initialized.</div>
-  <pre id="log">Runtime log:</pre>
+  <div id="app">Runtime JS inicializado.</div>
+  <pre id="log">Log do runtime:</pre>
   <script>
     const logNode = document.getElementById('log');
     const originalLog = console.log;
@@ -174,8 +174,8 @@ function buildTypeScriptPreview(source: string, extension: string): string {
   </style>
 </head>
 <body>
-  <div id="app">TypeScript runtime initialized.</div>
-  <pre id="log">Runtime log:</pre>
+  <div id="app">Runtime TypeScript inicializado.</div>
+  <pre id="log">Log do runtime:</pre>
   <script>
     const logNode = document.getElementById('log');
     const originalLog = console.log;
@@ -372,7 +372,7 @@ export default function PreviewPanel({
       <div className="flex-1 bg-[var(--aethel-surface-secondary)]">
         {forceInlineFallback && runtimeUrl && (
           <div className="aethel-state aethel-state-loading rounded-none border-x-0 border-t-0 text-[11px]" role="status" aria-live="polite">
-            Runtime externo indisponivel. Fallback inline ativo.
+            Runtime externo indisponivel. Fallback inline ativo (recursos de runtime desabilitados).
             {runtimeUnavailableReason ? ` Motivo: ${runtimeUnavailableReason}.` : ''}
           </div>
         )}

@@ -171,7 +171,7 @@ export default function LandingPageV3() {
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)]">Entregue mais rapido com contexto unico</span>
-                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs text-emerald-200">Preview e validacao no mesmo fluxo</span>
+                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-success-light)]">Preview e validacao no mesmo fluxo</span>
                 <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-primary-light)]">Governanca pronta para equipes</span>
               </div>
 
@@ -244,7 +244,7 @@ export default function LandingPageV3() {
                   <ul className="mt-4 space-y-3">
                     {TRUST_NOTES.map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                        <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-300" />
+                        <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[var(--aethel-success-light)]" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -329,7 +329,7 @@ export default function LandingPageV3() {
                   <ul className="space-y-2 text-xs text-[var(--aethel-text-secondary)]">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-[var(--aethel-success-light)]" />
                         {feature}
                       </li>
                     ))}

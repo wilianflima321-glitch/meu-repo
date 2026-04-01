@@ -6,6 +6,17 @@
 
 ---
 
+## 2026-04-01 Update (UX & Marketplace)
+
+- Consolidacao de sistemas de UI (toast + skeleton) e remocao de duplicidades antigas.
+- Unificacao de tokens globais em `app/globals.css` e limpeza de `styles/`.
+- Remocao de componentes `components/_deprecated` nao utilizados.
+- Localizacao PT-BR e melhorias de microcopy no Marketplace:
+  - `AssetDetailPanel`, `MarketplaceBrowser`, `UserLibrary`, `CreatorDashboard`.
+- Hardening de estados operacionais no chat e preview.
+
+---
+
 ## Executive Summary
 
 Implemented foundational architecture for professional-grade IDE platform with focus on Phase 1 critical features. Delivered extension marketplace, LSP client framework, DAP debugging infrastructure, and git client foundation.

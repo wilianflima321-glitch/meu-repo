@@ -26,7 +26,7 @@ import {
     useProgress
 } from '@react-three/drei';
 import { 
-    Star, Download, Heart, ShoppingCart, Share2, Flag,
+    Star, Baixar, Heart, ShoppingCart, Share2, Flag,
     ChevronLeft, ChevronRight, Check, ExternalLink, 
     User, Calendar, FileText, Box, Palette, Tag,
     MessageSquare, ThumbsUp, Shield, Loader2, Play, Pause
@@ -40,7 +40,7 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 import { Textarea } from '@/components/ui/Textarea';
 import { Progress } from '@/components/ui/progress';
-import { toast } from 'sonner';
+import { useToastActions } from '@/components/ui';
 import * as THREE from 'three';
 
 // ============================================================================
@@ -60,7 +60,7 @@ interface AssetDetail {
     thumbnailUrl: string;
     previewUrl?: string;
     modelUrl?: string;
-    fileSize: number;
+    fileTamanho: number;
     version: string;
     compatibility: string[];
     license: 'standard' | 'extended' | 'exclusive';
@@ -76,7 +76,7 @@ interface AssetDetail {
         downloads: number;
         rating: number;
         reviewCount: number;
-        favorites: number;
+        favoritos: number;
     };
     files: {
         name: string;
@@ -111,7 +111,7 @@ interface Review {
 }
 
 // ============================================================================
-// 3D Preview Components
+// Preview 3D Components
 // ============================================================================
 
 function Loader() {
@@ -121,7 +121,7 @@ function Loader() {
             <div className="flex flex-col items-center gap-2">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 <span className="text-sm text-muted-foreground">
-                    Loading {progress.toFixed(0)}%
+                    Carregando {progress.toFixed(0)}%
                 </span>
             </div>
         </Html>
@@ -303,7 +303,7 @@ function ReviewCard({ review }: { review: Review }) {
                         {review.verified && (
                             <Badge variant="secondary" className="text-xs">
                                 <Check className="w-3 h-3 mr-1" />
-                                Verified Purchase
+                                Compra verificada
                             </Badge>
                         )}
                         <span className="text-sm text-muted-foreground">
@@ -328,11 +328,11 @@ function ReviewCard({ review }: { review: Review }) {
                             className={cn(isHelpful && "text-primary")}
                         >
                             <ThumbsUp className="w-4 h-4 mr-1" />
-                            Helpful ({review.helpful + (isHelpful ? 1 : 0)})
+                            Util ({review.helpful + (isHelpful ? 1 : 0)})
                         </Button>
                         <Button variant="ghost" size="sm">
                             <Flag className="w-4 h-4 mr-1" />
-                            Report
+                            Denunciar
                         </Button>
                     </div>
                 </div>
@@ -353,7 +353,7 @@ function RatingBreakdown({ stats }: { stats: { [key: number]: number } }) {
                 return (
                     <div key={star} className="flex items-center gap-2">
                         <span className="w-8 text-sm text-muted-foreground">
-                            {star} ★
+                            {star} *
                         </span>
                         <Progress value={percentage} className="flex-1 h-2" />
                         <span className="w-12 text-sm text-muted-foreground text-right">
@@ -380,23 +380,24 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
     const [isFavorited, setIsFavorited] = useState(false);
     const [reviewText, setReviewText] = useState('');
     const [userRating, setUserRating] = useState(0);
+    const toast = useToastActions();
 
     // Fetch asset details
     const { data: asset, isLoading } = useQuery<AssetDetail>({
         queryKey: ['asset', assetId],
         queryFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}`);
-            if (!res.ok) throw new Error('Failed to fetch asset');
+            if (!res.ok) throw new Error('Falha ao carregar asset');
             return res.json();
         },
     });
 
-    // Fetch reviews
+    // Fetch avaliacoes
     const { data: reviews } = useQuery<Review[]>({
         queryKey: ['asset-reviews', assetId],
         queryFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}/reviews`);
-            if (!res.ok) throw new Error('Failed to fetch reviews');
+            if (!res.ok) throw new Error('Falha ao carregar avaliacoes');
             return res.json();
         },
     });
@@ -409,7 +410,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ assetId }),
             });
-            if (!res.ok) throw new Error('Checkout failed');
+            if (!res.ok) throw new Error('Falha no checkout');
             return res.json();
         },
         onSuccess: (data) => {
@@ -419,15 +420,15 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             }
         },
         onError: () => {
-            toast.error('Failed to start checkout');
+            toast.error('Falha ao iniciar o checkout.');
         },
     });
 
-    // Download mutation
+    // Baixar mutation
     const downloadMutation = useMutation({
         mutationFn: async () => {
             const res = await fetch(`/api/marketplace/assets/${assetId}/download`);
-            if (!res.ok) throw new Error('Download failed');
+            if (!res.ok) throw new Error('Falha no download');
             return res.blob();
         },
         onSuccess: (blob) => {
@@ -437,10 +438,10 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             a.download = `${asset?.name || 'asset'}.zip`;
             a.click();
             URL.revokeObjectURL(url);
-            toast.success('Download started');
+            toast.success('Baixar iniciado.');
         },
         onError: () => {
-            toast.error('Download failed');
+            toast.error('Falha no download.');
         },
     });
 
@@ -449,12 +450,12 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         mutationFn: async () => {
             const method = isFavorited ? 'DELETE' : 'POST';
             const res = await fetch(`/api/marketplace/favorites/${assetId}`, { method });
-            if (!res.ok) throw new Error('Failed to update favorites');
+            if (!res.ok) throw new Error('Falha ao atualizar favoritos');
         },
         onSuccess: () => {
             setIsFavorited(!isFavorited);
             queryClient.invalidateQueries({ queryKey: ['favorites'] });
-            toast.success(isFavorited ? 'Removed from favorites' : 'Added to favorites');
+            toast.success(isFavorited ? 'Removido dos favoritos.' : 'Adicionado aos favoritos.');
         },
     });
 
@@ -466,8 +467,8 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
     };
 
     const formatPrice = (price: number, currency: string) => {
-        if (price === 0) return 'Free';
-        return new Intl.NumberFormat('en-US', {
+        if (price === 0) return 'Gratis';
+        return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: currency || 'USD',
         }).format(price / 100);
@@ -490,9 +491,9 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
     if (!asset) {
         return (
             <div className="flex flex-col items-center justify-center h-full">
-                <p className="text-muted-foreground">Asset not found</p>
+                <p className="text-muted-foreground">Asset nao encontrado</p>
                 <Button variant="outline" className="mt-4" onClick={onClose}>
-                    Go Back
+                    Voltar
                 </Button>
             </div>
         );
@@ -504,7 +505,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
             <header className="flex items-center justify-between px-6 py-4 border-b">
                 <Button variant="ghost" onClick={onClose}>
                     <ChevronLeft className="w-4 h-4 mr-2" />
-                    Back to Marketplace
+                    Voltar ao Marketplace
                 </Button>
                 
                 <div className="flex items-center gap-2">
@@ -529,12 +530,12 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                     <div className="grid lg:grid-cols-5 gap-8">
                         {/* Left column - Preview */}
                         <div className="lg:col-span-3 space-y-6">
-                            {/* 3D Preview or Image Gallery */}
+                            {/* Preview 3D or Image Gallery */}
                             {asset.modelUrl ? (
                                 <Tabs defaultValue="3d">
                                     <TabList>
-                                        <TabTrigger value="3d">3D Preview</TabTrigger>
-                                        <TabTrigger value="images">Images</TabTrigger>
+                                        <TabTrigger value="3d">Preview 3D</TabTrigger>
+                                        <TabTrigger value="images">Imagens</TabTrigger>
                                     </TabList>
                                     <TabContent value="3d" className="mt-4">
                                         <ModelPreview modelUrl={asset.modelUrl} />
@@ -547,44 +548,44 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                 <ImageGallery images={asset.images} />
                             )}
 
-                            {/* Description */}
+                            {/* Descricao */}
                             <div>
-                                <h2 className="text-lg font-semibold mb-4">Description</h2>
+                                <h2 className="text-lg font-semibold mb-4">Descricao</h2>
                                 <div 
                                     className="prose prose-sm dark:prose-invert max-w-none"
                                     dangerouslySetInnerHTML={{ __html: asset.description }}
                                 />
                             </div>
 
-                            {/* Technical Details */}
+                            {/* Detalhes tecnicos */}
                             <div>
-                                <h2 className="text-lg font-semibold mb-4">Technical Details</h2>
+                                <h2 className="text-lg font-semibold mb-4">Detalhes tecnicos</h2>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="flex items-center gap-2">
                                         <Box className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Category:</span>{' '}
+                                            <span className="text-muted-foreground">Categoria:</span>{' '}
                                             {asset.category}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <FileText className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Size:</span>{' '}
+                                            <span className="text-muted-foreground">Tamanho:</span>{' '}
                                             {formatFileSize(asset.fileSize)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Tag className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">Version:</span>{' '}
+                                            <span className="text-muted-foreground">Versao:</span>{' '}
                                             {asset.version}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Shield className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
-                                            <span className="text-muted-foreground">License:</span>{' '}
+                                            <span className="text-muted-foreground">Licenca:</span>{' '}
                                             {asset.license.charAt(0).toUpperCase() + asset.license.slice(1)}
                                         </span>
                                     </div>
@@ -592,7 +593,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
 
                                 {/* Included files */}
                                 <div className="mt-6">
-                                    <h3 className="font-medium mb-3">Included Files</h3>
+                                    <h3 className="font-medium mb-3">Arquivos inclusos</h3>
                                     <div className="space-y-2">
                                         {asset.files.map((file, index) => (
                                             <div 
@@ -608,9 +609,9 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                     </div>
                                 </div>
 
-                                {/* Compatibility */}
+                                {/* Compatibilidade */}
                                 <div className="mt-6">
-                                    <h3 className="font-medium mb-3">Compatibility</h3>
+                                    <h3 className="font-medium mb-3">Compatibilidade</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {asset.compatibility.map((item) => (
                                             <Badge key={item} variant="secondary">
@@ -625,11 +626,11 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                             <div>
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="text-lg font-semibold">
-                                        Reviews ({asset.stats.reviewCount})
+                                        Avaliacoes ({asset.stats.reviewCount})
                                     </h2>
                                     <Button variant="outline" size="sm">
                                         <MessageSquare className="w-4 h-4 mr-2" />
-                                        Write a Review
+                                        Escrever avaliacao
                                     </Button>
                                 </div>
 
@@ -641,7 +642,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </div>
                                         <RatingStars rating={asset.stats.rating} />
                                         <div className="text-sm text-muted-foreground mt-1">
-                                            {asset.stats.reviewCount} reviews
+                                            {asset.stats.reviewCount} avaliacoes
                                         </div>
                                     </div>
                                     <div className="flex-1">
@@ -692,7 +693,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             ) : (
                                                 <Download className="w-4 h-4 mr-2" />
                                             )}
-                                            Download
+                                            Baixar
                                         </Button>
                                     ) : asset.price === 0 ? (
                                         <Button 
@@ -706,7 +707,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             ) : (
                                                 <Download className="w-4 h-4 mr-2" />
                                             )}
-                                            Get for Free
+                                            Baixar gratis
                                         </Button>
                                     ) : (
                                         <div className="space-y-2">
@@ -721,11 +722,11 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                                 ) : (
                                                     <ShoppingCart className="w-4 h-4 mr-2" />
                                                 )}
-                                                Buy Now
+                                                Comprar agora
                                             </Button>
                                             <Button variant="outline" className="w-full" size="lg">
                                                 <ShoppingCart className="w-4 h-4 mr-2" />
-                                                Add to Cart
+                                                Adicionar ao carrinho
                                             </Button>
                                         </div>
                                     )}
@@ -740,11 +741,11 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Heart className="w-4 h-4 text-muted-foreground" />
-                                            <span>{asset.stats.favorites.toLocaleString()} favorites</span>
+                                            <span>{asset.stats.favorites.toLocaleString()} favoritos</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Calendar className="w-4 h-4 text-muted-foreground" />
-                                            <span>Updated {new Date(asset.updatedAt).toLocaleDateString()}</span>
+                                            <span>Atualizado em {new Date(asset.updatedAt).toLocaleDateString()}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -771,7 +772,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </div>
                                         <Button variant="outline" size="sm">
                                             <ExternalLink className="w-4 h-4 mr-2" />
-                                            View Profile
+                                            Ver perfil
                                         </Button>
                                     </div>
                                 </div>
@@ -788,10 +789,10 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                     </div>
                                 </div>
 
-                                {/* Report */}
+                                {/* Denunciar */}
                                 <Button variant="ghost" className="w-full text-muted-foreground">
                                     <Flag className="w-4 h-4 mr-2" />
-                                    Report this asset
+                                    Denunciar este asset
                                 </Button>
                             </div>
                         </div>

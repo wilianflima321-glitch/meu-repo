@@ -38,6 +38,25 @@ type ProviderGateState = {
 
 const MODELS = DEFAULT_MODELS
 
+function formatAiErrorForUser(err: unknown): string {
+  if (err instanceof AdvancedChatRequestError) {
+    switch (err.code) {
+      case 'AI_PROVIDER_NOT_CONFIGURED':
+        return 'IA nao configurada. Conecte um provedor para continuar.'
+      case 'DEMO_LIMIT_REACHED':
+        return 'Limite da demo atingido. Ative um provedor para continuar.'
+      case 'MENTION_NOT_SUPPORTED':
+        return 'Esse tipo de mention ainda nao e suportado.'
+      case 'MODEL_NOT_AVAILABLE':
+        return 'Modelo indisponivel no momento. Tente outro perfil.'
+      default:
+        return err.message || 'Falha na requisicao de IA.'
+    }
+  }
+  if (err instanceof Error) return err.message
+  return 'Falha na requisicao de IA.'
+}
+
 const IDE_CHAT_INTENTS = [
   {
     id: 'implement',
@@ -182,6 +201,7 @@ export default function AIChatPanelContainer() {
   const [source, setSource] = useState<string | null>(null)
   const [providerGate, setProviderGate] = useState<ProviderGateState | null>(null)
   const [providerStatus, setProviderStatus] = useState<AiProviderStatusResponse | null>(null)
+  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
 
   const modelOptions = useMemo(() => MODELS, [])
 
@@ -340,6 +360,7 @@ export default function AIChatPanelContainer() {
   const handleSendMessage = useCallback(
     async (message: string, context?: { attachments?: unknown[] }) => {
       if (!message.trim() || isLoading) return
+      setLastFailedMessage(null)
 
       const fallbackProfile = inferAdvancedProfile(message)
       const profileResolution = resolveProfileFromMentions(message, fallbackProfile)
@@ -471,7 +492,7 @@ export default function AIChatPanelContainer() {
             {
               id: `assistant-${Date.now()}`,
               role: 'assistant',
-              content: 'Request interrupted by user.',
+              content: 'Solicitacao interrompida pelo usuario.',
               timestamp: new Date(),
               model: currentModel,
             },
@@ -497,12 +518,13 @@ export default function AIChatPanelContainer() {
           }
         }
 
-        const errorMessage =
+        const rawErrorMessage =
           err instanceof AdvancedChatRequestError
             ? `${err.code}: ${err.message}`.trim()
             : err instanceof Error
               ? err.message
               : 'AI_REQUEST_FAILED: AI request failed.'
+        const errorMessage = formatAiErrorForUser(err)
         const latencyMs = Math.max(
           0,
           Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
@@ -513,7 +535,7 @@ export default function AIChatPanelContainer() {
             source: 'ide-panel',
             model: currentModel,
             projectId,
-            error: errorMessage,
+            error: rawErrorMessage,
             latencyMs,
           },
         })
@@ -533,6 +555,7 @@ export default function AIChatPanelContainer() {
             model: currentModel,
           },
         ])
+        setLastFailedMessage(normalizedMessage)
       } finally {
         requestAbortRef.current = null
         setIsLoading(false)
@@ -602,6 +625,18 @@ export default function AIChatPanelContainer() {
               com resposta guiada sem provider real.
             </div>
           )}
+        </div>
+      )}
+      {lastFailedMessage && !isLoading && (
+        <div className="mx-3 mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-error-light)]">
+          <span>Falha ao processar a ultima mensagem.</span>
+          <button
+            type="button"
+            onClick={() => void handleSendMessage(lastFailedMessage)}
+            className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-error-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)]"
+          >
+            Tentar novamente
+          </button>
         </div>
       )}
       {isLoading && (

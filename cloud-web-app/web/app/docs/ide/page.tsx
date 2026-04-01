@@ -20,8 +20,8 @@ const IDE_FEATURES = [
   },
   {
     icon: Eye,
-    title: 'Live Preview',
-    description: 'Real-time preview with HMR. E2B sandbox or WebContainers fallback.',
+    title: 'Preview ao vivo',
+    description: 'Preview em tempo real com HMR. Sandbox E2B ou fallback WebContainers.',
     shortcut: 'Cmd+Shift+P',
   },
   {
@@ -68,7 +68,7 @@ export default function IDEDocsPage() {
 
         <h1 className="text-4xl font-bold">IDE / Workbench</h1>
         <p className="mt-3 text-lg text-[var(--aethel-text-tertiary)]">
-          Full-featured cloud IDE with AI assistance, live preview, and integrated terminal.
+          IDE cloud completa com assistencia de IA, preview ao vivo e terminal integrado.
         </p>
 
         <h2 className="mt-10 text-2xl font-semibold">Features</h2>

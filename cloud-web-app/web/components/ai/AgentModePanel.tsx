@@ -207,7 +207,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5 text-[var(--aethel-info-light)]" />
-          <span className="font-semibold text-[var(--aethel-text-primary)]">Agent Mode</span>
+          <span className="font-semibold text-[var(--aethel-text-primary)]">Modo agente</span>
           <span className={cn('rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] px-2 py-0.5 text-xs', getStatusColor(status))}>
             {status.toUpperCase()}
           </span>

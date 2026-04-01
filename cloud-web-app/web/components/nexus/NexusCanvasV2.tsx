@@ -273,7 +273,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
         >
           <div>FPS: {stats.fps}</div>
           <div>Objects: {stats.objects}</div>
-          <div>Renderer: WebGL</div>
+          <div>Renderizador: WebGL</div>
           <div>Mode: {renderMode}</div>
         </div>
       </div>
