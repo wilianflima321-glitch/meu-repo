@@ -241,7 +241,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
 
   return (
     <div className="mb-3">
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full text-left py-1 text-sm text-[var(--aethel-text-primary)] hover:text-[var(--aethel-text-primary)]"
       >
@@ -538,7 +538,7 @@ function BoneTreeItem({
         onClick={() => onSelect(bone.id)}
       >
         {hasChildren ? (
-          <button onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}>
+          <button type="button" onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}>
             {expanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
           </button>
         ) : (
@@ -552,20 +552,20 @@ function BoneTreeItem({
         </span>
 
         <div className="flex gap-0.5 opacity-0 group-hover:opacity-100">
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onToggleIK(bone.id); }}
             className={`p-0.5 rounded ${bone.ikEnabled ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Toggle IK"
           >
             <Target className="w-3 h-3" />
           </button>
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onToggleVisibility(bone.id); }}
             className="p-0.5 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             {bone.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
           </button>
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onToggleLock(bone.id); }}
             className={`p-0.5 rounded ${bone.locked ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
           >
@@ -607,7 +607,7 @@ function IKChainPanel({ chain, onUpdate, onDelete }: IKChainPanelProps) {
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium">{chain.name}</span>
         <div className="flex gap-1">
-          <button
+          <button type="button"
             onClick={() => onUpdate({ enabled: !chain.enabled })}
             className={`p-1 rounded ${chain.enabled ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
           >
@@ -666,11 +666,11 @@ function ConstraintPanel({ constraint, onUpdate, onDelete }: ConstraintPanelProp
       <div className="flex items-center gap-2 mb-2">
         {typeIcons[constraint.type]}
         <span className="text-xs font-medium capitalize">{constraint.type}</span>
-        <button
+        <button type="button"
           onClick={() => onUpdate({ enabled: !constraint.enabled })}
           className={`ml-auto p-1 rounded text-xs ${constraint.enabled ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
         >
-          {constraint.enabled ? 'ON' : 'OFF'}
+          {constraint.enabled ? 'Ativo' : 'Inativo'}
         </button>
       </div>
 
@@ -809,13 +809,13 @@ export default function ControlRigEditor({
 
         {/* View toggles */}
         <div className="p-3 border-t border-[var(--aethel-border-primary)] flex gap-2">
-          <button
+          <button type="button"
             onClick={() => setShowBones(!showBones)}
             className={`flex-1 p-2 rounded text-xs ${showBones ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
           >
             Bones
           </button>
-          <button
+          <button type="button"
             onClick={() => setShowIK(!showIK)}
             className={`flex-1 p-2 rounded text-xs ${showIK ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
           >
@@ -853,24 +853,24 @@ export default function ControlRigEditor({
 
         {/* Toolbar */}
         <div className="absolute top-4 left-4 flex gap-2">
-          <button
+          <button type="button"
             onClick={() => setIsSimulating(!isSimulating)}
             className={`p-2 rounded ${isSimulating ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
             title={isSimulating ? 'Stop' : 'Simulate'}
           >
             {isSimulating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
-          <button
+          <button type="button"
             onClick={() => setBones(HUMANOID_BONES)}
             className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]"
-            title="Reset"
+            title="Resetar"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
-          <button
+          <button type="button"
             onClick={handleExport}
             className="p-2 rounded bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
-            title="Export"
+            title="Exportar"
           >
             <Download className="w-4 h-4" />
           </button>
@@ -879,8 +879,8 @@ export default function ControlRigEditor({
         {/* Info */}
         <div className="absolute bottom-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_85%,transparent)] p-2 rounded text-xs">
           <div>Bones: {bones.length}</div>
-          <div>IK Chains: {ikChains.filter((c) => c.enabled).length}</div>
-          <div>Constraints: {constraints.filter((c) => c.enabled).length}</div>
+          <div>Cadeias IK: {ikChains.filter((c) => c.enabled).length}</div>
+          <div>Restrições: {constraints.filter((c) => c.enabled).length}</div>
         </div>
       </div>
 
@@ -907,7 +907,7 @@ export default function ControlRigEditor({
               />
 
               <div className="flex gap-2 mt-3">
-                <button
+                <button type="button"
                   onClick={() => toggleBoneIK(selectedBoneData.id)}
                   className={`flex-1 p-2 rounded text-xs ${
                     selectedBoneData.ikEnabled ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)]'
@@ -916,7 +916,7 @@ export default function ControlRigEditor({
                   <Target className="w-3 h-3 inline mr-1" />
                   IK
                 </button>
-                <button
+                <button type="button"
                   onClick={() => toggleBoneLock(selectedBoneData.id)}
                   className={`flex-1 p-2 rounded text-xs ${
                     selectedBoneData.locked ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[var(--aethel-surface-quaternary)]'
@@ -946,7 +946,7 @@ export default function ControlRigEditor({
 
           {/* Constraints */}
           <CollapsibleSection
-            title="Constraints"
+            title="Restrições"
             icon={<Link className="w-4 h-4 text-[var(--aethel-info-light)]" />}
             defaultOpen={false}
           >
@@ -963,7 +963,7 @@ export default function ControlRigEditor({
               ))
             )}
 
-            <button
+            <button type="button"
               className="w-full p-2 mt-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs"
             >
               + Add Constraint
@@ -977,27 +977,27 @@ export default function ControlRigEditor({
             defaultOpen={false}
           >
             <div className="grid grid-cols-3 gap-1">
-              <button className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
+              <button type="button" className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
                 <Hand className="w-4 h-4 mx-auto mb-1" />
                 L.Arm
               </button>
-              <button className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
+              <button type="button" className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
                 <User className="w-4 h-4 mx-auto mb-1" />
                 Spine
               </button>
-              <button className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
+              <button type="button" className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
                 <Hand className="w-4 h-4 mx-auto mb-1" />
                 R.Arm
               </button>
-              <button className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
+              <button type="button" className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
                 <Footprints className="w-4 h-4 mx-auto mb-1" />
                 L.Leg
               </button>
-              <button className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
+              <button type="button" className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
                 <Zap className="w-4 h-4 mx-auto mb-1" />
                 Hips
               </button>
-              <button className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
+              <button type="button" className="p-2 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-xs">
                 <Footprints className="w-4 h-4 mx-auto mb-1" />
                 R.Leg
               </button>

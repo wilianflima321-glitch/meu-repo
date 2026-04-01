@@ -12,7 +12,7 @@
  * - Localization support
  * - Audio cue linking
  * - Real-time preview
- * - Export to runtime format
+ * - Exportar to runtime format
  */
 
 'use client';
@@ -153,7 +153,7 @@ function EntryNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
     <div className={`px-4 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)] shadow-lg ${selected ? 'ring-2 ring-white' : ''}`}>
       <div className="flex items-center gap-2">
         <CircleDot className="w-4 h-4" />
-        <span className="font-medium">Start</span>
+        <span className="font-medium">Início</span>
       </div>
       <Handle type="source" position={Position.Bottom} className="!bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]" />
     </div>
@@ -189,7 +189,7 @@ function DialogueNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
           </div>
         ))}
         {lines.length === 0 && (
-          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">No dialogue lines</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">Sem linhas de diálogo</p>
         )}
       </div>
 
@@ -232,7 +232,7 @@ function ChoiceNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
           </div>
         ))}
         {choices.length === 0 && (
-          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">No choices</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">Sem escolhas</p>
         )}
       </div>
     </div>
@@ -262,7 +262,7 @@ function ConditionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
             {condition.variable} {condition.operator} {String(condition.value)}
           </div>
         ) : (
-          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">No condition set</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">Sem condição definida</p>
         )}
       </div>
 
@@ -313,7 +313,7 @@ function ActionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
           </div>
         ))}
         {actions.length === 0 && (
-          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">No actions</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">Sem ações</p>
         )}
       </div>
 
@@ -393,7 +393,7 @@ const initialNodes: Node<DialogueNodeData>[] = [
     id: 'entry',
     type: 'entry',
     position: { x: 400, y: 50 },
-    data: { label: 'Start', nodeType: 'entry' },
+    data: { label: 'Início', nodeType: 'entry' },
   },
   {
     id: 'dialogue1',
@@ -418,7 +418,7 @@ const initialNodes: Node<DialogueNodeData>[] = [
     type: 'choice',
     position: { x: 350, y: 350 },
     data: {
-      label: 'Player Response',
+      label: 'Resposta do jogador',
       nodeType: 'choice',
       choices: [
         { id: 'c1', text: 'Show me your wares.', localization: {} },
@@ -478,7 +478,7 @@ function DialogueLineEditor({ line, characters, onUpdate, onDelete }: DialogueLi
           ))}
         </select>
 
-        <button
+        <button type="button"
           onClick={onDelete}
           className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
         >
@@ -495,11 +495,11 @@ function DialogueLineEditor({ line, characters, onUpdate, onDelete }: DialogueLi
       />
 
       <div className="flex gap-2 mt-2">
-        <button className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs hover:bg-[var(--aethel-surface-quaternary)]">
+        <button type="button" className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs hover:bg-[var(--aethel-surface-quaternary)]">
           <Volume2 className="w-3 h-3" />
           Audio
         </button>
-        <button className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs hover:bg-[var(--aethel-surface-quaternary)]">
+        <button type="button" className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs hover:bg-[var(--aethel-surface-quaternary)]">
           <Globe className="w-3 h-3" />
           Localize
         </button>
@@ -580,7 +580,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
         </div>
 
         {node.type !== 'entry' && (
-          <button
+          <button type="button"
             onClick={() => onDelete(node.id)}
             className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
           >
@@ -604,7 +604,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs text-[var(--aethel-text-tertiary)]">Dialogue Lines</label>
-            <button
+            <button type="button"
               onClick={addLine}
               className="flex items-center gap-1 px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_45%,transparent)] rounded text-xs"
             >
@@ -630,7 +630,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs text-[var(--aethel-text-tertiary)]">Choices</label>
-            <button
+            <button type="button"
               onClick={addChoice}
               className="flex items-center gap-1 px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-warning-dark)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning-dark)_50%,transparent)] rounded text-xs"
             >
@@ -652,7 +652,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
                   }}
                   className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-sm"
                 />
-                <button
+                <button type="button"
                   onClick={() => {
                     const choices = [...(data.choices || [])];
                     choices.splice(i, 1);
@@ -699,7 +699,7 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
 
   return (
     <div className="border-t border-[var(--aethel-border-primary)]">
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full p-3 text-sm text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
       >
@@ -715,7 +715,7 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
               <code className="text-xs text-[var(--aethel-primary)] flex-1 font-mono">{v.name}</code>
               <span className="text-[10px] text-[var(--aethel-text-quaternary)]">{v.type}</span>
               <span className="text-xs text-[var(--aethel-text-tertiary)] font-mono">{String(v.defaultValue)}</span>
-              <button
+              <button type="button"
                 onClick={() => onDelete(i)}
                 className="p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
               >
@@ -724,7 +724,7 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
             </div>
           ))}
 
-          <button
+          <button type="button"
             onClick={() => onAdd({ name: `var_${Date.now()}`, type: 'string', defaultValue: '' })}
             className="flex items-center gap-1 w-full p-2 rounded bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] text-xs"
           >
@@ -762,12 +762,12 @@ function PreviewPanel({
 }: PreviewPanelProps) {
   if (!isPlaying) {
     return (
-      <button
+      <button type="button"
         onClick={onToggle}
         className="flex items-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded"
       >
         <Play className="w-4 h-4" />
-        Preview Dialogue
+        Prévia do diálogo
       </button>
     );
   }
@@ -779,8 +779,8 @@ function PreviewPanel({
   return (
     <div className="w-96 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl">
       <div className="flex items-center justify-between p-3 border-b border-[var(--aethel-border-primary)]">
-        <span className="text-sm font-medium">Dialogue Preview</span>
-        <button onClick={onToggle} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
+        <span className="text-sm font-medium">Prévia do diálogo</span>
+        <button type="button" onClick={onToggle} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
           <Pause className="w-4 h-4" />
         </button>
       </div>
@@ -803,7 +803,7 @@ function PreviewPanel({
             </div>
           </div>
 
-          <button
+          <button type="button"
             onClick={onNext}
             className="w-full py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
           >
@@ -815,7 +815,7 @@ function PreviewPanel({
       {data?.nodeType === 'choice' && (
         <div className="p-4 space-y-2">
           {data.choices?.map((choice) => (
-            <button
+            <button type="button"
               key={choice.id}
               onClick={() => onChoose(choice.id)}
               className="w-full p-3 bg-[color-mix(in_srgb,var(--aethel-warning-dark)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning-dark)_50%,transparent)] rounded text-left text-sm"
@@ -836,13 +836,13 @@ function PreviewPanel({
 export interface DialogueEditorProps {
   dialogueId?: string;
   onSave?: (nodes: Node<DialogueNodeData>[], edges: Edge[]) => void;
-  onExport?: (format: 'json' | 'yarn' | 'ink') => void;
+  onExportar?: (format: 'json' | 'yarn' | 'ink') => void;
 }
 
 export default function DialogueEditor({
   dialogueId,
   onSave,
-  onExport,
+  onExportar,
 }: DialogueEditorProps) {
   // Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -1001,35 +1001,35 @@ export default function DialogueEditor({
 
           {/* Toolbar */}
           <Panel position="top-left" className="flex gap-2">
-            <button
+            <button type="button"
               onClick={() => addNode('dialogue')}
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm"
             >
               <MessageSquare className="w-4 h-4" />
               Dialogue
             </button>
-            <button
+            <button type="button"
               onClick={() => addNode('choice')}
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] rounded text-sm"
             >
               <GitBranch className="w-4 h-4" />
               Choice
             </button>
-            <button
+            <button type="button"
               onClick={() => addNode('condition')}
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm"
             >
               <Code className="w-4 h-4" />
               Condition
             </button>
-            <button
+            <button type="button"
               onClick={() => addNode('action')}
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-info)] hover:brightness-110 rounded text-sm"
             >
               <Zap className="w-4 h-4" />
               Action
             </button>
-            <button
+            <button type="button"
               onClick={() => addNode('exit')}
               className="flex items-center gap-1 px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded text-sm"
             >
@@ -1040,14 +1040,14 @@ export default function DialogueEditor({
 
           {/* Actions */}
           <Panel position="top-right" className="flex gap-2">
-            <button
-              onClick={() => onExport?.('json')}
+            <button type="button"
+              onClick={() => onExportar?.('json')}
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Download className="w-4 h-4" />
-              Export
+              Exportar
             </button>
-            <button
+            <button type="button"
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Upload className="w-4 h-4" />
@@ -1068,7 +1068,7 @@ export default function DialogueEditor({
                 onChoose={chooseOption}
               />
             ) : (
-              <button
+              <button type="button"
                 onClick={startPreview}
                 className="flex items-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded"
               >

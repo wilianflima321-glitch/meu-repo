@@ -2,7 +2,7 @@
 
 ## Estado executivo
 - PT-BR e tokens Aethel aplicados em layout global, terminal, workspace e extensões.
-- Ajustes adicionais em FullscreenIDE, PreviewRuntimeToolbar, GitPanelPro e VideoTimeline com mensagens operacionais em PT-BR.
+- Ajustes adicionais em FullscreenIDE, PreviewRuntimeToolbar, GitPanelPro, VideoTimeline, DialogueEditor e ControlRigEditor com mensagens operacionais em PT-BR.
 - Sweep automatizado em app/components/lib reduziu cores hardcoded e expandiu uso de `var(--aethel-*)`.
 - Acessibilidade reforçada nos pontos tocados (aria-label, type="button", foco visível).
 - Nenhuma claim de backend novo, runtime externo ou conclusão operacional sem evidência local.
@@ -21,6 +21,8 @@
 - `cloud-web-app/web/components/extensions/ExtensionManager.tsx`
 - `cloud-web-app/web/components/ide/GitPanelPro.tsx`
 - `cloud-web-app/web/components/video/VideoTimeline.tsx`
+- `cloud-web-app/web/components/narrative/DialogueEditor.tsx`
+- `cloud-web-app/web/components/character/ControlRigEditor.tsx`
 - `cloud-web-app/web/components/terminal/XTerminal.tsx`
 - `cloud-web-app/web/components/extensions/ExtensionManagerPanel.tsx`
 - `cloud-web-app/web/components/outline/OutlinePanel.tsx`
