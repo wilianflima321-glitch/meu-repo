@@ -1,9 +1,9 @@
 /**
  * Project Settings UI - Configurações do Projeto
- * 
+ *
  * Interface profissional estilo Unreal Engine para gerenciar
  * todas as configurações do projeto e engine.
- * 
+ *
  * NÃO É MOCK - Sistema real e funcional!
  */
 
@@ -367,7 +367,7 @@ function BooleanEditor({ setting, value, onChange }: SettingEditorProps) {
 function NumberEditor({ setting, value, onChange }: SettingEditorProps) {
   const numValue = value as number;
   const isPercentage = setting.max === 1 && setting.min === 0;
-  
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
       <input
@@ -446,7 +446,7 @@ function EnumEditor({ setting, value, onChange }: SettingEditorProps) {
 
 function ColorEditor({ setting, value, onChange }: SettingEditorProps) {
   const color = value as string;
-  
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
       <input
@@ -482,7 +482,7 @@ function ColorEditor({ setting, value, onChange }: SettingEditorProps) {
 
 function Vector2Editor({ setting, value, onChange }: SettingEditorProps) {
   const vec = value as { x: number; y: number };
-  
+
   return (
     <div style={{ display: 'flex', gap: '8px' }}>
       <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -523,7 +523,7 @@ function Vector2Editor({ setting, value, onChange }: SettingEditorProps) {
 
 function Vector3Editor({ setting, value, onChange }: SettingEditorProps) {
   const vec = value as { x: number; y: number; z: number };
-  
+
   return (
     <div style={{ display: 'flex', gap: '8px' }}>
       <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -614,30 +614,30 @@ function PathEditor({ setting, value, onChange }: SettingEditorProps) {
 
 function KeybindEditor({ setting, value, onChange }: SettingEditorProps) {
   const [isListening, setIsListening] = useState(false);
-  
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!isListening) return;
-    
+
     e.preventDefault();
     e.stopPropagation();
-    
+
     let key = e.key;
     if (key === ' ') key = 'Space';
     if (key === 'Control') key = e.location === 1 ? 'LeftCtrl' : 'RightCtrl';
     if (key === 'Shift') key = e.location === 1 ? 'LeftShift' : 'RightShift';
     if (key === 'Alt') key = e.location === 1 ? 'LeftAlt' : 'RightAlt';
-    
+
     onChange(key);
     setIsListening(false);
-    
+
     window.removeEventListener('keydown', handleKeyDown);
   }, [isListening, onChange]);
-  
+
   const startListening = useCallback(() => {
     setIsListening(true);
     window.addEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
-  
+
   return (
     <button
       onClick={startListening}
@@ -705,15 +705,15 @@ export default function ProjectSettings() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  
+
   const currentCategory = useMemo(
     () => categories.find((c) => c.id === selectedCategory),
     [categories, selectedCategory]
   );
-  
+
   const filteredSections = useMemo(() => {
     if (!currentCategory) return [];
-    
+
     return currentCategory.sections
       .map((section) => ({
         ...section,
@@ -731,19 +731,19 @@ export default function ProjectSettings() {
       }))
       .filter((section) => section.settings.length > 0);
   }, [currentCategory, searchQuery, showAdvanced]);
-  
+
   const handleSettingChange = useCallback((id: string, value: unknown) => {
     setSettings((prev) => ({ ...prev, [id]: value }));
     setHasChanges(true);
   }, []);
-  
+
   const handleSave = useCallback(() => {
     // Save settings to localStorage or backend
     localStorage.setItem('aethel_project_settings', JSON.stringify(settings));
     setHasChanges(false);
     console.log('Settings saved:', settings);
   }, [settings]);
-  
+
   const handleReset = useCallback(() => {
     const initial: Record<string, unknown> = {};
     for (const cat of defaultSettings) {
@@ -756,7 +756,7 @@ export default function ProjectSettings() {
     setSettings(initial);
     setHasChanges(true);
   }, []);
-  
+
   const handleExport = useCallback(() => {
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -766,7 +766,7 @@ export default function ProjectSettings() {
     a.click();
     URL.revokeObjectURL(url);
   }, [settings]);
-  
+
   const handleImport = useCallback(() => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -786,7 +786,7 @@ export default function ProjectSettings() {
     };
     input.click();
   }, [toast]);
-  
+
   return (
     <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--aethel-surface-primary)', color: 'var(--aethel-text-primary)' }}>
       {/* Header */}
@@ -800,9 +800,9 @@ export default function ProjectSettings() {
         gap: '16px',
       }}>
         <span style={{ fontWeight: 'bold', fontSize: '16px' }}>⚙️ Project Settings</span>
-        
+
         <div style={{ flex: 1 }} />
-        
+
         <input
           type="text"
           value={searchQuery}
@@ -817,7 +817,7 @@ export default function ProjectSettings() {
             padding: '8px 12px',
           }}
         />
-        
+
         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -826,9 +826,9 @@ export default function ProjectSettings() {
           />
           Show Advanced
         </label>
-        
+
         <div style={{ width: '1px', height: '24px', background: 'var(--aethel-border-primary)' }} />
-        
+
         <button
           onClick={handleImport}
           style={{
@@ -842,7 +842,7 @@ export default function ProjectSettings() {
         >
           📥 Import
         </button>
-        
+
         <button
           onClick={handleExport}
           style={{
@@ -856,7 +856,7 @@ export default function ProjectSettings() {
         >
           📤 Export
         </button>
-        
+
         <button
           onClick={handleReset}
           style={{
@@ -870,7 +870,7 @@ export default function ProjectSettings() {
         >
           🔄 Reset
         </button>
-        
+
         <button
           onClick={handleSave}
           disabled={!hasChanges}
@@ -887,7 +887,7 @@ export default function ProjectSettings() {
           💾 Save
         </button>
       </div>
-      
+
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Category Sidebar */}
@@ -923,7 +923,7 @@ export default function ProjectSettings() {
             </button>
           ))}
         </div>
-        
+
         {/* Settings Panel */}
         <div style={{ flex: 1, overflow: 'auto', padding: '24px 32px' }}>
           {currentCategory && (
@@ -935,7 +935,7 @@ export default function ProjectSettings() {
               <p style={{ color: 'var(--aethel-text-quaternary)', marginBottom: '32px' }}>
                 Configure {currentCategory.name.toLowerCase()} settings for your project
               </p>
-              
+
               {filteredSections.map((section) => (
                 <div
                   key={section.id}
@@ -956,7 +956,7 @@ export default function ProjectSettings() {
                       <p style={{ fontSize: '12px', color: 'var(--aethel-text-quaternary)', margin: '4px 0 0 0' }}>{section.description}</p>
                     )}
                   </div>
-                  
+
                   <div style={{ padding: '8px 0' }}>
                     {section.settings.map((setting, index) => (
                       <div
@@ -995,7 +995,7 @@ export default function ProjectSettings() {
                           </div>
                           <p style={{ fontSize: '12px', color: 'var(--aethel-text-quaternary)', margin: 0 }}>{setting.description}</p>
                         </div>
-                        
+
                         <div style={{ flex: 1, maxWidth: '400px' }}>
                           <SettingEditor
                             setting={setting}
@@ -1008,7 +1008,7 @@ export default function ProjectSettings() {
                   </div>
                 </div>
               ))}
-              
+
               {filteredSections.length === 0 && (
                 <div style={{
                   textAlign: 'center',
@@ -1023,7 +1023,7 @@ export default function ProjectSettings() {
           )}
         </div>
       </div>
-      
+
       {/* Footer Status Bar */}
       <div style={{
         height: '28px',

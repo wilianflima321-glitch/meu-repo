@@ -120,7 +120,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
         />
-        
+
         <div className="search-options">
           <button
             className={`option-button ${options.isCaseSensitive ? 'active' : ''}`}

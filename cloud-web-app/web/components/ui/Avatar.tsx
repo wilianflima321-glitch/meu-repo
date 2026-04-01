@@ -83,7 +83,7 @@ function getColorFromName(name: string): string {
     'bg-[var(--aethel-accent)]',
     'bg-[var(--aethel-info)]',
   ]
-  
+
   const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
   return colors[hash % colors.length]
 }
@@ -123,7 +123,7 @@ export function Avatar({
           </span>
         )}
       </div>
-      
+
       {status && (
         <span
           className={`

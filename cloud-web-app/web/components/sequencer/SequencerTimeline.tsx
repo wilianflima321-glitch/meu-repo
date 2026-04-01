@@ -1,6 +1,6 @@
 /**
  * Sequencer Timeline Editor - Editor de Timeline Cinematico
- * 
+ *
  * Interface estilo Premiere/After Effects para edicao de sequencias cinematicas.
  * Conecta ao SequencerRuntime para reproducao em tempo real.
  */
@@ -177,7 +177,7 @@ const Playhead: React.FC<{
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     isDragging.current = true;
-    
+
     const handleMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
       const rect = (e.target as HTMLElement).closest('.timeline-tracks')?.getBoundingClientRect();
@@ -355,7 +355,7 @@ const TrackRow: React.FC<{
           {track.name}
         </span>
         <span style={{ fontSize: '10px', color: colors.textDim }}>{track.property}</span>
-        
+
         {/* Controls */}
         <div style={{ display: 'flex', gap: '4px' }}>
           <button

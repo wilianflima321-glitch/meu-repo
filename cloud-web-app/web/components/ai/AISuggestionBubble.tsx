@@ -1,13 +1,13 @@
 ﻿/**
  * AISuggestionBubble - Bolhas de Sugestão Proativa da IA
- * 
+ *
  * Sugestões contextuais não-intrusivas da IA.
  * Aparece próximo ao elemento relevante.
  * Pode ser dispensada ou aplicada rapidamente.
- * 
+ *
  * @see AI_SELF_REFLECTION_SYSTEM.md
  * @see INOVACOES_TECNICAS_DETALHADAS.md
- * 
+ *
  * @module components/ai/AISuggestionBubble
  */
 
@@ -41,7 +41,7 @@ import {
 // TYPES
 // ============================================================================
 
-export type SuggestionType = 
+export type SuggestionType =
   | 'code'        // Sugestão de código
   | 'design'      // Sugestão de design/visual
   | 'performance' // Sugestão de performance
@@ -49,14 +49,14 @@ export type SuggestionType =
   | 'error'       // Correção de erro
   | 'tip';        // Dica geral
 
-export type SuggestionPosition = 
-  | 'top' 
-  | 'bottom' 
-  | 'left' 
-  | 'right' 
-  | 'top-left' 
-  | 'top-right' 
-  | 'bottom-left' 
+export type SuggestionPosition =
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
   | 'bottom-right';
 
 export interface AISuggestion {
@@ -152,11 +152,11 @@ const TYPE_CONFIG: Record<SuggestionType, {
   },
 };
 
-const POSITION_STYLES: Record<SuggestionPosition, { 
+const POSITION_STYLES: Record<SuggestionPosition, {
   initial: { x: number; y: number; scale: number };
   arrow: string;
 }> = {
-  'top': { 
+  'top': {
     initial: { x: 0, y: 10, scale: 0.95 },
     arrow: 'bottom-[-6px] left-1/2 -translate-x-1/2 border-t-[var(--aethel-surface-secondary)] border-l-transparent border-r-transparent border-b-transparent border-t-[6px] border-l-[6px] border-r-[6px]',
   },
@@ -365,7 +365,7 @@ export function AISuggestionBubble({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={`
-          relative z-50 w-72 
+          relative z-50 w-72
           bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-xl shadow-xl
           ${className}
         `}
@@ -383,7 +383,7 @@ export function AISuggestionBubble({
                 <motion.div
                   animate={{ rotate: [0, 5, -5, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className={`relative z-10 w-6 h-6 rounded-lg ${config.bgColor} 
+                  className={`relative z-10 w-6 h-6 rounded-lg ${config.bgColor}
                             flex items-center justify-center`}
                 >
                   <Brain className={`w-4 h-4 ${config.color}`} />
@@ -480,7 +480,7 @@ export function AISuggestionBubble({
             <button
               type="button"
               onClick={() => onLearnMore(suggestion)}
-              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] 
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)]
                        hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-sm text-[var(--aethel-text-secondary)]
                        transition-colors"
             >
@@ -589,7 +589,7 @@ export function SuggestionManager({
         return b.createdAt - a.createdAt;
       })
       .slice(0, maxVisible);
-    
+
     setVisibleSuggestions(sorted);
   }, [suggestions, maxVisible]);
 

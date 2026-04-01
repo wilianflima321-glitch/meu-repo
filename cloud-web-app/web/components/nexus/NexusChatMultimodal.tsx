@@ -145,7 +145,7 @@ export default function NexusChatMultimodal() {
             <div
               className={`max-w-[85%] rounded-2xl p-4 ${
                 msg.role === 'user'
-                  ? 'bg-[var(--aethel-primary)] text-white shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]'
+                  ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]'
                   : 'bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)]'
               }`}
             >
@@ -220,7 +220,7 @@ export default function NexusChatMultimodal() {
               </button>
               <button
                 type="submit"
-                className="ml-1 rounded-lg bg-[var(--aethel-primary)] p-2 text-white shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] transition-all hover:brightness-110"
+                className="ml-1 rounded-lg bg-[var(--aethel-primary)] p-2 text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] transition-all hover:brightness-110"
                 aria-label="Enviar mensagem"
               >
                 <Send size={18} />

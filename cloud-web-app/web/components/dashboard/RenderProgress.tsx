@@ -1,7 +1,7 @@
 /**
  * AETHEL ENGINE - RENDER PROGRESS COMPONENT
  * =========================================
- * 
+ *
  * Componente para exibir progresso de renderização em tempo real
  * com suporte a múltiplos jobs, thumbnails e estimativa de tempo.
  */
@@ -32,7 +32,7 @@ import {
 // TYPES
 // ============================================================================
 
-export type RenderJobStatus = 
+export type RenderJobStatus =
     | 'queued'
     | 'preparing'
     | 'rendering'
@@ -101,11 +101,11 @@ export interface RenderQueueProps {
 
 function formatDuration(ms: number): string {
     if (ms < 1000) return `${ms}ms`;
-    
+
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) {
         return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
     }
@@ -117,10 +117,10 @@ function formatDuration(ms: number): string {
 
 function formatTimeRemaining(ms: number): string {
     if (ms < 60000) return '< 1 min';
-    
+
     const minutes = Math.floor(ms / 60000);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) {
         return `~${hours}h ${minutes % 60}m restantes`;
     }
@@ -130,7 +130,7 @@ function formatTimeRemaining(ms: number): string {
 function getStatusColor(status: RenderJobStatus): string {
     switch (status) {
         case 'completed':
-            return 'text-green-500';
+            return 'text-[var(--aethel-success-light)]';
         case 'rendering':
         case 'compositing':
             return 'text-[var(--aethel-primary)]';
@@ -152,7 +152,7 @@ function getStatusColor(status: RenderJobStatus): string {
 function getStatusBg(status: RenderJobStatus): string {
     switch (status) {
         case 'completed':
-            return 'bg-green-500';
+            return 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]';
         case 'rendering':
         case 'compositing':
             return 'bg-[var(--aethel-primary)]';
@@ -160,14 +160,14 @@ function getStatusBg(status: RenderJobStatus): string {
         case 'finalizing':
             return 'bg-[var(--aethel-warning)]';
         case 'queued':
-            return 'bg-gray-500';
+            return 'bg-[var(--aethel-surface-secondary)]';
         case 'paused':
             return 'bg-orange-500';
         case 'failed':
         case 'cancelled':
             return 'bg-[var(--aethel-error)]';
         default:
-            return 'bg-gray-500';
+            return 'bg-[var(--aethel-surface-secondary)]';
     }
 }
 
@@ -197,7 +197,7 @@ interface StatusIconProps {
 
 const StatusIcon: React.FC<StatusIconProps> = ({ status, size = 16 }) => {
     const className = getStatusColor(status);
-    
+
     switch (status) {
         case 'completed':
             return <CheckCircle size={size} className={className} />;
@@ -235,7 +235,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
 }) => {
     const [expanded, setExpanded] = useState(!compact);
     const [elapsedTime, setElapsedTime] = useState(0);
-    
+
     // Calculate elapsed time
     useEffect(() => {
         if (!job.startTime || job.status === 'completed' || job.status === 'failed') {
@@ -244,27 +244,27 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
             }
             return;
         }
-        
+
         const interval = setInterval(() => {
             setElapsedTime(Date.now() - job.startTime!);
         }, 1000);
-        
+
         return () => clearInterval(interval);
     }, [job.startTime, job.endTime, job.status]);
-    
+
     const isActive = ['rendering', 'compositing', 'preparing', 'finalizing'].includes(job.status);
     const canPause = isActive && onPause;
     const canResume = job.status === 'paused' && onResume;
     const canCancel = (isActive || job.status === 'queued' || job.status === 'paused') && onCancel;
     const canRetry = (job.status === 'failed' || job.status === 'cancelled') && onRetry;
     const canDownload = job.status === 'completed' && job.output && onDownload;
-    
+
     return (
-        <div className={`bg-gray-800 rounded-lg overflow-hidden ${className}`}>
+        <div className={`bg-[var(--aethel-surface-secondary)] rounded-lg overflow-hidden ${className}`}>
             {/* Header */}
             <div className="flex items-center gap-3 p-4">
                 {/* Thumbnail */}
-                <div className="relative w-16 h-16 bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="relative w-16 h-16 bg-[var(--aethel-surface-secondary)] rounded-lg overflow-hidden flex-shrink-0">
                     {job.thumbnail ? (
                         <>
                             <NextImage
@@ -293,16 +293,16 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                         </div>
                     )}
                 </div>
-                
+
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         <h3 className="font-medium text-[var(--aethel-text-primary)] truncate">{job.name}</h3>
-                        <span className={`px-2 py-0.5 rounded text-xs ${getStatusColor(job.status)} bg-gray-700`}>
+                        <span className={`px-2 py-0.5 rounded text-xs ${getStatusColor(job.status)} bg-[var(--aethel-surface-secondary)]`}>
                             {getStatusLabel(job.status)}
                         </span>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 mt-1 text-xs text-[var(--aethel-text-secondary)]">
                         <span>{job.resolution.width}x{job.resolution.height}</span>
                         <span>•</span>
@@ -316,11 +316,11 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                             </>
                         )}
                     </div>
-                    
+
                     {/* Progress bar */}
                     <div className="mt-2">
-                        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div 
+                        <div className="h-2 bg-[var(--aethel-surface-secondary)] rounded-full overflow-hidden">
+                            <div
                                 className={`h-full ${getStatusBg(job.status)} transition-all duration-300`}
                                 style={{ width: `${job.progress}%` }}
                             />
@@ -336,63 +336,63 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Actions */}
                 <div className="flex items-center gap-1">
                     {canPause && (
                         <button
                             onClick={() => onPause(job.id)}
-                            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Pausar"
                         >
                             <Pause size={18} className="text-[var(--aethel-text-secondary)]" />
                         </button>
                     )}
-                    
+
                     {canResume && (
                         <button
                             onClick={() => onResume(job.id)}
-                            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Retomar"
                         >
-                            <Play size={18} className="text-green-500" />
+                            <Play size={18} className="text-[var(--aethel-success-light)]" />
                         </button>
                     )}
-                    
+
                     {canCancel && (
                         <button
                             onClick={() => onCancel(job.id)}
-                            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Cancelar"
                         >
                             <Square size={18} className="text-[var(--aethel-error)]" />
                         </button>
                     )}
-                    
+
                     {canRetry && (
                         <button
                             onClick={() => onRetry(job.id)}
-                            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Tentar novamente"
                         >
                             <RotateCcw size={18} className="text-[var(--aethel-primary-light)]" />
                         </button>
                     )}
-                    
+
                     {canDownload && (
                         <button
                             onClick={() => onDownload(job.id, job.output!)}
-                            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Download"
                         >
-                            <Download size={18} className="text-green-400" />
+                            <Download size={18} className="text-[var(--aethel-success-light)]" />
                         </button>
                     )}
-                    
+
                     {!compact && (
                         <button
                             onClick={() => setExpanded(!expanded)}
-                            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                         >
                             {expanded ? (
                                 <ChevronUp size={18} className="text-[var(--aethel-text-secondary)]" />
@@ -403,10 +403,10 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
                 </div>
             </div>
-            
+
             {/* Expanded details */}
             {expanded && !compact && (
-                <div className="px-4 pb-4 border-t border-gray-700 pt-3">
+                <div className="px-4 pb-4 border-t border-[var(--aethel-border-primary)] pt-3">
                     {/* Error message */}
                     {job.error && (
                         <div className="mb-3 p-3 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg">
@@ -417,7 +417,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                             <p className="text-[var(--aethel-error)] text-sm mt-1">{job.error}</p>
                         </div>
                     )}
-                    
+
                     {/* Stats grid */}
                     <div className="grid grid-cols-4 gap-4 text-sm">
                         <div>
@@ -441,7 +441,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                             </div>
                         )}
                     </div>
-                    
+
                     {/* Frame progress for animations */}
                     {job.type === 'animation' && job.frames && job.frames.length > 0 && (
                         <div className="mt-4">
@@ -453,10 +453,10 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                                     <div
                                         key={frame.frame}
                                         className={`w-4 h-4 rounded ${
-                                            frame.status === 'completed' ? 'bg-green-500' :
+                                            frame.status === 'completed' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' :
                                             frame.status === 'rendering' ? 'bg-[var(--aethel-primary)] animate-pulse' :
                                             frame.status === 'failed' ? 'bg-[var(--aethel-error)]' :
-                                            'bg-gray-600'
+                                            'bg-[var(--aethel-surface-secondary)]'
                                         }`}
                                         title={`Frame ${frame.frame}: ${frame.status}`}
                                     />
@@ -488,24 +488,24 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
     onClearCompleted,
     className = ''
 }) => {
-    const activeJobs = useMemo(() => 
+    const activeJobs = useMemo(() =>
         jobs.filter(j => ['rendering', 'compositing', 'preparing', 'finalizing'].includes(j.status)),
         [jobs]
     );
-    
-    const queuedJobs = useMemo(() => 
+
+    const queuedJobs = useMemo(() =>
         jobs.filter(j => j.status === 'queued'),
         [jobs]
     );
-    
-    const completedJobs = useMemo(() => 
+
+    const completedJobs = useMemo(() =>
         jobs.filter(j => ['completed', 'failed', 'cancelled'].includes(j.status)),
         [jobs]
     );
-    
+
     if (jobs.length === 0) {
         return (
-            <div className={`bg-gray-900 rounded-xl p-8 text-center ${className}`}>
+            <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-8 text-center ${className}`}>
                 <ImageIcon size={48} className="mx-auto text-[var(--aethel-text-tertiary)] mb-4" />
                 <h3 className="text-lg font-medium text-[var(--aethel-text-primary)] mb-2">
                     Nenhum render na fila
@@ -516,18 +516,18 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
             </div>
         );
     }
-    
+
     return (
-        <div className={`bg-gray-900 rounded-xl p-6 ${className}`}>
+        <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-6 ${className}`}>
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Fila de Render</h2>
-                    <span className="px-2 py-1 bg-gray-700 rounded text-sm text-[var(--aethel-text-secondary)]">
+                    <span className="px-2 py-1 bg-[var(--aethel-surface-secondary)] rounded text-sm text-[var(--aethel-text-secondary)]">
                         {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'}
                     </span>
                 </div>
-                
+
                 {completedJobs.length > 0 && onClearCompleted && (
                     <button
                         onClick={onClearCompleted}
@@ -537,23 +537,23 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
                     </button>
                 )}
             </div>
-            
+
             {/* Summary */}
             <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="bg-gray-800 rounded-lg p-3 text-center">
+                <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-[var(--aethel-primary)]">{activeJobs.length}</div>
                     <div className="text-xs text-[var(--aethel-text-secondary)]">Ativos</div>
                 </div>
-                <div className="bg-gray-800 rounded-lg p-3 text-center">
+                <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-3 text-center">
                     <div className="text-2xl font-bold text-[var(--aethel-warning)]">{queuedJobs.length}</div>
                     <div className="text-xs text-[var(--aethel-text-secondary)]">Na Fila</div>
                 </div>
-                <div className="bg-gray-800 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-green-500">{completedJobs.length}</div>
+                <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-3 text-center">
+                    <div className="text-2xl font-bold text-[var(--aethel-success-light)]">{completedJobs.length}</div>
                     <div className="text-xs text-[var(--aethel-text-secondary)]">Concluídos</div>
                 </div>
             </div>
-            
+
             {/* Active Jobs */}
             {activeJobs.length > 0 && (
                 <div className="mb-6">
@@ -573,7 +573,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
                     </div>
                 </div>
             )}
-            
+
             {/* Queued Jobs */}
             {queuedJobs.length > 0 && (
                 <div className="mb-6">
@@ -592,7 +592,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
                     </div>
                 </div>
             )}
-            
+
             {/* Completed Jobs */}
             {completedJobs.length > 0 && (
                 <div>

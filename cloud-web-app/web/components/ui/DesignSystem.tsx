@@ -1,17 +1,17 @@
 /**
  * Aethel IDE - Design System UI Components
- * 
+ *
  * Componentes profissionais do design system baseados no VS Code.
  * Todos com acessibilidade, temas e comportamentos consistentes.
  */
 
 'use client';
 
-import React, { 
-  forwardRef, 
-  useState, 
-  useRef, 
-  useEffect, 
+import React, {
+  forwardRef,
+  useState,
+  useRef,
+  useEffect,
   useCallback,
   createContext,
   useContext,
@@ -56,51 +56,51 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
   ({ children, className = '', onEscapeKeyDown, onPointerDownOutside }, ref) => {
     const context = useContext(DialogContext);
     const contentRef = useRef<HTMLDivElement>(null);
-    
+
     useEffect(() => {
       if (!context?.open) return;
-      
+
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
           onEscapeKeyDown?.();
           context.onOpenChange(false);
         }
       };
-      
+
       const handleClick = (e: MouseEvent) => {
         if (contentRef.current && !contentRef.current.contains(e.target as Node)) {
           onPointerDownOutside?.();
           context.onOpenChange(false);
         }
       };
-      
+
       document.addEventListener('keydown', handleKeyDown);
       document.addEventListener('mousedown', handleClick);
-      
+
       // Focus trap
       const focusableElements = contentRef.current?.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
       const firstFocusable = focusableElements?.[0] as HTMLElement;
       firstFocusable?.focus();
-      
+
       // Lock body scroll
       document.body.style.overflow = 'hidden';
-      
+
       return () => {
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('mousedown', handleClick);
         document.body.style.overflow = '';
       };
     }, [context, onEscapeKeyDown, onPointerDownOutside]);
-    
+
     if (!context?.open) return null;
-    
+
     return createPortal(
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden />
-        
+        <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm" aria-hidden />
+
         {/* Content */}
         <div
           ref={(node) => {
@@ -183,10 +183,10 @@ interface DialogCloseProps {
 
 export const DialogClose: React.FC<DialogCloseProps> = ({ children, className = '' }) => {
   const context = useContext(DialogContext);
-  
+
   return (
     <button
-      className={`absolute top-4 right-4 p-1 rounded hover:bg-white/10 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] ${className}`}
+      className={`absolute top-4 right-4 p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] ${className}`}
       onClick={() => context?.onOpenChange(false)}
       aria-label="Close"
     >
@@ -225,7 +225,7 @@ interface TabsListProps {
 }
 
 export const TabsList: React.FC<TabsListProps> = ({ children, className = '' }) => (
-  <div 
+  <div
     className={`flex gap-0 border-b border-[var(--aethel-border-primary)] ${className}`}
     role="tablist"
   >
@@ -240,21 +240,21 @@ interface TabsTriggerProps {
   disabled?: boolean;
 }
 
-export const TabsTrigger: React.FC<TabsTriggerProps> = ({ 
-  value, 
-  children, 
+export const TabsTrigger: React.FC<TabsTriggerProps> = ({
+  value,
+  children,
   className = '',
-  disabled = false 
+  disabled = false
 }) => {
   const context = useContext(TabsContext);
   const isSelected = context?.value === value;
-  
+
   return (
     <button
       className={`
         px-4 py-2 text-sm font-medium transition-colors relative
-        ${isSelected 
-          ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary)] -mb-px' 
+        ${isSelected
+          ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary)] -mb-px'
           : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -278,9 +278,9 @@ interface TabsContentProps {
 
 export const TabsContent: React.FC<TabsContentProps> = ({ value, children, className = '' }) => {
   const context = useContext(TabsContext);
-  
+
   if (context?.value !== value) return null;
-  
+
   return (
     <div className={className} role="tabpanel">
       {children}
@@ -326,12 +326,12 @@ export const TreeView: React.FC<TreeViewProps> = ({
 }) => {
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(selectedId);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(defaultExpanded));
-  
+
   const handleSelect = useCallback((id: string) => {
     setInternalSelectedId(id);
     onSelect?.(id);
   }, [onSelect]);
-  
+
   const handleToggle = useCallback((id: string) => {
     setExpandedIds(prev => {
       const next = new Set(prev);
@@ -343,14 +343,14 @@ export const TreeView: React.FC<TreeViewProps> = ({
       return next;
     });
   }, []);
-  
+
   return (
-    <TreeViewContext.Provider 
-      value={{ 
-        selectedId: internalSelectedId, 
-        expandedIds, 
-        onSelect: handleSelect, 
-        onToggle: handleToggle 
+    <TreeViewContext.Provider
+      value={{
+        selectedId: internalSelectedId,
+        expandedIds,
+        onSelect: handleSelect,
+        onToggle: handleToggle
       }}
     >
       <div className={`text-sm ${className}`} role="tree">
@@ -372,13 +372,13 @@ const TreeNode: React.FC<TreeNodeProps> = ({ item, depth }) => {
   const hasChildren = item.children && item.children.length > 0;
   const isExpanded = context?.expandedIds.has(item.id);
   const isSelected = context?.selectedId === item.id;
-  
+
   return (
     <div>
       <div
         className={`
           flex items-center gap-1 px-2 py-1 cursor-pointer select-none
-          ${isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:bg-white/5'}
+          ${isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'}
           ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
@@ -395,7 +395,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ item, depth }) => {
       >
         {hasChildren ? (
           <button
-            className="p-0.5 rounded hover:bg-white/10"
+            className="p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
             onClick={(e) => {
               e.stopPropagation();
               context?.onToggle(item.id);
@@ -410,11 +410,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({ item, depth }) => {
         ) : (
           <span className="w-5" />
         )}
-        
+
         {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
         <span className="truncate">{item.label}</span>
       </div>
-      
+
       {hasChildren && isExpanded && (
         <div role="group">
           {item.children!.map(child => (
@@ -451,54 +451,54 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, onSelect, child
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
-  
+
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setPosition({ x: e.clientX, y: e.clientY });
     setIsOpen(true);
   }, []);
-  
+
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsOpen(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClick);
     document.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClick);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);
-  
+
   const handleSelect = (id: string) => {
     setIsOpen(false);
     onSelect(id);
   };
-  
+
   return (
     <>
       <div onContextMenu={handleContextMenu}>{children}</div>
-      
+
       {isOpen && createPortal(
         <div
           ref={menuRef}
-          className="fixed z-50 min-w-[180px] bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] 
+          className="fixed z-50 min-w-[180px] bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)]
                      rounded-md shadow-xl py-1 animate-in fade-in-0 zoom-in-95 duration-100"
-          style={{ 
-            left: Math.min(position.x, window.innerWidth - 200), 
-            top: Math.min(position.y, window.innerHeight - 300) 
+          style={{
+            left: Math.min(position.x, window.innerWidth - 200),
+            top: Math.min(position.y, window.innerHeight - 300)
           }}
           role="menu"
         >
@@ -510,11 +510,11 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, onSelect, child
                 key={item.id}
                 className={`
                   w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left
-                  ${item.disabled 
-                    ? 'opacity-50 cursor-not-allowed' 
-                    : item.danger 
-                      ? 'hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]' 
-                      : 'hover:bg-white/5 text-[var(--aethel-text-secondary)]'
+                  ${item.disabled
+                    ? 'opacity-50 cursor-not-allowed'
+                    : item.danger
+                      ? 'hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
+                      : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
                   }
                 `}
                 onClick={() => !item.disabled && handleSelect(item.id)}
@@ -560,13 +560,13 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
-  
+
   const showTooltip = useCallback(() => {
     timeoutRef.current = setTimeout(() => {
       if (triggerRef.current) {
         const rect = triggerRef.current.getBoundingClientRect();
         let x = 0, y = 0;
-        
+
         switch (side) {
           case 'top':
             x = rect.left + rect.width / 2;
@@ -585,22 +585,22 @@ export const Tooltip: React.FC<TooltipProps> = ({
             y = rect.top + rect.height / 2;
             break;
         }
-        
+
         setPosition({ x, y });
         setIsVisible(true);
       }
     }, delay);
   }, [side, delay]);
-  
+
   const hideTooltip = useCallback(() => {
     clearTimeout(timeoutRef.current);
     setIsVisible(false);
   }, []);
-  
+
   useEffect(() => {
     return () => clearTimeout(timeoutRef.current);
   }, []);
-  
+
   const getTransform = () => {
     switch (side) {
       case 'top': return 'translate(-50%, -100%)';
@@ -609,7 +609,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       case 'right': return 'translate(0, -50%)';
     }
   };
-  
+
   return (
     <>
       <div
@@ -621,7 +621,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       >
         {children}
       </div>
-      
+
       {isVisible && createPortal(
         <div
           className={`
@@ -667,23 +667,23 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   className = '',
 }) => {
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
-  
+
   const heights = {
     sm: 'h-1',
     md: 'h-2',
     lg: 'h-3',
   };
-  
+
   const colors = {
     default: 'bg-[var(--aethel-primary)]',
-    success: 'bg-green-500',
-    warning: 'bg-yellow-500',
+    success: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]',
+    warning: 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]',
     error: 'bg-[var(--aethel-error)]',
   };
-  
+
   return (
     <div className={`w-full ${className}`}>
-      <div 
+      <div
         className={`w-full bg-[var(--aethel-border-primary)] rounded-full overflow-hidden ${heights[size]}`}
         role="progressbar"
         aria-valuenow={value}
@@ -719,7 +719,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className = '' })
     md: 'w-6 h-6',
     lg: 'w-8 h-8',
   };
-  
+
   return (
     <svg
       className={`animate-spin ${sizes[size]} ${className}`}
@@ -775,22 +775,22 @@ export const Select: React.FC<SelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const id = useId();
-  
+
   const selectedOption = options.find(o => o.value === value);
-  
+
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const handleClick = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isOpen]);
-  
+
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       <button
@@ -811,7 +811,7 @@ export const Select: React.FC<SelectProps> = ({
         </span>
         <ChevronDown size={16} className={`text-[var(--aethel-text-tertiary)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-      
+
       {isOpen && (
         <div
           className="absolute top-full left-0 right-0 mt-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)]
@@ -824,7 +824,7 @@ export const Select: React.FC<SelectProps> = ({
               key={option.value}
               className={`
                 w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left
-                ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5'}
+                ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'}
                 ${option.value === value ? 'bg-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}
               `}
               onClick={() => {
@@ -868,14 +868,14 @@ export const Switch: React.FC<SwitchProps> = ({
   className = '',
 }) => {
   const id = useId();
-  
+
   const sizes = {
     sm: { track: 'w-7 h-4', thumb: 'w-3 h-3', translate: 'translate-x-3' },
     md: { track: 'w-9 h-5', thumb: 'w-4 h-4', translate: 'translate-x-4' },
   };
-  
+
   return (
-    <label 
+    <label
       className={`inline-flex items-center gap-2 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
       htmlFor={id}
     >
@@ -893,7 +893,7 @@ export const Switch: React.FC<SwitchProps> = ({
       >
         <span
           className={`
-            absolute top-0.5 left-0.5 ${sizes[size].thumb} rounded-full bg-white 
+            absolute top-0.5 left-0.5 ${sizes[size].thumb} rounded-full bg-[var(--aethel-surface-secondary)]
             shadow transition-transform
             ${checked ? sizes[size].translate : 'translate-x-0'}
           `}
@@ -927,15 +927,15 @@ export const Checkbox: React.FC<CheckboxProps> = ({
 }) => {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.indeterminate = indeterminate;
     }
   }, [indeterminate]);
-  
+
   return (
-    <label 
+    <label
       className={`inline-flex items-center gap-2 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
       htmlFor={id}
     >
@@ -960,7 +960,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
             <Check size={12} className="text-[var(--aethel-text-primary)]" />
           )}
           {indeterminate && !checked && (
-            <div className="absolute inset-1 bg-white rounded-sm" />
+            <div className="absolute inset-1 bg-[var(--aethel-surface-secondary)] rounded-sm" />
           )}
         </div>
       </div>

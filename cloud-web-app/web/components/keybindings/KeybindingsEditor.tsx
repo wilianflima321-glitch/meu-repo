@@ -3,7 +3,7 @@
 /**
  * Keybindings Editor - Visual Keyboard Shortcut Manager
  * Like VS Code Keyboard Shortcuts (Ctrl+K Ctrl+S)
- * 
+ *
  * Features:
  * - Visual keybinding list
  * - Search & filter
@@ -67,7 +67,7 @@ const DEFAULT_KEYBINDINGS: Keybinding[] = [
   { id: 'file.saveAll', command: 'file.saveAll', label: 'Save All', keybinding: 'Ctrl+K S', defaultKeybinding: 'Ctrl+K S', category: 'File', source: 'default' },
   { id: 'file.close', command: 'file.closeTab', label: 'Close Tab', keybinding: 'Ctrl+W', defaultKeybinding: 'Ctrl+W', category: 'File', source: 'default' },
   { id: 'file.closeAll', command: 'file.closeAllTabs', label: 'Close All Tabs', keybinding: 'Ctrl+K Ctrl+W', defaultKeybinding: 'Ctrl+K Ctrl+W', category: 'File', source: 'default' },
-  
+
   // Edit
   { id: 'edit.undo', command: 'edit.undo', label: 'Undo', keybinding: 'Ctrl+Z', defaultKeybinding: 'Ctrl+Z', category: 'Edit', source: 'default' },
   { id: 'edit.redo', command: 'edit.redo', label: 'Redo', keybinding: 'Ctrl+Y', defaultKeybinding: 'Ctrl+Y', category: 'Edit', source: 'default' },
@@ -84,7 +84,7 @@ const DEFAULT_KEYBINDINGS: Keybinding[] = [
   { id: 'edit.deleteLine', command: 'edit.deleteLine', label: 'Delete Line', keybinding: 'Ctrl+Shift+K', defaultKeybinding: 'Ctrl+Shift+K', category: 'Edit', source: 'default' },
   { id: 'edit.duplicateLine', command: 'edit.duplicateLine', label: 'Duplicate Line', keybinding: 'Shift+Alt+Down', defaultKeybinding: 'Shift+Alt+Down', category: 'Edit', source: 'default' },
   { id: 'edit.moveLine', command: 'edit.moveLine', label: 'Move Line Up', keybinding: 'Alt+Up', defaultKeybinding: 'Alt+Up', category: 'Edit', source: 'default' },
-  
+
   // View
   { id: 'view.commandPalette', command: 'view.commandPalette', label: 'Command Palette', keybinding: 'Ctrl+Shift+P', defaultKeybinding: 'Ctrl+Shift+P', category: 'View', source: 'default' },
   { id: 'view.quickOpen', command: 'view.quickOpen', label: 'Quick Open', keybinding: 'Ctrl+P', defaultKeybinding: 'Ctrl+P', category: 'View', source: 'default' },
@@ -101,7 +101,7 @@ const DEFAULT_KEYBINDINGS: Keybinding[] = [
   { id: 'view.zoomIn', command: 'view.zoomIn', label: 'Zoom In', keybinding: 'Ctrl+=', defaultKeybinding: 'Ctrl+=', category: 'View', source: 'default' },
   { id: 'view.zoomOut', command: 'view.zoomOut', label: 'Zoom Out', keybinding: 'Ctrl+-', defaultKeybinding: 'Ctrl+-', category: 'View', source: 'default' },
   { id: 'view.resetZoom', command: 'view.resetZoom', label: 'Reset Zoom', keybinding: 'Ctrl+0', defaultKeybinding: 'Ctrl+0', category: 'View', source: 'default' },
-  
+
   // Go
   { id: 'go.definition', command: 'go.definition', label: 'Go to Definition', keybinding: 'F12', defaultKeybinding: 'F12', category: 'Go', source: 'default' },
   { id: 'go.declaration', command: 'go.declaration', label: 'Go to Declaration', keybinding: 'Ctrl+F12', defaultKeybinding: 'Ctrl+F12', category: 'Go', source: 'default' },
@@ -112,7 +112,7 @@ const DEFAULT_KEYBINDINGS: Keybinding[] = [
   { id: 'go.forward', command: 'go.forward', label: 'Go Forward', keybinding: 'Alt+Right', defaultKeybinding: 'Alt+Right', category: 'Go', source: 'default' },
   { id: 'go.nextError', command: 'go.nextError', label: 'Go to Next Problem', keybinding: 'F8', defaultKeybinding: 'F8', category: 'Go', source: 'default' },
   { id: 'go.prevError', command: 'go.prevError', label: 'Go to Previous Problem', keybinding: 'Shift+F8', defaultKeybinding: 'Shift+F8', category: 'Go', source: 'default' },
-  
+
   // Debug
   { id: 'debug.start', command: 'debug.start', label: 'Start Debugging', keybinding: 'F5', defaultKeybinding: 'F5', category: 'Debug', source: 'default' },
   { id: 'debug.startWithout', command: 'debug.startWithout', label: 'Start Without Debugging', keybinding: 'Ctrl+F5', defaultKeybinding: 'Ctrl+F5', category: 'Debug', source: 'default' },
@@ -123,20 +123,20 @@ const DEFAULT_KEYBINDINGS: Keybinding[] = [
   { id: 'debug.stepInto', command: 'debug.stepInto', label: 'Step Into', keybinding: 'F11', defaultKeybinding: 'F11', when: 'debuggingActive', category: 'Debug', source: 'default' },
   { id: 'debug.stepOut', command: 'debug.stepOut', label: 'Step Out', keybinding: 'Shift+F11', defaultKeybinding: 'Shift+F11', category: 'Debug', source: 'default' },
   { id: 'debug.continue', command: 'debug.continue', label: 'Continue', keybinding: 'F5', defaultKeybinding: 'F5', when: 'debuggingActive', category: 'Debug', source: 'default' },
-  
+
   // Terminal
   { id: 'terminal.new', command: 'terminal.new', label: 'New Terminal', keybinding: 'Ctrl+Shift+`', defaultKeybinding: 'Ctrl+Shift+`', category: 'Terminal', source: 'default' },
   { id: 'terminal.split', command: 'terminal.split', label: 'Split Terminal', keybinding: 'Ctrl+Shift+5', defaultKeybinding: 'Ctrl+Shift+5', category: 'Terminal', source: 'default' },
   { id: 'terminal.clear', command: 'terminal.clear', label: 'Clear Terminal', keybinding: null, defaultKeybinding: null, category: 'Terminal', source: 'default' },
   { id: 'terminal.kill', command: 'terminal.kill', label: 'Kill Terminal', keybinding: null, defaultKeybinding: null, category: 'Terminal', source: 'default' },
-  
+
   // Engine
   { id: 'engine.play', command: 'engine.play', label: 'Play in Editor', keybinding: 'Alt+P', defaultKeybinding: 'Alt+P', category: 'Engine', source: 'default' },
   { id: 'engine.stop', command: 'engine.stop', label: 'Stop Playing', keybinding: 'Escape', defaultKeybinding: 'Escape', when: 'enginePlaying', category: 'Engine', source: 'default' },
   { id: 'engine.pause', command: 'engine.pause', label: 'Pause', keybinding: 'Alt+Pause', defaultKeybinding: 'Alt+Pause', category: 'Engine', source: 'default' },
   { id: 'engine.build', command: 'engine.build', label: 'Build Project', keybinding: 'Ctrl+Shift+B', defaultKeybinding: 'Ctrl+Shift+B', category: 'Engine', source: 'default' },
   { id: 'engine.rebuild', command: 'engine.rebuild', label: 'Rebuild Project', keybinding: 'Ctrl+Shift+Alt+B', defaultKeybinding: 'Ctrl+Shift+Alt+B', category: 'Engine', source: 'default' },
-  
+
   // AI
   { id: 'ai.chat', command: 'ai.openChat', label: 'Open AI Chat', keybinding: 'Ctrl+Shift+I', defaultKeybinding: 'Ctrl+Shift+I', category: 'AI', source: 'default' },
   { id: 'ai.inlineCompletion', command: 'ai.triggerInline', label: 'Trigger Inline Completion', keybinding: 'Ctrl+Space', defaultKeybinding: 'Ctrl+Space', category: 'AI', source: 'default' },
@@ -144,7 +144,7 @@ const DEFAULT_KEYBINDINGS: Keybinding[] = [
   { id: 'ai.rejectSuggestion', command: 'ai.rejectSuggestion', label: 'Reject AI Suggestion', keybinding: 'Escape', defaultKeybinding: 'Escape', when: 'aiSuggestionVisible', category: 'AI', source: 'default' },
   { id: 'ai.explainCode', command: 'ai.explainCode', label: 'Explain Code', keybinding: 'Ctrl+Shift+E', defaultKeybinding: 'Ctrl+Shift+E', when: 'editorHasSelection', category: 'AI', source: 'default' },
   { id: 'ai.fixErrors', command: 'ai.fixErrors', label: 'Fix Errors with AI', keybinding: 'Ctrl+.', defaultKeybinding: 'Ctrl+.', when: 'editorHasProblems', category: 'AI', source: 'default' },
-  
+
   // Preferences
   { id: 'pref.settings', command: 'preferences.settings', label: 'Open Settings', keybinding: 'Ctrl+,', defaultKeybinding: 'Ctrl+,', category: 'Preferences', source: 'default' },
   { id: 'pref.keybindings', command: 'preferences.keybindings', label: 'Keyboard Shortcuts', keybinding: 'Ctrl+K Ctrl+S', defaultKeybinding: 'Ctrl+K Ctrl+S', category: 'Preferences', source: 'default' },
@@ -162,34 +162,34 @@ interface KeyRecorderProps {
 function KeyRecorder({ value, onChange, onCancel }: KeyRecorderProps) {
   const [recording, setRecording] = useState<string[]>([])
   const [isRecording, setIsRecording] = useState(true)
-  
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isRecording) return
-      
+
       e.preventDefault()
       e.stopPropagation()
-      
+
       const parts: string[] = []
-      
+
       if (e.ctrlKey) parts.push('Ctrl')
       if (e.shiftKey) parts.push('Shift')
       if (e.altKey) parts.push('Alt')
       if (e.metaKey) parts.push('Meta')
-      
+
       // Get the key
       let key = e.key
-      
+
       // Normalize special keys
       if (key === ' ') key = 'Space'
       if (key === 'Escape') key = 'Escape'
       if (key.length === 1) key = key.toUpperCase()
-      
+
       // Don't add modifier keys alone
       if (!['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) {
         parts.push(key)
         setRecording(parts)
-        
+
         // Auto-confirm after a brief delay
         setTimeout(() => {
           onChange(parts.join('+'))
@@ -198,11 +198,11 @@ function KeyRecorder({ value, onChange, onCancel }: KeyRecorderProps) {
         setRecording(parts)
       }
     }
-    
+
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isRecording, onChange])
-  
+
   return (
     <div className="flex items-center gap-2 p-2 bg-sky-900/50 rounded border border-sky-500">
       <Keyboard className="w-4 h-4 text-sky-400" />
@@ -244,12 +244,12 @@ export default function KeybindingsEditor({
   const [showOnlyModified, setShowOnlyModified] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [hasChanges, setHasChanges] = useState(false)
-  
+
   // Load saved keybindings and register with manager
   useEffect(() => {
     const saved = localStorage.getItem('keybindings')
     let loadedBindings = DEFAULT_KEYBINDINGS
-    
+
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
@@ -262,7 +262,7 @@ export default function KeybindingsEditor({
         console.error('Failed to parse saved keybindings:', e)
       }
     }
-    
+
     // Register all keybindings with the KeybindingManager
     const manager = getKeybindingManager()
     loadedBindings.forEach((kb) => {
@@ -276,11 +276,11 @@ export default function KeybindingsEditor({
       }
     })
   }, [toast])
-  
+
   // Detect conflicts
   const conflicts = useMemo(() => {
     const map = new Map<string, Keybinding[]>()
-    
+
     keybindings.forEach((kb) => {
       if (kb.keybinding) {
         const existing = map.get(kb.keybinding) || []
@@ -288,21 +288,21 @@ export default function KeybindingsEditor({
         map.set(kb.keybinding, existing)
       }
     })
-    
+
     const result: Record<string, Keybinding[]> = {}
     map.forEach((kbs, key) => {
       if (kbs.length > 1) {
         result[key] = kbs
       }
     })
-    
+
     return result
   }, [keybindings])
-  
+
   // Filter keybindings
   const filteredKeybindings = useMemo(() => {
     let filtered = keybindings
-    
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter((kb) =>
@@ -311,28 +311,28 @@ export default function KeybindingsEditor({
         (kb.keybinding && kb.keybinding.toLowerCase().includes(query))
       )
     }
-    
+
     if (showOnlyModified) {
       filtered = filtered.filter((kb) => kb.keybinding !== kb.defaultKeybinding)
     }
-    
+
     return filtered
   }, [keybindings, searchQuery, showOnlyModified])
-  
+
   // Group by category
   const groupedKeybindings = useMemo(() => {
     const groups: Record<string, Keybinding[]> = {}
-    
+
     filteredKeybindings.forEach((kb) => {
       if (!groups[kb.category]) {
         groups[kb.category] = []
       }
       groups[kb.category].push(kb)
     })
-    
+
     return groups
   }, [filteredKeybindings])
-  
+
   // Toggle category
   const toggleCategory = useCallback((category: string) => {
     setExpandedCategories((prev) => {
@@ -345,7 +345,7 @@ export default function KeybindingsEditor({
       return next
     })
   }, [])
-  
+
   // Update keybinding
   const updateKeybinding = useCallback((id: string, newKeybinding: string | null) => {
     setKeybindings((prev) =>
@@ -356,7 +356,7 @@ export default function KeybindingsEditor({
     setEditingId(null)
     setHasChanges(true)
   }, [])
-  
+
   // Reset single keybinding
   const resetKeybinding = useCallback((id: string) => {
     setKeybindings((prev) =>
@@ -366,7 +366,7 @@ export default function KeybindingsEditor({
     )
     setHasChanges(true)
   }, [])
-  
+
   // Reset all
   const resetAll = useCallback(async () => {
     const shouldReset = await openConfirmDialog({
@@ -379,12 +379,12 @@ export default function KeybindingsEditor({
     setKeybindings(DEFAULT_KEYBINDINGS)
     setHasChanges(true)
   }, [])
-  
+
   // Save and register with manager
   const handleSave = useCallback(() => {
     const customized = keybindings.filter((kb) => kb.source === 'user')
     localStorage.setItem('keybindings', JSON.stringify(customized))
-    
+
     // Re-register all keybindings with the manager
     const manager = getKeybindingManager()
     keybindings.forEach((kb) => {
@@ -397,11 +397,11 @@ export default function KeybindingsEditor({
         })
       }
     })
-    
+
     setHasChanges(false)
     onSave?.(keybindings)
   }, [keybindings, onSave])
-  
+
   // Export
   const handleExport = useCallback(() => {
     const data = JSON.stringify(keybindings, null, 2)
@@ -413,7 +413,7 @@ export default function KeybindingsEditor({
     a.click()
     URL.revokeObjectURL(url)
   }, [keybindings])
-  
+
   // Import
   const handleImport = useCallback(() => {
     const input = document.createElement('input')
@@ -422,7 +422,7 @@ export default function KeybindingsEditor({
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
-      
+
       const reader = new FileReader()
       reader.onload = () => {
         try {
@@ -437,14 +437,14 @@ export default function KeybindingsEditor({
     }
     input.click()
   }, [toast])
-  
+
   // Get all categories for initial expansion
   useEffect(() => {
     if (searchQuery) {
       setExpandedCategories(new Set(Object.keys(groupedKeybindings)))
     }
   }, [searchQuery, groupedKeybindings])
-  
+
   return (
     <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Header */}
@@ -458,7 +458,7 @@ export default function KeybindingsEditor({
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center gap-2">
           <button
             onClick={handleImport}
@@ -500,7 +500,7 @@ export default function KeybindingsEditor({
           )}
         </div>
       </div>
-      
+
       {/* Search & Filters */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex-1 relative">
@@ -513,7 +513,7 @@ export default function KeybindingsEditor({
             className="w-full pl-10 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:outline-none focus:border-[var(--aethel-primary)]"
           />
         </div>
-        
+
         <button
           onClick={() => setShowOnlyModified(!showOnlyModified)}
           className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
@@ -526,7 +526,7 @@ export default function KeybindingsEditor({
           Modified Only
         </button>
       </div>
-      
+
       {/* Conflicts Warning */}
       {Object.keys(conflicts).length > 0 && (
         <div className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]">
@@ -538,7 +538,7 @@ export default function KeybindingsEditor({
           </div>
         </div>
       )}
-      
+
       {/* Keybindings List */}
       <div className="flex-1 overflow-y-auto">
         {/* Table Header */}
@@ -548,7 +548,7 @@ export default function KeybindingsEditor({
           <div>When</div>
           <div>Source</div>
         </div>
-        
+
         {/* Categories */}
         {Object.entries(groupedKeybindings).map(([category, kbs]) => (
           <div key={category}>
@@ -565,7 +565,7 @@ export default function KeybindingsEditor({
               <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">{category}</span>
               <span className="text-xs text-[var(--aethel-text-quaternary)]">({kbs.length})</span>
             </button>
-            
+
             {/* Keybindings */}
             {expandedCategories.has(category) && (
               <div>
@@ -585,7 +585,7 @@ export default function KeybindingsEditor({
             )}
           </div>
         ))}
-        
+
         {/* Empty State */}
         {filteredKeybindings.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-[var(--aethel-text-quaternary)]">
@@ -595,7 +595,7 @@ export default function KeybindingsEditor({
           </div>
         )}
       </div>
-      
+
       {/* Footer */}
       <div className="px-4 py-2 border-t border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-quaternary)]">
         <span>
@@ -629,7 +629,7 @@ function KeybindingRow({
   onCancelEdit,
 }: KeybindingRowProps) {
   const isModified = keybinding.keybinding !== keybinding.defaultKeybinding
-  
+
   return (
     <div
       className={`grid grid-cols-[1fr_200px_120px_80px] gap-4 px-4 py-2 border-b border-[var(--aethel-border-primary)] hover:bg-[var(--aethel-surface-secondary)]/30 items-center ${
@@ -641,7 +641,7 @@ function KeybindingRow({
         <div className="text-sm text-[var(--aethel-text-primary)]">{keybinding.label}</div>
         <div className="text-xs text-[var(--aethel-text-quaternary)]">{keybinding.command}</div>
       </div>
-      
+
       {/* Keybinding */}
       <div className="relative">
         {isEditing ? (
@@ -661,7 +661,7 @@ function KeybindingRow({
             ) : (
               <span className="text-sm text-[var(--aethel-text-quaternary)]">-</span>
             )}
-            
+
             <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
               <button
                 onClick={onEdit}
@@ -680,14 +680,14 @@ function KeybindingRow({
                 </button>
               )}
             </div>
-            
+
             {hasConflict && (
               <span title="Keybinding conflict"><AlertTriangle className="w-4 h-4 text-[var(--aethel-warning-light)]" /></span>
             )}
           </div>
         )}
       </div>
-      
+
       {/* When */}
       <div>
         {keybinding.when ? (
@@ -698,7 +698,7 @@ function KeybindingRow({
           <span className="text-sm text-[var(--aethel-text-quaternary)]">-</span>
         )}
       </div>
-      
+
       {/* Source */}
       <div>
         <span
@@ -706,7 +706,7 @@ function KeybindingRow({
             keybinding.source === 'user'
               ? 'bg-sky-500/20 text-sky-400'
               : keybinding.source === 'extension'
-              ? 'bg-blue-500/20 text-blue-400'
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
               : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
           }`}
         >
@@ -723,7 +723,7 @@ export function useKeybindings(customBindings?: Keybinding[]) {
   const [keybindings, setKeybindings] = useState<Keybinding[]>(
     customBindings || DEFAULT_KEYBINDINGS
   )
-  
+
   useEffect(() => {
     const saved = localStorage.getItem('keybindings')
     if (saved) {
@@ -738,16 +738,16 @@ export function useKeybindings(customBindings?: Keybinding[]) {
       } catch (e) {}
     }
   }, [])
-  
+
   const getKeybinding = useCallback((commandId: string) => {
     return keybindings.find((kb) => kb.command === commandId)?.keybinding
   }, [keybindings])
-  
+
   const executeCommand = useCallback((commandId: string) => {
     // This would dispatch the command to a command system
     console.log('Execute command:', commandId)
   }, [])
-  
+
   return { keybindings, getKeybinding, executeCommand }
 }
 

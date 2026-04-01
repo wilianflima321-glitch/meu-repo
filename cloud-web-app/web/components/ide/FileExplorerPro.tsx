@@ -63,7 +63,7 @@ function resolveProjectIdFromClient(): string {
 function getFileIcon(name: string, isOpen = false) {
   if (name === 'package.json') return FILE_ICONS.package
   if (name.includes('config')) return FILE_ICONS.config
-  
+
   const ext = name.split('.').pop()?.toLowerCase() || ''
   return FILE_ICONS[ext] || { icon: 'symbol-file' as CodiconName, color: 'text-[var(--aethel-text-tertiary)]' }
 }
@@ -156,13 +156,13 @@ function FileTreeNode({
             )}
           </span>
         )}
-        
+
         {/* File/Folder icon */}
         <Codicon name={nodeIcon} className={`${isFolder ? 'text-[var(--aethel-text-secondary)]' : fileIcon.color}`} />
-        
+
         {/* Name */}
         <span className="flex-1 truncate">{node.name}</span>
-        
+
         {/* Modified indicator */}
         {node.modified && (
           <span className="h-2 w-2 rounded-full bg-[var(--aethel-warning-light)]" title="Modificado" aria-label="Arquivo modificado" />
@@ -205,7 +205,7 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [menuPosition, setMenuPosition] = useState({ left: x, top: y })
   const isFolder = file.type === 'folder'
-  
+
     const menuItems = [
       ...(isFolder ? [
         { id: 'new-file', label: 'Novo arquivo', icon: 'new-file' as CodiconName },
@@ -273,11 +273,11 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 z-50"
         onClick={onClose}
       />
-      
+
       {/* Menu */}
       <div
         ref={menuRef}
@@ -431,7 +431,7 @@ export default function FileExplorerPro({
   // Handle context menu action
   const handleAction = useCallback((action: string) => {
     if (!contextMenu) return
-    
+
     switch (action) {
       case 'delete':
         onFileDelete?.(contextMenu.file)
@@ -458,23 +458,23 @@ export default function FileExplorerPro({
   // Filter files based on search
   const filteredFiles = useMemo(() => {
     if (!searchQuery) return resolvedFiles
-    
+
     const filterNode = (node: FileNode): FileNode | null => {
       if (node.type === 'file') {
         return node.name.toLowerCase().includes(searchQuery.toLowerCase()) ? node : null
       }
-      
+
       const filteredChildren = node.children
         ?.map(child => filterNode(child))
         .filter((child): child is FileNode => child !== null)
-      
+
       if (filteredChildren && filteredChildren.length > 0) {
         return { ...node, children: filteredChildren }
       }
-      
+
       return node.name.toLowerCase().includes(searchQuery.toLowerCase()) ? node : null
     }
-    
+
     return resolvedFiles
       .map(f => filterNode(f))
       .filter((f): f is FileNode => f !== null)
@@ -582,7 +582,7 @@ export default function FileExplorerPro({
             onContextMenu={handleContextMenu}
           />
         ))}
-        
+
         {filteredFiles.length === 0 && searchQuery && (
           <div className="px-3 py-3">
             <div className="aethel-state aethel-state-empty text-center text-xs">

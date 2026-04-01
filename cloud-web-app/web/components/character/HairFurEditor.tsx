@@ -381,7 +381,7 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
             style={{ left: `${stop.position * 100}%`, transform: 'translateX(-50%)' }}
             onClick={() => setSelectedStop(index)}
           >
-            <div className="w-3 h-3 rounded-full border-2 border-white shadow-lg mx-auto mt-6" style={{ backgroundColor: stop.color }} />
+            <div className="w-3 h-3 rounded-full border-2 border-[var(--aethel-border-primary)] shadow-lg mx-auto mt-6" style={{ backgroundColor: stop.color }} />
           </div>
         ))}
       </div>

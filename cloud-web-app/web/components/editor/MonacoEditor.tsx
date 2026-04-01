@@ -25,7 +25,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   const [value, setValue] = useState<string>(initialValue || '');
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  
+
   // Resolve file path from either path or filePath prop
   const resolvedPath = path || filePath;
 
@@ -38,7 +38,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
     if (fromStorage && fromStorage.trim()) return fromStorage.trim();
     return 'default';
   };
-  
+
   // Load file content when path changes
   useEffect(() => {
     if (resolvedPath && !initialValue) {
@@ -79,9 +79,9 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
       setLoadError(null);
     }
   }, [resolvedPath, initialValue]);
-  
+
   // Infer language from file path
-  const inferredLanguage = resolvedPath 
+  const inferredLanguage = resolvedPath
     ? getLanguageFromPath(resolvedPath)
     : language;
 

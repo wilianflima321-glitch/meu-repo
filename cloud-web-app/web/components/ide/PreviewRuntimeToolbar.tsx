@@ -178,7 +178,7 @@ export default function PreviewRuntimeToolbar({
             onClick={onToggleSettings}
             aria-label={showRuntimeSettings ? 'Ocultar configuracoes do runtime de preview' : 'Abrir configuracoes do runtime de preview'}
             aria-pressed={showRuntimeSettings}
-            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           >
             {showRuntimeSettings ? 'Ocultar runtime' : 'Configurar runtime'}
           </button>
@@ -196,7 +196,7 @@ export default function PreviewRuntimeToolbar({
               type="button"
               onClick={onOpenRuntime}
               aria-label="Abrir o preview em nova aba"
-              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Abrir preview
             </button>
@@ -205,7 +205,7 @@ export default function PreviewRuntimeToolbar({
       </div>
 
       {showRuntimeSettings && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--aethel-border-primary)] bg-white/[0.03] p-3">
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-3">
           <input
             type="url"
             value={previewRuntimeInput}
@@ -227,7 +227,7 @@ export default function PreviewRuntimeToolbar({
             onClick={onDiscoverRuntime}
             disabled={isDiscoveringRuntime}
             aria-label="Detectar automaticamente um runtime de preview"
-            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isDiscoveringRuntime ? 'Detectando...' : 'Auto-detectar'}
           </button>
@@ -256,7 +256,7 @@ export default function PreviewRuntimeToolbar({
               type="button"
               onClick={onRevalidate}
               aria-label="Revalidar o runtime de preview"
-              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Revalidar
             </button>
@@ -266,7 +266,7 @@ export default function PreviewRuntimeToolbar({
               type="button"
               onClick={onOpenRuntime}
               aria-label="Abrir o runtime em nova aba"
-              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+              className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Abrir runtime
             </button>
@@ -288,7 +288,7 @@ export default function PreviewRuntimeToolbar({
         <div className={`mt-3 rounded-xl border px-3 py-2 text-[11px] ${discoveryToneClass}`}>{runtimeDiscoveryMessage}</div>
       )}
 
-      <details className="mt-3 rounded-xl border border-[var(--aethel-border-primary)] bg-white/[0.02]">
+      <details className="mt-3 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]">
         <summary className="cursor-pointer list-none px-3 py-2 text-[11px] font-medium text-[var(--aethel-text-secondary)]">
           Ver detalhes tecnicos do runtime
         </summary>
@@ -322,7 +322,7 @@ export default function PreviewRuntimeToolbar({
               {runtimeReadiness.instructions.map((instruction) => (
                 <span
                   key={instruction}
-                  className="rounded-full border border-[var(--aethel-border-primary)] bg-white/[0.03] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]"
+                  className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]"
                 >
                   {instruction}
                 </span>
@@ -335,7 +335,7 @@ export default function PreviewRuntimeToolbar({
               {managedSetupEnv.map((envKey) => (
                 <span
                   key={envKey}
-                  className="rounded-full border border-[var(--aethel-border-primary)] bg-white/[0.03] px-2.5 py-1 text-[11px] text-[var(--aethel-text-tertiary)]"
+                  className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-tertiary)]"
                 >
                   env:{envKey}
                 </span>

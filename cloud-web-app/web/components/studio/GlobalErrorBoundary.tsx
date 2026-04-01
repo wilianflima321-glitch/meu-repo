@@ -18,12 +18,12 @@ interface State {
 
 /**
  * Global Error Boundary para o Studio Shell
- * 
+ *
  * Captura erros de renderização e oferece opções de recuperação:
  * - Retry (recarregar componente)
  * - Voltar para Dashboard
  * - Reportar erro (Sentry)
- * 
+ *
  * Padrão: Vercel, Linear, Cursor
  */
 export class GlobalErrorBoundary extends Component<Props, State> {

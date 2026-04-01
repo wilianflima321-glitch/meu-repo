@@ -389,7 +389,7 @@ export function BillingTab({
             type="button"
             onClick={() => setBillingCycle('month')}
             className={`rounded-full px-4 py-1.5 transition-colors ${
-              billingCycle === 'month' ? 'bg-white text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+              billingCycle === 'month' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Mensal
@@ -398,7 +398,7 @@ export function BillingTab({
             type="button"
             onClick={() => setBillingCycle('year')}
             className={`rounded-full px-4 py-1.5 transition-colors ${
-              billingCycle === 'year' ? 'bg-white text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+              billingCycle === 'year' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             Anual (-20%)

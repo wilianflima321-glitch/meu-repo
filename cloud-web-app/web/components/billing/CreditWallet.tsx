@@ -1,9 +1,9 @@
 ﻿/**
  * CreditWallet - UI Completa de Carteira de creditos
- * 
+ *
  * Painel que mostra saldo, histórico e opções de recarga.
  * Integra com /api/wallet/* endpoints.
- * 
+ *
  * @see ALINHAMENTO_PLANO_NEGOCIO_E_CUSTOS_2026.md - Seção 4
  */
 
@@ -162,7 +162,7 @@ interface TransactionItemProps {
 
 function TransactionItem({ transaction }: TransactionItemProps) {
   const isPositive = transaction.type === 'purchase' || transaction.type === 'bonus' || transaction.type === 'refund';
-  
+
   const typeIcons = {
     usage: <Zap className="w-4 h-4 text-[var(--aethel-info-light)]" />,
     purchase: <CreditCard className="w-4 h-4 text-[var(--aethel-success-light)]" />,
@@ -225,9 +225,9 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
       disabled={isLoading}
       className={`
         relative p-4 rounded-xl border text-left transition-all hover:scale-[1.02]
-        ${pkg.popular 
-          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' 
-          : pkg.bestValue 
+        ${pkg.popular
+          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+          : pkg.bestValue
           ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
           : 'bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-secondary)]'
         }
@@ -237,7 +237,7 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
       {(pkg.popular || pkg.bestValue) && (
         <span className={`
           absolute -top-2 left-4 px-2 py-0.5 text-xs font-medium rounded-full
-          ${pkg.popular ? 'bg-[var(--aethel-info)] text-white' : 'bg-[var(--aethel-success)] text-white'}
+          ${pkg.popular ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'}
         `}>
           {pkg.popular ? 'Popular' : 'Melhor valor'}
         </span>
@@ -295,7 +295,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
   const transactions = transactionsData?.transactions || [];
 
   // Calculate usage percentage
-  const usagePercent = wallet 
+  const usagePercent = wallet
     ? Math.round((wallet.monthlyUsage / wallet.monthlyLimit) * 100)
     : 0;
 
@@ -318,14 +318,14 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       }
 
       const { checkoutUrl } = await response.json();
-      
+
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else {
         await refreshWallet();
         setActiveTab('overview');
       }
-      
+
       if (onPurchase) onPurchase(packageId);
     } catch (err) {
       console.error('Erro de compra:', err);
@@ -379,7 +379,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Plano {wallet?.plan}</p>
           </div>
         </div>
-        
+
         {/* Low balance warning */}
         {isLowBalance && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] rounded-lg text-[var(--aethel-warning-light)] text-sm">
@@ -466,7 +466,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setActiveTab('purchase')}
-                className="flex items-center justify-center gap-2 p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-xl text-white font-medium transition-colors"
+                className="flex items-center justify-center gap-2 p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-xl text-[var(--aethel-text-primary)] font-medium transition-colors"
               >
                 <Sparkles className="w-5 h-5" />
                 Comprar creditos
@@ -508,7 +508,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <p className="text-sm text-[var(--aethel-text-tertiary)]">
               Escolha um pacote de creditos para recarregar sua carteira.
             </p>
-            
+
             <div className="grid grid-cols-2 gap-4">
               {CREDIT_PACKAGES.map((pkg) => (
                 <PackageCard

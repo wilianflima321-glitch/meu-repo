@@ -1,6 +1,6 @@
 /**
  * AETHEL ENGINE - Asset Detail Panel
- * 
+ *
  * Full asset detail view with:
  * - 3D preview
  * - Image gallery
@@ -16,18 +16,18 @@ import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { 
-    OrbitControls, 
-    Environment, 
-    useGLTF, 
+import {
+    OrbitControls,
+    Environment,
+    useGLTF,
     PresentationControls,
     Stage,
     Html,
     useProgress
 } from '@react-three/drei';
-import { 
+import {
     Star, Baixar, Heart, ShoppingCart, Share2, Flag,
-    ChevronLeft, ChevronRight, Check, ExternalLink, 
+    ChevronLeft, ChevronRight, Check, ExternalLink,
     User, Calendar, FileText, Box, Palette, Tag,
     MessageSquare, ThumbsUp, Shield, Loader2, Play, Pause
 } from 'lucide-react';
@@ -131,7 +131,7 @@ function Loader() {
 function Model({ url }: { url: string }) {
     const { scene } = useGLTF(url);
     const ref = useRef<THREE.Group>(null);
-    
+
     useEffect(() => {
         // Center and scale the model
         const box = new THREE.Box3().setFromObject(scene);
@@ -139,7 +139,7 @@ function Model({ url }: { url: string }) {
         const maxDim = Math.max(size.x, size.y, size.z);
         const scale = 2 / maxDim;
         scene.scale.setScalar(scale);
-        
+
         const center = box.getCenter(new THREE.Vector3());
         scene.position.sub(center.multiplyScalar(scale));
     }, [scene]);
@@ -152,7 +152,7 @@ function ModelPreview({ modelUrl }: { modelUrl: string }) {
 
     return (
         <div className="relative w-full h-full min-h-[400px] bg-gradient-to-b from-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)] rounded-lg overflow-hidden">
-            <Canvas 
+            <Canvas
                 camera={{ position: [0, 0, 5], fov: 50 }}
                 shadows
             >
@@ -160,7 +160,7 @@ function ModelPreview({ modelUrl }: { modelUrl: string }) {
                     <Stage environment="city" intensity={0.5}>
                         <Model url={modelUrl} />
                     </Stage>
-                    <OrbitControls 
+                    <OrbitControls
                         autoRotate={autoRotate}
                         autoRotateSpeed={2}
                         enablePan={false}
@@ -202,7 +202,7 @@ function ImageGallery({ images }: { images: string[] }) {
                     unoptimized
                     className="w-full h-full object-cover"
                 />
-                
+
                 {/* Navigation arrows */}
                 {images.length > 1 && (
                     <>
@@ -210,7 +210,7 @@ function ImageGallery({ images }: { images: string[] }) {
                             size="icon"
                             variant="secondary"
                             className="absolute left-2 top-1/2 -translate-y-1/2"
-                            onClick={() => setCurrentIndex(i => 
+                            onClick={() => setCurrentIndex(i =>
                                 i === 0 ? images.length - 1 : i - 1
                             )}
                         >
@@ -220,7 +220,7 @@ function ImageGallery({ images }: { images: string[] }) {
                             size="icon"
                             variant="secondary"
                             className="absolute right-2 top-1/2 -translate-y-1/2"
-                            onClick={() => setCurrentIndex(i => 
+                            onClick={() => setCurrentIndex(i =>
                                 i === images.length - 1 ? 0 : i + 1
                             )}
                         >
@@ -239,8 +239,8 @@ function ImageGallery({ images }: { images: string[] }) {
                             onClick={() => setCurrentIndex(index)}
                             className={cn(
                                 "flex-shrink-0 w-20 h-14 rounded-md overflow-hidden border-2 transition-colors",
-                                currentIndex === index 
-                                    ? "border-primary" 
+                                currentIndex === index
+                                    ? "border-primary"
                                     : "border-transparent hover:border-muted-foreground/50"
                             )}
                         >
@@ -275,7 +275,7 @@ function RatingStars({ rating, size = 'md' }: { rating: number; size?: 'sm' | 'm
                     className={cn(
                         sizes[size],
                         star <= Math.round(rating)
-                            ? "fill-yellow-400 text-yellow-400"
+                            ? "fill-yellow-400 text-[var(--aethel-warning-light)]"
                             : "text-muted-foreground"
                     )}
                 />
@@ -296,7 +296,7 @@ function ReviewCard({ review }: { review: Review }) {
                         {review.user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                 </Avatar>
-                
+
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium">{review.user.name}</span>
@@ -310,16 +310,16 @@ function ReviewCard({ review }: { review: Review }) {
                             {new Date(review.createdAt).toLocaleDateString()}
                         </span>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 mt-1">
                         <RatingStars rating={review.rating} size="sm" />
                         <span className="font-medium">{review.title}</span>
                     </div>
-                    
+
                     <p className="text-sm text-muted-foreground mt-2">
                         {review.content}
                     </p>
-                    
+
                     <div className="flex items-center gap-4 mt-3">
                         <Button
                             variant="ghost"
@@ -343,13 +343,13 @@ function ReviewCard({ review }: { review: Review }) {
 
 function RatingBreakdown({ stats }: { stats: { [key: number]: number } }) {
     const total = Object.values(stats).reduce((a, b) => a + b, 0);
-    
+
     return (
         <div className="space-y-2">
             {[5, 4, 3, 2, 1].map((star) => {
                 const count = stats[star] || 0;
                 const percentage = total > 0 ? (count / total) * 100 : 0;
-                
+
                 return (
                     <div key={star} className="flex items-center gap-2">
                         <span className="w-8 text-sm text-muted-foreground">
@@ -507,7 +507,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                     <ChevronLeft className="w-4 h-4 mr-2" />
                     Voltar ao Marketplace
                 </Button>
-                
+
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
@@ -516,7 +516,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                     >
                         <Heart className={cn(
                             "w-4 h-4",
-                            isFavorited && "fill-red-500 text-red-500"
+                            isFavorited && "fill-red-500 text-[var(--aethel-error-light)]"
                         )} />
                     </Button>
                     <Button variant="outline" size="icon">
@@ -551,7 +551,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                             {/* Descricao */}
                             <div>
                                 <h2 className="text-lg font-semibold mb-4">Descricao</h2>
-                                <div 
+                                <div
                                     className="prose prose-sm dark:prose-invert max-w-none"
                                     dangerouslySetInnerHTML={{ __html: asset.description }}
                                 />
@@ -596,7 +596,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                     <h3 className="font-medium mb-3">Arquivos inclusos</h3>
                                     <div className="space-y-2">
                                         {asset.files.map((file, index) => (
-                                            <div 
+                                            <div
                                                 key={index}
                                                 className="flex items-center justify-between px-3 py-2 bg-muted rounded-md text-sm"
                                             >
@@ -646,8 +646,8 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </div>
                                     </div>
                                     <div className="flex-1">
-                                        <RatingBreakdown 
-                                            stats={{ 5: 45, 4: 20, 3: 8, 2: 3, 1: 2 }} 
+                                        <RatingBreakdown
+                                            stats={{ 5: 45, 4: 20, 3: 8, 2: 3, 1: 2 }}
                                         />
                                     </div>
                                 </div>
@@ -667,7 +667,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                 {/* Main info card */}
                                 <div className="p-6 border rounded-lg bg-card">
                                     <h1 className="text-2xl font-bold mb-2">{asset.name}</h1>
-                                    
+
                                     <div className="flex items-center gap-2 mb-4">
                                         <RatingStars rating={asset.stats.rating} />
                                         <span className="text-sm text-muted-foreground">
@@ -682,8 +682,8 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
 
                                     {/* Action buttons */}
                                     {asset.isOwned ? (
-                                        <Button 
-                                            className="w-full" 
+                                        <Button
+                                            className="w-full"
                                             size="lg"
                                             onClick={() => downloadMutation.mutate()}
                                             disabled={downloadMutation.isPending}
@@ -696,8 +696,8 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             Baixar
                                         </Button>
                                     ) : asset.price === 0 ? (
-                                        <Button 
-                                            className="w-full" 
+                                        <Button
+                                            className="w-full"
                                             size="lg"
                                             onClick={() => downloadMutation.mutate()}
                                             disabled={downloadMutation.isPending}
@@ -711,8 +711,8 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </Button>
                                     ) : (
                                         <div className="space-y-2">
-                                            <Button 
-                                                className="w-full" 
+                                            <Button
+                                                className="w-full"
                                                 size="lg"
                                                 onClick={() => purchaseMutation.mutate()}
                                                 disabled={purchaseMutation.isPending}
@@ -763,7 +763,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             <div className="flex items-center gap-2">
                                                 <span className="font-medium">{asset.creator.name}</span>
                                                 {asset.creator.verified && (
-                                                    <Check className="w-4 h-4 text-blue-500" />
+                                                    <Check className="w-4 h-4 text-[var(--aethel-info-light)]" />
                                                 )}
                                             </div>
                                             <p className="text-sm text-muted-foreground">

@@ -67,7 +67,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                       <DefaultCommandsRegistration />
                       <Suspense fallback={<LoadingFallback />}>
                         {children}
-                        
+
                         {/* Componentes globais de UI */}
                         {isStudioSurface ? (
                           <>

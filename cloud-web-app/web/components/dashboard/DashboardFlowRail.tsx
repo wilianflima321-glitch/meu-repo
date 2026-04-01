@@ -65,7 +65,7 @@ export function DashboardFlowRail({
 }: DashboardFlowRailProps) {
   return (
     <section className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6">
-      <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] px-4 py-4 shadow-[0_18px_50px_rgba(2,6,23,0.22)]">
+      <div className="rounded-[24px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] px-4 py-4 shadow-[0_18px_50px_rgba(2,6,23,0.22)]">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Fluxo principal</p>
@@ -92,23 +92,23 @@ export function DashboardFlowRail({
             const state = getStepState(activeTab, step)
             const className =
               state === 'active'
-                ? 'border-sky-400/35 bg-[linear-gradient(135deg,rgba(79,70,229,0.28),rgba(14,165,233,0.16))] text-white'
+                ? 'border-sky-400/35 bg-[linear-gradient(135deg,rgba(79,70,229,0.28),rgba(14,165,233,0.16))] text-[var(--aethel-text-primary)]'
                 : state === 'complete'
-                ? 'border-emerald-400/25 bg-emerald-400/10 text-emerald-50'
-                : 'border-white/10 bg-white/[0.03] text-[var(--aethel-text-secondary)]'
+                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+                : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
 
             return (
               <button
                 key={step.id}
                 type="button"
                 onClick={() => (step.action === 'ide' ? onOpenIde() : onSelectTab(step.tab!))}
-                className={`rounded-[22px] border p-4 text-left transition hover:border-white/20 hover:bg-white/[0.05] ${className}`}
+                className={`rounded-[22px] border p-4 text-left transition hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] ${className}`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                     Etapa {index + 1}
                   </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]">
+                  <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]">
                     {state === 'active' ? 'Agora' : state === 'complete' ? 'Pronto' : 'Fila'}
                   </span>
                 </div>

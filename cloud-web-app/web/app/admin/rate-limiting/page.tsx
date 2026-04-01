@@ -75,7 +75,7 @@ export default function RateLimitingPage() {
         />
         <span className="text-xs text-[var(--aethel-text-tertiary)]">{filteredLimits.length} regras</span>
       </div>
-      
+
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Limites ativos</h2>
         {loading ? (

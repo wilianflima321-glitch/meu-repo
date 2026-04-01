@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
+import {
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Users,
   CreditCard,
   AlertTriangle,
   RefreshCw,
@@ -27,35 +27,35 @@ interface FinanceMetrics {
   mrr: number;
   mrrGrowth: number;
   arr: number;
-  
+
   dailyRevenue: number;
   dailyAICost: number;
   dailyInfraCost: number;
   dailyProfit: number;
   profitMargin: number;
-  
+
   burnRate: number;
   runway: number; // months
-  
+
   activeSubscriptions: number;
   churnRate: number;
   ltv: number;
   cac: number;
-  
+
   aiCostBreakdown: {
     model: string;
     cost: number;
     calls: number;
     percentage: number;
   }[];
-  
+
   revenueByPlan: {
     plan: string;
     users: number;
     revenue: number;
     percentage: number;
   }[];
-  
+
   recentTransactions: {
     id: string;
     type: 'subscription' | 'usage' | 'refund' | 'credit';
@@ -65,7 +65,7 @@ interface FinanceMetrics {
     description: string;
     createdAt: string;
   }[];
-  
+
   alerts: {
     type: 'warning' | 'critical';
     message: string;
@@ -88,14 +88,14 @@ interface DateRange {
 function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] }) {
   const colors = ['var(--aethel-primary)', 'var(--aethel-accent)', 'var(--aethel-secondary)', 'var(--aethel-warning)', 'var(--aethel-success)', 'var(--aethel-info)'];
   const total = data.reduce((sum, item) => sum + item.cost, 0);
-  
+
   return (
     <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
       <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
         <Bot className="w-4 h-4" />
         Custo de IA por modelo
       </h3>
-      
+
       {/* Bar chart */}
       <div className="space-y-3">
         {data.map((item, i) => (
@@ -107,9 +107,9 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
               </span>
             </div>
             <div className="h-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ 
+                style={{
                   width: `${item.percentage}%`,
                   backgroundColor: colors[i % colors.length]
                 }}
@@ -121,7 +121,7 @@ function CostBreakdownChart({ data }: { data: FinanceMetrics['aiCostBreakdown'] 
           </div>
         ))}
       </div>
-      
+
       <div className="mt-4 pt-4 border-t border-[var(--aethel-border-secondary)]">
         <div className="flex justify-between text-sm">
           <span className="text-[var(--aethel-text-tertiary)]">Custo total de IA hoje</span>
@@ -140,18 +140,18 @@ function RevenueByPlanChart({ data }: { data: FinanceMetrics['revenueByPlan'] })
     'studio': 'var(--aethel-warning)',
     'enterprise': 'var(--aethel-success)'
   };
-  
+
   return (
     <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
       <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
         <PieChart className="w-4 h-4" />
         Receita por plano
       </h3>
-      
+
       <div className="space-y-3">
         {data.map((item) => (
           <div key={item.plan} className="flex items-center gap-3">
-            <div 
+            <div
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: colors[item.plan.toLowerCase()] || 'var(--aethel-primary)' }}
             />
@@ -186,7 +186,7 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
       </div>
     );
   }
-  
+
   return (
     <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-4">
       <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-3 flex items-center gap-2">
@@ -195,11 +195,11 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
       </h3>
       <div className="space-y-2">
         {alerts.map((alert, i) => (
-          <div 
+          <div
             key={i}
             className={`p-3 rounded-lg border ${
-              alert.type === 'critical' 
-                ? 'bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' 
+              alert.type === 'critical'
+                ? 'bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'
                 : 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
             }`}
           >
@@ -232,7 +232,7 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
     refund: 'reembolso',
     credit: 'crédito',
   };
-  
+
   return (
     <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg overflow-hidden">
       <div className="p-4 border-b border-[var(--aethel-border-secondary)] flex items-center justify-between">
@@ -245,7 +245,7 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
           Exportar
         </button>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -298,7 +298,7 @@ export default function FinanceDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [dateRange, setDateRange] = useState<'today' | '7d' | '30d' | 'mtd'>('today');
-  
+
   const fetchMetrics = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/finance/metrics?range=${dateRange}`);
@@ -312,16 +312,16 @@ export default function FinanceDashboard() {
       setLoading(false);
     }
   }, [dateRange]);
-  
+
   useEffect(() => {
     fetchMetrics();
-    
+
     if (autoRefresh) {
       const interval = setInterval(fetchMetrics, 30000); // 30s refresh
       return () => clearInterval(interval);
     }
   }, [fetchMetrics, autoRefresh]);
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -329,12 +329,12 @@ export default function FinanceDashboard() {
       </div>
     );
   }
-  
+
   if (error || !metrics) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-[var(--aethel-error)]">{error || 'Sem dados disponíveis'}</p>
-        <button 
+        <button
           onClick={fetchMetrics}
           className="px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
         >
@@ -343,9 +343,9 @@ export default function FinanceDashboard() {
       </div>
     );
   }
-  
+
   const profitColor = metrics.dailyProfit >= 0 ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]';
-  
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -354,7 +354,7 @@ export default function FinanceDashboard() {
           <h1 className="text-xl font-semibold text-[var(--aethel-text-primary)]">Saúde financeira</h1>
           <p className="text-sm text-[var(--aethel-text-tertiary)]">MRR, custos e métricas de rentabilidade</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {/* Date Range */}
           <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-1">
@@ -363,8 +363,8 @@ export default function FinanceDashboard() {
                 key={range}
                 onClick={() => setDateRange(range)}
                 className={`px-3 py-1 text-xs rounded ${
-                  dateRange === range 
-                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' 
+                  dateRange === range
+                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
                     : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
                 }`}
               >
@@ -372,13 +372,13 @@ export default function FinanceDashboard() {
               </button>
             ))}
           </div>
-          
+
           {/* Auto Refresh Toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`p-2 rounded-lg border ${
-              autoRefresh 
-                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
+              autoRefresh
+                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
                 : 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-tertiary)]'
             }`}
             aria-label={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
@@ -387,7 +387,7 @@ export default function FinanceDashboard() {
           </button>
         </div>
       </div>
-      
+
       {/* Critical Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <AdminMetricCard
@@ -422,7 +422,7 @@ export default function FinanceDashboard() {
           subValue={`Fôlego: ${metrics.runway} meses`}
         />
       </div>
-      
+
       {/* Cost Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <AdminMetricCard
@@ -446,7 +446,7 @@ export default function FinanceDashboard() {
           subValue={`Churn: ${metrics.churnRate.toFixed(1)}%`}
         />
       </div>
-      
+
       {/* Unit Economics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <AdminMetricCard
@@ -480,18 +480,18 @@ export default function FinanceDashboard() {
           subValue="Mensal"
         />
       </div>
-      
+
       {/* Alerts */}
       {metrics.alerts.length > 0 && (
         <AlertsPanel alerts={metrics.alerts} />
       )}
-      
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <CostBreakdownChart data={metrics.aiCostBreakdown} />
         <RevenueByPlanChart data={metrics.revenueByPlan} />
       </div>
-      
+
       {/* Transactions */}
       <TransactionsTable transactions={metrics.recentTransactions} />
     </div>

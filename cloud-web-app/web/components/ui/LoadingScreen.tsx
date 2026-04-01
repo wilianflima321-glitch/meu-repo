@@ -8,9 +8,9 @@ interface LoadingScreenProps {
   showLogo?: boolean
 }
 
-export function LoadingScreen({ 
-  message = 'Carregando...', 
-  showLogo = true 
+export function LoadingScreen({
+  message = 'Carregando...',
+  showLogo = true
 }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0)
 
@@ -52,13 +52,13 @@ export function LoadingScreen({
         <div className="relative w-24 h-24 mb-8">
           {/* Outer ring */}
           <div className="absolute inset-0 rounded-full border-4 border-[var(--aethel-border-primary)]" />
-          
+
           {/* Spinning gradient ring */}
           <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--aethel-info)] border-r-[var(--aethel-accent)] animate-spin" />
-          
+
           {/* Inner glow */}
           <div className="absolute inset-4 rounded-full bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] blur-sm" />
-          
+
           {/* Center dot */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[var(--aethel-info)] to-[var(--aethel-accent)] animate-pulse" />

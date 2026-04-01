@@ -2,7 +2,7 @@
 
 /**
  * Aethel Engine - Breadcrumbs Navigation
- * 
+ *
  * VS Code-style breadcrumbs with:
  * - File path navigation
  * - Symbol outline dropdown
@@ -74,7 +74,7 @@ export interface DocumentSymbol {
   containerName?: string;
 }
 
-export type SymbolKind = 
+export type SymbolKind =
   | 'file' | 'module' | 'namespace' | 'package'
   | 'class' | 'method' | 'property' | 'field'
   | 'constructor' | 'enum' | 'interface' | 'function'
@@ -292,7 +292,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar..."
-              className="w-full px-2 py-1 text-sm bg-[var(--aethel-surface-secondary)] text-white placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
+              className="w-full px-2 py-1 text-sm bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
             />
           </div>
 
@@ -320,7 +320,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                       }`}
                     >
                       <Icon className={`w-4 h-4 flex-shrink-0 ${colorClass}`} />
-                      <span className="text-white truncate">{symbol.name}</span>
+                      <span className="text-[var(--aethel-text-primary)] truncate">{symbol.name}</span>
                       <span className="ml-auto text-xs text-[var(--aethel-text-tertiary)]">
                         :{symbol.range.startLine}
                       </span>
@@ -328,7 +328,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                   );
                 } else if ('label' in item) {
                   const segment = item as BreadcrumbSegment;
-                  const Icon = segment.type === 'folder' 
+                  const Icon = segment.type === 'folder'
                     ? (index === selectedIndex ? FolderOpen : Folder)
                     : getFileIcon(segment.label);
 
@@ -345,7 +345,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                       <Icon className={`w-4 h-4 flex-shrink-0 ${
                         segment.type === 'folder' ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-info)]'
                       }`} />
-                      <span className="text-white truncate">{segment.label}</span>
+                      <span className="text-[var(--aethel-text-primary)] truncate">{segment.label}</span>
                     </button>
                   );
                 }
@@ -427,7 +427,7 @@ export default function Breadcrumbs({
     if (!symbols.length || !currentLine) return [];
 
     const chain: DocumentSymbol[] = [];
-    
+
     const findChain = (syms: DocumentSymbol[]): boolean => {
       for (const sym of syms) {
         if (currentLine >= sym.range.startLine && currentLine <= sym.range.endLine) {
@@ -448,7 +448,7 @@ export default function Breadcrumbs({
   // Load folder contents on hover
   const handleFolderHover = useCallback(async (path: string) => {
     if (folderContents.has(path) || !onListFolder) return;
-    
+
     try {
       const contents = await onListFolder(path);
       setFolderContents(prev => new Map(prev).set(path, contents));
@@ -481,7 +481,7 @@ export default function Breadcrumbs({
   // Flatten symbols for dropdown
   const flatSymbols = useMemo(() => {
     const flat: DocumentSymbol[] = [];
-    
+
     const flatten = (syms: DocumentSymbol[], depth = 0) => {
       syms.forEach(sym => {
         flat.push({ ...sym, containerName: depth > 0 ? '  '.repeat(depth) : undefined });
@@ -490,7 +490,7 @@ export default function Breadcrumbs({
         }
       });
     };
-    
+
     flatten(symbols);
     return flat;
   }, [symbols]);
@@ -527,7 +527,7 @@ export default function Breadcrumbs({
                 onClick={() => handlePathClick(segment)}
                 className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded transition-colors ${
                   isLast
-                    ? 'text-white font-medium'
+                    ? 'text-[var(--aethel-text-primary)] font-medium'
                     : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
                 }`}
               >
@@ -545,15 +545,15 @@ export default function Breadcrumbs({
       {symbolChain.length > 0 && (
         <>
           <ChevronRight className="w-4 h-4 text-[var(--aethel-text-quaternary)] mx-1" />
-          
+
           {symbolChain.map((symbol, index) => {
             const Icon = SYMBOL_ICONS[symbol.kind] || Code;
             const colorClass = SYMBOL_COLORS[symbol.kind] || 'text-[var(--aethel-text-tertiary)]';
             const isLast = index === symbolChain.length - 1;
 
             // Get siblings for dropdown
-            const siblings = index === 0 
-              ? symbols 
+            const siblings = index === 0
+              ? symbols
               : symbolChain[index - 1]?.children || [];
 
             return (
@@ -565,7 +565,7 @@ export default function Breadcrumbs({
                 <Dropdown
                   trigger={
                     <span className={`flex items-center gap-1.5 ${
-                      isLast ? 'text-white' : 'text-[var(--aethel-text-secondary)]'
+                      isLast ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'
                     }`}>
                       <Icon className={`w-4 h-4 ${colorClass}`} />
                       {symbol.name}
@@ -658,7 +658,7 @@ export function SymbolOutlinePanel({
           }}
           className={`w-full flex items-center gap-1 px-2 py-1 text-sm text-left transition-colors ${
             isActive
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-white'
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-text-primary)]'
               : 'hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]'
           }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
@@ -691,7 +691,7 @@ export function SymbolOutlinePanel({
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <Code className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
-        <span className="text-sm font-medium text-white">Outline</span>
+        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Outline</span>
         <span className="ml-auto text-xs text-[var(--aethel-text-tertiary)]">
           {symbols.length} symbols
         </span>
@@ -704,7 +704,7 @@ export function SymbolOutlinePanel({
           value={filter}
           onChange={e => setFilter(e.target.value)}
           placeholder="Filtrar simbolos..."
-          className="w-full px-2 py-1 text-sm bg-[var(--aethel-surface-secondary)] text-white placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
+          className="w-full px-2 py-1 text-sm bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
         />
       </div>
 

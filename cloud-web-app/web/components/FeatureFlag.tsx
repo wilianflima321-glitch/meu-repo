@@ -2,7 +2,7 @@
 
 /**
  * Feature Flag Component - Aethel Engine
- * 
+ *
  * Componente para renderização condicional baseada em feature flags
  */
 
@@ -50,31 +50,31 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
     const flag = flags.find(f => f.key === key);
     if (!flag) return false;
     if (!flag.enabled) return false;
-    
+
     // Para percentage, usa hash do sessionId
     if (flag.type === 'percentage' && flag.percentage !== undefined) {
-      const sessionId = typeof window !== 'undefined' 
+      const sessionId = typeof window !== 'undefined'
         ? sessionStorage.getItem('sessionId') || Math.random().toString()
         : Math.random().toString();
-      const hash = Array.from(sessionId).reduce((acc, char) => 
+      const hash = Array.from(sessionId).reduce((acc, char) =>
         ((acc << 5) - acc) + char.charCodeAt(0), 0
       );
       return (Math.abs(hash) % 100) < flag.percentage;
     }
-    
+
     return true;
   };
 
   const getVariant = (key: string): string | null => {
     if (userVariants[key]) return userVariants[key];
-    
+
     const flag = flags.find(f => f.key === key);
     if (!flag?.variants || flag.variants.length === 0) return null;
-    
+
     // Seleciona variante por peso
     const random = Math.random() * 100;
     let cumulative = 0;
-    
+
     for (const variant of flag.variants) {
       cumulative += variant.weight;
       if (random < cumulative) {
@@ -82,7 +82,7 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
         return variant.id;
       }
     }
-    
+
     return flag.variants[0]?.id || null;
   };
 
@@ -117,7 +117,7 @@ interface FeatureProps {
 export function Feature({ flag, children, fallback = null }: FeatureProps) {
   const enabled = useFeatureFlag(flag);
   const { loading } = useFeatureFlags();
-  
+
   if (loading) return null;
   return enabled ? <>{children}</> : <>{fallback}</>;
 }
@@ -153,8 +153,8 @@ export function FeatureFlagAdmin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: !flag.enabled }),
       });
-      
-      setLocalFlags(prev => 
+
+      setLocalFlags(prev =>
         prev.map(f => f.key === key ? { ...f, enabled: !f.enabled } : f)
       );
     } catch (error) {
@@ -172,27 +172,27 @@ export function FeatureFlagAdmin() {
 
   return (
     <div className="p-4 space-y-4">
-      <h2 className="text-lg font-semibold text-white">Feature Flags</h2>
-      
+      <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Feature Flags</h2>
+
       <div className="space-y-2">
         {localFlags.map(flag => (
-          <div 
+          <div
             key={flag.key}
             className="flex items-center justify-between p-3 bg-neutral-800 rounded-lg"
           >
             <div>
-              <div className="font-medium text-white">{flag.name}</div>
+              <div className="font-medium text-[var(--aethel-text-primary)]">{flag.name}</div>
               <div className="text-sm text-neutral-400">
                 {flag.key} • {flag.type}
                 {flag.percentage !== undefined && ` • ${flag.percentage}%`}
               </div>
             </div>
-            
+
             <button
               onClick={() => toggleFlag(flag.key)}
               className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                flag.enabled 
-                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                flag.enabled
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                   : 'bg-neutral-600 text-neutral-300 hover:bg-neutral-500'
               }`}
             >

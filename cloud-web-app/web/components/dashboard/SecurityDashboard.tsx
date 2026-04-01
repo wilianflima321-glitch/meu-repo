@@ -3,10 +3,10 @@
 /**
  * AETHEL ENGINE - Security Dashboard
  * =====================================
- * 
+ *
  * Professional security monitoring and threat visualization.
  * Real-time display of blocked attacks, security events, and system health.
- * 
+ *
  * Features:
  * - Real-time threat feed
  * - Attack type breakdown
@@ -15,7 +15,7 @@
  * - Security score
  * - Audit log viewer
  * - Alert configuration
- * 
+ *
  * @see server/src/security/security-firewall.ts
  */
 
@@ -26,7 +26,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 // ============================================================================
 
 type ThreatLevel = 'critical' | 'high' | 'medium' | 'low' | 'none';
-type ThreatType = 
+type ThreatType =
   | 'prompt_injection'
   | 'code_injection'
   | 'xss'
@@ -153,7 +153,7 @@ const THREAT_LEVEL_COLORS: Record<ThreatLevel, { bg: string; text: string; borde
   high: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500' },
   medium: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]', text: 'text-[var(--aethel-warning)]', border: 'border-[var(--aethel-warning)]' },
   low: { bg: 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]', text: 'text-[var(--aethel-primary-light)]', border: 'border-[var(--aethel-primary)]' },
-  none: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500' },
+  none: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]', text: 'text-[var(--aethel-success-light)]', border: 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]' },
 };
 
 const THREAT_TYPE_LABELS: Record<ThreatType, string> = {
@@ -189,8 +189,8 @@ const THREAT_TYPE_ICONS: Record<ThreatType, React.ReactNode> = {
 function SkeletonScoreGauge() {
   return (
     <div className="flex flex-col items-center animate-pulse">
-      <div className="w-32 h-32 bg-gray-700 rounded-full" />
-      <div className="mt-2 w-16 h-4 bg-gray-700 rounded" />
+      <div className="w-32 h-32 bg-[var(--aethel-surface-secondary)] rounded-full" />
+      <div className="mt-2 w-16 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
     </div>
   );
 }
@@ -198,8 +198,8 @@ function SkeletonScoreGauge() {
 function SkeletonStatsCard() {
   return (
     <div className="animate-pulse">
-      <div className="h-8 w-16 bg-gray-700 rounded mb-1" />
-      <div className="h-4 w-20 bg-gray-600 rounded" />
+      <div className="h-8 w-16 bg-[var(--aethel-surface-secondary)] rounded mb-1" />
+      <div className="h-4 w-20 bg-[var(--aethel-surface-secondary)] rounded" />
     </div>
   );
 }
@@ -211,12 +211,12 @@ function SkeletonThreatBreakdown() {
         <div key={i} className="space-y-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-700 rounded" />
-              <div className="w-24 h-4 bg-gray-700 rounded" />
+              <div className="w-4 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
+              <div className="w-24 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
             </div>
-            <div className="w-8 h-4 bg-gray-700 rounded" />
+            <div className="w-8 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
           </div>
-          <div className="h-1.5 bg-gray-700 rounded-full" />
+          <div className="h-1.5 bg-[var(--aethel-surface-secondary)] rounded-full" />
         </div>
       ))}
     </div>
@@ -227,12 +227,12 @@ function SkeletonRateLimitCard() {
   return (
     <div className="p-3 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] animate-pulse">
       <div className="flex items-center justify-between mb-2">
-        <div className="w-20 h-4 bg-gray-700 rounded" />
-        <div className="w-16 h-3 bg-gray-700 rounded" />
+        <div className="w-20 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
+        <div className="w-16 h-3 bg-[var(--aethel-surface-secondary)] rounded" />
       </div>
       <div className="flex items-center gap-2">
-        <div className="flex-1 h-2 bg-gray-700 rounded-full" />
-        <div className="w-12 h-3 bg-gray-700 rounded" />
+        <div className="flex-1 h-2 bg-[var(--aethel-surface-secondary)] rounded-full" />
+        <div className="w-12 h-3 bg-[var(--aethel-surface-secondary)] rounded" />
       </div>
     </div>
   );
@@ -242,19 +242,19 @@ function SkeletonEventRow() {
   return (
     <div className="border-b border-[var(--aethel-border-primary)] animate-pulse">
       <div className="px-4 py-3 flex items-center gap-4">
-        <div className="w-2 h-2 bg-gray-700 rounded-full" />
-        <div className="w-5 h-5 bg-gray-700 rounded" />
+        <div className="w-2 h-2 bg-[var(--aethel-surface-secondary)] rounded-full" />
+        <div className="w-5 h-5 bg-[var(--aethel-surface-secondary)] rounded" />
         <div className="flex items-center gap-2 w-40">
-          <div className="w-4 h-4 bg-gray-700 rounded" />
-          <div className="w-24 h-4 bg-gray-700 rounded" />
+          <div className="w-4 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
+          <div className="w-24 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
         </div>
-        <div className="w-16 h-5 bg-gray-700 rounded" />
+        <div className="w-16 h-5 bg-[var(--aethel-surface-secondary)] rounded" />
         <div className="flex-1 flex gap-2">
-          <div className="w-10 h-4 bg-gray-700 rounded" />
-          <div className="w-32 h-4 bg-gray-700 rounded" />
+          <div className="w-10 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
+          <div className="w-32 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
         </div>
-        <div className="w-28 h-4 bg-gray-700 rounded" />
-        <div className="w-16 h-4 bg-gray-700 rounded" />
+        <div className="w-28 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
+        <div className="w-16 h-4 bg-[var(--aethel-surface-secondary)] rounded" />
       </div>
     </div>
   );
@@ -298,7 +298,7 @@ function ErrorState({ message, onRetry }: ErrorStateProps) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="w-16 h-16 text-green-400 mb-4 opacity-50">
+      <div className="w-16 h-16 text-[var(--aethel-success-light)] mb-4 opacity-50">
         <Icons.Shield />
       </div>
       <h3 className="text-lg font-medium text-[var(--aethel-text-primary)] mb-2">No Security Events</h3>
@@ -319,22 +319,22 @@ interface SecurityScoreGaugeProps {
 
 function SecurityScoreGauge({ score }: SecurityScoreGaugeProps) {
   const getColor = (s: number) => {
-    if (s >= 90) return 'text-green-400';
+    if (s >= 90) return 'text-[var(--aethel-success-light)]';
     if (s >= 70) return 'text-[var(--aethel-warning)]';
     if (s >= 50) return 'text-orange-400';
     return 'text-[var(--aethel-error)]';
   };
-  
+
   const getLabel = (s: number) => {
     if (s >= 90) return 'Excellent';
     if (s >= 70) return 'Good';
     if (s >= 50) return 'Fair';
     return 'Poor';
   };
-  
+
   const circumference = 2 * Math.PI * 45;
   const offset = circumference - (score / 100) * circumference;
-  
+
   return (
     <div className="flex flex-col items-center">
       <div className="relative w-32 h-32">
@@ -385,7 +385,7 @@ function ThreatBreakdown({ data }: ThreatBreakdownProps) {
   const sortedData = Object.entries(data)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5);
-  
+
   return (
     <div className="space-y-3">
       {sortedData.map(([type, count]) => {
@@ -404,7 +404,7 @@ function ThreatBreakdown({ data }: ThreatBreakdownProps) {
               <span className="text-sm text-[var(--aethel-text-secondary)]">{count}</span>
             </div>
             <div className="h-1.5 bg-[var(--aethel-border-primary)] rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-[var(--aethel-primary)] transition-all duration-300"
                 style={{ width: `${percent}%` }}
               />
@@ -428,7 +428,7 @@ function RateLimitCard({ status }: RateLimitCardProps) {
   const percent = (status.current / status.limit) * 100;
   const isWarning = percent > 80;
   const isCritical = percent > 95;
-  
+
   return (
     <div className={`p-3 rounded-lg border ${
       isCritical ? 'border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
@@ -443,11 +443,11 @@ function RateLimitCard({ status }: RateLimitCardProps) {
       </div>
       <div className="flex items-center gap-2">
         <div className="flex-1 h-2 bg-[var(--aethel-border-primary)] rounded-full overflow-hidden">
-          <div 
+          <div
             className={`h-full transition-all duration-300 ${
               isCritical ? 'bg-[var(--aethel-error)]' :
               isWarning ? 'bg-[var(--aethel-warning)]' :
-              'bg-green-500'
+              'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
             }`}
             style={{ width: `${percent}%` }}
           />
@@ -472,56 +472,56 @@ interface ThreatEventRowProps {
 
 function ThreatEventRow({ event, isExpanded, onToggle }: ThreatEventRowProps) {
   const levelColor = THREAT_LEVEL_COLORS[event.level];
-  
+
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    
+
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     return date.toLocaleDateString();
   };
-  
+
   return (
     <div className={`border-b border-[var(--aethel-border-primary)] ${event.blocked ? '' : 'bg-[color-mix(in_srgb,var(--aethel-error)_5%,transparent)]'}`}>
-      <div 
+      <div
         className="px-4 py-3 flex items-center gap-4 cursor-pointer hover:bg-[var(--aethel-surface-tertiary)] transition-colors"
         onClick={onToggle}
       >
         {/* Level indicator */}
         <div className={`w-2 h-2 rounded-full ${levelColor.bg.replace('/20', '')}`} />
-        
+
         {/* Blocked status */}
-        <div className={`w-5 h-5 ${event.blocked ? 'text-green-400' : 'text-[var(--aethel-error)]'}`}>
+        <div className={`w-5 h-5 ${event.blocked ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error)]'}`}>
           {event.blocked ? <Icons.CheckCircle /> : <Icons.XCircle />}
         </div>
-        
+
         {/* Type */}
         <div className="flex items-center gap-2 w-40">
           <span className="text-[var(--aethel-text-tertiary)]">{THREAT_TYPE_ICONS[event.type]}</span>
           <span className="text-sm text-[var(--aethel-text-primary)]">{THREAT_TYPE_LABELS[event.type]}</span>
         </div>
-        
+
         {/* Level */}
         <span className={`px-2 py-0.5 rounded text-xs font-medium uppercase ${levelColor.bg} ${levelColor.text}`}>
           {event.level}
         </span>
-        
+
         {/* Target */}
         <div className="flex-1 truncate">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">{event.target.method}</span>
           <span className="text-sm text-[var(--aethel-text-secondary)] ml-2">{event.target.endpoint}</span>
         </div>
-        
+
         {/* Source IP */}
         <span className="text-xs text-[var(--aethel-text-tertiary)] font-mono w-28">{event.source.ip}</span>
-        
+
         {/* Time */}
         <span className="text-xs text-[var(--aethel-text-tertiary)] w-16 text-right">{formatTime(event.timestamp)}</span>
       </div>
-      
+
       {/* Expanded details */}
       {isExpanded && (
         <div className="px-4 py-3 bg-[var(--aethel-surface-primary)] border-t border-[var(--aethel-border-primary)]">
@@ -545,7 +545,7 @@ function ThreatEventRow({ event, isExpanded, onToggle }: ThreatEventRowProps) {
                 </div>
               </dl>
             </div>
-            
+
             <div>
               <h4 className="text-xs text-[var(--aethel-text-tertiary)] uppercase mb-2">Detection Details</h4>
               <dl className="space-y-1">
@@ -592,38 +592,38 @@ export function SecurityDashboard({
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [filterLevel, setFilterLevel] = useState<ThreatLevel | 'all'>('all');
   const [showBlocked, setShowBlocked] = useState<'all' | 'blocked' | 'passed'>('all');
-  
+
   // Fetch data
   const fetchData = useCallback(async () => {
     if (!isLoading) {
       setIsRefreshing(true);
     }
     setError(null);
-    
+
     try {
       const [eventsResponse, rateLimitsResponse] = await Promise.all([
         fetch(`${apiUrl}/events`),
         fetch(`${apiUrl}/rate-limits`)
       ]);
-      
+
       if (!eventsResponse.ok) {
         throw new Error(`Failed to fetch events: ${eventsResponse.status} ${eventsResponse.statusText}`);
       }
-      
+
       if (!rateLimitsResponse.ok) {
         throw new Error(`Failed to fetch rate limits: ${rateLimitsResponse.status} ${rateLimitsResponse.statusText}`);
       }
-      
+
       const eventsData = await eventsResponse.json();
       const rateLimitsData = await rateLimitsResponse.json();
-      
+
       // Parse events
       const parsedEvents: ThreatEvent[] = eventsData.events || [];
       setEvents(parsedEvents);
-      
+
       // Set rate limits
       setRateLimits(rateLimitsData.rateLimits || []);
-      
+
       // Calculate stats from real data or use provided stats
       if (eventsData.stats) {
         setStats(eventsData.stats);
@@ -633,14 +633,14 @@ export function SecurityDashboard({
           acc[event.type] = (acc[event.type] || 0) + 1;
           return acc;
         }, {} as Record<ThreatType, number>);
-        
+
         const threatsByLevel = parsedEvents.reduce((acc: Record<ThreatLevel, number>, event) => {
           acc[event.level] = (acc[event.level] || 0) + 1;
           return acc;
         }, {} as Record<ThreatLevel, number>);
-        
+
         const uniqueIPs = new Set(parsedEvents.map(e => e.source.ip));
-        
+
         setStats({
           totalThreats24h: parsedEvents.length,
           blockedThreats24h: parsedEvents.filter(e => e.blocked).length,
@@ -677,18 +677,18 @@ export function SecurityDashboard({
       setIsRefreshing(false);
     }
   }, [apiUrl, isLoading]);
-  
+
   // Initial fetch and polling
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);
   }, [fetchData, refreshInterval]);
-  
+
   // WebSocket for real-time updates
   useEffect(() => {
     if (!wsUrl) return;
-    
+
     const ws = new WebSocket(wsUrl);
     ws.onmessage = (event) => {
       try {
@@ -700,10 +700,10 @@ export function SecurityDashboard({
         }
       } catch { /* ignore */ }
     };
-    
+
     return () => ws.close();
   }, [wsUrl]);
-  
+
   // Filtered events
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
@@ -713,7 +713,7 @@ export function SecurityDashboard({
       return true;
     });
   }, [events, filterLevel, showBlocked]);
-  
+
   // Error state
   if (error && !isRefreshing) {
     return (
@@ -726,7 +726,7 @@ export function SecurityDashboard({
       </div>
     );
   }
-  
+
   // Loading state with skeleton
   if (isLoading) {
     return (
@@ -736,19 +736,19 @@ export function SecurityDashboard({
           <div className="flex items-center gap-3">
             <Icons.Shield />
             <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Security Dashboard</h2>
-            <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-500/20 text-[var(--aethel-text-secondary)]">
+            <span className="px-2 py-0.5 rounded text-xs font-medium bg-[var(--aethel-surface-secondary)]/20 text-[var(--aethel-text-secondary)]">
               Loading...
             </span>
           </div>
         </div>
-        
+
         {/* Stats Overview Skeleton */}
         <div className="grid grid-cols-4 gap-4 p-4 border-b border-[var(--aethel-border-primary)]">
           <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4 flex items-center justify-center">
             <SkeletonScoreGauge />
           </div>
           <div className="col-span-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-            <div className="h-4 w-24 bg-gray-700 rounded mb-3" />
+            <div className="h-4 w-24 bg-[var(--aethel-surface-secondary)] rounded mb-3" />
             <div className="grid grid-cols-3 gap-4">
               <SkeletonStatsCard />
               <SkeletonStatsCard />
@@ -756,21 +756,21 @@ export function SecurityDashboard({
             </div>
           </div>
           <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
-            <div className="h-4 w-20 bg-gray-700 rounded mb-3" />
+            <div className="h-4 w-20 bg-[var(--aethel-surface-secondary)] rounded mb-3" />
             <SkeletonThreatBreakdown />
           </div>
         </div>
-        
+
         {/* Rate Limits Skeleton */}
         <div className="px-4 py-3 border-b border-[var(--aethel-border-primary)]">
-          <div className="h-4 w-20 bg-gray-700 rounded mb-3" />
+          <div className="h-4 w-20 bg-[var(--aethel-surface-secondary)] rounded mb-3" />
           <div className="grid grid-cols-3 gap-3">
             <SkeletonRateLimitCard />
             <SkeletonRateLimitCard />
             <SkeletonRateLimitCard />
           </div>
         </div>
-        
+
         {/* Events Skeleton */}
         <div className="flex-1 overflow-auto">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -780,7 +780,7 @@ export function SecurityDashboard({
       </div>
     );
   }
-  
+
   return (
     <div className={`flex flex-col h-full bg-[var(--aethel-surface-primary)] ${className}`}>
       {/* Header */}
@@ -788,11 +788,11 @@ export function SecurityDashboard({
         <div className="flex items-center gap-3">
           <Icons.Shield />
           <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Security Dashboard</h2>
-          <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-500/20 text-green-400">
+          <span className="px-2 py-0.5 rounded text-xs font-medium bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]">
             Protected
           </span>
         </div>
-        
+
         <button
           onClick={fetchData}
           className="p-1.5 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
@@ -801,14 +801,14 @@ export function SecurityDashboard({
           <Icons.Refresh />
         </button>
       </div>
-      
+
       {/* Stats Overview */}
       <div className="grid grid-cols-4 gap-4 p-4 border-b border-[var(--aethel-border-primary)]">
         {/* Security Score */}
         <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4 flex items-center justify-center">
           {stats && <SecurityScoreGauge score={stats.securityScore} />}
         </div>
-        
+
         {/* Quick Stats */}
         <div className="col-span-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
           <h3 className="text-xs text-[var(--aethel-text-tertiary)] uppercase mb-3">Last 24 Hours</h3>
@@ -818,7 +818,7 @@ export function SecurityDashboard({
               <div className="text-xs text-[var(--aethel-text-tertiary)]">Total Threats</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-400">{stats?.blockedThreats24h || 0}</div>
+              <div className="text-2xl font-bold text-[var(--aethel-success-light)]">{stats?.blockedThreats24h || 0}</div>
               <div className="text-xs text-[var(--aethel-text-tertiary)]">Blocked</div>
             </div>
             <div>
@@ -827,14 +827,14 @@ export function SecurityDashboard({
             </div>
           </div>
         </div>
-        
+
         {/* Threat Breakdown */}
         <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
           <h3 className="text-xs text-[var(--aethel-text-tertiary)] uppercase mb-3">Top Threats</h3>
           {stats && <ThreatBreakdown data={stats.threatsByType} />}
         </div>
       </div>
-      
+
       {/* Rate Limits */}
       <div className="px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <h3 className="text-xs text-[var(--aethel-text-tertiary)] uppercase mb-3">Rate Limits</h3>
@@ -844,7 +844,7 @@ export function SecurityDashboard({
           ))}
         </div>
       </div>
-      
+
       {/* Filters */}
       <div className="flex items-center gap-4 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <select
@@ -858,7 +858,7 @@ export function SecurityDashboard({
           <option value="medium">Medium</option>
           <option value="low">Low</option>
         </select>
-        
+
         <select
           value={showBlocked}
           onChange={(e) => setShowBlocked(e.target.value as 'all' | 'blocked' | 'passed')}
@@ -868,12 +868,12 @@ export function SecurityDashboard({
           <option value="blocked">Blocked Only</option>
           <option value="passed">Passed Only</option>
         </select>
-        
+
         <div className="flex-1" />
-        
+
         <span className="text-sm text-[var(--aethel-text-secondary)]">{filteredEvents.length} events</span>
       </div>
-      
+
       {/* Event List */}
       <div className="flex-1 overflow-auto">
         {filteredEvents.length === 0 && events.length === 0 ? (

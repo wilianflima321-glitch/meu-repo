@@ -36,7 +36,7 @@ export default function AethelHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [notifications, setNotifications] = useState(3)
-  
+
   // Simulated user data - in production, fetch from API
   const [user, setUser] = useState<UserData | null>(null)
 
@@ -127,7 +127,7 @@ export default function AethelHeader() {
   ]
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+    <header className="sticky top-0 z-40 w-full border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Left Section: Logo + Nav */}
@@ -140,10 +140,10 @@ export default function AethelHeader() {
                 width={32}
                 height={32}
                 sizes="32px"
-                className="h-8 w-8 rounded-xl border border-white/10 bg-white/[0.04] p-1 shadow-[0_12px_30px_rgba(56,189,248,0.25)] transition-shadow group-hover:shadow-[0_12px_34px_rgba(99,102,241,0.35)]"
+                className="h-8 w-8 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-1 shadow-[0_12px_30px_rgba(56,189,248,0.25)] transition-shadow group-hover:shadow-[0_12px_34px_rgba(99,102,241,0.35)]"
                 priority
               />
-              <span className="font-bold text-xl text-white">
+              <span className="font-bold text-xl text-[var(--aethel-text-primary)]">
                 Aethel
               </span>
             </Link>
@@ -206,7 +206,7 @@ export default function AethelHeader() {
                 >
                   <Bell className="w-5 h-5" />
                   {notifications > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-full flex items-center justify-center">
                       {notifications > 9 ? '9+' : notifications}
                     </span>
                   )}
@@ -222,7 +222,7 @@ export default function AethelHeader() {
                 {/* User Menu */}
                 <Dropdown
                   trigger={
-                    <div className="flex items-center gap-2 rounded-xl border border-transparent p-1 transition-colors hover:border-white/10 hover:bg-white/[0.06] cursor-pointer">
+                    <div className="flex items-center gap-2 rounded-xl border border-transparent p-1 transition-colors hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] cursor-pointer">
                       <Avatar
                         src={user?.avatar}
                         name={user?.name || 'User'}
@@ -286,9 +286,9 @@ export default function AethelHeader() {
                   {link.label}
                 </Link>
               ))}
-              
+
               <div className="my-2 border-t border-[var(--aethel-border-secondary)]" />
-              
+
               {productItems.filter(i => !i.divider).map((item) => (
                 <Link
                   key={item.id}
@@ -307,9 +307,9 @@ export default function AethelHeader() {
 
       {/* Search Modal */}
       {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setSearchOpen(false)}>
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm" onClick={() => setSearchOpen(false)}>
           <div className="fixed top-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4">
-            <div 
+            <div
               className="overflow-hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.96),rgba(10,14,24,0.94))] shadow-[0_32px_90px_rgba(2,6,23,0.55)]"
               onClick={(e) => e.stopPropagation()}
             >

@@ -619,14 +619,14 @@ function CommandPaletteUI({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[1px]" onClick={close} />
+      <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-[1px]" onClick={close} />
       <div
         className="fixed left-1/2 top-[12%] z-50 w-[680px] max-w-[94vw] -translate-x-1/2"
         role="dialog"
         aria-modal="true"
         aria-label="Paleta de comandos"
       >
-        <div className="overflow-hidden rounded-lg border border-[var(--aethel-border-secondary)]/80 bg-[#0f131b] shadow-2xl">
+        <div className="overflow-hidden rounded-lg border border-[var(--aethel-border-secondary)]/80 bg-[var(--aethel-surface-primary)] shadow-2xl">
           <div className="flex items-center gap-2 border-b border-[var(--aethel-border-secondary)]/70 px-3 py-2.5">
             {currentMode.prefix && <span className="font-mono text-xs text-[var(--aethel-info-light)]">{currentMode.prefix}</span>}
             <input

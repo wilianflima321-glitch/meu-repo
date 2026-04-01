@@ -100,13 +100,13 @@ function getWarningLevel(usagePercent: number): 'ok' | 'warning' | 'critical' | 
 function getWarningColor(level: string): string {
   switch (level) {
     case 'blocked':
-      return 'bg-rose-400'
+      return 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
     case 'critical':
-      return 'bg-rose-300'
+      return 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
     case 'warning':
-      return 'bg-yellow-300'
+      return 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]'
     default:
-      return 'bg-emerald-300'
+      return 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
   }
 }
 
@@ -337,17 +337,17 @@ export function StorageQuotaManager({
 
   return (
     <div className={`aethel-card ${className}`}>
-      <div className="border-b border-white/10 p-4">
+      <div className="border-b border-[var(--aethel-border-primary)] p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="text-sky-300">
               <Icons.Storage />
             </div>
-            <h3 className="text-sm font-semibold text-white">Armazenamento</h3>
+            <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Armazenamento</h3>
           </div>
 
           {storageInfo.isPersisted ? (
-            <div className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-1 text-xs text-emerald-300">
+            <div className="flex items-center gap-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2 py-1 text-xs text-[var(--aethel-success-light)]">
               <Icons.Shield />
               <span>Persistente</span>
             </div>
@@ -369,10 +369,10 @@ export function StorageQuotaManager({
           <div
             className={`mb-4 flex items-start gap-2 rounded-lg p-3 ${
               storageInfo.warningLevel === 'blocked'
-                ? 'bg-rose-500/20 text-rose-200'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
                 : storageInfo.warningLevel === 'critical'
-                  ? 'bg-rose-500/10 text-rose-200'
-                  : 'bg-yellow-500/10 text-yellow-200'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
+                  : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
             }`}
           >
             <Icons.Warning />
@@ -411,7 +411,7 @@ export function StorageQuotaManager({
         </div>
       </div>
 
-      <div className="border-t border-white/10">
+      <div className="border-t border-[var(--aethel-border-primary)]">
         <button
           onClick={() => setShowDetails(!showDetails)}
           className="flex w-full items-center justify-between p-3 text-xs text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
@@ -437,7 +437,7 @@ export function StorageQuotaManager({
                     className={`flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors ${
                       selectedForCleanup.has(entry.name)
                         ? 'border border-sky-500/50 bg-sky-500/10'
-                        : 'bg-white/[0.03] hover:bg-white/[0.06]'
+                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                     }`}
                     onClick={() => {
                       const newSelection = new Set(selectedForCleanup)
@@ -453,7 +453,7 @@ export function StorageQuotaManager({
                       {getCacheTypeLabel(entry.type)}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm text-white">{entry.name}</p>
+                      <p className="truncate text-sm text-[var(--aethel-text-primary)]">{entry.name}</p>
                       <p className="text-xs text-[var(--aethel-text-tertiary)]">{entry.type}</p>
                     </div>
                     <span className="text-xs text-[var(--aethel-text-tertiary)]">{formatBytes(entry.size)}</span>
@@ -497,7 +497,7 @@ export function StorageQuotaManager({
         )}
       </div>
 
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-[var(--aethel-border-primary)] p-4">
         <button className="aethel-button aethel-button-ghost w-full justify-center gap-2 text-xs">
           <Icons.Download />
           <span>Exportar assets locais</span>

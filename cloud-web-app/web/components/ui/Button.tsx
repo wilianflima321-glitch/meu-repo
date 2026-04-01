@@ -110,7 +110,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const roundedClass = rounded === 'full' ? 'rounded-full' : 'rounded-lg'
 
     const computedClassName = `
-      inline-flex items-center justify-center 
+      inline-flex items-center justify-center
       ${roundedClass}
       transition-all duration-200 ease-out
       transform active:scale-[0.98]

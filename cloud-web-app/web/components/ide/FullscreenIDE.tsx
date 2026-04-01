@@ -1077,7 +1077,7 @@ function IDEContent() {
             studioRightSlot={
               <Link
                 href={projectId && projectId !== 'default' ? `/dashboard?projectId=${encodeURIComponent(projectId)}` : "/dashboard"}
-                className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-white/20 hover:text-[var(--aethel-text-primary)]"
+                className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"
               >
                 Voltar ao dashboard
               </Link>
@@ -1245,7 +1245,7 @@ function IDEContent() {
                       </button>
                     )}
                     {fullAccessActiveGrant && (
-                      <span className="rounded border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] text-cyan-200">
+                      <span className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-info-light)]">
                         Full Access ativo{fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}
                       </span>
                     )}
@@ -1256,7 +1256,7 @@ function IDEContent() {
                         disabled={fullAccessBusy}
                         className={`rounded border px-2 py-0.5 text-[10px] disabled:opacity-60 ${
                           fullAccessActiveGrant
-                            ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20'
+                            ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
                             : 'border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
                         }`}
                         title={

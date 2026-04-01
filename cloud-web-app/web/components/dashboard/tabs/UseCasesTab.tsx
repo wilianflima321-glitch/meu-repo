@@ -31,7 +31,7 @@ export default function UseCasesTab({ useCases, onSelect }: UseCasesTabProps) {
               <h3 className="text-xl font-bold">{useCase.name}</h3>
               <p className="text-sm text-[var(--aethel-text-secondary)] mt-2">{useCase.description}</p>
             </div>
-            
+
             <div className="flex-1">
               <div className="text-[10px] font-bold text-[var(--aethel-text-tertiary)] uppercase mb-2">Funcionalidades principais</div>
               <ul className="space-y-1">

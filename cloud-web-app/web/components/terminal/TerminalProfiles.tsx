@@ -1,6 +1,6 @@
 /**
  * Terminal Profiles Configuration
- * 
+ *
  * Perfis pré-configurados para diferentes propósitos:
  * - Server Log: Monitoramento de servidor
  * - Build Output: Saída de compilação
@@ -186,8 +186,8 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState<'all' | 'development' | 'monitoring' | 'tools'>('all');
 
-  const filteredProfiles = filter === 'all' 
-    ? profiles 
+  const filteredProfiles = filter === 'all'
+    ? profiles
     : profiles.filter(p => p.category === filter);
 
   const selectedProfile = profiles.find(p => p.id === selectedId);
@@ -428,16 +428,16 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
           width: '6px',
           height: '6px',
           borderRadius: '50%',
-          background: terminal.status === 'running' 
-            ? colors.success 
-            : terminal.status === 'error' 
-            ? colors.error 
+          background: terminal.status === 'running'
+            ? colors.success
+            : terminal.status === 'error'
+            ? colors.error
             : colors.textDim,
         }}
       />
-      
+
       <span style={{ color: profile.color }}>{profile.icon}</span>
-      
+
       <span
         style={{
           flex: 1,
@@ -475,7 +475,7 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
             <RotateCcw size={12} />
           </button>
         )}
-        
+
         <button
           onClick={(e) => {
             e.stopPropagation();

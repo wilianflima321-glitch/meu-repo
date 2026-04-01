@@ -93,7 +93,7 @@ export function DashboardProjectsTab({
               <button
                 type="button"
                 onClick={onOpenIde}
-                className="rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
+                className="rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
               >
                 Seguir para IDE
               </button>
@@ -181,8 +181,8 @@ export function DashboardProjectsTab({
                 <span
                   className={`px-2.5 py-1 rounded-full text-xs ${
                     project.status === 'active'
-                      ? 'bg-green-500/20 text-green-400'
-                      : 'bg-gray-500/20 text-[var(--aethel-text-secondary)]'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+                      : 'bg-[var(--aethel-surface-secondary)]/20 text-[var(--aethel-text-secondary)]'
                   }`}
                 >
                   {project.status}

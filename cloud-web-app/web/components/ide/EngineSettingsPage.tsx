@@ -330,7 +330,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
           `}
         >
           <div className={`
-            absolute top-1 w-4 h-4 rounded-full bg-white transition-transform
+            absolute top-1 w-4 h-4 rounded-full bg-[var(--aethel-surface-secondary)] transition-transform
             ${setting.value ? 'left-6' : 'left-1'}
           `} />
         </button>

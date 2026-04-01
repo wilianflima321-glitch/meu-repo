@@ -71,7 +71,7 @@ export const Minimap: React.FC<MinimapProps> = ({
     const lines = content.split('\n');
     lines.forEach((line, index) => {
       const y = index * lineHeight;
-      
+
       // Draw line background based on content
       if (line.trim()) {
         const intensity = Math.min(line.length / 80, 1);

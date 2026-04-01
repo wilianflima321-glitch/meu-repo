@@ -8,7 +8,7 @@ import { getWasmRuntime } from '@/lib/wasm-runtime';
  * ============================================
  * THE FORGE: IDE UNIFICADA AAA
  * ============================================
- * 
+ *
  * Interface mestre que consolida:
  * - Editor de código (Monaco)
  * - Chat multimodal com IA
@@ -16,7 +16,7 @@ import { getWasmRuntime } from '@/lib/wasm-runtime';
  * - File explorer
  * - Terminal/Console
  * - Quality gates automáticos
- * 
+ *
  * Objetivo: Superar VS Code + Unreal Engine
  * em um único ambiente web.
  *

@@ -34,7 +34,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
 
   const openFile = useCallback((file: FileItem | undefined) => {
     if (!file) return;
-    
+
     if (file.type === 'file') {
       const projectId = resolveProjectIdFromClient();
       router.push(`/ide?projectId=${encodeURIComponent(projectId)}&file=${encodeURIComponent(file.path)}`);
@@ -45,17 +45,17 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
   const fuzzyMatch = useCallback((str: string, pattern: string): boolean => {
     const patternLower = pattern.toLowerCase();
     const strLower = str.toLowerCase();
-    
+
     let patternIdx = 0;
     let strIdx = 0;
-    
+
     while (patternIdx < patternLower.length && strIdx < strLower.length) {
       if (patternLower[patternIdx] === strLower[strIdx]) {
         patternIdx++;
       }
       strIdx++;
     }
-    
+
     return patternIdx === patternLower.length;
   }, []);
 
@@ -197,40 +197,40 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
 
   const highlightMatch = (text: string, query: string): JSX.Element => {
     if (!query) return <>{text}</>;
-    
+
     const parts: JSX.Element[] = [];
     let lastIndex = 0;
     const lowerText = text.toLowerCase();
     const lowerQuery = query.toLowerCase();
-    
+
     for (let i = 0; i < lowerQuery.length; i++) {
       const char = lowerQuery[i];
       const index = lowerText.indexOf(char, lastIndex);
-      
+
       if (index !== -1) {
         if (index > lastIndex) {
           parts.push(<span key={`text-${i}`}>{text.substring(lastIndex, index)}</span>);
         }
         parts.push(
-          <span key={`match-${i}`} className="text-blue-400 font-semibold">
+          <span key={`match-${i}`} className="text-[var(--aethel-info-light)] font-semibold">
             {text[index]}
           </span>
         );
         lastIndex = index + 1;
       }
     }
-    
+
     if (lastIndex < text.length) {
       parts.push(<span key="text-end">{text.substring(lastIndex)}</span>);
     }
-    
+
     return <>{parts}</>;
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4 pt-20">
+    <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm flex items-start justify-center z-50 p-4 pt-20">
       <div className="bg-[var(--aethel-surface-secondary)] rounded-lg shadow-2xl w-full max-w-3xl max-h-[600px] overflow-hidden">
         {/* Search Input */}
         <div className="p-4 border-b border-[var(--aethel-border-primary)]">
@@ -277,7 +277,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full px-4 py-3 flex items-center justify-between rounded-lg transition-colors ${
                       isSelected
-                        ? 'bg-blue-600 text-[var(--aethel-text-primary)]'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
                         : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
                     }`}
                   >

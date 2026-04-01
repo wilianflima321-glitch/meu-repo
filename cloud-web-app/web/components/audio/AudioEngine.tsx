@@ -1,6 +1,6 @@
 /**
  * Waveform Renderer - Renderizacao REAL de Audio Waveform
- * 
+ *
  * Usa Canvas 2D para renderizar waveform de audio.
  * Funciona com Web Audio API.
  */
@@ -40,7 +40,7 @@ export function WaveformRenderer({
     if (audioUrl && !audioBuffer) {
       setIsLoading(true);
       const audioContext = new AudioContext();
-      
+
       fetch(audioUrl)
         .then(response => response.arrayBuffer())
         .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
@@ -58,28 +58,28 @@ export function WaveformRenderer({
   // Calcular peaks
   useEffect(() => {
     if (!buffer) return;
-    
+
     const channelData = buffer.getChannelData(0);
     const samplesPerPixel = Math.floor(channelData.length / width);
     const newPeaks: number[] = [];
-    
+
     for (let i = 0; i < width; i++) {
       const start = i * samplesPerPixel;
       const end = start + samplesPerPixel;
-      
+
       let min = 0;
       let max = 0;
-      
+
       for (let j = start; j < end && j < channelData.length; j++) {
         const sample = channelData[j];
         if (sample < min) min = sample;
         if (sample > max) max = sample;
       }
-      
+
       // Normalizar para 0-1
       newPeaks.push(Math.max(Math.abs(min), Math.abs(max)));
     }
-    
+
     setPeaks(newPeaks);
   }, [buffer, width]);
 
@@ -87,31 +87,31 @@ export function WaveformRenderer({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || peaks.length === 0) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     // Background
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
-    
+
     const centerY = height / 2;
     const barWidth = 2;
     const gap = 1;
     const maxBarHeight = height * 0.9;
-    
+
     peaks.forEach((peak, i) => {
       const x = i * (barWidth + gap);
       const barHeight = peak * maxBarHeight;
-      
+
       // Cor baseada no progresso
       const progressX = progress * width;
       ctx.fillStyle = x < progressX ? 'var(--aethel-primary-light)' : color;
-      
+
       // Desenhar barra simetrica
       ctx.fillRect(x, centerY - barHeight / 2, barWidth, barHeight);
     });
-    
+
     // Linha central
     ctx.strokeStyle = 'var(--aethel-text-quaternary)';
     ctx.lineWidth = 1;
@@ -119,7 +119,7 @@ export function WaveformRenderer({
     ctx.moveTo(0, centerY);
     ctx.lineTo(width, centerY);
     ctx.stroke();
-    
+
     // Playhead
     if (progress > 0) {
       const playheadX = progress * width;
@@ -135,20 +135,20 @@ export function WaveformRenderer({
   // Handle click para seek
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!onSeek) return;
-    
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const position = x / width;
-    
+
     onSeek(Math.max(0, Math.min(1, position)));
   }, [onSeek, width]);
 
   if (isLoading) {
     return (
-      <div 
+      <div
         className="flex items-center justify-center bg-[var(--aethel-surface-tertiary)] rounded"
         style={{ width, height }}
       >
@@ -201,17 +201,17 @@ export function MixerChannel({
     <div className="flex flex-col items-center p-2 bg-[var(--aethel-surface-tertiary)] rounded w-20 gap-2">
       {/* Nome */}
       <span className="text-xs text-[var(--aethel-text-secondary)] truncate w-full text-center">{name}</span>
-      
+
       {/* Meter */}
       <div className="w-4 h-32 bg-[var(--aethel-surface-secondary)] rounded relative">
-        <div 
+        <div
           className={`absolute bottom-0 w-full rounded transition-all ${
             peakLevel > 0.9 ? 'bg-[var(--aethel-error)]' : peakLevel > 0.7 ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]'
           }`}
           style={{ height: `${peakLevel * 100}%` }}
         />
       </div>
-      
+
       {/* Volume Slider */}
       <input
         type="range"
@@ -223,12 +223,12 @@ export function MixerChannel({
         className="w-full h-2"
         style={{ writingMode: 'vertical-lr', direction: 'rtl', height: '80px' }}
       />
-      
+
       {/* dB Label */}
       <span className="text-xs text-[var(--aethel-text-tertiary)]">
         {volume === 0 ? '-' : `${(20 * Math.log10(volume)).toFixed(1)}`}dB
       </span>
-      
+
       {/* Pan */}
       <input
         type="range"
@@ -242,7 +242,7 @@ export function MixerChannel({
       <span className="text-xs text-[var(--aethel-text-quaternary)]">
         {pan === 0 ? 'C' : pan < 0 ? `L${Math.abs(Math.round(pan * 100))}` : `R${Math.round(pan * 100)}`}
       </span>
-      
+
       {/* Buttons */}
       <div className="flex gap-1">
         <button
@@ -275,10 +275,10 @@ export class AudioEngine {
     this.context = new AudioContext();
     this.masterGain = this.context.createGain();
     this.analyser = this.context.createAnalyser();
-    
+
     this.masterGain.connect(this.analyser);
     this.analyser.connect(this.context.destination);
-    
+
     this.analyser.fftSize = 2048;
   }
 
@@ -286,7 +286,7 @@ export class AudioEngine {
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
     const audioBuffer = await this.context.decodeAudioData(arrayBuffer);
-    
+
     const track = new AudioTrack(this.context, audioBuffer, this.masterGain);
     this.tracks.set(id, track);
   }
@@ -326,13 +326,13 @@ export class AudioEngine {
   getPeakLevel(): number {
     const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
     this.analyser.getByteTimeDomainData(dataArray);
-    
+
     let max = 0;
     for (let i = 0; i < dataArray.length; i++) {
       const value = Math.abs(dataArray[i] - 128) / 128;
       if (value > max) max = value;
     }
-    
+
     return max;
   }
 
@@ -360,17 +360,17 @@ class AudioTrack {
     this.context = context;
     this.buffer = buffer;
     this.output = output;
-    
+
     this.gainNode = context.createGain();
     this.panNode = context.createStereoPanner();
-    
+
     this.gainNode.connect(this.panNode);
     this.panNode.connect(output);
   }
 
   play(startTime: number = 0): void {
     this.stop();
-    
+
     this.source = this.context.createBufferSource();
     this.source.buffer = this.buffer;
     this.source.connect(this.gainNode);

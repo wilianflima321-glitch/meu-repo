@@ -2,17 +2,17 @@
 
 /**
  * AETHEL ENGINE - Gameplay Ability System Editor
- * 
+ *
  * Visual editor for the GAS (Gameplay Ability System).
  * Connects the 957-line backend system to a professional UI.
- * 
+ *
  * Features:
  * - Tag-based ability browser
  * - Visual attribute editor
  * - Gameplay effect composer
  * - Ability cost/cooldown editor
  * - Real-time preview
- * 
+ *
  * @see lib/gameplay-ability-system.ts for backend implementation
  */
 
@@ -132,35 +132,35 @@ function createSampleAbilities(): GameplayAbilitySpec[] {
 function TagBadge({ tag, onRemove }: { tag: string; onRemove?: () => void }) {
   const getTagColor = (t: string) => {
     if (t.includes('Fire')) return 'bg-orange-600';
-    if (t.includes('Ice')) return 'bg-cyan-600';
-    if (t.includes('Lightning')) return 'bg-yellow-600';
-    if (t.includes('Damage')) return 'bg-red-600';
+    if (t.includes('Ice')) return 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]';
+    if (t.includes('Lightning')) return 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]';
+    if (t.includes('Damage')) return 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]';
     if (t.includes('State')) return 'bg-[var(--aethel-primary)]';
     if (t.includes('Ability')) return 'bg-[var(--aethel-primary)]';
     return 'bg-[var(--aethel-success)]';
   };
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs text-white ${getTagColor(tag)}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs text-[var(--aethel-text-primary)] ${getTagColor(tag)}`}>
       {tag.split('.').pop()}
       {onRemove && (
-        <button onClick={onRemove} className="ml-1 hover:text-red-300">×</button>
+        <button onClick={onRemove} className="ml-1 hover:text-[var(--aethel-error-light)]">×</button>
       )}
     </span>
   );
 }
 
-function AttributeBar({ name, current, max, color = 'blue' }: { 
+function AttributeBar({ name, current, max, color = 'blue' }: {
   name: string; current: number; max: number; color?: string;
 }) {
   const percentage = Math.min(100, (current / max) * 100);
   const colorClass = {
-    blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    red: 'bg-red-500',
-    yellow: 'bg-yellow-500',
-    purple: 'bg-blue-500',
-  }[color] || 'bg-blue-500';
+    blue: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
+    green: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]',
+    red: 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]',
+    yellow: 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]',
+    purple: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
+  }[color] || 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]';
 
   return (
     <div className="space-y-1">
@@ -168,35 +168,35 @@ function AttributeBar({ name, current, max, color = 'blue' }: {
         <span>{name}</span>
         <span>{current}/{max}</span>
       </div>
-      <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+      <div className="h-2 bg-[var(--aethel-surface-secondary)] rounded-full overflow-hidden">
         <div className={`h-full ${colorClass} transition-all`} style={{ width: `${percentage}%` }} />
       </div>
     </div>
   );
 }
 
-function AbilityCard({ 
-  ability, 
-  isSelected, 
-  onClick 
-}: { 
-  ability: GameplayAbilitySpec; 
-  isSelected: boolean; 
-  onClick: () => void; 
+function AbilityCard({
+  ability,
+  isSelected,
+  onClick
+}: {
+  ability: GameplayAbilitySpec;
+  isSelected: boolean;
+  onClick: () => void;
 }) {
   return (
     <div
       onClick={onClick}
       className={`p-3 rounded-lg cursor-pointer transition-all ${
-        isSelected 
-          ? 'bg-[var(--aethel-primary)] ring-2 ring-blue-400' 
-          : 'bg-gray-800 hover:bg-gray-700'
+        isSelected
+          ? 'bg-[var(--aethel-primary)] ring-2 ring-blue-400'
+          : 'bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)]'
       }`}
     >
       <div className="flex items-center gap-3">
         <span className="text-2xl">{ability.icon || '⚡'}</span>
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-white truncate">{ability.name}</h4>
+          <h4 className="font-medium text-[var(--aethel-text-primary)] truncate">{ability.name}</h4>
           <p className="text-xs text-[var(--aethel-text-tertiary)] truncate">{ability.description}</p>
         </div>
       </div>
@@ -211,12 +211,12 @@ function AbilityCard({
 
 function EffectCard({ effect }: { effect: GameplayEffectSpec }) {
   return (
-    <div className="p-3 bg-gray-800 rounded-lg">
+    <div className="p-3 bg-[var(--aethel-surface-secondary)] rounded-lg">
       <div className="flex items-center justify-between">
-        <span className="font-medium text-white">{effect.name}</span>
+        <span className="font-medium text-[var(--aethel-text-primary)]">{effect.name}</span>
         <span className={`px-2 py-0.5 text-xs rounded ${
           effect.durationType === 'instant' ? 'bg-[var(--aethel-success)]' :
-          effect.durationType === 'duration' ? 'bg-yellow-600' : 'bg-[var(--aethel-primary)]'
+          effect.durationType === 'duration' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[var(--aethel-primary)]'
         }`}>
           {effect.durationType}
         </span>
@@ -251,7 +251,7 @@ export function AbilityEditor({
   const [selectedAbility, setSelectedAbility] = useState<GameplayAbilitySpec | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState<'abilities' | 'attributes' | 'effects'>('abilities');
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -294,8 +294,8 @@ export function AbilityEditor({
       activationType: formData.activationType,
       targetingMode: formData.targetingMode,
       costs: formData.manaCost > 0 ? [{ attribute: 'Mana', value: formData.manaCost }] : [],
-      cooldown: formData.cooldownDuration > 0 
-        ? { duration: formData.cooldownDuration, tags: [] } 
+      cooldown: formData.cooldownDuration > 0
+        ? { duration: formData.cooldownDuration, tags: [] }
         : undefined,
       tags: {
         ability: [GameplayTag.fromString('Ability.Active')],
@@ -351,15 +351,15 @@ export function AbilityEditor({
   ], []);
 
   return (
-    <div className={`flex h-full bg-gray-900 ${className}`}>
+    <div className={`flex h-full bg-[var(--aethel-surface-secondary)] ${className}`}>
       {/* Left Panel - Ability List */}
-      <div className="w-72 border-r border-gray-700 flex flex-col">
-        <div className="p-4 border-b border-gray-700">
+      <div className="w-72 border-r border-[var(--aethel-border-primary)] flex flex-col">
+        <div className="p-4 border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-white">Abilities</h2>
+            <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Abilities</h2>
             <button
               onClick={() => setEditMode(true)}
-              className="p-1.5 bg-[var(--aethel-primary)] hover:bg-blue-700 rounded-lg transition"
+              className="p-1.5 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg transition"
             >
               <Icons.Plus />
             </button>
@@ -367,10 +367,10 @@ export function AbilityEditor({
           <input
             type="text"
             placeholder="Search abilities..."
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500"
+            className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder-gray-500"
           />
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {abilities.map(ability => (
             <AbilityCard
@@ -386,14 +386,14 @@ export function AbilityEditor({
       {/* Center Panel - Editor */}
       <div className="flex-1 flex flex-col">
         {/* Tabs */}
-        <div className="flex border-b border-gray-700">
+        <div className="flex border-b border-[var(--aethel-border-primary)]">
           {(['abilities', 'attributes', 'effects'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 text-sm font-medium transition ${
-                activeTab === tab 
-                  ? 'text-white border-b-2 border-blue-500' 
+                activeTab === tab
+                  ? 'text-[var(--aethel-text-primary)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
@@ -409,15 +409,15 @@ export function AbilityEditor({
               {editMode ? (
                 /* Create/Edit Form */
                 <div className="max-w-xl space-y-4">
-                  <h3 className="text-lg font-semibold text-white">Create Ability</h3>
-                  
+                  <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Create Ability</h3>
+
                   <div>
                     <label className="block text-sm text-[var(--aethel-text-tertiary)] mb-1">Name</label>
                     <input
                       type="text"
                       value={formData.name}
                       onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                      className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-primary)]"
                     />
                   </div>
 
@@ -426,7 +426,7 @@ export function AbilityEditor({
                     <textarea
                       value={formData.description}
                       onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white h-20"
+                      className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-primary)] h-20"
                     />
                   </div>
 
@@ -436,7 +436,7 @@ export function AbilityEditor({
                       <select
                         value={formData.activationType}
                         onChange={e => setFormData(f => ({ ...f, activationType: e.target.value as AbilityActivationType }))}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                        className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-primary)]"
                       >
                         <option value="triggered">Triggered</option>
                         <option value="passive">Passive</option>
@@ -448,7 +448,7 @@ export function AbilityEditor({
                       <select
                         value={formData.targetingMode}
                         onChange={e => setFormData(f => ({ ...f, targetingMode: e.target.value as TargetingMode }))}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                        className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-primary)]"
                       >
                         <option value="self">Self</option>
                         <option value="single">Single Target</option>
@@ -465,7 +465,7 @@ export function AbilityEditor({
                         type="number"
                         value={formData.cooldownDuration}
                         onChange={e => setFormData(f => ({ ...f, cooldownDuration: Number(e.target.value) }))}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                        className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-primary)]"
                       />
                     </div>
                     <div>
@@ -474,7 +474,7 @@ export function AbilityEditor({
                         type="number"
                         value={formData.manaCost}
                         onChange={e => setFormData(f => ({ ...f, manaCost: Number(e.target.value) }))}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                        className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-primary)]"
                       />
                     </div>
                   </div>
@@ -482,13 +482,13 @@ export function AbilityEditor({
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={handleCreateAbility}
-                      className="px-4 py-2 bg-[var(--aethel-primary)] hover:bg-blue-700 rounded-lg text-white transition"
+                      className="px-4 py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] transition"
                     >
                       Create Ability
                     </button>
                     <button
                       onClick={() => setEditMode(false)}
-                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white transition"
+                      className="px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded-lg text-[var(--aethel-text-primary)] transition"
                     >
                       Cancel
                     </button>
@@ -500,32 +500,32 @@ export function AbilityEditor({
                   <div className="flex items-start gap-4">
                     <span className="text-5xl">{selectedAbility.icon || '⚡'}</span>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">{selectedAbility.name}</h3>
+                      <h3 className="text-2xl font-bold text-[var(--aethel-text-primary)]">{selectedAbility.name}</h3>
                       <p className="text-[var(--aethel-text-tertiary)] mt-1">{selectedAbility.description}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="p-4 bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-[var(--aethel-surface-secondary)] rounded-lg">
                       <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-1">
                         <Icons.Zap />
                         <span className="text-sm">Activation</span>
                       </div>
-                      <p className="text-white font-medium capitalize">{selectedAbility.activationType}</p>
+                      <p className="text-[var(--aethel-text-primary)] font-medium capitalize">{selectedAbility.activationType}</p>
                     </div>
-                    <div className="p-4 bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-[var(--aethel-surface-secondary)] rounded-lg">
                       <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-1">
                         <Icons.Target />
                         <span className="text-sm">Targeting</span>
                       </div>
-                      <p className="text-white font-medium capitalize">{selectedAbility.targetingMode}</p>
+                      <p className="text-[var(--aethel-text-primary)] font-medium capitalize">{selectedAbility.targetingMode}</p>
                     </div>
-                    <div className="p-4 bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-[var(--aethel-surface-secondary)] rounded-lg">
                       <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-1">
                         <Icons.Clock />
                         <span className="text-sm">Cooldown</span>
                       </div>
-                      <p className="text-white font-medium">{selectedAbility.cooldown?.duration || 0}s</p>
+                      <p className="text-[var(--aethel-text-primary)] font-medium">{selectedAbility.cooldown?.duration || 0}s</p>
                     </div>
                   </div>
 
@@ -543,7 +543,7 @@ export function AbilityEditor({
                       <h4 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Costs</h4>
                       <div className="flex gap-4">
                         {selectedAbility.costs.map((cost, i) => (
-                          <div key={i} className="px-3 py-1 bg-gray-800 rounded text-sm">
+                          <div key={i} className="px-3 py-1 bg-[var(--aethel-surface-secondary)] rounded text-sm">
                             <span className="text-[var(--aethel-text-tertiary)]">{cost.attribute}:</span>
                             <span className="text-[var(--aethel-error)] ml-1">-{cost.value}</span>
                           </div>
@@ -553,7 +553,7 @@ export function AbilityEditor({
                   )}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-64 text-gray-500">
+                <div className="flex items-center justify-center h-64 text-[var(--aethel-text-secondary)]">
                   Select an ability to view details
                 </div>
               )}
@@ -562,7 +562,7 @@ export function AbilityEditor({
 
           {activeTab === 'attributes' && (
             <div className="max-w-md space-y-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Entity Attributes</h3>
+              <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-4">Entity Attributes</h3>
               <AttributeBar name="Health" current={attributes.Health} max={attributes.MaxHealth} color="red" />
               <AttributeBar name="Mana" current={attributes.Mana} max={attributes.MaxMana} color="blue" />
               <AttributeBar name="Stamina" current={attributes.Stamina} max={attributes.MaxStamina} color="yellow" />
@@ -571,7 +571,7 @@ export function AbilityEditor({
 
           {activeTab === 'effects' && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">Effect Presets</h3>
+              <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Effect Presets</h3>
               <div className="grid grid-cols-2 gap-4">
                 {effectPresets.map(effect => (
                   <EffectCard key={effect.id} effect={effect} />
@@ -583,27 +583,27 @@ export function AbilityEditor({
       </div>
 
       {/* Right Panel - Preview */}
-      <div className="w-64 border-l border-gray-700 p-4">
+      <div className="w-64 border-l border-[var(--aethel-border-primary)] p-4">
         <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4">Live Preview</h3>
-        
+
         <div className="space-y-4">
-          <div className="aspect-square bg-gray-800 rounded-lg flex items-center justify-center">
+          <div className="aspect-square bg-[var(--aethel-surface-secondary)] rounded-lg flex items-center justify-center">
             {selectedAbility ? (
               <span className="text-6xl">{selectedAbility.icon || '⚡'}</span>
             ) : (
-              <span className="text-gray-600">No ability selected</span>
+              <span className="text-[var(--aethel-text-secondary)]">No ability selected</span>
             )}
           </div>
 
           {selectedAbility && (
-            <button className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-blue-700 rounded-lg text-white text-sm transition">
+            <button className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition">
               Test Ability
             </button>
           )}
 
           <button
             onClick={handleSave}
-            className="w-full py-2 bg-[var(--aethel-success)] hover:bg-green-700 rounded-lg text-white text-sm transition flex items-center justify-center gap-2"
+            className="w-full py-2 bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition flex items-center justify-center gap-2"
           >
             <Icons.Save />
             Save Changes

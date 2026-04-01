@@ -35,7 +35,7 @@ function getBiasLabel(score?: number | null) {
 }
 
 function getBiasColor(score?: number | null) {
-  if (score === null || score === undefined) return 'bg-gray-200 text-[var(--aethel-text-secondary)]';
+  if (score === null || score === undefined) return 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]';
   if (score >= 0.7) return 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]';
   if (score >= 0.4) return 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]';
   return 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]';

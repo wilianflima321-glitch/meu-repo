@@ -31,7 +31,7 @@ export default function TemplatesTab({ templates, onSelect }: TemplatesTabProps)
               <h3 className="text-xl font-bold">{template.name}</h3>
               <p className="text-sm text-[var(--aethel-text-secondary)] mt-2">{template.description}</p>
             </div>
-            
+
             <div className="flex-1">
               <div className="text-[10px] font-bold text-[var(--aethel-text-tertiary)] uppercase mb-2">Ações incluídas</div>
               <ul className="space-y-1">

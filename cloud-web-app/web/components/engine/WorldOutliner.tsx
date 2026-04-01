@@ -1,9 +1,9 @@
 /**
  * World Outliner - Hierarquia de Objetos da Cena
- * 
+ *
  * Sistema profissional estilo Unreal Engine para visualizar
  * e gerenciar a hierarquia de objetos na cena.
- * 
+ *
  * NAO E MOCK - Sistema real e funcional!
  */
 
@@ -16,7 +16,7 @@ import * as THREE from 'three';
 // TIPOS
 // ============================================================================
 
-export type SceneObjectType = 
+export type SceneObjectType =
   | 'empty'
   | 'mesh'
   | 'light'
@@ -116,32 +116,32 @@ function TreeItem({
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenomearValue] = useState(object.name);
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
   const config = OBJECT_TYPE_CONFIG[object.type];
   const isSelected = selecionadosIds.has(object.id);
   const hasChildren = object.children.length > 0;
-  
+
   useEffect(() => {
     if (isRenaming && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();
     }
   }, [isRenaming]);
-  
+
   const handleRenomearSubmit = () => {
     if (renameValue.trim() && renameValue !== object.name) {
       onRenomear(renameValue.trim());
     }
     setIsRenaming(false);
   };
-  
+
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (!isRenaming) {
       e.stopPropagation();
       setIsRenaming(true);
     }
   };
-  
+
   return (
     <div
       draggable
@@ -194,16 +194,16 @@ function TreeItem({
         >
           {isExpanded ? '▼' : '▶'}
         </button>
-        
+
         {/* Icon */}
-        <span style={{ 
-          marginRight: '6px', 
+        <span style={{
+          marginRight: '6px',
           fontSize: '14px',
           color: config.color,
         }}>
           {config.icon}
         </span>
-        
+
         {/* Name */}
         {isRenaming ? (
           <input
@@ -232,8 +232,8 @@ function TreeItem({
             }}
           />
         ) : (
-          <span style={{ 
-            flex: 1, 
+          <span style={{
+            flex: 1,
             color: isSelected ? 'var(--aethel-text-primary)' : 'var(--aethel-text-secondary)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -242,7 +242,7 @@ function TreeItem({
             {object.name}
           </span>
         )}
-        
+
         {/* Component badges */}
         {object.components && object.components.length > 0 && (
           <span style={{
@@ -256,7 +256,7 @@ function TreeItem({
             {object.components.length}
           </span>
         )}
-        
+
         {/* Visibility Toggle */}
         <button
           onClick={(e) => { e.stopPropagation(); onToggleVisibility(); }}
@@ -276,7 +276,7 @@ function TreeItem({
         >
           {object.visible ? '👁' : '👁‍🗨'}
         </button>
-        
+
         {/* Bloquear Toggle */}
         <button
           onClick={(e) => { e.stopPropagation(); onToggleBloquear(); }}
@@ -323,7 +323,7 @@ function OutlinerContextMenu({
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, [onClose]);
-  
+
   const items = object ? [
     { id: 'focus', label: '🎯 Focar', divider: false },
     { id: 'rename', label: '✏️ Renomear', divider: false },
@@ -346,7 +346,7 @@ function OutlinerContextMenu({
     { id: 'create_particle', label: '✨ Criar Particulas', divider: false },
     { id: 'create_trigger', label: '🎯 Criar Trigger', divider: false },
   ];
-  
+
   return (
     <div
       style={{
@@ -409,7 +409,7 @@ function OutlinerFilterBar({
   onExpandAll: () => void;
 }) {
   const [showTypeFilter, setMostrarTypeFilter] = useState(false);
-  
+
   return (
     <div style={{
       display: 'flex',
@@ -434,7 +434,7 @@ function OutlinerFilterBar({
           fontSize: '12px',
         }}
       />
-      
+
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
         <button
@@ -452,7 +452,7 @@ function OutlinerFilterBar({
         >
           📋
         </button>
-        
+
         {showTypeFilter && (
           <div style={{
             position: 'absolute',
@@ -495,7 +495,7 @@ function OutlinerFilterBar({
           </div>
         )}
       </div>
-      
+
       {/* Recolher tudo */}
       <button
         onClick={onCollapseAll}
@@ -512,7 +512,7 @@ function OutlinerFilterBar({
       >
         ⬆
       </button>
-      
+
       {/* Expandir tudo */}
       <button
         onClick={onExpandAll}
@@ -689,18 +689,18 @@ export default function WorldOutliner({
       ],
     },
   ]);
-  
+
   const [filter, setFilter] = useState<OutlinerFilter>({});
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['3', '4', '5', '7']));
   const [selecionadosIds, setSelectedIds] = useState<Set<string>>(new Set(['4']));
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; object: SceneObject | null } | null>(null);
-  
+
   // Flatten tree for rendering with filter
   const flattenedObjects = useMemo(() => {
     const result: { object: SceneObject; level: number }[] = [];
-    
+
     const traverse = (items: SceneObject[], level: number) => {
       for (const item of items) {
         // Apply filters
@@ -713,19 +713,19 @@ export default function WorldOutliner({
         if (!filter.showHidden && !item.visible) {
           continue;
         }
-        
+
         result.push({ object: item, level });
-        
+
         if (expandedIds.has(item.id) && item.children.length > 0) {
           traverse(item.children, level + 1);
         }
       }
     };
-    
+
     traverse(objetos, 0);
     return result;
   }, [objetos, filter, expandedIds]);
-  
+
   // Find object by ID in tree
   const findObjectById = useCallback((id: string, items: SceneObject[] = objetos): SceneObject | null => {
     for (const item of items) {
@@ -737,7 +737,7 @@ export default function WorldOutliner({
     }
     return null;
   }, [objetos]);
-  
+
   // Update object in tree
   const updateObject = useCallback((id: string, updates: Partial<SceneObject>) => {
     const updateInTree = (items: SceneObject[]): SceneObject[] => {
@@ -753,10 +753,10 @@ export default function WorldOutliner({
         return item;
       });
     };
-    
+
     setObjects(updateInTree(objetos));
   }, [objetos, onObjectChange]);
-  
+
   // Handlers
   const handleSelect = useCallback((object: SceneObject, e: React.MouseEvent) => {
     if (e.ctrlKey || e.metaKey) {
@@ -773,14 +773,14 @@ export default function WorldOutliner({
       setSelectedIds(new Set([object.id]));
     }
   }, []);
-  
+
   useEffect(() => {
     const selecionados = Array.from(selecionadosIds)
       .map(id => findObjectById(id))
       .filter(Boolean) as SceneObject[];
     onSelectionChange?.(selecionados);
   }, [selecionadosIds, findObjectById, onSelectionChange]);
-  
+
   const handleToggleExpand = useCallback((id: string) => {
     setExpandedIds(prev => {
       const next = new Set(prev);
@@ -792,70 +792,70 @@ export default function WorldOutliner({
       return next;
     });
   }, []);
-  
+
   const handleToggleVisibility = useCallback((id: string) => {
     const obj = findObjectById(id);
     if (obj) {
       updateObject(id, { visible: !obj.visible });
     }
   }, [findObjectById, updateObject]);
-  
+
   const handleToggleBloquear = useCallback((id: string) => {
     const obj = findObjectById(id);
     if (obj) {
       updateObject(id, { locked: !obj.locked });
     }
   }, [findObjectById, updateObject]);
-  
+
   const handleRenomear = useCallback((id: string, name: string) => {
     updateObject(id, { name });
   }, [updateObject]);
-  
+
   const handleDragStart = useCallback((e: React.DragEvent, id: string) => {
     setDraggedId(id);
     e.dataTransfer.effectAllowed = 'move';
   }, []);
-  
+
   const handleDragOver = useCallback((e: React.DragEvent, id: string) => {
     e.preventDefault();
     if (draggedId && draggedId !== id) {
       setDragOverId(id);
     }
   }, [draggedId]);
-  
+
   const handleDrop = useCallback((e: React.DragEvent, targetId: string) => {
     e.preventDefault();
-    
+
     if (draggedId && draggedId !== targetId) {
       const draggedObj = findObjectById(draggedId);
       const targetObj = findObjectById(targetId);
-      
+
       if (draggedObj && targetObj) {
         onReparentObject?.(draggedObj, targetObj);
       }
     }
-    
+
     setDraggedId(null);
     setDragOverId(null);
   }, [draggedId, findObjectById, onReparentObject]);
-  
+
   const handleContextMenu = useCallback((e: React.MouseEvent, object: SceneObject | null) => {
     e.preventDefault();
     setContextMenu({ x: e.clientX, y: e.clientY, object });
   }, []);
-  
+
   const handleContextAction = useCallback((action: string) => {
     const object = contextMenu?.object;
-    
+
     switch (action) {
       case 'focus':
         if (object) onFocarObject?.(object);
         break;
-        
+
       case 'rename':
         // Handled by double-click in tree item
         break;
-        
+
       case 'duplicate':
         if (object) {
           const duplicate: SceneObject = {
@@ -868,15 +868,15 @@ export default function WorldOutliner({
           setObjects(prev => [...prev, duplicate]);
         }
         break;
-        
+
       case 'visibility':
         if (object) handleToggleVisibility(object.id);
         break;
-        
+
       case 'lock':
         if (object) handleToggleBloquear(object.id);
         break;
-        
+
       case 'delete':
         if (object) {
           onExcluirObject?.(object);
@@ -894,7 +894,7 @@ export default function WorldOutliner({
           });
         }
         break;
-        
+
       // Create actions
       case 'create_empty':
         onCreateObject?.('empty');
@@ -921,11 +921,11 @@ export default function WorldOutliner({
         break;
     }
   }, [contextMenu, handleToggleVisibility, handleToggleBloquear, onFocarObject, onExcluirObject, onCreateObject]);
-  
+
   const handleCollapseAll = useCallback(() => {
     setExpandedIds(new Set());
   }, []);
-  
+
   const handleExpandAll = useCallback(() => {
     const allIds = new Set<string>();
     const collectIds = (items: SceneObject[]) => {
@@ -939,9 +939,9 @@ export default function WorldOutliner({
     collectIds(objetos);
     setExpandedIds(allIds);
   }, [objetos]);
-  
+
   return (
-    <div 
+    <div
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -962,7 +962,7 @@ export default function WorldOutliner({
       }}>
         🌍 World Outliner
       </div>
-      
+
       {/* Filter Bar */}
       <OutlinerFilterBar
         filter={filter}
@@ -970,7 +970,7 @@ export default function WorldOutliner({
         onCollapseAll={handleCollapseAll}
         onExpandAll={handleExpandAll}
       />
-      
+
       {/* Tree */}
       <div style={{ flex: 1, overflow: 'auto' }}>
         {flattenedObjects.map(({ object, level }) => (
@@ -992,7 +992,7 @@ export default function WorldOutliner({
             selecionadosIds={selecionadosIds}
           />
         ))}
-        
+
         {flattenedObjects.length === 0 && (
           <div style={{
             padding: '24px',
@@ -1004,7 +1004,7 @@ export default function WorldOutliner({
           </div>
         )}
       </div>
-      
+
       {/* Status Bar */}
       <div style={{
         padding: '4px 12px',
@@ -1015,7 +1015,7 @@ export default function WorldOutliner({
       }}>
         {flattenedObjects.length} objetos • {selecionadosIds.size} selecionados
       </div>
-      
+
       {/* Context Menu */}
       {contextMenu && (
         <OutlinerContextMenu

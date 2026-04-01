@@ -204,7 +204,7 @@ const VFXNodeComponent: React.FC<{
     >
       {/* Header */}
       <div
-        className="px-3 py-2 rounded-t-md text-white text-sm font-medium"
+        className="px-3 py-2 rounded-t-md text-[var(--aethel-text-primary)] text-sm font-medium"
         style={{ backgroundColor: borderColor }}
       >
         {node.name}
@@ -216,7 +216,7 @@ const VFXNodeComponent: React.FC<{
         {node.inputs.map((input) => (
           <div key={input.id} className="flex items-center mb-1">
             <div
-              className="port w-3 h-3 rounded-full bg-gray-500 hover:bg-blue-400 cursor-pointer mr-2"
+              className="port w-3 h-3 rounded-full bg-[var(--aethel-surface-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] cursor-pointer mr-2"
               onClick={() => onConnectEnd(input.id)}
               title={`${input.name} (${input.type})`}
             />
@@ -229,7 +229,7 @@ const VFXNodeComponent: React.FC<{
           <div key={output.id} className="flex items-center justify-end mb-1">
             <span className="text-xs text-[var(--aethel-text-secondary)]">{output.name}</span>
             <div
-              className="port w-3 h-3 rounded-full bg-gray-500 hover:bg-green-400 cursor-pointer ml-2"
+              className="port w-3 h-3 rounded-full bg-[var(--aethel-surface-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] cursor-pointer ml-2"
               onClick={() => onConnectStart(output.id)}
               title={`${output.name} (${output.type})`}
             />
@@ -355,39 +355,39 @@ export default function VFXGraphEditor() {
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-4">
-          <h2 className="text-white font-semibold"> VFX Graph Editor</h2>
+          <h2 className="text-[var(--aethel-text-primary)] font-semibold"> VFX Graph Editor</h2>
           <input
             type="text"
             value={graph.name}
             onChange={(e) => setGraph(prev => ({ ...prev, name: e.target.value }))}
-            className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-white rounded text-sm"
+            className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-sm"
           />
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className={`px-3 py-1 rounded text-sm font-medium ${
-              isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-[var(--aethel-success)] hover:bg-green-700'
-            } text-white`}
+              isPlaying ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : 'bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+            } text-[var(--aethel-text-primary)]`}
           >
             {isPlaying ? ' Stop' : ' Play'}
           </button>
           <button
-            className="px-3 py-1 bg-[var(--aethel-primary)] hover:bg-blue-700 text-white rounded text-sm"
+            className="px-3 py-1 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
             onClick={() => setShowAddMenu(true)}
           >
             + Add Node
           </button>
           <div className="flex items-center gap-1 ml-4">
             <button
-              className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-white rounded text-xs"
+              className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-xs"
               onClick={() => setZoom(z => Math.max(0.25, z - 0.25))}
             >
               -
             </button>
-            <span className="text-white text-xs w-12 text-center">{Math.round(zoom * 100)}%</span>
+            <span className="text-[var(--aethel-text-primary)] text-xs w-12 text-center">{Math.round(zoom * 100)}%</span>
             <button
-              className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-white rounded text-xs"
+              className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-xs"
               onClick={() => setZoom(z => Math.min(2, z + 0.25))}
             >
               +
@@ -467,7 +467,7 @@ export default function VFXGraphEditor() {
               style={{ left: menuPosition.x, top: menuPosition.y, minWidth: 200 }}
             >
               <div className="px-3 py-2 border-b border-[var(--aethel-border-secondary)]">
-                <span className="text-white text-sm font-medium">Add Node</span>
+                <span className="text-[var(--aethel-text-primary)] text-sm font-medium">Add Node</span>
               </div>
               <div className="max-h-80 overflow-y-auto">
                 {Object.entries(nodeGroups).map(([type, keys]) => (
@@ -498,8 +498,8 @@ export default function VFXGraphEditor() {
         {selectedNode && (
           <div className="w-72 bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)] overflow-y-auto">
             <div className="p-4">
-              <h3 className="text-white font-semibold mb-4">{selectedNode.name}</h3>
-              
+              <h3 className="text-[var(--aethel-text-primary)] font-semibold mb-4">{selectedNode.name}</h3>
+
               <div className="space-y-3">
                 {Object.entries(selectedNode.properties).map(([key, value]) => (
                   <div key={key}>
@@ -536,7 +536,7 @@ export default function VFXGraphEditor() {
                             )
                           }));
                         }}
-                        className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-white rounded text-sm"
+                        className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-sm"
                       />
                     ) : typeof value === 'string' ? (
                       <input
@@ -552,7 +552,7 @@ export default function VFXGraphEditor() {
                             )
                           }));
                         }}
-                        className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-white rounded text-sm"
+                        className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-sm"
                       />
                     ) : typeof value === 'object' && value !== null ? (
                       <pre className="text-xs text-[var(--aethel-text-tertiary)] bg-[var(--aethel-surface-quaternary)] p-2 rounded overflow-auto">
@@ -565,7 +565,7 @@ export default function VFXGraphEditor() {
 
               <button
                 onClick={deleteSelectedNode}
-                className="mt-4 w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+                className="mt-4 w-full px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
               >
                  Delete Node
               </button>

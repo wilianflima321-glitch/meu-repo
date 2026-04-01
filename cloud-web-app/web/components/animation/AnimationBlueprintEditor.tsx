@@ -167,7 +167,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
     </div>
   );
 }
-function TransitionEdge({ 
+function TransitionEdge({
   id,
   sourceX,
   sourceY,
@@ -220,7 +220,7 @@ function TransitionEdge({
             }}
             onClick={() => data?.onEdit?.(transition)}
           >
-            {transition.conditions.length > 0 
+            {transition.conditions.length > 0
               ? `${transition.conditions.length} conditions`
               : 'No conditions'}
             <br />
@@ -276,11 +276,11 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
             }}
           >
             {/* Type indicator */}
-            <span style={{ 
-              fontSize: '10px', 
-              padding: '2px 6px', 
+            <span style={{
+              fontSize: '10px',
+              padding: '2px 6px',
               borderRadius: '4px',
-              background: param.type === 'bool' ? 'var(--aethel-success)' : 
+              background: param.type === 'bool' ? 'var(--aethel-success)' :
                          param.type === 'trigger' ? 'var(--aethel-warning)' : 'var(--aethel-primary)',
               color: 'white',
             }}>
@@ -681,9 +681,9 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
           </label>
           <select
             value={editedTransition.blendMode}
-            onChange={(e) => setEditedTransition(prev => ({ 
-              ...prev, 
-              blendMode: e.target.value as AnimationTransition['blendMode'] 
+            onChange={(e) => setEditedTransition(prev => ({
+              ...prev,
+              blendMode: e.target.value as AnimationTransition['blendMode']
             }))}
             style={{
               width: '100%',
@@ -1106,9 +1106,9 @@ export function AnimationBlueprintEditor({
           />
           <Background color="var(--aethel-surface-tertiary)" gap={20} />
           <Panel position="top-right">
-            <div style={{ 
-              background: 'var(--aethel-surface-tertiary)', 
-              padding: '8px 12px', 
+            <div style={{
+              background: 'var(--aethel-surface-tertiary)',
+              padding: '8px 12px',
               borderRadius: '6px',
               color: 'var(--aethel-text-tertiary)',
               fontSize: '12px',

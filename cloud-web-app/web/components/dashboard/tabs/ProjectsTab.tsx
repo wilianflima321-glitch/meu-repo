@@ -118,7 +118,7 @@ function ProjectCard({
               <p className="text-sm text-[var(--aethel-text-tertiary)]">{typeLabels[project.type]}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={onToggleStar}
@@ -160,7 +160,7 @@ function ProjectCard({
               {project.lastOpened}
             </span>
           </div>
-          
+
           {project.collaborators && project.collaborators.length > 0 && (
             <AvatarGroup
               avatars={project.collaborators}

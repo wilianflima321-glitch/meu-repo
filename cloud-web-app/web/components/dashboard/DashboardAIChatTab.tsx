@@ -215,7 +215,7 @@ export function DashboardAIChatTab({
               <button
                 type="button"
                 onClick={onOpenIde}
-                className="rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
+                className="rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
               >
                 Abrir IDE
               </button>
@@ -238,15 +238,15 @@ export function DashboardAIChatTab({
         <div className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Qualidades que estamos perseguindo</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
+            <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
               <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Contexto persistente</p>
               <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">Missao, origem e proxima etapa continuam entre surfaces.</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
+            <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
               <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Operacao guiada</p>
               <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">Pesquisa, plano, build e revisao aparecem como trilhos reais.</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/10 px-4 py-3">
+            <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
               <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Handoff sem quebra</p>
               <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">Chat, projetos, IDE e preview funcionam como um studio unico.</p>
             </div>

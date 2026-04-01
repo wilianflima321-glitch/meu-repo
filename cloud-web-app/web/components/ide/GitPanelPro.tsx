@@ -87,7 +87,7 @@ function getStatusIcon(status: GitFile['status']) {
 
 function convertToGitFiles(status: GitStatus): GitFile[] {
   const files: GitFile[] = []
-  
+
   status.staged.forEach(f => {
     files.push({
       path: f.path,
@@ -96,7 +96,7 @@ function convertToGitFiles(status: GitStatus): GitFile[] {
       oldPath: f.oldPath,
     })
   })
-  
+
   status.unstaged.forEach(f => {
     files.push({
       path: f.path,
@@ -105,7 +105,7 @@ function convertToGitFiles(status: GitStatus): GitFile[] {
       oldPath: f.oldPath,
     })
   })
-  
+
   status.untracked.forEach(f => {
     files.push({
       path: f.path,
@@ -113,7 +113,7 @@ function convertToGitFiles(status: GitStatus): GitFile[] {
       staged: false,
     })
   })
-  
+
   status.conflicted.forEach(f => {
     files.push({
       path: f.path,
@@ -121,7 +121,7 @@ function convertToGitFiles(status: GitStatus): GitFile[] {
       staged: false,
     })
   })
-  
+
   return files
 }
 
@@ -216,7 +216,7 @@ export default function GitPanelPro({
   // Git client and consent manager
   const gitClient = useMemo(() => getGitClient(workspacePath), [workspacePath])
   const consentManager = useMemo(() => getConsentManager(), [])
-  
+
   // State
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -226,7 +226,7 @@ export default function GitPanelPro({
   const [currentBranch, setCurrentBranch] = useState('main')
   const [ahead, setAhead] = useState(0)
   const [behind, setBehind] = useState(0)
-  
+
   const [commitMessage, setCommitMessage] = useState('')
   const [showBranches, setShowBranches] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -289,7 +289,7 @@ export default function GitPanelPro({
     fetchStatus()
     fetchBranches()
     fetchCommits()
-    
+
     // Auto-refresh every 5 seconds
     const interval = setInterval(fetchStatus, 5000)
     return () => clearInterval(interval)
@@ -356,7 +356,7 @@ export default function GitPanelPro({
     })
 
     const response = await consentManager.requestConsent(request)
-    
+
     if (response.approved) {
       try {
         await gitClient.push()

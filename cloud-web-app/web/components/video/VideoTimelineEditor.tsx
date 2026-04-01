@@ -63,9 +63,9 @@ function TrackHeader({
       }} />
       {/* Track name */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ 
-          color: 'var(--aethel-text-primary)', 
-          fontSize: '12px', 
+        <div style={{
+          color: 'var(--aethel-text-primary)',
+          fontSize: '12px',
           fontWeight: 500,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -93,7 +93,7 @@ function TrackHeader({
           }}
           title="Visibility"
         >
-          
+
         </button>
         <button
           onClick={onToggleMute}
@@ -143,7 +143,7 @@ function TrackHeader({
           }}
           title="Lock"
         >
-          
+
         </button>
       </div>
     </div>
@@ -365,7 +365,7 @@ function TimelineClipComponent({
             top: '4px',
             fontSize: '10px',
           }}>
-            
+
           </div>
         )}
       </div>
@@ -496,7 +496,7 @@ function PlaybackControls({
           }}
           title="Go to Start"
         >
-          
+
         </button>
         <button
           onClick={onStepBackward}
@@ -512,7 +512,7 @@ function PlaybackControls({
           }}
           title="Step Back"
         >
-          
+
         </button>
         <button
           onClick={isPlaying ? onPause : onPlay}
@@ -544,7 +544,7 @@ function PlaybackControls({
           }}
           title="Step Forward"
         >
-          
+
         </button>
         <button
           onClick={onGoToEnd}
@@ -560,7 +560,7 @@ function PlaybackControls({
           }}
           title="Go to End"
         >
-          
+
         </button>
       </div>
       {/* Duration display */}
@@ -744,7 +744,7 @@ const availableEffects = [
 ];
 function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: EffectsPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const filteredEffects = availableEffects.filter(e => 
+  const filteredEffects = availableEffects.filter(e =>
     e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     e.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -805,7 +805,7 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
                   fontSize: '14px',
                 }}
               >
-                
+
               </button>
             </div>
           ))}

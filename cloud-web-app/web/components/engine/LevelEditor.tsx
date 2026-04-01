@@ -1,11 +1,11 @@
 /**
  * Level Editor Integrado - Editor de Níveis Profissional
- * 
+ *
  * Editor completo estilo Unreal Engine que integra todos
  * os sistemas: Scene, World Outliner, Details, etc.
- * 
+ *
  * NÃO É MOCK - Sistema real e funcional!
- * 
+ *
  * FEATURES:
  * - Save/Load via API + localStorage
  * - Play Mode com Physics real
@@ -16,11 +16,11 @@
 
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { 
-  OrbitControls, 
-  TransformControls, 
-  GizmoHelper, 
-  GizmoViewport, 
+import {
+  OrbitControls,
+  TransformControls,
+  GizmoHelper,
+  GizmoViewport,
   Grid,
   PivotControls,
   Stats,
@@ -74,14 +74,14 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
   const cameraNeutralAltColor = useMemo(() => resolveCssVarColor('--aethel-text-quaternary', '#444444'), []);
   const emptySelectedColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
   const lightFallbackColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
-  
+
   if (!object.visible) return null;
-  
+
   const renderMesh = () => {
     const meshComp = object.components.find(c => c.type === 'StaticMesh');
     const meshType = (meshComp?.properties?.mesh as string) || 'Cube';
     const color = isSelected ? selectionColor : neutralColor;
-    
+
     let geometry: THREE.BufferGeometry;
     switch (meshType) {
       case 'Sphere':
@@ -102,7 +102,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
       default:
         geometry = new THREE.BoxGeometry(1, 1, 1);
     }
-    
+
     return (
       <mesh
         ref={meshRef}
@@ -115,22 +115,22 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
       </mesh>
     );
   };
-  
+
   const renderLight = () => {
     const lightComp = object.components.find(c => c.type === 'DirectionalLight' || c.type === 'PointLight' || c.type === 'SpotLight');
     if (!lightComp) return null;
-    
+
     const color = (lightComp.properties.color as string) || lightFallbackColor;
     const intensity = (lightComp.properties.intensity as number) || 1;
-    
+
     switch (lightComp.type) {
       case 'DirectionalLight':
         return (
           <>
-            <directionalLight 
-              color={color} 
-              intensity={intensity} 
-              castShadow 
+            <directionalLight
+              color={color}
+              intensity={intensity}
+              castShadow
               shadow-mapSize={[2048, 2048]}
             />
             {isSelected && (
@@ -144,9 +144,9 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
       case 'PointLight':
         return (
           <>
-            <pointLight 
-              color={color} 
-              intensity={intensity} 
+            <pointLight
+              color={color}
+              intensity={intensity}
               distance={(lightComp.properties.range as number) || 10}
               castShadow
             />
@@ -161,9 +161,9 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
       case 'SpotLight':
         return (
           <>
-            <spotLight 
-              color={color} 
-              intensity={intensity} 
+            <spotLight
+              color={color}
+              intensity={intensity}
               angle={(lightComp.properties.angle as number) || 0.5}
               distance={(lightComp.properties.range as number) || 10}
               castShadow
@@ -180,7 +180,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
         return null;
     }
   };
-  
+
   const renderCamera = () => {
     return (
       <group>
@@ -197,7 +197,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
       </group>
     );
   };
-  
+
   const renderEmpty = () => {
     return (
       <mesh onClick={(e) => { e.stopPropagation(); onSelect(object.id); }}>
@@ -206,7 +206,7 @@ function SceneObject({ object, isSelected, onSelect, transformMode, onTransform 
       </mesh>
     );
   };
-  
+
   return (
     <group
       ref={groupRef}
@@ -243,7 +243,7 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
   const sceneBackground = useMemo(() => resolveCssVarColor('--aethel-surface-primary', '#1a1a1a'), []);
   const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#333333'), []);
   const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#555555'), []);
-  
+
   // Get camera position based on view mode
   const cameraPosition = useMemo(() => {
     switch (viewMode) {
@@ -253,9 +253,9 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
       default: return [10, 8, 10] as [number, number, number];
     }
   }, [viewMode]);
-  
+
   const selectedObject = objects.find(o => o.id === selectedId);
-  
+
   return (
     <Canvas
       shadows
@@ -263,19 +263,19 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
       onPointerMissed={() => onSelect(null)}
     >
       <color attach="background" args={[sceneBackground]} />
-      
+
       {/* Ambient Light */}
       <ambientLight intensity={environment.ambientIntensity} />
-      
+
       {/* Sky */}
       {environment.skyType === 'procedural' && <Sky sunPosition={[100, 20, 100]} />}
       {environment.skyType === 'solid' && <color attach="background" args={[environment.skyColor]} />}
-      
+
       {/* Fog */}
       {environment.fogEnabled && (
         <fog attach="fog" args={[environment.fogColor, 10, 100]} />
       )}
-      
+
       {/* Contact Shadows */}
       <ContactShadows
         position={[0, -0.049, 0]}
@@ -285,7 +285,7 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
         far={10}
         resolution={256}
       />
-      
+
       {/* Grid */}
       {showGrid && (
         <Grid
@@ -301,7 +301,7 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
           infiniteGrid
         />
       )}
-      
+
       {/* Scene Objects */}
       {objects.map((obj) => (
         <SceneObject
@@ -313,7 +313,7 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
           onTransform={onTransform}
         />
       ))}
-      
+
       {/* Transform Controls for Selected Object */}
       {selectedObject && !selectedObject.locked && (
         <TransformControls
@@ -333,15 +333,15 @@ function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, v
           }}
         />
       )}
-      
+
       {/* Controls */}
       <OrbitControls makeDefault enableDamping dampingFactor={0.1} />
-      
+
       {/* Gizmo */}
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
         <GizmoViewport />
       </GizmoHelper>
-      
+
       {/* Stats */}
       {showStats && <Stats />}
     </Canvas>
@@ -407,9 +407,9 @@ function Toolbar({
           </button>
         ))}
       </div>
-      
+
       <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
-      
+
       {/* Snap Mode */}
       <select
         value={snapMode}
@@ -427,7 +427,7 @@ function Toolbar({
         <option value="grid">Grid Snap</option>
         <option value="vertex">Vertex Snap</option>
       </select>
-      
+
       {snapMode === 'grid' && (
         <input
           type="number"
@@ -447,9 +447,9 @@ function Toolbar({
           }}
         />
       )}
-      
+
       <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
-      
+
       {/* View Mode */}
       <select
         value={viewMode}
@@ -468,9 +468,9 @@ function Toolbar({
         <option value="front">Front</option>
         <option value="right">Right</option>
       </select>
-      
+
       <div style={{ flex: 1 }} />
-      
+
       {/* Play/Pause */}
       <button
         onClick={onPlayPause}
@@ -489,9 +489,9 @@ function Toolbar({
       >
         {isPlaying ? '⏹ Stop' : '▶ Play'}
       </button>
-      
+
       <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
-      
+
       {/* Save & Build */}
       <button
         onClick={onSave}
@@ -507,7 +507,7 @@ function Toolbar({
       >
         💾 Save
       </button>
-      
+
       <button
         onClick={onBuild}
         style={{
@@ -554,13 +554,13 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
       default: return '❓';
     }
   };
-  
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
         World Outliner
       </div>
-      
+
       <div style={{ flex: 1, overflow: 'auto', padding: '4px' }}>
         {objects.map((obj) => (
           <div
@@ -600,7 +600,7 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
           </div>
         ))}
       </div>
-      
+
       {/* Add object buttons */}
       <div style={{ padding: '8px', borderTop: '1px solid var(--aethel-border-primary)', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
         {['Cube', 'Sphere', 'Light', 'Camera', 'Empty'].map((type) => (
@@ -646,13 +646,13 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
       </div>
     );
   }
-  
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--aethel-border-primary)', fontWeight: 'bold', fontSize: '12px' }}>
         Details - {object.name}
       </div>
-      
+
       <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>
         {/* Name */}
         <div style={{ marginBottom: '16px' }}>
@@ -672,11 +672,11 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
             }}
           />
         </div>
-        
+
         {/* Transform */}
         <div style={{ marginBottom: '16px' }}>
           <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}>Transform</div>
-          
+
           {/* Position */}
           <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>Position</label>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
@@ -705,7 +705,7 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
               </div>
             ))}
           </div>
-          
+
           {/* Rotation */}
           <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>Rotation</label>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
@@ -734,7 +734,7 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
               </div>
             ))}
           </div>
-          
+
           {/* Scale */}
           <label style={{ display: 'block', fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginBottom: '4px' }}>Scale</label>
           <div style={{ display: 'flex', gap: '4px' }}>
@@ -765,7 +765,7 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
             ))}
           </div>
         </div>
-        
+
         {/* Components */}
         <div>
           <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '8px' }}>Components</div>
@@ -785,7 +785,7 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
               </div>
             </div>
           ))}
-          
+
           <button
             style={{
               width: '100%',
@@ -821,7 +821,7 @@ export default function LevelEditor() {
   const [showGrid, setShowGrid] = useState(true);
   const [showStats, setShowStats] = useState(false);
   const [environment] = useState<EnvironmentSettings>(defaultEnvironment);
-  
+
   // Play Mode state
   const [savedObjects, setSavedObjects] = useState<LevelObject[] | null>(null);
   const physicsStateRef = useRef<PhysicsState>({
@@ -830,7 +830,7 @@ export default function LevelEditor() {
   });
   const lastTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number>(0);
-  
+
   // Play Mode loop
   useEffect(() => {
     if (!isPlaying) {
@@ -839,29 +839,29 @@ export default function LevelEditor() {
       }
       return;
     }
-    
+
     lastTimeRef.current = performance.now();
-    
+
     const gameLoop = (currentTime: number) => {
       const deltaTime = Math.min((currentTime - lastTimeRef.current) / 1000, 0.05);
       lastTimeRef.current = currentTime;
-      
+
       setObjects(prev => simulatePhysics(prev, physicsStateRef.current, deltaTime));
-      
+
       if (isPlaying) {
         animationFrameRef.current = requestAnimationFrame(gameLoop);
       }
     };
-    
+
     animationFrameRef.current = requestAnimationFrame(gameLoop);
-    
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [isPlaying]);
-  
+
   // Handle Play/Pause
   const handlePlayPause = useCallback(() => {
     if (!isPlaying) {
@@ -880,7 +880,7 @@ export default function LevelEditor() {
     }
     setIsPlaying(!isPlaying);
   }, [isPlaying, objects, savedObjects]);
-  
+
   const selectedObject = useMemo(
     () => objects.find(o => o.id === selectedId) || null,
     [objects, selectedId]
@@ -910,12 +910,12 @@ export default function LevelEditor() {
       setSelectedId(nextId);
     }
   }, []);
-  
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
-      
+
       switch (e.key.toLowerCase()) {
         case 'w':
           setTransformMode('translate');
@@ -946,40 +946,40 @@ export default function LevelEditor() {
           break;
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleDuplicate, selectedId, selectedObject]);
-  
+
   const handleTransform = useCallback((id: string, position: [number, number, number], rotation: [number, number, number], scale: [number, number, number]) => {
-    setObjects(prev => prev.map(obj => 
+    setObjects(prev => prev.map(obj =>
       obj.id === id ? { ...obj, position, rotation, scale } : obj
     ));
   }, []);
-  
+
   const handleObjectChange = useCallback((id: string, changes: Partial<LevelObject>) => {
-    setObjects(prev => prev.map(obj => 
+    setObjects(prev => prev.map(obj =>
       obj.id === id ? { ...obj, ...changes } : obj
     ));
   }, []);
-  
+
   const handleToggleVisibility = useCallback((id: string) => {
-    setObjects(prev => prev.map(obj => 
+    setObjects(prev => prev.map(obj =>
       obj.id === id ? { ...obj, visible: !obj.visible } : obj
     ));
   }, []);
-  
+
   const handleToggleLock = useCallback((id: string) => {
-    setObjects(prev => prev.map(obj => 
+    setObjects(prev => prev.map(obj =>
       obj.id === id ? { ...obj, locked: !obj.locked } : obj
     ));
   }, []);
-  
+
   const handleDelete = useCallback((id: string) => {
     setObjects(prev => prev.filter(obj => obj.id !== id));
     if (selectedId === id) setSelectedId(null);
   }, [selectedId]);
-  
+
   const handleSave = useCallback(async () => {
     const levelData: LevelData = {
       id: 'level_1',
@@ -989,10 +989,10 @@ export default function LevelEditor() {
       lightmapSettings: { resolution: 1024, quality: 'high', directSamples: 32, indirectSamples: 128, bounces: 3 },
       navmeshSettings: { agentRadius: 0.5, agentHeight: 2, maxSlope: 45, stepHeight: 0.4, cellSize: 0.3 },
     };
-    
+
     // Save to localStorage for immediate access
     localStorage.setItem('aethel_level_data', JSON.stringify(levelData));
-    
+
     // Also save to API if available
     try {
       const projectId = resolveProjectIdFromClient();
@@ -1016,10 +1016,10 @@ export default function LevelEditor() {
     } catch (e) {
       console.log('Server save failed, using localStorage only');
     }
-    
+
     console.log('Level saved:', levelData);
   }, [objects, environment]);
-  
+
   // Load level on mount
   useEffect(() => {
     const loadLevel = async () => {
@@ -1034,7 +1034,7 @@ export default function LevelEditor() {
           console.warn('Failed to parse cached level');
         }
       }
-      
+
       // Try API
       try {
         const projectId = resolveProjectIdFromClient();
@@ -1063,12 +1063,12 @@ export default function LevelEditor() {
     };
     loadLevel();
   }, []);
-  
+
   const handleBuild = useCallback(() => {
     console.log('Building level...');
     // Build process would go here
   }, []);
-  
+
   return (
     <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--aethel-surface-primary)', color: 'var(--aethel-text-primary)' }}>
       {/* Play Mode Indicator */}
@@ -1089,7 +1089,7 @@ export default function LevelEditor() {
           ▶ PLAY MODE - Press ESC or click Stop to exit
         </div>
       )}
-      
+
       {/* Toolbar */}
       <Toolbar
         transformMode={transformMode}
@@ -1105,7 +1105,7 @@ export default function LevelEditor() {
         onSave={handleSave}
         onBuild={handleBuild}
       />
-      
+
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Left Panel - World Outliner */}
@@ -1120,7 +1120,7 @@ export default function LevelEditor() {
             onDuplicate={handleDuplicate}
           />
         </div>
-        
+
         {/* Center - Viewport */}
         <div style={{ flex: 1, position: 'relative' }}>
           <Viewport
@@ -1134,7 +1134,7 @@ export default function LevelEditor() {
             showStats={showStats}
             environment={environment}
           />
-          
+
           {/* Viewport Overlay */}
           <div style={{
             position: 'absolute',
@@ -1172,7 +1172,7 @@ export default function LevelEditor() {
               Stats
             </button>
           </div>
-          
+
           {/* Status Bar */}
           <div style={{
             position: 'absolute',
@@ -1196,7 +1196,7 @@ export default function LevelEditor() {
             <span>W/E/R: Transform | G: Grid | Del: Delete</span>
           </div>
         </div>
-        
+
         {/* Right Panel - Details */}
         <div style={{ width: '300px', borderLeft: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)' }}>
           <DetailsPanelMini

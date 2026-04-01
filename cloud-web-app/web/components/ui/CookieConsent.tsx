@@ -35,7 +35,7 @@ export default function CookieConsent() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[1080] border-t border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)] backdrop-blur-xl shadow-2xl shadow-black/40"
+      className="fixed bottom-0 left-0 right-0 z-[1080] border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_92%,transparent)] backdrop-blur-xl shadow-2xl shadow-black/40"
       role="dialog"
       aria-label="Consentimento de cookies"
       style={{ animation: 'slideUp 300ms ease-out' }}

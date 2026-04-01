@@ -29,16 +29,16 @@ export interface TabsProps {
   className?: string
 }
 
-export function Tabs({ 
-  defaultValue, 
-  value, 
-  onChange, 
+export function Tabs({
+  defaultValue,
+  value,
+  onChange,
   onValueChange,
-  children, 
-  className = '' 
+  children,
+  className = ''
 }: TabsProps) {
   const [internalValue, setInternalValue] = useState(defaultValue ?? value ?? '')
-  
+
   const activeTab = value ?? internalValue
   const setActiveTab = (tab: string) => {
     setInternalValue(tab)
@@ -68,7 +68,7 @@ export interface TabListProps {
 
 const variantClasses = {
   default: `
-    bg-[var(--aethel-surface-primary)]/60 p-1 rounded-xl 
+    bg-[var(--aethel-surface-primary)]/60 p-1 rounded-xl
     border border-[var(--aethel-border-primary)]/80
   `,
   pills: `
@@ -82,15 +82,15 @@ const variantClasses = {
   `,
 }
 
-export function TabList({ 
-  children, 
+export function TabList({
+  children,
   variant = 'default',
   size = 'md',
   fullWidth = false,
-  className = '' 
+  className = ''
 }: TabListProps) {
   return (
-    <div 
+    <div
       role="tablist"
       className={`
         flex items-center
@@ -124,13 +124,13 @@ const triggerSizeClasses = {
   lg: 'px-5 py-2.5 text-base gap-2',
 }
 
-export function TabTrigger({ 
-  value, 
-  children, 
+export function TabTrigger({
+  value,
+  children,
   icon,
   badge,
   disabled = false,
-  className = '' 
+  className = ''
 }: TabTriggerProps) {
   const { activeTab, setActiveTab } = useTabsContext()
   const isActive = activeTab === value
@@ -152,13 +152,13 @@ export function TabTrigger({
         transition-all duration-200 ease-out
         focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
         disabled:opacity-40 disabled:cursor-not-allowed
-        ${isActive 
+        ${isActive
           ? `
             bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)]
             text-[var(--aethel-text-primary)]
             shadow-lg shadow-black/20
             border border-[var(--aethel-border-secondary)]/50
-          ` 
+          `
           : `
             bg-transparent
             text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
@@ -172,11 +172,11 @@ export function TabTrigger({
       {icon && <span className="flex-shrink-0">{icon}</span>}
       <span>{children}</span>
       {badge !== undefined && (
-        <span 
+        <span
           className={`
             px-1.5 py-0.5 text-[10px] font-semibold rounded-full
-            ${isActive 
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]' 
+            ${isActive
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
               : 'bg-[var(--aethel-surface-quaternary)]/80 text-[var(--aethel-text-tertiary)]'
             }
           `}
@@ -198,11 +198,11 @@ export interface TabContentProps {
   forceMount?: boolean
 }
 
-export function TabContent({ 
-  value, 
-  children, 
+export function TabContent({
+  value,
+  children,
   className = '',
-  forceMount = false 
+  forceMount = false
 }: TabContentProps) {
   const { activeTab } = useTabsContext()
   const isActive = activeTab === value

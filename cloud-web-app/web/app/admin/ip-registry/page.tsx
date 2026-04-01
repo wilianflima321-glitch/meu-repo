@@ -131,7 +131,7 @@ export default function AdminIpRegistryPage() {
           <p className="text-sm text-[var(--aethel-text-tertiary)]">Controle de permissões e licenças com auditoria.</p>
         </div>
         <div className="flex gap-2">
-          <button className="px-3 py-1 bg-gray-200 rounded" onClick={fetchRegistry}>Atualizar</button>
+          <button className="px-3 py-1 bg-[var(--aethel-surface-secondary)] rounded" onClick={fetchRegistry}>Atualizar</button>
           <button className="px-3 py-1 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded" onClick={saveRegistry}>Salvar</button>
         </div>
       </div>

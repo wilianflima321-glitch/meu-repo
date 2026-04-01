@@ -65,12 +65,12 @@ function StatCard({
   return (
     <Card variant="elevated" padding="md" className="relative overflow-hidden">
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
-      
+
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-[var(--aethel-text-secondary)] mb-1">{title}</p>
           <p className="text-3xl font-bold text-[var(--aethel-text-primary)]">{value}</p>
-          
+
           {change !== undefined && (
             <div className="flex items-center gap-1 mt-2">
               {trend === 'up' ? (
@@ -92,7 +92,7 @@ function StatCard({
             </div>
           )}
         </div>
-        
+
         <div className="p-3 rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]">
           {icon}
         </div>
@@ -195,7 +195,7 @@ export function OverviewTab({
               </Button>
             }
           />
-          
+
           {recentProjects.length === 0 ? (
             <EmptyProjects onCreate={onCreateProject || (() => {})} />
           ) : (
@@ -232,7 +232,7 @@ export function OverviewTab({
             title="Atividade Recente"
             description="Seu histórico de ações"
           />
-          
+
           {recentActivity.length === 0 ? (
             <div className="py-12 text-center">
               <TrendingUp className="w-12 h-12 text-[var(--aethel-text-tertiary)] mx-auto mb-4" />

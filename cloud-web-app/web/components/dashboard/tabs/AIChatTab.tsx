@@ -91,7 +91,7 @@ function MessageBubble({
         >
           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         </div>
-        
+
         {/* Actions */}
         <div
           className={`
@@ -211,7 +211,7 @@ export function AIChatTab({
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Dropdown
             trigger={
@@ -264,7 +264,7 @@ export function AIChatTab({
             rows={1}
             disabled={isGenerating}
           />
-          
+
           <div className="absolute right-2 bottom-2 flex items-center gap-2">
             {isGenerating ? (
               <Button
@@ -287,7 +287,7 @@ export function AIChatTab({
             )}
           </div>
         </form>
-        
+
         {/* Quick Actions */}
         <div className="flex items-center gap-2 mt-3">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Sugestões:</span>

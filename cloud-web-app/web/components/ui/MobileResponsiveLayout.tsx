@@ -174,7 +174,7 @@ export function MobileSidebarOverlay({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -197,7 +197,7 @@ export function MobileSidebarOverlay({
           )}
           <button
             onClick={onClose}
-            className="ml-auto flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
+            className="ml-auto flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
             aria-label="Fechar menu"
           >
             <X size={20} />
@@ -374,7 +374,7 @@ export function MobileMenuButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-secondary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] md:hidden ${className}`}
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] md:hidden ${className}`}
       aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
       aria-expanded={isOpen}
     >

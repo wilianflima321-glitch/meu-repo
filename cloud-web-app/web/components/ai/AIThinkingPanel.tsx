@@ -1,13 +1,13 @@
 ﻿/**
  * AIThinkingPanel - Painel Visual de "Cadeia de Pensamento" da IA
- * 
+ *
  * Mostra em tempo real os passos de raciocínio da IA.
  * Inspirado em "Chain of Thought" prompting visibility.
  * Usa WebSocket para streaming de tokens.
- * 
+ *
  * @see AI_SELF_REFLECTION_SYSTEM.md
  * @see INOVACOES_TECNICAS_DETALHADAS.md
- * 
+ *
  * @module components/ai/AIThinkingPanel
  */
 
@@ -47,7 +47,7 @@ import {
 // TYPES
 // ============================================================================
 
-export type ThinkingStepType = 
+export type ThinkingStepType =
   | 'thinking'      // Raciocínio geral
   | 'analyzing'     // Analisando código/contexto
   | 'searching'     // Buscando referências
@@ -176,10 +176,10 @@ function useThinkingStream(sessionId?: string) {
     if (!sessionId) return;
 
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
-    
+
     try {
       wsRef.current = new WebSocket(`${wsUrl}/ai/thinking/${sessionId}`);
-      
+
       wsRef.current.onopen = () => {
         setIsStreaming(true);
       };
@@ -187,15 +187,15 @@ function useThinkingStream(sessionId?: string) {
       wsRef.current.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          
+
           if (data.type === 'STEP_START') {
             setSteps(prev => [...prev, data.step]);
           } else if (data.type === 'STEP_UPDATE') {
-            setSteps(prev => prev.map(s => 
+            setSteps(prev => prev.map(s =>
               s.id === data.stepId ? { ...s, ...data.updates } : s
             ));
           } else if (data.type === 'STEP_COMPLETE') {
-            setSteps(prev => prev.map(s => 
+            setSteps(prev => prev.map(s =>
               s.id === data.stepId ? { ...s, status: 'complete', duration: data.duration } : s
             ));
           } else if (data.type === 'SESSION_COMPLETE') {
@@ -236,9 +236,9 @@ function ThinkingDots() {
         <motion.span
           key={i}
           className="w-1.5 h-1.5 bg-[var(--aethel-primary)] rounded-full"
-          animate={{ 
+          animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.4, 1, 0.4] 
+            opacity: [0.4, 1, 0.4]
           }}
           transition={{
             duration: 0.8,
@@ -253,9 +253,9 @@ function ThinkingDots() {
 
 function NeuralPulse({ active }: { active: boolean }) {
   if (!active) return null;
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="absolute inset-0 rounded-lg border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)]"
       animate={{
         opacity: [0.25, 0.6, 0.25],
@@ -374,7 +374,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
               </span>
               {step.status === 'active' && <ThinkingDots />}
             </div>
-            
+
             {step.duration && (
               <p className="text-xs text-[var(--aethel-text-tertiary)] mt-0.5">
                 Concluido em {(step.duration / 1000).toFixed(1)}s
@@ -419,7 +419,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
                       </pre>
                       <button
                         onClick={handleCopy}
-                        className="absolute top-2 right-2 p-1 bg-[var(--aethel-surface-tertiary)] 
+                        className="absolute top-2 right-2 p-1 bg-[var(--aethel-surface-tertiary)]
                                  hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
                       >
                         {copied ? (
@@ -507,8 +507,8 @@ export function AIThinkingPanel({
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ 
-        opacity: 1, 
+      animate={{
+        opacity: 1,
         scale: 1,
         width: isMaximized ? '50vw' : undefined,
         height: isMaximized ? '80vh' : undefined,
@@ -534,14 +534,14 @@ export function AIThinkingPanel({
               />
             )}
           </div>
-          
+
           <div>
             <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] flex items-center gap-2">
               Pensamento da IA
               {isStreaming && <ThinkingDots />}
             </h3>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
-              {session.status === 'complete' 
+              {session.status === 'complete'
                 ? `Concluido em ${((session.endTime || Date.now()) - session.startTime) / 1000}s`
                 : `${completedSteps}/${totalSteps} etapas`
               }
@@ -617,7 +617,7 @@ export function AIThinkingPanel({
             exit={{ height: 0 }}
             className="flex-1 overflow-hidden"
           >
-            <div 
+            <div
               ref={scrollRef}
               className="h-full overflow-y-auto p-4 space-y-3"
             >
@@ -644,7 +644,7 @@ export function AIThinkingPanel({
               Resultado gerado
             </span>
           </div>
-          
+
           {session.result.files && session.result.files.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {session.result.files.map((file, i) => (
@@ -657,7 +657,7 @@ export function AIThinkingPanel({
               ))}
             </div>
           )}
-          
+
           {session.result.preview && (
             <pre className="mt-2 p-2 bg-[var(--aethel-surface-primary)] rounded text-xs text-[var(--aethel-text-tertiary)] overflow-x-auto">
               {session.result.preview}

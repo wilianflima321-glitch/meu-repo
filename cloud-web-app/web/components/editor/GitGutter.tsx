@@ -2,10 +2,10 @@
 
 /**
  * Aethel Engine - Git Gutter Decorations
- * 
+ *
  * Monaco editor decorations showing git diff status:
  * - Green: Added lines
- * - Blue: Modified lines  
+ * - Blue: Modified lines
  * - Red: Deleted lines indicator
  * - Hover preview with diff
  * - Click to view full diff
@@ -169,7 +169,7 @@ export function useGitGutter({
 
     changes.forEach(change => {
       const className = DECORATION_CLASSES[change.type];
-      const lineClassName = change.type === 'added' 
+      const lineClassName = change.type === 'added'
         ? 'git-line-added'
         : change.type === 'modified'
           ? 'git-line-modified'
@@ -367,7 +367,7 @@ export function DiffHunkPreview({
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
-        <span className="text-sm font-medium text-white">{getTitle()}</span>
+        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{getTitle()}</span>
         <div className="flex items-center gap-1">
           {onViewFullDiff && (
             <button
@@ -514,7 +514,7 @@ export function GitStatusIndicator({
 export function parseGitDiff(diff: string): LineChange[] {
   const changes: LineChange[] = [];
   const lines = diff.split('\n');
-  
+
   let currentHunk: {
     oldStart: number;
     oldCount: number;
@@ -532,7 +532,7 @@ export function parseGitDiff(diff: string): LineChange[] {
       if (currentHunk) {
         processHunk(currentHunk, changes);
       }
-      
+
       currentHunk = {
         oldStart: parseInt(hunkMatch[1], 10),
         oldCount: parseInt(hunkMatch[2] || '1', 10),

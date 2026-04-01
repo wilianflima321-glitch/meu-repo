@@ -1,6 +1,6 @@
 /**
  * Aethel IDE - Outline Panel
- * 
+ *
  * Painel profissional de outline/symbols similar ao VS Code.
  * Mostra hierarquia de símbolos do arquivo atual (classes, funções, variáveis, etc.)
  */
@@ -8,8 +8,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { 
-  ChevronRight, 
+import {
+  ChevronRight,
   ChevronDown,
   FileCode,
   Braces,
@@ -32,7 +32,7 @@ import {
 // TYPES
 // ============================================================================
 
-export type SymbolKind = 
+export type SymbolKind =
   | 'file'
   | 'module'
   | 'namespace'
@@ -96,40 +96,40 @@ interface OutlinePanelProps {
 
 const getSymbolIcon = (kind: SymbolKind) => {
   const iconProps = { size: 16, className: 'flex-shrink-0' };
-  
+
   switch (kind) {
     case 'file':
-      return <FileCode {...iconProps} className="text-blue-400" />;
+      return <FileCode {...iconProps} className="text-[var(--aethel-info-light)]" />;
     case 'module':
     case 'namespace':
     case 'package':
-      return <Package {...iconProps} className="text-blue-400" />;
+      return <Package {...iconProps} className="text-[var(--aethel-info-light)]" />;
     case 'class':
       return <Box {...iconProps} className="text-[var(--aethel-warning-light)]" />;
     case 'method':
     case 'function':
     case 'constructor':
-      return <Braces {...iconProps} className="text-blue-400" />;
+      return <Braces {...iconProps} className="text-[var(--aethel-info-light)]" />;
     case 'property':
     case 'field':
-      return <Variable {...iconProps} className="text-cyan-400" />;
+      return <Variable {...iconProps} className="text-[var(--aethel-info-light)]" />;
     case 'enum':
     case 'enumMember':
       return <LayoutList {...iconProps} className="text-orange-400" />;
     case 'interface':
-      return <Type {...iconProps} className="text-green-400" />;
+      return <Type {...iconProps} className="text-[var(--aethel-success-light)]" />;
     case 'variable':
-      return <Variable {...iconProps} className="text-blue-300" />;
+      return <Variable {...iconProps} className="text-[var(--aethel-info-light)]" />;
     case 'constant':
-      return <Hash {...iconProps} className="text-blue-500" />;
+      return <Hash {...iconProps} className="text-[var(--aethel-info-light)]" />;
     case 'struct':
       return <Box {...iconProps} className="text-teal-400" />;
     case 'event':
-      return <Zap {...iconProps} className="text-yellow-400" />;
+      return <Zap {...iconProps} className="text-[var(--aethel-warning-light)]" />;
     case 'typeParameter':
-      return <Type {...iconProps} className="text-emerald-400" />;
+      return <Type {...iconProps} className="text-[var(--aethel-success-light)]" />;
     default:
-      return <CircleDot {...iconProps} className="text-gray-400" />;
+      return <CircleDot {...iconProps} className="text-[var(--aethel-text-secondary)]" />;
   }
 };
 
@@ -167,7 +167,7 @@ const getSymbolKindOrder = (kind: SymbolKind): number => {
 
 const sortSymbols = (symbols: DocumentSymbol[], mode: SortMode): DocumentSymbol[] => {
   const sorted = [...symbols];
-  
+
   switch (mode) {
     case 'name':
       sorted.sort((a, b) => a.name.localeCompare(b.name));
@@ -184,7 +184,7 @@ const sortSymbols = (symbols: DocumentSymbol[], mode: SortMode): DocumentSymbol[
       sorted.sort((a, b) => a.range.startLine - b.range.startLine);
       break;
   }
-  
+
   return sorted.map(s => ({
     ...s,
     children: s.children ? sortSymbols(s.children, mode) : undefined,
@@ -192,28 +192,28 @@ const sortSymbols = (symbols: DocumentSymbol[], mode: SortMode): DocumentSymbol[
 };
 
 const filterSymbols = (
-  symbols: DocumentSymbol[], 
+  symbols: DocumentSymbol[],
   query: string,
   visibleKinds: Set<SymbolKind>
 ): DocumentSymbol[] => {
   const q = query.toLowerCase();
-  
+
   return symbols.reduce<DocumentSymbol[]>((acc, symbol) => {
     // Filter by kind visibility
     if (!visibleKinds.has(symbol.kind)) {
       return acc;
     }
-    
+
     // Recursive filter children
-    const filteredChildren = symbol.children 
+    const filteredChildren = symbol.children
       ? filterSymbols(symbol.children, query, visibleKinds)
       : undefined;
-    
+
     // Check if matches query
-    const matches = !query || 
-      symbol.name.toLowerCase().includes(q) || 
+    const matches = !query ||
+      symbol.name.toLowerCase().includes(q) ||
       symbol.detail?.toLowerCase().includes(q);
-    
+
     // Include if matches or has matching children
     if (matches || (filteredChildren && filteredChildren.length > 0)) {
       acc.push({
@@ -221,7 +221,7 @@ const filterSymbols = (
         children: filteredChildren,
       });
     }
-    
+
     return acc;
   }, []);
 };
@@ -252,13 +252,13 @@ const SymbolItem: React.FC<SymbolItemProps> = ({
   onHover,
 }) => {
   const hasChildren = symbol.children && symbol.children.length > 0;
-  
+
   return (
     <div
       className={`
         flex items-center gap-1 px-2 py-1 cursor-pointer select-none
         transition-colors duration-100
-        ${isActive ? 'bg-blue-600/30' : isHovered ? 'bg-white/5' : ''}
+        ${isActive ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : isHovered ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]' : ''}
         ${symbol.deprecated ? 'opacity-50 line-through' : ''}
       `}
       style={{ paddingLeft: `${depth * 16 + 8}px` }}
@@ -273,7 +273,7 @@ const SymbolItem: React.FC<SymbolItemProps> = ({
       {/* Expand/Collapse Toggle */}
       <button
         className={`
-          p-0.5 rounded hover:bg-white/10 transition-colors
+          p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors
           ${!hasChildren ? 'invisible' : ''}
         `}
         onClick={(e) => {
@@ -283,29 +283,29 @@ const SymbolItem: React.FC<SymbolItemProps> = ({
         aria-label={expanded ? 'Collapse' : 'Expand'}
       >
         {expanded ? (
-          <ChevronDown size={14} className="text-gray-400" />
+          <ChevronDown size={14} className="text-[var(--aethel-text-secondary)]" />
         ) : (
-          <ChevronRight size={14} className="text-gray-400" />
+          <ChevronRight size={14} className="text-[var(--aethel-text-secondary)]" />
         )}
       </button>
-      
+
       {/* Symbol Icon */}
       {getSymbolIcon(symbol.kind)}
-      
+
       {/* Symbol Name */}
-      <span className="truncate text-sm text-gray-200">
+      <span className="truncate text-sm text-[var(--aethel-text-secondary)]">
         {symbol.name}
       </span>
-      
+
       {/* Detail (type info) */}
       {symbol.detail && (
-        <span className="truncate text-xs text-gray-500 ml-1">
+        <span className="truncate text-xs text-[var(--aethel-text-secondary)] ml-1">
           {symbol.detail}
         </span>
       )}
-      
+
       {/* Line number */}
-      <span className="ml-auto text-xs text-gray-600">
+      <span className="ml-auto text-xs text-[var(--aethel-text-secondary)]">
         {symbol.range.startLine + 1}
       </span>
     </div>
@@ -340,14 +340,14 @@ const SymbolTree: React.FC<SymbolTreeProps> = ({
   const getSymbolId = (symbol: DocumentSymbol): string => {
     return `${symbol.name}-${symbol.kind}-${symbol.range.startLine}`;
   };
-  
+
   return (
     <>
       {symbols.map((symbol) => {
         const id = getSymbolId(symbol);
         const isExpanded = expandedIds.has(id);
         const hasChildren = symbol.children && symbol.children.length > 0;
-        
+
         return (
           <React.Fragment key={id}>
             <SymbolItem
@@ -360,7 +360,7 @@ const SymbolTree: React.FC<SymbolTreeProps> = ({
               isHovered={hoveredSymbolId === id}
               onHover={(hovered) => onHover(hovered ? id : null)}
             />
-            
+
             {hasChildren && isExpanded && (
               <SymbolTree
                 symbols={symbol.children!}
@@ -391,7 +391,7 @@ interface FilterMenuProps {
 }
 
 const allKinds: SymbolKind[] = [
-  'class', 'interface', 'struct', 'enum', 
+  'class', 'interface', 'struct', 'enum',
   'function', 'method', 'constructor',
   'property', 'field', 'variable', 'constant',
   'module', 'namespace', 'package',
@@ -404,37 +404,37 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   onClose,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         onClose();
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
-  
+
   return (
     <div
       ref={menuRef}
-      className="absolute top-full right-0 mt-1 w-48 bg-[#252526] border border-[#3c3c3c] 
+      className="absolute top-full right-0 mt-1 w-48 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]
                  rounded-md shadow-lg z-50 py-1"
     >
-      <div className="px-3 py-1.5 text-xs text-gray-400 border-b border-[#3c3c3c]">
+      <div className="px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] border-b border-[var(--aethel-border-primary)]">
         Symbol Types
       </div>
       {allKinds.map((kind) => (
         <button
           key={kind}
-          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-gray-300
-                     hover:bg-white/5 transition-colors"
+          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)]
+                     hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
           onClick={() => onToggleKind(kind)}
         >
-          <div className={`w-4 h-4 rounded border ${visibleKinds.has(kind) 
-            ? 'bg-blue-500 border-blue-500' 
-            : 'border-gray-500'}`}
+          <div className={`w-4 h-4 rounded border ${visibleKinds.has(kind)
+            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+            : 'border-[var(--aethel-border-primary)]'}`}
           >
             {visibleKinds.has(kind) && (
               <svg viewBox="0 0 16 16" fill="white" className="w-4 h-4">
@@ -470,7 +470,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [visibleKinds, setVisibleKinds] = useState<Set<SymbolKind>>(new Set(allKinds));
   const [followCursor, setFollowCursor] = useState(true);
-  
+
   // Expand all on first load
   useEffect(() => {
     if (symbols.length > 0 && expandedIds.size === 0) {
@@ -485,20 +485,20 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
       setExpandedIds(allIds);
     }
   }, [symbols, expandedIds.size]);
-  
+
   // Processed symbols
   const processedSymbols = useMemo(() => {
     let result = symbols;
-    
+
     // Filter
     result = filterSymbols(result, searchQuery, visibleKinds);
-    
+
     // Sort
     result = sortSymbols(result, sortMode);
-    
+
     return result;
   }, [symbols, searchQuery, sortMode, visibleKinds]);
-  
+
   // Toggle expansion
   const handleToggle = useCallback((id: string) => {
     setExpandedIds(prev => {
@@ -511,14 +511,14 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
       return next;
     });
   }, []);
-  
+
   // Handle symbol click
   const handleSymbolClick = useCallback((symbol: DocumentSymbol) => {
     const id = `${symbol.name}-${symbol.kind}-${symbol.range.startLine}`;
     setActiveSymbolId(id);
     onSymbolClick?.(symbol);
   }, [onSymbolClick]);
-  
+
   // Toggle kind visibility
   const handleToggleKind = useCallback((kind: SymbolKind) => {
     setVisibleKinds(prev => {
@@ -531,7 +531,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
       return next;
     });
   }, []);
-  
+
   // Cycle sort mode
   const cycleSortMode = useCallback(() => {
     setSortMode(prev => {
@@ -542,7 +542,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
       }
     });
   }, []);
-  
+
   // Expand all
   const expandAll = useCallback(() => {
     const allIds = new Set<string>();
@@ -555,24 +555,24 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
     collectIds(symbols);
     setExpandedIds(allIds);
   }, [symbols]);
-  
+
   // Collapse all
   const collapseAll = useCallback(() => {
     setExpandedIds(new Set());
   }, []);
-  
+
   const fileName = activeFilePath?.split(/[/\\]/).pop() || 'No file';
-  
+
   return (
-    <div className="flex flex-col h-full bg-[#1e1e1e] text-gray-300">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-[#3c3c3c]">
-        <span className="text-xs font-medium uppercase tracking-wider text-gray-400">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
+        <span className="text-xs font-medium uppercase tracking-wider text-[var(--aethel-text-secondary)]">
           Outline
         </span>
         <div className="flex items-center gap-1">
           <button
-            className={`p-1 rounded hover:bg-white/10 transition-colors ${followCursor ? 'text-blue-400' : ''}`}
+            className={`p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors ${followCursor ? 'text-[var(--aethel-info-light)]' : ''}`}
             onClick={() => setFollowCursor(!followCursor)}
             title="Follow Cursor"
             aria-label="Follow cursor"
@@ -580,7 +580,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
             <Eye size={14} />
           </button>
           <button
-            className="p-1 rounded hover:bg-white/10 transition-colors"
+            className="p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
             onClick={cycleSortMode}
             title={`Sort by: ${sortMode}`}
             aria-label={`Sort by ${sortMode}`}
@@ -589,8 +589,8 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           </button>
           <div className="relative">
             <button
-              className={`p-1 rounded hover:bg-white/10 transition-colors 
-                ${visibleKinds.size < allKinds.length ? 'text-blue-400' : ''}`}
+              className={`p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors
+                ${visibleKinds.size < allKinds.length ? 'text-[var(--aethel-info-light)]' : ''}`}
               onClick={() => setShowFilterMenu(!showFilterMenu)}
               title="Filter symbols"
               aria-label="Filter symbols"
@@ -606,7 +606,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
             )}
           </div>
           <button
-            className="p-1 rounded hover:bg-white/10 transition-colors"
+            className="p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
             onClick={onRefresh}
               title="Atualizar"
               aria-label="Atualizar estrutura"
@@ -616,24 +616,24 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           </button>
         </div>
       </div>
-      
+
       {/* Search */}
-      <div className="px-2 py-2 border-b border-[#3c3c3c]">
+      <div className="px-2 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="relative">
-          <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+          <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-[var(--aethel-text-secondary)]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter symbols..."
-            className="w-full bg-[#3c3c3c] text-sm text-gray-200 rounded px-7 py-1.5
+            className="w-full bg-[var(--aethel-surface-tertiary)] text-sm text-[var(--aethel-text-secondary)] rounded px-7 py-1.5
                        placeholder-gray-500 border border-transparent
-                       focus:border-blue-500/50 focus:outline-none"
+                       focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] focus:outline-none"
             aria-label="Filter symbols"
           />
           {searchQuery && (
             <button
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]"
               onClick={() => setSearchQuery('')}
               aria-label="Clear search"
             >
@@ -642,9 +642,9 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           )}
         </div>
       </div>
-      
+
       {/* Current file */}
-      <div className="px-3 py-1.5 text-xs text-gray-500 border-b border-[#3c3c3c] flex items-center gap-2">
+      <div className="px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] border-b border-[var(--aethel-border-primary)] flex items-center gap-2">
         <FileCode size={12} />
         <span className="truncate">{fileName}</span>
         {processedSymbols.length > 0 && (
@@ -653,32 +653,32 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           </span>
         )}
       </div>
-      
+
       {/* Quick Actions */}
-      <div className="px-2 py-1 border-b border-[#3c3c3c] flex gap-1">
+      <div className="px-2 py-1 border-b border-[var(--aethel-border-primary)] flex gap-1">
         <button
-          className="text-xs text-gray-400 hover:text-gray-200 px-2 py-0.5 rounded hover:bg-white/5"
+          className="text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)] px-2 py-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
           onClick={expandAll}
         >
           Expand All
         </button>
         <button
-          className="text-xs text-gray-400 hover:text-gray-200 px-2 py-0.5 rounded hover:bg-white/5"
+          className="text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)] px-2 py-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
           onClick={collapseAll}
         >
           Collapse All
         </button>
       </div>
-      
+
       {/* Symbol Tree */}
       <div className="flex-1 overflow-auto" role="tree" aria-label="Document symbols">
         {isLoading ? (
-          <div className="flex items-center justify-center h-32 text-gray-500">
+          <div className="flex items-center justify-center h-32 text-[var(--aethel-text-secondary)]">
             <RefreshCw className="animate-spin mr-2" size={16} />
             Loading symbols...
           </div>
         ) : processedSymbols.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-32 text-gray-500 text-sm">
+          <div className="flex flex-col items-center justify-center h-32 text-[var(--aethel-text-secondary)] text-sm">
             <LayoutList size={32} className="mb-2 opacity-50" />
             {searchQuery ? (
               <span>No symbols match {`"${searchQuery}"`}</span>
@@ -700,14 +700,14 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           />
         )}
       </div>
-      
+
       {/* Footer - Sort indicator */}
-      <div className="px-3 py-1 border-t border-[#3c3c3c] text-xs text-gray-500 flex items-center justify-between">
+      <div className="px-3 py-1 border-t border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-secondary)] flex items-center justify-between">
         <span>
-          Sort: <span className="text-gray-400 capitalize">{sortMode}</span>
+          Sort: <span className="text-[var(--aethel-text-secondary)] capitalize">{sortMode}</span>
         </span>
         {visibleKinds.size < allKinds.length && (
-          <span className="text-blue-400">
+          <span className="text-[var(--aethel-info-light)]">
             {allKinds.length - visibleKinds.size} types hidden
           </span>
         )}

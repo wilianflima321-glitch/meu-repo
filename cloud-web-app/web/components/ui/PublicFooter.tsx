@@ -36,7 +36,7 @@ export default function PublicFooter() {
   return (
     <footer className="bg-gradient-to-b from-[var(--aethel-surface-primary)] via-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)]" role="contentinfo">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-12 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02),rgba(14,165,233,0.06))] px-6 py-6 shadow-[0_24px_70px_rgba(2,6,23,0.24)] lg:px-8">
+        <div className="mb-12 rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02),rgba(14,165,233,0.06))] px-6 py-6 shadow-[0_24px_70px_rgba(2,6,23,0.24)] lg:px-8">
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Plataforma studio-grade</p>
@@ -55,7 +55,7 @@ export default function PublicFooter() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-white/[0.08] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-4"
+                  className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-4"
                 >
                   <div className="text-[11px] uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">{item.label}</div>
                   <div className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">{item.value}</div>
@@ -86,16 +86,16 @@ export default function PublicFooter() {
               ))}
             </div>
             <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">
-              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">SOC 2 (planejado)</span>
-              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">GDPR (alvo)</span>
-              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">SSO (roadmap)</span>
+              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1">SOC 2 (planejado)</span>
+              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1">GDPR (alvo)</span>
+              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1">SSO (roadmap)</span>
             </div>
             <div className="mt-6 flex items-center gap-4">
               <a
                 href="https://github.com/wilianflima321-glitch/meu-repo"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.05] text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)]"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 aria-label="GitHub"
               >
                 <svg className="h-4.5 w-4.5" fill="currentColor" viewBox="0 0 24 24">
@@ -104,13 +104,13 @@ export default function PublicFooter() {
               </a>
               <Link
                 href="/docs"
-                className="flex h-9 min-w-[96px] items-center justify-center rounded-xl bg-white/[0.05] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)]"
+                className="flex h-9 min-w-[96px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
               >
                 Documentacao
               </Link>
               <Link
                 href="/status"
-                className="flex h-9 min-w-[72px] items-center justify-center rounded-xl bg-white/[0.05] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)]"
+                className="flex h-9 min-w-[72px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
               >
                 Status
               </Link>
@@ -134,7 +134,7 @@ export default function PublicFooter() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.06] pt-8 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[var(--aethel-border-primary)] pt-8 sm:flex-row">
           <p className="text-xs text-[var(--aethel-text-tertiary)]">&copy; {COPYRIGHT_YEAR} Aethel Engine. Todos os direitos reservados.</p>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5">

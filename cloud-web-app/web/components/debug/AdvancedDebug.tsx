@@ -2,7 +2,7 @@
 
 /**
  * Aethel Engine - Advanced Debug Components
- * 
+ *
  * VS Code-style debugging with:
  * - Conditional Breakpoints
  * - Logpoints
@@ -293,7 +293,7 @@ export function BreakpointsPanel({
     if (!bp.enabled) return 'text-[var(--aethel-text-tertiary)]';
     if (!bp.verified) return 'text-[var(--aethel-text-tertiary)]';
     if (bp.type === 'logpoint') return 'text-[var(--aethel-warning-light)]';
-    return 'text-red-500';
+    return 'text-[var(--aethel-error-light)]';
   };
 
   // Group breakpoints by file
@@ -312,7 +312,7 @@ export function BreakpointsPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
-          <Bug className="w-4 h-4 text-red-400" />
+          <Bug className="w-4 h-4 text-[var(--aethel-error-light)]" />
           <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Breakpoints</span>
           <span className="text-xs text-[var(--aethel-text-tertiary)] bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 rounded">
             {breakpoints.length}
@@ -568,15 +568,15 @@ export function WatchPanel({
               </span>
               <span className="text-[var(--aethel-text-quaternary)]">:</span>
               {expr.error ? (
-                <span className="text-sm text-red-400 truncate">
+                <span className="text-sm text-[var(--aethel-error-light)] truncate">
                   {expr.error}
                 </span>
               ) : (
                 <>
                   <span className={`text-sm font-mono truncate ${
-                    expr.type === 'string' ? 'text-emerald-400' :
+                    expr.type === 'string' ? 'text-[var(--aethel-success-light)]' :
                     expr.type === 'number' ? 'text-[var(--aethel-warning-light)]' :
-                    expr.type === 'boolean' ? 'text-blue-400' :
+                    expr.type === 'boolean' ? 'text-[var(--aethel-info-light)]' :
                     'text-[var(--aethel-text-secondary)]'
                   }`}>
                     {expr.value ?? 'undefined'}
@@ -957,9 +957,9 @@ export function DebugToolbar({
             disabled
               ? 'text-[var(--aethel-text-quaternary)] cursor-not-allowed'
               : primary
-                ? 'text-emerald-400 hover:bg-emerald-600/20'
+                ? 'text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                 : danger
-                  ? 'text-red-400 hover:bg-red-600/20'
+                  ? 'text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
                   : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
           }`}
         >

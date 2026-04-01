@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 // Lazy load simple 3D preview component (without required complex props)
 const SimpleMini3DPreview = dynamic(
   () => import('./SimpleMini3DPreview'),
-  { 
+  {
     ssr: false,
     loading: () => (
       <div className="h-full w-full bg-[var(--aethel-surface-primary)] flex items-center justify-center">
@@ -32,8 +32,8 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
       isExpanded ? 'fixed inset-4 z-50' : 'w-72 h-56'
     }`}>
       <div className="flex items-center justify-between px-3 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
-        <h4 className="text-white text-sm font-semibold flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <h4 className="text-[var(--aethel-text-primary)] text-sm font-semibold flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] animate-pulse" />
           AI Live Preview
         </h4>
         <button
@@ -69,7 +69,7 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
                   <span className="text-[var(--aethel-text-secondary)] flex-1">{suggestion}</span>
                   <button
                     onClick={() => onAcceptSuggestion(suggestion)}
-                    className="bg-emerald-600 px-2 py-1 rounded text-white hover:bg-emerald-500 transition-colors opacity-0 group-hover:opacity-100"
+                    className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2 py-1 rounded text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] transition-colors opacity-0 group-hover:opacity-100"
                   >
                     Aplicar
                   </button>
@@ -91,11 +91,11 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
             {previewError ? (
               <div className="h-full flex items-center justify-center p-4">
                 <div className="text-center">
-                  <div className="text-red-400 text-sm mb-2">Erro ao carregar preview</div>
+                  <div className="text-[var(--aethel-error-light)] text-sm mb-2">Erro ao carregar preview</div>
                   <div className="text-[var(--aethel-text-tertiary)] text-xs">{previewError}</div>
                   <button
                     onClick={() => setPreviewError(null)}
-                    className="mt-3 text-xs text-blue-400 hover:text-blue-300"
+                    className="mt-3 text-xs text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]"
                   >
                     Tentar novamente
                   </button>

@@ -120,7 +120,7 @@ function LifecycleIndicator({
       <div className={`w-2 h-2 rounded-full ${LIFECYCLE_COLORS[state]}`} />
       <span className="text-[var(--aethel-text-secondary)]">{LIFECYCLE_LABELS[state]}</span>
       {strategy && (
-        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
+        <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
           {STRATEGY_LABELS[strategy]}
         </span>
       )}
@@ -554,7 +554,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
             <button
               type="button"
               onClick={provision}
-              className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-white transition hover:brightness-110"
+              className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:brightness-110"
             >
               Iniciar preview
             </button>

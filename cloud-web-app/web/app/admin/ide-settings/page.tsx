@@ -314,7 +314,7 @@ export default function IDESettings() {
           </button>
           <button
             onClick={handleExport}
-            className='px-3 py-2 rounded bg-black text-[var(--aethel-text-primary)] text-sm'
+            className='px-3 py-2 rounded bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] text-sm'
           >
             Exportar JSON
           </button>
@@ -390,7 +390,7 @@ export default function IDESettings() {
               <button
                 onClick={handlePublish}
                 disabled={publishing}
-                className='px-3 py-2 rounded bg-black text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
+                className='px-3 py-2 rounded bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
               >
                 {publishing ? 'Publicando...' : 'Publicar em produção'}
               </button>

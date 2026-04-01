@@ -3,7 +3,7 @@
 /**
  * Debug Panel - Professional Debugging Interface
  * Like VS Code/Chrome DevTools debugger
- * 
+ *
  * Features:
  * - Breakpoints management
  * - Variable inspection
@@ -121,7 +121,7 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon, defaultOpen = true, badge, children }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
-  
+
   return (
     <div className="border-b border-[var(--aethel-border-secondary)]">
       <button
@@ -156,7 +156,7 @@ interface VariableTreeProps {
 
 function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  
+
   const toggleExpanded = (name: string) => {
     setExpanded(prev => {
       const next = new Set(prev)
@@ -168,7 +168,7 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
       return next
     })
   }
-  
+
   return (
     <div className="font-mono text-xs">
       {variables.map((variable, idx) => (
@@ -190,7 +190,7 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
             ) : (
               <span className="w-3" />
             )}
-            
+
             <span className={`${variable.changed ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-[var(--aethel-info-light)]'}`}>
               {variable.name}
             </span>
@@ -202,7 +202,7 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
               {variable.type}
             </span>
           </div>
-          
+
           {variable.expandable && expanded.has(variable.name) && variable.children && (
             <VariableTree
               variables={variable.children}
@@ -269,7 +269,7 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
                   : 'border-[var(--aethel-border-secondary)]'
               }`}
             />
-            
+
             <button
               onClick={() => onNavigate(bp)}
               className="flex-1 min-w-0 text-left"
@@ -283,11 +283,11 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
                 </div>
               )}
             </button>
-            
+
             {bp.hitCount !== undefined && bp.hitCount > 0 && (
               <span className="text-[var(--aethel-text-tertiary)]">{bp.hitCount}×</span>
             )}
-            
+
             <button
               onClick={() => onRemove(bp.id)}
               className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] opacity-0 group-hover:opacity-100"
@@ -351,14 +351,14 @@ interface WatchExpressionsProps {
 function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpressionsProps) {
   const [newExpression, setNewExpression] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  
+
   const handleAdd = () => {
     if (newExpression.trim()) {
       onAdd(newExpression.trim())
       setNewExpression('')
     }
   }
-  
+
   return (
     <div className="text-xs">
       {/* Add new expression */}
@@ -379,7 +379,7 @@ function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpress
           <Plus className="w-3 h-3" />
         </button>
       </div>
-      
+
       {/* Expressions list */}
       {expressions.map(expr => (
         <div
@@ -421,14 +421,14 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [showFilter, setShowFilter] = useState(false)
   const [typeFilter, setTypeFilter] = useState<Set<ConsoleMessage['type']>>(new Set())
-  
+
   // Auto-scroll to bottom
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight
     }
   }, [messages])
-  
+
   const filteredMessages = useMemo(() => {
     let filtered = messages
     if (filter) {
@@ -439,7 +439,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
     }
     return filtered
   }, [messages, filter, typeFilter])
-  
+
   const getMessageIcon = (type: ConsoleMessage['type']) => {
     switch (type) {
       case 'error': return <XCircle className="w-3 h-3 text-[var(--aethel-error)]" />
@@ -449,7 +449,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
       default: return <ChevronRight className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
     }
   }
-  
+
   const getMessageColor = (type: ConsoleMessage['type']) => {
     switch (type) {
       case 'error': return 'text-[var(--aethel-error)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]'
@@ -458,7 +458,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
       default: return 'text-[var(--aethel-text-secondary)]'
     }
   }
-  
+
   return (
     <div className="flex flex-col h-full">
       {/* Console toolbar */}
@@ -481,7 +481,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
           {filteredMessages.length} mensagens
         </span>
       </div>
-      
+
       {/* Filter bar */}
       {showFilter && (
         <div className="flex items-center gap-2 px-2 py-1 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-secondary)]">
@@ -510,7 +510,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
           ))}
         </div>
       )}
-      
+
       {/* Messages */}
       <div ref={containerRef} className="flex-1 overflow-y-auto text-xs font-mono">
         {filteredMessages.map(msg => (
@@ -567,7 +567,7 @@ export default function DebugPanel({
 }: DebugPanelProps) {
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'variables' | 'watch' | 'console'>('variables')
-  
+
   // Mock session for demo
   const demoSession: DebugSession = session || {
     id: 'demo',
@@ -628,12 +628,12 @@ export default function DebugPanel({
       { id: 'c5', type: 'log', message: 'Request: GET /api/users/42', timestamp: new Date() },
     ],
   }
-  
+
   const currentFrame = demoSession.callStack.find(f => f.id === selectedFrameId) || demoSession.callStack[0]
-  
+
   const isPaused = demoSession.state === 'paused'
   const isRunning = demoSession.state === 'running'
-  
+
   return (
     <div className="flex flex-col h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Debug toolbar */}
@@ -656,7 +656,7 @@ export default function DebugPanel({
             <Pause className="w-4 h-4" />
           </button>
         )}
-        
+
         {/* Stop */}
         <button
           onClick={onStop}
@@ -665,7 +665,7 @@ export default function DebugPanel({
         >
           <Square className="w-4 h-4" />
         </button>
-        
+
         {/* Restart */}
         <button
           onClick={onRestart}
@@ -674,9 +674,9 @@ export default function DebugPanel({
         >
           <RefreshCw className="w-4 h-4" />
         </button>
-        
+
         <div className="w-px h-4 bg-[var(--aethel-surface-quaternary)] mx-1" />
-        
+
         {/* Step controls */}
         <button
           onClick={onStepOver}
@@ -686,7 +686,7 @@ export default function DebugPanel({
         >
           <ArrowRight className="w-4 h-4" />
         </button>
-        
+
         <button
           onClick={onStepInto}
           disabled={!isPaused}
@@ -695,7 +695,7 @@ export default function DebugPanel({
         >
           <ArrowDown className="w-4 h-4" />
         </button>
-        
+
         <button
           onClick={onStepOut}
           disabled={!isPaused}
@@ -704,9 +704,9 @@ export default function DebugPanel({
         >
           <ArrowUp className="w-4 h-4" />
         </button>
-        
+
         <div className="flex-1" />
-        
+
         {/* Session info */}
         <span className="text-xs text-[var(--aethel-text-tertiary)]">
           {demoSession.name}
@@ -719,7 +719,7 @@ export default function DebugPanel({
           {demoSession.state}
         </span>
       </div>
-      
+
       <div className="flex-1 flex overflow-hidden">
         {/* Left panel - Breakpoints, Call Stack, Variables */}
         <div className="w-72 border-r border-[var(--aethel-border-secondary)] overflow-y-auto">
@@ -736,7 +736,7 @@ export default function DebugPanel({
               onNavigate={(bp) => onNavigateToFile(bp.filePath, bp.line)}
             />
           </CollapsibleSection>
-          
+
           <CollapsibleSection
             title="Pilha de chamadas"
             icon={<Layers className="w-4 h-4 text-[var(--aethel-info-light)]" />}
@@ -751,7 +751,7 @@ export default function DebugPanel({
               }}
             />
           </CollapsibleSection>
-          
+
           <CollapsibleSection
             title="Variaveis"
             icon={<Variable className="w-4 h-4 text-[var(--aethel-success-light)]" />}
@@ -765,7 +765,7 @@ export default function DebugPanel({
               </div>
             ))}
           </CollapsibleSection>
-          
+
           <CollapsibleSection
             title="Observacao"
             icon={<Eye className="w-4 h-4 text-[var(--aethel-info-light)]" />}
@@ -779,7 +779,7 @@ export default function DebugPanel({
             />
           </CollapsibleSection>
         </div>
-        
+
         {/* Right panel - Console */}
         <div className="flex-1 flex flex-col">
           {/* Tabs */}
@@ -796,7 +796,7 @@ export default function DebugPanel({
               Console
             </button>
           </div>
-          
+
           {/* Console content */}
           <div className="flex-1 overflow-hidden">
             <ConsoleOutput

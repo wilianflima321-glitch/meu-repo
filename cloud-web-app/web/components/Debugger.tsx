@@ -40,7 +40,7 @@ export default function Debugger() {
   }, []);
 
   return (
-    <div className="debugger p-4 bg-gray-50 dark:bg-gray-900">
+    <div className="debugger p-4 bg-[var(--aethel-surface-secondary)] dark:bg-[var(--aethel-surface-secondary)]">
       <h3 className="font-bold mb-2">Debugger</h3>
 
       {status === 'checking' ? (

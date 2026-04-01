@@ -7,12 +7,12 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { tokens, gradients } from '@/lib/design-tokens';
-import { 
-  Layout, 
-  Code2, 
-  Play, 
-  MessageSquare, 
-  FolderTree, 
+import {
+  Layout,
+  Code2,
+  Play,
+  MessageSquare,
+  FolderTree,
   Settings,
   ChevronLeft,
   ChevronRight,

@@ -84,14 +84,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {optional && <span className="text-[var(--aethel-text-tertiary)] text-xs font-normal">(opcional)</span>}
           </label>
         )}
-        
+
         <div className="relative">
           {icon && iconPosition === 'left' && (
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--aethel-text-tertiary)] transition-colors group-focus-within:text-[var(--aethel-text-tertiary)]">
               {icon}
             </div>
           )}
-          
+
           <input
             ref={ref}
             id={inputId}
@@ -111,26 +111,26 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             `}
             {...props}
           />
-          
+
           {icon && iconPosition === 'right' && !hasError && !hasSuccess && (
             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-[var(--aethel-text-tertiary)] transition-colors group-focus-within:text-[var(--aethel-text-tertiary)]">
               {icon}
             </div>
           )}
-          
+
           {hasError && (
             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
               <AlertCircle className="h-5 w-5 text-[var(--aethel-error)]" />
             </div>
           )}
-          
+
           {hasSuccess && (
             <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
               <CheckCircle className="h-5 w-5 text-[var(--aethel-success)]" />
             </div>
           )}
         </div>
-        
+
         {(error || success || hint) && (
           <div
             className={`mt-2 flex items-start gap-1.5 text-sm ${

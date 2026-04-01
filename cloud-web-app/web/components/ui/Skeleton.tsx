@@ -21,7 +21,7 @@ export function Skeleton({
   ...props
 }: SkeletonProps) {
   const baseClasses = `bg-[var(--aethel-surface-quaternary)]/50 ${animate ? 'animate-pulse' : ''}`
-  
+
   const variantClasses: Record<string, string> = {
     text: 'rounded h-4',
     circular: 'rounded-full',

@@ -1,12 +1,12 @@
 ﻿/**
  * LowBalanceModal - Modal Não-Intrusivo de Saldo Baixo
- * 
+ *
  * Aparece quando o saldo do usuário está crítico.
  * Design nao-bloqueante com opção de "depois".
  * Animações suaves e nao-agressivas.
- * 
+ *
  * @see ROADMAP_MONETIZACAO_XP_FINAL.md
- * 
+ *
  * @module components/billing/LowBalanceModal
  */
 
@@ -109,8 +109,8 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
       onClick={() => onSelect(pkg)}
       className={`
         relative p-4 rounded-xl border-2 transition-all text-left w-full
-        ${isSelected 
-          ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]' 
+        ${isSelected
+          ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]'
           : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)]'
         }
         ${pkg.popular ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : ''}
@@ -118,7 +118,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
     >
       {/* Popular badge */}
       {pkg.popular && (
-        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 
+        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2
                       px-2 py-0.5 bg-[var(--aethel-primary)] rounded-full
                       text-[10px] font-semibold uppercase tracking-wider">
           Mais Popular
@@ -135,7 +135,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
             </span>
             <span className="text-sm text-[var(--aethel-text-tertiary)]">creditos</span>
           </div>
-          
+
           {pkg.bonus && (
             <div className="flex items-center gap-1 mt-1 text-[var(--aethel-success)]">
               <Gift className="w-3.5 h-3.5" />
@@ -163,7 +163,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute top-2 right-2 w-5 h-5 bg-[var(--aethel-primary)] rounded-full 
+          className="absolute top-2 right-2 w-5 h-5 bg-[var(--aethel-primary)] rounded-full
                    flex items-center justify-center"
         >
           <Check className="w-3 h-3 text-[var(--aethel-text-primary)]" />
@@ -221,7 +221,7 @@ export function LowBalanceModal({
 
   const handleContinue = useCallback(async () => {
     if (!selectedPackage) return;
-    
+
     setIsProcessing(true);
     try {
       await onSelectPackage?.(selectedPackage);
@@ -245,7 +245,7 @@ export function LowBalanceModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm z-50"
           />
 
           {/* Modal */}
@@ -264,7 +264,7 @@ export function LowBalanceModal({
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 hover:bg-[var(--aethel-surface-quaternary)] 
+              className="absolute top-4 right-4 p-2 hover:bg-[var(--aethel-surface-quaternary)]
                        rounded-lg transition-colors z-10"
             >
               <X className="w-5 h-5 text-[var(--aethel-text-tertiary)]" />
@@ -276,15 +276,15 @@ export function LowBalanceModal({
                 {/* Icon with animation */}
                 <div className={`
                   relative w-14 h-14 rounded-2xl flex items-center justify-center
-                  ${balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]' 
-                    : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]' 
+                  ${balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]'
+                    : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
                     : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'}
                 `}>
                   <motion.div
-                    animate={{ 
+                    animate={{
                       scale: [1, 1.1, 1],
                     }}
-                    transition={{ 
+                    transition={{
                       duration: 2,
                       repeat: Infinity,
                       ease: 'easeInOut'
@@ -293,7 +293,7 @@ export function LowBalanceModal({
                   >
                     {balanceInfo.icon}
                   </motion.div>
-                  
+
                   {/* Pulse effect */}
                   <motion.div
                     className={`absolute inset-0 rounded-2xl ${
@@ -301,9 +301,9 @@ export function LowBalanceModal({
                         : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'
                     }`}
-                    animate={{ 
+                    animate={{
                       scale: [1, 1.3],
-                      opacity: [0.5, 0] 
+                      opacity: [0.5, 0]
                     }}
                     transition={{
                       duration: 2,
@@ -343,7 +343,7 @@ export function LowBalanceModal({
               <p className="text-sm font-medium text-[var(--aethel-text-secondary)] mb-3">
                 Escolha um pacote de creditos
               </p>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 {packages.map(pkg => (
                   <PackageCard
@@ -417,7 +417,7 @@ export function LowBalanceModal({
 
             {/* Upgrade suggestion for heavy users */}
             {balanceLevel === 'critical' && (
-              <div className="mx-6 mb-6 p-4 bg-[linear-gradient(120deg,color-mix(in_srgb,var(--aethel-primary)_18%,transparent),color-mix(in_srgb,var(--aethel-info)_18%,transparent))] 
+              <div className="mx-6 mb-6 p-4 bg-[linear-gradient(120deg,color-mix(in_srgb,var(--aethel-primary)_18%,transparent),color-mix(in_srgb,var(--aethel-info)_18%,transparent))]
                             border border-[var(--aethel-primary)]/20 rounded-xl">
                 <div className="flex items-start gap-3">
                   <TrendingUp className="w-5 h-5 text-[var(--aethel-primary)] flex-shrink-0 mt-0.5" />
@@ -428,7 +428,7 @@ export function LowBalanceModal({
                     <p className="text-xs text-[color-mix(in_srgb,var(--aethel-primary)_70%,transparent)] mt-1">
                       Considere o plano Pro para creditos ilimitados por $49/mês
                     </p>
-                    <button className="flex items-center gap-1 mt-2 text-xs font-medium 
+                    <button className="flex items-center gap-1 mt-2 text-xs font-medium
                                      text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
                       Ver planos
                       <ChevronRight className="w-3 h-3" />

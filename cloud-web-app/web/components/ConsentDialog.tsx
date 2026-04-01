@@ -46,10 +46,10 @@ export default function ConsentDialog({
 
   const getRiskColor = () => {
     switch (request.risk) {
-      case 'low': return 'text-green-400';
-      case 'medium': return 'text-yellow-400';
+      case 'low': return 'text-[var(--aethel-success-light)]';
+      case 'medium': return 'text-[var(--aethel-warning-light)]';
       case 'high': return 'text-orange-400';
-      case 'critical': return 'text-red-400';
+      case 'critical': return 'text-[var(--aethel-error-light)]';
       default: return 'text-[var(--aethel-text-tertiary)]';
     }
   };
@@ -80,13 +80,13 @@ export default function ConsentDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[var(--aethel-surface-secondary)] rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-6 border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-2">
+              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)] mb-2">
                 Consent Required
               </h2>
               <p className="text-[var(--aethel-text-secondary)]">{request.description}</p>
@@ -107,7 +107,7 @@ export default function ConsentDialog({
             <h3 className="text-sm font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">
               Operation
             </h3>
-            <p className="text-white font-mono">{request.operation}</p>
+            <p className="text-[var(--aethel-text-primary)] font-mono">{request.operation}</p>
           </div>
 
           {/* Risk Assessment */}
@@ -125,7 +125,7 @@ export default function ConsentDialog({
               {/* Estimated Time */}
               <div>
                 <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Estimated Time</div>
-                <div className="text-lg font-semibold text-white">
+                <div className="text-lg font-semibold text-[var(--aethel-text-primary)]">
                   {formatTime()}
                 </div>
               </div>
@@ -133,7 +133,7 @@ export default function ConsentDialog({
               {/* Cost */}
               <div>
                 <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Cost</div>
-                <div className="text-lg font-semibold text-white">
+                <div className="text-lg font-semibold text-[var(--aethel-text-primary)]">
                   {formatCost()}
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function ConsentDialog({
                   <div className="flex items-center gap-2 p-3 bg-[var(--aethel-surface-primary)] rounded">
                     <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">NET</span>
                     <div>
-                      <div className="text-white font-medium">Network Access</div>
+                      <div className="text-[var(--aethel-text-primary)] font-medium">Network Access</div>
                       <div className="text-xs text-[var(--aethel-text-tertiary)]">Internet connection required</div>
                     </div>
                   </div>
@@ -160,7 +160,7 @@ export default function ConsentDialog({
                   <div className="flex items-center gap-2 p-3 bg-[var(--aethel-surface-primary)] rounded">
                     <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">DISK</span>
                     <div>
-                      <div className="text-white font-medium">Disk Space</div>
+                      <div className="text-[var(--aethel-text-primary)] font-medium">Disk Space</div>
                       <div className="text-xs text-[var(--aethel-text-tertiary)]">{request.resources.disk} MB</div>
                     </div>
                   </div>
@@ -169,7 +169,7 @@ export default function ConsentDialog({
                   <div className="flex items-center gap-2 p-3 bg-[var(--aethel-surface-primary)] rounded">
                     <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">CPU</span>
                     <div>
-                      <div className="text-white font-medium">CPU Usage</div>
+                      <div className="text-[var(--aethel-text-primary)] font-medium">CPU Usage</div>
                       <div className="text-xs text-[var(--aethel-text-tertiary)]">Processing power required</div>
                     </div>
                   </div>
@@ -178,7 +178,7 @@ export default function ConsentDialog({
                   <div className="flex items-center gap-2 p-3 bg-[var(--aethel-surface-primary)] rounded">
                     <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">RAM</span>
                     <div>
-                      <div className="text-white font-medium">Memory</div>
+                      <div className="text-[var(--aethel-text-primary)] font-medium">Memory</div>
                       <div className="text-xs text-[var(--aethel-text-tertiary)]">{request.resources.memory} MB</div>
                     </div>
                   </div>
@@ -196,7 +196,7 @@ export default function ConsentDialog({
               <ul className="space-y-2">
                 {request.details.map((detail, index) => (
                   <li key={index} className="flex items-start gap-2 text-[var(--aethel-text-secondary)]">
-                    <span className="text-blue-400 mt-1">•</span>
+                    <span className="text-[var(--aethel-info-light)] mt-1">•</span>
                     <span>{detail}</span>
                   </li>
                 ))}
@@ -213,7 +213,7 @@ export default function ConsentDialog({
               <ul className="space-y-2">
                 {request.alternatives.map((alt, index) => (
                   <li key={index} className="flex items-start gap-2 text-[var(--aethel-text-secondary)]">
-                    <span className="text-blue-400 mt-1">→</span>
+                    <span className="text-[var(--aethel-info-light)] mt-1">→</span>
                     <span>{alt}</span>
                   </li>
                 ))}
@@ -233,14 +233,14 @@ export default function ConsentDialog({
           <button
             onClick={handleReject}
             disabled={isProcessing}
-            className="flex-1 px-6 py-3 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] disabled:bg-[var(--aethel-surface-secondary)] text-white rounded-lg transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] disabled:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors font-medium"
           >
             {isProcessing ? 'Processing...' : 'Reject'}
           </button>
           <button
             onClick={handleApprove}
             disabled={isProcessing}
-            className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded-lg transition-colors font-medium"
           >
             {isProcessing ? 'Processing...' : 'Approve & Continue'}
           </button>

@@ -139,7 +139,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
   const filtered = domainFilter === 'all' ? DOMAIN_TEMPLATES : DOMAIN_TEMPLATES.filter((t) => t.domain === domainFilter)
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Wizard de configuracao inicial">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Wizard de configuracao inicial">
       <div className="relative w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto rounded-3xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-2xl">
         {/* Close button */}
         <button
@@ -158,9 +158,9 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               <div
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${
                   step === s
-                    ? 'bg-blue-500 text-white'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
                     : (['domain', 'provider', 'ready'].indexOf(step) > i)
-                    ? 'bg-emerald-500/20 text-emerald-400'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
                     : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-quaternary)]'
                 }`}
               >
@@ -179,7 +179,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
         {step === 'domain' && (
           <div className="p-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">O que voce quer criar?</h2>
+              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">O que voce quer criar?</h2>
               <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">
                 Escolha um template para comecar com estrutura e contexto prontos.
               </p>
@@ -200,7 +200,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                   onClick={() => setDomainFilter(f.id)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                     domainFilter === f.id
-                      ? 'bg-white text-black'
+                      ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]'
                       : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
@@ -221,8 +221,8 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                     disabled={isDisabled}
                     className={`group relative rounded-xl border p-4 text-left transition-all ${
                       selectedTemplate === tpl.id
-                        ? 'border-blue-500/50 bg-blue-500/[0.08]'
-                        : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
+                        ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
+                        : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                     } ${isDisabled ? 'cursor-not-allowed opacity-60' : ''}`}
                   >
                     {isDisabled && (
@@ -231,14 +231,14 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                       </span>
                     )}
                     {selectedTemplate === tpl.id && !isDisabled && (
-                      <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white text-xs">
+                      <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] text-xs">
                         <Codicon name="check" />
                       </span>
                     )}
-                    <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${tpl.color} text-white`}>
+                    <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${tpl.color} text-[var(--aethel-text-primary)]`}>
                       <Codicon name={tpl.icon} />
                     </div>
-                    <h3 className="text-sm font-semibold text-white">{tpl.name}</h3>
+                    <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{tpl.name}</h3>
                     <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{tpl.description}</p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {tpl.stack.map((s) => (
@@ -262,7 +262,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               <button
                 type="button"
                 onClick={() => setStep('provider')}
-                className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:brightness-95 active:scale-[0.98] disabled:opacity-40"
+                className="flex items-center gap-2 rounded-xl bg-[var(--aethel-surface-secondary)] px-5 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] transition-all hover:brightness-95 active:scale-[0.98] disabled:opacity-40"
               >
                 Proximo
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,7 +277,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
         {step === 'provider' && (
           <div className="p-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">Configurar AI Provider</h2>
+              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Configurar AI Provider</h2>
               <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">
                 Escolha como a IA vai funcionar. Pode mudar depois em Settings.
               </p>
@@ -291,20 +291,20 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                   onClick={() => setSelectedProvider(prov.id)}
                   className={`group relative flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all ${
                     selectedProvider === prov.id
-                      ? 'border-blue-500/50 bg-blue-500/[0.08]'
-                      : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04]'
+                      ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
+                      : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                   }`}
                 >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                    prov.id === 'demo' ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-white'
+                    prov.id === 'demo' ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-primary)]'
                   }`}>
                     <Codicon name={prov.id === 'demo' ? 'beaker' : 'key'} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-white">{prov.name}</span>
+                      <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{prov.name}</span>
                       {prov.recommended && (
-                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                        <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2 py-0.5 text-[10px] font-semibold text-[var(--aethel-success-light)]">
                           Recomendado
                         </span>
                       )}
@@ -312,7 +312,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                     <p className="mt-0.5 text-xs text-[var(--aethel-text-tertiary)]">{prov.description}</p>
                   </div>
                   {selectedProvider === prov.id && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white text-xs">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] text-xs">
                       <Codicon name="check" />
                     </span>
                   )}
@@ -344,7 +344,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               <button
                 type="button"
                 onClick={() => setStep('ready')}
-                className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-black transition-all hover:brightness-95 active:scale-[0.98]"
+                className="flex items-center gap-2 rounded-xl bg-[var(--aethel-surface-secondary)] px-5 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] transition-all hover:brightness-95 active:scale-[0.98]"
               >
                 Proximo
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -359,10 +359,10 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
         {step === 'ready' && (
           <div className="p-6">
             <div className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-white text-2xl">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-[var(--aethel-text-primary)] text-2xl">
                 <Codicon name="rocket" />
               </div>
-              <h2 className="text-2xl font-bold text-white">Tudo pronto!</h2>
+              <h2 className="text-2xl font-bold text-[var(--aethel-text-primary)]">Tudo pronto!</h2>
               <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">
                 Seu workspace esta configurado. Voce vai ser direcionado para o dashboard.
               </p>
@@ -371,26 +371,26 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
             {/* Summary */}
             <div className="mt-6 space-y-3">
               {selectedTemplate && (
-                <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3.5">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                <div className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-3.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]">
                     <Codicon name="project" />
                   </span>
                   <div>
                     <p className="text-xs text-[var(--aethel-text-tertiary)]">Template</p>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
                       {DOMAIN_TEMPLATES.find((t) => t.id === selectedTemplate)?.name || 'Nenhum'}
                     </p>
                   </div>
                 </div>
               )}
               {selectedProvider && (
-                <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3.5">
+                <div className="flex items-center gap-3 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-3.5">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
                     <Codicon name="key" />
                   </span>
                   <div>
                     <p className="text-xs text-[var(--aethel-text-tertiary)]">AI Provider</p>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
                       {PROVIDER_PRESETS.find((p) => p.id === selectedProvider)?.name || 'Nenhum'}
                     </p>
                   </div>
@@ -399,7 +399,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
             </div>
 
             {/* Quick tips */}
-            <div className="mt-6 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+            <div className="mt-6 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Proximos passos</p>
               <ul className="mt-3 space-y-2">
                 {[
@@ -409,7 +409,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                   'Use Apply/Rollback para controlar as mudancas',
                 ].map((tip) => (
                   <li key={tip} className="flex items-start gap-2 text-xs text-[var(--aethel-text-tertiary)]">
-                    <span className="mt-0.5 text-emerald-500"><Codicon name="check" /></span>
+                    <span className="mt-0.5 text-[var(--aethel-success-light)]"><Codicon name="check" /></span>
                     {tip}
                   </li>
                 ))}
@@ -430,7 +430,7 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
               <button
                 type="button"
                 onClick={handleComplete}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-500 hover:to-cyan-500 active:scale-[0.98]"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-500/25 transition-all hover:from-blue-500 hover:to-cyan-500 active:scale-[0.98]"
               >
                 Abrir Dashboard
                 <Codicon name="arrow-right" />

@@ -27,8 +27,8 @@ export default function PublicHeader() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'border-b border-white/[0.06] bg-black/80 backdrop-blur-2xl shadow-xl shadow-black/20'
-            : 'bg-black/20 backdrop-blur-xl'
+            ? 'border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-2xl shadow-xl shadow-black/20'
+            : 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-xl'
         }`}
       >
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navegacao principal">
@@ -66,8 +66,8 @@ export default function PublicHeader() {
                   href={link.href}
                   className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-white/10 text-[var(--aethel-text-primary)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:bg-white/[0.05] hover:text-[var(--aethel-text-primary)]'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)]'
+                      : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   {link.label}
@@ -101,7 +101,7 @@ export default function PublicHeader() {
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)] md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] md:hidden"
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
             aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -119,7 +119,7 @@ export default function PublicHeader() {
         {/* Mobile menu */}
         <div
           id="mobile-menu"
-          className={`border-t border-white/[0.06] bg-black/95 backdrop-blur-2xl transition-all duration-300 md:hidden ${
+          className={`border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-2xl transition-all duration-300 md:hidden ${
             mobileOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 overflow-hidden opacity-0'
           }`}
         >
@@ -132,18 +132,18 @@ export default function PublicHeader() {
                   href={link.href}
                   className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-white/10 text-[var(--aethel-text-primary)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:bg-white/[0.05] hover:text-[var(--aethel-text-primary)]'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)]'
+                      : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   {link.label}
                 </Link>
               )
             })}
-            <div className="my-3 h-px bg-white/[0.06]" />
+            <div className="my-3 h-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]" />
             <Link
               href="/contact-sales"
-              className="block rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/[0.05] hover:text-[var(--aethel-text-primary)]"
+              className="block rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
             >
               Falar com vendas
             </Link>

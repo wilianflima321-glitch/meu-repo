@@ -228,14 +228,14 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
 
   const colors: Record<NotificationType, { bg: string; icon: string; border: string }> = {
     success: {
-      bg: 'bg-emerald-500/10',
-      icon: 'text-emerald-400',
-      border: 'border-emerald-500/30',
+      bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]',
+      icon: 'text-[var(--aethel-success-light)]',
+      border: 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
     },
     error: {
-      bg: 'bg-red-500/10',
-      icon: 'text-red-400',
-      border: 'border-red-500/30',
+      bg: 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]',
+      icon: 'text-[var(--aethel-error-light)]',
+      border: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
     },
     warning: {
       bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
@@ -243,9 +243,9 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
       border: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
     },
     info: {
-      bg: 'bg-blue-500/10',
-      icon: 'text-blue-400',
-      border: 'border-blue-500/30',
+      bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
+      icon: 'text-[var(--aethel-info-light)]',
+      border: 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
     },
     loading: {
       bg: 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_10%,transparent)]',
@@ -273,7 +273,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
           }`}
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white">{notification.title}</p>
+          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{notification.title}</p>
           {notification.message && (
             <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">{notification.message}</p>
           )}

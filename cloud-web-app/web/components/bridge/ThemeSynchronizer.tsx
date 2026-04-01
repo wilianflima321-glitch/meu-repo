@@ -2,12 +2,12 @@
 
 /**
  * AETHEL ENGINE - Theme Synchronizer
- * 
+ *
  * Synchronizes theme between Theia IDE shell and Next.js web modules.
  * Part of the Proteus Bridge System.
- * 
+ *
  * Reference: AETHEL_UNIFIED_BRIDGE_SYSTEM.md - Section 2.1 (Theme Sync)
- * 
+ *
  * The Theia shell (leader) sends theme updates via postMessage.
  * This component (follower) applies the colors to CSS variables.
  */
@@ -96,7 +96,7 @@ export function useThemeBridge() {
   // Handle incoming messages from Theia
   const handleMessage = useCallback((event: MessageEvent) => {
     const data = event.data as BridgeMessage;
-    
+
     if (data?.type === 'AETHEL_THEME_UPDATE' || data?.type === 'UPDATE_THEME') {
       const themeData = data as unknown as ThemeMessage;
       setCurrentTheme(themeData.theme || 'dark');
@@ -117,7 +117,7 @@ export function useThemeBridge() {
     if (typeof window === 'undefined') return;
 
     window.addEventListener('message', handleMessage);
-    
+
     // Request initial theme from host
     if (window.parent !== window) {
       window.parent.postMessage({ type: 'AETHEL_REQUEST_THEME' }, '*');
@@ -152,9 +152,9 @@ interface ThemeSynchronizerProps {
   defaultTheme?: 'dark' | 'light';
 }
 
-export default function ThemeSynchronizer({ 
-  children, 
-  defaultTheme = 'dark' 
+export default function ThemeSynchronizer({
+  children,
+  defaultTheme = 'dark'
 }: ThemeSynchronizerProps) {
   const { currentTheme, isHosted } = useThemeBridge();
 

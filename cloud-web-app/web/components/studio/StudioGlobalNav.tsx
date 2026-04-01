@@ -22,7 +22,7 @@ export default function StudioGlobalNav({ title, subtitle, rightSlot, className 
   const pathname = usePathname()
 
   return (
-    <header className={`sticky top-0 z-40 border-b border-white/10 bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${className}`}>
+    <header className={`sticky top-0 z-40 border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${className}`}>
       <div className="mx-auto w-full max-w-7xl px-4 py-3 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">

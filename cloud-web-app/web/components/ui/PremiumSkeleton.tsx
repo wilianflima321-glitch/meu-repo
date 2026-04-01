@@ -78,14 +78,14 @@ export function ShimmerSkeleton({
 }
 
 // Premium Card Skeleton
-export function PremiumCardSkeleton({ 
-  header = true, 
-  lines = 3, 
-  actions = 2 
-}: { 
+export function PremiumCardSkeleton({
+  header = true,
+  lines = 3,
+  actions = 2
+}: {
   header?: boolean
   lines?: number
-  actions?: number 
+  actions?: number
 }) {
   return (
     <GlassSkeleton className="p-6 space-y-4">
@@ -129,7 +129,7 @@ export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; column
   return (
     <GlassSkeleton className="overflow-hidden">
       {/* Header */}
-      <div className="flex gap-4 p-4 bg-white/[0.03] border-b border-white/[0.06]">
+      <div className="flex gap-4 p-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border-b border-[var(--aethel-border-primary)]">
         {Array.from({ length: columns }).map((_, i) => (
           <ShimmerSkeleton key={i} width={`${90 / columns}%`} />
         ))}
@@ -262,10 +262,10 @@ export function GallerySkeleton({ count = 6 }: { count?: number }) {
 export function TimelineSkeleton({ items = 4 }: { items?: number }) {
   return (
     <div className="relative space-y-0">
-      <div className="absolute left-4 top-0 bottom-0 w-px bg-white/[0.1]" />
+      <div className="absolute left-4 top-0 bottom-0 w-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]" />
       {Array.from({ length: items }).map((_, i) => (
         <GlassSkeleton key={i} className="relative pl-12 py-4">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/[0.1]" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]" />
           <div className="space-y-2">
             <ShimmerSkeleton width="40%" />
             <ShimmerSkeleton width="70%" />
@@ -277,18 +277,18 @@ export function TimelineSkeleton({ items = 4 }: { items?: number }) {
 }
 
 // Glass Skeleton Wrapper
-function GlassSkeleton({ 
-  children, 
-  className = '' 
-}: { 
+function GlassSkeleton({
+  children,
+  className = ''
+}: {
   children: React.ReactNode
-  className?: string 
+  className?: string
 }) {
   return (
     <div className={`
-      rounded-xl 
-      bg-white/[0.03] 
-      border border-white/[0.06]
+      rounded-xl
+      bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
+      border border-[var(--aethel-border-primary)]
       backdrop-blur-sm
       animate-pulse
       ${className}

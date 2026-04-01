@@ -57,19 +57,19 @@ export function GlassCard({
 }: GlassCardProps) {
   const intensityStyles = {
     low: {
-      bg: 'bg-white/[0.02]',
+      bg: 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]',
       blur: 'backdrop-blur-sm',
-      border: 'border-white/[0.04]',
+      border: 'border-[var(--aethel-border-primary)]',
     },
     medium: {
       bg: 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]',
       blur: 'backdrop-blur-xl',
-      border: 'border-white/[0.08]',
+      border: 'border-[var(--aethel-border-primary)]',
     },
     high: {
-      bg: 'bg-white/[0.08]',
+      bg: 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]',
       blur: 'backdrop-blur-2xl',
-      border: 'border-white/[0.12]',
+      border: 'border-[var(--aethel-border-primary)]',
     },
   }
 
@@ -164,20 +164,20 @@ export function GradientButton({
       border-0
     `,
     secondary: `
-      bg-white/[0.05]
-      hover:bg-white/[0.1]
+      bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
+      hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
       text-[var(--aethel-text-secondary)]
-      border border-white/[0.1]
-      hover:border-white/[0.2]
+      border border-[var(--aethel-border-primary)]
+      hover:border-[var(--aethel-border-primary)]
       shadow-lg shadow-black/20
     `,
     ghost: `
       bg-transparent
-      hover:bg-white/[0.05]
+      hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
       text-[var(--aethel-text-secondary)]
       hover:text-[var(--aethel-text-primary)]
       border border-transparent
-      hover:border-white/[0.1]
+      hover:border-[var(--aethel-border-primary)]
     `,
     glow: `
       bg-[var(--aethel-info)]
@@ -213,7 +213,7 @@ export function GradientButton({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--aethel-border-primary)] border-t-white" />
         </motion.span>
       )}
       <span className={`flex items-center gap-2 ${loading ? 'opacity-0' : ''}`}>
@@ -396,15 +396,15 @@ export function GlowInput({
           className={`
             w-full
             ${icon ? 'pl-10' : 'pl-4'} pr-4 py-3
-            bg-white/[0.05]
-            border border-white/[0.1]
+            bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
+            border border-[var(--aethel-border-primary)]
             rounded-xl
             text-[var(--aethel-text-secondary)] placeholder:text-[var(--aethel-text-tertiary)]
             transition-all duration-200
             focus:outline-none
             focus:border-[var(--aethel-primary)]/50
             focus:shadow-[0_0_20px_rgba(99,102,241,0.2)]
-            focus:bg-white/[0.08]
+            focus:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
             ${error ? 'border-[var(--aethel-error)]/50 focus:border-[var(--aethel-error)]/50 focus:shadow-[0_0_20px_rgba(239,68,68,0.2)]' : ''}
             ${className}
           `}
@@ -466,7 +466,7 @@ export function FeatureCard({
           {icon}
         </div>
         {badge && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)] bg-white/[0.05] px-2 py-1 rounded">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-1 rounded">
             {badge}
           </span>
         )}
@@ -515,7 +515,7 @@ export function StatCard({
           <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">{label}</p>
         </div>
         {icon && (
-          <div className="p-2 rounded-lg bg-white/[0.05] text-[var(--aethel-text-tertiary)]">
+          <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)]">
             {icon}
           </div>
         )}

@@ -1,13 +1,13 @@
 ﻿/**
  * DirectorNotePanel - Painel de Crítica Artística da IA
- * 
+ *
  * A IA age como um "diretor de cinema/jogos" experiente,
  * oferecendo feedback artístico e técnico sobre o projeto.
  * Sugestões proativas baseadas em análise de cena.
- * 
+ *
  * @see AI_SELF_REFLECTION_SYSTEM.md
  * @see IDEIAS_SUGESTOES_INOVACAO.md
- * 
+ *
  * @module components/ai/DirectorNotePanel
  */
 
@@ -51,7 +51,7 @@ import {
 // TYPES
 // ============================================================================
 
-export type NoteCategory = 
+export type NoteCategory =
   | 'composition'   // Composição visual
   | 'lighting'      // Iluminação
   | 'color'         // Paleta de cores
@@ -174,7 +174,7 @@ const fetcher = async (url: string) => {
 function ScoreRing({ score, size = 60 }: { score: number; size?: number }) {
   const circumference = 2 * Math.PI * ((size - 8) / 2);
   const strokeDashoffset = circumference - (score / 100) * circumference;
-  
+
   const getColor = (s: number) => {
     if (s >= 80) return 'text-[var(--aethel-success)]';
     if (s >= 60) return 'text-[var(--aethel-warning-light)]';
@@ -227,7 +227,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
   const [isExpanded, setIsExpanded] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
-  
+
   const categoryInfo = CATEGORY_INFO[note.category];
   const severityStyle = SEVERITY_STYLES[note.severity];
   const CategoryIcon = categoryInfo.icon;
@@ -278,11 +278,11 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
             </span>
             <span className="text-xs text-[var(--aethel-text-tertiary)]">{categoryInfo.label}</span>
           </div>
-          
+
           <h4 className="text-sm font-medium text-[var(--aethel-text-primary)]">
             {note.title}
           </h4>
-          
+
           {!isExpanded && (
             <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1 line-clamp-1">
               {note.description}
@@ -333,7 +333,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
               {note.reference && (
                 <button
                   onClick={() => onJumpTo?.(note.reference)}
-                  className="ml-11 flex items-center gap-2 px-2 py-1.5 
+                  className="ml-11 flex items-center gap-2 px-2 py-1.5
                            bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
                            text-xs text-[var(--aethel-text-secondary)] transition-colors group"
                 >
@@ -348,14 +348,14 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                 <div className="ml-11">
                   <button
                     onClick={() => setShowExamples(!showExamples)}
-                    className="flex items-center gap-1.5 text-xs text-[var(--aethel-text-tertiary)] 
+                    className="flex items-center gap-1.5 text-xs text-[var(--aethel-text-tertiary)]
                              hover:text-[var(--aethel-text-secondary)] transition-colors"
                   >
                     <Film className="w-3.5 h-3.5" />
                     Ver exemplos de referencia
                     <ChevronDown className={`w-3 h-3 transition-transform ${showExamples ? 'rotate-180' : ''}`} />
                   </button>
-                  
+
                   <AnimatePresence>
                     {showExamples && (
                       <motion.div
@@ -418,7 +418,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                 )}
 
                 {note.status === 'applied' && (
-                  <span className="flex items-center gap-1.5 px-3 py-1.5 
+                  <span className="flex items-center gap-1.5 px-3 py-1.5
                                  bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] rounded-lg text-xs text-[var(--aethel-success)]">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Aplicado
@@ -430,8 +430,8 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                   <button
                     onClick={() => onFeedback?.(note.id, 'helpful')}
                     className={`p-1.5 rounded transition-colors ${
-                      note.feedback === 'helpful' 
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] text-[var(--aethel-success)]' 
+                      note.feedback === 'helpful'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] text-[var(--aethel-success)]'
                         : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
                     }`}
                     title="Util"
@@ -534,8 +534,8 @@ export function DirectorNotePanel({
   };
 
   // Project type icons
-  const projectIcon = projectType === 'game' ? Gamepad2 
-    : projectType === 'film' ? Film 
+  const projectIcon = projectType === 'game' ? Gamepad2
+    : projectType === 'film' ? Film
     : Clapperboard;
   const ProjectIcon = projectIcon;
 
@@ -551,7 +551,7 @@ export function DirectorNotePanel({
       <div className="p-4 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-warning-dark)_20%,transparent)] 
+            <div className="w-10 h-10 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-warning-dark)_20%,transparent)]
                           rounded-lg flex items-center justify-center">
               <ProjectIcon className="w-5 h-5 text-[var(--aethel-warning-light)]" />
             </div>
@@ -604,19 +604,19 @@ export function DirectorNotePanel({
           <button
             onClick={requestAnalysis}
             disabled={isAnalyzing}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] 
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-quaternary)]
                      hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-xs text-[var(--aethel-text-secondary)]
                      transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
             {isAnalyzing ? 'Analisando...' : 'Nova analise'}
           </button>
-          
+
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="ml-auto p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
           >
-            {isCollapsed 
+            {isCollapsed
               ? <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
               : <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)] -rotate-90" />
             }
@@ -644,8 +644,8 @@ export function DirectorNotePanel({
                   onClick={() => setActiveFilter(key)}
                   className={`
                     px-2.5 py-1 rounded-full text-xs whitespace-nowrap transition-colors
-                    ${activeFilter === key 
-                      ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' 
+                    ${activeFilter === key
+                      ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                       : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
                     }
                   `}

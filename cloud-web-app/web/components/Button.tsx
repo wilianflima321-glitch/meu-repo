@@ -9,11 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-[var(--aethel-primary)] text-white hover:brightness-110 focus-visible:ring-[var(--aethel-primary)] shadow-sm',
+        primary: 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:ring-[var(--aethel-primary)] shadow-sm',
         secondary: 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] focus-visible:ring-[var(--aethel-primary)] border border-[var(--aethel-border-secondary)]',
         ghost: 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] focus-visible:ring-[var(--aethel-primary)]',
-        danger: 'bg-[var(--aethel-error)] text-white hover:brightness-110 focus-visible:ring-[var(--aethel-error)] shadow-sm',
-        success: 'bg-[var(--aethel-success)] text-white hover:brightness-110 focus-visible:ring-[var(--aethel-success)] shadow-sm',
+        danger: 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:ring-[var(--aethel-error)] shadow-sm',
+        success: 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:ring-[var(--aethel-success)] shadow-sm',
       },
       size: {
         sm: 'h-8 px-3 text-xs',

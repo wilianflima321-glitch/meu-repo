@@ -8,17 +8,17 @@ export function AAAPostProcessing() {
     <EffectComposer enableNormalPass={false} multisampling={0}>
       <>
         {/* SMAA: Superior to MSAA for deferred/post-processed pipelines */}
-        <SMAA preset={2} /> 
+        <SMAA preset={2} />
 
         {/* Bloom: Cinematic Glow */}
-        <Bloom 
+        <Bloom
           luminanceThreshold={0.9}
           luminanceSmoothing={0.025}
           intensity={1.5}
-          mipmapBlur 
+          mipmapBlur
         />
 
-        {/* Tone Mapping: ACES Filmic is redundant if R3F Canvas uses it, 
+        {/* Tone Mapping: ACES Filmic is redundant if R3F Canvas uses it,
             but adding explicitly ensures consistent look regardless of Canvas props */}
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
       </>

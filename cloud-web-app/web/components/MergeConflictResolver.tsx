@@ -24,7 +24,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
     try {
       const conflicts = await gitClient.getConflicts();
       const fileConflict = conflicts.find(c => c.path === filePath);
-      
+
       if (fileConflict) {
         setConflict(fileConflict);
         parseSections(fileConflict);
@@ -47,7 +47,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
 
   const parseSections = (conflict: GitConflict) => {
     const sections: ConflictSection[] = [];
-    
+
     // Parse ours section
     const oursLines = conflict.ours.split('\n');
     sections.push({
@@ -85,7 +85,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
 
     try {
       let content: string;
-      
+
       if (resolution === 'ours') {
         content = conflict.ours;
       } else if (resolution === 'theirs') {
@@ -95,7 +95,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
       }
 
       await gitClient.resolveConflict(conflict.path, resolution, content);
-      
+
       // Notify parent component
       const event = new CustomEvent('conflict-resolved', {
         detail: { path: conflict.path }
@@ -125,7 +125,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
       const theirsLine = theirsLines[i] || '';
 
       let status: 'same' | 'different' | 'added' | 'removed' = 'same';
-      
+
       if (oursLine === theirsLine) {
         status = 'same';
       } else if (!oursLine) {
@@ -180,31 +180,31 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
             onClick={() => setResolution('ours')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
               resolution === 'ours'
-                ? 'bg-blue-600 text-[var(--aethel-text-primary)]'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
             <div className="font-semibold mb-1">Accept Current (Ours)</div>
             <div className="text-xs opacity-75">Keep your changes</div>
           </button>
-          
+
           <button
             onClick={() => setResolution('theirs')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
               resolution === 'theirs'
-                ? 'bg-green-600 text-[var(--aethel-text-primary)]'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
             <div className="font-semibold mb-1">Accept Incoming (Theirs)</div>
             <div className="text-xs opacity-75">Use their changes</div>
           </button>
-          
+
           <button
             onClick={() => setResolution('manual')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
               resolution === 'manual'
-                ? 'bg-blue-600 text-[var(--aethel-text-primary)]'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
@@ -230,7 +230,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
           {/* Ours */}
           <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4">
             <h3 className="text-[var(--aethel-text-primary)] font-semibold mb-3 flex items-center gap-2">
-              <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
+              <span className="w-3 h-3 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-full"></span>
               Current Changes (Ours)
             </h3>
             <div className="bg-[var(--aethel-surface-primary)] rounded-lg p-4 h-96 overflow-y-auto">
@@ -243,7 +243,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
           {/* Theirs */}
           <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4">
             <h3 className="text-[var(--aethel-text-primary)] font-semibold mb-3 flex items-center gap-2">
-              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+              <span className="w-3 h-3 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-full"></span>
               Incoming Changes (Theirs)
             </h3>
             <div className="bg-[var(--aethel-surface-primary)] rounded-lg p-4 h-96 overflow-y-auto">
@@ -278,8 +278,8 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
                       line.status === 'same'
                         ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]'
                         : line.status === 'removed'
-                        ? 'bg-red-900/30 text-red-300'
-                        : 'bg-blue-900/30 text-blue-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
+                        : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
                     }`}
                   >
                     <span className="text-[var(--aethel-text-quaternary)] mr-4">{line.lineNumber}</span>
@@ -291,8 +291,8 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
                       line.status === 'same'
                         ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]'
                         : line.status === 'added'
-                        ? 'bg-green-900/30 text-green-300'
-                        : 'bg-green-900/30 text-green-300'
+                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+                        : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
                     }`}
                   >
                     <span className="text-[var(--aethel-text-quaternary)] mr-4">{line.lineNumber}</span>
@@ -321,7 +321,7 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
       <div className="flex gap-4">
         <button
           onClick={handleResolve}
-          className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-[var(--aethel-text-primary)] rounded-lg transition-colors font-semibold"
+          className="flex-1 px-6 py-3 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded-lg transition-colors font-semibold"
         >
           Mark as Resolved
         </button>

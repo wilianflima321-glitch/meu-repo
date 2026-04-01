@@ -51,7 +51,7 @@ export function Select({
 
   // Filter options based on search
   const filteredOptions = searchable && searchQuery
-    ? options.filter(opt => 
+    ? options.filter(opt =>
         opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
         opt.description?.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -101,7 +101,7 @@ export function Select({
         className={`
           ${sizeClasses[size]}
           w-full flex items-center justify-between gap-2
-          bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] 
+          bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)]
           border ${error ? 'border-[color-mix(in_srgb,var(--aethel-error)_70%,transparent)]' : isOpen ? 'border-[var(--aethel-info)]' : 'border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]'}
           rounded-lg
           text-left
@@ -115,8 +115,8 @@ export function Select({
           {selectedOption?.icon}
           {selectedOption?.label || placeholder}
         </span>
-        <ChevronDown 
-          className={`h-4 w-4 text-[var(--aethel-text-tertiary)] flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+        <ChevronDown
+          className={`h-4 w-4 text-[var(--aethel-text-tertiary)] flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -170,8 +170,8 @@ export function Select({
                     w-full px-4 py-2.5 flex items-center justify-between gap-3
                     text-left text-sm
                     transition-colors duration-100
-                    ${option.value === value 
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info-light)]' 
+                    ${option.value === value
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info-light)]'
                       : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)]/80'
                     }
                     ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}

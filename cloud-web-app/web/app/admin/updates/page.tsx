@@ -89,7 +89,7 @@ export default function Updates() {
               link.click();
               URL.revokeObjectURL(url);
             }}
-            className='px-3 py-2 rounded bg-black text-[var(--aethel-text-primary)] text-sm'
+            className='px-3 py-2 rounded bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] text-sm'
           >
             Exportar JSON
           </button>

@@ -2,7 +2,7 @@
 
 /**
  * Collaboration Panel Component
- * 
+ *
  * Interface para colaboracao em tempo real com
  * lista de usuarios, cursores e chat integrado.
  */
@@ -75,7 +75,7 @@ interface UserAvatarProps {
 
 const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 32, showStatus = true }) => {
   const isActive = Date.now() - user.lastActivity < 30000;
-  
+
   return (
     <div style={{ position: 'relative' }}>
       {user.avatar ? (
@@ -156,7 +156,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, isHost, isCurrentUser
       }}
     >
       <UserAvatar user={user} />
-      
+
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ color: colors.text, fontWeight: isCurrentUser ? 600 : 400 }}>
@@ -175,14 +175,14 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, isHost, isCurrentUser
           )}
         </div>
       </div>
-      
+
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         {user.permissions.includes('write') ? (
           <span title="Can edit"><Edit size={14} color={colors.blue} /></span>
         ) : (
           <span title="View only"><Eye size={14} color={colors.subtext0} /></span>
         )}
-        
+
         {!isCurrentUser && onFollow && (
           <button
             onClick={onFollow}
@@ -225,7 +225,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 }) => {
   const [showReactions, setShowReactions] = useState(false);
   const reactionEmojis = ['', '', '', '', '', ''];
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -251,7 +251,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           <div style={{ color: colors.text, fontSize: '14px', lineHeight: '1.4' }}>
             {message.text}
           </div>
-          
+
           {/* Reactions */}
           {Object.keys(message.reactions).length > 0 && (
             <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
@@ -278,7 +278,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
             </div>
           )}
         </div>
-        
+
         {/* Actions */}
         <div style={{ position: 'relative' }}>
           <button
@@ -295,7 +295,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           >
             <Smile size={14} />
           </button>
-          
+
           {showReactions && (
             <div
               style={{
@@ -361,40 +361,40 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
   const [sessionLink, setSessionLink] = useState('');
   const [copied, setCopied] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     // Generate session link
     const sessionId = client.getSessionId();
     if (sessionId) {
       setSessionLink(`${window.location.origin}/collaborate/${sessionId}`);
     }
-    
+
     // Event listeners
     const handleUserJoined = (user: CollaborationUser) => {
       setUsers(client.getUsers());
     };
-    
+
     const handleUserLeft = () => {
       setUsers(client.getUsers());
     };
-    
+
     const handleMessage = (message: ChatMessage) => {
       setMessages(client.getChatMessages());
     };
-    
+
     const handleConnected = () => setIsConnected(true);
     const handleDisconnected = () => setIsConnected(false);
-    
+
     client.on('user:joined', handleUserJoined);
     client.on('user:left', handleUserLeft);
     client.on('chat:message', handleMessage);
     client.on('connected', handleConnected);
     client.on('disconnected', handleDisconnected);
-    
+
     // Initial load
     setUsers(client.getUsers());
     setMessages(client.getChatMessages());
-    
+
     return () => {
       client.off('user:joined', handleUserJoined);
       client.off('user:left', handleUserLeft);
@@ -403,29 +403,29 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
       client.off('disconnected', handleDisconnected);
     };
   }, [client]);
-  
+
   useEffect(() => {
     // Scroll chat to bottom
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-  
+
   const handleSendMessage = useCallback(() => {
     if (!inputMessage.trim()) return;
-    
+
     client.sendMessage(inputMessage.trim());
     setInputMessage('');
   }, [client, inputMessage]);
-  
+
   const handleCopyLink = useCallback(() => {
     navigator.clipboard.writeText(sessionLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [sessionLink]);
-  
+
   const handleLeaveSession = useCallback(() => {
     client.leaveSession();
   }, [client]);
-  
+
   return (
     <div
       style={{
@@ -448,7 +448,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             <Users size={20} color={colors.blue} />
             <span style={{ fontWeight: 600 }}>Collaboration</span>
           </div>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {isConnected ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: colors.green }}>
@@ -463,7 +463,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             )}
           </div>
         </div>
-        
+
         {/* Session Link */}
         <div
           style={{
@@ -508,7 +508,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             {copied ? 'Copied!' : 'Copy'}
           </button>
         </div>
-        
+
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
           <button
@@ -551,7 +551,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
           </button>
         </div>
       </div>
-      
+
       {/* Content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
         <AnimatePresence mode="wait">
@@ -583,7 +583,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
                   ))}
                 </div>
               )}
-              
+
               {/* Invite button */}
               <button
                 onClick={handleCopyLink}
@@ -608,7 +608,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
               </button>
             </motion.div>
           )}
-          
+
           {activeTab === 'chat' && (
             <motion.div
               key="chat"
@@ -643,7 +643,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
                 )}
                 <div ref={chatEndRef} />
               </div>
-              
+
               {/* Input */}
               <div
                 style={{
@@ -701,7 +701,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
           )}
         </AnimatePresence>
       </div>
-      
+
       {/* Footer */}
       <div
         style={{
@@ -729,7 +729,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
           <LogOut size={14} />
           Leave Session
         </button>
-        
+
         <button
           style={{
             display: 'flex',

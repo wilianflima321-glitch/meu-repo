@@ -142,7 +142,7 @@ const PathInput: React.FC<{
           <div>
             <h4 className="flex items-center gap-2 text-sm font-semibold text-[var(--aethel-text-primary)]">
               {config.name}
-              {config.isRequired && <span className="text-[11px] text-rose-300">Obrigatorio</span>}
+              {config.isRequired && <span className="text-[11px] text-[var(--aethel-error-light)]">Obrigatorio</span>}
             </h4>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">{config.description}</p>
           </div>
@@ -152,11 +152,11 @@ const PathInput: React.FC<{
           {isValidating ? (
             <RefreshCw className="h-5 w-5 text-sky-300 animate-spin" />
           ) : config.isValid ? (
-            <Check className="h-5 w-5 text-emerald-300" />
+            <Check className="h-5 w-5 text-[var(--aethel-success-light)]" />
           ) : value ? (
-            <X className="h-5 w-5 text-rose-300" />
+            <X className="h-5 w-5 text-[var(--aethel-error-light)]" />
           ) : (
-            <AlertTriangle className="h-5 w-5 text-yellow-300" />
+            <AlertTriangle className="h-5 w-5 text-[var(--aethel-warning-light)]" />
           )}
         </div>
       </div>
@@ -169,7 +169,7 @@ const PathInput: React.FC<{
             onChange={(event) => onChange(event.target.value)}
             placeholder={config.defaultPaths[0] || 'Caminho nao configurado'}
             className={`aethel-input w-full font-mono text-xs ${
-              config.isValid ? 'border-emerald-500/50' : value ? 'border-rose-500/50' : ''
+              config.isValid ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]' : value ? 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : ''
             }`}
           />
         </div>
@@ -304,9 +304,9 @@ export const SettingsPathConfig: React.FC<{
   }))
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm">
       <div className="aethel-card w-full max-w-2xl overflow-hidden shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/10 p-4">
+        <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] p-4">
           <div className="flex items-center gap-3">
             <Settings className="h-5 w-5 text-sky-300" />
             <div>
@@ -348,9 +348,9 @@ export const SettingsPathConfig: React.FC<{
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-t border-white/10 bg-white/[0.03] p-4">
+        <div className="flex items-center justify-between border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <div className="text-xs text-[var(--aethel-text-tertiary)]">
-            {isDirty && <span className="text-yellow-300">Alteracoes nao salvas</span>}
+            {isDirty && <span className="text-[var(--aethel-warning-light)]">Alteracoes nao salvas</span>}
           </div>
 
           <div className="flex gap-2">

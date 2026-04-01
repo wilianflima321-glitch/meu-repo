@@ -24,13 +24,13 @@ const DEFAULT_KEYBINDINGS: KeyBinding[] = [
   { id: '2', command: 'workbench.action.files.saveAll', key: 'Cmd+Alt+S', category: 'File', description: 'Save all files' },
   { id: '3', command: 'workbench.action.files.newUntitledFile', key: 'Cmd+N', category: 'File', description: 'New file' },
   { id: '4', command: 'workbench.action.closeActiveEditor', key: 'Cmd+W', category: 'File', description: 'Close editor' },
-  
+
   // Navigation
   { id: '5', command: 'workbench.action.quickOpen', key: 'Cmd+P', category: 'Navigation', description: 'Quick open file' },
   { id: '6', command: 'workbench.action.showCommands', key: 'Cmd+Shift+P', category: 'Navigation', description: 'Command palette' },
   { id: '7', command: 'workbench.action.gotoLine', key: 'Ctrl+G', category: 'Navigation', description: 'Go to line' },
   { id: '8', command: 'workbench.action.gotoSymbol', key: 'Cmd+Shift+O', category: 'Navigation', description: 'Go to symbol' },
-  
+
   // Editor
   { id: '9', command: 'editor.action.formatDocument', key: 'Shift+Alt+F', category: 'Editor', description: 'Format document' },
   { id: '10', command: 'editor.action.commentLine', key: 'Cmd+/', category: 'Editor', description: 'Toggle line comment' },
@@ -38,19 +38,19 @@ const DEFAULT_KEYBINDINGS: KeyBinding[] = [
   { id: '12', command: 'editor.action.goToDeclaration', key: 'F12', category: 'Editor', description: 'Go to definition' },
   { id: '13', command: 'editor.action.findReferences', key: 'Shift+F12', category: 'Editor', description: 'Find references' },
   { id: '14', command: 'editor.action.rename', key: 'F2', category: 'Editor', description: 'Rename symbol' },
-  
+
   // Search
   { id: '15', command: 'actions.find', key: 'Cmd+F', category: 'Search', description: 'Find' },
   { id: '16', command: 'editor.action.startFindReplaceAction', key: 'Cmd+H', category: 'Search', description: 'Replace' },
   { id: '17', command: 'workbench.action.findInFiles', key: 'Cmd+Shift+F', category: 'Search', description: 'Find in files' },
-  
+
   // View
   { id: '18', command: 'workbench.action.toggleSidebarVisibility', key: 'Cmd+B', category: 'View', description: 'Toggle sidebar' },
   { id: '19', command: 'workbench.action.togglePanel', key: 'Cmd+J', category: 'View', description: 'Toggle panel' },
   { id: '20', command: 'workbench.action.terminal.toggleTerminal', key: 'Ctrl+`', category: 'View', description: 'Toggle terminal' },
   { id: '21', command: 'workbench.action.zoomIn', key: 'Cmd+=', category: 'View', description: 'Zoom in' },
   { id: '22', command: 'workbench.action.zoomOut', key: 'Cmd+-', category: 'View', description: 'Zoom out' },
-  
+
   // Debug
   { id: '23', command: 'workbench.action.debug.start', key: 'F5', category: 'Debug', description: 'Start debugging' },
   { id: '24', command: 'workbench.action.debug.continue', key: 'F5', when: 'inDebugMode', category: 'Debug', description: 'Continue' },
@@ -58,7 +58,7 @@ const DEFAULT_KEYBINDINGS: KeyBinding[] = [
   { id: '26', command: 'workbench.action.debug.stepInto', key: 'F11', when: 'inDebugMode', category: 'Debug', description: 'Step into' },
   { id: '27', command: 'workbench.action.debug.stepOut', key: 'Shift+F11', when: 'inDebugMode', category: 'Debug', description: 'Step out' },
   { id: '28', command: 'editor.debug.action.toggleBreakpoint', key: 'F9', category: 'Debug', description: 'Toggle breakpoint' },
-  
+
   // Git
   { id: '29', command: 'git.commit', key: 'Cmd+Enter', when: 'scmRepository', category: 'Git', description: 'Commit' },
   { id: '30', command: 'git.sync', key: 'Cmd+Shift+Enter', when: 'scmRepository', category: 'Git', description: 'Sync' },
@@ -127,13 +127,13 @@ export default function KeyboardShortcutsEditor() {
   // Filter keybindings
   const filteredKeybindings = useMemo(() => {
     return keybindings.filter(kb => {
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         kb.command.toLowerCase().includes(searchQuery.toLowerCase()) ||
         kb.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         kb.key.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       const matchesCategory = selectedCategory === 'All' || kb.category === selectedCategory;
-      
+
       return matchesSearch && matchesCategory;
     });
   }, [keybindings, searchQuery, selectedCategory]);
@@ -227,47 +227,47 @@ export default function KeyboardShortcutsEditor() {
   };
 
   return (
-    <div className="flex h-full bg-gray-900 text-white">
+    <div className="flex h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Sidebar */}
-      <div className="w-64 border-r border-gray-700 flex flex-col">
+      <div className="w-64 border-r border-[var(--aethel-border-primary)] flex flex-col">
         {/* Search */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="p-4 border-b border-[var(--aethel-border-primary)]">
           <input
             type="text"
             placeholder="Search shortcuts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* Categories */}
         <div className="flex-1 overflow-y-auto">
           {categories.map(category => {
-            const count = category === 'All' 
-              ? keybindings.length 
+            const count = category === 'All'
+              ? keybindings.length
               : keybindings.filter(kb => kb.category === category).length;
 
             return (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`w-full px-4 py-3 text-left hover:bg-gray-800 ${
-                  selectedCategory === category ? 'bg-gray-800 border-l-2 border-blue-500' : ''
+                className={`w-full px-4 py-3 text-left hover:bg-[var(--aethel-surface-secondary)] ${
+                  selectedCategory === category ? 'bg-[var(--aethel-surface-secondary)] border-l-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : ''
                 }`}
               >
                 <div className="text-sm font-medium">{category}</div>
-                <div className="text-xs text-gray-400">{count} shortcuts</div>
+                <div className="text-xs text-[var(--aethel-text-secondary)]">{count} shortcuts</div>
               </button>
             );
           })}
         </div>
 
         {/* Reset all */}
-        <div className="p-4 border-t border-gray-700">
+        <div className="p-4 border-t border-[var(--aethel-border-primary)]">
           <button
             onClick={resetAll}
-            className="w-full px-3 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
+            className="w-full px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded text-sm font-medium"
           >
             Reset All to Defaults
           </button>
@@ -280,10 +280,10 @@ export default function KeyboardShortcutsEditor() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-2">Keyboard Shortcuts</h1>
-            <p className="text-gray-400">
+            <p className="text-[var(--aethel-text-secondary)]">
               {filteredKeybindings.length} shortcuts
               {conflicts.size > 0 && (
-                <span className="ml-2 text-yellow-500">
+                <span className="ml-2 text-[var(--aethel-warning-light)]">
                   • {conflicts.size} conflicts detected
                 </span>
               )}
@@ -291,9 +291,9 @@ export default function KeyboardShortcutsEditor() {
           </div>
 
           {/* Shortcuts table */}
-          <div className="bg-gray-800 rounded-lg overflow-hidden">
+          <div className="bg-[var(--aethel-surface-secondary)] rounded-lg overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-700">
+              <thead className="bg-[var(--aethel-surface-secondary)]">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium">Command</th>
                   <th className="px-4 py-3 text-left text-sm font-medium">Keybinding</th>
@@ -309,29 +309,29 @@ export default function KeyboardShortcutsEditor() {
                   return (
                     <tr
                       key={binding.id}
-                      className={`hover:bg-gray-750 ${conflict ? 'bg-yellow-900/20' : ''}`}
+                      className={`hover:bg-[var(--aethel-surface-secondary)] ${conflict ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : ''}`}
                     >
                       <td className="px-4 py-3">
                         <div className="text-sm font-medium">{binding.description}</div>
-                        <div className="text-xs text-gray-400 font-mono">{binding.command}</div>
+                        <div className="text-xs text-[var(--aethel-text-secondary)] font-mono">{binding.command}</div>
                       </td>
                       <td className="px-4 py-3">
                         {isEditing && recordingKey ? (
-                          <div className="px-3 py-1 bg-blue-600 rounded text-sm font-mono inline-block">
+                          <div className="px-3 py-1 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded text-sm font-mono inline-block">
                             {recordedKeys.length > 0 ? recordedKeys.join('+') : 'Press keys...'}
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <code className="px-3 py-1 bg-gray-700 rounded text-sm font-mono">
+                            <code className="px-3 py-1 bg-[var(--aethel-surface-secondary)] rounded text-sm font-mono">
                               {binding.key}
                             </code>
                             {binding.isCustom && (
-                              <span className="px-2 py-0.5 bg-blue-600 text-xs rounded">
+                              <span className="px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-xs rounded">
                                 Custom
                               </span>
                             )}
                             {conflict && (
-                              <span className="px-2 py-0.5 bg-yellow-600 text-xs rounded">
+                              <span className="px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-xs rounded">
                                 Conflict
                               </span>
                             )}
@@ -340,7 +340,7 @@ export default function KeyboardShortcutsEditor() {
                       </td>
                       <td className="px-4 py-3">
                         {binding.when && (
-                          <code className="text-xs text-gray-400 font-mono">{binding.when}</code>
+                          <code className="text-xs text-[var(--aethel-text-secondary)] font-mono">{binding.when}</code>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -348,14 +348,14 @@ export default function KeyboardShortcutsEditor() {
                           <button
                             onClick={() => startRecording(binding.id)}
                             disabled={recordingKey}
-                            className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50"
+                            className="px-3 py-1 text-xs bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded disabled:opacity-50"
                           >
                             Change
                           </button>
                           {binding.isCustom && (
                             <button
                               onClick={() => resetKeybinding(binding.id)}
-                              className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded"
+                              className="px-3 py-1 text-xs bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
                             >
                               Reset
                             </button>
@@ -371,7 +371,7 @@ export default function KeyboardShortcutsEditor() {
 
           {/* Empty state */}
           {filteredKeybindings.length === 0 && (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-[var(--aethel-text-secondary)]">
               <p>No shortcuts found matching &quot;{searchQuery}&quot;</p>
             </div>
           )}

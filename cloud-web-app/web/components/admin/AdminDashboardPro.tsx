@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { 
+import {
   TrendingUp, AlertTriangle, Shield, Zap,
   CreditCard, Activity, RefreshCw,
   CheckCircle, XCircle

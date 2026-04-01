@@ -2,10 +2,10 @@
 
 /**
  * AETHEL ENGINE - Multiplayer Lobby Screen
- * 
+ *
  * Professional lobby system connected to networking-multiplayer.ts
  * Provides matchmaking, lobby creation, and player management.
- * 
+ *
  * Features:
  * - Lobby browser with filters
  * - Create/join lobbies
@@ -13,7 +13,7 @@
  * - Ready system
  * - In-lobby chat
  * - Game mode selection
- * 
+ *
  * @see lib/networking-multiplayer.ts for backend implementation
  */
 
@@ -63,7 +63,7 @@ const GAME_MODES = [
 // ============================================================================
 
 function PingIndicator({ ping }: { ping: number }) {
-  const color = ping < 50 ? 'text-green-400' : ping < 100 ? 'text-yellow-400' : 'text-red-400';
+  const color = ping < 50 ? 'text-[var(--aethel-success-light)]' : ping < 100 ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-error-light)]';
   const bars = ping < 50 ? 4 : ping < 100 ? 3 : ping < 150 ? 2 : 1;
 
   return (
@@ -72,7 +72,7 @@ function PingIndicator({ ping }: { ping: number }) {
         {[1, 2, 3, 4].map(i => (
           <div
             key={i}
-            className={`w-1 rounded-sm ${i <= bars ? color.replace('text-', 'bg-') : 'bg-gray-600'}`}
+            className={`w-1 rounded-sm ${i <= bars ? color.replace('text-', 'bg-') : 'bg-[var(--aethel-surface-secondary)]'}`}
             style={{ height: `${i * 3 + 4}px` }}
           />
         ))}
@@ -85,26 +85,26 @@ function PingIndicator({ ping }: { ping: number }) {
 function PlayerCard({ player, isReady }: { player: NetworkPlayer; isReady?: boolean }) {
   return (
     <div className={`flex items-center justify-between p-3 rounded ${
-      player.isHost ? 'bg-yellow-900/30 border border-yellow-700' : 'bg-gray-800'
+      player.isHost ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
     }`}>
       <div className="flex items-center gap-3">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
-          player.isHost ? 'bg-yellow-600' : 'bg-blue-600'
+          player.isHost ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
         }`}>
           {player.name[0].toUpperCase()}
         </div>
         <div>
           <div className="flex items-center gap-2">
             <span className="font-medium">{player.name}</span>
-            {player.isHost && <span className="text-xs bg-yellow-600 px-1.5 py-0.5 rounded">HOST</span>}
-            {player.isLocal && <span className="text-xs bg-blue-600 px-1.5 py-0.5 rounded">YOU</span>}
+            {player.isHost && <span className="text-xs bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-1.5 py-0.5 rounded">HOST</span>}
+            {player.isLocal && <span className="text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-1.5 py-0.5 rounded">YOU</span>}
           </div>
           <PingIndicator ping={player.ping} />
         </div>
       </div>
       {isReady !== undefined && (
         <div className={`px-3 py-1 rounded text-sm font-medium ${
-          isReady ? 'bg-green-600' : 'bg-gray-600'
+          isReady ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
         }`}>
           {isReady ? 'PRONTO' : 'NÃO PRONTO'}
         </div>
@@ -113,33 +113,33 @@ function PlayerCard({ player, isReady }: { player: NetworkPlayer; isReady?: bool
   );
 }
 
-function LobbyCard({ 
-  lobby, 
-  onJoin 
-}: { 
-  lobby: Lobby; 
+function LobbyCard({
+  lobby,
+  onJoin
+}: {
+  lobby: Lobby;
   onJoin: (lobbyId: string) => void;
 }) {
   const mode = GAME_MODES.find(m => m.id === lobby.gameMode);
   const isFull = lobby.players.length >= lobby.maxPlayers;
 
   return (
-    <div className={`p-4 bg-gray-800 rounded-lg border transition-colors ${
-      isFull ? 'border-gray-700 opacity-60' : 'border-gray-700 hover:border-blue-500'
+    <div className={`p-4 bg-[var(--aethel-surface-secondary)] rounded-lg border transition-colors ${
+      isFull ? 'border-[var(--aethel-border-primary)] opacity-60' : 'border-[var(--aethel-border-primary)] hover:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
     }`}>
       <div className="flex justify-between items-start mb-3">
         <div>
           <h3 className="font-bold text-lg">{lobby.name}</h3>
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)]">
             <span>{mode?.icon} {mode?.name}</span>
-            {lobby.isPrivate && <span className="text-yellow-400">🔒 Privado</span>}
+            {lobby.isPrivate && <span className="text-[var(--aethel-warning-light)]">🔒 Privado</span>}
           </div>
         </div>
         <div className="text-right">
-          <div className={`font-bold ${isFull ? 'text-red-400' : 'text-green-400'}`}>
+          <div className={`font-bold ${isFull ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-success-light)]'}`}>
             {lobby.players.length}/{lobby.maxPlayers}
           </div>
-          <div className="text-xs text-gray-500">jogadores</div>
+          <div className="text-xs text-[var(--aethel-text-secondary)]">jogadores</div>
         </div>
       </div>
 
@@ -147,30 +147,30 @@ function LobbyCard({
         {lobby.players.slice(0, 4).map(player => (
           <div
             key={player.id}
-            className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold"
+            className="w-8 h-8 rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] flex items-center justify-center text-xs font-bold"
             title={player.name}
           >
             {player.name[0]}
           </div>
         ))}
         {lobby.players.length > 4 && (
-          <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-xs">
+          <div className="w-8 h-8 rounded-full bg-[var(--aethel-surface-secondary)] flex items-center justify-center text-xs">
             +{lobby.players.length - 4}
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-[var(--aethel-text-secondary)]">
           Mapa: {(lobby.settings as any).mapName || 'Aleatório'}
         </div>
         <button
           onClick={() => !isFull && onJoin(lobby.id)}
           disabled={isFull}
           className={`px-4 py-2 rounded font-medium transition-colors ${
-            isFull 
-              ? 'bg-gray-600 cursor-not-allowed' 
-              : 'bg-blue-600 hover:bg-blue-500'
+            isFull
+              ? 'bg-[var(--aethel-surface-secondary)] cursor-not-allowed'
+              : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
           }`}
         >
           {isFull ? 'Cheio' : 'Entrar'}
@@ -197,24 +197,24 @@ function CreateLobbyModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md border border-gray-700">
+    <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] flex items-center justify-center z-50">
+      <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-6 w-full max-w-md border border-[var(--aethel-border-primary)]">
         <h2 className="text-xl font-bold mb-4">Criar Sala</h2>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Nome da Sala</label>
+            <label className="block text-sm text-[var(--aethel-text-secondary)] mb-1">Nome da Sala</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Digite o nome da sala..."
-              className="w-full px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-blue-500 outline-none"
+              className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] rounded border border-[var(--aethel-border-primary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">Modo de Jogo</label>
+            <label className="block text-sm text-[var(--aethel-text-secondary)] mb-2">Modo de Jogo</label>
             <div className="grid grid-cols-2 gap-2">
               {GAME_MODES.map(m => (
                 <button
@@ -222,19 +222,19 @@ function CreateLobbyModal({
                   onClick={() => setMode(m.id)}
                   className={`p-3 rounded text-left transition-colors ${
                     mode === m.id
-                      ? 'bg-blue-600 border-blue-400'
-                      : 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                      ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+                      : 'bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-primary)]'
                   } border`}
                 >
                   <div className="font-medium">{m.icon} {m.name}</div>
-                  <div className="text-xs text-gray-400">{m.description}</div>
+                  <div className="text-xs text-[var(--aethel-text-secondary)]">{m.description}</div>
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Máximo de Jogadores: {maxPlayers}</label>
+            <label className="block text-sm text-[var(--aethel-text-secondary)] mb-1">Máximo de Jogadores: {maxPlayers}</label>
             <input
               type="range"
               min={2}
@@ -259,7 +259,7 @@ function CreateLobbyModal({
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium transition-colors"
+            className="flex-1 px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded font-medium transition-colors"
           >
             Cancelar
           </button>
@@ -268,7 +268,7 @@ function CreateLobbyModal({
               onCreate(name || 'Minha Sala', mode, maxPlayers, isPrivate);
               onClose();
             }}
-            className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 rounded font-medium transition-colors"
+            className="flex-1 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded font-medium transition-colors"
           >
             Criar
           </button>
@@ -337,7 +337,7 @@ export default function LobbyScreen({
 
     try {
       const response = await fetch(LOBBIES_API_URL);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch lobbies: ${response.statusText}`);
       }
@@ -371,7 +371,7 @@ export default function LobbyScreen({
         method: 'GET',
         signal: AbortSignal.timeout(5000),
       });
-      
+
       if (!response.ok) {
         throw new Error('Servidor de matchmaking indisponível');
       }
@@ -535,7 +535,7 @@ export default function LobbyScreen({
     if (!currentLobby || !isHost) return;
 
     // Check if all players are ready
-    const allReady = currentLobby.players.every(p => 
+    const allReady = currentLobby.players.every(p =>
       p.isHost || readyPlayers.has(p.id)
     );
 
@@ -578,26 +578,26 @@ export default function LobbyScreen({
   // Not connected screen
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--aethel-surface-secondary)] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Multijogador</h1>
-          <p className="text-gray-400 mb-8">Conecte-se para jogar com outros</p>
+          <h1 className="text-4xl font-bold text-[var(--aethel-text-primary)] mb-4">Multijogador</h1>
+          <p className="text-[var(--aethel-text-secondary)] mb-8">Conecte-se para jogar com outros</p>
 
           {connectionError && (
-            <div className="bg-red-900/50 border border-red-600 rounded p-4 mb-4 max-w-md">
-              <p className="text-red-400">{connectionError}</p>
+            <div className="bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded p-4 mb-4 max-w-md">
+              <p className="text-[var(--aethel-error-light)]">{connectionError}</p>
             </div>
           )}
 
           <button
             onClick={handleConnect}
             disabled={isConnecting}
-            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 rounded-lg font-bold text-xl transition-colors"
+            className="px-8 py-4 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] rounded-lg font-bold text-xl transition-colors"
           >
             {isConnecting ? 'Conectando...' : 'Conectar ao Servidor'}
           </button>
 
-          <p className="text-gray-500 text-sm mt-4">
+          <p className="text-[var(--aethel-text-secondary)] text-sm mt-4">
             Servidor: {serverUrl}
           </p>
         </div>
@@ -608,20 +608,20 @@ export default function LobbyScreen({
   // In lobby screen
   if (currentLobby) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white flex">
+      <div className="min-h-screen bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] flex">
         {/* Main area */}
         <div className="flex-1 p-6">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-2xl font-bold">{currentLobby.name}</h1>
-              <p className="text-gray-400">
-                {GAME_MODES.find(m => m.id === currentLobby.gameMode)?.name} • 
+              <p className="text-[var(--aethel-text-secondary)]">
+                {GAME_MODES.find(m => m.id === currentLobby.gameMode)?.name} •
                 {currentLobby.players.length}/{currentLobby.maxPlayers} jogadores
               </p>
             </div>
             <button
               onClick={handleLeaveLobby}
-              className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium transition-colors"
+              className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded font-medium transition-colors"
             >
               Sair da Sala
             </button>
@@ -646,7 +646,7 @@ export default function LobbyScreen({
             {isHost ? (
               <button
                 onClick={handleStartGame}
-                className="flex-1 px-6 py-4 bg-green-600 hover:bg-green-500 rounded-lg font-bold text-xl transition-colors"
+                className="flex-1 px-6 py-4 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-lg font-bold text-xl transition-colors"
               >
                 Iniciar Jogo
               </button>
@@ -655,8 +655,8 @@ export default function LobbyScreen({
                 onClick={handleToggleReady}
                 className={`flex-1 px-6 py-4 rounded-lg font-bold text-xl transition-colors ${
                   isReady
-                    ? 'bg-yellow-600 hover:bg-yellow-500'
-                    : 'bg-green-600 hover:bg-green-500'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]'
+                    : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
                 }`}
               >
                 {isReady ? 'Não Pronto' : 'Pronto'}
@@ -666,8 +666,8 @@ export default function LobbyScreen({
         </div>
 
         {/* Chat sidebar */}
-        <div className="w-80 border-l border-gray-800 flex flex-col">
-          <div className="p-4 border-b border-gray-800">
+        <div className="w-80 border-l border-[var(--aethel-border-primary)] flex flex-col">
+          <div className="p-4 border-b border-[var(--aethel-border-primary)]">
             <h2 className="font-bold">Bate-papo</h2>
           </div>
 
@@ -675,15 +675,15 @@ export default function LobbyScreen({
             {messages.map(msg => (
               <div key={msg.id} className={msg.playerId === 'system' ? 'text-center' : ''}>
                 {msg.playerId === 'system' ? (
-                  <span className="text-gray-500 text-sm italic">{msg.content}</span>
+                  <span className="text-[var(--aethel-text-secondary)] text-sm italic">{msg.content}</span>
                 ) : (
                   <>
                     <span className={`font-medium ${
-                      msg.playerId === localPlayer.id ? 'text-blue-400' : 'text-gray-300'
+                      msg.playerId === localPlayer.id ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-secondary)]'
                     }`}>
                       {msg.playerName}:
                     </span>
-                    <span className="text-gray-300 ml-2">{msg.content}</span>
+                    <span className="text-[var(--aethel-text-secondary)] ml-2">{msg.content}</span>
                   </>
                 )}
               </div>
@@ -691,7 +691,7 @@ export default function LobbyScreen({
             <div ref={chatEndRef} />
           </div>
 
-          <div className="p-4 border-t border-gray-800">
+          <div className="p-4 border-t border-[var(--aethel-border-primary)]">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -699,11 +699,11 @@ export default function LobbyScreen({
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendChat()}
                 placeholder="Digite uma mensagem..."
-                className="flex-1 px-3 py-2 bg-gray-800 rounded border border-gray-700 focus:border-blue-500 outline-none"
+                className="flex-1 px-3 py-2 bg-[var(--aethel-surface-secondary)] rounded border border-[var(--aethel-border-primary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] outline-none"
               />
               <button
                 onClick={handleSendChat}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded transition-colors"
+                className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded transition-colors"
               >
                 Enviar
               </button>
@@ -716,14 +716,14 @@ export default function LobbyScreen({
 
   // Lobby browser
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-screen bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Salas Multijogador</h1>
           <div className="flex gap-3">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg font-bold transition-colors"
+              className="px-6 py-3 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-lg font-bold transition-colors"
             >
               + Criar Sala
             </button>
@@ -732,7 +732,7 @@ export default function LobbyScreen({
                 setIsConnected(false);
                 onDisconnect?.();
               }}
-              className="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              className="px-4 py-3 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
             >
               Desconectar
             </button>
@@ -746,12 +746,12 @@ export default function LobbyScreen({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar salas..."
-            className="flex-1 px-4 py-2 bg-gray-800 rounded-lg border border-gray-700 focus:border-blue-500 outline-none"
+            className="flex-1 px-4 py-2 bg-[var(--aethel-surface-secondary)] rounded-lg border border-[var(--aethel-border-primary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] outline-none"
           />
           <select
             value={filterMode || ''}
             onChange={(e) => setFilterMode(e.target.value || null)}
-            className="px-4 py-2 bg-gray-800 rounded-lg border border-gray-700 focus:border-blue-500 outline-none"
+            className="px-4 py-2 bg-[var(--aethel-surface-secondary)] rounded-lg border border-[var(--aethel-border-primary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] outline-none"
           >
             <option value="">Todos os Modos</option>
             {GAME_MODES.map(mode => (
@@ -763,29 +763,29 @@ export default function LobbyScreen({
         {/* Lobby list */}
         {isLoadingLobbies ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="text-gray-400">Carregando salas...</p>
+            <div className="w-12 h-12 border-4 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-[var(--aethel-text-secondary)]">Carregando salas...</p>
           </div>
         ) : lobbiesError ? (
           <div className="text-center py-12">
-            <div className="text-red-400 text-6xl mb-4">⚠️</div>
-            <p className="text-red-400 text-lg mb-2">Falha ao carregar salas</p>
-            <p className="text-gray-500 mb-4">{lobbiesError}</p>
+            <div className="text-[var(--aethel-error-light)] text-6xl mb-4">⚠️</div>
+            <p className="text-[var(--aethel-error-light)] text-lg mb-2">Falha ao carregar salas</p>
+            <p className="text-[var(--aethel-text-secondary)] mb-4">{lobbiesError}</p>
             <button
               onClick={fetchLobbies}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors"
+              className="px-6 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg font-medium transition-colors"
             >
               Tentar Novamente
             </button>
           </div>
         ) : filteredLobbies.length === 0 ? (
           <div className="text-center py-16">
-            <div className="text-gray-600 text-6xl mb-4">🎮</div>
-            <p className="text-gray-400 text-xl mb-2">
+            <div className="text-[var(--aethel-text-secondary)] text-6xl mb-4">🎮</div>
+            <p className="text-[var(--aethel-text-secondary)] text-xl mb-2">
               {lobbies.length === 0 ? 'Nenhuma sala disponível' : 'Nenhuma sala encontrada'}
             </p>
-            <p className="text-gray-500 mb-6">
-              {lobbies.length === 0 
+            <p className="text-[var(--aethel-text-secondary)] mb-6">
+              {lobbies.length === 0
                 ? 'Seja o primeiro a criar uma sala e começar a jogar!'
                 : 'Tente ajustar sua busca ou filtros'
               }
@@ -793,7 +793,7 @@ export default function LobbyScreen({
             {lobbies.length === 0 && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded-lg font-bold transition-colors"
+                className="px-6 py-3 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-lg font-bold transition-colors"
               >
                 + Criar Primeira Sala
               </button>

@@ -107,7 +107,7 @@ function Scene({ onMagicWandSelect, suggestions, onOpenMiniChat }: { onMagicWand
 
       {suggestions.map((suggestion, index) => (
         <Html key={index} position={[2, 2 - index * 0.5, 0]}>
-          <div className="bg-gray-800 text-white p-2 rounded text-sm max-w-xs">
+          <div className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-2 rounded text-sm max-w-xs">
             {suggestion}
           </div>
         </Html>
@@ -187,7 +187,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
 
 
   return (
-    <div className="relative w-full h-full bg-black">
+    <div className="relative w-full h-full bg-[var(--aethel-surface-primary)]">
       <Canvas className="w-full h-full">
         <Scene onMagicWandSelect={onMagicWandSelect} suggestions={suggestions} onOpenMiniChat={openMiniChat} />
       </Canvas>
@@ -195,7 +195,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
       {/* Magic Wand Button */}
       <button
         onClick={handleMagicWandClick}
-        className={`absolute top-4 left-4 p-3 rounded-full ${magicWandActive ? 'bg-blue-600' : 'bg-gray-700'} hover:bg-blue-500 transition`}
+        className={`absolute top-4 left-4 p-3 rounded-full ${magicWandActive ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'} hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] transition`}
         title="Magic Wand - Select areas to improve"
       >
         <span className="text-xs font-semibold">Tools</span>
@@ -204,7 +204,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
       {/* Mini Chat Button */}
       <button
         onClick={() => setMiniChatOpen(!miniChatOpen)}
-        className="absolute top-4 right-4 p-3 rounded-full bg-blue-600 hover:bg-blue-700 transition"
+        className="absolute top-4 right-4 p-3 rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] transition"
         title="Open Mini Chat"
       >
         <span className="text-xs font-semibold">Chat</span>
@@ -212,18 +212,18 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
 
       {/* Mini Chat Panel */}
       {miniChatOpen && (
-        <div className="absolute top-16 right-4 bg-gray-800 p-4 rounded-lg shadow-lg w-80">
-          <h4 className="text-white mb-2">Suggestions for AI</h4>
+        <div className="absolute top-16 right-4 bg-[var(--aethel-surface-secondary)] p-4 rounded-lg shadow-lg w-80">
+          <h4 className="text-[var(--aethel-text-primary)] mb-2">Suggestions for AI</h4>
           <textarea
             value={suggestionText}
             onChange={(e) => setSuggestionText(e.target.value)}
             placeholder="Tell the AI what to improve..."
-            className="w-full p-2 bg-gray-700 text-white rounded mb-2"
+            className="w-full p-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded mb-2"
             rows={3}
           />
           <button
             onClick={handleSendSuggestion}
-            className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-2 rounded hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
           >
             Send
           </button>
@@ -232,18 +232,18 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
 
       <div
         ref={joystickZoneRef}
-        className="absolute bottom-4 left-4 w-24 h-24 bg-gray-700 rounded-full opacity-50 md:hidden"
+        className="absolute bottom-4 left-4 w-24 h-24 bg-[var(--aethel-surface-secondary)] rounded-full opacity-50 md:hidden"
       />
 
       {/* Loading Indicator */}
       {isGenerating && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="text-white text-xl">AI is generating...</div>
+        <div className="absolute inset-0 bg-[var(--aethel-surface-primary)] bg-opacity-50 flex items-center justify-center">
+          <div className="text-[var(--aethel-text-primary)] text-xl">AI is generating...</div>
         </div>
       )}
 
       {/* Instructions */}
-      <div className="absolute bottom-4 right-4 bg-gray-800 p-3 rounded text-white text-sm max-w-xs">
+      <div className="absolute bottom-4 right-4 bg-[var(--aethel-surface-secondary)] p-3 rounded text-[var(--aethel-text-primary)] text-sm max-w-xs">
         Use WASD to move, mouse to look around, magic wand to select areas, mini chat for suggestions.
       </div>
     </div>

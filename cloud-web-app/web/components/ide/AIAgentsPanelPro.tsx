@@ -89,12 +89,12 @@ interface AgentMetrics {
   tokensUsed: number
 }
 
-type AgentType = 
-  | 'architect' 
-  | 'coder' 
-  | 'researcher' 
-  | 'debugger' 
-  | 'reviewer' 
+type AgentType =
+  | 'architect'
+  | 'coder'
+  | 'researcher'
+  | 'debugger'
+  | 'reviewer'
   | 'tester'
   | 'orchestrator'
   | 'dreamer'
@@ -259,16 +259,16 @@ interface AgentCardProps {
 
 function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop, onConfigure }: AgentCardProps) {
   const colors = getAgentColorClasses(agent.color)
-  
+
   return (
     <div className={`rounded-lg border ${colors.border} ${colors.bg} overflow-hidden`}>
       {/* Header */}
-      <div 
-        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-white/5"
+      <div
+        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
         onClick={onToggleExpand}
       >
         <span className="text-2xl">{agent.icon}</span>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium text-[var(--aethel-text-primary)]">{agent.name}</span>
@@ -279,7 +279,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
           </div>
           <p className="text-xs text-[var(--aethel-text-tertiary)] truncate">{agent.description}</p>
         </div>
-        
+
         {/* Quick Actions */}
         <div className="flex items-center gap-1">
           {agent.status === 'idle' && (
@@ -329,7 +329,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
           )}
           <button
             onClick={(e) => { e.stopPropagation(); onConfigure() }}
-            className="p-1.5 rounded hover:bg-white/10 text-[var(--aethel-text-tertiary)]"
+            className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)]"
             title="Configurar"
           >
             <Settings className="w-3 h-3" />
@@ -337,12 +337,12 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
           {isExpanded ? <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" /> : <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />}
         </div>
       </div>
-      
+
       {/* Expanded Content */}
       {isExpanded && (
         <div className="border-t border-[var(--aethel-border-primary)]">
           {/* Capabilities */}
-          <div className="p-3 border-b border-white/5">
+          <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Capacidades</div>
             <div className="flex flex-wrap gap-1">
               {agent.capabilities.map(cap => (
@@ -355,10 +355,10 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               ))}
             </div>
           </div>
-          
+
           {/* Current Task */}
           {agent.currentTask && (
-            <div className="p-3 border-b border-white/5">
+            <div className="p-3 border-b border-[var(--aethel-border-primary)]">
               <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Tarefa atual</div>
               <div className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded">
                 <p className="text-sm text-[var(--aethel-text-primary)] mb-1">{agent.currentTask.description}</p>
@@ -369,7 +369,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
                       <span>{agent.currentTask.progress}%</span>
                     </div>
                     <div className="h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full ${colors.bg.replace('/10', '')} transition-all`}
                         style={{ width: `${agent.currentTask.progress}%` }}
                       />
@@ -394,7 +394,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               </div>
             </div>
           )}
-          
+
           {/* Metrics */}
           <div className="p-3">
             <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Metricas</div>
@@ -437,7 +437,7 @@ function TaskTimeline({ tasks }: TaskTimelineProps) {
       </div>
     )
   }
-  
+
   return (
     <div className="space-y-2 p-2">
       {tasks.map((task, index) => (
@@ -463,9 +463,9 @@ function TaskTimeline({ tasks }: TaskTimelineProps) {
               </span>
             </div>
             <div className="text-xs text-[var(--aethel-text-tertiary)] mt-0.5">
-              {task.completedAt 
+              {task.completedAt
                 ? `Concluida em ${formatDuration(task.completedAt.getTime() - (task.startedAt?.getTime() || 0))}`
-                : task.startedAt 
+                : task.startedAt
                   ? 'Em andamento...'
                   : 'Pendente'
               }
@@ -499,20 +499,20 @@ function WorkflowBuilder({
 }) {
   const [steps, setSteps] = useState<WorkflowStepConfig[]>([])
   const [objective, setObjective] = useState('')
-  
+
   const addStep = () => {
     if (agents.length === 0) return
     setSteps([...steps, { agent: agents[0], prompt: '' }])
   }
-  
+
   const removeStep = (index: number) => {
     setSteps(steps.filter((_, i) => i !== index))
   }
-  
+
   const updateStep = (index: number, updates: Partial<WorkflowStepConfig>) => {
     setSteps(steps.map((s, i) => i === index ? { ...s, ...updates } : s))
   }
-  
+
   return (
     <div className="space-y-4">
       <div>
@@ -525,7 +525,7 @@ function WorkflowBuilder({
           rows={2}
         />
       </div>
-      
+
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Etapas do workflow</span>
@@ -537,7 +537,7 @@ function WorkflowBuilder({
             Adicionar etapa
           </button>
         </div>
-        
+
         {steps.length === 0 ? (
           <div className="p-4 text-center text-[var(--aethel-text-tertiary)] text-sm border border-dashed border-[var(--aethel-border-secondary)] rounded">
             Adicione etapas para montar o workflow
@@ -579,7 +579,7 @@ function WorkflowBuilder({
           </div>
         )}
       </div>
-      
+
       <button
         onClick={() => onCreateWorkflow(steps)}
         disabled={steps.length === 0 || !objective}
@@ -605,7 +605,7 @@ interface AIAgentsPanelProProps {
 }
 
 export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAgentsPanelProProps) {
-  const [agents, setAgents] = useState<Agent[]>(() => 
+  const [agents, setAgents] = useState<Agent[]>(() =>
     AGENT_TEMPLATES.map((template, i) => ({
       ...template,
       id: `agent-${i}`,
@@ -618,12 +618,12 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       },
     }))
   )
-  
+
   const [expandedAgents, setExpandedAgents] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<'agents' | 'workflow' | 'history'>('agents')
   const [sessions, setSessions] = useState<AgentSession[]>([])
   const [showAgentConfig, setShowAgentConfig] = useState<string | null>(null)
-  
+
   // Toggle agent expansion
   const toggleAgentExpand = useCallback((id: string) => {
     setExpandedAgents(prev => {
@@ -633,40 +633,40 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       return next
     })
   }, [])
-  
+
   // Agent controls
   const startAgent = useCallback((id: string) => {
-    setAgents(prev => prev.map(a => 
+    setAgents(prev => prev.map(a =>
       a.id === id ? { ...a, status: 'running' as const } : a
     ))
   }, [])
-  
+
   const pauseAgent = useCallback((id: string) => {
-    setAgents(prev => prev.map(a => 
+    setAgents(prev => prev.map(a =>
       a.id === id ? { ...a, status: 'paused' as const } : a
     ))
   }, [])
-  
+
   const stopAgent = useCallback((id: string) => {
-    setAgents(prev => prev.map(a => 
+    setAgents(prev => prev.map(a =>
       a.id === id ? { ...a, status: 'idle' as const, currentTask: undefined } : a
     ))
   }, [])
-  
+
   const configureAgent = useCallback((id: string) => {
     setShowAgentConfig(id)
   }, [])
-  
+
   // Start all agents
   const startAllAgents = useCallback(() => {
     setAgents(prev => prev.map(a => ({ ...a, status: 'running' as const })))
   }, [])
-  
+
   // Stop all agents
   const stopAllAgents = useCallback(() => {
     setAgents(prev => prev.map(a => ({ ...a, status: 'idle' as const, currentTask: undefined })))
   }, [])
-  
+
   // Create workflow
   const handleCreateWorkflow = useCallback((steps: WorkflowStepConfig[]) => {
     const workflowSummary = steps
@@ -676,10 +676,10 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       `Workflow solicitado (${steps.length} etapas).\n${workflowSummary}\n\nStatus: WORKFLOW_EXECUTION_GATED (P1).`
     )
   }, [onSendToChat])
-  
+
   const runningAgents = agents.filter(a => a.status === 'running').length
   const allHistory = agents.flatMap(a => a.taskHistory)
-  
+
   return (
     <div className={`h-full flex flex-col bg-[var(--aethel-surface-secondary)] ${className}`}>
       {/* Header */}
@@ -713,7 +713,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
           )}
         </div>
       </div>
-      
+
       {/* Tabs */}
       <div className="flex gap-1 p-2 border-b border-[var(--aethel-border-primary)]">
         {(['agents', 'workflow', 'history'] as const).map(tab => (
@@ -735,7 +735,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
           </button>
         ))}
       </div>
-      
+
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === 'agents' && (
@@ -754,7 +754,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             ))}
           </div>
         )}
-        
+
         {activeTab === 'workflow' && (
           <div className="p-3">
             <WorkflowBuilder
@@ -763,12 +763,12 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             />
           </div>
         )}
-        
+
         {activeTab === 'history' && (
           <TaskTimeline tasks={allHistory} />
         )}
       </div>
-      
+
       {/* Quick Actions Footer */}
       <div className="p-3 border-t border-[var(--aethel-border-primary)]">
         <div className="grid grid-cols-2 gap-2">
@@ -787,10 +787,10 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
           </button>
         </div>
       </div>
-      
+
       {/* Agent Config Modal */}
       {showAgentConfig && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] flex items-center justify-center z-50">
           <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg w-full max-w-md p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[var(--aethel-text-primary)]">
@@ -803,7 +803,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
                 <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Modelo</label>
@@ -815,7 +815,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Temperatura</label>
                 <input
@@ -827,7 +827,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
                   className="w-full"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Maximo de tokens</label>
                 <input
@@ -836,7 +836,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
                   className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)]"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">Prompt do sistema</label>
                 <textarea
@@ -846,7 +846,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => setShowAgentConfig(null)}

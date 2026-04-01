@@ -51,7 +51,7 @@ export function EmptyState({
 
   return (
     <div className={`flex flex-col items-center justify-center text-center ${sizeClasses[variant]}`}>
-      <div className="mb-4 rounded-2xl border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-4 text-[var(--aethel-text-tertiary)] shadow-lg shadow-black/20">
+      <div className="mb-4 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-4 text-[var(--aethel-text-tertiary)] shadow-lg shadow-black/20">
         {icon || <Inbox className={iconSizeClasses[variant]} />}
       </div>
       <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">{title}</h3>

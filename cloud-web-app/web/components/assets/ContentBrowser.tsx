@@ -1,6 +1,6 @@
 ﻿/**
  * Content Browser Component - Navegador de Assets
- * 
+ *
  * Interface profissional para gerenciar e visualizar assets do projeto.
  * Suporta drag-and-drop para o viewport 3D.
  */
@@ -49,7 +49,7 @@ import { openPromptDialog } from '@/lib/ui/non-blocking-dialogs';
 // TYPES
 // ============================================================================
 
-export type AssetType = 
+export type AssetType =
   | 'mesh'      // 3D Models (.fbx, .obj, .gltf)
   | 'texture'   // Images (.png, .jpg, .tga)
   | 'material'  // Material definitions
@@ -435,7 +435,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, asset, onClose, onActio
         style={{ position: 'fixed', inset: 0, zIndex: 999 }}
         onClick={onClose}
       />
-      
+
       {/* Menu */}
       <div
         style={{
@@ -527,7 +527,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
     label: 'Storage verificando',
     detail: null,
   });
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

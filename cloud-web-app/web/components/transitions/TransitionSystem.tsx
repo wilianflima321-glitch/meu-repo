@@ -81,15 +81,15 @@ export function computeTransition(
   direction: TransitionDirection
 ): TransitionResult {
   const { type, easing = 'easeInOut', softness = 0.1, angle = 0, feather = 20 } = params
-  
+
   // Apply easing
   let t = applyEasing(progress, easing)
-  
+
   // For 'out' transitions, invert progress
   if (direction === 'out') {
     t = 1 - t
   }
-  
+
   const result: TransitionResult = {
     alpha: 1,
     scaleX: 1,
@@ -99,16 +99,16 @@ export function computeTransition(
     rotation: 0,
     blur: 0
   }
-  
+
   switch (type) {
     case 'cut':
       result.alpha = direction === 'in' ? (progress >= 0.5 ? 1 : 0) : (progress >= 0.5 ? 0 : 1)
       break
-    
+
     case 'crossfade':
       result.alpha = t
       break
-    
+
     case 'dipToBlack':
     case 'dipToWhite':
       // First half: fade to black/white, second half: fade from black/white
@@ -118,90 +118,90 @@ export function computeTransition(
         result.alpha = direction === 'in' ? ((progress - 0.5) * 2) : 0
       }
       break
-    
+
     case 'wipeLeft':
       result.clipPath = createWipeClipPath('left', t, softness)
       break
-    
+
     case 'wipeRight':
       result.clipPath = createWipeClipPath('right', t, softness)
       break
-    
+
     case 'wipeUp':
       result.clipPath = createWipeClipPath('up', t, softness)
       break
-    
+
     case 'wipeDown':
       result.clipPath = createWipeClipPath('down', t, softness)
       break
-    
+
     case 'slideLeft':
       result.translateX = direction === 'in' ? (1 - t) * 100 : -t * 100
       break
-    
+
     case 'slideRight':
       result.translateX = direction === 'in' ? -(1 - t) * 100 : t * 100
       break
-    
+
     case 'slideUp':
       result.translateY = direction === 'in' ? (1 - t) * 100 : -t * 100
       break
-    
+
     case 'slideDown':
       result.translateY = direction === 'in' ? -(1 - t) * 100 : t * 100
       break
-    
+
     case 'pushLeft':
       result.translateX = direction === 'in' ? (1 - t) * 100 : -t * 100
       break
-    
+
     case 'pushRight':
       result.translateX = direction === 'in' ? -(1 - t) * 100 : t * 100
       break
-    
+
     case 'pushUp':
       result.translateY = direction === 'in' ? (1 - t) * 100 : -t * 100
       break
-    
+
     case 'pushDown':
       result.translateY = direction === 'in' ? -(1 - t) * 100 : t * 100
       break
-    
+
     case 'zoomIn':
       const zoomInScale = direction === 'in' ? t : (1 - t)
       result.scaleX = zoomInScale
       result.scaleY = zoomInScale
       result.alpha = t
       break
-    
+
     case 'zoomOut':
       const zoomOutScale = direction === 'in' ? (2 - t) : (1 + t)
       result.scaleX = zoomOutScale
       result.scaleY = zoomOutScale
       result.alpha = t
       break
-    
+
     case 'spin':
       result.rotation = direction === 'in' ? (1 - t) * 360 : t * 360
       result.alpha = t
       result.scaleX = t
       result.scaleY = t
       break
-    
+
     case 'blur':
       result.blur = (1 - t) * feather
       result.alpha = t
       break
-    
+
     case 'iris':
       result.clipPath = createIrisClipPath(t)
       break
-    
+
     case 'clock':
       result.clipPath = createClockClipPath(t)
       break
   }
-  
+
   return result
 }
 
@@ -211,7 +211,7 @@ export function computeTransition(
 
 function createWipeClipPath(direction: 'left' | 'right' | 'up' | 'down', t: number, softness: number): string {
   const edgeSoftness = softness * 20 // Convert to percentage
-  
+
   switch (direction) {
     case 'left':
       return `polygon(${t * 100}% 0%, 100% 0%, 100% 100%, ${t * 100}% 100%)`
@@ -234,7 +234,7 @@ function createClockClipPath(t: number): string {
   // Clock wipe from 12 o'clock position
   const angle = t * 360
   const points: string[] = ['50% 50%', '50% 0%']
-  
+
   // Add points around the clock
   for (let deg = 0; deg <= angle; deg += 15) {
     const rad = (deg - 90) * Math.PI / 180
@@ -242,7 +242,7 @@ function createClockClipPath(t: number): string {
     const y = 50 + 70 * Math.sin(rad)
     points.push(`${x}% ${y}%`)
   }
-  
+
   return `polygon(${points.join(', ')})`
 }
 
@@ -258,7 +258,7 @@ export function applyTransitionToCanvas(
   height: number
 ) {
   ctx.save()
-  
+
   // Apply transforms
   ctx.translate(width / 2, height / 2)
   ctx.scale(result.scaleX, result.scaleY)
@@ -267,23 +267,23 @@ export function applyTransitionToCanvas(
     -width / 2 + (result.translateX / 100) * width,
     -height / 2 + (result.translateY / 100) * height
   )
-  
+
   // Apply alpha
   ctx.globalAlpha = result.alpha
-  
+
   // Apply blur (via filter)
   if (result.blur > 0) {
     ctx.filter = `blur(${result.blur}px)`
   }
-  
+
   // Apply clip path (for wipes)
   if (result.clipPath) {
     applyClipPathToCanvas(ctx, result.clipPath, width, height)
   }
-  
+
   // Draw image
   ctx.drawImage(image, 0, 0, width, height)
-  
+
   ctx.restore()
 }
 
@@ -294,19 +294,19 @@ function applyClipPathToCanvas(
   height: number
 ) {
   ctx.beginPath()
-  
+
   if (clipPath.startsWith('polygon')) {
     const points = clipPath
       .replace('polygon(', '')
       .replace(')', '')
       .split(',')
       .map(p => p.trim())
-    
+
     points.forEach((point, i) => {
       const [xStr, yStr] = point.split(' ')
       const x = (parseFloat(xStr) / 100) * width
       const y = (parseFloat(yStr) / 100) * height
-      
+
       if (i === 0) {
         ctx.moveTo(x, y)
       } else {
@@ -323,7 +323,7 @@ function applyClipPathToCanvas(
       ctx.arc(cx, cy, radius, 0, Math.PI * 2)
     }
   }
-  
+
   ctx.clip()
 }
 
@@ -338,7 +338,7 @@ export function transitionResultToCSS(result: TransitionResult): {
   clipPath: string
 } {
   const transforms: string[] = []
-  
+
   if (result.translateX !== 0 || result.translateY !== 0) {
     transforms.push(`translate(${result.translateX}%, ${result.translateY}%)`)
   }
@@ -348,7 +348,7 @@ export function transitionResultToCSS(result: TransitionResult): {
   if (result.rotation !== 0) {
     transforms.push(`rotate(${result.rotation}deg)`)
   }
-  
+
   return {
     transform: transforms.length > 0 ? transforms.join(' ') : 'none',
     opacity: result.alpha,
@@ -406,11 +406,11 @@ export function TransitionSelector({
   onDurationChange
 }: TransitionSelectorProps) {
   const [showPicker, setShowPicker] = useState(false)
-  
+
   const categories = Array.from(new Set(Object.values(TRANSITION_PRESETS).map(p => p.category)))
-  
+
   const current = TRANSITION_PRESETS[value]
-  
+
   return (
     <div style={{ position: 'relative' }}>
       {/* Current selection button */}
@@ -433,7 +433,7 @@ export function TransitionSelector({
         <span>{current.name}</span>
         <span style={{ color: 'var(--aethel-text-tertiary)' }}>▼</span>
       </button>
-      
+
       {/* Duration slider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
         <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: 11 }}>Duration:</span>
@@ -448,7 +448,7 @@ export function TransitionSelector({
         />
         <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 11, minWidth: 35 }}>{duration.toFixed(1)}s</span>
       </div>
-      
+
       {/* Picker dropdown */}
       {showPicker && (
         <>

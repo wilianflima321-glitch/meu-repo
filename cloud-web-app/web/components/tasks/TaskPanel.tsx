@@ -1,6 +1,6 @@
 /**
  * Aethel Engine - Task Panel UI Component
- * 
+ *
  * Interface completa para gerenciamento e execução de tasks
  * com visualização em tempo real e controles de execução.
  */

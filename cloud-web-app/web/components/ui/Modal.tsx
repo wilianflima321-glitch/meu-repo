@@ -65,7 +65,7 @@ export function Modal({
     <Fragment>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+        className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm animate-in fade-in duration-200"
         onClick={closeOnOverlayClick ? onClose : undefined}
         aria-hidden="true"
       />

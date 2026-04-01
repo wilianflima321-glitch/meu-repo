@@ -45,7 +45,7 @@ export function Tooltip({
     if (isVisible && triggerRef.current && tooltipRef.current) {
       const triggerRect = triggerRef.current.getBoundingClientRect()
       const tooltipRect = tooltipRef.current.getBoundingClientRect()
-      
+
       let top = 0
       let left = 0
 
@@ -127,7 +127,7 @@ export function Tooltip({
           {content}
           <span
             className={`
-              absolute w-0 h-0 
+              absolute w-0 h-0
               border-4 border-solid
               ${arrowClasses[position]}
             `}

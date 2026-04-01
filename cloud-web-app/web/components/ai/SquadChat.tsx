@@ -1,14 +1,14 @@
 /**
  * SquadChat - AI Squad com Visualização de Steps
- * 
+ *
  * Interface de chat que tangibiliza o trabalho dos agentes de IA.
  * Mostra visualmente o processo de cada agente:
  * - Arquiteto (Roxo): Planejamento
  * - Engenheiro (Azul): Construção
  * - QA (Verde): Validação
- * 
+ *
  * Isso justifica o preço do plano Studio e o tempo de espera.
- * 
+ *
  * @see DETALHAMENTO_UX_STRATEGY_2026.md - Seção 4
  */
 
@@ -194,8 +194,8 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
       {/* Step Content */}
       <div className={`
         rounded-lg border transition-all
-        ${isActive 
-          ? `${agent.bgColor} ${agent.borderColor}` 
+        ${isActive
+          ? `${agent.bgColor} ${agent.borderColor}`
           : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] border-[var(--aethel-border-primary)]'
         }
       `}>
@@ -300,7 +300,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
   const [expanded, setExpanded] = useState(true);
   const currentStepIndex = task.steps.findIndex(s => s.phase !== 'complete');
   const isProcessing = task.status !== 'complete' && task.status !== 'error';
-  const duration = task.endTime 
+  const duration = task.endTime
     ? (task.endTime.getTime() - task.startTime.getTime()) / 1000
     : (Date.now() - task.startTime.getTime()) / 1000;
 
@@ -341,9 +341,9 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
         {/* Progress Bar */}
         {isProcessing && (
           <div className="mt-3 h-1 rounded-full overflow-hidden bg-[color-mix(in_srgb,var(--aethel-border-primary)_85%,transparent)]">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-[var(--aethel-info)] via-[var(--aethel-primary)] to-[var(--aethel-success)] animate-pulse"
-              style={{ 
+              style={{
                 width: `${Math.min(((currentStepIndex + 1) / task.steps.length) * 100, 100)}%`,
                 transition: 'width 0.5s ease-out'
               }}
@@ -372,7 +372,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
                 <span className="font-medium">Tarefa concluida</span>
               </div>
               <p className="text-sm text-[var(--aethel-text-secondary)]">{task.result}</p>
-              
+
               {/* Files Created */}
               {task.files && task.files.length > 0 && (
                 <div className="mt-3">
@@ -489,7 +489,7 @@ export function SquadChat({ projectId, onFileChange, onApplyDiff, className }: S
   const [messages, setMessages] = useState<SquadMessage[]>([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -576,11 +576,11 @@ interface ${prompt.includes('inventario') ? 'InventorySystem' : 'GameSystem'} {
       code: `// src/systems/GameSystem.ts
 export class GameSystem implements ISystem {
   private entities: Entity[] = [];
-  
+
   initialize() {
     console.log('System initialized');
   }
-  
+
   update(delta: number) {
     this.entities.forEach(e => e.update(delta));
   }
@@ -667,7 +667,7 @@ export function SystemPanel() {
 
     try {
       const task = await executeTask(input);
-      
+
       setMessages(prev => [...prev, {
         id: `task-${Date.now()}`,
         role: 'assistant',
@@ -753,7 +753,7 @@ export function SystemPanel() {
             }}
           />
         ))}
-        
+
         {/* Processing Indicator */}
         {isProcessing && (
           <div className="flex items-center gap-3 text-[var(--aethel-text-tertiary)]" role="status" aria-live="polite">
@@ -771,7 +771,7 @@ export function SystemPanel() {
             <span className="text-sm">Squad trabalhando...</span>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 

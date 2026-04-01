@@ -7,13 +7,13 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { tokens } from '@/lib/design-tokens';
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Sparkles, 
-  Code2, 
-  FileText, 
+import {
+  Send,
+  Bot,
+  User,
+  Sparkles,
+  Code2,
+  FileText,
   X,
   ChevronUp,
   ChevronDown,
@@ -72,7 +72,7 @@ export function InlineAIChat({
     {
       id: 'welcome',
       role: 'system',
-      content: activeFile 
+      content: activeFile
         ? `Estou vendo que voce esta trabalhando em **${activeFile.path}**. Como posso ajudar com este arquivo?`
         : 'Ola! Sou seu assistente de IA para codigo. Abra um arquivo ou me pergunte qualquer coisa sobre o projeto.',
       timestamp: new Date(),
@@ -132,37 +132,37 @@ export function InlineAIChat({
 
   const suggestionChips: SuggestionChip[] = activeFile
     ? [
-        { 
-          icon: <Code2 size={14} />, 
-          label: 'Explicar este codigo', 
-          prompt: 'Pode explicar o que este codigo faz?' 
+        {
+          icon: <Code2 size={14} />,
+          label: 'Explicar este codigo',
+          prompt: 'Pode explicar o que este codigo faz?'
         },
-        { 
-          icon: <Sparkles size={14} />, 
-          label: 'Refatorar', 
-          prompt: 'Pode refatorar este codigo para ficar mais limpo?' 
+        {
+          icon: <Sparkles size={14} />,
+          label: 'Refatorar',
+          prompt: 'Pode refatorar este codigo para ficar mais limpo?'
         },
-        { 
-          icon: <FileText size={14} />, 
-          label: 'Adicionar docs', 
-          prompt: 'Pode adicionar documentacao a este codigo?' 
+        {
+          icon: <FileText size={14} />,
+          label: 'Adicionar docs',
+          prompt: 'Pode adicionar documentacao a este codigo?'
         },
-        { 
-          icon: <Check size={14} />, 
-          label: 'Encontrar bugs', 
-          prompt: 'Pode encontrar bugs ou problemas neste codigo?' 
+        {
+          icon: <Check size={14} />,
+          label: 'Encontrar bugs',
+          prompt: 'Pode encontrar bugs ou problemas neste codigo?'
         },
       ]
     : [
-        { 
-          icon: <Sparkles size={14} />, 
-          label: 'Nova feature', 
-          prompt: 'Ajude-me a criar uma nova feature' 
+        {
+          icon: <Sparkles size={14} />,
+          label: 'Nova feature',
+          prompt: 'Ajude-me a criar uma nova feature'
         },
-        { 
-          icon: <Code2 size={14} />, 
-          label: 'Revisar codigo', 
-          prompt: 'Pode revisar a estrutura do meu projeto?' 
+        {
+          icon: <Code2 size={14} />,
+          label: 'Revisar codigo',
+          prompt: 'Pode revisar a estrutura do meu projeto?'
         },
       ];
 
@@ -713,13 +713,13 @@ Quer que eu refatore isso ou adicione tratamento de erro?`;
 // Extrai a logica para um hook customizado
 export function useProjectState() {
   const [state, setState] = useState(initialState);
-  
+
   const handlers = useMemo(() => ({
-    update: (key: string, value: any) => 
+    update: (key: string, value: any) =>
       setState(prev => ({ ...prev, [key]: value })),
     reset: () => setState(initialState)
   }), []);
-  
+
   return [state, handlers] as const;
 }
 \`\`\`

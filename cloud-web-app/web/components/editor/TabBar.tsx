@@ -2,7 +2,7 @@
 
 /**
  * Aethel Engine - Advanced Tab Bar System
- * 
+ *
  * VS Code-style tabs with:
  * - Drag & drop reordering
  * - Pin tabs (sticky left)
@@ -282,7 +282,7 @@ export function TabProvider({
     setTabs(prev => {
       const newTabs = [...prev];
       const [movedTab] = newTabs.splice(fromIndex, 1);
-      
+
       // Don't allow moving unpinned tabs before pinned tabs
       const pinnedCount = newTabs.filter(t => t.isPinned).length;
       if (!movedTab.isPinned && toIndex < pinnedCount) {
@@ -304,7 +304,7 @@ export function TabProvider({
 
       // Reorder: pinned tabs go to the left
       const otherTabs = prev.filter(t => t.id !== tabId);
-      
+
       if (!wasPinned) {
         // Pin: move to end of pinned tabs
         const pinnedTabs = otherTabs.filter(t => t.isPinned);
@@ -336,7 +336,7 @@ export function TabProvider({
     if (!tab) return;
 
     const newGroupId = generateId();
-    
+
     setGroups(prev => [...prev, {
       id: newGroupId,
       tabs: [{ ...tab, id: generateId(), groupId: newGroupId }],
@@ -602,7 +602,7 @@ function Tab({
         group flex h-9 items-center gap-2 border-r border-[var(--aethel-border-subtle)] px-3 cursor-pointer
         transition-all select-none
         ${isActive
-          ? 'bg-[linear-gradient(180deg,rgba(18,23,33,0.98),rgba(14,18,25,0.98))] text-white border-t-2 border-t-[var(--aethel-info)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
+          ? 'bg-[linear-gradient(180deg,rgba(18,23,33,0.98),rgba(14,18,25,0.98))] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-info)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
           : 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)] border-t-2 border-t-transparent hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)]'
         }
         ${tab.isPreview ? 'italic' : ''}
@@ -649,7 +649,7 @@ function Tab({
               ? 'opacity-100'
               : 'opacity-0 group-hover:opacity-100'
             }
-            hover:bg-white/[0.08]
+            hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
           `}
         >
           {tab.isDirty ? (
@@ -760,7 +760,7 @@ export function TabBar({ className }: { className?: string }) {
         <div className="relative">
           <button
             onClick={() => setShowOverflowMenu(!showOverflowMenu)}
-            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:bg-white/[0.06] hover:text-[var(--aethel-text-primary)]"
+            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
           >
             <MoreHorizontal className="w-4 h-4" />
             <span className="text-xs">{overflowTabs.length}</span>
@@ -781,7 +781,7 @@ export function TabBar({ className }: { className?: string }) {
                     className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm ${
                       tab.id === activeTabId
                         ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                        : 'text-[var(--aethel-text-secondary)] hover:bg-white/[0.06]'
+                        : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                     }`}
                   >
                     <Icon className="w-4 h-4" />

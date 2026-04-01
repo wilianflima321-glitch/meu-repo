@@ -1,9 +1,9 @@
 /**
  * ADVANCED PROFILER - Aethel Engine
- * 
+ *
  * Profiler visual avançado no estilo Unreal Insights/Chrome DevTools.
  * Monitora performance em tempo real com visualizações detalhadas.
- * 
+ *
  * FEATURES:
  * - Frame timeline visualization
  * - GPU/CPU flame graphs
@@ -125,28 +125,28 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
-  
+
   const visibleFrames = useMemo(() => {
     return frames.slice(viewRange.start, viewRange.end);
   }, [frames, viewRange]);
-  
+
   const maxFrameTime = useMemo(() => {
     return Math.max(...visibleFrames.map(f => f.duration), TARGET_FRAME_TIME * 2);
   }, [visibleFrames]);
-  
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart(e.clientX);
   };
-  
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
-    
+
     const delta = (e.clientX - dragStart) / containerRef.current.clientWidth;
     const frameCount = frames.length;
     const viewSize = viewRange.end - viewRange.start;
     const shift = Math.round(delta * viewSize);
-    
+
     if (shift !== 0) {
       const newStart = Math.max(0, Math.min(frameCount - viewSize, viewRange.start - shift));
       const newEnd = newStart + viewSize;
@@ -154,11 +154,11 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
       setDragStart(e.clientX);
     }
   }, [isDragging, dragStart, frames.length, viewRange, onViewRangeChange]);
-  
+
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
-  
+
   useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
@@ -169,7 +169,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
-  
+
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const zoomFactor = e.deltaY > 0 ? 1.2 : 0.8;
@@ -180,11 +180,11 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
     const newEnd = Math.min(frames.length, newStart + newSize);
     onViewRangeChange({ start: newStart, end: newEnd });
   };
-  
+
   return (
     <div style={{ marginBottom: '16px' }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '8px' }}>Frame Timeline</h3>
-      
+
       {/* Timeline view */}
       <div
         ref={containerRef}
@@ -212,7 +212,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
             zIndex: 1,
           }}
         />
-        
+
         {/* Warning line (30 FPS) */}
         <div
           style={{
@@ -226,7 +226,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
             zIndex: 1,
           }}
         />
-        
+
         {/* Frame bars */}
         <div style={{ display: 'flex', height: '100%', alignItems: 'flex-end', padding: '4px' }}>
           {visibleFrames.map((frame, index) => {
@@ -234,7 +234,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
             const isSelected = frame.frameId === selectedFrame;
             const isSlow = frame.duration > WARNING_FRAME_TIME;
             const isWarning = frame.duration > TARGET_FRAME_TIME && !isSlow;
-            
+
             return (
               <div
                 key={frame.frameId}
@@ -256,7 +256,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
             );
           })}
         </div>
-        
+
         {/* Labels */}
         <div style={{
           position: 'absolute',
@@ -268,7 +268,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
           {(1000 / maxFrameTime).toFixed(0)} FPS
         </div>
       </div>
-      
+
       {/* Scroll bar */}
       <div style={{
         height: '8px',
@@ -305,34 +305,34 @@ interface FlameGraphProps {
 function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
   const [hoveredMarker, setHoveredMarker] = useState<ProfilerMarker | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-  
+
   const flattenMarkers = useCallback((markers: ProfilerMarker[], depth = 0): (ProfilerMarker & { depth: number })[] => {
     const result: (ProfilerMarker & { depth: number })[] = [];
-    
+
     for (const marker of markers) {
       result.push({ ...marker, depth });
       if (marker.children) {
         result.push(...flattenMarkers(marker.children, depth + 1));
       }
     }
-    
+
     return result;
   }, []);
-  
+
   const flatMarkers = useMemo(() => flattenMarkers(markers), [markers, flattenMarkers]);
   const maxDepth = useMemo(() => Math.max(...flatMarkers.map(m => m.depth), 0) + 1, [flatMarkers]);
-  
+
   const handleMouseMove = (e: React.MouseEvent, marker: ProfilerMarker) => {
     setHoveredMarker(marker);
     setTooltipPos({ x: e.clientX, y: e.clientY });
   };
-  
+
   return (
     <div style={{ marginBottom: '16px' }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '8px' }}>
         {type === 'cpu' ? 'CPU' : 'GPU'} Flame Graph
       </h3>
-      
+
       <div style={{
         background: '#0f172a',
         borderRadius: '8px',
@@ -343,7 +343,7 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
         {flatMarkers.map((marker) => {
           const left = (marker.startTime / frameTime) * 100;
           const width = Math.max(0.5, (marker.duration / frameTime) * 100);
-          
+
           return (
             <div
               key={marker.id}
@@ -377,7 +377,7 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
             </div>
           );
         })}
-        
+
         {/* Time scale */}
         <div style={{
           position: 'absolute',
@@ -396,7 +396,7 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
           <span>{frameTime.toFixed(1)}ms</span>
         </div>
       </div>
-      
+
       {/* Tooltip */}
       {hoveredMarker && (
         <div
@@ -443,9 +443,9 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
     if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
   };
-  
+
   const usagePercent = (stats.usedHeap / stats.totalHeap) * 100;
-  
+
   return (
     <div style={{
       padding: '12px',
@@ -453,7 +453,7 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Memory</h3>
-      
+
       {/* Heap usage bar */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -478,7 +478,7 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
           />
         </div>
       </div>
-      
+
       {/* Memory breakdown */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
         <div style={{ padding: '8px', background: '#1e293b', borderRadius: '4px' }}>
@@ -487,21 +487,21 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
             {formatBytes(stats.textures)}
           </div>
         </div>
-        
+
         <div style={{ padding: '8px', background: '#1e293b', borderRadius: '4px' }}>
           <div style={{ color: '#64748b', fontSize: '10px' }}>Geometries</div>
           <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
             {formatBytes(stats.geometries)}
           </div>
         </div>
-        
+
         <div style={{ padding: '8px', background: '#1e293b', borderRadius: '4px' }}>
           <div style={{ color: '#64748b', fontSize: '10px' }}>Materials</div>
           <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
             {formatBytes(stats.materials)}
           </div>
         </div>
-        
+
         <div style={{ padding: '8px', background: '#1e293b', borderRadius: '4px' }}>
           <div style={{ color: '#64748b', fontSize: '10px' }}>Shaders</div>
           <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
@@ -509,7 +509,7 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Memory graph */}
       <div style={{ marginTop: '12px' }}>
         <div style={{ color: '#64748b', fontSize: '11px', marginBottom: '4px' }}>History</div>
@@ -551,7 +551,7 @@ interface StatsPanelProps {
 
 function StatsPanel({ frame, session }: StatsPanelProps) {
   const currentFPS = frame ? 1000 / frame.duration : 0;
-  
+
   return (
     <div style={{
       padding: '12px',
@@ -559,7 +559,7 @@ function StatsPanel({ frame, session }: StatsPanelProps) {
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Statistics</h3>
-      
+
       {/* FPS display */}
       <div style={{
         display: 'flex',
@@ -596,7 +596,7 @@ function StatsPanel({ frame, session }: StatsPanelProps) {
           </div>
         </div>
       </div>
-      
+
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
         <StatBox label="Frame Time" value={`${frame?.duration.toFixed(2) ?? 0}ms`} />
@@ -606,7 +606,7 @@ function StatsPanel({ frame, session }: StatsPanelProps) {
         <StatBox label="Triangles" value={`${((frame?.triangles ?? 0) / 1000).toFixed(1)}K`} />
         <StatBox label="Vertices" value={`${((frame?.vertices ?? 0) / 1000).toFixed(1)}K`} />
       </div>
-      
+
       {/* Session stats */}
       <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #374151' }}>
         <div style={{ color: '#64748b', fontSize: '11px', marginBottom: '8px' }}>Session Statistics</div>
@@ -629,10 +629,10 @@ function StatBox({ label, value, small, warning }: { label: string; value: strin
       border: warning ? '1px solid #ef4444' : 'none',
     }}>
       <div style={{ color: '#64748b', fontSize: small ? '9px' : '10px' }}>{label}</div>
-      <div style={{ 
-        color: warning ? '#ef4444' : 'white', 
-        fontSize: small ? '12px' : '14px', 
-        fontWeight: 'bold' 
+      <div style={{
+        color: warning ? '#ef4444' : 'white',
+        fontSize: small ? '12px' : '14px',
+        fontWeight: 'bold'
       }}>
         {value}
       </div>
@@ -655,24 +655,24 @@ function CategoryBreakdown({ markers, frameTime }: CategoryBreakdownProps) {
       render: 0, physics: 0, animation: 0, ai: 0, audio: 0,
       scripts: 0, ui: 0, network: 0, loading: 0, custom: 0,
     };
-    
+
     const sumMarkers = (markers: ProfilerMarker[]) => {
       for (const marker of markers) {
         times[marker.category] = (times[marker.category] || 0) + marker.duration;
         if (marker.children) sumMarkers(marker.children);
       }
     };
-    
+
     sumMarkers(markers);
     return times;
   }, [markers]);
-  
+
   const sortedCategories = useMemo(() => {
     return Object.entries(categoryTimes)
       .filter(([_, time]) => time > 0)
       .sort((a, b) => b[1] - a[1]);
   }, [categoryTimes]);
-  
+
   return (
     <div style={{
       padding: '12px',
@@ -680,10 +680,10 @@ function CategoryBreakdown({ markers, frameTime }: CategoryBreakdownProps) {
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Category Breakdown</h3>
-      
+
       {sortedCategories.map(([category, time]) => {
         const percent = (time / frameTime) * 100;
-        
+
         return (
           <div key={category} style={{ marginBottom: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
@@ -748,19 +748,19 @@ export function AdvancedProfiler({
     minFPS: Infinity,
     maxFPS: 0,
   }));
-  
+
   const [isRecording, setIsRecording] = useState(autoCapture);
   const [selectedFrame, setSelectedFrame] = useState<number | null>(null);
   const [viewRange, setViewRange] = useState({ start: 0, end: 100 });
   const [activeTab, setActiveTab] = useState<'timeline' | 'memory' | 'gpu'>('timeline');
   const [memoryHistory, setMemoryHistory] = useState<MemoryStats[]>([]);
-  
+
   // Generate mock frame data for demo
   const generateMockFrame = useCallback((): ProfilerFrame => {
     const baseTime = 10 + Math.random() * 10;
     const spike = Math.random() > 0.95 ? 20 : 0;
     const duration = baseTime + spike;
-    
+
     return {
       frameId: session.frames.length,
       timestamp: Date.now(),
@@ -847,19 +847,19 @@ export function AdvancedProfiler({
       vertices: 250000 + Math.floor(Math.random() * 100000),
     };
   }, [session.frames.length]);
-  
+
   // Recording loop
   useEffect(() => {
     if (!isRecording) return;
-    
+
     const interval = setInterval(() => {
       const frame = onCapture?.() ?? generateMockFrame();
-      
+
       setSession(prev => {
         const frames = [...prev.frames, frame].slice(-maxFrames);
         const fps = 1000 / frame.duration;
         const totalFPS = frames.reduce((sum, f) => sum + 1000 / f.duration, 0);
-        
+
         return {
           ...prev,
           frames,
@@ -868,9 +868,9 @@ export function AdvancedProfiler({
           maxFPS: Math.max(prev.maxFPS, fps),
         };
       });
-      
+
       setMemoryHistory(prev => [...prev.slice(-100), frame.memory]);
-      
+
       // Auto-scroll
       setViewRange(prev => {
         const frameCount = session.frames.length + 1;
@@ -881,27 +881,27 @@ export function AdvancedProfiler({
         return prev;
       });
     }, 16);
-    
+
     return () => clearInterval(interval);
   }, [isRecording, onCapture, generateMockFrame, maxFrames, session.frames.length]);
-  
-  const currentFrame = selectedFrame !== null 
-    ? session.frames.find(f => f.frameId === selectedFrame) 
+
+  const currentFrame = selectedFrame !== null
+    ? session.frames.find(f => f.frameId === selectedFrame)
     : session.frames[session.frames.length - 1];
-  
+
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', background: '#0f172a' }}>
       {/* Main content */}
       <div style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Top bar */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '16px',
         }}>
           <h2 style={{ color: 'white', fontSize: '18px' }}>📊 Advanced Profiler</h2>
-          
+
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               onClick={() => setIsRecording(!isRecording)}
@@ -918,7 +918,7 @@ export function AdvancedProfiler({
             >
               {isRecording ? '⏹ Stop' : '⏺ Record'}
             </button>
-            
+
             <button
               onClick={() => {
                 setSession({
@@ -946,7 +946,7 @@ export function AdvancedProfiler({
             </button>
           </div>
         </div>
-        
+
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
           {(['timeline', 'memory', 'gpu'] as const).map(tab => (
@@ -968,7 +968,7 @@ export function AdvancedProfiler({
             </button>
           ))}
         </div>
-        
+
         {/* Content */}
         <div style={{ flex: 1, overflow: 'auto' }}>
           {activeTab === 'timeline' && (
@@ -980,7 +980,7 @@ export function AdvancedProfiler({
                 viewRange={viewRange}
                 onViewRangeChange={setViewRange}
               />
-              
+
               {currentFrame && (
                 <FlameGraph
                   markers={currentFrame.markers}
@@ -990,11 +990,11 @@ export function AdvancedProfiler({
               )}
             </>
           )}
-          
+
           {activeTab === 'memory' && currentFrame && (
             <MemoryPanel stats={currentFrame.memory} history={memoryHistory} />
           )}
-          
+
           {activeTab === 'gpu' && currentFrame && (
             <FlameGraph
               markers={currentFrame.markers.filter(m => m.category === 'render')}
@@ -1004,7 +1004,7 @@ export function AdvancedProfiler({
           )}
         </div>
       </div>
-      
+
       {/* Right sidebar */}
       <div style={{
         width: '300px',
@@ -1016,7 +1016,7 @@ export function AdvancedProfiler({
         overflowY: 'auto',
       }}>
         <StatsPanel frame={currentFrame ?? null} session={session} />
-        
+
         {currentFrame && (
           <CategoryBreakdown markers={currentFrame.markers} frameTime={currentFrame.duration} />
         )}

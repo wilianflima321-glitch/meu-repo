@@ -19,8 +19,8 @@ function RotatingCube() {
     <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
       <mesh ref={meshRef} castShadow>
         <boxGeometry args={[1.5, 1.5, 1.5]} />
-        <meshStandardMaterial 
-          color="#4f46e5" 
+        <meshStandardMaterial
+          color="#4f46e5"
           metalness={0.7}
           roughness={0.2}
           emissive="#3730a3"
@@ -33,9 +33,9 @@ function RotatingCube() {
 
 function GridFloor() {
   return (
-    <gridHelper 
-      args={[20, 20, '#374151', '#1f2937']} 
-      position={[0, -2, 0]} 
+    <gridHelper
+      args={[20, 20, '#374151', '#1f2937']}
+      position={[0, -2, 0]}
     />
   )
 }
@@ -46,19 +46,19 @@ function Scene() {
       <ambientLight intensity={0.3} />
       <pointLight position={[10, 10, 10]} intensity={1} castShadow />
       <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
-      <spotLight 
-        position={[5, 5, 5]} 
-        angle={0.3} 
-        penumbra={1} 
+      <spotLight
+        position={[5, 5, 5]}
+        angle={0.3}
+        penumbra={1}
         intensity={1}
         castShadow
       />
-      
+
       <RotatingCube />
       <GridFloor />
       <Stars radius={100} depth={50} count={1000} factor={4} saturation={0} fade speed={1} />
-      
-      <OrbitControls 
+
+      <OrbitControls
         enablePan={false}
         enableZoom={true}
         enableRotate={true}
@@ -83,15 +83,15 @@ export default function SimpleMini3DPreview() {
           <Scene />
         </Suspense>
       </Canvas>
-      
+
       {/* Overlay com informações */}
       <div className="absolute bottom-2 left-2 text-xs text-[var(--aethel-text-quaternary)] pointer-events-none">
         <div className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+          <span className="w-1.5 h-1.5 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-full animate-pulse" />
           Preview Ativo
         </div>
       </div>
-      
+
       <div className="absolute top-2 right-2 text-xs text-[var(--aethel-text-quaternary)] pointer-events-none">
         Use o mouse para rotacionar
       </div>

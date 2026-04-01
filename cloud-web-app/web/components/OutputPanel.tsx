@@ -51,9 +51,9 @@ export default function OutputPanel() {
 
   const getSeverityColor = (severity?: string) => {
     switch (severity) {
-      case 'error': return 'text-red-400';
-      case 'warning': return 'text-yellow-400';
-      case 'info': return 'text-blue-400';
+      case 'error': return 'text-[var(--aethel-error-light)]';
+      case 'warning': return 'text-[var(--aethel-warning-light)]';
+      case 'info': return 'text-[var(--aethel-info-light)]';
       default: return 'text-[var(--aethel-text-secondary)]';
     }
   };

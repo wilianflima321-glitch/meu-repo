@@ -70,12 +70,12 @@ interface InfrastructureData {
   services: ServiceHealth[];
   resources: ResourceMetrics;
   queues: QueueMetrics[];
-  
+
   // Additional metrics
   requestsPerMinute: number;
   activeConnections: number;
   errorRate: number;
-  
+
   // Database
   dbConnections: {
     active: number;
@@ -83,7 +83,7 @@ interface InfrastructureData {
     max: number;
   };
   dbQueryTime: number;
-  
+
   // Cache
   cacheHitRate: number;
   cacheMemory: number;
@@ -118,14 +118,14 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
   return (
     <div className={`
       bg-[var(--aethel-surface-secondary)] border rounded-lg p-4
-      ${service.status === 'healthy' ? 'border-[var(--aethel-border-primary)]' : 
+      ${service.status === 'healthy' ? 'border-[var(--aethel-border-primary)]' :
         service.status === 'degraded' ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'}
     `}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-[var(--aethel-text-primary)]">{service.name}</h3>
         <StatusBadge status={service.status} />
       </div>
-      
+
       <div className="grid grid-cols-2 gap-4 text-xs">
         {service.latency !== undefined && (
           <div>
@@ -138,7 +138,7 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
             </p>
           </div>
         )}
-        
+
         {service.uptime !== undefined && (
           <div>
             <span className="text-[var(--aethel-text-tertiary)]">Disponibilidade</span>
@@ -146,11 +146,11 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
           </div>
         )}
       </div>
-      
+
       {service.details && (
         <p className="text-xs text-[var(--aethel-text-tertiary)] mt-3">{service.details}</p>
       )}
-      
+
       <p className="text-[10px] text-[var(--aethel-text-secondary)] mt-3">
         Última verificação: {new Date(service.lastCheck).toLocaleTimeString()}
       </p>
@@ -158,10 +158,10 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
   );
 }
 
-function ResourceGauge({ 
-  label, 
-  value, 
-  max, 
+function ResourceGauge({
+  label,
+  value,
+  max,
   unit,
   icon: Icon,
   warning = 70,
@@ -176,11 +176,11 @@ function ResourceGauge({
   critical?: number;
 }) {
   const percentage = max ? (value / max) * 100 : value;
-  const color = percentage >= critical ? 'text-[var(--aethel-error)]' : 
+  const color = percentage >= critical ? 'text-[var(--aethel-error)]' :
                 percentage >= warning ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-success)]';
-  const barColor = percentage >= critical ? 'bg-[var(--aethel-error)]' : 
+  const barColor = percentage >= critical ? 'bg-[var(--aethel-error)]' :
                    percentage >= warning ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]';
-  
+
   return (
     <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
@@ -192,14 +192,14 @@ function ResourceGauge({
           {percentage.toFixed(1)}%
         </span>
       </div>
-      
+
       <div className="h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
-        <div 
+        <div
           className={`h-full rounded-full transition-all duration-500 ${barColor}`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
         />
       </div>
-      
+
       {max && (
         <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">
           {value.toFixed(1)} / {max.toFixed(1)} {unit}
@@ -212,7 +212,7 @@ function ResourceGauge({
 function QueueCard({ queue }: { queue: QueueMetrics }) {
   const total = queue.waiting + queue.active + queue.completed + queue.failed;
   const failRate = total > 0 ? (queue.failed / total) * 100 : 0;
-  
+
   return (
     <div className={`
       bg-[var(--aethel-surface-secondary)] border rounded-lg p-4
@@ -228,7 +228,7 @@ function QueueCard({ queue }: { queue: QueueMetrics }) {
           </span>
         )}
       </div>
-      
+
       <div className="grid grid-cols-4 gap-2 text-center">
         <div>
           <p className="text-lg font-bold text-[var(--aethel-warning)]">{queue.waiting}</p>
@@ -263,7 +263,7 @@ export default function InfrastructureDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  
+
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/infrastructure/status');
@@ -278,16 +278,16 @@ export default function InfrastructureDashboard() {
       setLoading(false);
     }
   }, []);
-  
+
   useEffect(() => {
     fetchData();
-    
+
     if (autoRefresh) {
       const interval = setInterval(fetchData, 10000); // 10s refresh
       return () => clearInterval(interval);
     }
   }, [fetchData, autoRefresh]);
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -295,13 +295,13 @@ export default function InfrastructureDashboard() {
       </div>
     );
   }
-  
+
   if (error || !data) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <XCircle className="w-12 h-12 text-[var(--aethel-error)]" />
         <p className="text-[var(--aethel-error)]">{error || 'Sem dados disponíveis'}</p>
-        <button 
+        <button
           onClick={fetchData}
           className="px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
         >
@@ -310,10 +310,10 @@ export default function InfrastructureDashboard() {
       </div>
     );
   }
-  
+
   const overallStatus = data.services.every(s => s.status === 'healthy') ? 'healthy' :
                         data.services.some(s => s.status === 'down') ? 'down' : 'degraded';
-  
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -331,13 +331,13 @@ export default function InfrastructureDashboard() {
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3">
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
-              autoRefresh 
-                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]' 
+              autoRefresh
+                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
                 : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]'
             }`}
           >
@@ -346,7 +346,7 @@ export default function InfrastructureDashboard() {
           </button>
         </div>
       </div>
-      
+
       {/* Key Metrics */}
       <div className="grid grid-cols-4 gap-4">
         <AdminMetricCard
@@ -375,7 +375,7 @@ export default function InfrastructureDashboard() {
           trend={data.cacheHitRate > 80 ? 'up' : undefined}
         />
       </div>
-      
+
       {/* Services Grid */}
       <div>
         <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4">Serviços</h2>
@@ -385,7 +385,7 @@ export default function InfrastructureDashboard() {
           ))}
         </div>
       </div>
-      
+
       {/* Resources */}
       <div>
         <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4">Recursos</h2>
@@ -432,7 +432,7 @@ export default function InfrastructureDashboard() {
           </div>
         </div>
       </div>
-      
+
       {/* Database */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
@@ -440,7 +440,7 @@ export default function InfrastructureDashboard() {
             <Database className="w-4 h-4" />
             Banco de dados
           </h3>
-          
+
           <div className="grid grid-cols-3 gap-4">
             <div>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Ativas</p>
@@ -455,7 +455,7 @@ export default function InfrastructureDashboard() {
               <p className="text-xl font-bold text-[var(--aethel-text-primary)]">{data.dbConnections.max}</p>
             </div>
           </div>
-          
+
           <div className="mt-4 pt-4 border-t border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between">
               <span className="text-xs text-[var(--aethel-text-tertiary)]">Tempo médio de consulta</span>
@@ -468,14 +468,14 @@ export default function InfrastructureDashboard() {
             </div>
           </div>
         </div>
-        
+
         {/* Cache */}
         <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg p-4">
           <h3 className="text-sm font-medium text-[var(--aethel-text-primary)] mb-4 flex items-center gap-2">
             <Zap className="w-4 h-4" />
             Cache (Redis)
           </h3>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Taxa de acerto</p>
@@ -495,7 +495,7 @@ export default function InfrastructureDashboard() {
           </div>
         </div>
       </div>
-      
+
       {/* Queues */}
       <div>
         <h2 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4 flex items-center gap-2">

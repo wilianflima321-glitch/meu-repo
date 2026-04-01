@@ -442,8 +442,8 @@ export default function SettingsEditor() {
 
   return (
     <div className="flex h-full bg-transparent text-[var(--aethel-text-primary)]">
-      <div className="w-72 border-r border-white/10">
-        <div className="border-b border-white/10 p-4">
+      <div className="w-72 border-r border-[var(--aethel-border-primary)]">
+        <div className="border-b border-[var(--aethel-border-primary)] p-4">
           <input
             type="text"
             placeholder="Buscar configuracoes..."
@@ -453,7 +453,7 @@ export default function SettingsEditor() {
           />
         </div>
 
-        <div className="border-b border-white/10 p-4">
+        <div className="border-b border-[var(--aethel-border-primary)] p-4">
           <div className="flex gap-2">
             <button
               onClick={() => setScope('user')}
@@ -483,7 +483,7 @@ export default function SettingsEditor() {
                 selectedCategory === category.id ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
               }`}
             >
-              <span className="rounded-md bg-white/5 px-2 py-1 text-[11px] text-[var(--aethel-text-tertiary)]">{category.icon}</span>
+              <span className="rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-tertiary)]">{category.icon}</span>
               <div className="flex-1">
                 <div className="text-sm font-medium">{category.label}</div>
                 <div className="text-xs text-[var(--aethel-text-quaternary)]">{category.settings.length} configuracoes</div>
@@ -492,7 +492,7 @@ export default function SettingsEditor() {
           ))}
         </div>
 
-        <div className="border-t border-white/10 p-4">
+        <div className="border-t border-[var(--aethel-border-primary)] p-4">
           <button onClick={resetAllSettings} className="aethel-button aethel-button-danger w-full text-xs">
             Redefinir todas as configuracoes
           </button>
@@ -503,7 +503,7 @@ export default function SettingsEditor() {
         <div className="mx-auto max-w-4xl p-8">
           <div className="mb-8">
             <h1 className="flex items-center gap-3 text-2xl font-semibold">
-              <span className="rounded-md bg-white/5 px-2 py-1 text-sm text-[var(--aethel-text-secondary)]">{currentCategory?.icon}</span>
+              <span className="rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-1 text-sm text-[var(--aethel-text-secondary)]">{currentCategory?.icon}</span>
               {currentCategory?.label}
             </h1>
             <p className="text-sm text-[var(--aethel-text-quaternary)]">{currentCategory?.settings.length} configuracoes</p>
@@ -514,7 +514,7 @@ export default function SettingsEditor() {
               const isModified = modifiedSettings.has(setting.key)
 
               return (
-                <div key={setting.key} className="border-b border-white/10 pb-6 last:border-0">
+                <div key={setting.key} className="border-b border-[var(--aethel-border-primary)] pb-6 last:border-0">
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="mb-1 flex items-center gap-2">

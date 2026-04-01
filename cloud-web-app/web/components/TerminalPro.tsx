@@ -59,10 +59,10 @@ const COMMON_COMMANDS = [
 
 // Task buttons for quick actions
 const QUICK_TASKS = [
-  { label: 'Install', command: 'npm install', color: 'text-emerald-400' },
-  { label: 'Dev', command: 'npm run dev', color: 'text-blue-400' },
+  { label: 'Install', command: 'npm install', color: 'text-[var(--aethel-success-light)]' },
+  { label: 'Dev', command: 'npm run dev', color: 'text-[var(--aethel-info-light)]' },
   { label: 'Build', command: 'npm run build', color: 'text-[var(--aethel-warning-light)]' },
-  { label: 'Test', command: 'npm run test', color: 'text-blue-400' },
+  { label: 'Test', command: 'npm run test', color: 'text-[var(--aethel-info-light)]' },
 ]
 
 export default function Terminal({
@@ -79,7 +79,7 @@ export default function Terminal({
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [selectedSuggestion, setSelectedSuggestion] = useState(0)
   const [showSuggestions, setShowSuggestions] = useState(false)
-  
+
   const inputRef = useRef<HTMLInputElement>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
@@ -123,14 +123,14 @@ export default function Terminal({
       const filtered = COMMON_COMMANDS.filter(cmd =>
         cmd.toLowerCase().startsWith(input.toLowerCase())
       )
-      
+
       // Also search in command history
       const historyMatches = commandHistory
         .filter(h => h.command.toLowerCase().startsWith(input.toLowerCase()))
         .map(h => h.command)
         .reverse()
         .slice(0, 3)
-      
+
       const combined = [...new Set([...historyMatches, ...filtered])].slice(0, 5)
       setSuggestions(combined)
       setShowSuggestions(combined.length > 0)
@@ -187,7 +187,7 @@ Available commands:
   clear     - Clear terminal
   history   - Show command history
   help      - Show this help message
-  
+
 Use ↑/↓ arrows to navigate command history
 Use Tab for autocomplete
 Press Ctrl+C to cancel running command
@@ -226,21 +226,21 @@ Press Ctrl+C to cancel running command
         }
         return
       }
-      
+
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setSelectedSuggestion(prev => 
+        setSelectedSuggestion(prev =>
           prev < suggestions.length - 1 ? prev + 1 : prev
         )
         return
       }
-      
+
       if (e.key === 'ArrowUp' && suggestions.length > 0) {
         e.preventDefault()
         setSelectedSuggestion(prev => prev > 0 ? prev - 1 : prev)
         return
       }
-      
+
       if (e.key === 'Escape') {
         setShowSuggestions(false)
         return
@@ -251,8 +251,8 @@ Press Ctrl+C to cancel running command
     if (e.key === 'ArrowUp' && !showSuggestions) {
       e.preventDefault()
       if (commandHistory.length > 0) {
-        const newIndex = historyIndex < commandHistory.length - 1 
-          ? historyIndex + 1 
+        const newIndex = historyIndex < commandHistory.length - 1
+          ? historyIndex + 1
           : historyIndex
         setHistoryIndex(newIndex)
         setInput(commandHistory[commandHistory.length - 1 - newIndex]?.command || '')
@@ -296,10 +296,10 @@ Press Ctrl+C to cancel running command
   }
 
   const lineColors: Record<TerminalLine['type'], string> = {
-    input: 'text-emerald-400',
+    input: 'text-[var(--aethel-success-light)]',
     output: 'text-[var(--aethel-text-secondary)]',
-    error: 'text-red-400',
-    info: 'text-blue-400',
+    error: 'text-[var(--aethel-error-light)]',
+    info: 'text-[var(--aethel-info-light)]',
   }
 
   return (
@@ -317,10 +317,10 @@ Press Ctrl+C to cancel running command
           <TerminalIcon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Terminal</span>
           {isExecuting && (
-            <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
+            <Loader2 className="w-3 h-3 text-[var(--aethel-info-light)] animate-spin" />
           )}
         </div>
-        
+
         <div className="flex items-center gap-1">
           {/* Quick Tasks */}
           <div className="hidden sm:flex items-center gap-1 mr-4">
@@ -340,10 +340,10 @@ Press Ctrl+C to cancel running command
               </button>
             ))}
           </div>
-          
+
           <button
             onClick={() => setIsMaximized(!isMaximized)}
-            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
+            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
           >
             {isMaximized ? (
               <Minimize2 className="w-4 h-4" />
@@ -353,7 +353,7 @@ Press Ctrl+C to cancel running command
           </button>
           <button
             onClick={() => setLines([])}
-            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
+            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -371,7 +371,7 @@ Press Ctrl+C to cancel running command
             Terminal ready. Type {`'help'`} for available commands.
           </div>
         )}
-        
+
         {lines.map(line => (
           <div key={line.id} className={`mb-1 ${lineColors[line.type]}`}>
             {line.type === 'input' && (
@@ -398,7 +398,7 @@ Press Ctrl+C to cancel running command
                 className={`
                   w-full px-3 py-2 text-left text-sm font-mono
                   ${index === selectedSuggestion
-                    ? 'bg-sky-600 text-white'
+                    ? 'bg-sky-600 text-[var(--aethel-text-primary)]'
                     : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
                   }
                 `}
@@ -408,9 +408,9 @@ Press Ctrl+C to cancel running command
             ))}
           </div>
         )}
-        
+
         <div className="flex items-center gap-2">
-          <ChevronRight className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          <ChevronRight className="w-4 h-4 text-[var(--aethel-success-light)] flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -423,7 +423,7 @@ Press Ctrl+C to cancel running command
             autoFocus
           />
         </div>
-        
+
         <div className="flex items-center gap-4 mt-2 text-xs text-[var(--aethel-text-quaternary)]">
           <span>↑↓ History</span>
           <span>Tab Autocomplete</span>

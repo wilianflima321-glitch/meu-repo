@@ -68,7 +68,7 @@ export function SettingsSidebar({
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
             placeholder="Search settings..."
-            className="w-full bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded pl-9 pr-3 py-2 text-sm text-white placeholder:text-[var(--aethel-text-quaternary)]"
+            className="w-full bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded pl-9 pr-3 py-2 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)]"
           />
         </div>
       </div>
@@ -81,7 +81,7 @@ export function SettingsSidebar({
               className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
                 selectedCategory === category.id && !selectedSubcategory
                   ? 'bg-sky-600/20 text-sky-400'
-                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-white'
+                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
               {category.icon}
@@ -97,7 +97,7 @@ export function SettingsSidebar({
                     className={`w-full flex items-center gap-2 px-4 py-1.5 text-left text-sm transition-colors ${
                       selectedSubcategory === subcategory.id
                         ? 'text-sky-400'
-                        : 'text-[var(--aethel-text-quaternary)] hover:text-white'
+                        : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]'
                     }`}
                   >
                     {subcategory.label}
@@ -116,14 +116,14 @@ export function SettingsSidebar({
         <div className="flex gap-2">
           <button
             onClick={onResetAll}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-white rounded text-xs"
+            className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-xs"
           >
             <RotateCcw className="w-3 h-3" />
             Reset All
           </button>
           <button
             onClick={onExport}
-            className="p-1.5 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-white rounded"
+            className="p-1.5 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded"
             title="Export settings"
           >
             <Download className="w-3 h-3" />
@@ -155,7 +155,7 @@ export function SettingsContent({
       <div className="px-6 py-4 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
           <Settings className="w-5 h-5 text-[var(--aethel-text-tertiary)]" />
-          <h1 className="text-lg font-semibold text-white">Settings</h1>
+          <h1 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Settings</h1>
         </div>
         {currentCategory && !searchQuery && (
           <p className="text-sm text-[var(--aethel-text-quaternary)] mt-1">{currentCategory.description}</p>

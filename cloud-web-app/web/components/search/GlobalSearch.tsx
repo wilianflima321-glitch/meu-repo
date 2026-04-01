@@ -2,7 +2,7 @@
 
 /**
  * Aethel Engine - Global Search & Replace
- * 
+ *
  * VS Code-style search with:
  * - Search across all files
  * - Regex support
@@ -405,7 +405,7 @@ function SearchInput({
           onFocus={() => showHistory && setShowDropdown(true)}
           onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-8 py-1.5 text-sm bg-[var(--aethel-surface-secondary)] text-white placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
+          className="w-full pl-10 pr-8 py-1.5 text-sm bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
         />
         {value && (
           <button
@@ -414,7 +414,7 @@ function SearchInput({
             aria-label="Limpar campo"
             className="absolute right-3 top-1/2 -translate-y-1/2"
           >
-            <X className="w-4 h-4 text-[var(--aethel-text-quaternary)] hover:text-white" />
+            <X className="w-4 h-4 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]" />
           </button>
         )}
       </div>
@@ -464,7 +464,7 @@ function OptionButton({
       className={`p-1 rounded transition-colors ${
         active
           ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-          : 'text-[var(--aethel-text-quaternary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)]'
+          : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
       }`}
     >
       <Icon className="w-4 h-4" />
@@ -507,7 +507,7 @@ function SearchResultFile({
           <ChevronDown className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />
         )}
         <FileCode className="w-4 h-4 text-[var(--aethel-info-light)]" />
-        <span className="text-sm text-white">{fileName}</span>
+        <span className="text-sm text-[var(--aethel-text-primary)]">{fileName}</span>
         <span className="text-xs text-[var(--aethel-text-quaternary)] truncate">{dirPath}</span>
         <span className="ml-auto text-xs text-[var(--aethel-text-quaternary)] bg-[var(--aethel-surface-secondary)] px-1.5 py-0.5 rounded">
           {result.matches.length}
@@ -638,7 +638,7 @@ export function GlobalSearchPanel({
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Search className="w-4 h-4 text-[var(--aethel-info-light)]" />
-          <span className="text-sm font-medium text-white">Buscar</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Buscar</span>
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -646,7 +646,7 @@ export function GlobalSearchPanel({
             className={`p-1 rounded transition-colors ${
               showReplace
                 ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)]'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
             }`}
             title="Alternar substituicao (Ctrl+Shift+H)"
           >
@@ -655,14 +655,14 @@ export function GlobalSearchPanel({
           <button
             onClick={() => search()}
             disabled={state.searching}
-            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded disabled:opacity-50"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded disabled:opacity-50"
             title="Atualizar busca"
           >
             <RefreshCw className={`w-4 h-4 ${state.searching ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={clearResults}
-            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
             title="Limpar resultados"
           >
             <X className="w-4 h-4" />
@@ -727,7 +727,7 @@ export function GlobalSearchPanel({
               <button
                 onClick={replaceAll}
                 disabled={state.totalMatches === 0}
-                className="px-2 py-1 text-xs bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] disabled:bg-[var(--aethel-surface-tertiary)] disabled:text-[var(--aethel-text-quaternary)] text-white rounded transition-colors"
+                className="px-2 py-1 text-xs bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] disabled:bg-[var(--aethel-surface-tertiary)] disabled:text-[var(--aethel-text-quaternary)] text-[var(--aethel-text-primary)] rounded transition-colors"
                 title="Substituir tudo"
               >
                 Substituir tudo
@@ -739,7 +739,7 @@ export function GlobalSearchPanel({
         {/* File filters */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-1 text-xs text-[var(--aethel-text-tertiary)] hover:text-white"
+          className="flex items-center gap-1 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
         >
           <MoreVertical className="w-3 h-3" />
           arquivos a incluir/excluir
@@ -757,14 +757,14 @@ export function GlobalSearchPanel({
               value={state.options.includePattern}
               onChange={e => setOptions({ includePattern: e.target.value })}
               placeholder="arquivos a incluir (ex.: *.ts, src/**)"
-              className="w-full px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] text-white placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
+              className="w-full px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
             />
             <input
               type="text"
               value={state.options.excludePattern}
               onChange={e => setOptions({ excludePattern: e.target.value })}
               placeholder="arquivos a excluir"
-              className="w-full px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] text-white placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
+              className="w-full px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
             />
           </div>
         )}
@@ -827,7 +827,7 @@ export function GlobalSearchPanel({
       {state.totalMatches > 0 && (
         <div className="flex items-center justify-between px-3 py-2 border-t border-[var(--aethel-border-primary)]">
           <button
-            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
             title="Resultado anterior (F3)"
           >
             <ArrowUp className="w-4 h-4" />
@@ -836,7 +836,7 @@ export function GlobalSearchPanel({
             Navegue com F3 / Shift+F3
           </span>
           <button
-            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
             title="Proximo resultado (Shift+F3)"
           >
             <ArrowDown className="w-4 h-4" />

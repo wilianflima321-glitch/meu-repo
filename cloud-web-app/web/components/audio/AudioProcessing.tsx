@@ -194,39 +194,39 @@ export class AudioEffectProcessor {
   private outputNode: GainNode
   private effectNodes: Map<string, AudioNode[]> = new Map()
   private analyserNode: AnalyserNode
-  
+
   constructor(audioContext: AudioContext) {
     this.audioContext = audioContext
     this.inputNode = audioContext.createGain()
     this.outputNode = audioContext.createGain()
     this.analyserNode = audioContext.createAnalyser()
     this.analyserNode.fftSize = 2048
-    
+
     // Default: input -> output
     this.inputNode.connect(this.outputNode)
     this.outputNode.connect(this.analyserNode)
   }
-  
+
   get input(): GainNode {
     return this.inputNode
   }
-  
+
   get output(): GainNode {
     return this.outputNode
   }
-  
+
   get analyser(): AnalyserNode {
     return this.analyserNode
   }
-  
+
   addEffect(effect: AudioEffect): void {
     const nodes = this.createEffectNodes(effect)
     if (nodes.length === 0) return
-    
+
     this.effectNodes.set(effect.id, nodes)
     this.rebuildChain()
   }
-  
+
   removeEffect(effectId: string): void {
     const nodes = this.effectNodes.get(effectId)
     if (nodes) {
@@ -235,17 +235,17 @@ export class AudioEffectProcessor {
       this.rebuildChain()
     }
   }
-  
+
   updateEffect(effect: AudioEffect): void {
     this.removeEffect(effect.id)
     if (!effect.bypass) {
       this.addEffect(effect)
     }
   }
-  
+
   private createEffectNodes(effect: AudioEffect): AudioNode[] {
     const ctx = this.audioContext
-    
+
     switch (effect.type) {
       case 'eq': {
         const params = effect.params as EQParams
@@ -260,7 +260,7 @@ export class AudioEffectProcessor {
             return filter
           })
       }
-      
+
       case 'compressor': {
         const params = effect.params as CompressorParams
         const comp = ctx.createDynamicsCompressor()
@@ -269,13 +269,13 @@ export class AudioEffectProcessor {
         comp.attack.value = params.attack / 1000
         comp.release.value = params.release / 1000
         comp.knee.value = params.knee
-        
+
         const makeup = ctx.createGain()
         makeup.gain.value = Math.pow(10, params.makeupGain / 20)
-        
+
         return [comp, makeup]
       }
-      
+
       case 'limiter': {
         const params = effect.params as LimiterParams
         const comp = ctx.createDynamicsCompressor()
@@ -286,51 +286,51 @@ export class AudioEffectProcessor {
         comp.knee.value = 0
         return [comp]
       }
-      
+
       case 'reverb': {
         const params = effect.params as ReverbParams
         // Create convolver with generated impulse response
         const convolver = ctx.createConvolver()
         convolver.buffer = this.generateReverbIR(params)
-        
+
         const wetGain = ctx.createGain()
         wetGain.gain.value = params.wetLevel
-        
+
         return [convolver, wetGain]
       }
-      
+
       case 'delay': {
         const params = effect.params as DelayParams
         const delay = ctx.createDelay(3)
         delay.delayTime.value = params.time / 1000
-        
+
         const feedback = ctx.createGain()
         feedback.gain.value = params.feedback
-        
+
         const wet = ctx.createGain()
         wet.gain.value = params.wetLevel
-        
+
         // Feedback loop
         delay.connect(feedback)
         feedback.connect(delay)
-        
+
         return [delay, wet]
       }
-      
+
       case 'gain': {
         const params = effect.params as GainParams
         const gain = ctx.createGain()
         gain.gain.value = params.mute ? 0 : Math.pow(10, params.gain / 20)
         return [gain]
       }
-      
+
       case 'pan': {
         const params = effect.params as PanParams
         const panner = ctx.createStereoPanner()
         panner.pan.value = params.pan
         return [panner]
       }
-      
+
       case 'filter': {
         const params = effect.params as FilterParams
         const filter = ctx.createBiquadFilter()
@@ -339,35 +339,35 @@ export class AudioEffectProcessor {
         filter.Q.value = params.resonance
         return [filter]
       }
-      
+
       case 'distortion': {
         const params = effect.params as DistortionParams
         const waveshaper = ctx.createWaveShaper()
         waveshaper.curve = this.generateDistortionCurve(params)
         waveshaper.oversample = '4x'
-        
+
         // Tone control
         const tone = ctx.createBiquadFilter()
         tone.type = 'lowpass'
         tone.frequency.value = 2000 + params.tone * 18000
-        
+
         const mix = ctx.createGain()
         mix.gain.value = params.mix
-        
+
         return [waveshaper, tone, mix]
       }
-      
+
       default:
         return []
     }
   }
-  
+
   private generateReverbIR(params: ReverbParams): AudioBuffer {
     const ctx = this.audioContext
     const sampleRate = ctx.sampleRate
     const length = Math.ceil(params.decay * sampleRate)
     const buffer = ctx.createBuffer(2, length, sampleRate)
-    
+
     for (let channel = 0; channel < 2; channel++) {
       const data = buffer.getChannelData(channel)
       for (let i = 0; i < length; i++) {
@@ -381,19 +381,19 @@ export class AudioEffectProcessor {
         data[i] = damped * params.roomSize
       }
     }
-    
+
     return buffer
   }
-  
+
   private generateDistortionCurve(params: DistortionParams): Float32Array<ArrayBuffer> {
     const samples = 44100
     const curve = new Float32Array(samples)
     const deg = Math.PI / 180
     const drive = params.drive * 100 + 1
-    
+
     for (let i = 0; i < samples; i++) {
       const x = (i * 2) / samples - 1
-      
+
       switch (params.type) {
         case 'soft':
           curve[i] = Math.tanh(x * drive)
@@ -409,44 +409,44 @@ export class AudioEffectProcessor {
           break
       }
     }
-    
+
     return curve
   }
-  
+
   private rebuildChain(): void {
     // Disconnect all
     this.inputNode.disconnect()
     this.effectNodes.forEach(nodes => nodes.forEach(n => n.disconnect()))
-    
+
     // Rebuild chain: input -> effects -> output
     let lastNode: AudioNode = this.inputNode
-    
+
     // Sort effects by order and connect
     const sortedEffects = Array.from(this.effectNodes.entries())
-    
+
     for (const [, nodes] of sortedEffects) {
       for (const node of nodes) {
         lastNode.connect(node)
         lastNode = node
       }
     }
-    
+
     lastNode.connect(this.outputNode)
     this.outputNode.connect(this.analyserNode)
   }
-  
+
   getFrequencyData(): Uint8Array {
     const data = new Uint8Array(this.analyserNode.frequencyBinCount)
     this.analyserNode.getByteFrequencyData(data)
     return data
   }
-  
+
   getTimeDomainData(): Uint8Array {
     const data = new Uint8Array(this.analyserNode.fftSize)
     this.analyserNode.getByteTimeDomainData(data)
     return data
   }
-  
+
   dispose(): void {
     this.effectNodes.forEach(nodes => nodes.forEach(n => n.disconnect()))
     this.effectNodes.clear()
@@ -475,7 +475,7 @@ export function EQVisualizer({
 }: EQVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [dragging, setDragging] = useState<string | null>(null)
-  
+
   // Frequency to X position (logarithmic scale)
   const freqToX = useCallback((freq: number) => {
     const minLog = Math.log10(20)
@@ -483,7 +483,7 @@ export function EQVisualizer({
     const log = Math.log10(freq)
     return ((log - minLog) / (maxLog - minLog)) * width
   }, [width])
-  
+
   // X position to frequency
   const xToFreq = useCallback((x: number) => {
     const minLog = Math.log10(20)
@@ -491,33 +491,33 @@ export function EQVisualizer({
     const log = minLog + (x / width) * (maxLog - minLog)
     return Math.pow(10, log)
   }, [width])
-  
+
   // Gain to Y position
   const gainToY = useCallback((gain: number) => {
     return height / 2 - (gain / 24) * (height / 2)
   }, [height])
-  
+
   // Y position to gain
   const yToGain = useCallback((y: number) => {
     return -((y - height / 2) / (height / 2)) * 24
   }, [height])
-  
+
   // Draw EQ curve
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    
+
     // Clear
     ctx.fillStyle = 'var(--aethel-surface-secondary)'
     ctx.fillRect(0, 0, width, height)
-    
+
     // Grid lines
     ctx.strokeStyle = 'var(--aethel-surface-tertiary)'
     ctx.lineWidth = 1
-    
+
     // Frequency grid (logarithmic)
     const freqs = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000]
     freqs.forEach(freq => {
@@ -526,7 +526,7 @@ export function EQVisualizer({
       ctx.moveTo(x, 0)
       ctx.lineTo(x, height)
       ctx.stroke()
-      
+
       // Label
       ctx.fillStyle = 'var(--aethel-text-quaternary)'
       ctx.font = '9px system-ui'
@@ -534,7 +534,7 @@ export function EQVisualizer({
       const label = freq >= 1000 ? `${freq / 1000}k` : `${freq}`
       ctx.fillText(label, x, height - 4)
     })
-    
+
     // Gain grid
     const gains = [-24, -12, 0, 12, 24]
     gains.forEach(gain => {
@@ -543,31 +543,31 @@ export function EQVisualizer({
       ctx.moveTo(0, y)
       ctx.lineTo(width, y)
       ctx.stroke()
-      
+
       // Label
       ctx.fillStyle = 'var(--aethel-text-quaternary)'
       ctx.font = '9px system-ui'
       ctx.textAlign = 'left'
       ctx.fillText(`${gain > 0 ? '+' : ''}${gain}dB`, 4, y - 2)
     })
-    
+
     // Draw response curve
     ctx.beginPath()
     ctx.strokeStyle = 'var(--aethel-primary)'
     ctx.lineWidth = 2
-    
+
     for (let x = 0; x < width; x++) {
       const freq = xToFreq(x)
       let totalGain = 0
-      
+
       bands.forEach(band => {
         if (!band.enabled) return
         totalGain += calculateBandResponse(band, freq)
       })
-      
+
       totalGain = Math.max(-24, Math.min(24, totalGain))
       const y = gainToY(totalGain)
-      
+
       if (x === 0) {
         ctx.moveTo(x, y)
       } else {
@@ -575,21 +575,21 @@ export function EQVisualizer({
       }
     }
     ctx.stroke()
-    
+
     // Fill under curve
     ctx.lineTo(width, height / 2)
     ctx.lineTo(0, height / 2)
     ctx.closePath()
     ctx.fillStyle = 'rgba(51, 154, 240, 0.1)'
     ctx.fill()
-    
+
     // Draw band control points
     bands.forEach(band => {
       if (!band.enabled) return
-      
+
       const x = freqToX(band.frequency)
       const y = gainToY(band.gain)
-      
+
       ctx.beginPath()
       ctx.arc(x, y, 8, 0, Math.PI * 2)
       ctx.fillStyle = dragging === band.id ? 'var(--aethel-primary-dark)' : 'var(--aethel-primary)'
@@ -597,7 +597,7 @@ export function EQVisualizer({
       ctx.strokeStyle = 'var(--aethel-text-primary)'
       ctx.lineWidth = 2
       ctx.stroke()
-      
+
       // Q indicator (width of the dot)
       const qWidth = Math.min(50, 100 / band.q)
       ctx.beginPath()
@@ -606,57 +606,57 @@ export function EQVisualizer({
       ctx.lineWidth = 1
       ctx.stroke()
     })
-    
+
   }, [bands, width, height, freqToX, gainToY, xToFreq, dragging])
-  
+
   // Mouse handlers for dragging bands
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const rect = canvas.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    
+
     // Find closest band
     for (const band of bands) {
       if (!band.enabled) continue
-      
+
       const bx = freqToX(band.frequency)
       const by = gainToY(band.gain)
       const dist = Math.sqrt((x - bx) ** 2 + (y - by) ** 2)
-      
+
       if (dist < 12) {
         setDragging(band.id)
         return
       }
     }
   }, [bands, freqToX, gainToY])
-  
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!dragging) return
-    
+
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const rect = canvas.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
-    
+
     const newFreq = Math.max(20, Math.min(20000, xToFreq(x)))
     const newGain = Math.max(-24, Math.min(24, yToGain(y)))
-    
+
     onChange(bands.map(b =>
       b.id === dragging
         ? { ...b, frequency: Math.round(newFreq), gain: Math.round(newGain * 10) / 10 }
         : b
     ))
   }, [dragging, bands, xToFreq, yToGain, onChange])
-  
+
   const handleMouseUp = useCallback(() => {
     setDragging(null)
   }, [])
-  
+
   return (
     <canvas
       ref={canvasRef}
@@ -678,10 +678,10 @@ function calculateBandResponse(band: EQBand, freq: number): number {
   const f0 = band.frequency
   const q = band.q
   const gain = band.gain
-  
+
   const omega = freq / f0
   const logOmega = Math.log2(omega)
-  
+
   switch (band.type) {
     case 'peaking':
       return gain * Math.exp(-Math.pow(logOmega * q, 2))
@@ -722,61 +722,61 @@ export function CompressorVisualizer({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const width = 200
   const height = 200
-  
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    
+
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    
+
     ctx.fillStyle = 'var(--aethel-surface-secondary)'
     ctx.fillRect(0, 0, width, height)
-    
+
     // Grid
     ctx.strokeStyle = 'var(--aethel-surface-tertiary)'
     ctx.lineWidth = 1
-    
+
     for (let db = 0; db >= -60; db -= 10) {
       const x = ((db + 60) / 60) * width
       const y = height - ((db + 60) / 60) * height
-      
+
       ctx.beginPath()
       ctx.moveTo(x, 0)
       ctx.lineTo(x, height)
       ctx.stroke()
-      
+
       ctx.beginPath()
       ctx.moveTo(0, y)
       ctx.lineTo(width, y)
       ctx.stroke()
     }
-    
+
     // Unity line
     ctx.strokeStyle = 'var(--aethel-text-quaternary)'
     ctx.beginPath()
     ctx.moveTo(0, height)
     ctx.lineTo(width, 0)
     ctx.stroke()
-    
+
     // Compression curve
     ctx.beginPath()
     ctx.strokeStyle = 'var(--aethel-primary)'
     ctx.lineWidth = 2
-    
+
     for (let input = -60; input <= 0; input += 0.5) {
       const x = ((input + 60) / 60) * width
       let output = input
-      
+
       if (input > params.threshold) {
         const overshoot = input - params.threshold
         const compressed = overshoot / params.ratio
         output = params.threshold + compressed
       }
-      
+
       output = Math.min(0, output + params.makeupGain)
       const y = height - ((output + 60) / 60) * height
-      
+
       if (input === -60) {
         ctx.moveTo(x, y)
       } else {
@@ -784,7 +784,7 @@ export function CompressorVisualizer({
       }
     }
     ctx.stroke()
-    
+
     // Threshold line
     const threshX = ((params.threshold + 60) / 60) * width
     ctx.strokeStyle = 'var(--aethel-error)'
@@ -794,26 +794,26 @@ export function CompressorVisualizer({
     ctx.lineTo(threshX, height)
     ctx.stroke()
     ctx.setLineDash([])
-    
+
     // Input level dot
     const inputX = ((inputLevel + 60) / 60) * width
     const inputY = height - ((outputLevel + 60) / 60) * height
-    
+
     ctx.beginPath()
     ctx.arc(inputX, inputY, 6, 0, Math.PI * 2)
     ctx.fillStyle = 'var(--aethel-warning)'
     ctx.fill()
-    
+
     // Gain reduction meter
     ctx.fillStyle = 'var(--aethel-surface-tertiary)'
     ctx.fillRect(width - 20, 0, 20, height)
-    
+
     const grHeight = Math.min(height, (-gainReduction / 24) * height)
     ctx.fillStyle = 'var(--aethel-error)'
     ctx.fillRect(width - 18, 0, 16, grHeight)
-    
+
   }, [params, inputLevel, outputLevel, gainReduction])
-  
+
   return (
     <canvas
       ref={canvasRef}
@@ -842,7 +842,7 @@ export function EffectRack({
   onRemove
 }: EffectRackProps) {
   const [expandedEffect, setExpandedEffect] = useState<string | null>(null)
-  
+
   const effectTypes: { type: AudioEffectType; name: string; icon: string }[] = [
     { type: 'eq', name: 'Parametric EQ', icon: '' },
     { type: 'compressor', name: 'Compressor', icon: '' },
@@ -855,7 +855,7 @@ export function EffectRack({
     { type: 'gate', name: 'Gate', icon: '' },
     { type: 'deEsser', name: 'De-Esser', icon: '' },
   ]
-  
+
   return (
     <div style={{ background: 'var(--aethel-surface-secondary)', borderRadius: 6, padding: 8 }}>
       <div style={{
@@ -867,7 +867,7 @@ export function EffectRack({
         borderBottom: '1px solid var(--aethel-border-primary)'
       }}>
         <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 12, fontWeight: 600 }}>Effect Rack</span>
-        
+
         {/* Add effect dropdown */}
         <select
           onChange={e => {
@@ -892,7 +892,7 @@ export function EffectRack({
           ))}
         </select>
       </div>
-      
+
       {/* Effect list */}
       {effects.length === 0 ? (
         <div style={{ color: 'var(--aethel-text-quaternary)', fontSize: 11, textAlign: 'center', padding: 20 }}>
@@ -927,7 +927,7 @@ export function EffectRack({
                 <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 11, flex: 1 }}>
                   {effectTypes.find(t => t.type === effect.type)?.icon} {effect.name}
                 </span>
-                
+
                 {/* Bypass toggle */}
                 <button
                   onClick={e => {
@@ -948,7 +948,7 @@ export function EffectRack({
                 >
                   {effect.bypass ? 'OFF' : 'ON'}
                 </button>
-                
+
                 {/* Remove button */}
                 <button
                   onClick={e => {
@@ -963,10 +963,10 @@ export function EffectRack({
                     fontSize: 12
                   }}
                 >
-                  
+
                 </button>
               </div>
-              
+
               {/* Expanded params */}
               {expandedEffect === effect.id && (
                 <div style={{
@@ -984,7 +984,7 @@ export function EffectRack({
                       height={150}
                     />
                   )}
-                  
+
                   {effect.type === 'compressor' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {Object.entries(effect.params as CompressorParams).map(([key, value]) => (
@@ -1012,7 +1012,7 @@ export function EffectRack({
                       ))}
                     </div>
                   )}
-                  
+
                   {/* Generic params for other effects */}
                   {!['eq', 'compressor'].includes(effect.type) && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

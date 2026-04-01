@@ -1,6 +1,6 @@
 ﻿/**
  * Glassmorphism UI Components - Nível Studio L5
- * 
+ *
  * Componentes com efeitos de vidro, glows dinâmicos e transições de elite
  * Inspirado em: Vercel, Linear, Cursor, Figma
  */
@@ -96,9 +96,9 @@ export function GlassCard({
       initial={animated ? 'hidden' : undefined}
       animate={animated ? 'visible' : undefined}
       className={`
-        relative rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl
+        relative rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] backdrop-blur-xl
         transition-all duration-300
-        ${hover ? 'hover:border-white/20 hover:bg-white/10 hover:shadow-2xl' : ''}
+        ${hover ? 'hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:shadow-2xl' : ''}
         ${glow ? 'shadow-[0_0_40px_rgba(59,130,246,0.2)]' : ''}
         ${className}
       `}
@@ -107,7 +107,7 @@ export function GlassCard({
       {glow && (
         <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] via-transparent to-[color-mix(in_srgb,var(--aethel-accent)_10%,transparent)] opacity-0 hover:opacity-100 transition-opacity duration-300" />
       )}
-      
+
       <div className="relative z-10">{children}</div>
     </motion.div>
   )
@@ -137,8 +137,8 @@ export function GlassButton({
 
   const variantClasses = {
     primary: 'bg-gradient-to-r from-[var(--aethel-info)] to-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)] active:scale-95',
-    secondary: 'bg-white/10 text-[var(--aethel-text-primary)] border border-white/20 hover:bg-white/20 hover:border-white/30',
-    ghost: 'text-[var(--aethel-text-primary)] hover:bg-white/10 border border-transparent hover:border-white/20',
+    secondary: 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] border border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:border-[var(--aethel-border-primary)]',
+    ghost: 'text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-transparent hover:border-[var(--aethel-border-primary)]',
     danger: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)]',
   }
 
@@ -166,7 +166,7 @@ export function GlassButton({
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+          className="w-4 h-4 border-2 border-[var(--aethel-border-primary)] border-t-white rounded-full"
         />
       )}
       {children}
@@ -202,11 +202,11 @@ export function GlassInput({
         onChange={onChange}
         className={`
           w-full px-4 py-2.5 rounded-lg
-          bg-white/5 border border-white/10
+          bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)]
           text-[var(--aethel-text-primary)] placeholder-white/40
           backdrop-blur-xl
           transition-all duration-200
-          focus:outline-none focus:border-white/30 focus:bg-white/10 focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]
+          focus:outline-none focus:border-[var(--aethel-border-primary)] focus:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]
           ${Icon ? 'pl-10' : ''}
           ${className}
         `}
@@ -229,10 +229,10 @@ export function AnimatedBadge({
 }) {
   const variantClasses = {
     default: 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
-    success: 'bg-green-500/20 text-green-300 border-green-500/30',
-    warning: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+    success: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
+    warning: 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
     error: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
-    info: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    info: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
   }
 
   return (
@@ -423,7 +423,7 @@ export function HoverCard({
             className={`
               absolute ${tooltipPosition[side]} whitespace-nowrap
               px-3 py-1.5 rounded-lg
-              bg-white/10 backdrop-blur-xl border border-white/20
+              bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] backdrop-blur-xl border border-[var(--aethel-border-primary)]
               text-xs text-[var(--aethel-text-primary)]/80
               pointer-events-none z-50
             `}
@@ -486,7 +486,7 @@ export function AnimatedProgressBar({
 
   return (
     <div className="w-full space-y-2">
-      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/20">
+      <div className="w-full h-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-full overflow-hidden border border-[var(--aethel-border-primary)]">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}

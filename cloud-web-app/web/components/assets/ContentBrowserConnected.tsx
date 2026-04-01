@@ -1,9 +1,9 @@
 /**
  * Content Browser Connected - Real Data Integration
- * 
+ *
  * Wrapper around ContentBrowser that connects to real backend APIs.
  * Replaces DEMO_ASSETS with live project data from useProjectAssets hook.
- * 
+ *
  * Features:
  * - Real-time asset loading from server
  * - Upload with progress tracking
@@ -392,7 +392,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
 
     for (const file of fileArray) {
       const uploadId = `${file.name}-${Date.now()}`;
-      
+
       // Add to progress tracking
       setUploadProgress(prev => [...prev, {
         fileName: file.name,
@@ -404,7 +404,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         if (file.size > LARGE_FILE_THRESHOLD) {
           // Large file - use presigned URL for direct S3 upload
           await uploadLargeAsset(projectId, file, (progress) => {
-            setUploadProgress(prev => 
+            setUploadProgress(prev =>
               prev.map(p => p.fileName === file.name ? { ...p, progress } : p)
             );
           });
@@ -414,7 +414,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         }
 
         // Mark as done
-        setUploadProgress(prev => 
+        setUploadProgress(prev =>
           prev.map(p => p.fileName === file.name ? { ...p, status: 'done', progress: 100 } : p)
         );
 
@@ -424,7 +424,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         }, 3000);
 
       } catch (err) {
-        setUploadProgress(prev => 
+        setUploadProgress(prev =>
           prev.map(p => p.fileName === file.name ? {
             ...p,
             status: 'error',
@@ -447,7 +447,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
       cancelText: 'Cancelar',
     });
     if (!shouldDelete) return;
-    
+
     try {
       await deleteAsset(asset.id);
     } catch (err) {

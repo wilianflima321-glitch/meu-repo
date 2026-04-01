@@ -1,6 +1,6 @@
 /**
  * AETHEL ENGINE - User Library Component
- * 
+ *
  * User's purchased/downloaded assets library with:
  * - Assets comprados
  * - Favoritos
@@ -14,8 +14,8 @@ import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Download, Heart, FolderOpen, Clock, Package, 
+import {
+    Download, Heart, FolderOpen, Clock, Package,
     Grid, List, Search, Filter, MoreVertical,
     Trash2, FolderPlus, Star, Check, ExternalLink,
     ChevronRight, Plus, Edit2, X
@@ -122,13 +122,13 @@ async function downloadAsset(assetId: string): Promise<Blob> {
 // Sub-Components
 // ============================================================================
 
-function AssetCard({ 
-    asset, 
+function AssetCard({
+    asset,
     viewMode,
     onDownload,
     onRemove,
     onAddToCollection
-}: { 
+}: {
     asset: LibraryAsset;
     viewMode: 'grid' | 'list';
     onDownload: (id: string) => void;
@@ -190,7 +190,7 @@ function AssetCard({
 
                         {/* Rating */}
                         <div className="flex items-center gap-1 text-sm">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            <Star className="w-4 h-4 fill-yellow-400 text-[var(--aethel-warning-light)]" />
                             {asset.rating.toFixed(1)}
                         </div>
 
@@ -220,8 +220,8 @@ function AssetCard({
                                         Ver no Marketplace
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                        className="text-red-500"
+                                    <DropdownMenuItem
+                                        className="text-[var(--aethel-error-light)]"
                                         onClick={() => onRemove(asset.id)}
                                     >
                                         <Trash2 className="w-4 h-4 mr-2" />
@@ -246,8 +246,8 @@ function AssetCard({
                         Ver no Marketplace
                     </ContextMenuItem>
                     <ContextMenuSeparator />
-                    <ContextMenuItem 
-                        className="text-red-500"
+                    <ContextMenuItem
+                        className="text-[var(--aethel-error-light)]"
                         onClick={() => onRemove(asset.id)}
                     >
                         <Trash2 className="w-4 h-4 mr-2" />
@@ -277,7 +277,7 @@ function AssetCard({
                             unoptimized
                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                         />
-                        
+
                         {/* Update badge */}
                         {asset.hasUpdate && (
                             <Badge className="absolute top-2 right-2">
@@ -286,7 +286,7 @@ function AssetCard({
                         )}
 
                         {/* Quick download */}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <Button onClick={handleDownload} disabled={isDownloading}>
                                 <Download className="w-4 h-4 mr-2" />
                                 {isDownloading ? 'Baixando...' : 'Baixar'}
@@ -300,7 +300,7 @@ function AssetCard({
                         <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
                             {asset.creator.name}
                             {asset.creator.verified && (
-                                <Check className="w-3 h-3 text-blue-500" />
+                                <Check className="w-3 h-3 text-[var(--aethel-info-light)]" />
                             )}
                         </p>
                         <div className="flex items-center justify-between mt-2">
@@ -322,8 +322,8 @@ function AssetCard({
                     Adicionar a colecao
                 </ContextMenuItem>
                 <ContextMenuSeparator />
-                <ContextMenuItem 
-                    className="text-red-500"
+                <ContextMenuItem
+                    className="text-[var(--aethel-error-light)]"
                     onClick={() => onRemove(asset.id)}
                 >
                     <Trash2 className="w-4 h-4 mr-2" />
@@ -334,12 +334,12 @@ function AssetCard({
     );
 }
 
-function CollectionCard({ 
+function CollectionCard({
     collection,
     onClick,
     onEdit,
     onDelete
-}: { 
+}: {
     collection: Collection;
     onClick: () => void;
     onEdit: () => void;
@@ -374,9 +374,9 @@ function CollectionCard({
                     <h3 className="font-medium truncate">{collection.name}</h3>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button 
-                                size="icon" 
-                                variant="ghost" 
+                            <Button
+                                size="icon"
+                                variant="ghost"
                                 className="h-8 w-8 opacity-0 group-hover:opacity-100"
                             >
                                 <MoreVertical className="w-4 h-4" />
@@ -391,8 +391,8 @@ function CollectionCard({
                                 Editar
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                                className="text-red-500"
+                            <DropdownMenuItem
+                                className="text-[var(--aethel-error-light)]"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onDelete();
@@ -412,12 +412,12 @@ function CollectionCard({
     );
 }
 
-function EmptyState({ 
-    icon: Icon, 
-    title, 
+function EmptyState({
+    icon: Icon,
+    title,
     description,
-    action 
-}: { 
+    action
+}: {
     icon: React.ElementType;
     title: string;
     description: string;
@@ -517,7 +517,7 @@ export default function UserLibrary() {
 
     const handleCreateCollection = useCallback(() => {
         if (!newCollectionName.trim()) return;
-        
+
         // Criar collection API call
         toast.success(`Colecao "${newCollectionName}" criada.`);
         setNewCollectionName('');
@@ -529,7 +529,7 @@ export default function UserLibrary() {
     const filterAssets = (assets: LibraryAsset[] | undefined) => {
         if (!assets) return [];
         if (!searchQuery) return assets;
-        return assets.filter(asset => 
+        return assets.filter(asset =>
             asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             asset.category.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -541,7 +541,7 @@ export default function UserLibrary() {
             <header className="border-b px-6 py-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Minha biblioteca</h1>
-                    
+
                     <div className="flex items-center gap-4">
                         {/* Search */}
                         <div className="relative w-64">

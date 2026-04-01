@@ -30,7 +30,7 @@ export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
             className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
               item.path
                 ? 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] cursor-pointer'
-                : 'text-white cursor-default'
+                : 'text-[var(--aethel-text-primary)] cursor-default'
             }`}
           >
             {item.icon && <span>{item.icon}</span>}

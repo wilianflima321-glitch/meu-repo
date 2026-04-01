@@ -36,28 +36,28 @@ interface ModerationItem {
   type: 'user_report' | 'ai_output' | 'project_content' | 'asset';
   status: 'pending' | 'approved' | 'rejected' | 'escalated';
   priority: 'low' | 'normal' | 'high' | 'urgent';
-  
+
   reporterId?: string;
   reporterEmail?: string;
-  
+
   targetType: 'user' | 'project' | 'asset' | 'ai_generation';
   targetId: string;
   targetOwnerId?: string;
   targetOwnerEmail?: string;
-  
+
   contentSnapshot?: {
     type: string;
     preview: string;
     fullContent?: string;
   };
-  
+
   reason?: string;
   category?: string;
   notes?: string;
-  
+
   autoScore?: number;
   autoFlags?: string[];
-  
+
   createdAt: string;
   updatedAt: string;
 }
@@ -114,7 +114,7 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
         </div>
         <p className="text-xl font-bold text-[var(--aethel-text-primary)] mt-1">{stats.pending}</p>
       </div>
-      
+
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg p-3">
         <div className="flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Urgentes</span>
@@ -122,7 +122,7 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
         </div>
         <p className="text-xl font-bold text-[var(--aethel-error)] mt-1">{stats.urgent}</p>
       </div>
-      
+
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-3">
         <div className="flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Processados hoje</span>
@@ -130,7 +130,7 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
         </div>
         <p className="text-xl font-bold text-[var(--aethel-text-primary)] mt-1">{stats.todayProcessed}</p>
       </div>
-      
+
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-3">
         <div className="flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Tempo médio</span>
@@ -142,38 +142,38 @@ function StatsBar({ stats }: { stats: ModerationStats }) {
   );
 }
 
-function ItemCard({ 
-  item, 
-  isSelected, 
+function ItemCard({
+  item,
+  isSelected,
   onClick,
-  onAction 
-}: { 
-  item: ModerationItem; 
+  onAction
+}: {
+  item: ModerationItem;
   isSelected: boolean;
   onClick: () => void;
   onAction: (action: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showContent, setShowContent] = useState(false);
-  
+
   const priorityColors = {
     low: 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]',
     normal: 'border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[var(--aethel-primary)]/5',
     high: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning)]/5',
     urgent: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/10',
   };
-  
+
   const typeIcons = {
     user_report: Flag,
     ai_output: Bot,
     project_content: FileCode,
     asset: Image,
   };
-  
+
   const TypeIcon = typeIcons[item.type];
-  
+
   return (
-    <div 
+    <div
       className={`
         border rounded-lg p-4 cursor-pointer transition-all
         ${priorityColors[item.priority]}
@@ -203,7 +203,7 @@ function ItemCard({
           {new Date(item.createdAt).toLocaleString()}
         </span>
       </div>
-      
+
       {/* Target Info */}
       <div className="mb-3">
         <p className="text-sm text-[var(--aethel-text-primary)]">
@@ -216,7 +216,7 @@ function ItemCard({
           </p>
         )}
       </div>
-      
+
       {/* Reason & Category */}
       {item.reason && (
         <div className="mb-3 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] rounded text-sm">
@@ -229,11 +229,11 @@ function ItemCard({
           )}
         </div>
       )}
-      
+
       {/* Content Preview */}
       {item.contentSnapshot && (
         <div className="mb-3">
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); setShowContent(!showContent); }}
             className="flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
@@ -249,7 +249,7 @@ function ItemCard({
           )}
         </div>
       )}
-      
+
       {/* Auto Flags */}
       {item.autoFlags && item.autoFlags.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-1">
@@ -260,7 +260,7 @@ function ItemCard({
           ))}
         </div>
       )}
-      
+
       {/* Quick Actions */}
       {isSelected && (
         <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--aethel-border-secondary)]">
@@ -294,7 +294,7 @@ function ItemCard({
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('skip'); }}
-            className="flex items-center gap-1 px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-[var(--aethel-text-primary)] text-sm rounded ml-auto"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] text-sm rounded ml-auto"
           >
             <SkipForward className="w-4 h-4" />
             Ignorar (S)
@@ -318,7 +318,7 @@ function ShortcutsModal({ onClose }: { onClose: () => void }) {
             <XCircle className="w-5 h-5" />
           </button>
         </div>
-        
+
         <div className="space-y-2">
           {Object.entries(SHORTCUTS).map(([key, action]) => (
             <div key={key} className="flex items-center justify-between py-2 border-b border-[var(--aethel-border-secondary)]">
@@ -329,7 +329,7 @@ function ShortcutsModal({ onClose }: { onClose: () => void }) {
             </div>
           ))}
         </div>
-        
+
         <p className="text-xs text-[var(--aethel-text-tertiary)] mt-4">
           Pressione qualquer tecla enquanto um item estiver selecionado para executar a ação.
         </p>
@@ -357,9 +357,9 @@ export default function ModerationQueue() {
   const [processing, setProcessing] = useState(false);
   const [search, setSearch] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const fetchItems = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/moderation/queue?filter=${filter}`);
@@ -374,7 +374,7 @@ export default function ModerationQueue() {
       setLoading(false);
     }
   }, [filter]);
-  
+
   useEffect(() => {
     fetchItems();
     const interval = setInterval(fetchItems, 30000);
@@ -398,18 +398,18 @@ export default function ModerationQueue() {
   const handleAction = useCallback(async (action: string) => {
     const item = filteredItems[selectedIndex];
     if (!item || processing) return;
-    
+
     setProcessing(true);
-    
+
     try {
       const res = await fetch(`/api/admin/moderation/${item.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action }),
       });
-      
+
       if (!res.ok) throw new Error('Falha na ação');
-      
+
       // Remove item from list and refresh stats
       setItems(prev => prev.filter((entry) => entry.id !== item.id));
       setStats(prev => ({
@@ -417,17 +417,17 @@ export default function ModerationQueue() {
         pending: Math.max(0, prev.pending - 1),
         todayProcessed: prev.todayProcessed + (action !== 'skip' ? 1 : 0),
       }));
-      
+
       // Keep selection in bounds
       setSelectedIndex(i => Math.min(i, filteredItems.length - 2));
-      
+
     } catch (error) {
       console.error('Falha na ação:', error);
     } finally {
       setProcessing(false);
     }
   }, [filteredItems, processing, selectedIndex]);
-  
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -435,10 +435,10 @@ export default function ModerationQueue() {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
-      
+
       const item = filteredItems[selectedIndex];
       if (!item && e.key !== '?' && e.key !== 'n' && e.key !== 'p') return;
-      
+
       switch (e.key.toLowerCase()) {
         case 'a':
           handleAction('approve');
@@ -472,11 +472,11 @@ export default function ModerationQueue() {
           break;
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [filteredItems, handleAction, selectedIndex]);
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -484,7 +484,7 @@ export default function ModerationQueue() {
       </div>
     );
   }
-  
+
   return (
     <div ref={containerRef} className="space-y-6">
       {/* Header */}
@@ -501,7 +501,7 @@ export default function ModerationQueue() {
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3">
           {/* Shortcuts hint */}
           <button
@@ -511,7 +511,7 @@ export default function ModerationQueue() {
             <Keyboard className="w-4 h-4" />
             Atalhos (?)
           </button>
-          
+
           {/* Filter */}
           <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-1">
             {(['pending', 'urgent', 'all'] as const).map((f) => (
@@ -519,8 +519,8 @@ export default function ModerationQueue() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1 text-xs rounded capitalize ${
-                  filter === f 
-                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' 
+                  filter === f
+                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
                     : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
                 }`}
               >
@@ -537,7 +537,7 @@ export default function ModerationQueue() {
             onChange={(e) => setSearch(e.target.value)}
             className="px-3 py-1.5 text-xs rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]"
           />
-          
+
           {/* Refresh */}
           <button
             onClick={fetchItems}
@@ -547,10 +547,10 @@ export default function ModerationQueue() {
           </button>
         </div>
       </div>
-      
+
       {/* Stats */}
       <StatsBar stats={stats} />
-      
+
       {/* Queue */}
       {filteredItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg">
@@ -571,7 +571,7 @@ export default function ModerationQueue() {
           ))}
         </div>
       )}
-      
+
       {/* Processing indicator */}
       {processing && (
         <div className="fixed bottom-4 right-4 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded-lg flex items-center gap-2">
@@ -579,7 +579,7 @@ export default function ModerationQueue() {
           Processando...
         </div>
       )}
-      
+
       {/* Shortcuts Modal */}
       {showShortcuts && <ShortcutsModal onClose={() => setShowShortcuts(false)} />}
     </div>

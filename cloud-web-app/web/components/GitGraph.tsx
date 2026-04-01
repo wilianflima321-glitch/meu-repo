@@ -17,7 +17,7 @@ export default function GitGraph() {
   const [loading, setLoading] = useState(true);
   const [selectedCommit, setSelectedCommit] = useState<GitCommit | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  
+
   const gitClient = useMemo(() => getGitClient('/workspace'), []);
 
   const loadCommits = useCallback(async () => {
@@ -50,7 +50,7 @@ export default function GitGraph() {
 
     for (let i = 0; i < commits.length; i++) {
       const commit = commits[i];
-      
+
       // Determine branch
       let branch = branchMap.get(commit.hash);
       if (branch === undefined) {
@@ -156,7 +156,7 @@ export default function GitGraph() {
               height={Math.max(600, nodes.length * 60 + 100)}
               className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg"
             />
-            
+
             {/* Commit Labels */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
               {nodes.map((node, index) => (
@@ -254,7 +254,7 @@ export default function GitGraph() {
 
               {/* Actions */}
               <div className="pt-4 border-t border-[var(--aethel-border-primary)] space-y-2">
-                <button className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--aethel-text-primary)] rounded-lg transition-colors">
+                <button className="w-full px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
                   View Changes
                 </button>
                 <button className="w-full px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">

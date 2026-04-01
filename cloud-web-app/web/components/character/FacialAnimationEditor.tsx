@@ -369,8 +369,8 @@ const BlendShapeSlider: React.FC<BlendShapeSliderProps> = React.memo(({ name, va
         value={value}
         onChange={(e) => onChange(name, parseFloat(e.target.value))}
         className="flex-1 h-1 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 
-                   [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full 
+                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3
+                   [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full
                    [&::-webkit-slider-thumb]:bg-sky-500 [&::-webkit-slider-thumb]:cursor-pointer
                    [&::-webkit-slider-thumb]:hover:bg-sky-400"
       />
@@ -396,8 +396,8 @@ const EmotionPresetButton: React.FC<EmotionPresetButtonProps> = React.memo(({ pr
     <button
       onClick={onClick}
       className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200
-                  ${isActive 
-                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-sky-400' 
+                  ${isActive
+                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-sky-400'
                     : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
     >
       <span className="text-2xl mb-1">{preset.icon}</span>
@@ -538,7 +538,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const time = (x / rect.width) * duration
-    
+
     if (e.shiftKey) {
       onAddKeyframe(time, selectedViseme)
     } else {
@@ -656,14 +656,14 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
   return (
     <div className="bg-[var(--aethel-surface-secondary)] rounded-lg p-4">
       <h4 className="text-sm font-semibold text-[var(--aethel-text-secondary)] mb-3">FACS Action Units Reference</h4>
-      
+
       <input
         type="text"
         placeholder="Search action units..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full px-3 py-2 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded text-sm
-                   text-[var(--aethel-text-secondary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2 
+                   text-[var(--aethel-text-secondary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2
                    focus:ring-sky-500 mb-3"
       />
 
@@ -683,7 +683,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
               </div>
               <span className="text-[var(--aethel-text-tertiary)]">{expandedAU === au.au ? '' : ''}</span>
             </div>
-            
+
             {expandedAU === au.au && (
               <div className="mt-2 pl-2 border-l-2 border-[var(--aethel-border-primary)]">
                 <p className="text-xs text-[var(--aethel-text-tertiary)] mb-2">{au.description}</p>
@@ -704,7 +704,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
                   }}
                   className="mt-2 text-xs text-sky-400 hover:text-sky-300"
                 >
-                  Apply to sliders 
+                  Apply to sliders
                 </button>
               </div>
             )}
@@ -730,7 +730,7 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
   // Create a generic face geometry with morph targets
   const geometry = useMemo(() => {
     const geo = new THREE.SphereGeometry(1, 64, 64)
-    
+
     // Create morph target attributes for face deformation
     const morphAttributes: { [key: string]: THREE.BufferAttribute[] } = {
       position: []
@@ -741,10 +741,10 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
 
     // Generate morph targets for each blend shape category
     const allShapes = BLEND_SHAPE_CATEGORIES.flatMap(cat => cat.shapes)
-    
+
     allShapes.forEach((shapeName, idx) => {
       const morphPositions = new Float32Array(posArray.length)
-      
+
       for (let i = 0; i < posArray.length; i += 3) {
         const x = posArray[i]
         const y = posArray[i + 1]
@@ -844,7 +844,7 @@ const FaceMesh: React.FC<FacePreview3DProps> = ({ blendShapes }) => {
   // Update morph target influences based on blend shapes
   useFrame(() => {
     if (!meshRef.current) return
-    
+
     const morphInfluences = meshRef.current.morphTargetInfluences
     if (!morphInfluences) return
 
@@ -917,7 +917,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
   const [currentTime, setCurrentTime] = useState(0)
   const [duration] = useState(5)
   const [showFACS, setShowFACS] = useState(false)
-  const [audioData] = useState<number[]>(() => 
+  const [audioData] = useState<number[]>(() =>
     Array.from({ length: 100 }, () => Math.random() * 0.5 + 0.2)
   )
 
@@ -1002,7 +1002,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
         blendShapeCount: Object.keys(blendShapes).length,
       },
     }
-    
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')

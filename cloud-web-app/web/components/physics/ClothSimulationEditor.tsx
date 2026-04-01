@@ -3,10 +3,10 @@
 
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { 
-  OrbitControls, 
-  Grid, 
-  Environment, 
+import {
+  OrbitControls,
+  Grid,
+  Environment,
   GizmoHelper,
   GizmoViewport,
   Line,
@@ -14,13 +14,13 @@ import {
   TransformControls,
 } from '@react-three/drei';
 import * as THREE from 'three';
-import { 
-  Layers, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Wind, 
-  Pin, 
+import {
+  Layers,
+  Play,
+  Pause,
+  RotateCcw,
+  Wind,
+  Pin,
   Download,
   Settings,
   Eye,
@@ -35,15 +35,15 @@ import {
   Box,
   Circle,
 } from 'lucide-react';
-import { 
-  ClothSimulation, 
-  ClothConfig, 
-  ClothConstraint, 
+import {
+  ClothSimulation,
+  ClothConfig,
+  ClothConstraint,
   ClothCollider,
 } from '@/lib/cloth-simulation';
 
 
-export type ClothToolType = 
+export type ClothToolType =
   | 'select'
   | 'pin'
   | 'unpin'
@@ -259,12 +259,12 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon, defaultOpen = true, children }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  
+
   return (
     <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] 
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -285,32 +285,32 @@ interface ClothMesh3DProps {
   selectedTool: ClothToolType;
 }
 
-function ClothMesh3D({ 
-  simulation, 
-  config, 
-  editorState, 
+function ClothMesh3D({
+  simulation,
+  config,
+  editorState,
   onVertexClick,
   selectedTool,
 }: ClothMesh3DProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const pointsRef = useRef<THREE.Points>(null);
   const linesRef = useRef<THREE.LineSegments>(null);
-  
+
   const [hoverVertex, setHoverVertex] = useState<number | null>(null);
-  
+
   const { geometry, pointsGeometry, constraintGeometry } = useMemo(() => {
     if (!simulation) return { geometry: null, pointsGeometry: null, constraintGeometry: null };
-    
+
     const segmentsX = config.segmentsX;
     const segmentsY = config.segmentsY;
     const particles = simulation.particles;
-    
+
     const geo = new THREE.BufferGeometry();
     const positions: number[] = [];
     const normals: number[] = [];
     const uvs: number[] = [];
     const indices: number[] = [];
-    
+
     for (const p of particles) {
       positions.push(p.position.x, p.position.y, p.position.z);
       uvs.push(
@@ -318,32 +318,32 @@ function ClothMesh3D({
         Math.floor(p.index / (segmentsX + 1)) / segmentsY
       );
     }
-    
+
     for (let j = 0; j < segmentsY; j++) {
       for (let i = 0; i < segmentsX; i++) {
         const a = j * (segmentsX + 1) + i;
         const b = a + 1;
         const c = a + (segmentsX + 1);
         const d = c + 1;
-        
+
         indices.push(a, b, c);
         indices.push(b, d, c);
       }
     }
-    
+
     geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     geo.setIndex(indices);
     geo.computeVertexNormals();
-    
+
     const pointsGeo = new THREE.BufferGeometry();
     const pointPositions: number[] = [];
     const pointColors: number[] = [];
-    
+
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
       pointPositions.push(p.position.x, p.position.y, p.position.z);
-      
+
       if (editorState.pinnedVertices.has(i)) {
         pointColors.push(1, 0.3, 0.3); // Red for pinned
       } else if (editorState.selectedVertices.has(i)) {
@@ -352,24 +352,24 @@ function ClothMesh3D({
         pointColors.push(0.5, 0.5, 0.5); // Gray for normal
       }
     }
-    
+
     pointsGeo.setAttribute('position', new THREE.Float32BufferAttribute(pointPositions, 3));
     pointsGeo.setAttribute('color', new THREE.Float32BufferAttribute(pointColors, 3));
-    
+
     const constraintGeo = new THREE.BufferGeometry();
     const linePositions: number[] = [];
     const lineColors: number[] = [];
-    
+
     if (editorState.showConstraints) {
       for (const constraint of simulation.constraints) {
         if (constraint.broken) continue;
-        
+
         const p1 = particles[constraint.p1];
         const p2 = particles[constraint.p2];
-        
+
         linePositions.push(p1.position.x, p1.position.y, p1.position.z);
         linePositions.push(p2.position.x, p2.position.y, p2.position.z);
-        
+
         let color: [number, number, number];
         switch (constraint.type) {
           case 'structural': color = [0.2, 0.8, 0.2]; break;
@@ -377,22 +377,22 @@ function ClothMesh3D({
           case 'bend': color = [0.2, 0.2, 0.8]; break;
           default: color = [0.5, 0.5, 0.5];
         }
-        
+
         lineColors.push(...color, ...color);
       }
     }
-    
+
     constraintGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
     constraintGeo.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
-    
+
     return { geometry: geo, pointsGeometry: pointsGeo, constraintGeometry: constraintGeo };
   }, [simulation, config, editorState.selectedVertices, editorState.pinnedVertices, editorState.showConstraints]);
-  
+
   useFrame((_, delta) => {
     if (!simulation || !editorState.isSimulating) return;
-    
+
     simulation.update(Math.min(delta, 0.033)); // Cap at ~30fps physics
-    
+
     if (meshRef.current && geometry) {
       const positions = geometry.attributes.position.array as Float32Array;
       for (let i = 0; i < simulation.particles.length; i++) {
@@ -404,7 +404,7 @@ function ClothMesh3D({
       geometry.attributes.position.needsUpdate = true;
       geometry.computeVertexNormals();
     }
-    
+
     if (pointsRef.current && pointsGeometry) {
       const positions = pointsGeometry.attributes.position.array as Float32Array;
       for (let i = 0; i < simulation.particles.length; i++) {
@@ -416,23 +416,23 @@ function ClothMesh3D({
       pointsGeometry.attributes.position.needsUpdate = true;
     }
   });
-  
+
   const handlePointClick = useCallback((event: THREE.Event) => {
     if (!simulation) return;
-    
+
     const intersection = (event as any).intersections?.[0];
     if (intersection && intersection.index !== undefined) {
       onVertexClick(intersection.index, (event as any).shiftKey || false);
     }
   }, [simulation, onVertexClick]);
-  
+
   if (!geometry || !pointsGeometry) return null;
-  
+
   return (
     <group>
       {/* Cloth mesh */}
       <mesh ref={meshRef} geometry={geometry}>
-        <meshStandardMaterial 
+        <meshStandardMaterial
           color="#4a90d9"
           side={THREE.DoubleSide}
           wireframe={editorState.showWireframe}
@@ -440,20 +440,20 @@ function ClothMesh3D({
           roughness={0.8}
         />
       </mesh>
-      
+
       {/* Vertex points */}
-      <points 
-        ref={pointsRef} 
+      <points
+        ref={pointsRef}
         geometry={pointsGeometry}
         onClick={handlePointClick}
       >
-        <pointsMaterial 
+        <pointsMaterial
           size={selectedTool === 'pin' || selectedTool === 'unpin' ? 12 : 6}
           vertexColors
           sizeAttenuation={false}
         />
       </points>
-      
+
       {/* Constraint lines */}
       {editorState.showConstraints && constraintGeometry && (
         <lineSegments ref={linesRef} geometry={constraintGeometry}>
@@ -472,25 +472,25 @@ interface ColliderVisualizerProps {
   selectedCollider: number | null;
 }
 
-function ColliderVisualizer({ 
-  colliders, 
-  showColliders, 
+function ColliderVisualizer({
+  colliders,
+  showColliders,
   onColliderSelect,
   selectedCollider,
 }: ColliderVisualizerProps) {
   if (!showColliders) return null;
-  
+
   return (
     <group>
       {colliders.map((collider, index) => {
         const isSelected = selectedCollider === index;
         const color = isSelected ? '#ffaa00' : '#00aaff';
-        
+
         switch (collider.type) {
           case 'sphere':
             return (
-              <mesh 
-                key={index} 
+              <mesh
+                key={index}
                 position={collider.position}
                 onClick={() => onColliderSelect(index)}
               >
@@ -500,8 +500,8 @@ function ColliderVisualizer({
             );
           case 'plane':
             return (
-              <mesh 
-                key={index} 
+              <mesh
+                key={index}
                 position={collider.position}
                 rotation={new THREE.Euler().setFromQuaternion(
                   new THREE.Quaternion().setFromUnitVectors(
@@ -517,8 +517,8 @@ function ColliderVisualizer({
             );
           case 'box':
             return (
-              <mesh 
-                key={index} 
+              <mesh
+                key={index}
                 position={collider.position}
                 onClick={() => onColliderSelect(index)}
               >
@@ -547,11 +547,11 @@ interface WindArrowProps {
 
 function WindArrow({ direction, strength, visible }: WindArrowProps) {
   if (!visible || strength === 0) return null;
-  
+
   const length = strength * 2;
   const dir = new THREE.Vector3(direction.x, direction.y, direction.z).normalize();
   const end = dir.clone().multiplyScalar(length);
-  
+
   return (
     <group position={[0, 3, 0]}>
       <Line
@@ -581,10 +581,10 @@ interface ToolbarProps {
   onReset: () => void;
 }
 
-function Toolbar({ 
-  selectedTool, 
-  onToolChange, 
-  isSimulating, 
+function Toolbar({
+  selectedTool,
+  onToolChange,
+  isSimulating,
   onToggleSimulation,
   onReset,
 }: ToolbarProps) {
@@ -595,22 +595,22 @@ function Toolbar({
     { id: 'tear', icon: <Scissors className="w-4 h-4" />, label: 'Tear' },
     { id: 'move_collider', icon: <Box className="w-4 h-4" />, label: 'Move Collider' },
   ];
-  
+
   return (
     <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Simulation controls */}
       <button
         onClick={onToggleSimulation}
         className={`p-2 rounded transition-colors ${
-          isSimulating 
-            ? 'bg-green-600 text-[var(--aethel-text-primary)]' 
+          isSimulating
+            ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]'
             : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
         }`}
         title={isSimulating ? 'Pause Simulation' : 'Play Simulation'}
       >
         {isSimulating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
       </button>
-      
+
       <button
         onClick={onReset}
         className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
@@ -618,9 +618,9 @@ function Toolbar({
       >
         <RotateCcw className="w-4 h-4" />
       </button>
-      
+
       <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
-      
+
       {/* Tools */}
       {tools.map((tool) => (
         <button
@@ -672,7 +672,7 @@ export default function ClothSimulationEditor({
     groundHeight: -2,
     ...initialConfig,
   });
-  
+
   const [editorState, setEditorState] = useState<ClothEditorState>({
     selectedVertices: new Set(),
     pinnedVertices: new Set([0, 1, 2, 3, 4]), // Default: pin top row
@@ -682,10 +682,10 @@ export default function ClothSimulationEditor({
     showColliders: true,
     currentPreset: null,
   });
-  
+
   const [selectedTool, setSelectedTool] = useState<ClothToolType>('select');
   const [showWindArrow, setShowWindArrow] = useState(true);
-  
+
   const [colliders, setColliders] = useState<ClothCollider[]>([
     {
       type: 'sphere',
@@ -694,23 +694,23 @@ export default function ClothSimulationEditor({
     },
   ]);
   const [selectedCollider, setSelectedCollider] = useState<number | null>(null);
-  
+
   const [simulation, setSimulation] = useState<ClothSimulation | null>(null);
-  
+
   useEffect(() => {
     const sim = new ClothSimulation(config);
-    
+
     for (const idx of editorState.pinnedVertices) {
       if (sim.particles[idx]) {
         sim.particles[idx].pinned = true;
       }
     }
-    
+
     sim.setColliders(colliders);
-    
+
     setSimulation(sim);
   }, [config, colliders, editorState.pinnedVertices]);
-  
+
   useEffect(() => {
     if (simulation) {
       simulation.updateConfig(config);
@@ -718,13 +718,13 @@ export default function ClothSimulationEditor({
       onSimulationUpdate?.(config);
     }
   }, [simulation, config, colliders, onSimulationUpdate]);
-  
+
   const handleVertexClick = useCallback((index: number, shiftKey: boolean) => {
     if (!simulation) return;
-    
+
     setEditorState((prev) => {
       const newState = { ...prev };
-      
+
       switch (selectedTool) {
         case 'select':
           if (shiftKey) {
@@ -739,7 +739,7 @@ export default function ClothSimulationEditor({
             newState.selectedVertices = new Set([index]);
           }
           break;
-          
+
         case 'pin':
           const newPinned = new Set(prev.pinnedVertices);
           newPinned.add(index);
@@ -748,7 +748,7 @@ export default function ClothSimulationEditor({
             simulation.particles[index].pinned = true;
           }
           break;
-          
+
         case 'unpin':
           const unpinned = new Set(prev.pinnedVertices);
           unpinned.delete(index);
@@ -757,7 +757,7 @@ export default function ClothSimulationEditor({
             simulation.particles[index].pinned = false;
           }
           break;
-          
+
         case 'tear':
           for (const constraint of simulation.constraints) {
             if (constraint.p1 === index || constraint.p2 === index) {
@@ -766,11 +766,11 @@ export default function ClothSimulationEditor({
           }
           break;
       }
-      
+
       return newState;
     });
   }, [simulation, selectedTool]);
-  
+
   const applyPreset = useCallback((preset: ClothPreset) => {
     setConfig((prev) => ({
       ...prev,
@@ -783,7 +783,7 @@ export default function ClothSimulationEditor({
       currentPreset: preset.id,
     }));
   }, []);
-  
+
   const resetSimulation = useCallback(() => {
     const sim = new ClothSimulation(config);
     for (const idx of editorState.pinnedVertices) {
@@ -795,14 +795,14 @@ export default function ClothSimulationEditor({
     setSimulation(sim);
     setEditorState((prev) => ({ ...prev, isSimulating: false }));
   }, [config, editorState.pinnedVertices, colliders]);
-  
+
   const handleExport = useCallback(() => {
     onExport?.({
       config,
       pinnedVertices: Array.from(editorState.pinnedVertices),
     });
   }, [config, editorState.pinnedVertices, onExport]);
-  
+
   const addCollider = useCallback((type: ClothCollider['type']) => {
     const newCollider: ClothCollider = {
       type,
@@ -813,14 +813,14 @@ export default function ClothSimulationEditor({
     };
     setColliders((prev) => [...prev, newCollider]);
   }, []);
-  
+
   const removeSelectedCollider = useCallback(() => {
     if (selectedCollider !== null) {
       setColliders((prev) => prev.filter((_, i) => i !== selectedCollider));
       setSelectedCollider(null);
     }
   }, [selectedCollider]);
-  
+
   return (
     <div className="flex h-full w-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Left toolbar */}
@@ -829,22 +829,22 @@ export default function ClothSimulationEditor({
           selectedTool={selectedTool}
           onToolChange={setSelectedTool}
           isSimulating={editorState.isSimulating}
-          onToggleSimulation={() => setEditorState((prev) => ({ 
-            ...prev, 
-            isSimulating: !prev.isSimulating 
+          onToggleSimulation={() => setEditorState((prev) => ({
+            ...prev,
+            isSimulating: !prev.isSimulating
           }))}
           onReset={resetSimulation}
         />
       </div>
-      
+
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
           <color attach="background" args={['#0f172a']} />
-          
+
           <ambientLight intensity={0.4} />
           <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-          
+
           <ClothMesh3D
             simulation={simulation}
             config={config}
@@ -852,27 +852,27 @@ export default function ClothSimulationEditor({
             onVertexClick={handleVertexClick}
             selectedTool={selectedTool}
           />
-          
+
           <ColliderVisualizer
             colliders={colliders}
             showColliders={editorState.showColliders}
             onColliderSelect={setSelectedCollider}
             selectedCollider={selectedCollider}
           />
-          
+
           <WindArrow
             direction={{ x: config.wind.x, y: config.wind.y, z: config.wind.z }}
             strength={config.wind.length()}
             visible={showWindArrow}
           />
-          
+
           {config.groundPlane && (
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, config.groundHeight, 0]}>
               <planeGeometry args={[20, 20]} />
               <meshStandardMaterial color="#1e293b" />
             </mesh>
           )}
-          
+
           <Grid infiniteGrid fadeDistance={50} />
           <OrbitControls makeDefault />
           <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
@@ -880,7 +880,7 @@ export default function ClothSimulationEditor({
           </GizmoHelper>
           <Environment preset="city" />
         </Canvas>
-        
+
         {/* Viewport overlay info */}
         <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] p-2 rounded text-xs">
           <div className="text-[var(--aethel-text-secondary)]">
@@ -897,7 +897,7 @@ export default function ClothSimulationEditor({
           )}
         </div>
       </div>
-      
+
       {/* Right panel - Settings */}
       <div className="w-72 bg-[var(--aethel-surface-tertiary)] border-l border-[var(--aethel-border-secondary)] overflow-y-auto">
         <div className="p-4">
@@ -915,7 +915,7 @@ export default function ClothSimulationEditor({
               <Download className="w-4 h-4" />
             </button>
           </div>
-          
+
           {/* Presets */}
           <CollapsibleSection title="Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
@@ -935,7 +935,7 @@ export default function ClothSimulationEditor({
               ))}
             </div>
           </CollapsibleSection>
-          
+
           {/* Physics Parameters */}
           <CollapsibleSection title="Physics" icon={<Settings className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <Slider
@@ -984,27 +984,27 @@ export default function ClothSimulationEditor({
               onChange={(v) => setConfig((p) => ({ ...p, tearThreshold: v }))}
               tooltip="Force required to tear the cloth"
             />
-            
+
             <div className="flex items-center justify-between mt-3">
               <label className="text-xs text-[var(--aethel-text-secondary)]">Self Collision</label>
               <input
                 type="checkbox"
                 checked={config.selfCollision}
                 onChange={(e) => setConfig((p) => ({ ...p, selfCollision: e.target.checked }))}
-                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)] 
+                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]
                          focus:ring-[var(--aethel-primary)] focus:ring-offset-[var(--aethel-surface-primary)]"
               />
             </div>
           </CollapsibleSection>
-          
+
           {/* Wind */}
           <CollapsibleSection title="Wind" icon={<Wind className="w-4 h-4 text-[var(--aethel-info)]" />}>
             <Vector3Input
               label="Direction & Strength"
               value={{ x: config.wind.x, y: config.wind.y, z: config.wind.z }}
-              onChange={(v) => setConfig((p) => ({ 
-                ...p, 
-                wind: new THREE.Vector3(v.x, v.y, v.z) 
+              onChange={(v) => setConfig((p) => ({
+                ...p,
+                wind: new THREE.Vector3(v.x, v.y, v.z)
               }))}
               min={-10}
               max={10}
@@ -1028,21 +1028,21 @@ export default function ClothSimulationEditor({
               />
             </div>
           </CollapsibleSection>
-          
+
           {/* Gravity */}
           <CollapsibleSection title="Gravity" icon={<Circle className="w-4 h-4 text-[var(--aethel-primary-light)]" />}>
             <Vector3Input
               label="Gravity Vector"
               value={{ x: config.gravity.x, y: config.gravity.y, z: config.gravity.z }}
-              onChange={(v) => setConfig((p) => ({ 
-                ...p, 
-                gravity: new THREE.Vector3(v.x, v.y, v.z) 
+              onChange={(v) => setConfig((p) => ({
+                ...p,
+                gravity: new THREE.Vector3(v.x, v.y, v.z)
               }))}
               min={-20}
               max={20}
             />
           </CollapsibleSection>
-          
+
           {/* Colliders */}
           <CollapsibleSection title="Colliders" icon={<Box className="w-4 h-4 text-orange-400" />}>
             <div className="flex gap-1 mb-3">
@@ -1065,13 +1065,13 @@ export default function ClothSimulationEditor({
                 + Plane
               </button>
             </div>
-            
+
             {colliders.map((collider, index) => (
-              <div 
+              <div
                 key={index}
                 className={`p-2 rounded mb-1.5 cursor-pointer transition-colors ${
-                  selectedCollider === index 
-                    ? 'bg-[var(--aethel-info)]/30 border border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]' 
+                  selectedCollider === index
+                    ? 'bg-[var(--aethel-info)]/30 border border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]'
                     : 'bg-[var(--aethel-surface-quaternary)]'
                 }`}
                 onClick={() => setSelectedCollider(index)}
@@ -1090,7 +1090,7 @@ export default function ClothSimulationEditor({
                 </div>
               </div>
             ))}
-            
+
             <div className="flex items-center justify-between mt-2">
               <label className="text-xs text-[var(--aethel-text-secondary)]">Show Colliders</label>
               <input
@@ -1100,7 +1100,7 @@ export default function ClothSimulationEditor({
                 className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]"
               />
             </div>
-            
+
             <div className="flex items-center justify-between mt-2">
               <label className="text-xs text-[var(--aethel-text-secondary)]">Ground Plane</label>
               <input
@@ -1111,7 +1111,7 @@ export default function ClothSimulationEditor({
               />
             </div>
           </CollapsibleSection>
-          
+
           {/* View Options */}
           <CollapsibleSection title="View Options" icon={<Eye className="w-4 h-4 text-[var(--aethel-text-secondary)]" />} defaultOpen={false}>
             <div className="space-y-2">
@@ -1135,7 +1135,7 @@ export default function ClothSimulationEditor({
               </div>
             </div>
           </CollapsibleSection>
-          
+
           {/* Mesh Settings */}
           <CollapsibleSection title="Mesh Resolution" icon={<Layers className="w-4 h-4 text-[var(--aethel-success)]" />} defaultOpen={false}>
             <Slider

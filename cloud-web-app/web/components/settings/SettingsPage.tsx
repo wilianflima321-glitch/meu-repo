@@ -838,7 +838,7 @@ function SettingToggle({ setting, value, onChange }: SettingInputProps) {
       }`}
     >
       <span
-        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-[var(--aethel-surface-secondary)] rounded-full transition-transform ${
           value ? 'translate-x-5' : 'translate-x-0'
         }`}
       />
@@ -851,7 +851,7 @@ function SettingSelect({ setting, value, onChange }: SettingInputProps) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-white min-w-[200px]"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-[var(--aethel-text-primary)] min-w-[200px]"
     >
       {setting.options?.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -871,7 +871,7 @@ function SettingNumber({ setting, value, onChange }: SettingInputProps) {
       min={setting.min}
       max={setting.max}
       step={setting.step || 1}
-      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-white w-24"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-[var(--aethel-text-primary)] w-24"
     />
   )
 }
@@ -882,7 +882,7 @@ function SettingText({ setting, value, onChange }: SettingInputProps) {
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-white min-w-[300px]"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-[var(--aethel-text-primary)] min-w-[300px]"
     />
   )
 }
@@ -925,14 +925,14 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
     <div className="flex items-start justify-between py-4 border-b border-[var(--aethel-border-primary)] group">
       <div className="flex-1 pr-8">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-white">{setting.label}</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{setting.label}</span>
           {isModified && (
             <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] rounded">
               Modified
             </span>
           )}
           {setting.requiresReload && (
-            <span className="px-1.5 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 rounded">
+            <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] rounded">
               Requires Reload
             </span>
           )}
@@ -950,7 +950,7 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
         {isModified && (
           <button
             onClick={onReset}
-            className="p-1 text-[var(--aethel-text-quaternary)] hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="p-1 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] opacity-0 group-hover:opacity-100 transition-opacity"
             title="Reset to default"
           >
             <RotateCcw className="w-4 h-4" />

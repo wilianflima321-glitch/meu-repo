@@ -7,10 +7,10 @@ import * as THREE from 'three';
  * ============================================
  * NEXUS CANVAS V2: Motor de Renderizacao (Baseline)
  * ============================================
- * 
+ *
  * Renderizador 3D baseado em Three.js/WebGL para iteracao local.
  * Recursos WebGPU avancados permanecem como trilha de evolucao.
- * 
+ *
  * Características:
  * - Renderização em tempo real (60 FPS)
  * - Suporte a Scene Graphs

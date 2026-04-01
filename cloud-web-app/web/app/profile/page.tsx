@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { 
-  User, 
-  Mail, 
-  Shield, 
-  Key, 
-  Bell, 
-  Palette, 
-  Globe, 
+import {
+  User,
+  Mail,
+  Shield,
+  Key,
+  Bell,
+  Palette,
+  Globe,
   CreditCard,
   Clock,
   LogOut,
@@ -56,14 +56,14 @@ interface UserProfile {
 // Components
 // ============================================================================
 
-function ProfileSection({ 
-  title, 
-  description, 
-  children 
-}: { 
+function ProfileSection({
+  title,
+  description,
+  children
+}: {
   title: string
   description-: string
-  children: React.ReactNode 
+  children: React.ReactNode
 }) {
   return (
     <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded-xl border border-[var(--aethel-border-secondary)]/50 p-6 mb-6">
@@ -76,13 +76,13 @@ function ProfileSection({
   )
 }
 
-function SettingRow({ 
-  icon: Icon, 
-  label, 
-  value, 
+function SettingRow({
+  icon: Icon,
+  label,
+  value,
   action,
-  danger = false 
-}: { 
+  danger = false
+}: {
   icon: React.ElementType
   label: string
   value-: string | React.ReactNode
@@ -131,16 +131,16 @@ export default function ProfilePage() {
     enterprise: 'Empresarial',
     free: 'Gratuito',
   }
-  
+
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push('/login')
       return
     }
-    
+
     loadProfile()
   }, [router])
-  
+
   async function loadProfile() {
     try {
       setLoading(true)
@@ -174,10 +174,10 @@ export default function ProfilePage() {
       setLoading(false)
     }
   }
-  
+
   async function updateProfile(updates: Partial<UserProfile>) {
     if (!profile) return
-    
+
     setSaving(true)
     try {
       const response = await AethelAPIClient.updateProfile(updates)
@@ -266,13 +266,13 @@ export default function ProfilePage() {
       setTwoFactorLoading(false)
     }
   }
-  
+
   async function saveName() {
     if (!tempName.trim()) return
     await updateProfile({ name: tempName })
     setEditingName(false)
   }
-  
+
   async function deleteAccount() {
     try {
       await AethelAPIClient.deleteAccount()
@@ -282,7 +282,7 @@ export default function ProfilePage() {
       console.error('Falha ao excluir a conta:', error)
     }
   }
-  
+
   if (loading) {
     return (
       <StudioLayout title="Perfil" subtitle="Conta, seguranca e preferencias do workspace.">
@@ -292,7 +292,7 @@ export default function ProfilePage() {
       </StudioLayout>
     )
   }
-  
+
   if (!profile) {
     return (
       <StudioLayout title="Perfil" subtitle="Conta, seguranca e preferencias do workspace.">
@@ -302,7 +302,7 @@ export default function ProfilePage() {
       </StudioLayout>
     )
   }
-  
+
   return (
     <StudioLayout title="Perfil" subtitle="Conta, seguranca e preferencias do workspace.">
       {/* Header */}
@@ -329,7 +329,7 @@ export default function ProfilePage() {
                 <Camera className="w-6 h-6" />
               </button>
             </div>
-            
+
             {/* Info */}
             <div className="flex-1">
               <div className="flex items-center gap-2">
@@ -352,7 +352,7 @@ export default function ProfilePage() {
                 ) : (
                   <>
                     <h1 className="text-2xl font-bold">{profile.name}</h1>
-                    <button 
+                    <button
                       onClick={() => { setTempName(profile.name); setEditingName(true); }}
                       className="text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
                     >
@@ -373,7 +373,7 @@ export default function ProfilePage() {
                 )}
               </div>
             </div>
-            
+
             {/* Actions */}
             <button
               onClick={() => router.push('/dashboard')}
@@ -384,7 +384,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </header>
-      
+
       {/* Tabs */}
       <div className="border-b border-[var(--aethel-border-primary)]">
         <div className="max-w-5xl mx-auto px-4">
@@ -398,8 +398,8 @@ export default function ProfilePage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-4 border-b-2 transition-colors ${
-                  activeTab === tab.id 
-                    - 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' 
+                  activeTab === tab.id
+                    - 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                     : 'border-transparent text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                 }`}
               >
@@ -410,20 +410,20 @@ export default function ProfilePage() {
           </nav>
         </div>
       </div>
-      
+
       {/* Content */}
       <main className="max-w-5xl mx-auto px-4 py-8">
-        
+
         {/* Profile Tab */}
         {activeTab === 'profile' && (
           <>
             <ProfileSection title="Informacoes Basicas" description="Gerencie suas informacoes pessoais">
-              <SettingRow 
-                icon={User} 
-                label="Nome" 
+              <SettingRow
+                icon={User}
+                label="Nome"
                 value={profile.name}
                 action={
-                  <button 
+                  <button
                     onClick={() => { setTempName(profile.name); setEditingName(true); }}
                     className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-text-primary)]"
                   >
@@ -431,9 +431,9 @@ export default function ProfilePage() {
                   </button>
                 }
               />
-              <SettingRow 
-                icon={Mail} 
-                label="E-mail" 
+              <SettingRow
+                icon={Mail}
+                label="E-mail"
                 value={profile.email}
                 action={
                   <button className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-text-primary)]">
@@ -441,24 +441,24 @@ export default function ProfilePage() {
                   </button>
                 }
               />
-              <SettingRow 
-                icon={Calendar} 
-                label="Membro desde" 
-                value={new Date(profile.createdAt).toLocaleDateString('pt-BR', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+              <SettingRow
+                icon={Calendar}
+                label="Membro desde"
+                value={new Date(profile.createdAt).toLocaleDateString('pt-BR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
                 })}
               />
             </ProfileSection>
-            
+
             <ProfileSection title="Plano e Faturamento">
-              <SettingRow 
-                icon={CreditCard} 
-                label="Plano atual" 
+              <SettingRow
+                icon={CreditCard}
+                label="Plano atual"
                 value={planLabels[profile.plan] -- profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                 action={
-                  <button 
+                  <button
                     onClick={() => router.push('/billing')}
                     className="px-3 py-1 text-sm bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] rounded-lg transition-colors"
                   >
@@ -469,14 +469,14 @@ export default function ProfilePage() {
             </ProfileSection>
           </>
         )}
-        
+
         {/* Security Tab */}
         {activeTab === 'security' && (
           <>
             <ProfileSection title="Autenticacao" description="Proteja sua conta com camadas adicionais de seguranca">
-              <SettingRow 
-                icon={Key} 
-                label="Senha" 
+              <SettingRow
+                icon={Key}
+                label="Senha"
                 value="Ultima alteracao ha 30 dias"
                 action={
                   <button className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-text-primary)]">
@@ -484,12 +484,12 @@ export default function ProfilePage() {
                   </button>
                 }
               />
-              <SettingRow 
-                icon={Smartphone} 
-                label="Autenticacao de dois fatores" 
+              <SettingRow
+                icon={Smartphone}
+                label="Autenticacao de dois fatores"
                 value={profile.twoFactorEnabled - 'Ativada' : 'Desativada'}
                 action={
-                  <button 
+                  <button
                     onClick={() => {
                       if (profile.twoFactorEnabled) {
                         setTwoFactorModal('disable')
@@ -502,8 +502,8 @@ export default function ProfilePage() {
                     }}
                     disabled={twoFactorLoading}
                     className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                      profile.twoFactorEnabled 
-                        - 'bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)]' 
+                      profile.twoFactorEnabled
+                        - 'bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)]'
                         : 'bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)]'
                     }`}
                   >
@@ -512,15 +512,15 @@ export default function ProfilePage() {
                 }
               />
             </ProfileSection>
-            
+
             <ProfileSection title="Zona de Perigo" description="Acoes irreversiveis">
-              <SettingRow 
-                icon={Trash2} 
-                label="Excluir conta" 
+              <SettingRow
+                icon={Trash2}
+                label="Excluir conta"
                 value="Esta acao nao pode ser desfeita"
                 danger
                 action={
-                  <button 
+                  <button
                     onClick={() => setShowDeleteConfirm(true)}
                     className="px-3 py-1 text-sm bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)] rounded-lg transition-colors"
                   >
@@ -531,17 +531,17 @@ export default function ProfilePage() {
             </ProfileSection>
           </>
         )}
-        
+
         {/* Preferences Tab */}
         {activeTab === 'preferences' && (
           <>
             <ProfileSection title="Aparencia">
-              <SettingRow 
-                icon={Palette} 
-                label="Tema" 
+              <SettingRow
+                icon={Palette}
+                label="Tema"
                 value={profile.theme === 'dark' - 'Escuro' : profile.theme === 'light' - 'Claro' : 'Sistema'}
                 action={
-                  <select 
+                  <select
                     value={profile.theme}
                     onChange={(e) => updateProfile({ theme: e.target.value as any })}
                     className="bg-[var(--aethel-surface-quaternary)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] rounded px-2 py-1 text-sm"
@@ -553,14 +553,14 @@ export default function ProfilePage() {
                 }
               />
             </ProfileSection>
-            
+
             <ProfileSection title="Localizacao">
-              <SettingRow 
-                icon={Globe} 
-                label="Idioma" 
+              <SettingRow
+                icon={Globe}
+                label="Idioma"
                 value={profile.language === 'pt-BR' - 'Portugues (Brasil)' : 'Ingles'}
                 action={
-                  <select 
+                  <select
                     value={profile.language}
                     onChange={(e) => updateProfile({ language: e.target.value })}
                     className="bg-[var(--aethel-surface-quaternary)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] rounded px-2 py-1 text-sm"
@@ -570,20 +570,20 @@ export default function ProfilePage() {
                   </select>
                 }
               />
-              <SettingRow 
-                icon={Clock} 
-                label="Fuso horario" 
+              <SettingRow
+                icon={Clock}
+                label="Fuso horario"
                 value={profile.timezone}
               />
             </ProfileSection>
-            
+
             <ProfileSection title="Notificacoes">
-              <SettingRow 
-                icon={Bell} 
-                label="Notificacoes por e-mail" 
+              <SettingRow
+                icon={Bell}
+                label="Notificacoes por e-mail"
                 action={
-                  <button 
-                    onClick={() => updateProfile({ 
+                  <button
+                    onClick={() => updateProfile({
                       notifications: { ...profile.notifications, email: !profile.notifications.email }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
@@ -596,12 +596,12 @@ export default function ProfilePage() {
                   </button>
                 }
               />
-              <SettingRow 
-                icon={Bell} 
-                label="Notificacoes push" 
+              <SettingRow
+                icon={Bell}
+                label="Notificacoes push"
                 action={
-                  <button 
-                    onClick={() => updateProfile({ 
+                  <button
+                    onClick={() => updateProfile({
                       notifications: { ...profile.notifications, push: !profile.notifications.push }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
@@ -614,12 +614,12 @@ export default function ProfilePage() {
                   </button>
                 }
               />
-              <SettingRow 
-                icon={Mail} 
-                label="E-mails de marketing" 
+              <SettingRow
+                icon={Mail}
+                label="E-mails de marketing"
                 action={
-                  <button 
-                    onClick={() => updateProfile({ 
+                  <button
+                    onClick={() => updateProfile({
                       notifications: { ...profile.notifications, marketing: !profile.notifications.marketing }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
@@ -635,9 +635,9 @@ export default function ProfilePage() {
             </ProfileSection>
           </>
         )}
-        
+
       </main>
-      
+
       {/* Two-Factor Modal */}
       {twoFactorModal && (
         <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] flex items-center justify-center z-50">
@@ -752,12 +752,12 @@ export default function ProfilePage() {
               </div>
               <h3 className="text-xl font-bold text-[var(--aethel-text-primary)]">Excluir conta</h3>
             </div>
-            
+
             <p className="text-[var(--aethel-text-secondary)] mb-6">
-              Esta acao e <strong className="text-[var(--aethel-text-primary)]">permanente e irreversivel</strong>. 
+              Esta acao e <strong className="text-[var(--aethel-text-primary)]">permanente e irreversivel</strong>.
               Todos os seus dados, projetos e configuracoes serao excluidos.
             </p>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}

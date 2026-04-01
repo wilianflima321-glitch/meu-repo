@@ -1,12 +1,12 @@
 ﻿/**
  * Usage Dashboard - Visualização de Consumo de Recursos
- * 
+ *
  * Mostra ao usuário seu consumo atual de:
  * - Tokens de IA
  * - Storage
  * - Minutos de build
  * - Horas de GPU
- * 
+ *
  * @module components/billing/UsageDashboard
  */
 
@@ -14,12 +14,12 @@
 
 import React, { useMemo } from 'react';
 import useSWR from 'swr';
-import { 
-  Cpu, 
-  HardDrive, 
-  Zap, 
-  Clock, 
-  TrendingUp, 
+import {
+  Cpu,
+  HardDrive,
+  Zap,
+  Clock,
+  TrendingUp,
   AlertTriangle,
   Sparkles,
   Server,
@@ -81,7 +81,7 @@ export function UsageDashboard() {
 
   const metrics: UsageMetric[] = useMemo(() => {
     if (!usage) return [];
-    
+
     return [
       {
         id: 'ai-tokens',
@@ -165,7 +165,7 @@ export function UsageDashboard() {
         <div>
           <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Seu consumo</h2>
           <p className="text-sm text-[var(--aethel-text-tertiary)]">
-            Plano <span className="text-[var(--aethel-info)] font-medium">{usage.plan.name}</span> - 
+            Plano <span className="text-[var(--aethel-info)] font-medium">{usage.plan.name}</span> -
             Renova em {daysUntilRenewal} dias
           </p>
         </div>
@@ -217,13 +217,13 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
 
   const colorOptions = {
     indigo: { bg: 'bg-sky-500', text: 'text-[var(--aethel-info)]', ring: 'ring-sky-500/30' },
-    blue: { bg: 'bg-blue-500', text: 'text-blue-400', ring: 'ring-blue-500/30' },
-    green: { bg: 'bg-green-500', text: 'text-green-400', ring: 'ring-green-500/30' },
-    purple: { bg: 'bg-blue-500', text: 'text-blue-400', ring: 'ring-sky-500/30' },
+    blue: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', text: 'text-[var(--aethel-info-light)]', ring: 'ring-blue-500/30' },
+    green: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]', text: 'text-[var(--aethel-success-light)]', ring: 'ring-green-500/30' },
+    purple: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', text: 'text-[var(--aethel-info-light)]', ring: 'ring-sky-500/30' },
     amber: { bg: 'bg-[var(--aethel-warning)]', text: 'text-[var(--aethel-warning-light)]', ring: 'ring-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' },
-    cyan: { bg: 'bg-cyan-500', text: 'text-cyan-400', ring: 'ring-cyan-500/30' },
+    cyan: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', text: 'text-[var(--aethel-info-light)]', ring: 'ring-cyan-500/30' },
   };
-  
+
   const colorClasses = colorOptions[metric.color as keyof typeof colorOptions] || colorOptions.indigo;
 
   const formatNumber = (num: number) => {
@@ -234,7 +234,7 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
 
   return (
     <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-5 border ${
-      isCritical ? 'border-red-500/50' : isWarning ? 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]' : 'border-[var(--aethel-border-primary)]'
+      isCritical ? 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : isWarning ? 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]' : 'border-[var(--aethel-border-primary)]'
     }`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -248,7 +248,7 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
           </div>
         </div>
         {isCritical && (
-          <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full font-medium">
+          <span className="px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs rounded-full font-medium">
             Crítico
           </span>
         )}
@@ -271,9 +271,9 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
 
       {/* Progress Bar */}
       <div className="h-2 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
-        <div 
+        <div
           className={`h-full rounded-full transition-all duration-500 ${
-            isCritical ? 'bg-red-500' : isWarning ? 'bg-[var(--aethel-warning)]' : colorClasses.bg
+            isCritical ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : isWarning ? 'bg-[var(--aethel-warning)]' : colorClasses.bg
           }`}
           style={{ width: `${percentage}%` }}
         />
@@ -282,7 +282,7 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
       {/* Percentage */}
       <div className="mt-2 flex items-center justify-between text-xs">
         <span className={`${
-          isCritical ? 'text-red-400' : isWarning ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-text-tertiary)]'
+          isCritical ? 'text-[var(--aethel-error-light)]' : isWarning ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-text-tertiary)]'
         }`}>
           {percentage.toFixed(1)}% usado
         </span>
@@ -297,7 +297,7 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
 function UsageChart({ history }: { history: UsageData['history'] }) {
   // Gráfico simplificado - em produção usar Recharts ou Victory
   const maxTokens = Math.max(...history.map(h => h.aiTokens), 1);
-  
+
   return (
     <div className="h-48 flex items-end gap-1">
       {history.slice(-30).map((day, i) => {
@@ -339,15 +339,15 @@ function UsageSkeleton() {
 
 function UsageError() {
   return (
-    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 text-center">
-      <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+    <div className="bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-xl p-8 text-center">
+      <AlertTriangle className="w-12 h-12 text-[var(--aethel-error-light)] mx-auto mb-4" />
       <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-2">
         Erro ao carregar dados de consumo
       </h3>
       <p className="text-[var(--aethel-text-tertiary)] mb-4">
         Não foi possível carregar seus dados de consumo. Tente novamente.
       </p>
-      <button 
+      <button
         onClick={() => window.location.reload()}
         className="px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
       >

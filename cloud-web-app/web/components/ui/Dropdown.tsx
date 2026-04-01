@@ -88,8 +88,8 @@ export function Dropdown({ trigger, items, align = 'right', width = 'auto' }: Dr
               flex items-center gap-3 w-full px-4 py-2 text-sm text-left
               transition-colors duration-150
               ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-              ${item.danger 
-                ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]' 
+              ${item.danger
+                ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]'
                 : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
               }
             `

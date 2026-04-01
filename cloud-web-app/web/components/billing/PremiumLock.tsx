@@ -1,14 +1,14 @@
 /**
  * PremiumLock Component - Paywall para Features Premium
- * 
+ *
  * Wrapper que bloqueia conteudo e exibe CTA de upgrade quando
  * o usuario nao tem acesso a uma feature especifica.
- * 
+ *
  * Uso:
  * <PremiumLock feature="agents" plan="pro">
  *   <AIAgentPanel />
  * </PremiumLock>
- * 
+ *
  * Se o usuario nao tiver o plano necessario, mostra overlay com:
  * - Descricao da feature
  * - Beneficios do upgrade
@@ -239,7 +239,7 @@ export function PremiumLock({
   onUpgradeClick,
 }: PremiumLockProps) {
   const [showModal, setShowModal] = useState(false);
-  
+
   // Fetch user's current plan
   const { data: userData } = useSWR<{ plan: string }>('/api/auth/me', fetcher);
   const userPlan = (userData?.plan?.replace('_trial', '') || 'starter') as PlanId;

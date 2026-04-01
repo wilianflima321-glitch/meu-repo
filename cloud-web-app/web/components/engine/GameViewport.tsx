@@ -14,7 +14,7 @@ let rapierLoaded = false;
 async function loadRapier() {
   if (rapierLoaded) return;
   rapierLoaded = true;
-  
+
   if (typeof window !== 'undefined') {
     try {
       // Usa eval para evitar que webpack tente bundlar o módulo
@@ -102,16 +102,16 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
     <div className="w-full h-full bg-[var(--aethel-surface-primary)] relative">
       {/* Toolbar Overlay */}
       <div className="absolute top-4 left-4 z-10 flex gap-2">
-        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur p-2 rounded border border-[var(--aethel-border-primary)] text-xs text-white">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur p-2 rounded border border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-primary)]">
           Mode: <span className="font-bold text-sky-400 uppercase">{mode}</span>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur p-2 rounded border border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-success)] flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/> 
+          <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] animate-pulse"/>
           {Physics ? 'Rapier Physics v3' : 'No Physics (Rapier not installed)'}
         </div>
-        <button 
+        <button
           onClick={() => setBoxes(prev => [...prev, [(Math.random() - 0.5) * 5, 10, (Math.random() - 0.5) * 5]])}
-          className="bg-[var(--aethel-info)] hover:bg-sky-700 text-white px-3 py-1 rounded text-xs font-bold transition"
+          className="bg-[var(--aethel-info)] hover:bg-sky-700 text-[var(--aethel-text-primary)] px-3 py-1 rounded text-xs font-bold transition"
         >
           Spawn Cube
         </button>
@@ -121,14 +121,14 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
         <Suspense fallback={null}>
           {/* Environment */}
           <ambientLight intensity={0.5} />
-          <directionalLight 
-            position={[10, 10, 5]} 
-            intensity={1} 
-            castShadow 
-            shadow-mapSize={[1024, 1024]} 
+          <directionalLight
+            position={[10, 10, 5]}
+            intensity={1}
+            castShadow
+            shadow-mapSize={[1024, 1024]}
           />
           <Environment preset="city" />
-          
+
           {/* Editor Helpers */}
           {mode === 'edit' && <Grid infiniteGrid fadeDistance={50} sectionColor={gridSectionColor} cellColor={gridCellColor} />}
           <OrbitControls makeDefault />

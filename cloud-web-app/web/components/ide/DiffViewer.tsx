@@ -53,19 +53,19 @@ function computeDiff(oldText: string, newText: string): DiffLine[] {
   const oldLines = oldText.split('\n')
   const newLines = newText.split('\n')
   const diff: DiffLine[] = []
-  
+
   // Simple LCS-based diff (in production, use a library like diff-match-patch)
   const lcs = computeLCS(oldLines, newLines)
-  
+
   let oldIdx = 0
   let newIdx = 0
   let lcsIdx = 0
-  
+
   while (oldIdx < oldLines.length || newIdx < newLines.length) {
     const oldLine = oldLines[oldIdx]
     const newLine = newLines[newIdx]
     const lcsLine = lcs[lcsIdx]
-    
+
     if (oldIdx < oldLines.length && oldLine === lcsLine && newIdx < newLines.length && newLine === lcsLine) {
       // Unchanged line
       diff.push({
@@ -112,7 +112,7 @@ function computeDiff(oldText: string, newText: string): DiffLine[] {
       }
     }
   }
-  
+
   return diff
 }
 
@@ -120,7 +120,7 @@ function computeLCS(a: string[], b: string[]): string[] {
   const m = a.length
   const n = b.length
   const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0))
-  
+
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
       if (a[i - 1] === b[j - 1]) {
@@ -130,7 +130,7 @@ function computeLCS(a: string[], b: string[]): string[] {
       }
     }
   }
-  
+
   // Backtrack to find LCS
   const lcs: string[] = []
   let i = m, j = n
@@ -145,7 +145,7 @@ function computeLCS(a: string[], b: string[]): string[] {
       j--
     }
   }
-  
+
   return lcs
 }
 
@@ -156,7 +156,7 @@ function groupIntoHunks(diff: DiffLine[]): DiffHunk[] {
   let currentHunk: DiffLine[] = []
   let hunkStart = 0
   let lastChangeIdx = -10 // Context lines threshold
-  
+
   diff.forEach((line, idx) => {
     if (line.type !== 'unchanged') {
       // Start new hunk or extend current
@@ -193,7 +193,7 @@ function groupIntoHunks(diff: DiffLine[]): DiffHunk[] {
       }
     }
   })
-  
+
   // Close last hunk
   if (currentHunk.some(l => l.type !== 'unchanged')) {
     hunks.push({
@@ -204,7 +204,7 @@ function groupIntoHunks(diff: DiffLine[]): DiffHunk[] {
       accepted: null,
     })
   }
-  
+
   return hunks
 }
 
@@ -223,21 +223,21 @@ function DiffLineComponent({ line, showLineNumbers, highlightSyntax }: DiffLineP
     removed: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]',
     modified: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
   }[line.type]
-  
+
   const textColor = {
     unchanged: 'text-[var(--aethel-text-secondary)]',
     added: 'text-[var(--aethel-success-light)]',
     removed: 'text-[var(--aethel-error)]',
     modified: 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]',
   }[line.type]
-  
+
   const marker = {
     unchanged: ' ',
     added: '+',
     removed: '-',
     modified: '~',
   }[line.type]
-  
+
   return (
     <div className={`flex items-stretch ${bgColor} hover:bg-[var(--aethel-surface-tertiary)]/30`}>
       {showLineNumbers && (
@@ -271,13 +271,13 @@ interface DiffHunkProps {
 
 function DiffHunkComponent({ hunk, onAccept, onReject, showLineNumbers }: DiffHunkProps) {
   const hasChanges = hunk.lines.some(l => l.type !== 'unchanged')
-  
+
   return (
     <div className={`border rounded-lg overflow-hidden mb-4 ${
-      hunk.accepted === true 
-        ? 'border-[color-mix(in_srgb,var(--aethel-success)_45%,transparent)]' 
-        : hunk.accepted === false 
-        ? 'border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] opacity-50' 
+      hunk.accepted === true
+        ? 'border-[color-mix(in_srgb,var(--aethel-success)_45%,transparent)]'
+        : hunk.accepted === false
+        ? 'border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] opacity-50'
         : 'border-[var(--aethel-border-secondary)]'
     }`}>
       {/* Hunk header */}
@@ -285,7 +285,7 @@ function DiffHunkComponent({ hunk, onAccept, onReject, showLineNumbers }: DiffHu
         <span className="text-xs text-[var(--aethel-text-tertiary)] font-mono">
           @@ Lines {hunk.startLine + 1} - {hunk.endLine + 1} @@
         </span>
-        
+
         {hasChanges && hunk.accepted === null && (
           <div className="flex items-center gap-1">
             <button
@@ -304,14 +304,14 @@ function DiffHunkComponent({ hunk, onAccept, onReject, showLineNumbers }: DiffHu
             </button>
           </div>
         )}
-        
+
         {hunk.accepted === true && (
           <span className="text-xs text-[var(--aethel-success-light)] flex items-center gap-1">
             <Check className="w-3 h-3" />
             Aceito
           </span>
         )}
-        
+
         {hunk.accepted === false && (
           <span className="text-xs text-[var(--aethel-error)] flex items-center gap-1">
             <X className="w-3 h-3" />
@@ -319,7 +319,7 @@ function DiffHunkComponent({ hunk, onAccept, onReject, showLineNumbers }: DiffHu
           </span>
         )}
       </div>
-      
+
       {/* Hunk content */}
       <div className="overflow-x-auto">
         {hunk.lines.map((line, idx) => (
@@ -345,11 +345,11 @@ function SideBySideView({ originalContent, modifiedContent }: SideBySideViewProp
   const originalLines = originalContent.split('\n')
   const modifiedLines = modifiedContent.split('\n')
   const diff = computeDiff(originalContent, modifiedContent)
-  
+
   // Build aligned lines for side-by-side
   const leftLines: (DiffLine | null)[] = []
   const rightLines: (DiffLine | null)[] = []
-  
+
   diff.forEach(line => {
     if (line.type === 'unchanged') {
       leftLines.push(line)
@@ -362,7 +362,7 @@ function SideBySideView({ originalContent, modifiedContent }: SideBySideViewProp
       rightLines.push(line)
     }
   })
-  
+
   return (
     <div className="flex">
       {/* Left (Original) */}
@@ -380,7 +380,7 @@ function SideBySideView({ originalContent, modifiedContent }: SideBySideViewProp
           ))}
         </div>
       </div>
-      
+
       {/* Right (Modified) */}
       <div className="flex-1">
         <div className="px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-b border-[var(--aethel-border-secondary)] text-xs font-semibold text-[var(--aethel-success-light)]">
@@ -421,40 +421,40 @@ export default function DiffViewer({
   const [viewMode, setViewMode] = useState<'side-by-side' | 'inline' | 'unified'>(mode)
   const [hunks, setHunks] = useState<DiffHunk[]>([])
   const [isFullscreen, setIsFullscreen] = useState(false)
-  
+
   // Compute diff and hunks
   useEffect(() => {
     const diff = computeDiff(originalContent, modifiedContent)
     const groupedHunks = groupIntoHunks(diff)
     setHunks(groupedHunks)
   }, [originalContent, modifiedContent])
-  
+
   // Handle hunk accept/reject
   const handleAcceptHunk = useCallback((hunkId: string) => {
-    setHunks(prev => prev.map(h => 
+    setHunks(prev => prev.map(h =>
       h.id === hunkId ? { ...h, accepted: true } : h
     ))
     onAcceptHunk(hunkId)
   }, [onAcceptHunk])
-  
+
   const handleRejectHunk = useCallback((hunkId: string) => {
-    setHunks(prev => prev.map(h => 
+    setHunks(prev => prev.map(h =>
       h.id === hunkId ? { ...h, accepted: false } : h
     ))
     onRejectHunk(hunkId)
   }, [onRejectHunk])
-  
+
   // Accept/Reject all
   const handleAcceptAll = useCallback(() => {
     setHunks(prev => prev.map(h => ({ ...h, accepted: true })))
     onAcceptAll()
   }, [onAcceptAll])
-  
+
   const handleRejectAll = useCallback(() => {
     setHunks(prev => prev.map(h => ({ ...h, accepted: false })))
     onRejectAll()
   }, [onRejectAll])
-  
+
   // Apply changes
   const handleApply = useCallback(() => {
     // Build final content from accepted hunks
@@ -462,7 +462,7 @@ export default function DiffViewer({
     // In real implementation, merge accepted changes into original
     onApply(modifiedContent)
   }, [hunks, modifiedContent, onApply])
-  
+
   // Stats
   const stats = useMemo(() => {
     const diff = computeDiff(originalContent, modifiedContent)
@@ -475,12 +475,12 @@ export default function DiffViewer({
       rejected: hunks.filter(h => h.accepted === false).length,
     }
   }, [originalContent, modifiedContent, hunks])
-  
+
   // Copy to clipboard
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(modifiedContent)
   }, [modifiedContent])
-  
+
   return (
     <div className={`flex flex-col h-full bg-[var(--aethel-surface-secondary)] ${isFullscreen ? 'fixed inset-0 z-50' : ''} ${className}`}>
       {/* Header */}
@@ -489,7 +489,7 @@ export default function DiffViewer({
           <FileCode className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{resolvedFileName}</span>
           <span className="text-xs text-[var(--aethel-text-tertiary)]">{language}</span>
-          
+
           {/* Stats */}
           <div className="flex items-center gap-2 ml-4 text-xs">
             <span className="text-[var(--aethel-success-light)]">+{stats.additions}</span>
@@ -501,7 +501,7 @@ export default function DiffViewer({
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {/* View mode toggle */}
           <div className="flex items-center bg-[var(--aethel-surface-quaternary)] rounded overflow-hidden">
@@ -518,7 +518,7 @@ export default function DiffViewer({
               Lado a lado
             </button>
           </div>
-          
+
           {/* Actions */}
           <button
             onClick={handleCopy}
@@ -543,7 +543,7 @@ export default function DiffViewer({
           </button>
         </div>
       </div>
-      
+
       {/* Diff content */}
       <div className="flex-1 overflow-auto">
         {viewMode === 'side-by-side' ? (
@@ -562,7 +562,7 @@ export default function DiffViewer({
                 showLineNumbers={true}
               />
             ))}
-            
+
             {hunks.length === 0 && (
               <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
                 <Check className="w-12 h-12 mx-auto mb-2 opacity-30" />
@@ -572,7 +572,7 @@ export default function DiffViewer({
           </div>
         )}
       </div>
-      
+
       {/* Footer actions */}
       <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-tertiary)] border-t border-[var(--aethel-border-secondary)]">
         <div className="flex items-center gap-2">
@@ -600,7 +600,7 @@ export default function DiffViewer({
             Resetar
           </button>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">
             {stats.accepted}/{stats.hunks} mudancas aceitas

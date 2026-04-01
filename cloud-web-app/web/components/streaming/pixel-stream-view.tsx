@@ -1,26 +1,26 @@
 ﻿/**
  * AETHEL ENGINE - Pixel Streaming React Component
- * 
+ *
  * Full-featured React component for cloud GPU streaming.
  * Provides UI for connection status, quality controls, and stats overlay.
- * 
+ *
  * @version 2.0.0
  */
 
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
-import { 
-    usePixelStreaming, 
-    PixelStreamingConfig, 
-    StreamingStats 
+import {
+    usePixelStreaming,
+    PixelStreamingConfig,
+    StreamingStats
 } from '@/lib/pixel-streaming';
 import { cn } from '@/lib/utils';
-import { 
-    Play, 
-    Pause, 
-    Settings, 
-    Maximize2, 
+import {
+    Play,
+    Pause,
+    Settings,
+    Maximize2,
     Minimize2,
     Volume2,
     VolumeX,
@@ -50,34 +50,34 @@ import { Badge } from '@/components/ui/Badge';
 export interface PixelStreamViewProps {
     /** Streaming server URL */
     serverUrl?: string;
-    
+
     /** Initial configuration */
     config?: Partial<PixelStreamingConfig>;
-    
+
     /** Auto-connect on mount */
     autoConnect?: boolean;
-    
+
     /** Show stats overlay */
     showStats?: boolean;
-    
+
     /** Show quality controls */
     showControls?: boolean;
-    
+
     /** Show fullscreen button */
     allowFullscreen?: boolean;
-    
+
     /** Custom CSS class */
     className?: string;
-    
+
     /** Callback when connected */
     onConnected?: () => void;
-    
+
     /** Callback when disconnected */
     onDisconnected?: () => void;
-    
+
     /** Callback on error */
     onError?: (error: string) => void;
-    
+
     /** Callback on stats update */
     onStatsUpdate?: (stats: StreamingStats) => void;
 }
@@ -100,76 +100,76 @@ type QualityPreset = keyof typeof QUALITY_PRESETS;
 // STATS OVERLAY COMPONENT
 // ============================================================================
 
-const StatsOverlay = memo(function StatsOverlay({ 
-    stats, 
-    visible 
-}: { 
+const StatsOverlay = memo(function StatsOverlay({
+    stats,
+    visible
+}: {
     stats: StreamingStats | null;
     visible: boolean;
 }) {
     if (!visible || !stats) return null;
-    
+
     const getQualityColor = (score: number) => {
-        if (score >= 80) return 'text-green-400';
-        if (score >= 50) return 'text-yellow-400';
-        return 'text-red-400';
+        if (score >= 80) return 'text-[var(--aethel-success-light)]';
+        if (score >= 50) return 'text-[var(--aethel-warning-light)]';
+        return 'text-[var(--aethel-error-light)]';
     };
-    
+
     const getLatencyColor = (rtt: number) => {
-        if (rtt < 30) return 'text-green-400';
-        if (rtt < 60) return 'text-yellow-400';
-        return 'text-red-400';
+        if (rtt < 30) return 'text-[var(--aethel-success-light)]';
+        if (rtt < 60) return 'text-[var(--aethel-warning-light)]';
+        return 'text-[var(--aethel-error-light)]';
     };
-    
+
     return (
-        <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-sm rounded-lg p-3 text-xs font-mono text-white z-20 min-w-[200px]">
-            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/20">
+        <div className="absolute top-4 left-4 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm rounded-lg p-3 text-xs font-mono text-[var(--aethel-text-primary)] z-20 min-w-[200px]">
+            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[var(--aethel-border-primary)]">
                 <BarChart3 className="w-4 h-4" />
                 <span className="font-semibold">Stream Stats</span>
             </div>
-            
+
             <div className="space-y-1">
                 <div className="flex justify-between">
-                    <span className="text-gray-400">Resolution:</span>
+                    <span className="text-[var(--aethel-text-secondary)]">Resolution:</span>
                     <span>{stats.resolution.width}x{stats.resolution.height}</span>
                 </div>
-                
+
                 <div className="flex justify-between">
-                    <span className="text-gray-400">FPS:</span>
+                    <span className="text-[var(--aethel-text-secondary)]">FPS:</span>
                     <span>{stats.fps}</span>
                 </div>
-                
+
                 <div className="flex justify-between">
-                    <span className="text-gray-400">Bitrate:</span>
+                    <span className="text-[var(--aethel-text-secondary)]">Bitrate:</span>
                     <span>{(stats.bitrate / 1000).toFixed(1)} Mbps</span>
                 </div>
-                
+
                 <div className="flex justify-between">
-                    <span className="text-gray-400">Latency:</span>
+                    <span className="text-[var(--aethel-text-secondary)]">Latency:</span>
                     <span className={getLatencyColor(stats.rtt)}>
                         {stats.rtt.toFixed(0)} ms
                     </span>
                 </div>
-                
+
                 <div className="flex justify-between">
-                    <span className="text-gray-400">Codec:</span>
+                    <span className="text-[var(--aethel-text-secondary)]">Codec:</span>
                     <span className="uppercase">{stats.codec}</span>
                 </div>
-                
+
                 <div className="flex justify-between">
-                    <span className="text-gray-400">Frames:</span>
+                    <span className="text-[var(--aethel-text-secondary)]">Frames:</span>
                     <span>
                         {stats.framesDecoded.toLocaleString()}
                         {stats.framesDropped > 0 && (
-                            <span className="text-red-400 ml-1">
+                            <span className="text-[var(--aethel-error-light)] ml-1">
                                 (-{stats.framesDropped})
                             </span>
                         )}
                     </span>
                 </div>
-                
-                <div className="flex justify-between items-center pt-1 border-t border-white/20 mt-1">
-                    <span className="text-gray-400">Quality:</span>
+
+                <div className="flex justify-between items-center pt-1 border-t border-[var(--aethel-border-primary)] mt-1">
+                    <span className="text-[var(--aethel-text-secondary)]">Quality:</span>
                     <span className={cn('font-bold', getQualityColor(stats.qualityScore))}>
                         {stats.qualityScore}%
                     </span>
@@ -197,18 +197,18 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
     onRetry: () => void;
 }) {
     if (isStreaming) return null;
-    
+
     return (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/90 z-30">
+        <div className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] z-30">
             <div className="text-center space-y-4">
                 {error ? (
                     <>
-                        <div className="w-16 h-16 mx-auto bg-red-500/20 rounded-full flex items-center justify-center">
-                            <AlertTriangle className="w-8 h-8 text-red-400" />
+                        <div className="w-16 h-16 mx-auto bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-full flex items-center justify-center">
+                            <AlertTriangle className="w-8 h-8 text-[var(--aethel-error-light)]" />
                         </div>
-                        <div className="text-red-400 font-medium">Connection Failed</div>
-                        <div className="text-gray-400 text-sm max-w-xs">{error}</div>
-                        <Button 
+                        <div className="text-[var(--aethel-error-light)] font-medium">Connection Failed</div>
+                        <div className="text-[var(--aethel-text-secondary)] text-sm max-w-xs">{error}</div>
+                        <Button
                             onClick={onRetry}
                             variant="outline"
                             className="mt-4"
@@ -218,22 +218,22 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                     </>
                 ) : isConnected ? (
                     <>
-                        <div className="w-16 h-16 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center animate-pulse">
-                            <Monitor className="w-8 h-8 text-blue-400" />
+                        <div className="w-16 h-16 mx-auto bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-full flex items-center justify-center animate-pulse">
+                            <Monitor className="w-8 h-8 text-[var(--aethel-info-light)]" />
                         </div>
-                        <div className="text-white font-medium">Initializing Stream...</div>
-                        <div className="text-gray-400 text-sm">Connecting to render server</div>
+                        <div className="text-[var(--aethel-text-primary)] font-medium">Initializing Stream...</div>
+                        <div className="text-[var(--aethel-text-secondary)] text-sm">Connecting to render server</div>
                     </>
                 ) : (
                     <>
                         <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]">
-                            <Play className="w-10 h-10 text-white ml-1" />
+                            <Play className="w-10 h-10 text-[var(--aethel-text-primary)] ml-1" />
                         </div>
-                        <div className="text-white font-medium text-lg">Cloud Rendering</div>
-                        <div className="text-gray-400 text-sm max-w-xs">
+                        <div className="text-[var(--aethel-text-primary)] font-medium text-lg">Cloud Rendering</div>
+                        <div className="text-[var(--aethel-text-secondary)] text-sm max-w-xs">
                             Stream AAA graphics from cloud GPU directly to your browser
                         </div>
-                        <Button 
+                        <Button
                             onClick={onConnect}
                             className="mt-4 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700"
                             size="lg"
@@ -278,10 +278,10 @@ const ControlsBar = memo(function ControlsBar({
     onDisconnect: () => void;
 }) {
     if (!isStreaming) return null;
-    
+
     const getConnectionBadge = () => {
         if (!stats) return null;
-        
+
           if (stats.qualityScore >= 80) {
             return <Badge variant="success">Excelente</Badge>;
           } else if (stats.qualityScore >= 50) {
@@ -290,7 +290,7 @@ const ControlsBar = memo(function ControlsBar({
             return <Badge variant="error">Ruim</Badge>;
           }
     };
-    
+
     return (
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 hover:opacity-100 transition-opacity z-20">
             <div className="flex items-center justify-between">
@@ -300,18 +300,18 @@ const ControlsBar = memo(function ControlsBar({
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-white hover:bg-white/20"
+                            className="text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
                             onClick={onDisconnect}
                         >
                             <Pause className="w-5 h-5" />
                         </Button>
                     </Tooltip>
-                    
+
                     <Tooltip content={isMuted ? 'Unmute' : 'Mute'}>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-white hover:bg-white/20"
+                            className="text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
                             onClick={onToggleMute}
                         >
                             {isMuted ? (
@@ -321,12 +321,12 @@ const ControlsBar = memo(function ControlsBar({
                             )}
                         </Button>
                     </Tooltip>
-                    
+
                     {getConnectionBadge()}
                 </div>
-                
+
                 {/* Center - Stats */}
-                <div className="flex items-center gap-4 text-sm text-white/80">
+                <div className="flex items-center gap-4 text-sm text-[var(--aethel-text-secondary)]">
                     {stats && (
                         <>
                             <span>{stats.resolution.width}x{stats.resolution.height}</span>
@@ -335,7 +335,7 @@ const ControlsBar = memo(function ControlsBar({
                         </>
                     )}
                 </div>
-                
+
                 {/* Right controls */}
                 <div className="flex items-center gap-2">
                     <Tooltip content="Toggle Stats">
@@ -343,22 +343,22 @@ const ControlsBar = memo(function ControlsBar({
                             variant="ghost"
                             size="icon"
                             className={cn(
-                                "text-white hover:bg-white/20",
-                                showStats && "bg-white/20"
+                                "text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]",
+                                showStats && "bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
                             )}
                             onClick={onToggleStats}
                         >
                             <BarChart3 className="w-5 h-5" />
                         </Button>
                     </Tooltip>
-                    
+
                     {/* Quality selector */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-white hover:bg-white/20"
+                                className="text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
                             >
                                 <Settings className="w-5 h-5" />
                             </Button>
@@ -382,12 +382,12 @@ const ControlsBar = memo(function ControlsBar({
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    
+
                     <Tooltip content={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-white hover:bg-white/20"
+                            className="text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
                             onClick={onToggleFullscreen}
                         >
                             {isFullscreen ? (
@@ -421,18 +421,18 @@ export function PixelStreamView({
     onStatsUpdate
 }: PixelStreamViewProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    
+
     const [showStatsOverlay, setShowStatsOverlay] = useState(initialShowStats);
     const [isMuted, setIsMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [quality, setQuality] = useState<QualityPreset>('auto');
-    
+
     // Initialize streaming client
     const streamConfig: Partial<PixelStreamingConfig> = {
         ...config,
         ...(serverUrl && { serverUrl })
     };
-    
+
     const {
         client,
         stats,
@@ -445,58 +445,58 @@ export function PixelStreamView({
         config: streamConfig,
         autoConnect
     });
-    
+
     // Callbacks
     useEffect(() => {
         if (isConnected && onConnected) {
             onConnected();
         }
     }, [isConnected, onConnected]);
-    
+
     useEffect(() => {
         if (!isConnected && onDisconnected) {
             onDisconnected();
         }
     }, [isConnected, onDisconnected]);
-    
+
     useEffect(() => {
         if (error && onError) {
             onError(error);
         }
     }, [error, onError]);
-    
+
     useEffect(() => {
         if (stats && onStatsUpdate) {
             onStatsUpdate(stats);
         }
     }, [stats, onStatsUpdate]);
-    
+
     // Fullscreen handling
     useEffect(() => {
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };
-        
+
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         return () => {
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
     }, []);
-    
+
     const toggleFullscreen = useCallback(async () => {
         if (!containerRef.current) return;
-        
+
         if (document.fullscreenElement) {
             await document.exitFullscreen();
         } else {
             await containerRef.current.requestFullscreen();
         }
     }, []);
-    
+
     // Quality change
     const handleQualityChange = useCallback((preset: QualityPreset) => {
         setQuality(preset);
-        
+
         if (client && preset !== 'auto') {
             const settings = QUALITY_PRESETS[preset];
             client.requestQualityChange({
@@ -507,47 +507,47 @@ export function PixelStreamView({
             });
         }
     }, [client]);
-    
+
     // Mute toggle
     const toggleMute = useCallback(() => {
         setIsMuted(prev => !prev);
-        
+
         const videoElement = client?.getVideoElement();
         if (videoElement) {
             videoElement.muted = !isMuted;
         }
     }, [client, isMuted]);
-    
+
     // Handle reconnect
     const handleRetry = useCallback(() => {
         connect();
     }, [connect]);
-    
+
     // Attach video when streaming starts
     useEffect(() => {
         if (containerRef.current && client && isStreaming) {
             client.attachTo(containerRef.current);
         }
     }, [client, isStreaming]);
-    
+
     return (
-        <div 
+        <div
             ref={containerRef}
             className={cn(
-                "relative w-full h-full bg-black overflow-hidden",
+                "relative w-full h-full bg-[var(--aethel-surface-primary)] overflow-hidden",
                 "focus:outline-none",
                 className
             )}
             tabIndex={0}
         >
             {/* Video will be appended here by client.attachTo() */}
-            
+
             {/* Stats Overlay */}
-            <StatsOverlay 
-                stats={stats} 
-                visible={showStatsOverlay && isStreaming} 
+            <StatsOverlay
+                stats={stats}
+                visible={showStatsOverlay && isStreaming}
             />
-            
+
             {/* Connection Overlay */}
             <ConnectionOverlay
                 isConnected={isConnected}
@@ -556,7 +556,7 @@ export function PixelStreamView({
                 onConnect={connect}
                 onRetry={handleRetry}
             />
-            
+
             {/* Controls Bar */}
             {showControls && (
                 <ControlsBar
@@ -573,10 +573,10 @@ export function PixelStreamView({
                     onDisconnect={disconnect}
                 />
             )}
-            
+
             {/* Latency Warning */}
             {stats && stats.rtt > 100 && isStreaming && (
-                <div className="absolute top-4 right-4 bg-yellow-500/90 text-black px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 z-20">
+                <div className="absolute top-4 right-4 bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-text-primary)] px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 z-20">
                     <AlertTriangle className="w-4 h-4" />
                     High Latency: {stats.rtt.toFixed(0)}ms
                 </div>
