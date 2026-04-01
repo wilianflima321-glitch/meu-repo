@@ -59,7 +59,7 @@ const KEYBOARD_SHORTCUTS = [
 
 export default function IDEDocsPage() {
   return (
-    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <PublicHeader />
       <main className="relative z-10 mx-auto max-w-4xl px-6 pt-12 pb-20">
         <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
@@ -76,12 +76,12 @@ export default function IDEDocsPage() {
           {IDE_FEATURES.map((feature) => {
             const Icon = feature.icon
             return (
-              <div key={feature.title} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+              <div key={feature.title} className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] p-5">
                 <div className="flex items-center gap-3 mb-2">
                   <Icon className="h-5 w-5 text-[var(--aethel-primary-light)]" />
                   <h3 className="font-semibold">{feature.title}</h3>
                   {feature.shortcut && (
-                    <kbd className="ml-auto rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-[var(--aethel-text-tertiary)]">
+                    <kbd className="ml-auto rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] px-1.5 py-0.5 text-[10px] font-mono text-[var(--aethel-text-tertiary)]">
                       {feature.shortcut}
                     </kbd>
                   )}
@@ -93,16 +93,16 @@ export default function IDEDocsPage() {
         </div>
 
         <h2 className="mt-10 text-2xl font-semibold">Keyboard Shortcuts</h2>
-        <div className="mt-4 rounded-xl border border-white/10 overflow-hidden">
+        <div className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] overflow-hidden">
           {KEYBOARD_SHORTCUTS.map((shortcut, i) => (
             <div
               key={shortcut.key}
               className={`flex items-center justify-between px-4 py-2.5 ${
-                i < KEYBOARD_SHORTCUTS.length - 1 ? 'border-b border-white/5' : ''
+                i < KEYBOARD_SHORTCUTS.length - 1 ? 'border-b border-[var(--aethel-border-subtle)]' : ''
               }`}
             >
               <span className="text-sm text-[var(--aethel-text-secondary)]">{shortcut.action}</span>
-              <kbd className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-xs font-mono text-[var(--aethel-text-tertiary)]">
+              <kbd className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] px-2 py-0.5 text-xs font-mono text-[var(--aethel-text-tertiary)]">
                 {shortcut.key}
               </kbd>
             </div>
@@ -110,7 +110,7 @@ export default function IDEDocsPage() {
         </div>
 
         <h2 className="mt-10 text-2xl font-semibold">AI Context Mentions</h2>
-        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-6">
+        <div className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] p-6">
           <p className="text-sm text-[var(--aethel-text-tertiary)] mb-4">
             Use @mentions in the AI chat to inject specific context:
           </p>
@@ -122,7 +122,7 @@ export default function IDEDocsPage() {
               { mention: '@Error', desc: 'Inject current error/stacktrace from console' },
               { mention: '@git:log', desc: 'Include relevant commit history' },
             ].map((item) => (
-              <div key={item.mention} className="flex items-center gap-3 rounded-lg bg-white/[0.02] px-3 py-2">
+              <div key={item.mention} className="flex items-center gap-3 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] px-3 py-2">
                 <code className="text-sm font-mono font-semibold text-[var(--aethel-primary-light)]">{item.mention}</code>
                 <span className="text-sm text-[var(--aethel-text-tertiary)]">{item.desc}</span>
               </div>

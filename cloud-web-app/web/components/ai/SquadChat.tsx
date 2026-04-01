@@ -391,7 +391,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
               <div className="flex items-center gap-2 mt-4">
                 <button
                   onClick={onApply}
-                  className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded-lg text-sm font-medium text-white transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded-lg text-sm font-medium text-[var(--aethel-text-primary)] transition-colors"
                   aria-label="Revisar proposta"
                 >
                   <Play className="w-4 h-4" />
@@ -418,7 +418,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
               </div>
               <button
                 onClick={onRetry}
-                className="mt-2 flex items-center gap-2 rounded-lg bg-[var(--aethel-error)] px-4 py-2 text-sm font-medium text-white transition-colors hover:brightness-110"
+                className="mt-2 flex items-center gap-2 rounded-lg bg-[var(--aethel-error)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110"
               >
                 <RotateCcw className="w-4 h-4" />
                 Tentar novamente
@@ -447,7 +447,7 @@ function MessageBubble({ message, onApply, onReject, onRetry }: MessageBubblePro
     return (
       <div className="flex justify-end mb-4">
         <div className="max-w-[80%] px-4 py-3 bg-[var(--aethel-primary)] rounded-2xl rounded-br-sm">
-          <p className="text-white">{message.content}</p>
+          <p className="text-[var(--aethel-text-primary)]">{message.content}</p>
           <span className="text-xs text-[color-mix(in_srgb,var(--aethel-primary-light)_80%,transparent)] mt-1 block">
             {message.timestamp.toLocaleTimeString()}
           </span>
@@ -795,7 +795,7 @@ export function SystemPanel() {
             className={`
               p-3 rounded-xl transition-all
               ${input.trim() && !isProcessing
-                ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-white'
+                ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
               }
             `}

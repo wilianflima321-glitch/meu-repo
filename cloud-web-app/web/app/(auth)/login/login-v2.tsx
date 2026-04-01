@@ -111,18 +111,18 @@ export default function LoginPageV2() {
         Ir para formulario de login
       </a>
       <div className="pointer-events-none absolute inset-0 bg-grid-aethel" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.22),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-info)_22%,transparent),transparent_55%)]" />
 
       <div className="relative z-10 w-full max-w-6xl">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:items-stretch">
-          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-cyan-950/20 sm:p-8">
+          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-[0_24px_70px_rgba(2,8,23,0.35)] sm:p-8">
             <div className="mb-6 flex items-center justify-between gap-3">
               <Link href="/" className="inline-flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
                 <Codicon name="arrow-left" />
                 Voltar ao site
               </Link>
-              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-200">
-                Workspace
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)]">
+                Studio
               </span>
             </div>
 
@@ -217,7 +217,7 @@ export default function LoginPageV2() {
               >
                 <Codicon name="github-inverted" />
                 Continuar com GitHub
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   em breve
                 </span>
               </button>
@@ -229,7 +229,7 @@ export default function LoginPageV2() {
               >
                 <Codicon name="google" />
                 Continuar com Google
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   em breve
                 </span>
               </button>
@@ -237,7 +237,7 @@ export default function LoginPageV2() {
 
             <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">OAuth entra assim que Google e GitHub forem ligados. Por enquanto, o acesso oficial continua por email e senha.</p>
 
-            <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="mt-6 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                 Proximo passo
               </p>
@@ -273,4 +273,3 @@ export default function LoginPageV2() {
     </main>
   )
 }
-

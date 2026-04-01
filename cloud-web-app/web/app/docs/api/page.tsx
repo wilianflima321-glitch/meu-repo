@@ -69,7 +69,7 @@ const METHOD_COLORS: Record<string, string> = {
 
 export default function APIDocsPage() {
   return (
-    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <PublicHeader />
       <main className="relative z-10 mx-auto max-w-5xl px-6 pt-12 pb-20">
         <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors">
@@ -82,17 +82,17 @@ export default function APIDocsPage() {
         </p>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] p-4">
             <Key className="mb-2 h-5 w-5 text-[var(--aethel-primary-light)]" />
             <h3 className="text-sm font-semibold">Authentication</h3>
             <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Bearer token via Authorization header</p>
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] p-4">
             <Zap className="mb-2 h-5 w-5 text-[var(--aethel-warning)]" />
             <h3 className="text-sm font-semibold">Rate Limits</h3>
             <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Plan-based. Check X-RateLimit-* headers.</p>
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] p-4">
             <Globe className="mb-2 h-5 w-5 text-[var(--aethel-success)]" />
             <h3 className="text-sm font-semibold">Base URL</h3>
             <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)] font-mono">https://aethel.dev/api</p>
@@ -103,12 +103,12 @@ export default function APIDocsPage() {
           {API_ENDPOINTS.map((category) => (
             <div key={category.category}>
               <h2 className="mb-4 text-xl font-semibold">{category.category}</h2>
-              <div className="rounded-xl border border-white/10 overflow-hidden">
+              <div className="rounded-xl border border-[var(--aethel-border-primary)] overflow-hidden">
                 {category.endpoints.map((ep, i) => (
                   <div
                     key={ep.path}
-                    className={`flex items-center gap-4 px-4 py-3 hover:bg-white/[0.02] transition-colors ${
-                      i < category.endpoints.length - 1 ? 'border-b border-white/5' : ''
+                    className={`flex items-center gap-4 px-4 py-3 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] transition-colors ${
+                      i < category.endpoints.length - 1 ? 'border-b border-[var(--aethel-border-subtle)]' : ''
                     }`}
                   >
                     <span className={`inline-flex w-16 justify-center rounded-md px-2 py-0.5 text-xs font-bold ${METHOD_COLORS[ep.method] || ''}`}>

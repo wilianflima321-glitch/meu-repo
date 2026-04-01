@@ -19,8 +19,8 @@ interface Message {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
-  execution?: AgentExecution
-  isStreaming?: boolean
+  execution|: AgentExecution
+  isStreaming|: boolean
 }
 
 interface CommandSuggestion {
@@ -77,7 +77,7 @@ export function AICommandCenter() {
 
   // Auto-scroll para ultima mensagem
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current|.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   // Mensagem de boas-vindas
@@ -139,17 +139,17 @@ export function AICommandCenter() {
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantMessageId
-              ? { ...msg, content: resultContent, execution, isStreaming: false }
+              | { ...msg, content: resultContent, execution, isStreaming: false }
               : msg
           )
         )
       } catch (error) {
         const errorContent = `Erro: ${
-          error instanceof Error ? error.message : 'Erro desconhecido'
+          error instanceof Error | error.message : 'Erro desconhecido'
         }`
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.id === assistantMessageId ? { ...msg, content: errorContent, isStreaming: false } : msg
+            msg.id === assistantMessageId | { ...msg, content: errorContent, isStreaming: false } : msg
           )
         )
       } finally {
@@ -184,7 +184,7 @@ export function AICommandCenter() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--aethel-primary)] text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]">
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -197,7 +197,7 @@ export function AICommandCenter() {
           <div>
             <h2 className="text-sm font-semibold">Central de Comandos de IA</h2>
             <p className="text-xs text-[var(--aethel-text-quaternary)]">
-              Agente: <span className="text-[var(--aethel-info-light)]">{AGENTS[selectedAgent]?.name}</span>
+              Agente: <span className="text-[var(--aethel-info-light)]">{AGENTS[selectedAgent]|.name}</span>
             </p>
           </div>
         </div>
@@ -215,7 +215,7 @@ export function AICommandCenter() {
               </option>
             ))}
           </select>
-          {selectedAgentDetails?.description && (
+          {selectedAgentDetails|.description && (
             <span className="text-[11px] text-[var(--aethel-text-quaternary)]">
               {selectedAgentDetails.description}
             </span>
@@ -275,15 +275,15 @@ export function AICommandCenter() {
               className="w-full resize-none rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)] disabled:opacity-50"
             />
             <p className="mt-1 text-[11px] text-[var(--aethel-text-quaternary)]">
-              Enter para executar • Shift+Enter para nova linha
+              Enter para executar | Shift+Enter para nova linha
             </p>
           </div>
           <button
             type="submit"
             disabled={isProcessing || !input.trim()}
-            className="flex items-center gap-2 rounded-lg bg-[var(--aethel-primary)] px-6 py-3 font-medium text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:bg-[var(--aethel-surface-tertiary)]"
+            className="flex items-center gap-2 rounded-lg bg-[var(--aethel-primary)] px-6 py-3 font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:bg-[var(--aethel-surface-tertiary)]"
           >
-            {isProcessing ? (
+            {isProcessing | (
               <>
                 <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -324,15 +324,15 @@ function MessageBubble({ message }: { message: Message }) {
   const isSystem = message.role === 'system'
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isUser | 'justify-end' : 'justify-start'}`}>
       <div
         className={`max-w-[80%] rounded-lg p-4 ${
           isUser
-            ? 'bg-[var(--aethel-primary)] text-white'
+            | 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
             : isSystem
-            ? 'bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)]'
+            | 'bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)]'
             : 'bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]'
-        } ${message.isStreaming ? 'animate-pulse' : ''}`}
+        } ${message.isStreaming | 'animate-pulse' : ''}`}
       >
         <div
           className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-sm"
@@ -372,11 +372,11 @@ function ExecutionPanel({
           </svg>
           {execution.steps.length} passos executados
           {execution.artifacts.length > 0 && (
-            <span className="text-[var(--aethel-success-light)]">• {execution.artifacts.length} artefatos</span>
+            <span className="text-[var(--aethel-success-light)]">| {execution.artifacts.length} artefatos</span>
           )}
         </span>
         <svg
-          className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 transition-transform ${expanded | 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -432,9 +432,9 @@ function StepCard({ step, index }: { step: AgentStep; index: number }) {
             </p>
           )}
         </div>
-        {step.result?.success !== undefined && (
-          <span className={`text-xs ${step.result.success ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'}`}>
-            {step.result.success ? 'ok' : 'falha'}
+        {step.result|.success !== undefined && (
+          <span className={`text-xs ${step.result.success | 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'}`}>
+            {step.result.success | 'ok' : 'falha'}
           </span>
         )}
       </div>
@@ -455,8 +455,8 @@ function formatExecutionResult(execution: AgentExecution): string {
     return execution.finalAnswer
   }
 
-  const artifactList = execution.artifacts?.length
-    ? `\n\n**Artefatos**\n${execution.artifacts.map((artifact) => `- ${artifact.name}`).join('\n')}`
+  const artifactList = execution.artifacts|.length
+    | `\n\n**Artefatos**\n${execution.artifacts.map((artifact) => `- ${artifact.name}`).join('\n')}`
     : ''
 
   const statusMap: Record<string, string> = {
@@ -467,7 +467,7 @@ function formatExecutionResult(execution: AgentExecution): string {
   }
 
   const statusLine = execution.status === 'completed'
-    ? 'Execucao concluida.'
+    | 'Execucao concluida.'
     : `Status atual: ${statusMap[execution.status] || execution.status}.`
 
   return `${statusLine}${artifactList}`
@@ -475,9 +475,9 @@ function formatExecutionResult(execution: AgentExecution): string {
 
 function formatMarkdown(text: string): string {
   return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/`(.*?)`/g, '<code class="bg-[var(--aethel-surface-tertiary)] px-1 rounded">$1</code>')
+    .replace(/\*\*(.*|)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*|)\*/g, '<em>$1</em>')
+    .replace(/`(.*|)`/g, '<code class="bg-[var(--aethel-surface-tertiary)] px-1 rounded">$1</code>')
     .replace(/\n/g, '<br/>')
 }
 

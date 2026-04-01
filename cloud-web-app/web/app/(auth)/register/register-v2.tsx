@@ -119,11 +119,11 @@ export default function RegisterPageV2() {
         Ir para formulario de cadastro
       </a>
       <div className="pointer-events-none absolute inset-0 bg-grid-aethel" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.22),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-primary)_22%,transparent),transparent_55%)]" />
 
       <div className="relative z-10 w-full max-w-6xl">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)] lg:items-stretch">
-          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-cyan-950/20 sm:p-8">
+          <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-[0_24px_70px_rgba(2,8,23,0.35)] sm:p-8">
             <div className="mb-6 flex items-center justify-between gap-3">
               <Link href="/" className="inline-flex items-center gap-2 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]">
                 <Codicon name="arrow-left" />
@@ -231,7 +231,7 @@ export default function RegisterPageV2() {
                 </div>
               )}
 
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                   Primeiro passo
                 </p>
@@ -264,7 +264,7 @@ export default function RegisterPageV2() {
               >
                 <Codicon name="github-inverted" />
                 Continuar com GitHub
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   em breve
                 </span>
               </button>
@@ -276,7 +276,7 @@ export default function RegisterPageV2() {
               >
                 <Codicon name="google" />
                 Continuar com Google
-                <span className="ml-auto rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
                   em breve
                 </span>
               </button>

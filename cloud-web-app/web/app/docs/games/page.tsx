@@ -46,7 +46,7 @@ const GAME_CAPABILITIES = [
 
 export default function GamesDocsPage() {
   return (
-    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <PublicHeader />
       <main className="relative z-10 mx-auto max-w-4xl px-6 pt-12 pb-20">
         <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
@@ -72,7 +72,7 @@ export default function GamesDocsPage() {
           {GAME_CAPABILITIES.map((cap) => {
             const Icon = cap.icon
             return (
-              <div key={cap.title} className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+              <div key={cap.title} className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] p-5">
                 <div className="flex items-center gap-3 mb-2">
                   <Icon className="h-5 w-5 text-[var(--aethel-success)]" />
                   <h3 className="font-semibold">{cap.title}</h3>
@@ -89,7 +89,7 @@ export default function GamesDocsPage() {
         </div>
 
         <h2 className="mt-10 text-2xl font-semibold">Quick Start</h2>
-        <div className="mt-4 rounded-xl border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-6 font-mono text-sm text-[var(--aethel-text-secondary)]">
+        <div className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-6 font-mono text-sm text-[var(--aethel-text-secondary)]">
           <p className="text-[var(--aethel-text-quaternary)]"># Create a new game project</p>
           <p>1. Go to /dashboard and click &quot;New Project&quot;</p>
           <p>2. Select &quot;Games&quot; domain</p>

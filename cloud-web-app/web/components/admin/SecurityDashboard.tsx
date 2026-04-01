@@ -64,32 +64,32 @@ interface SecurityStats {
 const SkeletonCard: React.FC = () => (
   <div className="aethel-card aethel-p-4 animate-pulse">
     <div className="flex items-center justify-between">
-      <div className="h-9 w-9 rounded-lg bg-white/10" />
-      <div className="h-4 w-12 rounded bg-white/10" />
+      <div className="h-9 w-9 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
+      <div className="h-4 w-12 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
     </div>
-    <div className="mt-3 h-8 w-20 rounded bg-white/10" />
-    <div className="mt-2 h-4 w-24 rounded bg-white/10" />
+    <div className="mt-3 h-8 w-20 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
+    <div className="mt-2 h-4 w-24 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
   </div>
 )
 
 const SkeletonEventRow: React.FC = () => (
-  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 animate-pulse">
+  <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] p-3 animate-pulse">
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex items-center gap-2">
-          <div className="h-6 w-20 rounded-full bg-white/10" />
-          <div className="h-6 w-28 rounded bg-white/10" />
+          <div className="h-6 w-20 rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
+          <div className="h-6 w-28 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
         </div>
-        <div className="mb-2 h-5 w-3/4 rounded bg-white/10" />
+        <div className="mb-2 h-5 w-3/4 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
         <div className="flex items-center gap-4">
-          <div className="h-4 w-24 rounded bg-white/10" />
-          <div className="h-4 w-16 rounded bg-white/10" />
-          <div className="h-4 w-20 rounded bg-white/10" />
+          <div className="h-4 w-24 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
+          <div className="h-4 w-16 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
+          <div className="h-4 w-20 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
         </div>
       </div>
       <div className="flex items-center gap-1">
-        <div className="h-8 w-8 rounded bg-white/10" />
-        <div className="h-8 w-8 rounded bg-white/10" />
+        <div className="h-8 w-8 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
+        <div className="h-8 w-8 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
       </div>
     </div>
   </div>
@@ -102,7 +102,7 @@ const SkeletonEventRow: React.FC = () => (
 const ErrorState: React.FC<{ message: string; onRetry: () => void }> = ({ message, onRetry }) => (
   <div className="flex flex-col items-center justify-center py-12 text-center">
     <AlertCircle className="mb-4 h-12 w-12 text-[var(--aethel-error-light)]" />
-    <h3 className="mb-2 text-lg font-semibold text-white">Erro ao carregar dados</h3>
+    <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Erro ao carregar dados</h3>
     <p className="mb-4 max-w-md text-sm text-[var(--aethel-text-tertiary)]">{message}</p>
     <button onClick={onRetry} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
       <RefreshCw className="h-4 w-4" />
@@ -114,7 +114,7 @@ const ErrorState: React.FC<{ message: string; onRetry: () => void }> = ({ messag
 const EmptyState: React.FC = () => (
   <div className="flex flex-col items-center justify-center py-12 text-center">
     <ShieldCheck className="mb-4 h-16 w-16 text-[var(--aethel-success-light)]/60" />
-    <h3 className="mb-2 text-lg font-semibold text-white">Nenhum evento de seguranca</h3>
+    <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Nenhum evento de seguranca</h3>
     <p className="max-w-md text-sm text-[var(--aethel-text-tertiary)]">
       Nenhum evento registrado. O ambiente esta protegido e operando normalmente.
     </p>
@@ -129,8 +129,8 @@ const THREAT_LEVELS: Record<
   ThreatLevel,
   { color: string; icon: React.ElementType; label: string }
 > = {
-  critical: { color: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border-rose-500/30', icon: ShieldX, label: 'CRITICO' },
-  high: { color: 'bg-orange-500/15 text-orange-300 border-orange-500/30', icon: ShieldAlert, label: 'ALTO' },
+  critical: { color: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]', icon: ShieldX, label: 'CRITICO' },
+  high: { color: 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]', icon: ShieldAlert, label: 'ALTO' },
   medium: { color: 'bg-[var(--aethel-warning)]/15 text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]', icon: AlertTriangle, label: 'MEDIO' },
   low: { color: 'bg-[var(--aethel-info)]/15 text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]', icon: Shield, label: 'BAIXO' },
   info: { color: 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_15%,transparent)] text-[var(--aethel-text-secondary)] border-[color-mix(in_srgb,var(--aethel-text-tertiary)_35%,transparent)]', icon: ShieldCheck, label: 'INFO' },
@@ -141,7 +141,7 @@ const THREAT_TYPE_LABELS: Record<ThreatType, string> = {
   code_injection: 'Injecao de codigo',
   rate_limit: 'Limite de taxa',
   path_traversal: 'Travessia de caminho',
-  auth_failure: 'Falha de auth',
+  auth_failure: 'Falha de autenticacao',
   suspicious_pattern: 'Padrao suspeito',
 }
 
@@ -178,7 +178,7 @@ const StatsCard: React.FC<{
         </div>
       )}
     </div>
-    <p className="mt-3 text-2xl font-semibold text-white">{value.toLocaleString()}</p>
+    <p className="mt-3 text-2xl font-semibold text-[var(--aethel-text-primary)]">{value.toLocaleString()}</p>
     <p className="text-sm text-[var(--aethel-text-tertiary)]">{label}</p>
   </div>
 )
@@ -189,15 +189,15 @@ const EventRow: React.FC<{
   onInvestigate: () => void
 }> = ({ event, onBloquear, onInvestigate }) => {
   const levelColors: Record<ThreatLevel, string> = {
-    critical: 'border-l-rose-500',
-    high: 'border-l-orange-500',
+    critical: 'border-l-[var(--aethel-error)]',
+    high: 'border-l-[var(--aethel-warning)]',
     medium: 'border-l-yellow-500',
-    low: 'border-l-sky-500',
+    low: 'border-l-[var(--aethel-info)]',
     info: 'border-l-[color-mix(in_srgb,var(--aethel-text-tertiary)_40%,transparent)]',
   }
 
   return (
-    <div className={`rounded-xl border border-white/10 border-l-4 ${levelColors[event.level]} bg-white/[0.03] p-3`}>
+    <div className={`rounded-xl border border-[var(--aethel-border-primary)] border-l-4 ${levelColors[event.level]} bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] p-3`}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -210,7 +210,7 @@ const EventRow: React.FC<{
             )}
           </div>
 
-          <p className="mb-1 text-sm font-medium text-white">{event.description}</p>
+          <p className="mb-1 text-sm font-medium text-[var(--aethel-text-primary)]">{event.description}</p>
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--aethel-text-tertiary)]">
             <span className="flex items-center gap-1">
@@ -299,7 +299,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
       }
 
       if (!rateLimitsResponse.ok) {
-        throw new Error(`Falha ao buscar rate limits: ${rateLimitsResponse.status} ${rateLimitsResponse.statusText}`)
+        throw new Error(`Falha ao buscar limites de taxa: ${rateLimitsResponse.status} ${rateLimitsResponse.statusText}`)
       }
 
       const eventsData = await eventsResponse.json()
@@ -350,10 +350,10 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
   if (error && !isRefreshing) {
     return (
       <div className={`aethel-card ${className}`}>
-        <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-[var(--aethel-border-primary)] px-4 py-3">
           <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
-            <h2 className="text-base font-semibold text-white">Central de seguranca</h2>
+            <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Central de seguranca</h2>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Monitoramento de ameacas em tempo real</p>
           </div>
         </div>
@@ -365,10 +365,10 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
   if (isLoading) {
     return (
       <div className={`aethel-card ${className}`}>
-        <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-[var(--aethel-border-primary)] px-4 py-3">
           <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
-            <h2 className="text-base font-semibold text-white">Central de seguranca</h2>
+            <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Central de seguranca</h2>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Monitoramento de ameacas em tempo real</p>
           </div>
         </div>
@@ -388,11 +388,11 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
 
   return (
     <div className={`aethel-card ${className}`}>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <div className="flex items-center gap-3">
           <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
-            <h2 className="text-base font-semibold text-white">Central de seguranca</h2>
+            <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Central de seguranca</h2>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Monitoramento de ameacas em tempo real</p>
           </div>
         </div>
@@ -429,16 +429,16 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
           value={stats.criticalThreats}
           icon={<ShieldX className="h-5 w-5 text-[var(--aethel-error-light)]" />}
           trend={15}
-          color="border border-rose-500/30 bg-[var(--aethel-error)]/5"
+          color="border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[var(--aethel-error)]/5"
         />
         <StatsCard
           label="IPs bloqueados"
           value={stats.blockedIPs}
-          icon={<Ban className="h-5 w-5 text-orange-300" />}
-          color="border border-orange-500/30 bg-orange-500/5"
+          icon={<Ban className="h-5 w-5 text-[var(--aethel-warning-light)]" />}
+          color="border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning)]/5"
         />
         <StatsCard
-          label="Rate limits"
+          label="Limites de taxa"
           value={stats.rateLimitHits}
           icon={<Activity className="h-5 w-5 text-[var(--aethel-warning-light)]" />}
           color="border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning)]/5"
@@ -495,7 +495,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
             <option value="code_injection">Injecao de codigo</option>
             <option value="rate_limit">Limite de taxa</option>
             <option value="path_traversal">Travessia de caminho</option>
-            <option value="auth_failure">Falha de auth</option>
+            <option value="auth_failure">Falha de autenticacao</option>
             <option value="suspicious_pattern">Padrao suspeito</option>
           </select>
         </div>

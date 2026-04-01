@@ -453,7 +453,7 @@ export function AISuggestionBubble({
                 flex-1 flex items-center justify-center gap-1.5 py-2
                 bg-[linear-gradient(120deg,var(--aethel-primary),var(--aethel-info))]
                 hover:brightness-110
-                rounded-lg text-sm font-medium text-white transition-all
+                rounded-lg text-sm font-medium text-[var(--aethel-text-primary)] transition-all
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
             >
@@ -689,12 +689,12 @@ export function AISuggestionBubbleAuto() {
       });
 
       if (!res.ok) {
-        throw new Error('apply failed');
+        throw new Error('Falha ao aplicar sugestao.');
       }
 
       setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
     } catch (e) {
-      console.error('Failed to apply suggestion:', e);
+      console.error('Falha ao aplicar sugestao:', e);
       throw e;
     }
   }, []);

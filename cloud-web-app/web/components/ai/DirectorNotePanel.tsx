@@ -163,7 +163,7 @@ const SEVERITY_STYLES: Record<NoteSeverity, {
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
-  if (!res.ok) throw new Error('Failed to fetch');
+  if (!res.ok) throw new Error('Falha ao buscar dados.');
   return res.json();
 };
 
@@ -560,7 +560,7 @@ export function DirectorNotePanel({
                 Notas do Diretor
               </h3>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">
-                Feedback artistico por IA
+                Feedback artistico de IA
               </p>
             </div>
           </div>
@@ -609,7 +609,7 @@ export function DirectorNotePanel({
                      transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
-            {isAnalyzing ? 'Analisando...' : 'Nova Analise'}
+            {isAnalyzing ? 'Analisando...' : 'Nova analise'}
           </button>
           
           <button
@@ -645,7 +645,7 @@ export function DirectorNotePanel({
                   className={`
                     px-2.5 py-1 rounded-full text-xs whitespace-nowrap transition-colors
                     ${activeFilter === key 
-                      ? 'bg-[var(--aethel-primary)] text-white' 
+                      ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' 
                       : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
                     }
                   `}

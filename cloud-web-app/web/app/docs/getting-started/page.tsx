@@ -15,8 +15,8 @@ function CodeBlock({ code, language = 'bash' }: { code: string; language?: strin
   }, [code])
 
   return (
-    <div className="group relative my-4 rounded-xl border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]">
-      <div className="flex items-center justify-between border-b border-white/5 px-4 py-2">
+    <div className="group relative my-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]">
+      <div className="flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4 py-2">
         <span className="text-xs font-mono text-[var(--aethel-text-quaternary)]">{language}</span>
         <button onClick={copy} className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] transition-colors">
           {copied ? <Check className="h-4 w-4 text-[var(--aethel-success)]" /> : <Copy className="h-4 w-4" />}
@@ -90,7 +90,7 @@ npm run build`,
 
 export default function GettingStartedPage() {
   return (
-    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <PublicHeader />
 
       <main className="relative z-10 mx-auto max-w-4xl px-6 pt-12 pb-20">
@@ -115,7 +115,7 @@ export default function GettingStartedPage() {
                 <div className="absolute left-5 top-12 h-[calc(100%+1rem)] w-px bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] to-transparent" />
               )}
               <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--aethel-primary-dark)] to-[var(--aethel-accent-dark)] text-sm font-bold text-white">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--aethel-primary-dark)] to-[var(--aethel-info)] text-sm font-bold text-[var(--aethel-text-primary)]">
                   {step.number}
                 </div>
                 <div className="flex-1">
@@ -136,7 +136,7 @@ export default function GettingStartedPage() {
           </p>
           <Link
             href="/dashboard"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--aethel-success)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--aethel-success-dark)] transition-colors"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--aethel-success)] px-6 py-2.5 text-sm font-semibold text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-success-dark)] transition-colors"
           >
             Open Studio <ArrowRight className="h-4 w-4" />
           </Link>
