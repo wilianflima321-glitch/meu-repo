@@ -13,7 +13,7 @@ function ReadinessBadge({
   return (
     <div className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2">
       <p className="text-[10px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">{label}</p>
-      <p className={`mt-1 text-sm font-semibold ${ready ? 'text-emerald-300' : 'text-[var(--aethel-warning-light)]'}`}>
+      <p className={`mt-1 text-sm font-semibold ${ready ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-warning-light)]'}`}>
         {ready ? 'Pronto' : 'Parcial'}
       </p>
     </div>
@@ -54,7 +54,7 @@ export default function PublicBillingReadiness() {
   if (!readiness) {
     return (
       <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[var(--aethel-warning)]/10 p-8">
-        <h2 className="text-2xl font-semibold text-white">Prontidao de billing indisponivel</h2>
+        <h2 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Prontidao de billing indisponivel</h2>
         <p className="mt-3 text-sm leading-7 text-[var(--aethel-warning-light)]/85">
           Os planos continuam canonicos, mas este ambiente nao retornou um payload de prontidao de billing ao vivo.
         </p>
@@ -66,12 +66,12 @@ export default function PublicBillingReadiness() {
     <section className="mx-auto mt-20 max-w-5xl rounded-3xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[var(--aethel-warning)]/10 p-8">
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Prontidao de billing ao vivo</h2>
+          <h2 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Prontidao de billing ao vivo</h2>
           <p className="mt-3 text-sm leading-7 text-[var(--aethel-warning-light)]/85">
             Os planos ja sao canonicos. A conversao ainda depende do checkout/runtime ao vivo neste ambiente.
           </p>
           <p className="mt-3 text-xs text-[var(--aethel-warning-light)]/70">
-            status={readiness.status} | gateway={readiness.gateway?.activeGateway || 'unknown'} | provider={readiness.provider?.label || 'unknown'}
+            status={readiness.status} | gateway={readiness.gateway?.activeGateway || 'desconhecido'} | provider={readiness.provider?.label || 'desconhecido'}
           </p>
         </div>
         <div className="grid min-w-[260px] grid-cols-3 gap-3">
@@ -82,9 +82,9 @@ export default function PublicBillingReadiness() {
       </div>
 
       {readiness.provider ? (
-        <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+        <div className="mt-5 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">Provedor de billing</p>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[var(--aethel-text-primary)]">
             <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1">
               {readiness.provider.label}
             </span>
@@ -117,7 +117,7 @@ export default function PublicBillingReadiness() {
       ) : null}
 
       {readiness.stripe?.missingEnv?.length ? (
-        <div className="mt-5 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-black/20 p-4">
+        <div className="mt-5 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-warning-light)]">Variaveis de ambiente ausentes</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {readiness.stripe.missingEnv.map((envKey) => (
@@ -133,7 +133,7 @@ export default function PublicBillingReadiness() {
       ) : null}
 
       {readiness.instructions?.length ? (
-        <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+        <div className="mt-5 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">Proximas acoes</p>
           <ul className="mt-3 space-y-2 text-sm text-[var(--aethel-text-secondary)]">
             {readiness.instructions.map((instruction) => (
@@ -145,7 +145,7 @@ export default function PublicBillingReadiness() {
               {readiness.recommendedCommands.map((command) => (
                 <code
                   key={command}
-                  className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-2.5 py-1 text-[11px] text-cyan-300"
+                  className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-info-light)]"
                 >
                   {command}
                 </code>

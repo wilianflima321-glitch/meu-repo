@@ -111,8 +111,8 @@ function buildCssPreview(css: string): string {
 <body>
   <div class="app">
     <div class="card">
-      <h2>Preview CSS do Aethel</h2>
-      <p>Arquivo CSS aplicado em um template de teste.</p>
+      <h2>Previa CSS do Aethel</h2>
+      <p>Arquivo CSS aplicado a um template de teste.</p>
       <button class="btn">Botao de teste</button>
     </div>
   </div>
@@ -232,7 +232,7 @@ function resolvePreviewMode(filePath?: string): PreviewMode {
 }
 
 export default function PreviewPanel({
-  title = 'Preview',
+  title = 'Previa',
   filePath,
   content,
   html,
@@ -345,7 +345,7 @@ export default function PreviewPanel({
               className="rounded border border-[color-mix(in_srgb,var(--aethel-error)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-1.5 py-0.5 text-[10px] normal-case text-[var(--aethel-error-light)]"
               title={runtimeUnavailableReason || 'Runtime indisponivel'}
             >
-              runtime:unavailable
+              runtime:indisponivel
             </span>
           )}
           {isStale && (
@@ -426,7 +426,7 @@ export default function PreviewPanel({
               <video
                 controls
                 src={rawAssetUrl}
-                className="max-w-full max-h-full bg-black"
+                className="max-w-full max-h-full bg-[var(--aethel-surface-primary)]"
                 onError={() => setMediaLoadError('Falha no preview de video: codec nao suportado ou origem do runtime ausente.')}
               />
             )}

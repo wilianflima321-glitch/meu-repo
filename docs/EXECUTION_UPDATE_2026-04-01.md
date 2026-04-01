@@ -1,56 +1,44 @@
-ï»¿# EXECUTION_UPDATE_2026-04-01
+# EXECUTION UPDATE — 2026-04-01
 
-## Escopo
-- Consolidacao de UI/UX para eliminar duplicidades.
-- Localizacao PT-BR nas superfices do Marketplace.
-- Hardening de mensagens e estados operacionais.
+Status: EXECUTADO LOCALMENTE
 
-## Mudancas principais
-- Toast: unificacao do sistema e wrapper de compatibilidade, removendo implementacoes antigas.
-- Skeleton: consolidacao em um unico componente canonico.
-- CSS: remocao de `styles/globals.css` e `styles/design-tokens.css`, com tokens integrados em `app/globals.css`.
-- Deprecated: remocao de `components/_deprecated`.
-- Marketplace:
-  - AssetDetailPanel: textos em PT-BR, erros claros, labels consistentes e formatos locais.
-  - MarketplaceBrowser: erros e labels coerentes; ajustes de microcopys.
-  - UserLibrary: traducao completa de estados e acoes, mantendo logs e nomes tecnicos internos.
-  - CreatorDashboard: traducao ampla de labels, titulos, menus, estados e charts; formato PT-BR.
-- Chat e preview:
-  - AIChatPanelContainer: retry de ultima mensagem falhada.
-  - PreviewPanel: banner de fallback explicito.
-- Nexus e IDE:
-  - Ajustes de copy e consistencia visual em telas de orquestracao e pesquisa.
-- Retoques PT-BR e UX fina:
-  - SecurityDashboard, GitPanel e OutlinePanel com labels de atualizacao em PT-BR.
-  - FileTree com estado "Carregando..." em PT-BR.
-  - FileExplorerPro com foco visivel e indicadores acessiveis de modificacao.
-  - Pixel Stream com labels de qualidade (Excelente/Boa/Ruim).
-  - DesignSystem com aria-label de carregamento em PT-BR.
-- Chat/IA:
-  - Quick prompts mais orientados a tarefas reais.
-  - Banner de erro de voz com mensagem clara e opcao de fechar.
-  - Blocos de codigo com acoes (aplicar/diff/criar arquivo) marcadas como pendentes de integracao.
-  - ThinkingDisplay com timeline resumida e ToolCallDisplay com params/duracao.
-  - AICommandCenter com input multiline, hint de atalho e descricao do agente ativo.
-  - AIChatContextPanels com copy PT-BR em contexto de codebase e mencoes.
-  - Acessibilidade reforcada em chats (aria-label, focus-visible, status live e microcopy consistente).
-- Preview:
-  - Indicador de HMR explicita indisponibilidade quando o runtime esta ativo sem hot reload.
-  - Normalizacao de URL aceita `localhost:porta` automaticamente.
-  - PreviewRuntimeToolbar e CanonicalPreviewSurface com estados e mensagens PT-BR.
-  - CTAs de retry/fallback com foco visivel e labels operacionais.
-- Shell publica:
-  - Metadata global em PT-BR e skip link com copy local.
-- Prompt v0:
-  - Novo prompt de melhoria incremental para v0, focado em refino do que ja existe, sem reinventar backend.
-- Landing:
-  - Copy alinhado com Apps + Pesquisa, com disclaimers honestos sobre preview gerenciado.
+## Escopo executado
+- Refino PT-BR e tokens Aethel em superfices criticas de preview, chat, onboarding, billing, marketplace e admin.
+- Ajustes de microcopy e consistencia operacional sem criar backend novo.
+- Acessibilidade aplicada em pontos de acao primaria (focus-visible e labels em botoes tocados).
 
-## Observacoes
-- Nenhum teste automatizado foi executado nesta rodada.
-- Dependencia `sonner` removida do `package.json`.
+## Superficies atualizadas (arquivo -> ajuste)
+- Preview: `cloud-web-app/web/components/ide/PreviewPanel.tsx`
+  - Previa CSS em PT-BR, default title em PT-BR.
+  - Badge `runtime:indisponivel` e background de midia com token Aethel.
+- Shell / Explorer: `cloud-web-app/web/components/ide/IDELayout.tsx`, `cloud-web-app/web/components/ide/FileExplorerPro.tsx`
+  - Labels de menu em PT-BR e hover/focus com tokens Aethel.
+  - Acoes com `type="button"` e aria-label em PT-BR.
+- Chat / IA: `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
+  - Copy de modo ao vivo em PT-BR e consistencia de labels.
+- Onboarding: `cloud-web-app/web/components/onboarding/WelcomeWizard.tsx`, `cloud-web-app/web/components/onboarding/OnboardingWizard.tsx`
+  - Remocao de `text-white`/`bg-black` e substituicao por tokens Aethel.
+- Billing: `cloud-web-app/web/components/billing/PublicBillingReadiness.tsx`, `cloud-web-app/web/components/billing/BillingIntegration.tsx`
+  - Cores e badges migrados para tokens Aethel.
+- Admin / First value: `cloud-web-app/web/app/admin/onboarding/page.tsx`, `cloud-web-app/web/components/dashboard/FirstValueGuide.tsx`
+  - Rotulos traduzidos e status em PT-BR.
+- Marketplace: `cloud-web-app/web/app/marketplace/page.tsx`
+  - Background principal migrado para token Aethel.
 
-## Proximos passos sugeridos
-- Validar build/lint quando `node_modules` estiver disponivel.
-- Revisar acessibilidade com WCAG 2.2 em screens secundarias.
-- Auditar inconsistencias de strings restantes em superfices nao-marketplace.
+## Gaps reais identificados (com evidencia)
+### P0
+- Preview runtime continua dependente de runtime externo.
+  - Evidencia: `cloud-web-app/web/components/ide/PreviewRuntimeToolbar.tsx`, `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`.
+- Billing publico permanece parcial quando runtime nao responde.
+  - Evidencia: `cloud-web-app/web/components/billing/PublicBillingReadiness.tsx` mostra prontidao parcial e variaveis ausentes.
+- Marketplace ainda depende de backend de instalacao para paridade real ponta a ponta.
+  - Evidencia: `cloud-web-app/web/app/marketplace/page.tsx` usa endpoints de install/uninstall.
+
+### P1
+- Varredura de tokens/linguagem limitada aos arquivos acima; outras superficies nao foram auditadas neste ciclo.
+
+## Validacoes
+- Build, lint e testes NAO executados (node_modules ausente e sem lockfile neste workspace).
+
+## Traceability note
+Todas as afirmacoes acima estao ligadas a arquivos reais do repositorio e nao inferem runtime externo.

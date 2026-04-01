@@ -153,7 +153,7 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
     >
       {/* Popular badge */}
       {plan.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--aethel-primary)] px-3 py-0.5 text-xs font-bold text-white">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--aethel-primary)] px-3 py-0.5 text-xs font-bold text-[var(--aethel-text-primary)]">
           Popular
         </div>
       )}
@@ -227,7 +227,7 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
           isCurrent
             ? 'cursor-default border border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
             : plan.popular
-            ? 'bg-[var(--aethel-primary)] text-white hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
+            ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
             : 'border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
         }`}
         aria-label={isCurrent ? `Plano atual: ${plan.name}` : `Selecionar plano ${plan.name}`}

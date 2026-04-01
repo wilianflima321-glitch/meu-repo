@@ -366,7 +366,7 @@ export default function IDELayout({
         { label: 'Redo', shortcut: 'Ctrl+Shift+Z', action: onRedo },
         { separator: true, label: '' },
         { label: 'Cut', shortcut: 'Ctrl+X', action: onCut },
-        { label: 'Copy', shortcut: 'Ctrl+C', action: onCopy },
+        { label: 'Copiar', shortcut: 'Ctrl+C', action: onCopy },
         { label: 'Paste', shortcut: 'Ctrl+V', action: onPaste },
         { separator: true, label: '' },
         { label: 'Find', shortcut: 'Ctrl+F', action: onFind },
@@ -383,7 +383,7 @@ export default function IDELayout({
         { label: 'Explorer', shortcut: 'Ctrl+Shift+E', action: () => openSidebarTab('explorer') },
         { label: 'Search', shortcut: 'Ctrl+Shift+F', action: () => openSidebarTab('search') },
         { label: 'Controle de codigo', shortcut: 'Ctrl+Shift+G', action: () => openSidebarTab('git') },
-        { label: 'Refresh Preview', shortcut: 'Ctrl+Shift+V', action: onTogglePreview },
+        { label: 'Atualizar previa', shortcut: 'Ctrl+Shift+V', action: onTogglePreview },
       ],
     },
     {

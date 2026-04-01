@@ -140,7 +140,7 @@ function FileTreeNode({
         }}
         className={`
           w-full density-row flex items-center gap-1.5 px-2 text-xs text-left
-          hover:bg-white/5 active:bg-white/10 transition-colors
+          hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] active:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_88%,transparent)] transition-colors
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
           ${isSelected ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}
         `}
@@ -282,7 +282,7 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
       <div
         ref={menuRef}
         role="menu"
-        aria-label={`Context actions for ${file.name}`}
+        aria-label={`Acoes de contexto para ${file.name}`}
         onKeyDown={handleMenuKeyDown}
         className="fixed z-50 min-w-48 py-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg shadow-xl"
         style={{ left: menuPosition.left, top: menuPosition.top }}
@@ -489,33 +489,37 @@ export default function FileExplorerPro({
         </span>
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={() => setShowSearch(!showSearch)}
             aria-label="Alternar busca de arquivos"
-            className={`p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)] ${showSearch ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
+            className={`p-1 rounded transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showSearch ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Buscar arquivos"
           >
             <Codicon name="search" />
           </button>
           <button
+            type="button"
             onClick={() => onFileCreate?.('/', 'file')}
             aria-label="Criar novo arquivo"
-            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)] text-[var(--aethel-text-tertiary)]"
+            className="p-1 rounded text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             title="Novo arquivo"
           >
             <Codicon name="new-file" />
           </button>
           <button
+            type="button"
             onClick={() => onFileCreate?.('/', 'folder')}
             aria-label="Criar nova pasta"
-            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)] text-[var(--aethel-text-tertiary)]"
+            className="p-1 rounded text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             title="Nova pasta"
           >
             <Codicon name="new-folder" />
           </button>
           <button
+            type="button"
             onClick={handleRefresh}
             aria-label="Atualizar arquivos do workspace"
-            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)] text-[var(--aethel-text-tertiary)]"
+            className="p-1 rounded text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             title="Atualizar"
           >
             <Codicon name="refresh" />

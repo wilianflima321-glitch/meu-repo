@@ -110,7 +110,7 @@ export default function AdminDashboardPro() {
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
               activeTab === tab
-                ? 'bg-[var(--aethel-primary)] text-white'
+                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                 : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >

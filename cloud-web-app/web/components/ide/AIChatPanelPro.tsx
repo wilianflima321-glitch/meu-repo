@@ -873,8 +873,8 @@ export default function AIChatPanelPro({
                   <button
                     onClick={onToggleLiveMode}
                     className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isLiveMode ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
-                    title={isLiveMode ? 'Sair do modo live' : 'Entrar no modo live (voz em tempo real)'}
-                    aria-label={isLiveMode ? 'Sair do modo live' : 'Entrar no modo live'}
+                    title={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo (voz em tempo real)'}
+                    aria-label={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo'}
                   >
                     <Radio className="w-4 h-4" />
                   </button>
@@ -926,7 +926,7 @@ export default function AIChatPanelPro({
               {selectedModel.supportsVoice && (
                 <p className="text-xs text-[var(--aethel-info-light)] mb-4 flex items-center gap-1">
                   <Radio className="w-3 h-3" />
-                  Este modelo suporta modo live para voz em tempo real
+                  Este modelo suporta modo ao vivo para voz em tempo real
                 </p>
               )}
               {showAdvancedControls ? (
