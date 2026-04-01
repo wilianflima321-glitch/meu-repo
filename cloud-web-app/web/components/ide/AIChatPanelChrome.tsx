@@ -163,11 +163,18 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle }: ThinkingDisp
     <button
       type="button"
       onClick={onToggle}
+      aria-expanded={isExpanded}
       className="mb-2 w-full rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-left text-xs text-[var(--aethel-text-secondary)]"
     >
       <div className="flex items-center gap-2">
         <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-text-tertiary)]" />
         <span>Raciocinio {isExpanded ? 'expandido' : 'resumido'}</span>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-1 text-[10px] text-[var(--aethel-text-quaternary)]">
+        <span>• Entendendo contexto</span>
+        <span>• Lendo arquivos</span>
+        <span>• Executando ferramentas</span>
+        <span>• Montando resposta</span>
       </div>
       {isExpanded && <div className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">{thinking}</div>}
     </button>
@@ -192,13 +199,31 @@ export function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
       : toolCall.status === 'failed'
         ? 'falhou'
         : 'executando'
+  const argsSummary = toolCall.args
+    ? Object.entries(toolCall.args)
+        .slice(0, 3)
+        .map(([key, value]) => `${key}=${String(value)}`)
+        .join(', ')
+    : null
+  const durationLabel =
+    typeof toolCall.duration === 'number'
+      ? toolCall.duration >= 1000
+        ? `${(toolCall.duration / 1000).toFixed(1)}s`
+        : `${Math.round(toolCall.duration)}ms`
+      : null
   return (
     <div className="mb-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">
         <Icon className={`h-3.5 w-3.5 ${toolCall.status === 'failed' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'}`} />
         <span className="font-medium">{toolCall.name}</span>
         <span className="text-[11px] text-[var(--aethel-text-quaternary)]">{statusLabel}</span>
+        {durationLabel && (
+          <span className="text-[11px] text-[var(--aethel-text-quaternary)]">• {durationLabel}</span>
+        )}
       </div>
+      {argsSummary && (
+        <div className="mt-1 text-[11px] text-[var(--aethel-text-quaternary)]">params: {argsSummary}</div>
+      )}
       {toolCall.result && <div className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">{toolCall.result}</div>}
     </div>
   )

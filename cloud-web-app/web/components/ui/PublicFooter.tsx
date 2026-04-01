@@ -7,8 +7,8 @@ const FOOTER_SECTIONS = [
     links: [
       { label: 'Dashboard', href: '/dashboard' },
       { label: 'IDE', href: '/ide' },
-      { label: 'Pricing', href: '/pricing' },
-      { label: 'Docs', href: '/docs' },
+      { label: 'Planos', href: '/pricing' },
+      { label: 'Documentacao', href: '/docs' },
     ],
   },
   {
@@ -39,12 +39,12 @@ export default function PublicFooter() {
         <div className="mb-12 rounded-[28px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02),rgba(14,165,233,0.06))] px-6 py-6 shadow-[0_24px_70px_rgba(2,6,23,0.24)] lg:px-8">
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Studio-grade platform</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Plataforma studio-grade</p>
               <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">
                 Do briefing ao preview no mesmo sistema de trabalho.
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)]">
-                Apps + Research continuam no centro do produto, com IA, preview e readiness no mesmo fluxo.
+                Apps + Pesquisa continuam no centro do produto, com IA, preview e readiness no mesmo fluxo.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -76,7 +76,7 @@ export default function PublicFooter() {
               Studio multi-agent para sair da ideia e chegar em software validavel com mais rapidez e controle.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              {['Apps', 'Research', 'Preview', 'Governanca'].map((item) => (
+              {['Apps', 'Pesquisa', 'Preview', 'Governanca'].map((item) => (
                 <span
                   key={item}
                   className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]"
@@ -84,6 +84,11 @@ export default function PublicFooter() {
                   {item}
                 </span>
               ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">
+              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">SOC 2 (planejado)</span>
+              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">GDPR (alvo)</span>
+              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1">SSO (roadmap)</span>
             </div>
             <div className="mt-6 flex items-center gap-4">
               <a
@@ -99,9 +104,9 @@ export default function PublicFooter() {
               </a>
               <Link
                 href="/docs"
-                className="flex h-9 min-w-[72px] items-center justify-center rounded-xl bg-white/[0.05] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)]"
+                className="flex h-9 min-w-[96px] items-center justify-center rounded-xl bg-white/[0.05] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)]"
               >
-                Docs
+                Documentacao
               </Link>
               <Link
                 href="/status"
@@ -134,7 +139,7 @@ export default function PublicFooter() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-full bg-[var(--aethel-success)]" />
-              <span className="text-xs text-[var(--aethel-text-tertiary)]">Studio-grade workflow, atualizado continuamente</span>
+              <span className="text-xs text-[var(--aethel-text-tertiary)]">Fluxo studio-grade, atualizado continuamente</span>
             </div>
             <Link href="/status" className="text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]">
               Ver status operacional

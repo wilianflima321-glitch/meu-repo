@@ -256,7 +256,7 @@ export default function LoginPageV2() {
 
           <AuthExperiencePanel
             eyebrow="Acesso operacional"
-            domainLabel="Apps + research"
+            domainLabel="Apps + Pesquisa"
             title="Entre para continuar no mesmo fluxo de produto."
             description="O login devolve voce ao fluxo real do studio em vez de abrir uma area isolada."
             highlights={LOGIN_HIGHLIGHTS}

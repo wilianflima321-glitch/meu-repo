@@ -192,6 +192,9 @@ Rules:
   - Aethel token enforcement on formerly template-driven palettes,
   - explicit state honesty for preview/runtime and Git UI empty/error/loading states.
 
+## Latest Additions (2026-04-01)
+- `docs/master/70_V0_PROMPT_STUDIO_UX_INCREMENTAL_2026-04-01.md` (prompt de melhoria incremental para v0)
+
 ## External Benchmark Absorption Rule
 - External claims are directional only.
 - If not reproducible in this repo, tag as `EXTERNAL_BENCHMARK_ASSUMPTION`.

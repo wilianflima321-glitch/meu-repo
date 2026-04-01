@@ -282,13 +282,13 @@ const ControlsBar = memo(function ControlsBar({
     const getConnectionBadge = () => {
         if (!stats) return null;
         
-        if (stats.qualityScore >= 80) {
-            return <Badge variant="success">Excellent</Badge>;
-        } else if (stats.qualityScore >= 50) {
-            return <Badge variant="warning">Good</Badge>;
-        } else {
-            return <Badge variant="error">Poor</Badge>;
-        }
+          if (stats.qualityScore >= 80) {
+            return <Badge variant="success">Excelente</Badge>;
+          } else if (stats.qualityScore >= 50) {
+            return <Badge variant="warning">Boa</Badge>;
+          } else {
+            return <Badge variant="error">Ruim</Badge>;
+          }
     };
     
     return (

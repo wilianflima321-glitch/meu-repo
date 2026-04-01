@@ -10,6 +10,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   RefreshCw,
+  AlertTriangle,
   Code,
   Lightbulb,
   Bug,
@@ -64,14 +65,14 @@ import {
 import { MentionChip, SuggestionList, useMentions } from '@/lib/copilot/mention-parser'
 
 const QUICK_PROMPTS = [
-  { icon: Code, label: 'Explicar codigo', prompt: 'Explique este codigo:' },
-  { icon: Bug, label: 'Encontrar bugs', prompt: 'Encontre bugs neste codigo:' },
-  { icon: Zap, label: 'Otimizar', prompt: 'Otimize este codigo para desempenho:' },
-  { icon: Lightbulb, label: 'Sugerir', prompt: 'Sugira melhorias para:' },
-  { icon: Terminal, label: 'Gerar', prompt: 'Gere codigo para:' },
-  { icon: Wand2, label: 'Refatorar', prompt: 'Refatore este codigo:' },
   { icon: Brain, label: 'Explicar erro', prompt: 'Explique este erro e como corrigir:' },
-  { icon: Layers, label: 'Adicionar testes', prompt: 'Gere testes unitarios para:' },
+  { icon: Bug, label: 'Corrigir arquivo', prompt: 'Corrija problemas neste arquivo:' },
+  { icon: Zap, label: 'Otimizar', prompt: 'Otimize este codigo para desempenho:' },
+  { icon: Wand2, label: 'Refatorar', prompt: 'Refatore este codigo:' },
+  { icon: Layers, label: 'Gerar testes', prompt: 'Gere testes unitarios para:' },
+  { icon: Code, label: 'Explicar codigo', prompt: 'Explique este codigo:' },
+  { icon: Lightbulb, label: 'Melhorar UX', prompt: 'Sugira melhorias de UX para:' },
+  { icon: Terminal, label: 'Gerar modulo', prompt: 'Gere um modulo para:' },
 ]
 
 const QUICK_MENTIONS = [
@@ -92,11 +93,13 @@ function useVoiceRecording() {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [transcript, setTranscript] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
+  const [voiceError, setVoiceError] = useState<string | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const startRecording = useCallback(async () => {
     try {
+      setVoiceError(null)
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
         recognitionRef.current = new SpeechRecognitionAPI() as SpeechRecognitionInstance
@@ -115,6 +118,9 @@ function useVoiceRecording() {
             }
           }
           setTranscript(finalTranscript || interimTranscript)
+        }
+        recognitionRef.current.onerror = () => {
+          setVoiceError('Falha ao transcrever. Verifique permissao do microfone.')
         }
         recognitionRef.current.start()
       }
@@ -135,6 +141,7 @@ function useVoiceRecording() {
       setIsRecording(true)
     } catch (error) {
       console.error('Error starting recording:', error)
+      setVoiceError('Nao foi possivel iniciar a captura de voz. Verifique as permissoes do navegador.')
     }
   }, [])
   const stopRecording = useCallback(() => {
@@ -150,14 +157,19 @@ function useVoiceRecording() {
     setAudioBlob(null)
     setTranscript('')
   }, [])
+  const clearVoiceError = useCallback(() => {
+    setVoiceError(null)
+  }, [])
   return {
     isRecording,
     audioBlob,
     transcript,
     isTranscribing,
+    voiceError,
     startRecording,
     stopRecording,
     clearRecording,
+    clearVoiceError,
   }
 }
 const DEMO_MESSAGES: Message[] = [
@@ -205,6 +217,47 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
               <pre className="p-3 overflow-x-auto text-sm">
                 <code className="text-[var(--aethel-text-secondary)]">{code}</code>
               </pre>
+              <div className="flex flex-wrap items-center gap-2 border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-tertiary)]">
+                <button
+                  type="button"
+                  disabled
+                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
+                  title="Requer integracao com o editor"
+                  aria-disabled="true"
+                >
+                  Aplicar no editor
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
+                  title="Requer integracao com o editor"
+                  aria-disabled="true"
+                >
+                  Abrir diff
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
+                  title="Requer integracao com o editor"
+                  aria-disabled="true"
+                >
+                  Criar arquivo
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
+                  title="Requer integracao com o editor"
+                  aria-disabled="true"
+                >
+                  Inserir selecao
+                </button>
+                <span className="ml-auto text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
+                  Integracao do editor pendente
+                </span>
+              </div>
             </div>
           )
         }
@@ -374,7 +427,7 @@ export default function AIChatPanelPro({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const { isRecording, transcript, startRecording, stopRecording, clearRecording } = useVoiceRecording()
+  const { isRecording, transcript, voiceError, startRecording, stopRecording, clearRecording, clearVoiceError } = useVoiceRecording()
   const [isSpeaking, setIsSpeaking] = useState(false)
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null)
   const mentionState = useMentions('')
@@ -866,7 +919,7 @@ export default function AIChatPanelPro({
               </div>
               <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-2">Assistente de IA</h3>
               <p className="mb-6 max-w-sm text-sm text-[var(--aethel-text-tertiary)]">
-                Pergunte qualquer coisa sobre o seu codigo. Eu explico, depuro, otimizo e gero trechos sob demanda.
+                Selecione um arquivo, cole um erro ou use @codebase para iniciar. Eu explico, depuro e gero trechos sob demanda.
               </p>
               {selectedModel.supportsVoice && (
                 <p className="text-xs text-[var(--aethel-info-light)] mb-4 flex items-center gap-1">
@@ -985,6 +1038,19 @@ export default function AIChatPanelPro({
               className="px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] rounded text-xs text-[var(--aethel-error)]"
             >
               Parar
+            </button>
+          </div>
+        )}
+        {voiceError && (
+          <div className="mb-3 flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-warning)]" role="alert" aria-live="polite">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            <span className="flex-1">{voiceError}</span>
+            <button
+              type="button"
+              onClick={clearVoiceError}
+              className="rounded px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
+            >
+              Fechar
             </button>
           </div>
         )}

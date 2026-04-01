@@ -114,6 +114,7 @@ function LifecycleIndicator({
   filesInSync?: number;
   lastSyncAt?: number | null;
 }) {
+  const showHmrWarning = state === 'healthy' && strategy && strategy !== 'inline' && !hmrConnected;
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur-sm border-b border-[var(--aethel-border-secondary)]/50 text-xs">
       <div className={`w-2 h-2 rounded-full ${LIFECYCLE_COLORS[state]}`} />
@@ -143,6 +144,14 @@ function LifecycleIndicator({
             <path d="M4.5 4a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1-.708.708l-1.5-1.5A.5.5 0 0 1 4.5 4zm7 0a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708-.708l1.5-1.5A.5.5 0 0 1 11.5 4z" />
           </svg>
           HMR
+        </span>
+      )}
+      {showHmrWarning && (
+        <span className="ml-auto flex items-center gap-1 text-[var(--aethel-warning)]">
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 1a.75.75 0 0 1 .66.39l6 11A.75.75 0 0 1 14 13H2a.75.75 0 0 1-.66-1.11l6-11A.75.75 0 0 1 8 1zm0 3.25a.75.75 0 0 0-.75.75v3.5a.75.75 0 0 0 1.5 0V5a.75.75 0 0 0-.75-.75zm0 7.5a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8z" />
+          </svg>
+          HMR indisponivel
         </span>
       )}
     </div>

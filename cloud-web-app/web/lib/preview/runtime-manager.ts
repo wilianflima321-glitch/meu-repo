@@ -85,6 +85,9 @@ export function normalizeRuntimeUrl(input: string | null): string | null {
   const value = input.trim();
   if (!value) return null;
   if (/^https?:\/\//i.test(value)) return value;
+  if (/^[\w.-]+(:\d+)?(\/.*)?$/.test(value)) {
+    return `http://${value}`;
+  }
   return null;
 }
 

@@ -52,7 +52,7 @@ export default function PublicHeader() {
             </Link>
             <div className="hidden xl:flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
               <span className="inline-flex h-2 w-2 rounded-full bg-[var(--aethel-success)]" />
-              {isStudioSurface ? 'Surface ativa' : 'Apps + Research'}
+              {isStudioSurface ? 'Surface ativa' : 'Apps + Pesquisa'}
             </div>
           </div>
 

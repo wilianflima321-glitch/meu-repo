@@ -88,7 +88,7 @@ export default function DownloadPage() {
     'IDE com Monaco Editor e terminal integrado',
     'Fluxo multi-agent com Architect, Engineer e Critic',
     'Preview unificado com status e readiness visiveis',
-    'Templates e onboarding guiado para Apps e Research',
+    'Templates e onboarding guiado para Apps e Pesquisa',
     'Audit trail e rollback deterministico por change set',
     'Sync com o web studio e handoff para deploy',
   ]
@@ -115,7 +115,7 @@ export default function DownloadPage() {
             Download <span className="gradient-text">Aethel Studio</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--aethel-text-secondary)]">
-            IDE e studio operacional para Apps e Research. Games e Films seguem em fase experimental.
+            IDE e studio operacional para Apps e Pesquisa. Games e Films seguem em fase experimental.
           </p>
         </section>
 

@@ -20,6 +20,21 @@
   - PreviewPanel: banner de fallback explicito.
 - Nexus e IDE:
   - Ajustes de copy e consistencia visual em telas de orquestracao e pesquisa.
+- Retoques PT-BR e UX fina:
+  - SecurityDashboard, GitPanel e OutlinePanel com labels de atualizacao em PT-BR.
+  - FileTree com estado "Carregando..." em PT-BR.
+  - Pixel Stream com labels de qualidade (Excelente/Boa/Ruim).
+  - DesignSystem com aria-label de carregamento em PT-BR.
+- Chat/IA:
+  - Quick prompts mais orientados a tarefas reais.
+  - Banner de erro de voz com mensagem clara e opcao de fechar.
+  - Blocos de codigo com acoes (aplicar/diff/criar arquivo) marcadas como pendentes de integracao.
+  - ThinkingDisplay com timeline resumida e ToolCallDisplay com params/duracao.
+- Preview:
+  - Indicador de HMR explicita indisponibilidade quando o runtime esta ativo sem hot reload.
+  - Normalizacao de URL aceita `localhost:porta` automaticamente.
+- Prompt v0:
+  - Novo prompt de melhoria incremental para v0, focado em refino do que ja existe, sem reinventar backend.
 
 ## Observacoes
 - Nenhum teste automatizado foi executado nesta rodada.

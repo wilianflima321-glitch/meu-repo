@@ -408,7 +408,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
       setStashes(newStashes);
       setCurrentBranch(branch);
     } catch (error) {
-      console.error('Git refresh failed:', error);
+        console.error('Falha ao atualizar Git:', error);
     }
     setIsLoading(false);
   }, [gitService]);
@@ -529,7 +529,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                 color: colors.subtext0,
                 cursor: 'pointer',
               }}
-              title="Refresh"
+              title="Atualizar"
             >
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
             </button>

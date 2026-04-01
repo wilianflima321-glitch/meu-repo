@@ -796,7 +796,7 @@ export function SecurityDashboard({
         <button
           onClick={fetchData}
           className="p-1.5 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
-          title="Refresh"
+          title="Atualizar"
         >
           <Icons.Refresh />
         </button>

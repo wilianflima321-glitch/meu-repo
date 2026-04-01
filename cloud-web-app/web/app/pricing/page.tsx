@@ -39,6 +39,14 @@ const FAQ_ITEMS = [
     q: 'O billing ja esta funcionando ponta a ponta?',
     a: 'As superficies de billing ja existem, mas o checkout publico depende das credenciais reais do Stripe. Mantemos essa transparencia na propria pagina.',
   },
+  {
+    q: 'Como funciona o cancelamento?',
+    a: 'Voce pode cancelar a qualquer momento. O acesso permanece ativo ate o fim do ciclo contratado.',
+  },
+  {
+    q: 'Impostos estao incluidos?',
+    a: 'Os valores exibidos nao incluem impostos locais. A cobranca segue a politica fiscal aplicavel a sua regiao.',
+  },
 ]
 
 const COMPARISON_ROWS = [
@@ -131,6 +139,9 @@ export default function PricingPage() {
                   </span>
                 </button>
               </div>
+              <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">
+                Valores sem impostos. Cobranca mensal ou anual com cancelamento a qualquer momento.
+              </p>
             </div>
 
             <aside className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
@@ -199,6 +210,9 @@ export default function PricingPage() {
                     <span className="pb-1 text-xs text-[var(--aethel-text-tertiary)]">/{isAnnual ? 'ano' : 'mes'}</span>
                   </div>
                   <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">US${plan.displayPrice}/{isAnnual ? 'ano' : 'mes'}</p>
+                  <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">
+                    Cobranca {isAnnual ? 'anual' : 'mensal'} • impostos nao inclusos
+                  </p>
                 </div>
 
                 <div className="mb-5 grid grid-cols-2 gap-2">
@@ -333,6 +347,9 @@ export default function PricingPage() {
             <h2 className="mt-2 text-2xl font-bold text-[var(--aethel-text-primary)]">Billing readiness real</h2>
           </div>
           <PublicBillingReadiness />
+          <p className="mt-3 text-center text-xs text-[var(--aethel-text-tertiary)]">
+            Pagamentos sao processados pela Stripe quando as credenciais estiverem configuradas.
+          </p>
         </div>
 
         <section className="mx-auto mt-24 w-full max-w-3xl px-4 pb-24 sm:px-6">

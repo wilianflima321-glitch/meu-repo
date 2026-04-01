@@ -14,6 +14,10 @@
 - Localizacao PT-BR e melhorias de microcopy no Marketplace:
   - `AssetDetailPanel`, `MarketplaceBrowser`, `UserLibrary`, `CreatorDashboard`.
 - Hardening de estados operacionais no chat e preview.
+- Retoques PT-BR e UX fina em paineis de sistema (SecurityDashboard, GitPanel, OutlinePanel, FileTree, Pixel Stream).
+- Prompt v0 para melhorias incrementais do Studio (sem reinventar backend).
+- Chat/IA com estados mais operacionais (timeline de raciocinio, tool calls enriquecidas, erro de voz visivel).
+- Preview com indicador de HMR indisponivel e normalizacao automatica de URL local.
 
 ---
 

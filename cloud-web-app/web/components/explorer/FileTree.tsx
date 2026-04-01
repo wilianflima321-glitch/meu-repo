@@ -149,7 +149,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect, onFileOpen }) 
 
   return (
     <div className="file-tree">
-      {root ? renderNode(root) : <div className="loading">Loading...</div>}
+      {root ? renderNode(root) : <div className="loading">Carregando...</div>}
 
       {contextMenu && (
         <FileContextMenu

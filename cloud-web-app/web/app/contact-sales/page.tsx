@@ -15,7 +15,7 @@ const enterpriseFeatures = [
   },
   {
     icon: Workflow,
-    title: 'Research -> plan -> code',
+    title: 'Pesquisa -> plano -> codigo',
     desc: 'Fluxo unico para times que precisam sair da analise e entrar em execucao.',
   },
   {
@@ -33,7 +33,7 @@ const DEAL_STEPS = [
 
 const SALES_SIGNALS = [
   'SSO, SAML, rollout e trilha de auditoria entram melhor na conversa enterprise.',
-  'Apps + Research continuam sendo a frente comercial mais madura do produto.',
+  'Apps + Pesquisa continuam sendo a frente comercial mais madura do produto.',
   'Preview, readiness e governanca devem ser tratados no mesmo rollout, nao em trilhas separadas.',
 ]
 

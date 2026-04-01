@@ -608,8 +608,8 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           <button
             className="p-1 rounded hover:bg-white/10 transition-colors"
             onClick={onRefresh}
-            title="Refresh"
-            aria-label="Refresh outline"
+              title="Atualizar"
+              aria-label="Atualizar estrutura"
             disabled={isLoading}
           >
             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
