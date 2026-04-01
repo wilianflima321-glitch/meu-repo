@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -36,14 +36,14 @@ const WORKFLOW = [
 ]
 
 const TRUST_NOTES = [
-  'Workspace unico para discovery, implementacao e validacao.',
+  'Workspace unico para descoberta, implementacao e validacao.',
   'Papeis multi-agent com trilha operacional explicita.',
   'Governanca, rollback e readiness visiveis no mesmo fluxo.',
 ]
 
 const PRICING_TEASER = [
   {
-    title: 'Free',
+    title: 'Gratis',
     price: '$0',
     desc: 'Explorar o studio e experimentar o fluxo.',
     features: ['1 projeto ativo', 'Limites de IA diarios', 'Preview limitado'],
@@ -54,16 +54,16 @@ const PRICING_TEASER = [
     title: 'Pro',
     price: '$49',
     desc: 'Para devs e squads que precisam de velocidade.',
-    features: ['Preview gerenciado', 'RAG + mentions', 'Deploy one-click'],
+    features: ['Preview gerenciado', 'RAG + mentions', 'Deploy em 1 clique'],
     cta: 'Assinar Pro',
     variant: 'primary' as const,
     highlight: true,
   },
   {
     title: 'Enterprise',
-    price: 'Custom',
+    price: 'Sob consulta',
     desc: 'Governanca, compliance e suporte dedicado.',
-    features: ['SSO/SAML', 'SLA + Audit Logs', 'Limites customizados'],
+    features: ['SSO/SAML', 'SLA + trilhas de auditoria', 'Limites customizados'],
     cta: 'Falar com vendas',
     variant: 'ghost' as const,
   },
@@ -72,7 +72,7 @@ const PRICING_TEASER = [
 const PROOF_STRIP = [
   { label: 'Fluxo orientado a entrega', detail: 'Da missao ao ambiente validavel' },
   { label: 'Governanca visivel', detail: 'Status e readiness no mesmo studio' },
-  { label: 'Experiencia unificada', detail: 'Research, codigo e preview no mesmo fluxo' },
+  { label: 'Experiencia unificada', detail: 'Pesquisa, codigo e preview no mesmo fluxo' },
 ]
 
 function ScreenshotCard({
@@ -89,8 +89,8 @@ function ScreenshotCard({
   priority?: boolean
 }) {
   return (
-    <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.92))] shadow-[0_24px_90px_rgba(2,6,23,0.42)]">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+    <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.92))] shadow-[0_24px_90px_rgba(2,6,23,0.42)]">
+      <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <div>
           <p className="text-sm font-medium text-white">{title}</p>
           <p className="text-xs text-[var(--aethel-text-tertiary)]">{subtitle}</p>
@@ -98,7 +98,7 @@ function ScreenshotCard({
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_78%,transparent)]" />
           <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_78%,transparent)]" />
         </div>
       </div>
       <Image src={src} alt={alt} width={1600} height={960} className="h-auto w-full object-cover" priority={priority} />
@@ -166,7 +166,7 @@ export default function LandingPageV3() {
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
                 O Aethel conecta discovery, implementacao, preview e readiness no mesmo fluxo.
-                O foco principal hoje e <span className="font-medium text-white">Apps + Research</span>, com governanca explicita e sem fake success.
+                O foco principal hoje e <span className="font-medium text-white">Apps + Pesquisa</span>, com governanca explicita e sem promessas falsas.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -176,7 +176,7 @@ export default function LandingPageV3() {
               </div>
 
               <form onSubmit={handleSubmit} className="mt-8 max-w-2xl">
-                <div className="flex flex-col gap-3 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.92))] p-4 shadow-[0_24px_80px_rgba(2,6,23,0.42)] sm:flex-row sm:items-center">
+                <div className="flex flex-col gap-3 rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.92))] p-4 shadow-[0_24px_80px_rgba(2,6,23,0.42)] sm:flex-row sm:items-center">
                   <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-4 py-3">
                     <Sparkles className="h-4.5 w-4.5 shrink-0 text-cyan-300" />
                     <input
@@ -211,7 +211,7 @@ export default function LandingPageV3() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/dashboard?onboarding=1&source=landing-primary-cta"
-                  className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                  className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[color-mix(in_srgb,white_90%,var(--aethel-surface-secondary))]"
                 >
                   Comecar gratis
                 </Link>
@@ -225,7 +225,7 @@ export default function LandingPageV3() {
                   href="/workbench-preview.html"
                   className="inline-flex items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_38%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)]"
                 >
-                  Ver north-star do workbench
+                  Ver referencia do workbench
                 </Link>
               </div>
             </motion.div>
@@ -239,7 +239,7 @@ export default function LandingPageV3() {
                 priority
               />
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[26px] border border-white/10 bg-white/[0.04] p-5">
+                <div className="rounded-[26px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Por que equipes escolhem o studio</p>
                   <ul className="mt-4 space-y-3">
                     {TRUST_NOTES.map((item) => (
@@ -266,14 +266,14 @@ export default function LandingPageV3() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <GlowBadge color="info">Studio real</GlowBadge>
-                <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja o fluxo inteiro em uma tela</h2>
+                <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Veja o fluxo completo em uma tela</h2>
                 <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
                   Missao, contexto, execucao e validacao no mesmo ambiente operacional.
                 </p>
               </div>
-              <span className="text-xs text-[var(--aethel-text-secondary)]">Screenshot real</span>
+                <span className="text-xs text-[var(--aethel-text-secondary)]">Captura real</span>
             </div>
-            <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
+            <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
               <Image
                 src="/screenshots/editor.png"
                 alt="Aethel Studio com editor, contexto e preview integrados"
@@ -285,7 +285,7 @@ export default function LandingPageV3() {
             </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {PROOF_STRIP.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-4">
+                <div key={item.label} className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-4 py-4">
                   <p className="text-sm font-semibold text-white">{item.label}</p>
                   <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{item.detail}</p>
                 </div>
@@ -299,12 +299,12 @@ export default function LandingPageV3() {
             <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-[var(--aethel-text-tertiary)]">Planos</p>
-                <h2 className="mt-3 text-3xl font-semibold text-white">Pricing transparente para cada fase</h2>
-                <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">Escolha um plano para explorar, escalar o time ou abrir conversa enterprise.</p>
+                <h2 className="mt-3 text-3xl font-semibold text-white">Planos transparentes para cada fase</h2>
+                <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">Escolha um plano para explorar, escalar o time ou abrir conversa enterprise com contexto claro.</p>
               </div>
               <Link
                 href="/pricing"
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs text-white hover:bg-white/[0.1]"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_76%,transparent)] px-4 py-2 text-xs text-white hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]"
               >
                 Ver todos os planos
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -337,7 +337,7 @@ export default function LandingPageV3() {
                   <GradientButton
                     variant={plan.variant}
                     onClick={() => {
-                      if (plan.title === 'Free') {
+                      if (plan.title === 'Gratis') {
                         router.push('/dashboard?onboarding=1&source=landing-pricing-free')
                         return
                       }
@@ -370,7 +370,7 @@ export default function LandingPageV3() {
 
             <div className="mt-10 grid gap-5 lg:grid-cols-3">
               {WORKFLOW.map((item) => (
-                <div key={item.step} className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
+                <div key={item.step} className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-quaternary)]">{item.step}</p>
                   <h3 className="mt-3 text-xl font-semibold text-white">{item.title}</h3>
                   <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-tertiary)]">{item.description}</p>
@@ -381,7 +381,7 @@ export default function LandingPageV3() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="grid gap-6 rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.90))] p-8 shadow-[0_24px_90px_rgba(2,6,23,0.42)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="grid gap-6 rounded-[32px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.90))] p-8 shadow-[0_24px_90px_rgba(2,6,23,0.42)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Proximo passo</p>
               <h2 className="mt-3 text-3xl font-semibold text-white">Entre pelo studio e siga com o fluxo real do produto.</h2>
@@ -392,7 +392,7 @@ export default function LandingPageV3() {
             <div className="flex flex-wrap gap-3 lg:justify-end">
               <Link
                 href="/dashboard?onboarding=1&source=landing-bottom-cta"
-                className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[color-mix(in_srgb,white_90%,var(--aethel-surface-secondary))]"
               >
                 Abrir studio
               </Link>
@@ -417,3 +417,4 @@ export default function LandingPageV3() {
     </div>
   )
 }
+

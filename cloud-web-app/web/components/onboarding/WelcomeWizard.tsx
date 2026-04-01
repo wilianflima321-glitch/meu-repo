@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { Sparkles, ChevronRight, X } from 'lucide-react'
@@ -42,7 +42,7 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[var(--aethel-surface-primary)]/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
         <div className="flex h-40 items-center justify-center bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary-dark)_90%,transparent)] via-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-primary)_80%,transparent)]">
           <Sparkles className="h-12 w-12 text-white" />
           <button
@@ -57,7 +57,7 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
 
         <div className="p-6 text-center">
           <h2 className="text-2xl font-bold text-white">{current.title}</h2>
-          <p className="mt-3 text-sm text-slate-300">{current.description}</p>
+          <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">{current.description}</p>
 
           <div className="mt-6 flex justify-center gap-2">
             {STEPS.map((_, index) => (
@@ -92,3 +92,4 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
 }
 
 export default WelcomeWizard
+

@@ -77,7 +77,7 @@ export default function CookieConsent() {
             </button>
             <button
               onClick={() => accept('all')}
-              className="rounded-lg bg-[var(--aethel-primary)] px-4 py-2 text-sm font-medium text-white hover:brightness-110 transition-colors"
+              className="rounded-lg bg-[var(--aethel-primary)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:brightness-110 transition-colors"
             >
               Aceitar todos
             </button>

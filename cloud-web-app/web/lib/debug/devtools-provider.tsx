@@ -428,12 +428,12 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`fixed bottom-0 left-0 right-0 z-50 bg-slate-900 border-t border-slate-700 shadow-2xl ${
+            className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--aethel-surface-primary)] border-t border-[var(--aethel-border-primary)] shadow-2xl ${
               isMinimized ? 'h-12' : 'h-80'
             }`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-3 h-12 border-b border-slate-700 bg-slate-800/50">
+            <div className="flex items-center justify-between px-3 h-12 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 text-[var(--aethel-primary-light)]">
                   <Bug className="w-4 h-4" />
@@ -449,14 +449,14 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-colors ${
                           activeTab === tab.id
                             ? 'bg-[var(--aethel-primary-dark)] text-white'
-                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
                         }`}
                       >
                         {tab.icon}
                         <span>{tab.label}</span>
                         {tab.count > 0 && (
                           <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                            activeTab === tab.id ? 'bg-[var(--aethel-primary)]' : 'bg-slate-600'
+                            activeTab === tab.id ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'
                           }`}>
                             {tab.count > 99 ? '99+' : tab.count}
                           </span>
@@ -472,13 +472,13 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                   <>
                     {/* Search */}
                     <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--aethel-text-quaternary)]" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Search..."
-                        className="w-40 pl-7 pr-2 py-1 text-xs bg-slate-800 border border-slate-600 rounded-md text-slate-200 placeholder-slate-500 focus:border-[var(--aethel-primary)] focus:outline-none"
+                        className="w-40 pl-7 pr-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-md text-[var(--aethel-text-secondary)] placeholder-[var(--aethel-text-quaternary)] focus:border-[var(--aethel-primary)] focus:outline-none"
                       />
                     </div>
                     
@@ -486,7 +486,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     <button
                       onClick={toggleRecording}
                       className={`p-1.5 rounded-md transition-colors ${
-                        isRecording ? 'text-red-400 bg-red-500/20' : 'text-slate-400 hover:text-slate-200'
+                        isRecording ? 'text-red-400 bg-red-500/20' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
                       }`}
                       title={isRecording ? 'Stop Recording' : 'Start Recording'}
                     >
@@ -496,7 +496,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     {/* Clear */}
                     <button
                       onClick={clearAll}
-                      className="p-1.5 text-slate-400 hover:text-slate-200 rounded-md transition-colors"
+                      className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] rounded-md transition-colors"
                       title="Clear All"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -505,7 +505,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     {/* Export */}
                     <button
                       onClick={exportLogs}
-                      className="p-1.5 text-slate-400 hover:text-slate-200 rounded-md transition-colors"
+                      className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] rounded-md transition-colors"
                       title="Export Logs"
                     >
                       <Download className="w-4 h-4" />
@@ -516,7 +516,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 {/* Minimize */}
                 <button
                   onClick={onMinimize}
-                  className="p-1.5 text-slate-400 hover:text-slate-200 rounded-md transition-colors"
+                  className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] rounded-md transition-colors"
                   title={isMinimized ? 'Expand' : 'Minimize'}
                 >
                   {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
@@ -525,7 +525,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 {/* Close */}
                 <button
                   onClick={toggle}
-                  className="p-1.5 text-slate-400 hover:text-red-400 rounded-md transition-colors"
+                  className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-red-400 rounded-md transition-colors"
                   title="Close DevTools"
                 >
                   <X className="w-4 h-4" />
@@ -563,7 +563,7 @@ function StateTab({ snapshots, searchQuery }: { snapshots: StateSnapshot[]; sear
   
   if (filtered.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-slate-500">
+      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
         <div className="text-center">
           <Database className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No state snapshots yet</p>
@@ -576,24 +576,24 @@ function StateTab({ snapshots, searchQuery }: { snapshots: StateSnapshot[]; sear
   return (
     <div className="h-full overflow-auto p-2 space-y-1">
       {filtered.map(snapshot => (
-        <div key={snapshot.id} className="bg-slate-800/50 rounded-lg overflow-hidden">
+        <div key={snapshot.id} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded-lg overflow-hidden">
           <button
             onClick={() => setExpandedId(expandedId === snapshot.id ? null : snapshot.id)}
-            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-700/50 transition-colors"
+            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-tertiary)]/50 transition-colors"
           >
             {expandedId === snapshot.id ? (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             )}
-            <span className="text-sm text-slate-200">{snapshot.label}</span>
-            <span className="text-xs text-slate-500 ml-auto">
+            <span className="text-sm text-[var(--aethel-text-secondary)]">{snapshot.label}</span>
+            <span className="text-xs text-[var(--aethel-text-quaternary)] ml-auto">
               {new Date(snapshot.timestamp).toLocaleTimeString()}
             </span>
           </button>
           {expandedId === snapshot.id && (
             <div className="px-3 pb-3">
-              <pre className="text-xs text-slate-300 bg-slate-900 p-2 rounded overflow-auto max-h-40">
+              <pre className="text-xs text-[var(--aethel-text-secondary)] bg-[var(--aethel-surface-primary)] p-2 rounded overflow-auto max-h-40">
                 {JSON.stringify(snapshot.state, null, 2)}
               </pre>
             </div>
@@ -614,7 +614,7 @@ function ActionsTab({ actions, searchQuery }: { actions: ActionLog[]; searchQuer
   
   if (filtered.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-slate-500">
+      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
         <div className="text-center">
           <History className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No actions logged</p>
@@ -631,25 +631,25 @@ function ActionsTab({ actions, searchQuery }: { actions: ActionLog[]; searchQuer
         const payloadStr = hasPayload ? JSON.stringify(action.payload, null, 2) : '';
         
         return (
-          <div key={action.id} className="bg-slate-800/50 rounded-lg overflow-hidden">
+          <div key={action.id} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded-lg overflow-hidden">
             <button
               onClick={() => setExpandedId(expandedId === action.id ? null : action.id)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-700/50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-tertiary)]/50 transition-colors"
             >
               {expandedId === action.id ? (
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
               )}
               <span className="text-sm text-[var(--aethel-primary-light)] font-mono">{action.type}</span>
-              <span className="text-xs text-slate-500">{action.source}</span>
-              <span className="text-xs text-slate-500 ml-auto">
+              <span className="text-xs text-[var(--aethel-text-quaternary)]">{action.source}</span>
+              <span className="text-xs text-[var(--aethel-text-quaternary)] ml-auto">
                 {new Date(action.timestamp).toLocaleTimeString()}
               </span>
             </button>
             {expandedId === action.id && hasPayload && (
               <div className="px-3 pb-3">
-                <pre className="text-xs text-slate-300 bg-slate-900 p-2 rounded overflow-auto max-h-40">
+                <pre className="text-xs text-[var(--aethel-text-secondary)] bg-[var(--aethel-surface-primary)] p-2 rounded overflow-auto max-h-40">
                   {payloadStr}
                 </pre>
               </div>
@@ -683,7 +683,7 @@ function PerformanceTab({ metrics, searchQuery }: { metrics: PerformanceMetric[]
   
   if (filtered.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-slate-500">
+      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
         <div className="text-center">
           <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No performance metrics</p>
@@ -697,15 +697,15 @@ function PerformanceTab({ metrics, searchQuery }: { metrics: PerformanceMetric[]
     <div className="h-full overflow-auto p-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(grouped).map(([category, items]) => (
-          <div key={category} className="bg-slate-800/50 rounded-lg p-3">
-            <div className="flex items-center gap-2 text-slate-400 mb-2">
+          <div key={category} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded-lg p-3">
+            <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-2">
               {categoryIcons[category]}
               <span className="text-xs uppercase tracking-wide">{category}</span>
             </div>
             <div className="space-y-2">
               {items.slice(0, 5).map(metric => (
                 <div key={metric.id} className="flex items-baseline justify-between">
-                  <span className="text-xs text-slate-300">{metric.name}</span>
+                  <span className="text-xs text-[var(--aethel-text-secondary)]">{metric.name}</span>
                   <span className="text-sm font-mono text-[var(--aethel-primary-light)]">
                     {metric.value.toFixed(1)} {metric.unit}
                   </span>
@@ -728,7 +728,7 @@ function NetworkTab({ requests, searchQuery }: { requests: NetworkRequest[]; sea
   );
   
   const getStatusColor = (status?: number) => {
-    if (!status) return 'text-slate-400';
+    if (!status) return 'text-[var(--aethel-text-tertiary)]';
     if (status >= 200 && status < 300) return 'text-green-400';
     if (status >= 300 && status < 400) return 'text-yellow-400';
     return 'text-red-400';
@@ -736,7 +736,7 @@ function NetworkTab({ requests, searchQuery }: { requests: NetworkRequest[]; sea
   
   if (filtered.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-slate-500">
+      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
         <div className="text-center">
           <Network className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No network requests</p>
@@ -749,8 +749,8 @@ function NetworkTab({ requests, searchQuery }: { requests: NetworkRequest[]; sea
   return (
     <div className="h-full overflow-auto">
       <table className="w-full text-xs">
-        <thead className="sticky top-0 bg-slate-800">
-          <tr className="text-left text-slate-400">
+        <thead className="sticky top-0 bg-[var(--aethel-surface-secondary)]">
+          <tr className="text-left text-[var(--aethel-text-tertiary)]">
             <th className="px-3 py-2">Method</th>
             <th className="px-3 py-2">URL</th>
             <th className="px-3 py-2">Status</th>
@@ -763,17 +763,17 @@ function NetworkTab({ requests, searchQuery }: { requests: NetworkRequest[]; sea
             <tr
               key={req.id}
               onClick={() => setExpandedId(expandedId === req.id ? null : req.id)}
-              className="border-t border-slate-700/50 hover:bg-slate-800/50 cursor-pointer"
+              className="border-t border-[var(--aethel-border-primary)]/50 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] cursor-pointer"
             >
               <td className="px-3 py-2 font-mono text-[var(--aethel-primary-light)]">{req.method}</td>
-              <td className="px-3 py-2 text-slate-300 max-w-xs truncate">{req.url}</td>
+              <td className="px-3 py-2 text-[var(--aethel-text-secondary)] max-w-xs truncate">{req.url}</td>
               <td className={`px-3 py-2 font-mono ${getStatusColor(req.status)}`}>
                 {req.status || 'pending'}
               </td>
-              <td className="px-3 py-2 text-slate-400">
+              <td className="px-3 py-2 text-[var(--aethel-text-tertiary)]">
                 {req.duration ? `${req.duration}ms` : '-'}
               </td>
-              <td className="px-3 py-2 text-slate-400">
+              <td className="px-3 py-2 text-[var(--aethel-text-tertiary)]">
                 {req.size ? `${(req.size / 1024).toFixed(1)}KB` : '-'}
               </td>
             </tr>
@@ -791,7 +791,7 @@ function ConsoleTab({ entries, searchQuery }: { entries: ConsoleEntry[]; searchQ
   );
   
   const levelColors: Record<string, string> = {
-    log: 'text-slate-300',
+    log: 'text-[var(--aethel-text-secondary)]',
     info: 'text-blue-400',
     warn: 'text-yellow-400',
     error: 'text-red-400',
@@ -808,7 +808,7 @@ function ConsoleTab({ entries, searchQuery }: { entries: ConsoleEntry[]; searchQ
   
   if (filtered.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-slate-500">
+      <div className="h-full flex items-center justify-center text-[var(--aethel-text-quaternary)]">
         <div className="text-center">
           <Terminal className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No console entries</p>
@@ -823,16 +823,16 @@ function ConsoleTab({ entries, searchQuery }: { entries: ConsoleEntry[]; searchQ
       {filtered.map(entry => (
         <div
           key={entry.id}
-          className={`flex items-start gap-2 px-3 py-1.5 border-b border-slate-800 ${levelBgs[entry.level]}`}
+          className={`flex items-start gap-2 px-3 py-1.5 border-b border-[var(--aethel-border-primary)] ${levelBgs[entry.level]}`}
         >
           <span className={`uppercase text-[10px] w-12 ${levelColors[entry.level]}`}>
             [{entry.level}]
           </span>
           <span className={`flex-1 ${levelColors[entry.level]}`}>{entry.message}</span>
           {entry.source && (
-            <span className="text-slate-500">{entry.source}</span>
+            <span className="text-[var(--aethel-text-quaternary)]">{entry.source}</span>
           )}
-          <span className="text-slate-500">
+          <span className="text-[var(--aethel-text-quaternary)]">
             {new Date(entry.timestamp).toLocaleTimeString()}
           </span>
         </div>
@@ -911,3 +911,5 @@ export function useActionLogger(source: string) {
 }
 
 export default DevToolsProvider;
+
+

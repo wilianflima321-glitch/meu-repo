@@ -62,7 +62,7 @@ export function GlassCard({
       border: 'border-white/[0.04]',
     },
     medium: {
-      bg: 'bg-white/[0.04]',
+      bg: 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]',
       blur: 'backdrop-blur-xl',
       border: 'border-white/[0.08]',
     },
@@ -78,7 +78,7 @@ export function GlassCard({
     elevated: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur} shadow-2xl shadow-black/30`,
     glow: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur} shadow-[0_0_40px_rgba(99,102,241,0.15)]`,
     gradient: 'bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-transparent backdrop-blur-xl',
-    glass: 'bg-slate-900/30 backdrop-blur-2xl backdrop-saturate-150',
+    glass: 'bg-[var(--aethel-surface-primary)]/30 backdrop-blur-2xl backdrop-saturate-150',
   }
 
   const baseClasses = `
@@ -158,7 +158,7 @@ export function GradientButton({
     primary: `
       bg-[var(--aethel-primary)]
       hover:bg-[var(--aethel-primary-dark)]
-      text-white
+      text-[var(--aethel-text-primary)]
       shadow-lg shadow-[var(--aethel-primary)]/25
       hover:shadow-xl hover:shadow-[var(--aethel-primary)]/40
       border-0
@@ -181,7 +181,7 @@ export function GradientButton({
     `,
     glow: `
       bg-[var(--aethel-info)]
-      text-white
+      text-[var(--aethel-text-primary)]
       shadow-[0_0_20px_rgba(6,182,212,0.5)]
       hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]
       border-0
@@ -248,8 +248,8 @@ export function GlowBadge({
     warning: 'bg-[var(--aethel-warning)]/20 text-[var(--aethel-warning-light)] border-[var(--aethel-warning)]/30',
     error: 'bg-[var(--aethel-error)]/20 text-[var(--aethel-error-light)] border-[var(--aethel-error)]/30',
     accent: 'bg-[var(--aethel-accent)]/20 text-[var(--aethel-accent-light)] border-[var(--aethel-accent)]/30',
-    emerald: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
-    cyan: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30',
+    emerald: 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
+    cyan: 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
   }
 
   const sizeClasses = {
@@ -379,7 +379,7 @@ export function GlowInput({
   return (
     <div className="space-y-1.5">
       {label && (
-        <label className="text-sm font-medium text-slate-300">
+        <label className="text-sm font-medium text-[var(--aethel-text-secondary)]">
           {label}
         </label>
       )}
@@ -388,7 +388,7 @@ export function GlowInput({
         whileFocus={{ scale: 1.01 }}
       >
         {icon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--aethel-text-tertiary)]">
             {icon}
           </div>
         )}
@@ -399,7 +399,7 @@ export function GlowInput({
             bg-white/[0.05]
             border border-white/[0.1]
             rounded-xl
-            text-slate-200 placeholder:text-slate-500
+            text-[var(--aethel-text-secondary)] placeholder:text-[var(--aethel-text-tertiary)]
             transition-all duration-200
             focus:outline-none
             focus:border-[var(--aethel-primary)]/50
@@ -441,12 +441,12 @@ export function FeatureCard({
   color = 'primary',
 }: FeatureCardProps) {
   const colorClasses = {
-    primary: 'bg-[var(--aethel-primary)] text-white',
-    info: 'bg-[var(--aethel-info)] text-white',
-    success: 'bg-[var(--aethel-success)] text-white',
-    warning: 'bg-[var(--aethel-warning)] text-white',
-    error: 'bg-[var(--aethel-error)] text-white',
-    accent: 'bg-[var(--aethel-accent)] text-white',
+    primary: 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]',
+    info: 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]',
+    success: 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]',
+    warning: 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]',
+    error: 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]',
+    accent: 'bg-[var(--aethel-accent)] text-[var(--aethel-text-primary)]',
   }
 
   return (
@@ -466,13 +466,13 @@ export function FeatureCard({
           {icon}
         </div>
         {badge && (
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 bg-white/[0.05] px-2 py-1 rounded">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)] bg-white/[0.05] px-2 py-1 rounded">
             {badge}
           </span>
         )}
       </div>
-      <h3 className="text-lg font-semibold text-slate-100 mb-2">{title}</h3>
-      <p className="text-sm text-slate-400 leading-relaxed">{description}</p>
+      <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-2">{title}</h3>
+      <p className="text-sm text-[var(--aethel-text-tertiary)] leading-relaxed">{description}</p>
     </GlassCard>
   )
 }
@@ -512,10 +512,10 @@ export function StatCard({
           >
             {value}
           </motion.p>
-          <p className="mt-1 text-sm text-slate-400">{label}</p>
+          <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">{label}</p>
         </div>
         {icon && (
-          <div className="p-2 rounded-lg bg-white/[0.05] text-slate-400">
+          <div className="p-2 rounded-lg bg-white/[0.05] text-[var(--aethel-text-tertiary)]">
             {icon}
           </div>
         )}

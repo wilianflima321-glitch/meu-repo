@@ -219,15 +219,15 @@ interface DiffLineProps {
 function DiffLineComponent({ line, showLineNumbers, highlightSyntax }: DiffLineProps) {
   const bgColor = {
     unchanged: 'bg-transparent',
-    added: 'bg-emerald-500/10',
-    removed: 'bg-red-500/10',
+    added: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]',
+    removed: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]',
     modified: 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
   }[line.type]
   
   const textColor = {
-    unchanged: 'text-slate-300',
-    added: 'text-emerald-300',
-    removed: 'text-red-300',
+    unchanged: 'text-[var(--aethel-text-secondary)]',
+    added: 'text-[var(--aethel-success-light)]',
+    removed: 'text-[var(--aethel-error)]',
     modified: 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]',
   }[line.type]
   
@@ -239,13 +239,13 @@ function DiffLineComponent({ line, showLineNumbers, highlightSyntax }: DiffLineP
   }[line.type]
   
   return (
-    <div className={`flex items-stretch ${bgColor} hover:bg-slate-800/30`}>
+    <div className={`flex items-stretch ${bgColor} hover:bg-[var(--aethel-surface-tertiary)]/30`}>
       {showLineNumbers && (
         <>
-          <div className="w-12 flex-shrink-0 text-right pr-2 text-slate-600 text-xs font-mono border-r border-slate-800 select-none">
+          <div className="w-12 flex-shrink-0 text-right pr-2 text-[var(--aethel-text-quaternary)] text-xs font-mono border-r border-[var(--aethel-border-primary)] select-none">
             {line.lineNumber.old || ''}
           </div>
-          <div className="w-12 flex-shrink-0 text-right pr-2 text-slate-600 text-xs font-mono border-r border-slate-800 select-none">
+          <div className="w-12 flex-shrink-0 text-right pr-2 text-[var(--aethel-text-quaternary)] text-xs font-mono border-r border-[var(--aethel-border-primary)] select-none">
             {line.lineNumber.new || ''}
           </div>
         </>
@@ -275,14 +275,14 @@ function DiffHunkComponent({ hunk, onAccept, onReject, showLineNumbers }: DiffHu
   return (
     <div className={`border rounded-lg overflow-hidden mb-4 ${
       hunk.accepted === true 
-        ? 'border-emerald-500/50' 
+        ? 'border-[color-mix(in_srgb,var(--aethel-success)_45%,transparent)]' 
         : hunk.accepted === false 
-        ? 'border-red-500/50 opacity-50' 
-        : 'border-slate-700'
+        ? 'border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] opacity-50' 
+        : 'border-[var(--aethel-border-secondary)]'
     }`}>
       {/* Hunk header */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800/50 border-b border-slate-700">
-        <span className="text-xs text-slate-400 font-mono">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] border-b border-[var(--aethel-border-secondary)]">
+        <span className="text-xs text-[var(--aethel-text-tertiary)] font-mono">
           @@ Lines {hunk.startLine + 1} - {hunk.endLine + 1} @@
         </span>
         
@@ -290,32 +290,32 @@ function DiffHunkComponent({ hunk, onAccept, onReject, showLineNumbers }: DiffHu
           <div className="flex items-center gap-1">
             <button
               onClick={onAccept}
-              className="flex items-center gap-1 px-2 py-0.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs"
+              className="flex items-center gap-1 px-2 py-0.5 bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-xs"
             >
               <Check className="w-3 h-3" />
-              Accept
+              Aceitar
             </button>
             <button
               onClick={onReject}
-              className="flex items-center gap-1 px-2 py-0.5 bg-red-600 hover:bg-red-500 text-white rounded text-xs"
+              className="flex items-center gap-1 px-2 py-0.5 bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-xs"
             >
               <X className="w-3 h-3" />
-              Reject
+              Rejeitar
             </button>
           </div>
         )}
         
         {hunk.accepted === true && (
-          <span className="text-xs text-emerald-400 flex items-center gap-1">
+          <span className="text-xs text-[var(--aethel-success-light)] flex items-center gap-1">
             <Check className="w-3 h-3" />
-            Accepted
+            Aceito
           </span>
         )}
         
         {hunk.accepted === false && (
-          <span className="text-xs text-red-400 flex items-center gap-1">
+          <span className="text-xs text-[var(--aethel-error)] flex items-center gap-1">
             <X className="w-3 h-3" />
-            Rejected
+            Rejeitado
           </span>
         )}
       </div>
@@ -366,8 +366,8 @@ function SideBySideView({ originalContent, modifiedContent }: SideBySideViewProp
   return (
     <div className="flex">
       {/* Left (Original) */}
-      <div className="flex-1 border-r border-slate-700">
-        <div className="px-3 py-1.5 bg-red-500/10 border-b border-slate-700 text-xs font-semibold text-red-400">
+      <div className="flex-1 border-r border-[var(--aethel-border-secondary)]">
+        <div className="px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] border-b border-[var(--aethel-border-secondary)] text-xs font-semibold text-[var(--aethel-error)]">
           Original
         </div>
         <div className="overflow-x-auto">
@@ -375,7 +375,7 @@ function SideBySideView({ originalContent, modifiedContent }: SideBySideViewProp
             line ? (
               <DiffLineComponent key={idx} line={line} showLineNumbers={true} />
             ) : (
-              <div key={idx} className="h-6 bg-slate-900/50" />
+              <div key={idx} className="h-6 bg-[var(--aethel-surface-secondary)]/50" />
             )
           ))}
         </div>
@@ -383,15 +383,15 @@ function SideBySideView({ originalContent, modifiedContent }: SideBySideViewProp
       
       {/* Right (Modified) */}
       <div className="flex-1">
-        <div className="px-3 py-1.5 bg-emerald-500/10 border-b border-slate-700 text-xs font-semibold text-emerald-400">
-          Modified
+        <div className="px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-b border-[var(--aethel-border-secondary)] text-xs font-semibold text-[var(--aethel-success-light)]">
+          Atual
         </div>
         <div className="overflow-x-auto">
           {rightLines.map((line, idx) => (
             line ? (
               <DiffLineComponent key={idx} line={line} showLineNumbers={true} />
             ) : (
-              <div key={idx} className="h-6 bg-slate-900/50" />
+              <div key={idx} className="h-6 bg-[var(--aethel-surface-secondary)]/50" />
             )
           ))}
         </div>
@@ -482,62 +482,62 @@ export default function DiffViewer({
   }, [modifiedContent])
   
   return (
-    <div className={`flex flex-col h-full bg-slate-900 ${isFullscreen ? 'fixed inset-0 z-50' : ''} ${className}`}>
+    <div className={`flex flex-col h-full bg-[var(--aethel-surface-secondary)] ${isFullscreen ? 'fixed inset-0 z-50' : ''} ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-secondary)]">
         <div className="flex items-center gap-3">
-          <FileCode className="w-4 h-4 text-slate-400" />
-          <span className="text-sm font-medium text-white">{resolvedFileName}</span>
-          <span className="text-xs text-slate-500">{language}</span>
+          <FileCode className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{resolvedFileName}</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{language}</span>
           
           {/* Stats */}
           <div className="flex items-center gap-2 ml-4 text-xs">
-            <span className="text-emerald-400">+{stats.additions}</span>
-            <span className="text-red-400">-{stats.deletions}</span>
-            <span className="text-slate-500">|</span>
-            <span className="text-slate-400">{stats.hunks} hunks</span>
+            <span className="text-[var(--aethel-success-light)]">+{stats.additions}</span>
+            <span className="text-[var(--aethel-error)]">-{stats.deletions}</span>
+            <span className="text-[var(--aethel-text-tertiary)]">|</span>
+            <span className="text-[var(--aethel-text-tertiary)]">{stats.hunks} blocos</span>
             {stats.pending > 0 && (
-              <span className="text-[var(--aethel-warning-light)]">{stats.pending} pending</span>
+              <span className="text-[var(--aethel-warning-light)]">{stats.pending} pendentes</span>
             )}
           </div>
         </div>
         
         <div className="flex items-center gap-2">
           {/* View mode toggle */}
-          <div className="flex items-center bg-slate-700 rounded overflow-hidden">
+          <div className="flex items-center bg-[var(--aethel-surface-quaternary)] rounded overflow-hidden">
             <button
               onClick={() => setViewMode('unified')}
-              className={`px-2 py-1 text-xs ${viewMode === 'unified' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2 py-1 text-xs ${viewMode === 'unified' ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'}`}
             >
-              Unified
+              Unificado
             </button>
             <button
               onClick={() => setViewMode('side-by-side')}
-              className={`px-2 py-1 text-xs ${viewMode === 'side-by-side' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2 py-1 text-xs ${viewMode === 'side-by-side' ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'}`}
             >
-              Side by Side
+              Lado a lado
             </button>
           </div>
           
           {/* Actions */}
           <button
             onClick={handleCopy}
-            className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
-            title="Copy modified"
+            className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
+            title="Copiar alterado"
           >
             <Copy className="w-4 h-4" />
           </button>
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
-            title="Toggle fullscreen"
+            className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
+            title="Alternar tela cheia"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
-            title="Close"
+            className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
+            title="Fechar"
           >
             <X className="w-4 h-4" />
           </button>
@@ -564,9 +564,9 @@ export default function DiffViewer({
             ))}
             
             {hunks.length === 0 && (
-              <div className="text-center py-12 text-slate-500">
+              <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
                 <Check className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                <p>No differences found</p>
+                <p>Nenhuma diferenca encontrada</p>
               </div>
             )}
           </div>
@@ -574,48 +574,48 @@ export default function DiffViewer({
       </div>
       
       {/* Footer actions */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-t border-slate-700">
+      <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-tertiary)] border-t border-[var(--aethel-border-secondary)]">
         <div className="flex items-center gap-2">
           <button
             onClick={handleAcceptAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-sm"
           >
             <Check className="w-4 h-4" />
-            Accept All
+            Aceitar tudo
           </button>
           <button
             onClick={handleRejectAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded text-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-sm"
           >
             <X className="w-4 h-4" />
-            Reject All
+            Rejeitar tudo
           </button>
           <button
             onClick={() => {
               setHunks(prev => prev.map(h => ({ ...h, accepted: null })))
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-sm"
           >
             <RotateCcw className="w-4 h-4" />
-            Reset
+            Resetar
           </button>
         </div>
         
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">
-            {stats.accepted}/{stats.hunks} changes accepted
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">
+            {stats.accepted}/{stats.hunks} mudancas aceitas
           </span>
           <button
             onClick={handleApply}
             disabled={stats.pending > 0}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm font-medium ${
               stats.pending > 0
-                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                : 'bg-sky-600 hover:bg-sky-500 text-white'
+                ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
+                : 'bg-[var(--aethel-info)] hover:brightness-110 text-[var(--aethel-text-primary)]'
             }`}
           >
             <FilePlus className="w-4 h-4" />
-            Apply Changes
+            Aplicar mudancas
           </button>
         </div>
       </div>

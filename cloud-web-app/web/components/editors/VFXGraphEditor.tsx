@@ -220,14 +220,14 @@ const VFXNodeComponent: React.FC<{
               onClick={() => onConnectEnd(input.id)}
               title={`${input.name} (${input.type})`}
             />
-            <span className="text-xs text-gray-300">{input.name}</span>
+            <span className="text-xs text-[var(--aethel-text-secondary)]">{input.name}</span>
           </div>
         ))}
 
         {/* Outputs */}
         {node.outputs.map((output) => (
           <div key={output.id} className="flex items-center justify-end mb-1">
-            <span className="text-xs text-gray-300">{output.name}</span>
+            <span className="text-xs text-[var(--aethel-text-secondary)]">{output.name}</span>
             <div
               className="port w-3 h-3 rounded-full bg-gray-500 hover:bg-green-400 cursor-pointer ml-2"
               onClick={() => onConnectStart(output.id)}
@@ -351,43 +351,43 @@ export default function VFXGraphEditor() {
   const selectedNode = graph.nodes.find(n => n.id === selectedNodeId);
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)]">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-4">
           <h2 className="text-white font-semibold"> VFX Graph Editor</h2>
           <input
             type="text"
             value={graph.name}
             onChange={(e) => setGraph(prev => ({ ...prev, name: e.target.value }))}
-            className="px-2 py-1 bg-slate-700 text-white rounded text-sm"
+            className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-white rounded text-sm"
           />
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
             className={`px-3 py-1 rounded text-sm font-medium ${
-              isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+              isPlaying ? 'bg-red-600 hover:bg-red-700' : 'bg-[var(--aethel-success)] hover:bg-green-700'
             } text-white`}
           >
             {isPlaying ? ' Stop' : ' Play'}
           </button>
           <button
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm"
+            className="px-3 py-1 bg-[var(--aethel-primary)] hover:bg-blue-700 text-white rounded text-sm"
             onClick={() => setShowAddMenu(true)}
           >
             + Add Node
           </button>
           <div className="flex items-center gap-1 ml-4">
             <button
-              className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs"
+              className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-white rounded text-xs"
               onClick={() => setZoom(z => Math.max(0.25, z - 0.25))}
             >
               -
             </button>
             <span className="text-white text-xs w-12 text-center">{Math.round(zoom * 100)}%</span>
             <button
-              className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs"
+              className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-white rounded text-xs"
               onClick={() => setZoom(z => Math.min(2, z + 0.25))}
             >
               +
@@ -463,10 +463,10 @@ export default function VFXGraphEditor() {
           {/* Add Node Menu */}
           {showAddMenu && (
             <div
-              className="absolute bg-slate-800 rounded-lg shadow-2xl border border-slate-600 z-50"
+              className="absolute bg-[var(--aethel-surface-secondary)] rounded-lg shadow-2xl border border-[var(--aethel-border-secondary)] z-50"
               style={{ left: menuPosition.x, top: menuPosition.y, minWidth: 200 }}
             >
-              <div className="px-3 py-2 border-b border-slate-600">
+              <div className="px-3 py-2 border-b border-[var(--aethel-border-secondary)]">
                 <span className="text-white text-sm font-medium">Add Node</span>
               </div>
               <div className="max-h-80 overflow-y-auto">
@@ -481,7 +481,7 @@ export default function VFXGraphEditor() {
                     {keys.map((key) => (
                       <button
                         key={key}
-                        className="w-full px-3 py-1 text-left text-sm text-gray-300 hover:bg-slate-700"
+                        className="w-full px-3 py-1 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]"
                         onClick={() => addNode(key)}
                       >
                         {NODE_TEMPLATES[key].name}
@@ -496,14 +496,14 @@ export default function VFXGraphEditor() {
 
         {/* Properties Panel */}
         {selectedNode && (
-          <div className="w-72 bg-slate-800 border-l border-slate-700 overflow-y-auto">
+          <div className="w-72 bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)] overflow-y-auto">
             <div className="p-4">
               <h3 className="text-white font-semibold mb-4">{selectedNode.name}</h3>
               
               <div className="space-y-3">
                 {Object.entries(selectedNode.properties).map(([key, value]) => (
                   <div key={key}>
-                    <label className="block text-xs text-gray-400 mb-1 capitalize">
+                    <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1 capitalize">
                       {key.replace(/([A-Z])/g, ' $1')}
                     </label>
                     {typeof value === 'boolean' ? (
@@ -536,7 +536,7 @@ export default function VFXGraphEditor() {
                             )
                           }));
                         }}
-                        className="w-full px-2 py-1 bg-slate-700 text-white rounded text-sm"
+                        className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-white rounded text-sm"
                       />
                     ) : typeof value === 'string' ? (
                       <input
@@ -552,10 +552,10 @@ export default function VFXGraphEditor() {
                             )
                           }));
                         }}
-                        className="w-full px-2 py-1 bg-slate-700 text-white rounded text-sm"
+                        className="w-full px-2 py-1 bg-[var(--aethel-surface-quaternary)] text-white rounded text-sm"
                       />
                     ) : typeof value === 'object' && value !== null ? (
-                      <pre className="text-xs text-gray-400 bg-slate-700 p-2 rounded overflow-auto">
+                      <pre className="text-xs text-[var(--aethel-text-tertiary)] bg-[var(--aethel-surface-quaternary)] p-2 rounded overflow-auto">
                         {JSON.stringify(value, null, 2)}
                       </pre>
                     ) : null}
@@ -575,7 +575,7 @@ export default function VFXGraphEditor() {
       </div>
 
       {/* Status Bar */}
-      <div className="flex items-center justify-between px-4 py-1 bg-slate-800 border-t border-slate-700 text-xs text-gray-400">
+      <div className="flex items-center justify-between px-4 py-1 bg-[var(--aethel-surface-secondary)] border-t border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-tertiary)]">
         <span>Nodes: {graph.nodes.length} | Connections: {graph.connections.length}</span>
         <span>{isPlaying ? ' Running' : ' Stopped'}</span>
       </div>

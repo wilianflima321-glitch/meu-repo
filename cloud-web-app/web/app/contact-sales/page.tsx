@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -52,9 +52,9 @@ export default function ContactSalesPage() {
 
   const requiredReady = formData.name.trim() && formData.email.trim() && formData.company.trim()
   const fieldBase =
-    'h-12 w-full rounded-2xl border border-white/[0.08] bg-slate-950/60 px-4 text-white placeholder:text-slate-500 focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/20'
+    'h-12 w-full rounded-2xl border border-white/[0.08] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-4 text-white placeholder:text-[var(--aethel-text-quaternary)] focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/20'
   const textAreaBase =
-    'w-full resize-none rounded-2xl border border-white/[0.08] bg-slate-950/60 px-4 py-3 text-white placeholder:text-slate-500 focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/20'
+    'w-full resize-none rounded-2xl border border-white/[0.08] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-4 py-3 text-white placeholder:text-[var(--aethel-text-quaternary)] focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/20'
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -104,19 +104,19 @@ export default function ContactSalesPage() {
               <CheckCircle2 className="h-8 w-8" />
             </div>
             <h1 className="mt-6 text-3xl font-semibold text-white">Briefing enviado</h1>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
+            <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
               Recebemos seu contexto comercial. Nosso objetivo e responder em ate 24 horas uteis com o melhor proximo passo para o seu time.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[color-mix(in_srgb,white_90%,var(--aethel-surface-secondary))]"
               >
                 Revisar planos
               </Link>
               <Link
                 href="/dashboard?onboarding=1&source=contact-sales-success"
-                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
               >
                 Abrir studio
               </Link>
@@ -147,7 +147,7 @@ export default function ContactSalesPage() {
               <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
                 Fale com vendas e desenhe o melhor rollout para o seu time.
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
                 Compartilhe objetivos, requisitos de seguranca e contexto operacional. Organizamos a conversa comercial para acelerar avaliacao, plano e proximos passos.
               </p>
 
@@ -156,11 +156,11 @@ export default function ContactSalesPage() {
                   const Icon = feature.icon
                   return (
                     <article key={feature.title} className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-slate-100">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-[var(--aethel-text-primary)]">
                         <Icon className="h-5 w-5" />
                       </div>
                       <h2 className="mt-4 text-lg font-semibold text-white">{feature.title}</h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-400">{feature.desc}</p>
+                      <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-tertiary)]">{feature.desc}</p>
                     </article>
                   )
                 })}
@@ -168,7 +168,7 @@ export default function ContactSalesPage() {
             </div>
 
             <aside className="rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(2,6,23,0.92))] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.42)]">
-              <div className="overflow-hidden rounded-[22px] border border-white/10 bg-slate-950">
+              <div className="overflow-hidden rounded-[22px] border border-white/10 bg-[var(--aethel-surface-primary)]">
                 <Image
                   src="/screenshots/dashboard.png"
                   alt="Dashboard do Aethel Studio"
@@ -192,12 +192,12 @@ export default function ContactSalesPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Contato comercial</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Contato comercial</p>
                   <h2 className="mt-2 text-2xl font-semibold text-white">Compartilhe seu briefing enterprise</h2>
                 </div>
-                <Mail className="mt-1 h-5 w-5 shrink-0 text-slate-400" />
+                <Mail className="mt-1 h-5 w-5 shrink-0 text-[var(--aethel-text-tertiary)]" />
               </div>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--aethel-text-tertiary)]">
                 Use este formulario para compartilhar contexto comercial, requisitos tecnicos e prioridades de rollout. Nossa equipe responde com direcionamento claro e proximo passo recomendado.
               </p>
 
@@ -209,7 +209,7 @@ export default function ContactSalesPage() {
                 )}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">Nome *</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Nome *</label>
                     <input
                       type="text"
                       value={formData.name}
@@ -219,7 +219,7 @@ export default function ContactSalesPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">Email corporativo *</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Email corporativo *</label>
                     <input
                       type="email"
                       value={formData.email}
@@ -231,7 +231,7 @@ export default function ContactSalesPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Empresa *</label>
+                  <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Empresa *</label>
                   <input
                     type="text"
                     value={formData.company}
@@ -243,7 +243,7 @@ export default function ContactSalesPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">Cargo</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Cargo</label>
                     <input
                       type="text"
                       value={formData.role}
@@ -253,24 +253,24 @@ export default function ContactSalesPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">Tamanho do time</label>
+                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Tamanho do time</label>
                     <select
                       value={formData.teamSize}
                       onChange={(event) => setFormData({ ...formData, teamSize: event.target.value })}
                       className={fieldBase}
                     >
-                      <option value="" className="bg-slate-950">Selecione</option>
-                      <option value="1-10" className="bg-slate-950">1-10</option>
-                      <option value="11-50" className="bg-slate-950">11-50</option>
-                      <option value="51-200" className="bg-slate-950">51-200</option>
-                      <option value="201-500" className="bg-slate-950">201-500</option>
-                      <option value="500+" className="bg-slate-950">500+</option>
+                      <option value="" className="bg-[var(--aethel-surface-primary)]">Selecione</option>
+                      <option value="1-10" className="bg-[var(--aethel-surface-primary)]">1-10</option>
+                      <option value="11-50" className="bg-[var(--aethel-surface-primary)]">11-50</option>
+                      <option value="51-200" className="bg-[var(--aethel-surface-primary)]">51-200</option>
+                      <option value="201-500" className="bg-[var(--aethel-surface-primary)]">201-500</option>
+                      <option value="500+" className="bg-[var(--aethel-surface-primary)]">500+</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Contexto e requisitos</label>
+                  <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Contexto e requisitos</label>
                   <textarea
                     rows={5}
                     value={formData.message}
@@ -287,7 +287,7 @@ export default function ContactSalesPage() {
                     className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold transition ${
                       requiredReady && !loading
                         ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.92))] text-white shadow-[0_18px_40px_rgba(56,189,248,0.24)] hover:brightness-110'
-                        : 'cursor-not-allowed border border-white/10 bg-white/[0.04] text-slate-500'
+                        : 'cursor-not-allowed border border-white/10 bg-white/[0.04] text-[var(--aethel-text-quaternary)]'
                     }`}
                   >
                     {loading ? 'Enviando briefing...' : 'Enviar briefing para vendas'}
@@ -295,14 +295,14 @@ export default function ContactSalesPage() {
                   </button>
                   <Link
                     href="/pricing"
-                    className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+                    className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
                   >
                     Revisar pricing
                   </Link>
                 </div>
 
                 {!requiredReady && (
-                  <p className="text-xs text-slate-400">Preencha nome, email e empresa para enviar o briefing.</p>
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Preencha nome, email e empresa para enviar o briefing.</p>
                 )}
               </div>
               </form>
@@ -310,25 +310,25 @@ export default function ContactSalesPage() {
 
             <aside className="space-y-5">
               <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Sinais para a conversa</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Sinais para a conversa</p>
                 <div className="mt-4 space-y-3">
                   {SALES_SIGNALS.map((item) => (
-                    <div key={item} className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3">
-                      <p className="text-sm leading-6 text-slate-300">{item}</p>
+                    <div key={item} className="rounded-2xl border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] px-4 py-3">
+                      <p className="text-sm leading-6 text-[var(--aethel-text-secondary)]">{item}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">O que acontece depois</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">O que acontece depois</p>
                 <div className="mt-4 space-y-3">
                   {DEAL_STEPS.map((item, index) => (
                     <div key={item} className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-950/60 text-[11px] font-semibold text-slate-200">
+                      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] text-[11px] font-semibold text-[var(--aethel-text-secondary)]">
                         {index + 1}
                       </div>
-                      <p className="text-sm leading-6 text-slate-300">{item}</p>
+                      <p className="text-sm leading-6 text-[var(--aethel-text-secondary)]">{item}</p>
                     </div>
                   ))}
                 </div>
@@ -363,3 +363,4 @@ export default function ContactSalesPage() {
     </div>
   )
 }
+

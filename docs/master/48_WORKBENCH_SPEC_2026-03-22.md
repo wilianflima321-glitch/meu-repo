@@ -1,67 +1,90 @@
-# WORKBENCH_SPEC.md
-## Especificação Técnica do Workbench IDE
+﻿# WORKBENCH_SPEC.md
+## EspecificaÃ§Ã£o TÃ©cnica do Workbench IDE
 **Data:** Janeiro 2026  
-**Versão:** 1.0  
-**Status:** Contrato de Execução
+**VersÃ£o:** 1.0  
+**Status:** Contrato de ExecuÃ§Ã£o
 
 ---
 
-## 1. VISÃO GERAL
+## REALITY CORRECTION (2026-03-25)
 
-O **Workbench** é a shell única da plataforma - uma IDE web completa que unifica:
-- Edição de código (VS Code-like)
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
+## 1. VISÃƒO GERAL
+
+O **Workbench** Ã© a shell Ãºnica da plataforma - uma IDE web completa que unifica:
+- EdiÃ§Ã£o de cÃ³digo (VS Code-like)
 - Preview interativo
-- Viewport 2D/3D (quando aplicável)
-- Timeline de mídia (quando aplicável)
+- Viewport 2D/3D (quando aplicÃ¡vel)
+- Timeline de mÃ­dia (quando aplicÃ¡vel)
 - AI nativa integrada
-- Colaboração real-time
+- ColaboraÃ§Ã£o real-time
 
 ---
 
 ## 2. ARQUITETURA DE COMPONENTES
 
-### 2.1 Diagrama de Alto Nível
+### 2.1 Diagrama de Alto NÃ­vel
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           WORKBENCH SHELL                               │
-├─────────────────────────────────────────────────────────────────────────┤
-│ ┌─────────────────────────────────────────────────────────────────────┐ │
-│ │                        MENU BAR                                     │ │
-│ │  File │ Edit │ View │ Run │ Terminal │ AI │ Help                   │ │
-│ └─────────────────────────────────────────────────────────────────────┘ │
-├───────────┬─────────────────────────────────────────────┬───────────────┤
-│           │                                             │               │
-│  SIDEBAR  │              MAIN AREA                      │  AI PANEL     │
-│           │                                             │               │
-│ ┌───────┐ │  ┌─────────────────────────────────────┐   │ ┌───────────┐ │
-│ │Explorer│ │  │           EDITOR TABS               │   │ │   Chat    │ │
-│ │-------│ │  │  file.js │ style.css │ + │          │   │ │  -------  │ │
-│ │ src/  │ │  └─────────────────────────────────────┘   │ │  [input]  │ │
-│ │ └─app │ │  ┌─────────────────────────────────────┐   │ │           │ │
-│ │ └─comp│ │  │                                     │   │ │ Actions:  │ │
-│ │ assets│ │  │         CODE EDITOR                 │   │ │ • Explain │ │
-│ │ public│ │  │         (Monaco)                    │   │ │ • Refactor│ │
-│ │-------│ │  │                                     │   │ │ • Fix     │ │
-│ │Search │ │  │         Line numbers │ Minimap      │   │ │ • Test    │ │
-│ │-------│ │  │                                     │   │ │           │ │
-│ │Git    │ │  └─────────────────────────────────────┘   │ │ History:  │ │
-│ │-------│ │                   OR                       │ │ [msgs]    │ │
-│ │AI     │ │  ┌─────────────────────────────────────┐   │ │           │ │
-│ └───────┘ │  │         PREVIEW / VIEWPORT          │   │ └───────────┘ │
-│           │  │         (iframe / Three.js)         │   │               │
-│           │  └─────────────────────────────────────┘   │               │
-├───────────┴─────────────────────────────────────────────┴───────────────┤
-│ ┌─────────────────────────────────────────────────────────────────────┐ │
-│ │                        BOTTOM PANEL                                 │ │
-│ │  Terminal │ Problems │ Output │ Debug │ Ports                      │ │
-│ │  $ npm run dev                                                      │ │
-│ │  > Server running on port 3000                                      │ │
-│ └─────────────────────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────────────┤
-│                          STATUS BAR                                     │
-│  main │ JavaScript │ UTF-8 │ LF │ Ln 42, Col 15 │ AI: Ready │ Deploy ▶│
-└─────────────────────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                           WORKBENCH SHELL                               â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚                        MENU BAR                                     â”‚ â”‚
+â”‚ â”‚  File â”‚ Edit â”‚ View â”‚ Run â”‚ Terminal â”‚ AI â”‚ Help                   â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚           â”‚                                             â”‚               â”‚
+â”‚  SIDEBAR  â”‚              MAIN AREA                      â”‚  AI PANEL     â”‚
+â”‚           â”‚                                             â”‚               â”‚
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â” â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚Explorerâ”‚ â”‚  â”‚           EDITOR TABS               â”‚   â”‚ â”‚   Chat    â”‚ â”‚
+â”‚ â”‚-------â”‚ â”‚  â”‚  file.js â”‚ style.css â”‚ + â”‚          â”‚   â”‚ â”‚  -------  â”‚ â”‚
+â”‚ â”‚ src/  â”‚ â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚ â”‚  [input]  â”‚ â”‚
+â”‚ â”‚ â””â”€app â”‚ â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚ â”‚           â”‚ â”‚
+â”‚ â”‚ â””â”€compâ”‚ â”‚  â”‚                                     â”‚   â”‚ â”‚ Actions:  â”‚ â”‚
+â”‚ â”‚ assetsâ”‚ â”‚  â”‚         CODE EDITOR                 â”‚   â”‚ â”‚ â€¢ Explain â”‚ â”‚
+â”‚ â”‚ publicâ”‚ â”‚  â”‚         (Monaco)                    â”‚   â”‚ â”‚ â€¢ Refactorâ”‚ â”‚
+â”‚ â”‚-------â”‚ â”‚  â”‚                                     â”‚   â”‚ â”‚ â€¢ Fix     â”‚ â”‚
+â”‚ â”‚Search â”‚ â”‚  â”‚         Line numbers â”‚ Minimap      â”‚   â”‚ â”‚ â€¢ Test    â”‚ â”‚
+â”‚ â”‚-------â”‚ â”‚  â”‚                                     â”‚   â”‚ â”‚           â”‚ â”‚
+â”‚ â”‚Git    â”‚ â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚ â”‚ History:  â”‚ â”‚
+â”‚ â”‚-------â”‚ â”‚                   OR                       â”‚ â”‚ [msgs]    â”‚ â”‚
+â”‚ â”‚AI     â”‚ â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚ â”‚           â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚  â”‚         PREVIEW / VIEWPORT          â”‚   â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”‚           â”‚  â”‚         (iframe / Three.js)         â”‚   â”‚               â”‚
+â”‚           â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚               â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚
+â”‚ â”‚                        BOTTOM PANEL                                 â”‚ â”‚
+â”‚ â”‚  Terminal â”‚ Problems â”‚ Output â”‚ Debug â”‚ Ports                      â”‚ â”‚
+â”‚ â”‚  $ npm run dev                                                      â”‚ â”‚
+â”‚ â”‚  > Server running on port 3000                                      â”‚ â”‚
+â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                          STATUS BAR                                     â”‚
+â”‚  main â”‚ JavaScript â”‚ UTF-8 â”‚ LF â”‚ Ln 42, Col 15 â”‚ AI: Ready â”‚ Deploy â–¶â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 2.2 Componentes Core
@@ -78,7 +101,30 @@ O **Workbench** é a shell única da plataforma - uma IDE web completa que unifi
 
 ---
 
-## 3. ESPECIFICAÇÕES POR COMPONENTE
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
+## 3. ESPECIFICAÃ‡Ã•ES POR COMPONENTE
 
 ### 3.1 Menu Bar
 
@@ -100,7 +146,7 @@ interface MenuItem {
   separator?: boolean;
 }
 
-// Menus obrigatórios:
+// Menus obrigatÃ³rios:
 const MENUS = [
   { label: 'File', items: ['New File', 'New Project', 'Open', 'Save', 'Save All', '---', 'Export', 'Settings'] },
   { label: 'Edit', items: ['Undo', 'Redo', '---', 'Cut', 'Copy', 'Paste', '---', 'Find', 'Replace'] },
@@ -150,7 +196,7 @@ interface FileTreeNode {
 }
 
 // Asset Library Panel (Cloud Content)
-// Diferente do Explorer, isso busca do nosso Marketplace/CDN, não do projeto local
+// Diferente do Explorer, isso busca do nosso Marketplace/CDN, nÃ£o do projeto local
 interface AssetLibraryPanel {
   categories: string[]; // "3D Models", "Materials", "Audio", "Scripts"
   searchQuery: string;
@@ -186,7 +232,7 @@ interface EditorConfig {
 }
 
 // Inspector Panel (Properties)
-// Substitui o AI Panel ou fica ao lado quando um objeto 3D é selecionado
+// Substitui o AI Panel ou fica ao lado quando um objeto 3D Ã© selecionado
 interface InspectorPanel {
   selectedEntity: SceneEntity | null;
   components: ComponentData[];
@@ -228,7 +274,7 @@ interface EditorArea {
   splits?: EditorArea[];
 }
 
-// Monaco extensions necessárias:
+// Monaco extensions necessÃ¡rias:
 const MONACO_FEATURES = [
   'bracketPairColorization',
   'inlineSuggest', // Para AI autocomplete
@@ -373,11 +419,11 @@ interface StatusBarItem {
   priority: number;
 }
 
-// Items obrigatórios:
+// Items obrigatÃ³rios:
 const STATUS_BAR_ITEMS = {
   left: [
     { id: 'branch', text: 'main', icon: <GitBranch /> },
-    { id: 'sync', text: '↑0 ↓0', icon: <Sync /> },
+    { id: 'sync', text: 'â†‘0 â†“0', icon: <Sync /> },
     { id: 'errors', text: '0', icon: <Error /> },
     { id: 'warnings', text: '0', icon: <Warning /> },
   ],
@@ -394,6 +440,29 @@ const STATUS_BAR_ITEMS = {
 
 ---
 
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
 ## 4. LAYOUT SYSTEM
 
 ### 4.1 CSS Grid Layout
@@ -434,7 +503,7 @@ interface ResizableConfig {
   onResize: (size: number) => void;
 }
 
-// Panels resizáveis:
+// Panels resizÃ¡veis:
 const RESIZABLE_PANELS = {
   sidebar: { minWidth: 170, maxWidth: 500, defaultSize: 250 },
   aiPanel: { minWidth: 250, maxWidth: 600, defaultSize: 300 },
@@ -489,6 +558,29 @@ const SHORTCUTS: Record<string, string> = {
 
 ---
 
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
 ## 5. COMMAND PALETTE
 
 ```typescript
@@ -533,6 +625,29 @@ const COMMANDS: Command[] = [
 
 ---
 
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
 ## 6. THEMES
 
 ```typescript
@@ -583,7 +698,7 @@ interface ThemeColors {
   'ai.codeBlock': string;
 }
 
-// Themes incluídos:
+// Themes incluÃ­dos:
 const BUILT_IN_THEMES = [
   'Dark Modern', // Default
   'Light Modern',
@@ -596,6 +711,29 @@ const BUILT_IN_THEMES = [
 
 ---
 
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
 ## 7. STATE MANAGEMENT
 
 ```typescript
@@ -653,6 +791,29 @@ interface WorkbenchState {
 
 ---
 
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
 ## 8. API INTEGRATION
 
 ### 8.1 File System API
@@ -724,9 +885,32 @@ interface AIAPI {
 
 ---
 
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
 ## 9. PERFORMANCE TARGETS
 
-| Métrica | Target | Crítico |
+| MÃ©trica | Target | CrÃ­tico |
 |---------|--------|---------|
 | Initial Load | <3s | <5s |
 | Editor Ready | <500ms | <1s |
@@ -741,6 +925,29 @@ interface AIAPI {
 
 ---
 
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
 ## 10. ACCESSIBILITY
 
 ```typescript
@@ -768,13 +975,59 @@ const ACCESSIBILITY_REQUIREMENTS = {
 
 ---
 
-## PRÓXIMOS DOCUMENTOS
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
+## PRÃ“XIMOS DOCUMENTOS
 
 - `AI_SYSTEM_SPEC.md` - Sistema de AI detalhado
-- `EXECUTION_PLAN.md` - Plano de execução
+- `EXECUTION_PLAN.md` - Plano de execuÃ§Ã£o
 
 ---
 
+## REALITY CORRECTION (2026-03-25)
+
+This document remains useful as a technical reference, but it is no longer the primary interface authority for Workbench.
+
+Canonical precedence for interface decisions is now:
+1. docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md
+2. docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md
+3. AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md
+4. AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md
+5. AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md
+
+If this file conflicts with the blueprint set on shell anatomy, mode behavior, AI Console structure, Preview Engine behavior, approval flow, connected flows, or route strategy, the blueprint set wins.
+
+## LIMITATIONS OF THIS DOCUMENT
+
+This file still carries older assumptions that can cause interface drift if treated as the main UX contract:
+- it assumes a traditional Menu Bar as a first-class shell zone, while the canonical shell now uses a lean Top Bar
+- it describes a generic AI Panel instead of the canonical AI Console with Conversation, Plan, Runs, Approvals, and Memory / Context
+- it implies simpler preview and terminal families than the now-canonical unified Preview Engine and Bottom Dock contracts
+- it does not fully encode Connected Flows, Preview Deck, artifact invalidation, or health/recovery rules
+- it predates the stricter shell geometry and mode sovereignty rules now defined in the blueprint set
+
+Use this document for implementation hints and historical technical context, not as the final product UX contract.
 ## 11. EXECUTION DELTA (2026-02-13) - COMPACT AAA BASELINE
 
 This section records implemented UI contracts aligned with the canonical execution plan.
@@ -808,3 +1061,5 @@ This section records implemented UI contracts aligned with the canonical executi
 - `/ide` provides explicit panel content for:
   - Search, Source Control, Output, Problems, Debug, Ports
 - Generic fallback panel is no longer the primary user path for those tabs.
+
+

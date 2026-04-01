@@ -90,7 +90,7 @@ export function PremiumEmptyState({
         
         {/* Icon container */}
         <div className="relative rounded-2xl border border-white/[0.1] bg-white/[0.05] backdrop-blur-sm p-6 shadow-2xl shadow-[var(--aethel-primary)]/10">
-          <div className="text-slate-300">
+          <div className="text-[var(--aethel-text-secondary)]">
             {icon || Illustration || <Sparkles className="h-16 w-16" />}
           </div>
           
@@ -118,7 +118,7 @@ export function PremiumEmptyState({
       {/* Title */}
       <motion.h3 
         variants={staggerItem}
-        className="mb-3 text-2xl font-bold text-white"
+        className="mb-3 text-2xl font-bold text-[var(--aethel-text-primary)]"
       >
         {title}
       </motion.h3>
@@ -126,7 +126,7 @@ export function PremiumEmptyState({
       {/* Description */}
       <motion.p 
         variants={staggerItem}
-        className="mb-8 max-w-md text-base text-slate-400 leading-relaxed"
+        className="mb-8 max-w-md text-base text-[var(--aethel-text-tertiary)] leading-relaxed"
       >
         {description}
       </motion.p>
@@ -137,7 +137,7 @@ export function PremiumEmptyState({
           variants={staggerItem}
           className="mb-8 flex flex-wrap items-center justify-center gap-2"
         >
-          <span className="text-xs text-slate-500">Sugestões:</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Sugestões:</span>
           {suggestions.map((suggestion) => (
             <motion.button
               key={suggestion}
@@ -278,11 +278,11 @@ export function EmptyNotifications() {
   return (
     <GlassCard variant="default" className="p-6">
       <div className="flex flex-col items-center text-center">
-        <div className="mb-4 rounded-xl bg-white/[0.05] p-4 text-slate-400">
+        <div className="mb-4 rounded-xl bg-white/[0.05] p-4 text-[var(--aethel-text-tertiary)]">
           <Inbox className="h-8 w-8" />
         </div>
-        <h4 className="text-sm font-medium text-slate-200">Sem notificacoes</h4>
-        <p className="mt-1 text-xs text-slate-500">
+        <h4 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Sem notificacoes</h4>
+        <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
           Novas atualizacoes aparecerao aqui
         </p>
       </div>
@@ -301,10 +301,10 @@ export function EmptyData({
     <GlassCard variant="default" className="p-8">
       <div className="flex flex-col items-center text-center">
         <div className="mb-4 rounded-xl border border-white/[0.1] bg-white/[0.03] p-4">
-          <Database className="h-8 w-8 text-slate-400" />
+          <Database className="h-8 w-8 text-[var(--aethel-text-tertiary)]" />
         </div>
-        <h4 className="text-base font-medium text-slate-200">{title}</h4>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
+        <h4 className="text-base font-medium text-[var(--aethel-text-secondary)]">{title}</h4>
+        <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">{description}</p>
       </div>
     </GlassCard>
   )
@@ -343,8 +343,8 @@ export function ErrorState({
             </div>
           </div>
 
-          <h3 className="mb-2 text-xl font-bold text-white">{title}</h3>
-          <p className="mb-6 text-sm text-slate-400">{message}</p>
+          <h3 className="mb-2 text-xl font-bold text-[var(--aethel-text-primary)]">{title}</h3>
+          <p className="mb-6 text-sm text-[var(--aethel-text-tertiary)]">{message}</p>
 
           <div className="flex gap-3">
             {onRetry && (
@@ -386,7 +386,7 @@ export function ComingSoon({
             transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
             style={{ padding: 2 }}
           >
-            <div className="h-full w-full rounded-full bg-slate-950" />
+            <div className="h-full w-full rounded-full bg-[var(--aethel-surface-primary)]" />
           </motion.div>
           <div className="relative rounded-full border border-white/[0.1] bg-white/[0.05] p-5">
             <Rocket className="h-10 w-10 text-[var(--aethel-primary-light)]" />
@@ -395,13 +395,13 @@ export function ComingSoon({
 
         <GlowBadge color="primary" className="mb-4">Em breve</GlowBadge>
         
-        <h3 className="mb-2 text-xl font-bold text-white">{feature}</h3>
-        <p className="mb-4 max-w-sm text-sm text-slate-400">
+        <h3 className="mb-2 text-xl font-bold text-[var(--aethel-text-primary)]">{feature}</h3>
+        <p className="mb-4 max-w-sm text-sm text-[var(--aethel-text-tertiary)]">
           {description || 'Esta funcionalidade esta em desenvolvimento e estara disponivel em uma atualizacao futura.'}
         </p>
         
         {eta && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">
             Previsao: <span className="text-[var(--aethel-primary-light)]">{eta}</span>
           </p>
         )}
@@ -427,8 +427,8 @@ export function FirstValueGuide({ steps, currentStep }: FirstValueGuideProps) {
     <GlassCard variant="elevated" className="p-6">
       <div className="mb-6">
         <GlowBadge color="info" className="mb-2">Primeiros passos</GlowBadge>
-        <h3 className="text-lg font-bold text-white">Guia de inicio rapido</h3>
-        <p className="text-sm text-slate-400">Complete estas etapas para aproveitar ao maximo</p>
+        <h3 className="text-lg font-bold text-[var(--aethel-text-primary)]">Guia de inicio rapido</h3>
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">Complete estas etapas para aproveitar ao maximo</p>
       </div>
 
       <div className="space-y-4">
@@ -467,7 +467,7 @@ export function FirstValueGuide({ steps, currentStep }: FirstValueGuideProps) {
               <h4 className={`text-sm font-medium ${step.completed ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-text-secondary)]'}`}>
                 {step.title}
               </h4>
-              <p className="mt-0.5 text-xs text-slate-500">{step.description}</p>
+              <p className="mt-0.5 text-xs text-[var(--aethel-text-tertiary)]">{step.description}</p>
               
               {index === currentStep && step.action && (
                 <button

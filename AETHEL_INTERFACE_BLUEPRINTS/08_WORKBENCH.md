@@ -28,6 +28,140 @@ The problem is fragmentation:
 
 This blueprint is intentionally opinionated so the product stops feeling scattered.
 
+## Implementation Reality Check (2026-03-25)
+The canonical contract is now stronger than the implementation.
+That is useful for direction, but it also means the real frontend still carries drift risk.
+
+### 1. Shell reality
+Current production entry:
+- `cloud-web-app/web/app/ide/page.tsx`
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
+
+Current problem:
+- `FullscreenIDE.tsx` still supports two shell paths
+- `ModernIDEShell` is gated by `shell=modern`
+- `IDELayout` remains a live fallback instead of a historical reference
+
+Critical opinion:
+- this is the single biggest architecture leak in the current interface
+- a canonical shell cannot remain optional
+- while two shell identities stay alive, every downstream surface inherits ambiguity
+
+Concrete implementation gaps:
+- `FullscreenIDE.tsx` still branches between `ModernIDEShell` and `IDELayout`
+- `shell=modern` is still used as a live switch instead of a migration-only flag
+- `IDELayout.tsx` still behaves like an active shell path instead of a historical reference
+- `components/_deprecated/layout/IDELayout.tsx` still exists, which increases cognitive and maintenance drift
+
+### 2. Preview reality
+Current preview family:
+- `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`
+- `cloud-web-app/web/components/ide/PreviewRuntimeToolbar.tsx`
+- `cloud-web-app/web/components/ide/PreviewPanel.tsx`
+- `cloud-web-app/web/components/LivePreview.tsx`
+- `cloud-web-app/web/components/VRPreview.tsx`
+
+Current problem:
+- `CanonicalPreviewSurface.tsx` is already the correct direction, but it still composes older preview surfaces instead of fully replacing them
+- the canonical layer still delegates to `LivePreview` and `PreviewPanel`
+- route fragmentation is reduced, but preview still leaks into dashboard and other non-Workbench contexts in ways that can blur the product center
+
+Critical opinion:
+- this is a strong transitional architecture, not a fully consolidated one
+- the preview engine is on the right path, but it is still acting as a wrapper around multiple preview identities
+
+Concrete implementation gaps:
+- `CanonicalPreviewSurface.tsx` still delegates to `LivePreview` and `PreviewPanel`
+- runtime state exists both inside `CanonicalPreviewSurface` and inside `usePreviewRuntimeManager` / `PreviewRuntimeToolbar`
+- Preview Deck is still a blueprint concept more than a real production surface
+- `entry=vr-preview` redirects into `/ide`, but the Workbench entry handling does not clearly honor a VR-specific preview mode
+- inline fallback can still disappear behind idle skeleton behavior when runtime URL state is missing
+
+### 3. AI reality
+Current AI family:
+- `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
+- `cloud-web-app/web/components/ide/AIChatPanelChrome.tsx`
+- `cloud-web-app/web/components/ide/AIChatContextPanels.tsx`
+- `cloud-web-app/web/components/ide/InlineAIChat.tsx`
+- `cloud-web-app/web/components/nexus/NexusChatMultimodal.tsx`
+
+Current problem:
+- the main Workbench AI surface is still structurally chat-first
+- `AIChatPanelContainer` is the best canonical foothold, but the visible implementation is still centered on `AIChatPanelPro`
+- the operational AI Console model (`Conversation`, `Plan`, `Runs`, `Approvals`, `Memory / Context`) is not yet fully enforced in the live component tree
+- `NexusChatMultimodal` still acts like a parallel AI center in another product surface
+
+Critical opinion:
+- the current AI UI is capable, but not fully disciplined
+- if we stop at "advanced chat panel", we will miss the biggest product advantage
+
+Concrete implementation gaps:
+- `AIChatPanelContainer` still renders through `AIChatPanelPro` as the dominant runtime surface
+- the live UI does not yet enforce a clear hierarchy of `Approvals` > `Runs` > `Plan` > `Conversation` when execution is active
+- `InlineAIChat.tsx` and `NexusChatMultimodal.tsx` keep parallel chat identities alive
+- approvals, rollback, memory scope and cost are stronger in docs than in the current visible hierarchy
+
+### 4. Terminal reality
+Current terminal family:
+- `cloud-web-app/web/components/terminal/XTerminal.tsx`
+- `cloud-web-app/web/components/terminal/IntegratedTerminal.tsx`
+- `cloud-web-app/web/components/terminal/TerminalWidget.tsx`
+- `cloud-web-app/web/components/TerminalPro.tsx`
+
+Current problem:
+- the most serious terminal implementation exists, but the product still exposes multiple terminal identities
+- the Bottom Dock contract is clearer in the blueprint than in the runtime UI
+- the terminal family still reads like a toolkit, not one canonical product surface
+
+Critical opinion:
+- terminal fragmentation is smaller than shell fragmentation, but it still weakens the sense of product maturity
+- the product needs one dock, one terminal identity, and one diagnostic basin
+
+Concrete implementation gaps:
+- `IDELayout.tsx` still exposes a dock contract that diverges from the canonical Bottom Dock tab set
+- `XTerminal.tsx`, `IntegratedTerminal.tsx`, `TerminalWidget.tsx`, and `TerminalPro.tsx` still coexist as visible terminal identities
+- output/log/runtime surfaces are not yet fully disciplined as one canonical diagnostic basin
+
+### 5. Nexus reality
+Current competing surface:
+- `cloud-web-app/web/app/nexus/page.tsx`
+
+Current problem:
+- Nexus still behaves like a partial alternate studio center with its own canvas, right panel modes, and chat focus
+- it carries real value, but it competes with Workbench for conceptual authority
+
+Critical opinion:
+- Nexus should become a domain/lab specialization under the Workbench mental model, not a second main product language
+
+Concrete implementation gaps:
+- `app/nexus/page.tsx` still carries its own chat/research/director right-panel center of gravity
+- Nexus still behaves more like a parallel product surface than a contextual Workbench specialization
+
+## Implementation Gaps That Still Matter
+These gaps are no longer conceptual. They are the main reasons the interface can still drift away from the benchmark level we want.
+
+### Missing consolidation outcomes
+- one shell path only
+- one preview family only
+- one AI Console family only
+- one terminal family only
+- one route identity for serious production work
+
+### Missing runtime behaviors
+- full mode persistence across shell states
+- fully visible `Connected Flows` as a first-class UI concept
+- real `Preview Deck` authority in the active work loop
+- approval-first AI operations instead of chat-first emphasis
+- explicit stale/outdated propagation when shared assets change
+- robust restore into the correct preview variant instead of generic preview enablement only
+- one factual runtime status path instead of duplicated preview-health surfaces
+
+### Remaining architectural risks
+- preview still being perceived as a secondary widget instead of a sovereign validation surface
+- AI still being perceived as a sidebar chat rather than operational control
+- dashboard and Nexus still absorbing too much production gravity
+
 ## Canonical Structural Decision
 Use one workbench shell model built around these permanent zones:
 1. Top Bar
@@ -39,6 +173,73 @@ Use one workbench shell model built around these permanent zones:
 7. Status Bar
 
 No other page family is allowed to compete with this shell for the role of main product surface.
+
+## Quality Correction
+The current interface still has critical quality gaps that must be treated as first-class product work, not polish work.
+
+### Quality gaps that are currently too important to ignore
+- the shell still feels transitional instead of inevitable
+- resize and visibility control are not yet explicit enough for a true IDE-grade experience
+- too many core components are defined in blueprints more clearly than they exist in the runtime UI
+- dark theme direction is present, but it is not yet strict enough, calm enough, or graphite-heavy enough
+- too many surfaces still rely on composition shortcuts instead of disciplined component anatomy
+
+### Non-negotiable quality rule
+Workbench quality is not achieved by adding more panels.
+It is achieved by:
+- stronger structural hierarchy
+- better resize behavior
+- better persistence
+- more factual runtime states
+- more complete IDE component coverage
+- darker, calmer, more serious visual discipline
+
+## Canonical Experience Loop
+Workbench should feel excellent not only because of its components, but because the sequence of use is coherent.
+
+### 1. Orient
+The user must instantly understand:
+- which workspace they are in
+- which project is active
+- which mode is active
+- which flow or artifact is selected
+- whether something is blocked, running or outdated
+
+### 2. Focus
+One surface must clearly lead:
+- editor in Build
+- preview in Preview
+- canvas in Canvas
+- approval/compare in Review
+- asset browser in Assets
+
+### 3. Act
+The main action surface must have immediate supporting controls nearby:
+- AI in the right rail
+- diagnostics in the dock
+- scope and navigation in top bar or side bar
+
+### 4. Validate
+Any meaningful change should become visible without sending the user into another product:
+- preview refreshes in place
+- approvals appear in place
+- stale/outdated states appear in place
+
+### 5. Decide
+The product must make risky actions legible:
+- semantic diff before raw diff
+- risk badge before approval CTA
+- rollback or retry paths near the action
+
+### 6. Recover
+When something fails, the user must get one obvious next step:
+- retry
+- rollback
+- open logs
+- inspect diff
+
+Opinion:
+If any one of these phases is weak, the Workbench will feel below benchmark even if individual panels look polished.
 
 ## Benchmark Alignment
 ### From VS Code
@@ -63,6 +264,18 @@ Keep:
 - deployment and rollback as workflow moments
 - project-level preview attached to active work
 
+### From Genspark
+Keep:
+- one-workspace, many-output ambition
+- AI workflows that can move across artifact types without making the user feel lost
+- guided creation and save-point mentality for risky generation flows
+- a sense that the workspace can expand from prompt into real deliverables
+
+Reject:
+- a loose AI-workspace feel with weak shell discipline
+- prompt-first ambiguity replacing explicit artifact structure
+- too many top-level tool identities competing for attention
+
 ### From Unreal
 Keep:
 - viewport as first-class surface
@@ -75,6 +288,29 @@ Keep:
 - canvas and board logic for ideation
 - filmstrip or variants strip
 - timeline literacy for media work
+
+## Benchmark Critique Matrix
+### Where Aethel must beat VS Code
+- stronger AI operations
+- multimodal preview as a first-class citizen
+- connected flows across app, game, film and assets
+
+### Where Aethel must beat Replit
+- stricter shell hierarchy
+- stronger non-chat operational truth
+- better separation between orientation surfaces and production surfaces
+
+### Where Aethel must beat Genspark
+- harder IDE-grade structure
+- clearer artifact ownership and preview authority
+- less workspace ambiguity when multiple outputs exist
+
+### Benchmark failure conditions
+The Workbench is below benchmark if:
+- it still feels like a chat panel beside an editor
+- preview still feels like a widget instead of a sovereign validation surface
+- switching between outputs still feels like changing products
+- resize, panel control and artifact focus still feel weaker than a serious IDE
 
 ## Canonical Route Rule
 The product should conceptually expose one serious production route.
@@ -112,6 +348,103 @@ Treat as contextual extensions, not separate product centers:
 ### Terminal
 One integrated bottom-dock terminal family must survive.
 Four competing terminal identities cannot remain visible in product architecture.
+
+## Critical Quality Audit By Zone
+The Workbench still has quality gaps that are not cosmetic. They affect credibility, flow and production confidence.
+
+### Top Bar critique
+Current risk:
+- top-level orientation is still too vulnerable to becoming a utility dump
+- connected flows, breadcrumbs, runtime truth and global command access are not yet enforced as a disciplined hierarchy
+
+What must improve:
+- project identity must remain visually dominant over auxiliary actions
+- connected flows need stronger chips with selected, outdated and blocked states
+- breadcrumbs must remain readable under pressure instead of collapsing into generic labels
+- command entry must feel like the operational heart of the shell, not a search afterthought
+
+### Left Activity Rail critique
+Current risk:
+- rail items still feel more like navigation shortcuts than a serious workbench spine
+- blocked, active and attention states are not yet explicit enough
+
+What must improve:
+- active state needs stronger structural contrast
+- blocked/attention state must be factual, not badge spam
+- hover and keyboard affordances should teach predictability, not novelty
+
+### Left Sidebar critique
+Current risk:
+- sidebar content can still feel like a generic panel stack rather than a domain-specific navigation basin
+- collapse and resize behavior is not documented tightly enough in the runtime
+
+What must improve:
+- file tree, scene tree and asset tree need disciplined row anatomy
+- expansion state should persist per tool family
+- resize must be mechanical and forgiving, with visible seam strengthening on hover
+
+### Center Workspace critique
+Current risk:
+- the center can still feel like a host for multiple widgets instead of a sovereign work surface
+- split editor behavior is not yet formal enough to feel IDE-grade
+
+What must improve:
+- one surface must clearly lead in every mode
+- split groups need explicit controls, remembered proportions and drag seams
+- active artifact context must survive mode switches without neutral re-entry
+
+### Right Rail critique
+Current risk:
+- the rail still risks reading as a chat sidebar instead of operational control
+- properties, approvals and AI can compete instead of obeying mode sovereignty
+
+What must improve:
+- in Build, AI Console leads
+- in Canvas, Properties leads
+- in Review, Approval Details leads
+- secondary tabs must stay reachable without flattening the main hierarchy
+
+### Bottom Dock critique
+Current risk:
+- dock behavior still feels toolkit-like rather than canonical
+- terminal, logs and runtime do not yet read as one diagnostic basin
+
+What must improve:
+- one terminal identity
+- one dock tab grammar
+- factual counts and problem states in the tab strip
+- collapse-by-default with strong persistence of the last useful state
+
+### Status Bar critique
+Current risk:
+- status truth is still duplicated elsewhere
+- it can drift into decorative metadata instead of operational fact
+
+What must improve:
+- status bar should carry branch, preview health, AI readiness, environment target and blocked state in a fixed low-noise order
+- anything shown there should be factual, compact and actionable
+
+### Seam and resize critique
+Current risk:
+- the interface still does not yet feel physically adjustable enough for a true IDE
+- users need stronger control over visibility without hunting for tiny grips
+
+What must improve:
+- every structural seam must be easy to grab from the middle edge
+- resize must prioritize the surface the user is actively working in
+- seam reset on double-click must exist wherever canonical defaults exist
+- expanding one area should not blind adjacent critical context
+
+### Theme critique
+Current risk:
+- dark styling exists, but not yet with enough graphite discipline
+- some surfaces still risk reading as generic dark SaaS or flashy AI tooling
+
+What must improve:
+- graphite, slate and cold blue must dominate the workbench chrome
+- purple should never be the default emotional color of the runtime
+- borders, tabs and rails should feel machined and calm
+- contrast should be achieved through structure, not glow
 
 ## Shell Anatomy
 ### 1. Top Bar
@@ -182,6 +515,15 @@ Sidebar width:
 - resizable
 - collapsible
 
+Resize contract:
+- seam must be draggable from the middle edge, not only through a tiny decorative handle
+- default hit area: `8 px`
+- hover on seam shows stronger divider state
+- drag immediately expands the active working surface without animation lag
+- double-click resets to default width
+- drag below the minimum threshold should snap back instead of causing accidental collapse
+- explicit collapse action is preferred over accidental collapse-by-drag
+
 Opinion:
 This sidebar should never try to show two tool families at once.
 Doing so would recreate the product fragmentation inside the shell.
@@ -189,10 +531,16 @@ Doing so would recreate the product fragmentation inside the shell.
 ### 4. Center Workspace
 Purpose:
 - the dominant production area
-- the user...s main focus surface
+- the user's main focus surface
 
 This area changes by mode but keeps the same outer shell constraints.
 It must always feel dominant over side chrome.
+
+Center workspace rules:
+- editor groups, preview groups and compare groups must share one split grammar
+- the active group must have unmistakable focus treatment
+- group headers must support pin, split, close-other and reveal-in-sidebar actions
+- switching modes should preserve the most relevant active artifact, not reset to a neutral center
 
 ### 5. Right Rail
 Purpose:
@@ -216,6 +564,13 @@ Right rail width:
 - resizable
 - may collapse to icon rail on tighter widths
 
+Resize contract:
+- draggable seam must be obvious when the pointer reaches the center edge
+- user must be able to widen the AI Console or Properties area quickly while preserving center workspace context
+- right rail must not shrink below real operational usability
+- rail should snap back to canonical width on double-click
+- collapse should occur only through deliberate threshold or explicit collapse control
+
 Opinion:
 This rail is where the product beats a traditional IDE.
 It must not degrade into a generic property inspector or generic chat panel.
@@ -238,6 +593,14 @@ Dock behavior:
 - remembers last open tab per project
 - can collapse to tab strip
 - can expand higher in Preview and Review modes
+
+Resize contract:
+- top seam is always draggable
+- drag expands logs/runtime visibility without detaching the dock from the shell
+- double-click resets to default height
+- dragging must not force a full layout recomposition of the shell
+- drag close to the minimum should snap back to the tab-strip state instead of jittering
+- full collapse must preserve the active tab so re-open feels continuous
 
 Opinion:
 Bottom dock is the right home for terminal and runtime internals.
@@ -337,6 +700,40 @@ Properties panel categories vary by artifact type:
 - scene: transform, material, lighting, behavior
 - media: clip, duration, transition, caption, audio level
 
+Canvas anatomy:
+- top contextual toolbar
+- dominant canvas/stage
+- optional compact left tool palette for selection/insert/transform modes
+- left structure panel
+- right properties panel
+- lower variants/filmstrip strip when applicable
+- optional contextual floating palette near selection for high-frequency actions only
+
+Canvas editing rules:
+- the canvas should privilege direct manipulation first, property editing second
+- floating palettes must stay compact and contextual; they must never replace the main properties rail
+- selection handles, bounding boxes and guides must be visible enough for precision without flooding the stage
+- insert mode, transform mode and inspect mode must be visually distinct
+- the user should always know whether they are selecting, transforming, inserting or comparing
+
+Canvas selection model:
+- no selection
+- single selection
+- multi-selection
+- locked item selected
+- parent/group selected
+
+Canvas toolbar groups:
+- mode: Select, Insert, Transform, Inspect
+- edit: Duplicate, Group, Lock, Hide
+- compare/sync: Compare, Apply to Code, Sync Runtime
+- generation: Generate Variant, Ask AI on Selection
+
+Canvas palette rules:
+- the compact tool palette should appear only for high-frequency editing tools
+- deeper editing options belong in the properties rail, not in large floating trays
+- canvas-specific quick actions must not compete with the top bar or the AI Console
+
 Critical opinion:
 Canvas Mode is where Aethel becomes more than an IDE.
 But it must still stay in the same workbench shell and language. Otherwise the product fractures again.
@@ -354,6 +751,23 @@ Primary actions:
 - revise
 - reject
 - rollback
+
+Review mode UX rules:
+- the before/after or active-output context must remain visually reachable while the decision is being made
+- semantic impact must lead before raw implementation detail
+- risk should be explained in words and structure, not only color
+- the user must understand exactly what will change if they approve
+- rollback lineage must stay nearby whenever it exists
+
+Review mode states:
+- pending approval
+- multi-artifact approval
+- compare active
+- waiting on evidence
+- blocked by missing context
+- approved
+- rejected
+- rollback available
 
 Critical opinion:
 Review Mode is essential to making AI feel trustworthy.
@@ -460,6 +874,31 @@ The user should always understand what context the system is using and why.
 ## Preview Engine
 The Workbench preview engine supports four surface types.
 
+## Unified Preview Context Contract
+Preview, viewport, media inspection and research are not separate products or detached pages.
+They are navigable faces and layers of the same project-bound preview context.
+
+### Core rule
+The user can stay inside one project, one Workbench shell and one preview context while:
+- inspecting the active output
+- comparing another connected flow
+- opening research/reference material
+- watching AI research or browser-assisted work progress
+- returning to the active output without losing scope
+
+### Preview layer model
+The unified preview context may expose:
+- active output layer
+- reference/source layer
+- compare layer
+- research/browser-operator layer
+- approval overlay
+
+Rules:
+- these are layers or navigable states inside the same preview family, not separate top-level surfaces
+- moving between layers must preserve project, flow, run and AI scope
+- the user should feel they are navigating one intelligent preview space, not jumping between tools
+
 ### 1. Web Preview
 Required tools:
 - route selector
@@ -468,6 +907,11 @@ Required tools:
 - open in tab
 - issue count
 - runtime badge
+
+Web preview UX rules:
+- route and device state must stay glanceable at all times
+- responsive/device switching should not feel like leaving the current output
+- issue count and runtime health should stay close to the preview, not buried in dock-only controls
 
 ### 2. 3D Viewport
 Required tools:
@@ -478,6 +922,28 @@ Required tools:
 - overlays or gizmo toggles
 - play or game view toggle
 
+3D viewport UX rules:
+- camera, transform and view mode controls must remain close to the viewport header
+- overlay and gizmo controls should be visible enough for repeated use, not buried in generic menus
+- play/game view transitions should preserve the user's mental model of the current scene
+- object/scene focus should feel immediate and not require panel hunting
+
+3D viewport anatomy:
+- viewport header with camera, transform, view mode and runtime controls
+- dominant viewport canvas
+- optional scene hierarchy awareness through left sidebar, not overlaid clutter
+- selection readout and focus action near viewport chrome
+- compact diagnostics strip for FPS/health only when relevant
+
+3D viewport states:
+- editor view
+- game/play view
+- selected object
+- no selection
+- loading scene
+- degraded runtime
+- blocked runtime
+
 ### 3. Media Preview
 Required tools:
 - play or pause
@@ -487,6 +953,30 @@ Required tools:
 - audio mute or levels
 - export state
 
+Media UX rules:
+- distinguish clearly between the active output and any reference or source clip
+- transport controls must stay visible without competing with the image
+- frame/time readout should remain glanceable during scrub
+- fit, zoom and compare behaviors should preserve orientation instead of resetting the monitor unexpectedly
+
+Media preview anatomy:
+- monitor header with sequence/shot context
+- dominant monitor surface
+- transport bar with play/pause, scrubber and time readout
+- zoom/fit controls
+- audio state cluster
+- compare or reference toggle when source context exists
+
+Media preview states:
+- paused
+- playing
+- scrubbing
+- compare mode
+- muted
+- render outdated
+- export in progress
+- blocked media/runtime
+
 ### 4. Research Preview
 Required tools:
 - compare references
@@ -494,9 +984,78 @@ Required tools:
 - extract notes
 - attach to current flow
 
+Research preview anatomy:
+- source rail or source switcher
+- dominant board/reference/output surface
+- visible provenance row
+- extract queue or structured notes tray
+- compare lane or compare mode toggle
+- action cluster for `Attach to Flow`, `Create Artifact`, `Open Source`
+
+Research preview states:
+- browsing sources
+- compare mode
+- extraction in progress
+- evidence ready
+- attached to flow
+- blocked source
+- degraded retrieval
+
 Critical opinion:
 This unified preview engine is what prevents Aethel from splitting into separate tools for app, game, film, and research.
 The product must feel like one engine with domain-specific faces.
+
+## Preview / Viewport Benchmark Matrix
+### From Unreal Engine
+Absorb:
+- viewport sovereignty; the viewport must feel like a primary work surface, not a media box
+- toolbar grouped by intent rather than implementation detail
+- explicit separation between navigation, transform, view mode and play/runtime states
+- selection focus, camera control and overlay toggles that stay close to the viewport
+
+Apply to Aethel:
+- 3D preview should support camera, transform, overlays and play-state without leaving Workbench
+- preview toolbars should remain stable while controls swap by surface type
+- the viewport should tolerate dense work without becoming visually noisy
+
+Reject:
+- scattering viewport controls into distant side panels
+- hiding runtime/play state under generic overflow
+- treating 3D preview like a slightly richer iframe
+
+### From Adobe Premiere and Firefly Boards
+Absorb:
+- monitor-first validation: the active output monitor must stay visually dominant
+- precise scrub, zoom, frame/time readout and fit controls for media work
+- distinction between reference material and the active output
+- boards and references as part of the same creative loop, not separate product families
+
+Apply to Aethel:
+- media preview should pair playback precision with easy jump-to-source context
+- research preview should support reference comparison, note extraction and attach-to-flow behavior
+- Preview Deck should function more like a serious sequence/reference strip than a decorative thumbnail row
+
+Reject:
+- burying playback controls in generic tool menus
+- making references feel detached from production decisions
+- forcing the user to leave the main work context to inspect alternative takes or sources
+
+### From Manus-style advanced research workflows
+Absorb:
+- parallel research subtasks with visible progress
+- evidence-first outputs with traceable sources
+- research that ends in artifacts, not only summaries
+- browser-assisted collection and structured extraction inside the same task context
+
+Apply to Aethel:
+- research preview should show source trace, extract queue, compare set and flow-attachment actions
+- AI runs for research should expose subtask progress and evidence readiness, not just a final paragraph
+- connected flows should allow research outputs to feed landing pages, trailers, assets and scripts directly
+
+Reject:
+- long unstructured research transcripts
+- source citations hidden behind chat history
+- research outputs that do not connect back into flows and artifacts
 
 ## Preview Deck
 The Preview Deck is mandatory in Preview Mode and available in Build Mode.
@@ -622,6 +1181,69 @@ The user must always see the current scope in:
 - `Attach to Project`
 - `Replace Usage`
 - `Export`
+
+## Missing IDE-Grade Components That Must Exist
+If these components do not become real and cohesive, the product will continue to feel below the benchmark level we want.
+
+### Core shell components
+- resize handles on all structural seams
+- explicit rail collapse affordances
+- tab overflow and pinning controls
+- breadcrumbs row with clickable ancestry
+- command palette with recent commands and recent files
+- status bar slots with stable ordering
+- panel snap states and remembered layout ratios
+- active group focus ring or header emphasis
+- draggable split headers and reset affordances
+
+### Editor workflow components
+- split editor manager
+- outline/symbols view
+- find/replace panel
+- search results tree with grouped matches
+- diff viewer
+- sticky inline approval bar
+- inline diagnostics with quick-fix actions
+- dirty-state tab markers
+- peek overlay for definition, reference or diff snippet
+- minimap or structural scroll aid when density requires it
+
+### Preview workflow components
+- Preview Deck with real state and compare behavior
+- preview compare mode
+- surface-specific preview headers
+- stale/outdated propagation indicators
+- recovery cards at failure points
+- preview header intent groups for Navigation, Runtime, View and Diagnostics
+- device or camera selector group with persistent last choice
+- compare slider or side-by-side variant for validation work
+
+### AI workflow components
+- visible plan checklist
+- run cards
+- approval cards
+- memory/context scope controls
+- agent cards
+- cost/confidence capsules
+- rollback action surface
+- blocked-state escalation surface
+- pinned context strip above the composer
+
+### Dock/runtime workflow components
+- Problems tab
+- Output tab
+- Logs tab
+- Ports tab
+- Runtime tab
+- terminal session tabs
+- runtime target/environment indicator
+- branch/environment status slot
+- long-running task progress row
+- restart and recovery controls near failing runtime states
+
+Rule:
+This list is not feature creep.
+It is the minimum anatomy required for Workbench to feel like a real professional IDE-grade production shell.
 
 ## States
 ### Empty
@@ -812,13 +1434,18 @@ Rule:
 - impacted area summary
 - risk badge
 - expected result
+- affected flow/project
+- visible output or artifact reference
 - rollback condition
 - primary decision buttons
 - optional diff preview teaser
+- inspect deeper action
+- evidence/log lineage link when available
 
 Rule:
 - this card must feel serious and high-trust
 - destructive actions are visually isolated from neutral actions
+- if the approval changes something the user can see, the card should make that surface obvious
 
 ### Preview Header: exact grouped control system
 #### Group 1: Navigation
@@ -1063,6 +1690,7 @@ Critical behavior:
 ## Wireflow: Canvas Mode
 ### Center workspace exact order
 - top contextual toolbar
+- compact tool palette near canvas edge
 - canvas body
 - lower filmstrip or variant strip
 
@@ -1079,6 +1707,8 @@ Critical behavior:
 Critical behavior:
 - selecting an element updates properties, AI context, and linked artifact references together
 - apply-to-code must clearly show what will change before it happens
+- selection state must be obvious before transform or generation actions are offered
+- the compact tool palette must stay secondary to the stage, never hovering like a second main panel
 
 ## Wireflow: Review Mode
 ### Center workspace exact order
@@ -1155,6 +1785,77 @@ Rules:
 - shows what context is active, not every possible context
 - includes project, connected flows, active rules, and linked artifacts
 
+## AI Console <-> Preview Unification Contract
+The AI Console and the active preview/viewport must behave like one working pair, not two adjacent products.
+
+### Core coupling rules
+- changing the active preview target updates the AI artifact chips immediately
+- changing the selected flow updates both preview scope and AI scope
+- selecting an object, shot, route or source should enrich AI context without resetting the conversation
+- the AI Console must always know whether the user is looking at:
+  - active output
+  - reference/source
+  - compare state
+  - approval state
+
+### Conversation-to-preview rules
+- a prompt that targets the active surface should produce a visible scope chip before execution
+- if the prompt affects a visible output, the resulting change should be inspectable in the current preview without navigation to another product
+- if the prompt affects a non-visible connected flow, the Preview Deck should surface that change immediately
+- long chat history must never push preview-critical actions out of reach
+
+### Preview-to-conversation rules
+- clicking a route, shot, object or source may update scope chips and suggested actions, but should not clear draft input
+- clicking `Compare`, `Inspect`, `Attach to Flow` or `Open Source` should preserve the current AI run context
+- preview failure should open local recovery inside the current AI/preview pair, not a detached troubleshooting area
+- if AI research or browser-operator work is running, the user should be able to inspect that work inside the same preview context without leaving the active project
+- returning from reference/research layers to the active output should feel like navigation inside one workspace, not a route change between products
+
+### Approval-to-preview rules
+- approvals that affect a visible preview must keep that preview reachable beside or behind the approval state
+- semantic summary and expected result should reference the affected surface explicitly
+- rollback should restore the previous visible output when lineage exists
+
+## Surface-Aware AI Behavior
+The AI Console must adapt its interaction grammar by active surface type.
+
+### Web Preview + AI
+- prompts often target route, component, layout region or responsive state
+- scope chips should include route and device when relevant
+- AI suggestions should prefer visible UI changes, issue fixes and approval-ready deltas
+
+### 3D Viewport + AI
+- prompts often target scene object, camera, transform, lighting or gameplay/runtime state
+- scope chips should include scene/object/camera when relevant
+- AI should preserve scene focus and avoid ambiguous object references when a selection exists
+
+### Media Preview + AI
+- prompts often target shot, sequence, timing beat, audio cue or export variant
+- scope chips should include shot/sequence/time context when relevant
+- AI suggestions should respect the current frame/segment context and support compare-friendly outcomes
+
+### Research Preview + AI
+- prompts often target source sets, extracted findings, comparison hypotheses or artifact generation
+- scope chips should include source set and compare context when relevant
+- AI should surface provenance-aware outputs and structured extractions instead of freeform prose by default
+
+### Surface-aware quick actions
+The console should expose different high-value actions depending on the active surface:
+- Web Preview: `Fix visible issue`, `Adjust layout`, `Compare breakpoint`, `Open changed component`
+- 3D Viewport: `Focus selected`, `Adjust camera`, `Change lighting`, `Apply transform suggestion`
+- Media Preview: `Revise shot`, `Trim beat`, `Adjust pacing`, `Compare take`
+- Research Preview: `Extract findings`, `Compare sources`, `Create brief`, `Attach to flow`
+
+Rule:
+These actions should feel like accelerators for the current surface, not like a second toolbar fighting the preview header.
+
+### Surface-aware approval language
+Approval copy should adapt to the active surface:
+- Web Preview: emphasize route, component, responsive state and visible issue outcome
+- 3D Viewport: emphasize object, camera, scene, lighting or runtime behavior
+- Media Preview: emphasize shot, timing, pacing, audio or export effect
+- Research Preview: emphasize source set, extraction quality, evidence coverage or downstream artifact impact
+
 ## Preview Header: Surface-specific Variants
 ### Web Preview variant
 Controls:
@@ -1174,6 +1875,14 @@ Controls:
 - play/game view toggle
 - frame selected or focus action
 
+Priority order:
+1. camera selector
+2. play/game view
+3. transform mode
+4. shading/view mode
+5. overlays/gizmos
+6. focus selected
+
 ### Media Preview variant
 Controls:
 - play/pause
@@ -1183,12 +1892,47 @@ Controls:
 - mute/levels
 - export state
 
+Priority order:
+1. play/pause
+2. scrubber
+3. frame/time readout
+4. compare/source toggle when present
+5. zoom/fit
+6. mute/levels
+7. export state
+
 ### Research Preview variant
 Controls:
 - source selector
 - compare toggle
 - notes/extract action
 - attach to flow action
+
+Priority order:
+1. source selector
+2. compare toggle
+3. provenance visibility
+4. notes/extract action
+5. attach to flow
+6. create artifact
+
+Required anatomy:
+- source rail or source switcher with visible provenance
+- main reference/board/output surface
+- extract queue or notes tray
+- compare lane for two or more references when active
+- direct `Attach to Flow` and `Create Artifact` actions
+
+Research UX rules:
+- source provenance must remain visible without opening a separate citations page
+- extracts should be collectible into structured insight groups, not only freeform notes
+- compare mode should privilege difference and relevance, not only side-by-side screenshots
+- a research session should feel capable of feeding the rest of the Workbench, not like a dead-end reading pane
+
+Research run UX rules:
+- research runs should expose subtask progress, source collection status and evidence readiness
+- citations/provenance should remain reachable from the run and from the preview
+- a completed research run should end in one or more usable outputs: extract set, brief, board, flow attachment or generated artifact
 
 ## Preview Deck: State Variants
 Each card needs variants for:
@@ -1351,12 +2095,13 @@ If preview or live keep their own full route identity in product messaging, frag
 ## Canonical Terminal Decision
 The integrated bottom-dock terminal family should inherit its behavior from the strongest PTY-capable implementation.
 Canonical direction:
-- `components/terminal/XTerminal.tsx` for engine depth and session model
+- merge the strongest PTY runtime spine with the strongest dock chrome and session UX
 - integrated into one bottom-dock shell pattern, not exposed as a free-floating standalone product
 
 Reference-only patterns:
-- `IntegratedTerminal.tsx` for toolbar ideas
-- `TerminalWidget.tsx` for session/theme ideas
+- `TerminalWidget.tsx` and `useTerminal.ts` for PTY/runtime behavior
+- `XTerminal.tsx` for shell ambition, presentation depth and session UX ideas
+- `IntegratedTerminal.tsx` for smaller toolbar ideas
 - any standalone terminal page as legacy or utility only
 
 ## Top Bar Ordering Contract
@@ -1430,6 +2175,12 @@ Pending approval always opens:
 - file or artifact detail third
 The user should never have to hunt through conversation history to find what is being approved.
 
+### Approvals -> Visible Output
+If an approval affects a visible preview or viewport:
+- the affected output remains reachable in the same mode
+- before/after or compare state should open without losing the approval card
+- the expected result should name the visible surface explicitly
+
 ### Memory -> Scope Control
 Memory/context items are not passive notes.
 They must support:
@@ -1470,12 +2221,47 @@ If two runs target the same flow:
 - compare mode
 - pinned
 
+Preview deck UX rules:
+- the deck should feel closer to a serious filmstrip/reference strip than to a gallery carousel
+- selected state must be unmistakable even at peripheral vision
+- the deck must support fast lateral scanning without aggressive hover dependence
+- compare entry should be explicit and reversible
+- pinned cards should stay physically stable to preserve spatial memory
+
 ## AI Console Section Priority Rules
 - conversation is default visible but not allowed to bury approvals
 - approvals rise to the top whenever a user decision is blocking progress
 - runs stay above memory when there is active execution
 - memory/context can collapse to a summary when space is constrained
 - live controls appear only when live is explicitly enabled
+
+## AI Console By Mode
+The AI Console is one family, but its dominant section changes by mode.
+
+### Build Mode AI behavior
+- default visible sections: Conversation + Plan + compact Runs
+- approval state may interrupt only when directly blocking the current artifact
+- quick actions should emphasize fix/apply/open-changed-file flows
+
+### Preview Mode AI behavior
+- default visible sections: surface-aware Conversation + compact Approvals + compact Runs
+- AI should stay tightly coupled to the current preview target
+- quick actions should emphasize compare, inspect, revise and refresh-related actions
+
+### Canvas Mode AI behavior
+- default visible sections: compact Conversation + Properties-adjacent suggestions + Plan when generating
+- AI should respect the selected object/layer/scene and avoid broad ambiguous instructions when selection exists
+- quick actions should emphasize variation, transform, apply-to-code and reuse
+
+### Review Mode AI behavior
+- default visible sections: Approvals first, then semantic summary, then Runs/Memory
+- conversation becomes secondary support, not the lead
+- quick actions should emphasize approve, revise, reject, rollback and inspect evidence
+
+### Assets Mode AI behavior
+- default visible sections: compact Conversation + linked usage/context + generation/transform actions
+- AI should emphasize insertion scope, replace-usage scope and downstream flow impact
+- quick actions should emphasize attach, generate variation, replace usage and inspect dependencies
 
 ## Right Rail Tab Contract
 Recommended tab order:
@@ -1709,6 +2495,12 @@ The preview toolbar must be grouped by user intent, not by implementation trivia
 
 Rule:
 Toolbar group labels and spacing must stay consistent across web, 3D, media and research variants, even when the actual controls differ.
+
+Preview toolbar UX rules:
+- the toolbar should stay close enough to the surface to feel like viewport chrome, not global app chrome
+- controls with high repetition value must be visible; low-frequency controls may move into overflow
+- current mode, current source/camera/route and current health state must remain glanceable
+- the user must never wonder whether they are editing the output, viewing a source, or reviewing a reference
 
 ## Connected Flow Update Contract
 A flow is considered affected when a linked asset, rule, component, scene, sequence, or generated output changes in a way that impacts its visible result.

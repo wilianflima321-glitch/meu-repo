@@ -25,7 +25,7 @@ export function SkipToContent({ links = DEFAULT_SKIP_LINKS }: { links?: SkipLink
         <a
           key={link.href}
           href={link.href}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg ring-2 ring-blue-400 ring-offset-2 ring-offset-black transition-colors focus:outline-none"
+          className="rounded-lg bg-[var(--aethel-primary)] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg ring-2 ring-[var(--aethel-info)] ring-offset-2 ring-offset-black transition-colors focus:outline-none"
         >
           {link.label}
         </a>
@@ -147,7 +147,7 @@ export function IconButton({ label, size = 'md', className = '', children, ...pr
     <button
       type="button"
       aria-label={label}
-      className={`inline-flex items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] ${sizeClasses[size]} ${className}`}
       {...props}
     >
       {children}
@@ -155,3 +155,4 @@ export function IconButton({ label, size = 'md', className = '', children, ...pr
     </button>
   )
 }
+

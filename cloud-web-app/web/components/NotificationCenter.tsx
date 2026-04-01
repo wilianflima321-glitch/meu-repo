@@ -109,9 +109,9 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-96 bg-slate-800 border-l border-slate-700 shadow-2xl z-50 flex flex-col">
+    <div className="fixed inset-y-0 right-0 w-96 bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)] shadow-2xl z-50 flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-slate-700">
+      <div className="p-4 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-white">Notifications</h2>
@@ -123,7 +123,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >
             ✕
           </button>
@@ -138,7 +138,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
               className={`px-3 py-1 rounded text-xs transition-colors ${
                 filter === f
                   ? 'bg-blue-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
               }`}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -149,10 +149,10 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
 
       {/* Actions */}
       {notifications.length > 0 && (
-        <div className="p-3 border-b border-slate-700 flex gap-2">
+        <div className="p-3 border-b border-[var(--aethel-border-primary)] flex gap-2">
           <button
             onClick={markAllAsRead}
-            className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded transition-colors"
+            className="flex-1 px-3 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-white text-sm rounded transition-colors"
           >
             Mark All Read
           </button>
@@ -168,7 +168,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
       {/* Notifications List */}
       <div className="flex-1 overflow-y-auto">
         {filteredNotifications.length === 0 ? (
-          <div className="p-8 text-center text-slate-400">
+          <div className="p-8 text-center text-[var(--aethel-text-tertiary)]">
             <div className="text-4xl mb-2">🔔</div>
             <p>No notifications</p>
           </div>
@@ -179,8 +179,8 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                 key={notification.id}
                 className={`p-4 rounded-lg border transition-colors ${
                   notification.read
-                    ? 'bg-slate-900/50 border-slate-700'
-                    : 'bg-slate-900 border-slate-600'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] border-[var(--aethel-border-primary)]'
+                    : 'bg-[var(--aethel-surface-primary)] border-[var(--aethel-border-secondary)]'
                 } ${getSeverityColor(notification.severity)}`}
               >
                 <div className="flex items-start gap-3">
@@ -195,18 +195,18 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                       </h3>
                       <button
                         onClick={() => deleteNotification(notification.id)}
-                        className="text-slate-500 hover:text-white transition-colors"
+                        className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                       >
                         ✕
                       </button>
                     </div>
                     
-                    <p className="text-sm text-slate-300 mb-2">
+                    <p className="text-sm text-[var(--aethel-text-secondary)] mb-2">
                       {notification.message}
                     </p>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[var(--aethel-text-tertiary)]">
                         {notification.timestamp.toLocaleTimeString()}
                       </span>
                       
@@ -238,7 +238,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                     )}
                     
                     {notification.source && (
-                      <div className="mt-2 text-xs text-slate-500">
+                      <div className="mt-2 text-xs text-[var(--aethel-text-tertiary)]">
                         Source: {notification.source}
                       </div>
                     )}

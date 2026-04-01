@@ -26,7 +26,7 @@ export function LoadingScreen({
   }, [])
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[var(--aethel-surface-primary)]">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] rounded-full blur-[100px] animate-pulse" />
@@ -38,7 +38,7 @@ export function LoadingScreen({
         {showLogo && (
           <div className="mb-10 flex flex-col items-center">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--aethel-info)] via-[var(--aethel-accent)] to-[var(--aethel-primary)] flex items-center justify-center shadow-2xl shadow-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] mb-4 animate-bounce-slow">
-              <Sparkles className="w-10 h-10 text-white" />
+              <Sparkles className="w-10 h-10 text-[var(--aethel-text-primary)]" />
             </div>
             <h1 className="text-3xl font-bold">
               <span className="bg-gradient-to-r from-[var(--aethel-info-light)] via-[var(--aethel-accent-light)] to-[var(--aethel-primary-light)] bg-clip-text text-transparent">
@@ -51,7 +51,7 @@ export function LoadingScreen({
         {/* Loading Spinner */}
         <div className="relative w-24 h-24 mb-8">
           {/* Outer ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-slate-800" />
+          <div className="absolute inset-0 rounded-full border-4 border-[var(--aethel-border-primary)]" />
           
           {/* Spinning gradient ring */}
           <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--aethel-info)] border-r-[var(--aethel-accent)] animate-spin" />
@@ -66,7 +66,7 @@ export function LoadingScreen({
         </div>
 
         {/* Progress Bar */}
-        <div className="w-64 h-1.5 bg-slate-800 rounded-full overflow-hidden mb-4">
+        <div className="w-64 h-1.5 bg-[var(--aethel-surface-secondary)] rounded-full overflow-hidden mb-4">
           <div
             className="h-full bg-gradient-to-r from-[var(--aethel-info)] via-[var(--aethel-accent)] to-[var(--aethel-primary)] rounded-full transition-all duration-300 ease-out"
             style={{ width: `${Math.min(progress, 100)}%` }}
@@ -74,12 +74,12 @@ export function LoadingScreen({
         </div>
 
         {/* Message */}
-        <p className="text-slate-400 text-sm animate-pulse">{message}</p>
+        <p className="text-[var(--aethel-text-tertiary)] text-sm animate-pulse">{message}</p>
       </div>
 
       {/* Version */}
-      <div className="absolute bottom-6 text-xs text-slate-600">
-        v1.0.0 â€¢ Enterprise Edition
+      <div className="absolute bottom-6 text-xs text-[var(--aethel-text-quaternary)]">
+        v1.0.0 - Enterprise Edition
       </div>
     </div>
   )
@@ -92,10 +92,10 @@ export function PageLoader({ text = 'Carregando página...' }: { text?: string }
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center">
       <div className="relative w-16 h-16 mb-4">
-        <div className="absolute inset-0 rounded-full border-4 border-slate-800" />
-        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-sky-500 animate-spin" />
+        <div className="absolute inset-0 rounded-full border-4 border-[var(--aethel-border-primary)]" />
+        <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--aethel-info)] animate-spin" />
       </div>
-      <p className="text-slate-400 text-sm">{text}</p>
+      <p className="text-[var(--aethel-text-tertiary)] text-sm">{text}</p>
     </div>
   )
 }
@@ -111,7 +111,7 @@ export function InlineLoader({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   }
 
   return (
-    <div className={`${sizes[size]} rounded-full border-slate-700 border-t-sky-500 animate-spin`} />
+    <div className={`${sizes[size]} rounded-full border-[var(--aethel-border-primary)] border-t-[var(--aethel-info)] animate-spin`} />
   )
 }
 
@@ -124,7 +124,7 @@ export function DotsLoader() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="w-2 h-2 rounded-full bg-sky-500 animate-bounce"
+          className="w-2 h-2 rounded-full bg-[var(--aethel-info)] animate-bounce"
           style={{ animationDelay: `${i * 150}ms` }}
         />
       ))}
@@ -137,7 +137,7 @@ export function DotsLoader() {
 ============================================ */
 export function PulseLoader({ className = '' }: { className?: string }) {
   return (
-    <div className={`bg-slate-800/60 animate-pulse rounded ${className}`} />
+    <div className={`bg-[var(--aethel-surface-secondary)]/60 animate-pulse rounded ${className}`} />
   )
 }
 

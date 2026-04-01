@@ -1,7 +1,7 @@
-﻿/**
+/**
  * DIALOGUE EDITOR - Aethel Engine
  * 
- * Editor visual baseado em nós para criação de diálogos ramificados.
+ * Editor visual baseado em n�s para cria��o de di�logos ramificados.
  * Sistema profissional inspirado em Ink, Yarn Spinner e Articy:Draft.
  * 
  * FEATURES:
@@ -169,31 +169,31 @@ function DialogueNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   const firstLine = lines[0];
   
   return (
-    <div className={`w-72 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-blue-500 border-blue-500' : 'border-slate-600'}`}>
-      <Handle type="target" position={Position.Top} className="!bg-blue-400" />
+    <div className={`w-72 rounded-lg bg-[var(--aethel-surface-secondary)] border shadow-lg ${selected ? 'ring-2 ring-[var(--aethel-primary)] border-[var(--aethel-primary)]' : 'border-[var(--aethel-border-secondary)]'}`}>
+      <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-primary)]" />
       
-      <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
-        <MessageSquare className="w-4 h-4 text-blue-400" />
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)] flex items-center gap-2">
+        <MessageSquare className="w-4 h-4 text-[var(--aethel-primary)]" />
         <span className="font-medium text-sm text-white truncate">{data.label}</span>
       </div>
       
       <div className="p-3 space-y-2 max-h-40 overflow-y-auto">
         {lines.map((line, i) => (
-          <div key={line.id} className="bg-slate-700/50 rounded p-2">
+          <div key={line.id} className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded p-2">
             <div className="flex items-center gap-2 mb-1">
-              <User className="w-3 h-3 text-slate-400" />
-              <span className="text-xs text-slate-400">{line.characterId}</span>
-              <span className="text-[10px] text-slate-500">[{line.emotion}]</span>
+              <User className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
+              <span className="text-xs text-[var(--aethel-text-tertiary)]">{line.characterId}</span>
+              <span className="text-[10px] text-[var(--aethel-text-quaternary)]">[{line.emotion}]</span>
             </div>
-            <p className="text-xs text-slate-200 line-clamp-2">{line.text}</p>
+            <p className="text-xs text-[var(--aethel-text-primary)] line-clamp-2">{line.text}</p>
           </div>
         ))}
         {lines.length === 0 && (
-          <p className="text-xs text-slate-500 italic">No dialogue lines</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">No dialogue lines</p>
         )}
       </div>
       
-      <Handle type="source" position={Position.Bottom} className="!bg-blue-400" />
+      <Handle type="source" position={Position.Bottom} className="!bg-[var(--aethel-primary)]" />
     </div>
   );
 }
@@ -206,10 +206,10 @@ function ChoiceNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   const choices = data.choices || [];
   
   return (
-    <div className={`w-64 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]' : 'border-slate-600'}`}>
+    <div className={`w-64 rounded-lg bg-[var(--aethel-surface-secondary)] border shadow-lg ${selected ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]' : 'border-[var(--aethel-border-secondary)]'}`}>
       <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-warning-light)]" />
       
-      <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)] flex items-center gap-2">
         <GitBranch className="w-4 h-4 text-[var(--aethel-warning-light)]" />
         <span className="font-medium text-sm text-white">{data.label}</span>
       </div>
@@ -232,7 +232,7 @@ function ChoiceNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
           </div>
         ))}
         {choices.length === 0 && (
-          <p className="text-xs text-slate-500 italic p-2">No choices</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">No choices</p>
         )}
       </div>
     </div>
@@ -248,21 +248,21 @@ function ConditionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   const condition = conditions[0];
   
   return (
-    <div className={`w-56 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-[var(--aethel-info)] border-[var(--aethel-primary)]' : 'border-slate-600'}`}>
-      <Handle type="target" position={Position.Top} className="!bg-blue-400" />
+    <div className={`w-56 rounded-lg bg-[var(--aethel-surface-secondary)] border shadow-lg ${selected ? 'ring-2 ring-[var(--aethel-info)] border-[var(--aethel-primary)]' : 'border-[var(--aethel-border-secondary)]'}`}>
+      <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-primary)]" />
       
-      <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
-        <Code className="w-4 h-4 text-blue-400" />
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)] flex items-center gap-2">
+        <Code className="w-4 h-4 text-[var(--aethel-primary)]" />
         <span className="font-medium text-sm text-white">Condition</span>
       </div>
       
       <div className="p-3">
         {condition ? (
-          <div className="bg-blue-900/30 rounded p-2 text-xs font-mono text-blue-200">
+          <div className="bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] rounded p-2 text-xs font-mono text-[var(--aethel-primary)]">
             {condition.variable} {condition.operator} {String(condition.value)}
           </div>
         ) : (
-          <p className="text-xs text-slate-500 italic">No condition set</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic">No condition set</p>
         )}
       </div>
       
@@ -298,26 +298,26 @@ function ActionNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   const actions = data.actions || [];
   
   return (
-    <div className={`w-56 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-cyan-500 border-cyan-500' : 'border-slate-600'}`}>
-      <Handle type="target" position={Position.Top} className="!bg-cyan-400" />
+    <div className={`w-56 rounded-lg bg-[var(--aethel-surface-secondary)] border shadow-lg ${selected ? 'ring-2 ring-[var(--aethel-info)] border-[var(--aethel-info)]' : 'border-[var(--aethel-border-secondary)]'}`}>
+      <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-info)]" />
       
-      <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
-        <Zap className="w-4 h-4 text-cyan-400" />
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)] flex items-center gap-2">
+        <Zap className="w-4 h-4 text-[var(--aethel-info)]" />
         <span className="font-medium text-sm text-white">Action</span>
       </div>
       
       <div className="p-2 space-y-1">
         {actions.map((action, i) => (
-          <div key={i} className="bg-cyan-900/30 rounded p-2 text-xs text-cyan-200 font-mono">
+          <div key={i} className="bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] rounded p-2 text-xs text-[var(--aethel-info)] font-mono">
             {action.type}: {JSON.stringify(action.params).slice(0, 30)}...
           </div>
         ))}
         {actions.length === 0 && (
-          <p className="text-xs text-slate-500 italic p-2">No actions</p>
+          <p className="text-xs text-[var(--aethel-text-quaternary)] italic p-2">No actions</p>
         )}
       </div>
       
-      <Handle type="source" position={Position.Bottom} className="!bg-cyan-400" />
+      <Handle type="source" position={Position.Bottom} className="!bg-[var(--aethel-info)]" />
     </div>
   );
 }
@@ -344,23 +344,23 @@ function ExitNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
 
 function RandomNode({ data, selected }: NodeProps<Node<DialogueNodeData>>) {
   return (
-    <div className={`w-48 rounded-lg bg-slate-800 border shadow-lg ${selected ? 'ring-2 ring-cyan-500 border-cyan-500' : 'border-slate-600'}`}>
-      <Handle type="target" position={Position.Top} className="!bg-cyan-400" />
+    <div className={`w-48 rounded-lg bg-[var(--aethel-surface-secondary)] border shadow-lg ${selected ? 'ring-2 ring-[var(--aethel-info)] border-[var(--aethel-info)]' : 'border-[var(--aethel-border-secondary)]'}`}>
+      <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-info)]" />
       
-      <div className="px-3 py-2 border-b border-slate-700 flex items-center gap-2">
-        <HelpCircle className="w-4 h-4 text-cyan-400" />
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)] flex items-center gap-2">
+        <HelpCircle className="w-4 h-4 text-[var(--aethel-info)]" />
         <span className="font-medium text-sm text-white">Random</span>
       </div>
       
       <div className="p-2 flex flex-col gap-1">
         {[1, 2, 3].map((n) => (
-          <div key={n} className="relative bg-cyan-900/30 rounded p-1.5 text-xs text-cyan-200 pr-4">
+          <div key={n} className="relative bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] rounded p-1.5 text-xs text-[var(--aethel-info)] pr-4">
             Path {n}
             <Handle
               type="source"
               position={Position.Right}
               id={`path${n}`}
-              className="!bg-cyan-400"
+              className="!bg-[var(--aethel-info)]"
               style={{ top: `${n * 28 + 44}px` }}
             />
           </div>
@@ -456,12 +456,12 @@ function DialogueLineEditor({ line, characters, onUpdate, onDelete }: DialogueLi
   const character = characters.find((c) => c.id === line.characterId);
   
   return (
-    <div className="bg-slate-800/50 rounded p-3 mb-2">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-3 mb-2">
       <div className="flex gap-2 mb-2">
         <select
           value={line.characterId}
           onChange={(e) => onUpdate({ ...line, characterId: e.target.value })}
-          className="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
+          className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-sm"
         >
           {characters.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
@@ -471,7 +471,7 @@ function DialogueLineEditor({ line, characters, onUpdate, onDelete }: DialogueLi
         <select
           value={line.emotion}
           onChange={(e) => onUpdate({ ...line, emotion: e.target.value })}
-          className="w-28 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
+          className="w-28 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-sm"
         >
           {character?.emotions.map((e) => (
             <option key={e} value={e}>{e}</option>
@@ -489,17 +489,17 @@ function DialogueLineEditor({ line, characters, onUpdate, onDelete }: DialogueLi
       <textarea
         value={line.text}
         onChange={(e) => onUpdate({ ...line, text: e.target.value })}
-        className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm resize-none"
+        className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm resize-none"
         rows={3}
         placeholder="Enter dialogue text..."
       />
       
       <div className="flex gap-2 mt-2">
-        <button className="flex items-center gap-1 px-2 py-1 bg-slate-700 rounded text-xs hover:bg-slate-600">
+        <button className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs hover:bg-[var(--aethel-surface-quaternary)]">
           <Volume2 className="w-3 h-3" />
           Audio
         </button>
-        <button className="flex items-center gap-1 px-2 py-1 bg-slate-700 rounded text-xs hover:bg-slate-600">
+        <button className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs hover:bg-[var(--aethel-surface-quaternary)]">
           <Globe className="w-3 h-3" />
           Localize
         </button>
@@ -522,7 +522,7 @@ interface NodeInspectorProps {
 function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorProps) {
   if (!node) {
     return (
-      <div className="p-4 text-center text-slate-500">
+      <div className="p-4 text-center text-[var(--aethel-text-quaternary)]">
         <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-sm">Select a node to edit</p>
       </div>
@@ -572,10 +572,10 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          {data.nodeType === 'dialogue' && <MessageSquare className="w-5 h-5 text-blue-400" />}
+          {data.nodeType === 'dialogue' && <MessageSquare className="w-5 h-5 text-[var(--aethel-primary)]" />}
           {data.nodeType === 'choice' && <GitBranch className="w-5 h-5 text-[var(--aethel-warning-light)]" />}
-          {data.nodeType === 'condition' && <Code className="w-5 h-5 text-blue-400" />}
-          {data.nodeType === 'action' && <Zap className="w-5 h-5 text-cyan-400" />}
+          {data.nodeType === 'condition' && <Code className="w-5 h-5 text-[var(--aethel-primary)]" />}
+          {data.nodeType === 'action' && <Zap className="w-5 h-5 text-[var(--aethel-info)]" />}
           <span className="font-medium capitalize">{data.nodeType}</span>
         </div>
         
@@ -591,11 +591,11 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
       
       {/* Label */}
       <div className="mb-4">
-        <label className="text-xs text-slate-400 block mb-1">Node Label</label>
+        <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Node Label</label>
         <input
           value={data.label}
           onChange={(e) => updateData({ label: e.target.value })}
-          className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm"
+          className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm"
         />
       </div>
       
@@ -603,10 +603,10 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
       {data.nodeType === 'dialogue' && (
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs text-slate-400">Dialogue Lines</label>
+            <label className="text-xs text-[var(--aethel-text-tertiary)]">Dialogue Lines</label>
             <button
               onClick={addLine}
-              className="flex items-center gap-1 px-2 py-1 bg-blue-600/30 hover:bg-blue-600/50 rounded text-xs"
+              className="flex items-center gap-1 px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_45%,transparent)] rounded text-xs"
             >
               <Plus className="w-3 h-3" />
               Add Line
@@ -629,7 +629,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
       {data.nodeType === 'choice' && (
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs text-slate-400">Choices</label>
+            <label className="text-xs text-[var(--aethel-text-tertiary)]">Choices</label>
             <button
               onClick={addChoice}
               className="flex items-center gap-1 px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-warning-dark)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning-dark)_50%,transparent)] rounded text-xs"
@@ -640,7 +640,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
           </div>
           
           {(data.choices || []).map((choice, i) => (
-            <div key={choice.id} className="bg-slate-800/50 rounded p-2 mb-2">
+            <div key={choice.id} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-2 mb-2">
               <div className="flex gap-2">
                 <span className="text-[var(--aethel-warning-light)] text-sm">{i + 1}.</span>
                 <input
@@ -650,7 +650,7 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
                     choices[i] = { ...choice, text: e.target.value };
                     updateData({ choices });
                   }}
-                  className="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
+                  className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-sm"
                 />
                 <button
                   onClick={() => {
@@ -670,11 +670,11 @@ function NodeInspector({ node, characters, onUpdate, onDelete }: NodeInspectorPr
       
       {/* Notes */}
       <div className="mb-4">
-        <label className="text-xs text-slate-400 block mb-1">Notes</label>
+        <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Notes</label>
         <textarea
           value={data.notes || ''}
           onChange={(e) => updateData({ notes: e.target.value })}
-          className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm resize-none"
+          className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm resize-none"
           rows={2}
           placeholder="Internal notes..."
         />
@@ -698,23 +698,23 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
   const [isOpen, setIsOpen] = useState(false);
   
   return (
-    <div className="border-t border-slate-700">
+    <div className="border-t border-[var(--aethel-border-primary)]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full p-3 text-sm text-left hover:bg-slate-800/50"
+        className="flex items-center gap-2 w-full p-3 text-sm text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-        <Code className="w-4 h-4 text-blue-400" />
+        <Code className="w-4 h-4 text-[var(--aethel-primary)]" />
         Variables ({variables.length})
       </button>
       
       {isOpen && (
         <div className="p-3 pt-0 space-y-2">
           {variables.map((v, i) => (
-            <div key={v.name} className="flex gap-2 items-center bg-slate-800/50 rounded p-2">
-              <code className="text-xs text-blue-300 flex-1 font-mono">{v.name}</code>
-              <span className="text-[10px] text-slate-500">{v.type}</span>
-              <span className="text-xs text-slate-400 font-mono">{String(v.defaultValue)}</span>
+            <div key={v.name} className="flex gap-2 items-center bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-2">
+              <code className="text-xs text-[var(--aethel-primary)] flex-1 font-mono">{v.name}</code>
+              <span className="text-[10px] text-[var(--aethel-text-quaternary)]">{v.type}</span>
+              <span className="text-xs text-[var(--aethel-text-tertiary)] font-mono">{String(v.defaultValue)}</span>
               <button
                 onClick={() => onDelete(i)}
                 className="p-0.5 rounded hover:bg-red-600/30"
@@ -726,7 +726,7 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
           
           <button
             onClick={() => onAdd({ name: `var_${Date.now()}`, type: 'string', defaultValue: '' })}
-            className="flex items-center gap-1 w-full p-2 rounded bg-blue-600/20 hover:bg-blue-600/30 text-xs"
+            className="flex items-center gap-1 w-full p-2 rounded bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] text-xs"
           >
             <Plus className="w-3 h-3" />
             Add Variable
@@ -777,10 +777,10 @@ function PreviewPanel({
   const character = characters.find((c) => c.id === line?.characterId);
   
   return (
-    <div className="w-96 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
-      <div className="flex items-center justify-between p-3 border-b border-slate-700">
+    <div className="w-96 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl">
+      <div className="flex items-center justify-between p-3 border-b border-[var(--aethel-border-primary)]">
         <span className="text-sm font-medium">Dialogue Preview</span>
-        <button onClick={onToggle} className="p-1 hover:bg-slate-700 rounded">
+        <button onClick={onToggle} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
           <Pause className="w-4 h-4" />
         </button>
       </div>
@@ -797,7 +797,7 @@ function PreviewPanel({
             <div className="flex-1">
               <div className="text-sm font-medium" style={{ color: character?.color }}>
                 {character?.name}
-                <span className="text-slate-500 text-xs ml-2">[{line.emotion}]</span>
+                <span className="text-[var(--aethel-text-quaternary)] text-xs ml-2">[{line.emotion}]</span>
               </div>
               <p className="text-sm mt-1">{line.text}</p>
             </div>
@@ -805,9 +805,9 @@ function PreviewPanel({
           
           <button
             onClick={onNext}
-            className="w-full py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm"
+            className="w-full py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
           >
-            Continue â†’
+            Continue →
           </button>
         </div>
       )}
@@ -963,7 +963,7 @@ export default function DialogueEditor({
   }, [previewNode, nodes, edges]);
   
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-200">
+    <div className="flex h-full w-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Main Flow */}
       <div className="flex-1 relative">
         <ReactFlow
@@ -983,9 +983,9 @@ export default function DialogueEditor({
           }}
         >
           <Background color="#334155" gap={15} />
-          <Controls className="!bg-slate-800 !border-slate-700" />
+          <Controls className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]" />
           <MiniMap 
-            className="!bg-slate-800 !border-slate-700"
+            className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]"
             nodeColor={(node) => {
               switch (node.type) {
                 case 'entry': return '#22c55e';
@@ -1003,7 +1003,7 @@ export default function DialogueEditor({
           <Panel position="top-left" className="flex gap-2">
             <button
               onClick={() => addNode('dialogue')}
-              className="flex items-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm"
             >
               <MessageSquare className="w-4 h-4" />
               Dialogue
@@ -1017,14 +1017,14 @@ export default function DialogueEditor({
             </button>
             <button
               onClick={() => addNode('condition')}
-              className="flex items-center gap-1 px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm"
             >
               <Code className="w-4 h-4" />
               Condition
             </button>
             <button
               onClick={() => addNode('action')}
-              className="flex items-center gap-1 px-3 py-2 bg-cyan-600 hover:bg-cyan-500 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-info)] hover:brightness-110 rounded text-sm"
             >
               <Zap className="w-4 h-4" />
               Action
@@ -1042,13 +1042,13 @@ export default function DialogueEditor({
           <Panel position="top-right" className="flex gap-2">
             <button
               onClick={() => onExport?.('json')}
-              className="flex items-center gap-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Download className="w-4 h-4" />
               Export
             </button>
             <button
-              className="flex items-center gap-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Upload className="w-4 h-4" />
               Import
@@ -1081,10 +1081,10 @@ export default function DialogueEditor({
       </div>
       
       {/* Right Panel - Inspector */}
-      <div className="w-80 border-l border-slate-700 flex flex-col">
-        <div className="p-3 border-b border-slate-700">
+      <div className="w-80 border-l border-[var(--aethel-border-primary)] flex flex-col">
+        <div className="p-3 border-b border-[var(--aethel-border-primary)]">
           <h2 className="text-sm font-semibold flex items-center gap-2">
-            <Settings className="w-4 h-4 text-slate-400" />
+            <Settings className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             Inspector
           </h2>
         </div>
@@ -1115,8 +1115,8 @@ export default function DialogueEditor({
         />
         
         {/* Characters */}
-        <div className="border-t border-slate-700 p-3">
-          <div className="text-xs text-slate-400 mb-2">Characters</div>
+        <div className="border-t border-[var(--aethel-border-primary)] p-3">
+          <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Characters</div>
           <div className="flex gap-2 flex-wrap">
             {characters.map((c) => (
               <div
@@ -1137,3 +1137,4 @@ export default function DialogueEditor({
     </div>
   );
 }
+

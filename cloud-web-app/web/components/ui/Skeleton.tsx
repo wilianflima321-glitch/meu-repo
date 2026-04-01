@@ -20,7 +20,7 @@ export function Skeleton({
   style,
   ...props
 }: SkeletonProps) {
-  const baseClasses = `bg-slate-700/50 ${animate ? 'animate-pulse' : ''}`
+  const baseClasses = `bg-[var(--aethel-surface-quaternary)]/50 ${animate ? 'animate-pulse' : ''}`
   
   const variantClasses: Record<string, string> = {
     text: 'rounded h-4',
@@ -64,7 +64,7 @@ export function Skeleton({
 // Pre-built skeleton patterns
 export function SkeletonCard() {
   return (
-    <div className="p-6 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-4">
+    <div className="p-6 rounded-xl bg-[var(--aethel-surface-secondary)]/50 border border-[var(--aethel-border-primary)]/50 space-y-4">
       <div className="flex items-center gap-4">
         <Skeleton variant="circular" width={48} height={48} />
         <div className="flex-1 space-y-2">
@@ -85,7 +85,7 @@ export function SkeletonTable({ rows = 5 }: { rows?: number }) {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex gap-4 p-3 bg-slate-800/30 rounded-lg">
+      <div className="flex gap-4 p-3 bg-[var(--aethel-surface-secondary)]/30 rounded-lg">
         <Skeleton variant="text" width="20%" />
         <Skeleton variant="text" width="30%" />
         <Skeleton variant="text" width="25%" />
@@ -108,7 +108,7 @@ export function SkeletonList({ items = 5 }: { items?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/30">
+        <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-[var(--aethel-surface-secondary)]/30">
           <Skeleton variant="circular" width={40} height={40} />
           <div className="flex-1 space-y-2">
             <Skeleton variant="text" width="70%" />

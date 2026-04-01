@@ -80,7 +80,7 @@ export function ChatHistorySidebar({
             key={thread.id}
             className={`mb-2 rounded-lg border px-3 py-2 text-xs ${
               thread.id === activeThreadId
-                ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200'
+                ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
                 : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] text-[var(--aethel-text-secondary)]'
             }`}
           >
@@ -106,7 +106,7 @@ export function ChatHistorySidebar({
                 <button
                   type="button"
                   onClick={() => onDeleteThread(thread.id)}
-                  className="text-[11px] text-red-400 hover:text-red-300"
+                  className="text-[11px] text-[var(--aethel-error)] hover:text-[var(--aethel-error)]"
                 >
                   Excluir
                 </button>
@@ -136,7 +136,7 @@ export function LiveModeIndicator({ status = 'idle', onEnd }: LiveModeIndicatorP
   return (
     <div className="flex items-center justify-between gap-3 border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.86))] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">
-        <Zap className="h-3.5 w-3.5 text-cyan-400" />
+        <Zap className="h-3.5 w-3.5 text-[var(--aethel-info-light)]" />
         <span>Modo live: {label}</span>
       </div>
       {onEnd && (
@@ -195,7 +195,7 @@ export function ToolCallDisplay({ toolCall }: ToolCallDisplayProps) {
   return (
     <div className="mb-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-secondary)]">
       <div className="flex items-center gap-2">
-        <Icon className={`h-3.5 w-3.5 ${toolCall.status === 'failed' ? 'text-red-400' : 'text-[var(--aethel-text-tertiary)]'}`} />
+        <Icon className={`h-3.5 w-3.5 ${toolCall.status === 'failed' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'}`} />
         <span className="font-medium">{toolCall.name}</span>
         <span className="text-[11px] text-[var(--aethel-text-quaternary)]">{statusLabel}</span>
       </div>

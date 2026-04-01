@@ -136,10 +136,10 @@ export function GlassButton({
   const baseClasses = 'relative font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2'
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/50 active:scale-95',
-    secondary: 'bg-white/10 text-white border border-white/20 hover:bg-white/20 hover:border-white/30',
-    ghost: 'text-white hover:bg-white/10 border border-transparent hover:border-white/20',
-    danger: 'bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 hover:border-red-500/50',
+    primary: 'bg-gradient-to-r from-[var(--aethel-info)] to-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:shadow-lg hover:shadow-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)] active:scale-95',
+    secondary: 'bg-white/10 text-[var(--aethel-text-primary)] border border-white/20 hover:bg-white/20 hover:border-white/30',
+    ghost: 'text-[var(--aethel-text-primary)] hover:bg-white/10 border border-transparent hover:border-white/20',
+    danger: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)]',
   }
 
   const sizeClasses = {
@@ -194,7 +194,7 @@ export function GlassInput({
 }) {
   return (
     <div className="relative">
-      {Icon && <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50">{Icon}</div>}
+      {Icon && <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--aethel-text-primary)]/50">{Icon}</div>}
       <input
         type={type}
         placeholder={placeholder}
@@ -203,10 +203,10 @@ export function GlassInput({
         className={`
           w-full px-4 py-2.5 rounded-lg
           bg-white/5 border border-white/10
-          text-white placeholder-white/40
+          text-[var(--aethel-text-primary)] placeholder-white/40
           backdrop-blur-xl
           transition-all duration-200
-          focus:outline-none focus:border-white/30 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/30
+          focus:outline-none focus:border-white/30 focus:bg-white/10 focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]
           ${Icon ? 'pl-10' : ''}
           ${className}
         `}
@@ -228,10 +228,10 @@ export function AnimatedBadge({
   animated?: boolean
 }) {
   const variantClasses = {
-    default: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    default: 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
     success: 'bg-green-500/20 text-green-300 border-green-500/30',
     warning: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-    error: 'bg-red-500/20 text-red-300 border-red-500/30',
+    error: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
     info: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
   }
 
@@ -424,7 +424,7 @@ export function HoverCard({
               absolute ${tooltipPosition[side]} whitespace-nowrap
               px-3 py-1.5 rounded-lg
               bg-white/10 backdrop-blur-xl border border-white/20
-              text-xs text-white/80
+              text-xs text-[var(--aethel-text-primary)]/80
               pointer-events-none z-50
             `}
           >
@@ -478,9 +478,9 @@ export function AnimatedProgressBar({
   showLabel?: boolean
 }) {
   const colorClasses = {
-    blue: 'from-blue-400 to-blue-600',
+    blue: 'from-[var(--aethel-info-light)] to-[var(--aethel-primary)]',
     green: 'from-green-400 to-green-600',
-    red: 'from-red-400 to-red-600',
+    red: 'from-[color-mix(in_srgb,var(--aethel-error)_60%,transparent)] to-[var(--aethel-error)]',
     purple: 'from-[var(--aethel-accent-light)] to-[var(--aethel-accent-dark)]',
   }
 
@@ -495,7 +495,7 @@ export function AnimatedProgressBar({
         />
       </div>
       {showLabel && (
-        <div className="text-xs text-white/60 text-right">{Math.round(progress)}%</div>
+        <div className="text-xs text-[var(--aethel-text-primary)]/60 text-right">{Math.round(progress)}%</div>
       )}
     </div>
   )
@@ -516,9 +516,9 @@ export function FloatingActionButton({
   color?: 'blue' | 'green' | 'red' | 'purple'
 }) {
   const colorClasses = {
-    blue: 'from-blue-500 to-blue-600 hover:shadow-blue-500/50',
+    blue: 'from-[var(--aethel-info)] to-[var(--aethel-primary)] hover:shadow-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]',
     green: 'from-green-500 to-green-600 hover:shadow-green-500/50',
-    red: 'from-red-500 to-red-600 hover:shadow-red-500/50',
+    red: 'from-[color-mix(in_srgb,var(--aethel-error)_70%,transparent)] to-[var(--aethel-error)] hover:shadow-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)]',
     purple: 'from-[var(--aethel-accent)] to-[var(--aethel-accent-dark)] hover:shadow-[0_0_24px_color-mix(in_srgb,var(--aethel-accent)_50%,transparent)]',
   }
 
@@ -531,7 +531,7 @@ export function FloatingActionButton({
         fixed bottom-8 right-8 z-40
         w-14 h-14 rounded-full
         bg-gradient-to-r ${colorClasses[color]}
-        text-white shadow-lg hover:shadow-2xl
+        text-[var(--aethel-text-primary)] shadow-lg hover:shadow-2xl
         flex items-center justify-center
         transition-all duration-200
       `}

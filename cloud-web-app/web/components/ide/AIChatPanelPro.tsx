@@ -64,14 +64,14 @@ import {
 import { MentionChip, SuggestionList, useMentions } from '@/lib/copilot/mention-parser'
 
 const QUICK_PROMPTS = [
-  { icon: Code, label: 'Explain Code', prompt: 'Explain this code:' },
-  { icon: Bug, label: 'Find Bugs', prompt: 'Find bugs in this code:' },
-  { icon: Zap, label: 'Optimize', prompt: 'Optimize this code for performance:' },
-  { icon: Lightbulb, label: 'Suggest', prompt: 'Suggest improvements for:' },
-  { icon: Terminal, label: 'Generate', prompt: 'Generate code for:' },
-  { icon: Wand2, label: 'Refactor', prompt: 'Refactor this code:' },
-  { icon: Brain, label: 'Explain Error', prompt: 'Explain this error and how to fix it:' },
-  { icon: Layers, label: 'Add Tests', prompt: 'Generate unit tests for:' },
+  { icon: Code, label: 'Explicar codigo', prompt: 'Explique este codigo:' },
+  { icon: Bug, label: 'Encontrar bugs', prompt: 'Encontre bugs neste codigo:' },
+  { icon: Zap, label: 'Otimizar', prompt: 'Otimize este codigo para desempenho:' },
+  { icon: Lightbulb, label: 'Sugerir', prompt: 'Sugira melhorias para:' },
+  { icon: Terminal, label: 'Gerar', prompt: 'Gere codigo para:' },
+  { icon: Wand2, label: 'Refatorar', prompt: 'Refatore este codigo:' },
+  { icon: Brain, label: 'Explicar erro', prompt: 'Explique este erro e como corrigir:' },
+  { icon: Layers, label: 'Adicionar testes', prompt: 'Gere testes unitarios para:' },
 ]
 
 const QUICK_MENTIONS = [
@@ -164,9 +164,9 @@ const DEMO_MESSAGES: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Hello! I\'m your AI assistant. I can help you with:\n\n- **Code explanation** - Understand complex code\n- **Bug detection** - Find issues in your code\n- **Optimization** - Improve performance\n- **Code generation** - Write new code\n\nHow can I help you today?',
+    content: 'Ola! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explicacao de codigo** - entender trechos complexos\n- **Deteccao de bugs** - encontrar problemas no seu projeto\n- **Otimizacao** - melhorar desempenho\n- **Geracao de codigo** - criar novas rotinas\n\nComo posso ajudar hoje?',
     timestamp: new Date(Date.now() - 60000),
-      model: DEFAULT_OPENROUTER_MODEL_ID,
+    model: DEFAULT_OPENROUTER_MODEL_ID,
   },
 ]
 interface MessageBubbleProps {
@@ -214,7 +214,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
           {part.split('\n').map((line, j) => (
             <span key={j}>
               {line.startsWith('- ') ? (
-                <span className="relative block pl-4 before:absolute before:left-0 before:text-[var(--aethel-text-quaternary)] before:content-['•']">
+                <span className="relative block pl-4 before:absolute before:left-0 before:text-[var(--aethel-text-quaternary)] before:content-['-']">
                   {line.slice(2)}
                 </span>
               ) : line.startsWith('**') && line.endsWith('**') ? (
@@ -234,17 +234,17 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
       {/* Avatar */}
       <div className={`
         w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-        ${isUser ? 'bg-blue-600' : 'bg-gradient-to-br from-emerald-500 to-cyan-500'}
+        ${isUser ? 'bg-[var(--aethel-primary)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}
       `}>
-        {isUser ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
+        {isUser ? <User className="w-4 h-4 text-[var(--aethel-text-primary)]" /> : <Bot className="w-4 h-4 text-[var(--aethel-text-primary)]" />}
       </div>
       {/* Content */}
       <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : ''}`}>
         {/* Voice indicator */}
         {message.isVoice && (
-          <div className="flex items-center gap-1 mb-1 text-xs text-blue-400">
+          <div className="flex items-center gap-1 mb-1 text-xs text-[var(--aethel-info-light)]">
             <Mic className="w-3 h-3" />
-            Voice message
+            Mensagem de voz
           </div>
         )}
         {/* Attachments */}
@@ -277,7 +277,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
         <div className={`
           inline-block max-w-full text-left px-4 py-2.5 rounded-2xl
           ${isUser
-            ? 'bg-blue-600 text-white rounded-tr-sm'
+            ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] rounded-tr-sm'
             : 'rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] text-[var(--aethel-text-secondary)]'
           }
         `}>
@@ -303,28 +303,32 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
               <button
                 onClick={handleCopy}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Copy"
+                title="Copiar"
+                aria-label="Copiar resposta"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-[var(--aethel-success)]" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <button
                 onClick={onRegenerate}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Regenerate"
+                title="Regerar"
+                aria-label="Regerar resposta"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onRate('up')}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Good response"
+                title="Resposta boa"
+                aria-label="Resposta boa"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onRate('down')}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Bad response"
+                title="Resposta ruim"
+                aria-label="Resposta ruim"
               >
                 <ThumbsDown className="w-3.5 h-3.5" />
               </button>
@@ -702,7 +706,8 @@ export default function AIChatPanelPro({
               <button
                 onClick={() => setShowHistorySidebar(!showHistorySidebar)}
                 className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] ${showHistorySidebar ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}
-                title="Chat History"
+                title="Historico do chat"
+                aria-label="Alternar historico do chat"
               >
                 <History className="w-4 h-4" />
               </button>
@@ -715,7 +720,7 @@ export default function AIChatPanelPro({
                     onClick={() => setShowModelSelector(!showModelSelector)}
                     className="flex items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
                   >
-                    <Sparkles className="w-4 h-4 text-blue-400" />
+                    <Sparkles className="w-4 h-4 text-[var(--aethel-info-light)]" />
                     <span>{selectedModel.name}</span>
                     <ChevronDown className="h-3.5 w-3.5 text-[var(--aethel-text-tertiary)]" />
                   </button>
@@ -738,7 +743,7 @@ export default function AIChatPanelPro({
                             <Sparkles className={`mt-0.5 h-4 w-4 ${model.id === currentModel ? 'text-[var(--aethel-info)]' : 'text-[var(--aethel-text-quaternary)]'}`} />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-sm font-medium text-white">{model.name}</span>
+                                <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{model.name}</span>
                                 <span className="text-xs text-[var(--aethel-text-quaternary)]">{model.provider}</span>
                                 {model.tier && (
                                   <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_68%,transparent)] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[var(--aethel-text-secondary)]">
@@ -746,10 +751,10 @@ export default function AIChatPanelPro({
                                   </span>
                                 )}
                                 {model.supportsVision && (
-                                  <span className="px-1.5 py-0.5 text-[10px] bg-cyan-500/20 text-cyan-400 rounded">Vision</span>
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)] rounded">Visao</span>
                                 )}
                                 {model.supportsVoice && (
-                                  <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded">Voice</span>
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success)] rounded">Voz</span>
                                 )}
                               </div>
                               {model.description && (
@@ -757,11 +762,11 @@ export default function AIChatPanelPro({
                               )}
                               {model.inputCost !== undefined && model.outputCost !== undefined && (
                                 <span className="text-[11px] text-[var(--aethel-text-quaternary)]">
-                                  {formatCost(model.inputCost)}/{formatCost(model.outputCost)} per 1M
+                                  {formatCost(model.inputCost)}/{formatCost(model.outputCost)} por 1M
                                 </span>
                               )}
                             </div>
-                            {model.id === currentModel && <Check className="w-4 h-4 text-blue-400" />}
+                            {model.id === currentModel && <Check className="w-4 h-4 text-[var(--aethel-info-light)]" />}
                           </button>
                         ))}
                       </div>
@@ -774,10 +779,10 @@ export default function AIChatPanelPro({
                       {modelTierLabel}
                     </span>
                     {inputCostLabel && outputCostLabel && (
-                      <span>{inputCostLabel}/{outputCostLabel} per 1M</span>
+                      <span>{inputCostLabel}/{outputCostLabel} por 1M</span>
                     )}
                     {agentCount > 1 && (
-                      <span className="text-[var(--aethel-text-quaternary)]">x{agentCount} agents</span>
+                      <span className="text-[var(--aethel-text-quaternary)]">x{agentCount} agentes</span>
                     )}
                   </div>
                 ) : (
@@ -786,7 +791,7 @@ export default function AIChatPanelPro({
               </div>
               {showAdvancedControls && (
                 <div className="flex items-center gap-1">
-                  <span className="text-[11px] text-[var(--aethel-text-quaternary)]">Agents</span>
+                  <span className="text-[11px] text-[var(--aethel-text-quaternary)]">Agentes</span>
                   {[1, 2, 3].map((count) => (
                     <button
                       key={count}
@@ -812,8 +817,9 @@ export default function AIChatPanelPro({
                 {selectedModel.supportsVoice && onToggleLiveMode && (
                   <button
                     onClick={onToggleLiveMode}
-                    className={`rounded p-1.5 ${isLiveMode ? 'bg-blue-600 text-white' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
-                    title={isLiveMode ? 'Exit Live Mode' : 'Enter Live Mode (Gemini Live style)'}
+                    className={`rounded p-1.5 ${isLiveMode ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+                    title={isLiveMode ? 'Sair do modo live' : 'Entrar no modo live (voz em tempo real)'}
+                    aria-label={isLiveMode ? 'Sair do modo live' : 'Entrar no modo live'}
                   >
                     <Radio className="w-4 h-4" />
                   </button>
@@ -824,8 +830,9 @@ export default function AIChatPanelPro({
                     const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
                     if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
                   }}
-                  className={`rounded p-1.5 ${isSpeaking ? 'bg-emerald-600 text-white' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
-                  title={isSpeaking ? 'Stop speaking' : 'Read last response'}
+                  className={`rounded p-1.5 ${isSpeaking ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+                  title={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
+                  aria-label={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
                 >
                   {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </button>
@@ -834,7 +841,8 @@ export default function AIChatPanelPro({
             <button
               onClick={onClearChat}
               className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-              title="Clear chat"
+              title="Limpar chat"
+              aria-label="Limpar chat"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -843,6 +851,7 @@ export default function AIChatPanelPro({
               className={`rounded p-1.5 ${showAdvancedControls ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
               title={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
               aria-pressed={showAdvancedControls}
+              aria-label={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
             >
               <Settings className="w-4 h-4" />
             </button>
@@ -852,17 +861,17 @@ export default function AIChatPanelPro({
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4">
-                <Bot className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] flex items-center justify-center mb-4">
+                <Bot className="w-8 h-8 text-[var(--aethel-text-primary)]" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">AI Assistant</h3>
+              <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)] mb-2">Assistente de IA</h3>
               <p className="mb-6 max-w-sm text-sm text-[var(--aethel-text-tertiary)]">
-                Ask me anything about your code. I can explain, debug, optimize, and generate code.
+                Pergunte qualquer coisa sobre o seu codigo. Eu explico, depuro, otimizo e gero trechos sob demanda.
               </p>
               {selectedModel.supportsVoice && (
-                <p className="text-xs text-blue-400 mb-4 flex items-center gap-1">
+                <p className="text-xs text-[var(--aethel-info-light)] mb-4 flex items-center gap-1">
                   <Radio className="w-3 h-3" />
-                  This model supports Live Mode for real-time voice chat
+                  Este modelo suporta modo live para voz em tempo real
                 </p>
               )}
               {showAdvancedControls ? (
@@ -901,22 +910,22 @@ export default function AIChatPanelPro({
         {/* Streaming response */}
         {streamingContent && (
           <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-white animate-pulse" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] flex items-center justify-center flex-shrink-0">
+              <Bot className="w-4 h-4 text-[var(--aethel-text-primary)] animate-pulse" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="inline-block max-w-full rounded-2xl rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] px-4 py-2.5 text-left text-[var(--aethel-text-secondary)]">
                 <div className="text-sm whitespace-pre-wrap">{streamingContent}</div>
-                <span className="inline-block w-2 h-4 bg-blue-400 animate-pulse ml-1" />
+                <span className="inline-block w-2 h-4 bg-[var(--aethel-info-light)] animate-pulse ml-1" />
               </div>
             </div>
           </div>
         )}
         {/* Loading indicator */}
         {isLoading && !streamingContent && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-white animate-pulse" />
+          <div className="flex gap-3" role="status" aria-live="polite" aria-label="Gerando resposta">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] flex items-center justify-center flex-shrink-0">
+              <Bot className="w-4 h-4 text-[var(--aethel-text-primary)] animate-pulse" />
             </div>
             <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] px-4 py-3">
               <div className="h-2 w-2 animate-bounce rounded-full bg-[var(--aethel-text-quaternary)]" style={{ animationDelay: '0ms' }} />
@@ -967,15 +976,15 @@ export default function AIChatPanelPro({
         )}
         {/* Voice recording indicator */}
         {isRecording && (
-          <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            <span className="flex-1 text-sm text-red-400">Recording... {transcript && `"${transcript}"`}</span>
+          <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg" role="status" aria-live="polite">
+            <div className="w-2 h-2 bg-[var(--aethel-error)] rounded-full animate-pulse" />
+            <span className="flex-1 text-sm text-[var(--aethel-error)]">Gravando... {transcript && `"${transcript}"`}</span>
             <button
               type="button"
               onClick={stopRecording}
-              className="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 rounded text-xs text-red-400"
+              className="px-2 py-1 bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] rounded text-xs text-[var(--aethel-error)]"
             >
-              Stop
+              Parar
             </button>
           </div>
         )}
@@ -987,7 +996,8 @@ export default function AIChatPanelPro({
                 type="button"
                 onClick={handleFileAttach}
                 className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Attach file"
+                title="Anexar arquivo"
+                aria-label="Anexar arquivo"
               >
                 <Paperclip className="w-4 h-4" />
               </button>
@@ -997,7 +1007,8 @@ export default function AIChatPanelPro({
                 type="button"
                 onClick={handleImageAttach}
                 className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
-                title="Attach image"
+                title="Anexar imagem"
+                aria-label="Anexar imagem"
               >
                 <ImageIcon className="w-4 h-4" />
               </button>
@@ -1005,8 +1016,9 @@ export default function AIChatPanelPro({
             <button
               type="button"
               onClick={handleVoiceToggle}
-              className={`rounded p-1.5 ${isRecording ? 'bg-red-500 text-white' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
-              title={isRecording ? 'Stop recording' : 'Voice input'}
+              className={`rounded p-1.5 ${isRecording ? 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+              title={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
+              aria-label={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
             >
               {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
@@ -1019,6 +1031,7 @@ export default function AIChatPanelPro({
                 activeIndex={mentionState.activeSuggestionIndex}
                 onSelect={mentionState.applySuggestion}
                 onHover={mentionState.setActiveSuggestionIndex}
+                listboxId="mention-suggestions-list"
               />
             )}
             <textarea
@@ -1026,8 +1039,10 @@ export default function AIChatPanelPro({
               value={input}
               onChange={(e) => mentionState.setText(e.target.value, e.target.selectionStart ?? e.target.value.length)}
               onKeyDown={handleComposerKeyDown}
-              placeholder={isRecording ? 'Listening...' : 'Ask AI...'}
+              placeholder={isRecording ? 'Ouvindo...' : 'Pergunte a IA sobre o seu codigo...'}
               disabled={isLoading}
+              aria-controls="mention-suggestions-list"
+              aria-label="Mensagem do chat"
               className="min-h-[44px] max-h-[200px] w-full resize-none rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-4 py-2.5 pr-12 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] focus:outline-none"
               rows={1}
             />
@@ -1037,10 +1052,12 @@ export default function AIChatPanelPro({
               className={`
                 absolute right-2 bottom-2 p-1.5 rounded-lg transition-colors
                 ${input.trim() && !isLoading
-                  ? 'bg-blue-600 hover:bg-blue-500 text-white'
+                  ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
                   : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
                 }
               `}
+              aria-label={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
+              title={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
             >
               {isLoading ? (
                 <StopCircle className="w-4 h-4" />

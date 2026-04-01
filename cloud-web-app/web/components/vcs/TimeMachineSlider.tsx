@@ -152,7 +152,7 @@ function FileIcon({ type }: { type: FileChange['type'] }) {
     case 'renamed':
       return <FileCode className="w-3.5 h-3.5 text-sky-400" />;
     default:
-      return <FileCode className="w-3.5 h-3.5 text-zinc-400" />;
+      return <FileCode className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />;
   }
 }
 
@@ -180,8 +180,8 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
       className={`
         relative flex-shrink-0 w-[280px] rounded-xl border transition-all cursor-pointer
         ${isActive 
-          ? 'bg-zinc-800 border-violet-500/50 shadow-lg shadow-violet-500/20' 
-          : 'bg-zinc-900 border-zinc-700 hover:border-zinc-600'
+          ? 'bg-[var(--aethel-surface-tertiary)] border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_25%,transparent)]' 
+          : 'bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
         }
         ${isPreviewing ? 'ring-2 ring-sky-500/50' : ''}
       `}
@@ -189,7 +189,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
     >
       {/* Merge indicator */}
       {commit.isMerge && (
-        <div className="absolute -top-2 -right-2 w-6 h-6 bg-violet-600 rounded-full 
+        <div className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--aethel-primary)] rounded-full 
                       flex items-center justify-center">
           <GitBranch className="w-3.5 h-3.5 text-white" />
         </div>
@@ -210,9 +210,9 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
                 className="w-8 h-8 rounded-full"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-violet-500/20 
+              <div className="w-8 h-8 rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] 
                             flex items-center justify-center">
-                <User className="w-4 h-4 text-violet-400" />
+                <User className="w-4 h-4 text-[var(--aethel-primary)]" />
               </div>
             )}
             
@@ -220,20 +220,20 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
               <p className="text-xs font-medium text-white">
                 {commit.author.name}
               </p>
-              <p className="text-[10px] text-zinc-500">
+              <p className="text-[10px] text-[var(--aethel-text-tertiary)]">
                 {formatRelativeTime(commit.timestamp)}
               </p>
             </div>
           </div>
 
-          <span className="px-2 py-0.5 bg-zinc-700 rounded-full 
-                         font-mono text-[10px] text-zinc-400">
+          <span className="px-2 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded-full 
+                         font-mono text-[10px] text-[var(--aethel-text-tertiary)]">
             {commit.shortHash}
           </span>
         </div>
 
         {/* Message */}
-        <p className={`text-sm text-zinc-200 ${isExpanded ? '' : 'line-clamp-2'}`}>
+        <p className={`text-sm text-[var(--aethel-text-secondary)] ${isExpanded ? '' : 'line-clamp-2'}`}>
           {commit.message}
         </p>
       </div>
@@ -274,10 +274,10 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-zinc-700"
+            className="overflow-hidden border-t border-[var(--aethel-border-secondary)]"
           >
             <div className="p-3 space-y-1.5 max-h-[150px] overflow-y-auto">
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-2">
+              <p className="text-[10px] text-[var(--aethel-text-tertiary)] uppercase tracking-wider mb-2">
                 Arquivos alterados
               </p>
               {commit.changes.files.slice(0, 5).map((file, i) => (
@@ -285,20 +285,20 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
                   key={i}
                   onClick={(e) => { e.stopPropagation(); onDiff(file); }}
                   className="w-full flex items-center gap-2 px-2 py-1 
-                           bg-zinc-900 hover:bg-zinc-800 rounded text-left
+                           bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] rounded text-left
                            transition-colors group"
                 >
                   <FileIcon type={file.type} />
-                  <span className="text-xs text-zinc-400 truncate flex-1">
+                  <span className="text-xs text-[var(--aethel-text-tertiary)] truncate flex-1">
                     {file.path.split('/').pop()}
                   </span>
-                  <span className="text-[10px] text-zinc-600 group-hover:text-zinc-400">
+                  <span className="text-[10px] text-[var(--aethel-text-quaternary)] group-hover:text-[var(--aethel-text-tertiary)]">
                     +{file.additions} -{file.deletions}
                   </span>
                 </button>
               ))}
               {commit.changes.files.length > 5 && (
-                <p className="text-xs text-zinc-500 text-center pt-1">
+                <p className="text-xs text-[var(--aethel-text-tertiary)] text-center pt-1">
                   +{commit.changes.files.length - 5} mais arquivos
                 </p>
               )}
@@ -309,8 +309,8 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
               <button
                 onClick={(e) => { e.stopPropagation(); onPreview(); }}
                 className="flex-1 flex items-center justify-center gap-1.5 py-1.5
-                         bg-zinc-700 hover:bg-zinc-600 rounded-lg
-                         text-xs text-zinc-300 transition-colors"
+                         bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
+                         text-xs text-[var(--aethel-text-secondary)] transition-colors"
               >
                 <Eye className="w-3.5 h-3.5" />
                 Preview
@@ -318,7 +318,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
               <button
                 onClick={(e) => { e.stopPropagation(); onDiff(); }}
                 className="flex-1 flex items-center justify-center gap-1.5 py-1.5
-                         bg-violet-600 hover:bg-violet-500 rounded-lg
+                         bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary)] rounded-lg
                          text-xs font-medium transition-colors"
               >
                 <History className="w-3.5 h-3.5" />
@@ -360,16 +360,16 @@ function TimelineBar({ commits, activeIndex, onSelect }: {
   }, [commits]);
 
   return (
-    <div className="relative h-8 bg-zinc-900 rounded-lg overflow-hidden">
+    <div className="relative h-8 bg-[var(--aethel-surface-secondary)] rounded-lg overflow-hidden">
       {/* Date groups */}
       <div className="absolute inset-0 flex">
         {dateGroups.map((group, i) => (
           <div
             key={i}
-            className="flex-1 flex items-center justify-center border-r border-zinc-800 last:border-0"
+            className="flex-1 flex items-center justify-center border-r border-[var(--aethel-border-primary)] last:border-0"
             style={{ flex: group.count }}
           >
-            <span className="text-[10px] text-zinc-500">{group.date}</span>
+            <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{group.date}</span>
           </div>
         ))}
       </div>
@@ -383,8 +383,8 @@ function TimelineBar({ commits, activeIndex, onSelect }: {
             className={`
               w-2 h-2 rounded-full transition-all mx-0.5
               ${i === activeIndex 
-                ? 'bg-violet-500 scale-150' 
-                : 'bg-zinc-600 hover:bg-zinc-500'
+                ? 'bg-[var(--aethel-primary)] scale-150' 
+                : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'
               }
             `}
           />
@@ -393,7 +393,7 @@ function TimelineBar({ commits, activeIndex, onSelect }: {
 
       {/* Active indicator line */}
       <motion.div
-        className="absolute bottom-0 h-0.5 bg-violet-500"
+        className="absolute bottom-0 h-0.5 bg-[var(--aethel-primary)]"
         initial={false}
         animate={{
           left: `${(activeIndex / commits.length) * 100}%`,
@@ -487,25 +487,25 @@ export function TimeMachineSlider({
 
   if (isLoading) {
     return (
-      <div className={`bg-zinc-900 rounded-xl p-8 text-center ${className}`}>
+      <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-8 text-center ${className}`}>
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           className="inline-block"
         >
-          <History className="w-8 h-8 text-violet-400" />
+          <History className="w-8 h-8 text-[var(--aethel-primary)]" />
         </motion.div>
-        <p className="text-sm text-zinc-400 mt-3">Carregando histórico...</p>
+        <p className="text-sm text-[var(--aethel-text-tertiary)] mt-3">Carregando histórico...</p>
       </div>
     );
   }
 
   if (commits.length === 0) {
     return (
-      <div className={`bg-zinc-900 rounded-xl p-8 text-center ${className}`}>
-        <GitCommit className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
-        <p className="text-sm text-zinc-400">Nenhum commit encontrado</p>
-        <p className="text-xs text-zinc-500 mt-1">
+      <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-8 text-center ${className}`}>
+        <GitCommit className="w-12 h-12 text-[var(--aethel-text-quaternary)] mx-auto mb-3" />
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhum commit encontrado</p>
+        <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
           Faça alterações e commite para ver o histórico
         </p>
       </div>
@@ -516,23 +516,23 @@ export function TimeMachineSlider({
     <motion.div
       layout
       className={`
-        bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden
+        bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] overflow-hidden
         ${isFullscreen ? 'fixed inset-4 z-50' : ''}
         ${className}
       `}
     >
       {/* Header */}
-      <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+      <div className="p-4 border-b border-[var(--aethel-border-primary)] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-violet-500/20 rounded-lg 
+          <div className="w-10 h-10 bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] rounded-lg 
                         flex items-center justify-center">
-            <History className="w-5 h-5 text-violet-400" />
+            <History className="w-5 h-5 text-[var(--aethel-primary)]" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white">
               Time Machine
             </h3>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">
               {commits.length} commits • {branch}
             </p>
           </div>
@@ -542,25 +542,25 @@ export function TimeMachineSlider({
           {/* Autoplay control */}
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--aethel-surface-tertiary)] rounded-lg transition-colors"
             title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
             {isPlaying ? (
-              <Pause className="w-4 h-4 text-violet-400" />
+              <Pause className="w-4 h-4 text-[var(--aethel-primary)]" />
             ) : (
-              <Play className="w-4 h-4 text-zinc-400" />
+              <Play className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             )}
           </button>
 
           {/* Fullscreen toggle */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--aethel-surface-tertiary)] rounded-lg transition-colors"
           >
             {isFullscreen ? (
-              <Minimize2 className="w-4 h-4 text-zinc-400" />
+              <Minimize2 className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             ) : (
-              <Maximize2 className="w-4 h-4 text-zinc-400" />
+              <Maximize2 className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             )}
           </button>
         </div>
@@ -600,20 +600,20 @@ export function TimeMachineSlider({
           <button
             onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))}
             disabled={activeIndex === 0}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg 
+            className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg 
                      transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           
-          <span className="text-xs text-zinc-500 min-w-[60px] text-center">
+          <span className="text-xs text-[var(--aethel-text-tertiary)] min-w-[60px] text-center">
             {activeIndex + 1} / {commits.length}
           </span>
 
           <button
             onClick={() => setActiveIndex(prev => Math.min(commits.length - 1, prev + 1))}
             disabled={activeIndex === commits.length - 1}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg 
+            className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg 
                      transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />
@@ -624,8 +624,8 @@ export function TimeMachineSlider({
           {/* Preview current state */}
           <button
             onClick={() => handlePreview(activeCommit, activeIndex)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 
-                     hover:bg-zinc-700 rounded-lg text-xs text-zinc-300 
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] 
+                     hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-xs text-[var(--aethel-text-secondary)] 
                      transition-colors"
           >
             <Eye className="w-3.5 h-3.5" />
@@ -637,7 +637,7 @@ export function TimeMachineSlider({
             <button
               onClick={handleRestore}
               className="flex items-center gap-1.5 px-3 py-1.5 
-                       bg-violet-600 hover:bg-violet-500 rounded-lg 
+                       bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary)] rounded-lg 
                        text-xs font-medium transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -648,7 +648,7 @@ export function TimeMachineSlider({
       </div>
 
       {/* Keyboard hints */}
-      <div className="px-4 pb-3 flex items-center justify-center gap-4 text-[10px] text-zinc-600">
+      <div className="px-4 pb-3 flex items-center justify-center gap-4 text-[10px] text-[var(--aethel-text-quaternary)]">
         <span>← → para navegar</span>
         <span>Espaço para play/pause</span>
       </div>

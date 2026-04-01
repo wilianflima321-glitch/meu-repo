@@ -89,10 +89,10 @@ export function Tooltip({
   }, [])
 
   const arrowClasses = {
-    top: 'bottom-[-4px] left-1/2 -translate-x-1/2 border-l-transparent border-r-transparent border-b-transparent border-t-slate-800',
-    bottom: 'top-[-4px] left-1/2 -translate-x-1/2 border-l-transparent border-r-transparent border-t-transparent border-b-slate-800',
-    left: 'right-[-4px] top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-r-transparent border-l-slate-800',
-    right: 'left-[-4px] top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-l-transparent border-r-slate-800',
+    top: 'bottom-[-4px] left-1/2 -translate-x-1/2 border-l-transparent border-r-transparent border-b-transparent border-t-[var(--aethel-surface-secondary)]',
+    bottom: 'top-[-4px] left-1/2 -translate-x-1/2 border-l-transparent border-r-transparent border-t-transparent border-b-[var(--aethel-surface-secondary)]',
+    left: 'right-[-4px] top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-r-transparent border-l-[var(--aethel-surface-secondary)]',
+    right: 'left-[-4px] top-1/2 -translate-y-1/2 border-t-transparent border-b-transparent border-l-transparent border-r-[var(--aethel-surface-secondary)]',
   }
 
   return (
@@ -116,8 +116,8 @@ export function Tooltip({
           className={`
             fixed z-[9999]
             px-3 py-2
-            bg-slate-800 border border-slate-700/80
-            text-sm text-slate-200
+            bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]
+            text-sm text-[var(--aethel-text-secondary)]
             rounded-lg
             shadow-xl shadow-black/30
             animate-in fade-in zoom-in-95 duration-150

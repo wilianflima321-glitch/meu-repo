@@ -49,7 +49,7 @@ export default function GamesDocsPage() {
     <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <PublicHeader />
       <main className="relative z-10 mx-auto max-w-4xl px-6 pt-12 pb-20">
-        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
           <ArrowLeft className="h-4 w-4" /> Back to Docs
         </Link>
 
@@ -57,7 +57,7 @@ export default function GamesDocsPage() {
           L2 Experimental
         </div>
         <h1 className="text-4xl font-bold">Games Module</h1>
-        <p className="mt-3 text-lg text-zinc-400">
+        <p className="mt-3 text-lg text-[var(--aethel-text-tertiary)]">
           Build games with AI assistance. From 2D platformers to 3D experiences, Aethel provides
           code-based logic generation, physics, and asset pipelines.
         </p>
@@ -82,15 +82,15 @@ export default function GamesDocsPage() {
                     {cap.status}
                   </span>
                 </div>
-                <p className="text-sm text-zinc-400">{cap.description}</p>
+                <p className="text-sm text-[var(--aethel-text-tertiary)]">{cap.description}</p>
               </div>
             )
           })}
         </div>
 
         <h2 className="mt-10 text-2xl font-semibold">Quick Start</h2>
-        <div className="mt-4 rounded-xl border border-white/10 bg-zinc-900/50 p-6 font-mono text-sm text-zinc-300">
-          <p className="text-zinc-500"># Create a new game project</p>
+        <div className="mt-4 rounded-xl border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-6 font-mono text-sm text-[var(--aethel-text-secondary)]">
+          <p className="text-[var(--aethel-text-quaternary)]"># Create a new game project</p>
           <p>1. Go to /dashboard and click &quot;New Project&quot;</p>
           <p>2. Select &quot;Games&quot; domain</p>
           <p>3. Choose a template (e.g., 2D Platformer)</p>
@@ -102,3 +102,4 @@ export default function GamesDocsPage() {
     </div>
   )
 }
+

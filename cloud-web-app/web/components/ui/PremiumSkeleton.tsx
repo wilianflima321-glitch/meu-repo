@@ -24,7 +24,7 @@ export function ShimmerSkeleton({
   animate = true,
 }: SkeletonProps) {
   const baseClasses = `
-    bg-gradient-to-r from-slate-700/40 via-slate-600/40 to-slate-700/40
+    bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-surface-quaternary)_40%,transparent)] via-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-quaternary)_40%,transparent)]
     bg-[length:200%_100%]
     ${animate ? 'animate-shimmer' : ''}
   `
@@ -241,7 +241,7 @@ export function GallerySkeleton({ count = 6 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <GlassSkeleton key={i} className="aspect-square">
           <motion.div
-            className="w-full h-full bg-gradient-to-br from-slate-700/30 via-slate-600/30 to-slate-700/30 bg-[length:200%_200%]"
+            className="w-full h-full bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] via-[color-mix(in_srgb,var(--aethel-surface-quaternary)_25%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-quaternary)_30%,transparent)] bg-[length:200%_200%]"
             animate={{
               backgroundPosition: ['0% 0%', '100% 100%'],
             }}
@@ -301,7 +301,7 @@ function GlassSkeleton({
 // Page Loading State
 export function PageLoadingState() {
   return (
-    <div className="min-h-screen bg-slate-950 p-6 space-y-6">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] p-6 space-y-6">
       <div className="flex items-center justify-between">
         <ShimmerSkeleton width={200} height={40} />
         <div className="flex gap-3">

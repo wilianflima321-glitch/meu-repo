@@ -711,7 +711,7 @@ export default function MediaStudio({
 
 
   return (
-    <div className="h-full w-full flex flex-col bg-slate-900">
+    <div className="h-full w-full flex flex-col bg-[var(--aethel-surface-primary)]">
       <MediaStudioToolbar
         currentTime={currentTime}
         duration={project.duration}
@@ -752,7 +752,7 @@ export default function MediaStudio({
             previewVideoTime={previewVideoTime}
           />
 
-          <div className="border-t border-slate-800 p-3 bg-slate-950/20">
+          <div className="border-t border-[var(--aethel-border-primary)] p-3 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)]">
             <VideoTimeline
               tracks={project.tracks}
               clips={project.clips}
@@ -768,7 +768,7 @@ export default function MediaStudio({
           </div>
         </div>
 
-        <div className="w-80 border-l border-slate-800 bg-slate-950/30 overflow-auto">
+        <div className="w-80 border-l border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] overflow-auto">
           <MediaStudioInspectorPanel
             currentTime={currentTime}
             selectedClip={selectedClip}

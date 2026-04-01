@@ -68,11 +68,11 @@ export function DashboardFlowRail({
       <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] px-4 py-4 shadow-[0_18px_50px_rgba(2,6,23,0.22)]">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500">Fluxo principal</p>
-            <h2 className="mt-1 text-base font-semibold text-zinc-100 sm:text-lg">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Fluxo principal</p>
+            <h2 className="mt-1 text-base font-semibold text-[var(--aethel-text-primary)] sm:text-lg">
               Entrar, planejar, construir e validar no mesmo studio.
             </h2>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-zinc-400">
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--aethel-text-tertiary)]">
               {entryMission
                 ? `Missao atual: ${entryMission}`
                 : 'Use este trilho para reduzir troca de contexto e seguir a jornada mais curta ate o preview e a validacao.'}
@@ -95,7 +95,7 @@ export function DashboardFlowRail({
                 ? 'border-sky-400/35 bg-[linear-gradient(135deg,rgba(79,70,229,0.28),rgba(14,165,233,0.16))] text-white'
                 : state === 'complete'
                 ? 'border-emerald-400/25 bg-emerald-400/10 text-emerald-50'
-                : 'border-white/10 bg-white/[0.03] text-zinc-200'
+                : 'border-white/10 bg-white/[0.03] text-[var(--aethel-text-secondary)]'
 
             return (
               <button
@@ -105,7 +105,7 @@ export function DashboardFlowRail({
                 className={`rounded-[22px] border p-4 text-left transition hover:border-white/20 hover:bg-white/[0.05] ${className}`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
                     Etapa {index + 1}
                   </span>
                   <span className="rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]">
@@ -113,7 +113,7 @@ export function DashboardFlowRail({
                   </span>
                 </div>
                 <div className="mt-3 text-base font-semibold">{step.label}</div>
-                <div className="mt-1 text-sm leading-6 text-zinc-300">{step.description}</div>
+                <div className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">{step.description}</div>
               </button>
             )
           })}

@@ -269,7 +269,7 @@ export default function IDELayout({
   }, [onOpenCommandPalette, onBottomViewChange])
   
   return (
-    <div className="h-screen flex flex-col bg-slate-900 text-white overflow-hidden">
+    <div className="h-screen flex flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] overflow-hidden">
       {/* Title Bar */}
       <TitleBar
         onMaximize={() => setIsMaximized(!isMaximized)}
@@ -299,15 +299,15 @@ export default function IDELayout({
         {showSidebar && (
           <>
             <div
-              className="flex flex-col bg-slate-850 border-r border-slate-700"
+              className="flex flex-col bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)]"
               style={{ width: sidebarWidth }}
             >
               {/* Sidebar Header */}
-              <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700">
-                <span className="text-xs font-semibold text-slate-400 uppercase">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--aethel-border-primary)]">
+                <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase">
                   {ACTIVITY_BAR_ITEMS.find((i) => i.id === activeSidebarView)?.title}
                 </span>
-                <button className="p-1 text-slate-500 hover:text-white">
+                <button className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
               </div>
@@ -321,7 +321,7 @@ export default function IDELayout({
             {/* Sidebar Resize Handle */}
             <div
               ref={sidebarResizeRef}
-              className="w-1 cursor-col-resize hover:bg-sky-500 active:bg-sky-500 transition-colors"
+              className="w-1 cursor-col-resize hover:bg-[var(--aethel-info)] active:bg-[var(--aethel-info)] transition-colors"
               onMouseDown={handleSidebarResize}
             />
           </>
@@ -351,16 +351,16 @@ export default function IDELayout({
                 {/* Bottom Resize Handle */}
                 <div
                   ref={bottomResizeRef}
-                  className="h-1 cursor-row-resize hover:bg-sky-500 active:bg-sky-500 transition-colors"
+                  className="h-1 cursor-row-resize hover:bg-[var(--aethel-info)] active:bg-[var(--aethel-info)] transition-colors"
                   onMouseDown={handleBottomResize}
                 />
                 
                 <div
-                  className="flex flex-col border-t border-slate-700 bg-slate-850"
+                  className="flex flex-col border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]"
                   style={{ height: bottomPanelHeight }}
                 >
                   {/* Bottom Panel Tabs */}
-                  <div className="flex items-center justify-between px-2 border-b border-slate-700">
+                  <div className="flex items-center justify-between px-2 border-b border-[var(--aethel-border-primary)]">
                     <div className="flex items-center">
                       {BOTTOM_PANEL_ITEMS.map((item) => (
                         <button
@@ -368,8 +368,8 @@ export default function IDELayout({
                           onClick={() => onBottomViewChange?.(item.id)}
                           className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                             activeBottomView === item.id
-                              ? 'text-white border-b-2 border-sky-500'
-                              : 'text-slate-400 hover:text-white'
+                              ? 'text-[var(--aethel-text-primary)] border-b-2 border-sky-500'
+                              : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
                           }`}
                         >
                           {item.title}
@@ -390,13 +390,13 @@ export default function IDELayout({
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setIsMaximized(!isMaximized)}
-                        className="p-1 text-slate-500 hover:text-white"
+                        className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                       >
                         {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                       </button>
                       <button
                         onClick={() => setShowBottomPanel(false)}
-                        className="p-1 text-slate-500 hover:text-white"
+                        className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -418,14 +418,14 @@ export default function IDELayout({
           <>
             <div
               ref={secondaryResizeRef}
-              className="w-1 cursor-col-resize hover:bg-sky-500 active:bg-sky-500 transition-colors"
+              className="w-1 cursor-col-resize hover:bg-[var(--aethel-info)] active:bg-[var(--aethel-info)] transition-colors"
             />
             <div
-              className="flex flex-col bg-slate-850 border-l border-slate-700"
+              className="flex flex-col bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)]"
               style={{ width: secondarySidebarWidth }}
             >
               {secondarySidebarContent || (
-                <div className="flex-1 flex items-center justify-center text-slate-500">
+                <div className="flex-1 flex items-center justify-center text-[var(--aethel-text-tertiary)]">
                   Secondary Panel
                 </div>
               )}
@@ -461,30 +461,30 @@ interface TitleBarProps {
 
 function TitleBar({ onMaximize, isMaximized }: TitleBarProps) {
   return (
-    <div className="h-8 flex items-center justify-between bg-slate-900 border-b border-slate-800 px-2 select-none">
+    <div className="h-8 flex items-center justify-between bg-[var(--aethel-surface-primary)] border-b border-[var(--aethel-border-primary)] px-2 select-none">
       {/* Left - Menu */}
       <div className="flex items-center gap-2">
         <div className="w-4 h-4 rounded-sm bg-gradient-to-br from-[var(--aethel-info)] to-[var(--aethel-accent-dark)]" />
-        <span className="text-sm font-medium text-slate-300">Aethel Engine</span>
+        <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Aethel Engine</span>
       </div>
       
       {/* Center - Title */}
-      <div className="absolute left-1/2 transform -translate-x-1/2 text-xs text-slate-500">
+      <div className="absolute left-1/2 transform -translate-x-1/2 text-xs text-[var(--aethel-text-tertiary)]">
         Aethel IDE - Professional Game Development
       </div>
       
       {/* Right - Window Controls */}
       <div className="flex items-center">
-        <button className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800">
+        <button className="w-8 h-8 flex items-center justify-center text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]">
           <Minimize2 className="w-3 h-3" />
         </button>
         <button
           onClick={onMaximize}
-          className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800"
+          className="w-8 h-8 flex items-center justify-center text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]"
         >
           <Maximize2 className="w-3 h-3" />
         </button>
-        <button className="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-white hover:bg-red-600">
+        <button className="w-8 h-8 flex items-center justify-center text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-red-600">
           <X className="w-3 h-3" />
         </button>
       </div>
@@ -503,7 +503,7 @@ interface ActivityBarProps {
 
 function ActivityBar({ items, activeItem, onItemClick, bottomItems }: ActivityBarProps) {
   return (
-    <div className="w-12 flex flex-col items-center py-2 bg-slate-900 border-r border-slate-800">
+    <div className="w-12 flex flex-col items-center py-2 bg-[var(--aethel-surface-primary)] border-r border-[var(--aethel-border-primary)]">
       {/* Main Items */}
       <div className="flex-1 flex flex-col items-center gap-1">
         {items.map((item) => (
@@ -512,8 +512,8 @@ function ActivityBar({ items, activeItem, onItemClick, bottomItems }: ActivityBa
             onClick={() => onItemClick(item.id)}
             className={`w-10 h-10 flex items-center justify-center rounded transition-colors ${
               activeItem === item.id
-                ? 'text-white bg-slate-800 border-l-2 border-sky-500'
-                : 'text-slate-500 hover:text-white'
+                ? 'text-[var(--aethel-text-primary)] bg-[var(--aethel-surface-secondary)] border-l-2 border-sky-500'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
             title={item.title}
           >
@@ -529,7 +529,7 @@ function ActivityBar({ items, activeItem, onItemClick, bottomItems }: ActivityBa
             <button
               key={item.id}
               onClick={item.onClick}
-              className="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-white rounded transition-colors"
+              className="w-10 h-10 flex items-center justify-center text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] rounded transition-colors"
               title={item.title}
             >
               {item.icon}
@@ -554,10 +554,10 @@ interface TabBarProps {
 function TabBar({ tabs, activeTabId, onTabChange, onTabClose, onNewTab }: TabBarProps) {
   if (tabs.length === 0) {
     return (
-      <div className="h-9 flex items-center px-2 bg-slate-850 border-b border-slate-700">
+      <div className="h-9 flex items-center px-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <button
           onClick={onNewTab}
-          className="flex items-center gap-1 px-2 py-1 text-xs text-slate-500 hover:text-white"
+          className="flex items-center gap-1 px-2 py-1 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
         >
           <Plus className="w-3 h-3" />
           New Tab
@@ -567,30 +567,30 @@ function TabBar({ tabs, activeTabId, onTabChange, onTabClose, onNewTab }: TabBar
   }
   
   return (
-    <div className="h-9 flex items-center bg-slate-850 border-b border-slate-700 overflow-x-auto">
+    <div className="h-9 flex items-center bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)] overflow-x-auto">
       {tabs.map((tab) => (
         <div
           key={tab.id}
           onClick={() => onTabChange?.(tab.id)}
-          className={`group flex items-center gap-2 px-3 h-full border-r border-slate-700 cursor-pointer ${
+          className={`group flex items-center gap-2 px-3 h-full border-r border-[var(--aethel-border-primary)] cursor-pointer ${
             activeTabId === tab.id
-              ? 'bg-slate-900 text-white'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
+              : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
           }`}
         >
-          {tab.icon || <FileCode className="w-4 h-4 text-slate-500" />}
+          {tab.icon || <FileCode className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />}
           <span className={`text-sm ${tab.isPreview ? 'italic' : ''}`}>
             {tab.title}
           </span>
           {tab.isDirty && (
-            <Circle className="w-2 h-2 fill-current text-white" />
+            <Circle className="w-2 h-2 fill-current text-[var(--aethel-text-primary)]" />
           )}
           <button
             onClick={(e) => {
               e.stopPropagation()
               onTabClose?.(tab.id)
             }}
-            className="p-0.5 opacity-0 group-hover:opacity-100 hover:bg-slate-700 rounded"
+            className="p-0.5 opacity-0 group-hover:opacity-100 hover:bg-[var(--aethel-surface-quaternary)] rounded"
           >
             <X className="w-3 h-3" />
           </button>
@@ -598,7 +598,7 @@ function TabBar({ tabs, activeTabId, onTabChange, onTabClose, onNewTab }: TabBar
       ))}
       <button
         onClick={onNewTab}
-        className="flex items-center justify-center w-8 h-full text-slate-500 hover:text-white hover:bg-slate-800"
+        className="flex items-center justify-center w-8 h-full text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]"
       >
         <Plus className="w-4 h-4" />
       </button>
@@ -636,7 +636,7 @@ function StatusBar({
   onPlayGame,
 }: StatusBarProps) {
   return (
-    <div className="h-6 flex items-center justify-between px-2 bg-sky-600 text-white text-xs select-none">
+    <div className="h-6 flex items-center justify-between px-2 bg-sky-600 text-[var(--aethel-text-primary)] text-xs select-none">
       {/* Left */}
       <div className="flex items-center gap-3">
         <button
@@ -658,7 +658,7 @@ function StatusBar({
             <CheckCircle className="w-3.5 h-3.5" />
           )}
           {problems.errors} <span className="opacity-75">errors</span>
-          <span className="mx-1">â€¢</span>
+          <span className="mx-1">-</span>
           {problems.warnings} <span className="opacity-75">warnings</span>
         </button>
       </div>
@@ -706,7 +706,7 @@ function StatusBar({
         {notifications > 0 && (
           <button className="flex items-center gap-1 hover:bg-sky-700 px-1 py-0.5 rounded">
             <Bell className="w-3.5 h-3.5" />
-            <span className="bg-red-500 text-white text-[10px] px-1 rounded">
+            <span className="bg-red-500 text-[var(--aethel-text-primary)] text-[10px] px-1 rounded">
               {notifications}
             </span>
           </button>
@@ -738,7 +738,7 @@ function DefaultSidebarContent({ view }: { view: SidebarView }) {
   }
   
   return (
-    <div className="flex items-center justify-center h-full text-slate-500">
+    <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
       {view.charAt(0).toUpperCase() + view.slice(1)} Panel
     </div>
   )
@@ -793,7 +793,7 @@ function ExplorerTree() {
     },
     { name: 'package.json', icon: <FileCode className="w-4 h-4 text-green-400" /> },
     { name: 'tsconfig.json', icon: <FileCode className="w-4 h-4 text-blue-400" /> },
-    { name: 'README.md', icon: <FileCode className="w-4 h-4 text-slate-400" /> },
+    { name: 'README.md', icon: <FileCode className="w-4 h-4 text-[var(--aethel-text-tertiary)]" /> },
   ]
   
   const renderItem = (item: any, path: string, depth: number = 0) => {
@@ -804,15 +804,15 @@ function ExplorerTree() {
       <div key={path}>
         <button
           onClick={() => isFolder && toggleFolder(path)}
-          className={`w-full flex items-center gap-1 px-2 py-0.5 hover:bg-slate-800 text-left text-sm`}
+          className={`w-full flex items-center gap-1 px-2 py-0.5 hover:bg-[var(--aethel-surface-secondary)] text-left text-sm`}
           style={{ paddingLeft: depth * 12 + 8 }}
         >
           {isFolder ? (
             <>
               {isExpanded ? (
-                <ChevronDown className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)] flex-shrink-0" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)] flex-shrink-0" />
               )}
               {isExpanded ? (
                 <FolderOpen className="w-4 h-4 text-[var(--aethel-warning-light)] flex-shrink-0" />
@@ -823,10 +823,10 @@ function ExplorerTree() {
           ) : (
             <>
               <span className="w-4" />
-              {item.icon || <FileCode className="w-4 h-4 text-slate-400 flex-shrink-0" />}
+              {item.icon || <FileCode className="w-4 h-4 text-[var(--aethel-text-tertiary)] flex-shrink-0" />}
             </>
           )}
-          <span className="text-slate-300 truncate">{item.name}</span>
+          <span className="text-[var(--aethel-text-secondary)] truncate">{item.name}</span>
         </button>
         
         {isFolder && isExpanded && item.children && (
@@ -842,7 +842,7 @@ function ExplorerTree() {
   
   return (
     <div className="py-2">
-      <div className="px-3 py-1 text-xs font-semibold text-slate-500 uppercase">
+      <div className="px-3 py-1 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase">
         Project
       </div>
       {folders.map((item) => renderItem(item, item.name))}
@@ -854,17 +854,17 @@ function ExplorerTree() {
 
 function EditorPlaceholder() {
   return (
-    <div className="flex-1 flex items-center justify-center bg-slate-900">
+    <div className="flex-1 flex items-center justify-center bg-[var(--aethel-surface-primary)]">
       <div className="text-center">
         <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[var(--aethel-info)] to-[var(--aethel-accent-dark)] flex items-center justify-center">
-          <Code className="w-12 h-12 text-white" />
+          <Code className="w-12 h-12 text-[var(--aethel-text-primary)]" />
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">Aethel IDE</h2>
-        <p className="text-slate-400 mb-6">Professional Game Development Environment</p>
-        <div className="flex flex-col gap-2 text-sm text-slate-500">
-          <p><kbd className="px-2 py-0.5 bg-slate-800 rounded">Ctrl+N</kbd> New File</p>
-          <p><kbd className="px-2 py-0.5 bg-slate-800 rounded">Ctrl+O</kbd> Open File</p>
-          <p><kbd className="px-2 py-0.5 bg-slate-800 rounded">Ctrl+Shift+P</kbd> Command Palette</p>
+        <h2 className="text-xl font-semibold text-[var(--aethel-text-primary)] mb-2">Aethel IDE</h2>
+        <p className="text-[var(--aethel-text-tertiary)] mb-6">Professional Game Development Environment</p>
+        <div className="flex flex-col gap-2 text-sm text-[var(--aethel-text-tertiary)]">
+          <p><kbd className="px-2 py-0.5 bg-[var(--aethel-surface-secondary)] rounded">Ctrl+N</kbd> New File</p>
+          <p><kbd className="px-2 py-0.5 bg-[var(--aethel-surface-secondary)] rounded">Ctrl+O</kbd> Open File</p>
+          <p><kbd className="px-2 py-0.5 bg-[var(--aethel-surface-secondary)] rounded">Ctrl+Shift+P</kbd> Command Palette</p>
         </div>
       </div>
     </div>
@@ -873,12 +873,12 @@ function EditorPlaceholder() {
 
 function TerminalPlaceholder() {
   return (
-    <div className="h-full p-2 font-mono text-sm bg-slate-900">
-      <div className="text-slate-500">
+    <div className="h-full p-2 font-mono text-sm bg-[var(--aethel-surface-primary)]">
+      <div className="text-[var(--aethel-text-tertiary)]">
         <span className="text-green-400">aethel@engine</span>
-        <span className="text-slate-600">:</span>
+        <span className="text-[var(--aethel-text-quaternary)]">:</span>
         <span className="text-blue-400">~/project</span>
-        <span className="text-slate-600">$</span>
+        <span className="text-[var(--aethel-text-quaternary)]">$</span>
         <span className="ml-2 animate-pulse">â–Š</span>
       </div>
     </div>

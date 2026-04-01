@@ -233,7 +233,7 @@ export function WelcomeModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)] shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
         {/* Header */}
         <div className="relative h-40 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-primary-dark)_90%,transparent)] via-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-primary)_80%,transparent)] flex items-center justify-center">
           {currentWelcomeStep.icon}
@@ -418,7 +418,7 @@ export function OnboardingChecklist() {
   return (
     <div className="fixed bottom-4 right-4 z-40">
       {isOpen ? (
-        <div className="w-80 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/95 shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+        <div className="w-80 overflow-hidden rounded-2xl border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)] shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
           {/* Header */}
           <div className="p-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] border-b border-white/10">
             <div className="flex items-center justify-between mb-2">

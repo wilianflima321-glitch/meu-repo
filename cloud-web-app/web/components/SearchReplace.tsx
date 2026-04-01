@@ -130,15 +130,15 @@ export default function SearchReplace() {
         )}
         
         {isSearching ? (
-          <div className="flex items-center gap-2 text-slate-500">
-            <div className="animate-spin w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full" />
+          <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
+            <div className="animate-spin w-4 h-4 border-2 border-[var(--aethel-border-primary)] border-t-[var(--aethel-info)] rounded-full" />
             Buscando...
           </div>
         ) : (
           <>
             <h4 className="font-semibold mb-2">Resultados ({results.length})</h4>
             {results.length === 0 && searchQuery && !error ? (
-              <div className="text-slate-500 text-sm">Nenhum resultado encontrado para &ldquo;{searchQuery}&rdquo;</div>
+              <div className="text-[var(--aethel-text-tertiary)] text-sm">Nenhum resultado encontrado para &ldquo;{searchQuery}&rdquo;</div>
             ) : (
               results.map((result, index) => (
                 <div key={index} className="mb-2 p-2 bg-white dark:bg-gray-800 rounded border">

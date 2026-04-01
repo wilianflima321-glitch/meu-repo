@@ -9,8 +9,8 @@ const SimpleMini3DPreview = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="h-full w-full bg-slate-900 flex items-center justify-center">
-        <div className="animate-pulse text-slate-500 text-sm">Carregando preview 3D...</div>
+      <div className="h-full w-full bg-[var(--aethel-surface-primary)] flex items-center justify-center">
+        <div className="animate-pulse text-[var(--aethel-text-tertiary)] text-sm">Carregando preview 3D...</div>
       </div>
     )
   }
@@ -28,17 +28,17 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
   const [previewError, setPreviewError] = useState<string | null>(null)
 
   return (
-    <div className={`bg-slate-900 border border-slate-700 rounded-xl overflow-hidden transition-all duration-300 shadow-xl ${
+    <div className={`bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl overflow-hidden transition-all duration-300 shadow-xl ${
       isExpanded ? 'fixed inset-4 z-50' : 'w-72 h-56'
     }`}>
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-3 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <h4 className="text-white text-sm font-semibold flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           AI Live Preview
         </h4>
         <button
           onClick={onToggleExpand}
-          className="text-slate-400 hover:text-white transition-colors p-1 rounded hover:bg-slate-700"
+          className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors p-1 rounded hover:bg-[var(--aethel-surface-quaternary)]"
           title={isExpanded ? 'Minimizar' : 'Expandir'}
         >
           {isExpanded ? (
@@ -55,18 +55,18 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
 
       <div className={`${isExpanded ? 'flex h-[calc(100%-44px)]' : 'h-[calc(100%-44px)]'}`}>
         {/* AI Activity & Suggestions Panel */}
-        <div className={`p-3 overflow-y-auto ${isExpanded ? 'w-80 border-r border-slate-700' : 'h-full'}`}>
-          <div className="text-slate-400 text-xs mb-3">
-            <div className="font-semibold text-slate-300 mb-1">Atividade IA:</div>
-            <div className="text-slate-500">{aiActivity || 'Aguardando comandos...'}</div>
+        <div className={`p-3 overflow-y-auto ${isExpanded ? 'w-80 border-r border-[var(--aethel-border-primary)]' : 'h-full'}`}>
+          <div className="text-[var(--aethel-text-tertiary)] text-xs mb-3">
+            <div className="font-semibold text-[var(--aethel-text-secondary)] mb-1">Atividade IA:</div>
+            <div className="text-[var(--aethel-text-tertiary)]">{aiActivity || 'Aguardando comandos...'}</div>
           </div>
 
           {suggestions.length > 0 && (
             <div className="space-y-2">
-              <div className="text-slate-300 text-xs font-semibold">Sugestões:</div>
+              <div className="text-[var(--aethel-text-secondary)] text-xs font-semibold">Sugestões:</div>
               {suggestions.map((suggestion, index) => (
-                <div key={index} className="flex items-center gap-2 bg-slate-800 p-2 rounded-lg text-xs group hover:bg-slate-700 transition-colors">
-                  <span className="text-slate-300 flex-1">{suggestion}</span>
+                <div key={index} className="flex items-center gap-2 bg-[var(--aethel-surface-secondary)] p-2 rounded-lg text-xs group hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
+                  <span className="text-[var(--aethel-text-secondary)] flex-1">{suggestion}</span>
                   <button
                     onClick={() => onAcceptSuggestion(suggestion)}
                     className="bg-emerald-600 px-2 py-1 rounded text-white hover:bg-emerald-500 transition-colors opacity-0 group-hover:opacity-100"
@@ -79,7 +79,7 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
           )}
 
           {!suggestions.length && !aiActivity && (
-            <div className="text-slate-600 text-xs text-center py-4">
+            <div className="text-[var(--aethel-text-quaternary)] text-xs text-center py-4">
               Preview em tempo real das alterações feitas pela IA
             </div>
           )}
@@ -87,12 +87,12 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
 
         {/* 3D Preview Canvas (only in expanded mode) */}
         {isExpanded && (
-          <div className="flex-1 bg-slate-950">
+          <div className="flex-1 bg-[var(--aethel-surface-primary)]">
             {previewError ? (
               <div className="h-full flex items-center justify-center p-4">
                 <div className="text-center">
                   <div className="text-red-400 text-sm mb-2">Erro ao carregar preview</div>
-                  <div className="text-slate-500 text-xs">{previewError}</div>
+                  <div className="text-[var(--aethel-text-tertiary)] text-xs">{previewError}</div>
                   <button
                     onClick={() => setPreviewError(null)}
                     className="mt-3 text-xs text-blue-400 hover:text-blue-300"
@@ -104,7 +104,7 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
             ) : (
               <Suspense fallback={
                 <div className="h-full flex items-center justify-center">
-                  <div className="animate-spin w-8 h-8 border-2 border-slate-600 border-t-blue-500 rounded-full" />
+                  <div className="animate-spin w-8 h-8 border-2 border-[var(--aethel-border-secondary)] border-t-[var(--aethel-info)] rounded-full" />
                 </div>
               }>
                 <div className="h-full w-full">

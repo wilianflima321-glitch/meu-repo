@@ -128,7 +128,7 @@ function LifecycleIndicator({
       )}
       {filesInSync !== undefined && filesInSync > 0 && (
         <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
-          sync {filesInSync}
+          sincr {filesInSync}
         </span>
       )}
       {lastSyncAt ? (
@@ -220,6 +220,24 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const pollRef = useRef<NodeJS.Timeout | null>(null);
   const warmupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const syncResetRef = useRef<NodeJS.Timeout | null>(null);
+  const hmrUnsubscribeRef = useRef<(() => void) | null>(null);
+
+  const resolveStrategy = (payload: any): PreviewStrategy => {
+    const provider = payload?.provider || payload?.metadata?.provider;
+    const rawStrategy = payload?.strategy || payload?.metadata?.strategy;
+    if (rawStrategy) {
+      if (rawStrategy === 'browser-side') return 'webcontainer';
+      if (rawStrategy === 'local') return 'iframe';
+      if (rawStrategy === 'managed') return provider === 'e2b' ? 'e2b' : 'iframe';
+      if (rawStrategy === 'inline') return 'inline';
+    }
+    const mode = payload?.metadata?.mode;
+    if (mode === 'local_fallback') return 'iframe';
+    if (provider === 'webcontainers') return 'webcontainer';
+    if (provider === 'e2b') return 'e2b';
+    if (mode === 'managed') return 'e2b';
+    return 'iframe';
+  };
 
   const startHealthPolling = useCallback((url: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
@@ -261,16 +279,17 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || data.message || `Provision failed (${res.status})`);
+        throw new Error(data.error || data.message || `Falha ao provisionar (${res.status})`);
       }
 
       const data = await res.json();
 
       if (data.runtimeUrl) {
+        const resolvedStrategy = resolveStrategy(data);
         setRuntime((prev) => ({
           ...prev,
           state: 'warming',
-          strategy: data.strategy || 'e2b',
+          strategy: resolvedStrategy,
           runtimeUrl: data.runtimeUrl,
           sandboxId: data.sandboxId || null,
           startedAt: Date.now(),
@@ -280,12 +299,13 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
       } else if (data.discoveryResult?.preferredRuntimeUrl) {
         setRuntime((prev) => ({
           ...prev,
-          state: 'healthy',
+          state: 'warming',
           strategy: 'iframe',
           runtimeUrl: data.discoveryResult.preferredRuntimeUrl,
           startedAt: Date.now(),
           latencyMs: data.discoveryResult.candidates?.[0]?.latencyMs || null,
         }));
+        startHealthPolling(data.discoveryResult.preferredRuntimeUrl);
       } else {
         setRuntime((prev) => ({
           ...prev,
@@ -297,13 +317,14 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
       setRuntime((prev) => ({
         ...prev,
         state: 'failed',
-        error: err instanceof Error ? err.message : 'Unknown provision error',
+        error: err instanceof Error ? err.message : 'Falha ao provisionar o preview.',
       }));
     }
   }, [projectId, startHealthPolling]);
 
   const connectHMR = useCallback((runtimeUrl: string) => {
     bridgeRef.current?.disconnect();
+    hmrUnsubscribeRef.current?.();
 
     try {
       bridgeRef.current = createHMRBridge({
@@ -333,6 +354,15 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
         onError: () => {
           setRuntime((prev) => ({ ...prev, hmrConnected: false }));
         },
+      });
+      hmrUnsubscribeRef.current = bridgeRef.current.onStateChange((state) => {
+        if (state === 'failed' || state === 'reconnecting') {
+          setRuntime((prev) => {
+            if (prev.strategy === 'inline') return prev;
+            if (prev.state === 'degraded') return prev;
+            return { ...prev, state: 'degraded' };
+          });
+        }
       });
     } catch {
       setRuntime((prev) => ({ ...prev, hmrConnected: false }));
@@ -365,6 +395,7 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
   useEffect(() => {
     return () => {
       bridgeRef.current?.disconnect();
+      hmrUnsubscribeRef.current?.();
       if (pollRef.current) clearInterval(pollRef.current);
       if (warmupTimeoutRef.current) clearTimeout(warmupTimeoutRef.current);
       if (syncResetRef.current) clearTimeout(syncResetRef.current);
@@ -424,7 +455,7 @@ export type CanonicalPreviewSurfaceProps = CanonicalLiveProps | CanonicalRuntime
  * - 'scene': 3D scene preview (Nexus Canvas)
  *
  * Runtime variant includes full lifecycle management:
- * idle → provisioning → warming → syncing → healthy / degraded / failed
+ * idle -> provisioning -> warming -> syncing -> healthy / degraded / failed
  *
  * @see docs/master/DUPLICATIONS_AND_CONFLICTS.md (C-07)
  */
@@ -467,26 +498,27 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
 
   // Determine effective URL
   const effectiveUrl = externalRuntimeUrl || runtime.runtimeUrl;
-  const useInline = forceInlineFallback || runtime.strategy === 'inline' || !effectiveUrl;
+  const effectiveStrategy = runtime.strategy === 'none' && externalRuntimeUrl ? 'iframe' : runtime.strategy;
+  const useInline = forceInlineFallback || effectiveStrategy === 'inline' || !effectiveUrl;
 
   // Track effective state
   const effectiveState: PreviewLifecycleState = useMemo(() => {
-    if (externalRuntimeUrl) return 'healthy';
-    if (forceInlineFallback || runtime.strategy === 'inline') return 'degraded';
+    if (externalRuntimeUrl) return 'degraded';
+    if (forceInlineFallback || effectiveStrategy === 'inline') return 'degraded';
     return runtime.state;
-  }, [externalRuntimeUrl, forceInlineFallback, runtime.state, runtime.strategy]);
+  }, [externalRuntimeUrl, forceInlineFallback, runtime.state, effectiveStrategy]);
 
   if (effectiveState === 'failed') {
     return (
       <div className="flex flex-col h-full">
         {showLifecycleBar && (
-          <LifecycleIndicator state="failed" latencyMs={null} hmrConnected={false} strategy={runtime.strategy} />
+          <LifecycleIndicator state="failed" latencyMs={null} hmrConnected={false} strategy={effectiveStrategy} />
         )}
         <PreviewFailedState
           error={runtime.error ?? runtimeUnavailableReason ?? null}
           onRetry={provision}
           onFallback={switchToInline}
-          strategy={runtime.strategy}
+          strategy={effectiveStrategy}
         />
       </div>
     );
@@ -530,7 +562,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
     return (
       <div className="flex flex-col h-full">
         {showLifecycleBar && (
-          <LifecycleIndicator state={effectiveState} latencyMs={null} hmrConnected={false} strategy={runtime.strategy} />
+          <LifecycleIndicator state={effectiveState} latencyMs={null} hmrConnected={false} strategy={effectiveStrategy} />
         )}
         <PreviewSkeleton />
       </div>
@@ -544,7 +576,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           state={effectiveState}
           latencyMs={runtime.latencyMs}
           hmrConnected={runtime.hmrConnected}
-          strategy={runtime.strategy}
+          strategy={effectiveStrategy}
           filesInSync={runtime.filesInSync}
           lastSyncAt={runtime.lastSyncAt}
         />

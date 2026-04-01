@@ -1,7 +1,7 @@
-Ôªø/**
+/**
  * Interactive Tour System - Tour Interativo Guiado
  * 
- * Sistema profissional de tour guiado com spotlight, tooltips e navega√ß√£o.
+ * Sistema profissional de tour guiado com spotlight, tooltips e navegaÁ„o.
  * Similar ao Intercom Product Tours ou Appcues.
  * 
  * @module components/onboarding/InteractiveTour
@@ -129,7 +129,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
       
       setCurrentStepIndex(nextIndex);
     } else {
-      // √Å≈°ltimo passo - finaliza tour
+      // ¡öltimo passo - finaliza tour
       if (activeTour.onComplete) {
         activeTour.onComplete();
       }
@@ -340,24 +340,24 @@ function TourOverlay() {
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className="absolute w-96 max-w-[calc(100vw-32px)] bg-slate-800 rounded-xl shadow-2xl border border-slate-700 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
+        className="absolute w-96 max-w-[calc(100vw-32px)] bg-[var(--aethel-surface-secondary)] rounded-xl shadow-2xl border border-[var(--aethel-border-primary)] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
         style={{
           top: tooltipPosition.top,
           left: tooltipPosition.left,
         }}
       >
         {/* Header */}
-        <div className="px-5 py-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] border-b border-slate-700">
+        <div className="px-5 py-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-sky-400" />
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-[var(--aethel-text-tertiary)] font-medium">
                 Passo {currentStepIndex + 1} de {totalSteps}
               </span>
             </div>
             <button
               onClick={endTour}
-              className="p-1 text-slate-400 hover:text-white rounded transition-colors"
+              className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] rounded transition-colors"
               aria-label="Fechar tour"
             >
               <X className="w-4 h-4" />
@@ -370,7 +370,7 @@ function TourOverlay() {
 
         {/* Content */}
         <div className="px-5 py-4">
-          <div className="text-sm text-slate-300 leading-relaxed">
+          <div className="text-sm text-[var(--aethel-text-secondary)] leading-relaxed">
             {currentStep.content}
           </div>
 
@@ -386,7 +386,7 @@ function TourOverlay() {
         </div>
 
         {/* Footer with navigation */}
-        <div className="px-5 py-3 bg-slate-900/50 border-t border-slate-700 flex items-center justify-between">
+        <div className="px-5 py-3 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] border-t border-[var(--aethel-border-primary)] flex items-center justify-between">
           {/* Progress dots */}
           <div className="flex gap-1.5">
             {Array.from({ length: totalSteps }).map((_, i) => (
@@ -398,7 +398,7 @@ function TourOverlay() {
                     ? 'bg-sky-500 w-4' 
                     : i < currentStepIndex 
                     ? 'bg-sky-400/50' 
-                    : 'bg-slate-600'
+                    : 'bg-[var(--aethel-surface-quaternary)]'
                 }`}
               />
             ))}
@@ -409,7 +409,7 @@ function TourOverlay() {
             {!isFirstStep && (
               <button
                 onClick={prevStep}
-                className="px-3 py-1.5 text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+                className="px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors flex items-center gap-1"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Anterior
@@ -426,7 +426,7 @@ function TourOverlay() {
                 </>
               ) : (
                 <>
-                  Pr√≥ximo
+                  PrÛximo
                   <ChevronRight className="w-4 h-4" />
                 </>
               )}
@@ -453,28 +453,28 @@ export const TOURS = {
         id: 'welcome',
         target: '',
         placement: 'center' as const,
-        title: 'Bem-vindo ao Aethel Engine! √∞≈∏≈Ω¬Æ',
-        content: 'Vamos fazer um tour r√°pido pelas principais funcionalidades. Voc√™ pode pular a qualquer momento pressionando ESC.',
+        title: 'Bem-vindo ao Aethel Engine! üéÆ',
+        content: 'Vamos fazer um tour r·pido pelas principais funcionalidades. VocÍ pode pular a qualquer momento pressionando ESC.',
       },
       {
         id: 'file-explorer',
         target: '[data-tour="file-explorer"]',
         placement: 'right' as const,
         title: 'Explorador de Arquivos',
-        content: 'Aqui voc√™ gerencia todos os arquivos do seu projeto. Clique com bot√£o direito para criar pastas, arquivos e assets.',
+        content: 'Aqui vocÍ gerencia todos os arquivos do seu projeto. Clique com bot„o direito para criar pastas, arquivos e assets.',
       },
       {
         id: 'code-editor',
         target: '[data-tour="code-editor"]',
         placement: 'left' as const,
-        title: 'Editor de C√≥digo',
+        title: 'Editor de CÛdigo',
         content: (
           <div>
             <p>Editor poderoso com autocomplete e IA integrada.</p>
-            <ul className="mt-2 text-xs space-y-1 text-slate-400">
-              <li>√¢‚Ç¨¬¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+K</kbd> - Edi√ß√£o com IA</li>
-              <li>√¢‚Ç¨¬¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+P</kbd> - Busca r√°pida</li>
-              <li>√¢‚Ç¨¬¢ <kbd className="px-1 bg-slate-700 rounded">Cmd+Shift+P</kbd> - Comandos</li>
+            <ul className="mt-2 text-xs space-y-1 text-[var(--aethel-text-tertiary)]">
+              <li>‚Ä¢ <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Cmd+K</kbd> - EdiÁ„o com IA</li>
+              <li>‚Ä¢ <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Cmd+P</kbd> - Busca r·pida</li>
+              <li>‚Ä¢ <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Cmd+Shift+P</kbd> - Comandos</li>
             </ul>
           </div>
         ),
@@ -484,7 +484,7 @@ export const TOURS = {
         target: '[data-tour="terminal"]',
         placement: 'top' as const,
         title: 'Terminal Integrado',
-        content: 'Terminal completo com acesso ao sistema. Execute comandos, gerencie depend√™ncias e fa√ßa builds.',
+        content: 'Terminal completo com acesso ao sistema. Execute comandos, gerencie dependÍncias e faÁa builds.',
       },
       {
         id: 'viewport',
@@ -498,21 +498,21 @@ export const TOURS = {
         target: '[data-tour="ai-assistant"]',
         placement: 'left' as const,
         title: 'Assistente de IA',
-        content: 'Seu parceiro de desenvolvimento. Pe√ßa para criar c√≥digo, assets, ou explicar conceitos. A IA pode at√© executar a√ß√µes automaticamente!',
+        content: 'Seu parceiro de desenvolvimento. PeÁa para criar cÛdigo, assets, ou explicar conceitos. A IA pode atÈ executar aÁıes automaticamente!',
       },
       {
         id: 'play-button',
         target: '[data-tour="play-button"]',
         placement: 'bottom' as const,
         title: 'Testar seu Jogo',
-        content: 'Clique em Play para testar seu jogo instantaneamente no navegador. Hot reload mant√©m suas altera√ß√µes em tempo real.',
+        content: 'Clique em Play para testar seu jogo instantaneamente no navegador. Hot reload mantÈm suas alteraÁıes em tempo real.',
       },
       {
         id: 'tour-complete',
         target: '',
         placement: 'center' as const,
-        title: 'Pronto para criar! √∞≈∏≈°‚Ç¨',
-        content: 'Voc√™ conhece o b√°sico. Explore, experimente e divirta-se criando! Se precisar de ajuda, a IA est√° sempre dispon√≠vel.',
+        title: 'Pronto para criar! üöÄ',
+        content: 'VocÍ conhece o b·sico. Explore, experimente e divirta-se criando! Se precisar de ajuda, a IA est· sempre disponÌvel.',
       },
     ],
   },
@@ -526,29 +526,29 @@ export const TOURS = {
         id: 'intro',
         target: '',
         placement: 'center' as const,
-        title: 'Visual Scripting (Blueprints) √∞≈∏‚Äù¬ß',
-        content: 'Crie l√≥gica de jogo sem escrever c√≥digo! Conecte n√≥s visualmente para programar comportamentos.',
+        title: 'Visual Scripting (Blueprints) üîß',
+        content: 'Crie lÛgica de jogo sem escrever cÛdigo! Conecte nÛs visualmente para programar comportamentos.',
       },
       {
         id: 'node-palette',
         target: '[data-tour="node-palette"]',
         placement: 'right' as const,
-        title: 'Paleta de N√≥s',
-        content: 'Arraste n√≥s daqui para o canvas. Temos eventos, condi√ß√µes, a√ß√µes, matem√°tica e muito mais.',
+        title: 'Paleta de NÛs',
+        content: 'Arraste nÛs daqui para o canvas. Temos eventos, condiÁıes, aÁıes, matem·tica e muito mais.',
       },
       {
         id: 'canvas',
         target: '[data-tour="vs-canvas"]',
         placement: 'left' as const,
-        title: 'Canvas de Edi√ß√£o',
-        content: 'Conecte os n√≥s arrastando das portas. Linhas brancas s√£o fluxo de execu√ß√£o, coloridas s√£o dados.',
+        title: 'Canvas de EdiÁ„o',
+        content: 'Conecte os nÛs arrastando das portas. Linhas brancas s„o fluxo de execuÁ„o, coloridas s„o dados.',
       },
       {
         id: 'variables',
         target: '[data-tour="vs-variables"]',
         placement: 'right' as const,
-        title: 'Vari√°veis',
-        content: 'Crie vari√°veis para armazenar valores. Arraste-as para o canvas para usar.',
+        title: 'Vari·veis',
+        content: 'Crie vari·veis para armazenar valores. Arraste-as para o canvas para usar.',
       },
     ],
   },
@@ -573,3 +573,4 @@ export function useStartTour() {
 // ============================================================================
 
 export default TourProvider;
+

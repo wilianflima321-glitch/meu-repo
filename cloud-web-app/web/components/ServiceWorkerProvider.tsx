@@ -114,7 +114,7 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
           aria-labelledby="update-title"
           aria-describedby="update-description"
         >
-          <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
+          <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden">
             <div className="p-4">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-10 h-10 bg-sky-500/20 rounded-full flex items-center justify-center">
@@ -141,7 +141,7 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
                   </h3>
                   <p 
                     id="update-description" 
-                    className="mt-1 text-sm text-slate-400"
+                    className="mt-1 text-sm text-[var(--aethel-text-tertiary)]"
                   >
                     Uma nova versão do Aethel Engine está pronta para ser instalada.
                   </p>
@@ -149,16 +149,16 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
               </div>
             </div>
             
-            <div className="flex border-t border-slate-700">
+            <div className="flex border-t border-[var(--aethel-border-primary)]">
               <button
                 onClick={handleDismiss}
-                className="flex-1 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
+                className="flex-1 px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] transition-colors"
               >
                 Mais tarde
               </button>
               <button
                 onClick={handleUpdate}
-                className="flex-1 px-4 py-3 text-sm font-medium text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors border-l border-slate-700"
+                className="flex-1 px-4 py-3 text-sm font-medium text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors border-l border-[var(--aethel-border-primary)]"
               >
                 Atualizar agora
               </button>
@@ -209,14 +209,14 @@ export function InstallPrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 z-[9999] max-w-sm">
-      <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4">
+      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl p-4">
         <div className="flex items-center gap-3">
             <Image src="/branding/aethel-icon-source.png" alt="" width={40} height={40} sizes="40px" className="w-10 h-10 rounded-lg" />
           <div className="flex-1">
             <p className="text-sm font-medium text-white">
               Instalar Aethel Engine
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">
               Acesse rapidamente do seu desktop
             </p>
           </div>

@@ -50,7 +50,7 @@ export default function ConsentDialog({
       case 'medium': return 'text-yellow-400';
       case 'high': return 'text-orange-400';
       case 'critical': return 'text-red-400';
-      default: return 'text-slate-400';
+      default: return 'text-[var(--aethel-text-tertiary)]';
     }
   };
 
@@ -81,19 +81,19 @@ export default function ConsentDialog({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--aethel-surface-secondary)] rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="p-6 border-b border-slate-700">
+        <div className="p-6 border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">
                 Consent Required
               </h2>
-              <p className="text-slate-300">{request.description}</p>
+              <p className="text-[var(--aethel-text-secondary)]">{request.description}</p>
             </div>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white transition-colors"
+              className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
             >
               ✕
             </button>
@@ -104,18 +104,18 @@ export default function ConsentDialog({
         <div className="p-6 space-y-6">
           {/* Operation */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-400 uppercase mb-2">
+            <h3 className="text-sm font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">
               Operation
             </h3>
             <p className="text-white font-mono">{request.operation}</p>
           </div>
 
           {/* Risk Assessment */}
-          <div className="bg-slate-900 rounded-lg p-4">
+          <div className="bg-[var(--aethel-surface-primary)] rounded-lg p-4">
             <div className="grid grid-cols-3 gap-4">
               {/* Risk Level */}
               <div>
-                <div className="text-sm text-slate-400 mb-1">Risk Level</div>
+                <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Risk Level</div>
                 <div className={`text-lg font-semibold ${getRiskColor()} flex items-center gap-2`}>
                   <span>{getRiskIcon()}</span>
                   <span className="capitalize">{request.risk}</span>
@@ -124,7 +124,7 @@ export default function ConsentDialog({
 
               {/* Estimated Time */}
               <div>
-                <div className="text-sm text-slate-400 mb-1">Estimated Time</div>
+                <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Estimated Time</div>
                 <div className="text-lg font-semibold text-white">
                   {formatTime()}
                 </div>
@@ -132,7 +132,7 @@ export default function ConsentDialog({
 
               {/* Cost */}
               <div>
-                <div className="text-sm text-slate-400 mb-1">Cost</div>
+                <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Cost</div>
                 <div className="text-lg font-semibold text-white">
                   {formatCost()}
                 </div>
@@ -143,43 +143,43 @@ export default function ConsentDialog({
           {/* Resources */}
           {Object.keys(request.resources).length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-400 uppercase mb-3">
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-3">
                 Resources Required
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 {request.resources.network && (
-                  <div className="flex items-center gap-2 p-3 bg-slate-900 rounded">
-                    <span className="text-xs font-semibold text-slate-400 w-10 text-center">NET</span>
+                  <div className="flex items-center gap-2 p-3 bg-[var(--aethel-surface-primary)] rounded">
+                    <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">NET</span>
                     <div>
                       <div className="text-white font-medium">Network Access</div>
-                      <div className="text-xs text-slate-400">Internet connection required</div>
+                      <div className="text-xs text-[var(--aethel-text-tertiary)]">Internet connection required</div>
                     </div>
                   </div>
                 )}
                 {request.resources.disk && (
-                  <div className="flex items-center gap-2 p-3 bg-slate-900 rounded">
-                    <span className="text-xs font-semibold text-slate-400 w-10 text-center">DISK</span>
+                  <div className="flex items-center gap-2 p-3 bg-[var(--aethel-surface-primary)] rounded">
+                    <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">DISK</span>
                     <div>
                       <div className="text-white font-medium">Disk Space</div>
-                      <div className="text-xs text-slate-400">{request.resources.disk} MB</div>
+                      <div className="text-xs text-[var(--aethel-text-tertiary)]">{request.resources.disk} MB</div>
                     </div>
                   </div>
                 )}
                 {request.resources.cpu && (
-                  <div className="flex items-center gap-2 p-3 bg-slate-900 rounded">
-                    <span className="text-xs font-semibold text-slate-400 w-10 text-center">CPU</span>
+                  <div className="flex items-center gap-2 p-3 bg-[var(--aethel-surface-primary)] rounded">
+                    <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">CPU</span>
                     <div>
                       <div className="text-white font-medium">CPU Usage</div>
-                      <div className="text-xs text-slate-400">Processing power required</div>
+                      <div className="text-xs text-[var(--aethel-text-tertiary)]">Processing power required</div>
                     </div>
                   </div>
                 )}
                 {request.resources.memory && (
-                  <div className="flex items-center gap-2 p-3 bg-slate-900 rounded">
-                    <span className="text-xs font-semibold text-slate-400 w-10 text-center">RAM</span>
+                  <div className="flex items-center gap-2 p-3 bg-[var(--aethel-surface-primary)] rounded">
+                    <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center">RAM</span>
                     <div>
                       <div className="text-white font-medium">Memory</div>
-                      <div className="text-xs text-slate-400">{request.resources.memory} MB</div>
+                      <div className="text-xs text-[var(--aethel-text-tertiary)]">{request.resources.memory} MB</div>
                     </div>
                   </div>
                 )}
@@ -190,12 +190,12 @@ export default function ConsentDialog({
           {/* Details */}
           {request.details && request.details.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-400 uppercase mb-3">
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-3">
                 Details
               </h3>
               <ul className="space-y-2">
                 {request.details.map((detail, index) => (
-                  <li key={index} className="flex items-start gap-2 text-slate-300">
+                  <li key={index} className="flex items-start gap-2 text-[var(--aethel-text-secondary)]">
                     <span className="text-blue-400 mt-1">•</span>
                     <span>{detail}</span>
                   </li>
@@ -207,12 +207,12 @@ export default function ConsentDialog({
           {/* Alternatives */}
           {request.alternatives && request.alternatives.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-400 uppercase mb-3">
+              <h3 className="text-sm font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-3">
                 Alternatives
               </h3>
               <ul className="space-y-2">
                 {request.alternatives.map((alt, index) => (
-                  <li key={index} className="flex items-start gap-2 text-slate-300">
+                  <li key={index} className="flex items-start gap-2 text-[var(--aethel-text-secondary)]">
                     <span className="text-blue-400 mt-1">→</span>
                     <span>{alt}</span>
                   </li>
@@ -222,18 +222,18 @@ export default function ConsentDialog({
           )}
 
           {/* Charge ID */}
-          <div className="bg-slate-900 rounded p-3">
-            <div className="text-xs text-slate-400 mb-1">Charge ID</div>
-            <div className="text-sm text-slate-300 font-mono">{chargeId}</div>
+          <div className="bg-[var(--aethel-surface-primary)] rounded p-3">
+            <div className="text-xs text-[var(--aethel-text-tertiary)] mb-1">Charge ID</div>
+            <div className="text-sm text-[var(--aethel-text-secondary)] font-mono">{chargeId}</div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-700 flex gap-3">
+        <div className="p-6 border-t border-[var(--aethel-border-primary)] flex gap-3">
           <button
             onClick={handleReject}
             disabled={isProcessing}
-            className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 text-white rounded-lg transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] disabled:bg-[var(--aethel-surface-secondary)] text-white rounded-lg transition-colors font-medium"
           >
             {isProcessing ? 'Processing...' : 'Reject'}
           </button>

@@ -33,13 +33,13 @@ export default function StatusBar({
   }, []);
 
   return (
-    <div className="h-6 bg-slate-900 border-t border-slate-700 flex items-center justify-between px-2 text-xs text-slate-400">
+    <div className="h-6 bg-[var(--aethel-surface-primary)] border-t border-[var(--aethel-border-primary)] flex items-center justify-between px-2 text-xs text-[var(--aethel-text-tertiary)]">
       {/* Left Section */}
       <div className="flex items-center gap-4">
         {/* Git Branch */}
         {gitBranch && (
-          <button className="flex items-center gap-1 hover:bg-slate-800 px-2 py-1 rounded transition-colors">
-            <span className="text-xs font-semibold text-slate-400">GIT</span>
+          <button className="flex items-center gap-1 hover:bg-[var(--aethel-surface-secondary)] px-2 py-1 rounded transition-colors">
+            <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)]">GIT</span>
             <span>{gitBranch}</span>
             {gitStatus && (
               <>
@@ -52,7 +52,7 @@ export default function StatusBar({
         )}
 
         {/* Problems */}
-        <button className="flex items-center gap-2 hover:bg-slate-800 px-2 py-1 rounded transition-colors">
+        <button className="flex items-center gap-2 hover:bg-[var(--aethel-surface-secondary)] px-2 py-1 rounded transition-colors">
           {errors > 0 && (
             <span className="flex items-center gap-1 text-red-400">
               <span className="text-xs font-semibold">ERR</span>
@@ -75,7 +75,7 @@ export default function StatusBar({
       <div className="flex items-center gap-4">
         {/* Position */}
         {position && (
-          <button className="hover:bg-slate-800 px-2 py-1 rounded transition-colors">
+          <button className="hover:bg-[var(--aethel-surface-secondary)] px-2 py-1 rounded transition-colors">
             Ln {position.line}, Col {position.column}
             {selection && selection.lines > 1 && (
               <span className="ml-2">
@@ -87,18 +87,18 @@ export default function StatusBar({
 
         {/* Language */}
         {language && (
-          <button className="hover:bg-slate-800 px-2 py-1 rounded transition-colors">
+          <button className="hover:bg-[var(--aethel-surface-secondary)] px-2 py-1 rounded transition-colors">
             {language}
           </button>
         )}
 
         {/* Encoding */}
-        <button className="hover:bg-slate-800 px-2 py-1 rounded transition-colors">
+        <button className="hover:bg-[var(--aethel-surface-secondary)] px-2 py-1 rounded transition-colors">
           {encoding}
         </button>
 
         {/* Line Ending */}
-        <button className="hover:bg-slate-800 px-2 py-1 rounded transition-colors">
+        <button className="hover:bg-[var(--aethel-surface-secondary)] px-2 py-1 rounded transition-colors">
           {lineEnding}
         </button>
 
@@ -108,7 +108,7 @@ export default function StatusBar({
         </div>
 
         {/* Notifications */}
-        <button className="hover:bg-slate-800 px-2 py-1 rounded transition-colors">
+        <button className="hover:bg-[var(--aethel-surface-secondary)] px-2 py-1 rounded transition-colors">
           🔔
         </button>
       </div>

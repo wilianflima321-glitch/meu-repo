@@ -105,18 +105,18 @@ export default function Terminal() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-slate-900 via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-slate-900">
+    <div className="flex flex-col h-full bg-gradient-to-br from-[var(--aethel-surface-primary)] via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-[var(--aethel-surface-primary)]">
       {/* Tasks Panel */}
       {tasks.length > 0 && (
-        <div className="bg-slate-800/50 backdrop-blur-sm p-4 border-b border-slate-700">
-          <h3 className="text-white font-semibold mb-2">Quick Tasks</h3>
+        <div className="bg-[var(--aethel-surface-secondary)]/50 backdrop-blur-sm p-4 border-b border-[var(--aethel-border-primary)]">
+          <h3 className="text-[var(--aethel-text-primary)] font-semibold mb-2">Quick Tasks</h3>
           <div className="flex flex-wrap gap-2">
             {tasks.slice(0, 6).map((task, index) => (
               <button
                 key={index}
                 onClick={() => runTask(task.label)}
                 disabled={isLoading}
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white text-sm rounded transition-colors"
+                className="px-3 py-1 bg-[var(--aethel-primary)] hover:brightness-110 disabled:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] text-sm rounded transition-colors"
               >
                 {task.label}
               </button>
@@ -128,14 +128,14 @@ export default function Terminal() {
       {/* Terminal Output */}
       <div 
         ref={outputRef}
-        className="flex-1 bg-slate-900 text-green-400 p-4 font-mono text-sm overflow-y-auto"
+        className="flex-1 bg-[var(--aethel-surface-primary)] text-green-400 p-4 font-mono text-sm overflow-y-auto"
       >
         {output.map((line, index) => (
           <div key={index} className="whitespace-pre-wrap">{line}</div>
         ))}
       </div>
       {/* Command Input */}
-      <div className="bg-slate-900 p-4 border-t border-slate-700 flex items-center gap-2">
+      <div className="bg-[var(--aethel-surface-primary)] p-4 border-t border-[var(--aethel-border-primary)] flex items-center gap-2">
         <span className="text-green-400">$</span>
         <input
           ref={inputRef}

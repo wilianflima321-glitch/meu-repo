@@ -1,9 +1,9 @@
 /**
  * AI Suggestions API
- * GET /api/ai/suggestions - Obtém sugestões proativas
- * POST /api/ai/suggestions/[id]/action - Ação em sugestão
+ * GET /api/ai/suggestions - Obtem sugestoes proativas
+ * POST /api/ai/suggestions/[id]/action - Acao em sugestao
  * 
- * Sugestões baseadas em contexto do usuário
+ * Sugestoes baseadas em contexto do usuario
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -31,14 +31,14 @@ interface AISuggestion {
   };
 }
 
-// Sugestões contextualizada (em produção, ML-driven)
+// Sugestoes contextualizadas (em producao, ML-driven)
 const suggestionPool: AISuggestion[] = [
   {
     id: 'sug_perf_1',
     type: 'optimization',
     priority: 'medium',
-    title: 'Otimizar texturas não utilizadas',
-    description: 'Detectamos 12 texturas que não estão sendo referenciadas. Removê-las pode economizar 340MB.',
+    title: 'Otimizar texturas nao utilizadas',
+    description: 'Detectamos 12 texturas que nao estao sendo referenciadas. Remove-las pode economizar 340MB.',
     action: {
       label: 'Limpar agora',
       command: 'aethel.cleanUnusedTextures',
@@ -53,8 +53,8 @@ const suggestionPool: AISuggestion[] = [
     id: 'sug_feat_1',
     type: 'feature',
     priority: 'low',
-    title: 'Experimente o novo sistema de iluminação',
-    description: 'Lumen está disponível para seu projeto. Ative para iluminação global em tempo real.',
+    title: 'Experimente o novo sistema de iluminacao',
+    description: 'Lumen esta disponivel para seu projeto. Ative para iluminacao global em tempo real.',
     action: {
       label: 'Ativar Lumen',
       command: 'aethel.enableLumen',
@@ -69,8 +69,8 @@ const suggestionPool: AISuggestion[] = [
     id: 'sug_workflow_1',
     type: 'workflow',
     priority: 'high',
-    title: 'Backup automático configurado',
-    description: 'Seu projeto tem alterações não salvas há 30 minutos. Ative auto-save para não perder trabalho.',
+    title: 'Backup automatico configurado',
+    description: 'Seu projeto tem alteracoes nao salvas ha 30 minutos. Ative auto-save para nao perder trabalho.',
     action: {
       label: 'Ativar auto-save',
       command: 'aethel.enableAutoSave',
@@ -85,8 +85,8 @@ const suggestionPool: AISuggestion[] = [
     id: 'sug_learn_1',
     type: 'learning',
     priority: 'low',
-    title: 'Dica: Atalho rápido',
-    description: 'Use Ctrl+Shift+P para abrir a paleta de comandos e acessar qualquer função rapidamente.',
+    title: 'Dica: Atalho rapido',
+    description: 'Use Ctrl+Shift+P para abrir a paleta de comandos e acessar qualquer funcao rapidamente.',
     dismissable: true,
     context: {
       trigger: 'new_user',
@@ -97,10 +97,10 @@ const suggestionPool: AISuggestion[] = [
     id: 'sug_warn_1',
     type: 'warning',
     priority: 'high',
-    title: 'Créditos baixos',
-    description: 'Você tem menos de 100 créditos. Considere adicionar mais para não interromper seu trabalho.',
+    title: 'Creditos baixos',
+    description: 'Voce tem menos de 100 creditos. Considere adicionar mais para nao interromper seu trabalho.',
     action: {
-      label: 'Adicionar créditos',
+      label: 'Adicionar creditos',
       command: 'aethel.openWallet',
     },
     dismissable: true,
@@ -119,14 +119,14 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '5');
     const types = searchParams.get('types')?.split(',') || [];
 
-    // Filtrar sugestões baseado em contexto do usuário
+    // Filtrar sugestoes baseado em contexto do usuario
     let suggestions = [...suggestionPool];
     
     if (types.length > 0) {
       suggestions = suggestions.filter(s => types.includes(s.type));
     }
 
-    // Ordenar por relevância e prioridade
+    // Ordenar por relevancia e prioridade
     suggestions.sort((a, b) => {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       const aPriority = priorityOrder[a.priority];
@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
       return bRelevance - aRelevance;
     });
 
-    // Adicionar expiração
+    // Adicionar expiracao
     suggestions = suggestions.slice(0, limit).map(s => ({
       ...s,
       expiresAt: Date.now() + 300000, // 5 min

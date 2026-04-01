@@ -68,17 +68,17 @@ export interface TabListProps {
 
 const variantClasses = {
   default: `
-    bg-slate-900/60 p-1 rounded-xl 
-    border border-slate-800/80
+    bg-[var(--aethel-surface-primary)]/60 p-1 rounded-xl 
+    border border-[var(--aethel-border-primary)]/80
   `,
   pills: `
     bg-transparent gap-2
   `,
   underline: `
-    bg-transparent border-b border-slate-800 pb-0
+    bg-transparent border-b border-[var(--aethel-border-primary)] pb-0
   `,
   enclosed: `
-    bg-slate-900/40 p-1.5 rounded-xl gap-1
+    bg-[var(--aethel-surface-primary)]/40 p-1.5 rounded-xl gap-1
   `,
 }
 
@@ -150,19 +150,19 @@ export function TabTrigger({
         relative flex items-center justify-center gap-2
         font-medium rounded-lg
         transition-all duration-200 ease-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
         disabled:opacity-40 disabled:cursor-not-allowed
         ${isActive 
           ? `
-            bg-gradient-to-b from-slate-700/90 to-slate-800/90
-            text-white
+            bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)]
+            text-[var(--aethel-text-primary)]
             shadow-lg shadow-black/20
-            border border-slate-600/50
+            border border-[var(--aethel-border-secondary)]/50
           ` 
           : `
             bg-transparent
-            text-slate-400 hover:text-slate-200
-            hover:bg-slate-800/40
+            text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
+            hover:bg-[var(--aethel-surface-secondary)]/40
             border border-transparent
           `
         }
@@ -176,8 +176,8 @@ export function TabTrigger({
           className={`
             px-1.5 py-0.5 text-[10px] font-semibold rounded-full
             ${isActive 
-              ? 'bg-sky-500/20 text-sky-300' 
-              : 'bg-slate-700/80 text-slate-400'
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]' 
+              : 'bg-[var(--aethel-surface-quaternary)]/80 text-[var(--aethel-text-tertiary)]'
             }
           `}
         >

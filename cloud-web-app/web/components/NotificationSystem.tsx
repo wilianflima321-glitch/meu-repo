@@ -248,9 +248,9 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
       border: 'border-blue-500/30',
     },
     loading: {
-      bg: 'bg-slate-500/10',
-      icon: 'text-slate-400',
-      border: 'border-slate-500/30',
+      bg: 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_10%,transparent)]',
+      icon: 'text-[var(--aethel-text-tertiary)]',
+      border: 'border-[color-mix(in_srgb,var(--aethel-text-tertiary)_30%,transparent)]',
     },
   }
 
@@ -275,7 +275,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-white">{notification.title}</p>
           {notification.message && (
-            <p className="mt-1 text-sm text-slate-400">{notification.message}</p>
+            <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">{notification.message}</p>
           )}
           {notification.action && (
             <button
@@ -289,7 +289,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
         {notification.dismissible && (
           <button
             onClick={handleDismiss}
-            className="p-1 text-slate-400 hover:text-white transition-colors rounded"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors rounded"
           >
             <X className="w-4 h-4" />
           </button>

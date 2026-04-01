@@ -135,9 +135,9 @@ function TagBadge({ tag, onRemove }: { tag: string; onRemove?: () => void }) {
     if (t.includes('Ice')) return 'bg-cyan-600';
     if (t.includes('Lightning')) return 'bg-yellow-600';
     if (t.includes('Damage')) return 'bg-red-600';
-    if (t.includes('State')) return 'bg-blue-600';
-    if (t.includes('Ability')) return 'bg-blue-600';
-    return 'bg-green-600';
+    if (t.includes('State')) return 'bg-[var(--aethel-primary)]';
+    if (t.includes('Ability')) return 'bg-[var(--aethel-primary)]';
+    return 'bg-[var(--aethel-success)]';
   };
 
   return (
@@ -164,7 +164,7 @@ function AttributeBar({ name, current, max, color = 'blue' }: {
 
   return (
     <div className="space-y-1">
-      <div className="flex justify-between text-xs text-gray-400">
+      <div className="flex justify-between text-xs text-[var(--aethel-text-tertiary)]">
         <span>{name}</span>
         <span>{current}/{max}</span>
       </div>
@@ -189,7 +189,7 @@ function AbilityCard({
       onClick={onClick}
       className={`p-3 rounded-lg cursor-pointer transition-all ${
         isSelected 
-          ? 'bg-blue-600 ring-2 ring-blue-400' 
+          ? 'bg-[var(--aethel-primary)] ring-2 ring-blue-400' 
           : 'bg-gray-800 hover:bg-gray-700'
       }`}
     >
@@ -197,7 +197,7 @@ function AbilityCard({
         <span className="text-2xl">{ability.icon || '⚡'}</span>
         <div className="flex-1 min-w-0">
           <h4 className="font-medium text-white truncate">{ability.name}</h4>
-          <p className="text-xs text-gray-400 truncate">{ability.description}</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)] truncate">{ability.description}</p>
         </div>
       </div>
       <div className="flex gap-1 mt-2 flex-wrap">
@@ -215,17 +215,17 @@ function EffectCard({ effect }: { effect: GameplayEffectSpec }) {
       <div className="flex items-center justify-between">
         <span className="font-medium text-white">{effect.name}</span>
         <span className={`px-2 py-0.5 text-xs rounded ${
-          effect.durationType === 'instant' ? 'bg-green-600' :
-          effect.durationType === 'duration' ? 'bg-yellow-600' : 'bg-blue-600'
+          effect.durationType === 'instant' ? 'bg-[var(--aethel-success)]' :
+          effect.durationType === 'duration' ? 'bg-yellow-600' : 'bg-[var(--aethel-primary)]'
         }`}>
           {effect.durationType}
         </span>
       </div>
-      <p className="text-xs text-gray-400 mt-1">{effect.description}</p>
+      <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{effect.description}</p>
       {effect.modifiers.length > 0 && (
         <div className="mt-2 space-y-1">
           {effect.modifiers.slice(0, 3).map((mod, i) => (
-            <div key={i} className="text-xs text-gray-300">
+            <div key={i} className="text-xs text-[var(--aethel-text-secondary)]">
               {mod.attribute}: {mod.operation === 'add' ? '+' : '×'}{mod.value}
             </div>
           ))}
@@ -359,7 +359,7 @@ export function AbilityEditor({
             <h2 className="text-lg font-semibold text-white">Abilities</h2>
             <button
               onClick={() => setEditMode(true)}
-              className="p-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+              className="p-1.5 bg-[var(--aethel-primary)] hover:bg-blue-700 rounded-lg transition"
             >
               <Icons.Plus />
             </button>
@@ -394,7 +394,7 @@ export function AbilityEditor({
               className={`px-4 py-3 text-sm font-medium transition ${
                 activeTab === tab 
                   ? 'text-white border-b-2 border-blue-500' 
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -412,7 +412,7 @@ export function AbilityEditor({
                   <h3 className="text-lg font-semibold text-white">Create Ability</h3>
                   
                   <div>
-                    <label className="block text-sm text-gray-400 mb-1">Name</label>
+                    <label className="block text-sm text-[var(--aethel-text-tertiary)] mb-1">Name</label>
                     <input
                       type="text"
                       value={formData.name}
@@ -422,7 +422,7 @@ export function AbilityEditor({
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-400 mb-1">Description</label>
+                    <label className="block text-sm text-[var(--aethel-text-tertiary)] mb-1">Description</label>
                     <textarea
                       value={formData.description}
                       onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
@@ -432,7 +432,7 @@ export function AbilityEditor({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">Activation</label>
+                      <label className="block text-sm text-[var(--aethel-text-tertiary)] mb-1">Activation</label>
                       <select
                         value={formData.activationType}
                         onChange={e => setFormData(f => ({ ...f, activationType: e.target.value as AbilityActivationType }))}
@@ -444,7 +444,7 @@ export function AbilityEditor({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">Targeting</label>
+                      <label className="block text-sm text-[var(--aethel-text-tertiary)] mb-1">Targeting</label>
                       <select
                         value={formData.targetingMode}
                         onChange={e => setFormData(f => ({ ...f, targetingMode: e.target.value as TargetingMode }))}
@@ -460,7 +460,7 @@ export function AbilityEditor({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">Cooldown (s)</label>
+                      <label className="block text-sm text-[var(--aethel-text-tertiary)] mb-1">Cooldown (s)</label>
                       <input
                         type="number"
                         value={formData.cooldownDuration}
@@ -469,7 +469,7 @@ export function AbilityEditor({
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">Mana Cost</label>
+                      <label className="block text-sm text-[var(--aethel-text-tertiary)] mb-1">Mana Cost</label>
                       <input
                         type="number"
                         value={formData.manaCost}
@@ -482,7 +482,7 @@ export function AbilityEditor({
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={handleCreateAbility}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition"
+                      className="px-4 py-2 bg-[var(--aethel-primary)] hover:bg-blue-700 rounded-lg text-white transition"
                     >
                       Create Ability
                     </button>
@@ -501,27 +501,27 @@ export function AbilityEditor({
                     <span className="text-5xl">{selectedAbility.icon || '⚡'}</span>
                     <div>
                       <h3 className="text-2xl font-bold text-white">{selectedAbility.name}</h3>
-                      <p className="text-gray-400 mt-1">{selectedAbility.description}</p>
+                      <p className="text-[var(--aethel-text-tertiary)] mt-1">{selectedAbility.description}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4">
                     <div className="p-4 bg-gray-800 rounded-lg">
-                      <div className="flex items-center gap-2 text-gray-400 mb-1">
+                      <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-1">
                         <Icons.Zap />
                         <span className="text-sm">Activation</span>
                       </div>
                       <p className="text-white font-medium capitalize">{selectedAbility.activationType}</p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg">
-                      <div className="flex items-center gap-2 text-gray-400 mb-1">
+                      <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-1">
                         <Icons.Target />
                         <span className="text-sm">Targeting</span>
                       </div>
                       <p className="text-white font-medium capitalize">{selectedAbility.targetingMode}</p>
                     </div>
                     <div className="p-4 bg-gray-800 rounded-lg">
-                      <div className="flex items-center gap-2 text-gray-400 mb-1">
+                      <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)] mb-1">
                         <Icons.Clock />
                         <span className="text-sm">Cooldown</span>
                       </div>
@@ -530,7 +530,7 @@ export function AbilityEditor({
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-2">Tags</h4>
+                    <h4 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Tags</h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedAbility.tags.ability.map((tag, i) => (
                         <TagBadge key={i} tag={tag.name} />
@@ -540,12 +540,12 @@ export function AbilityEditor({
 
                   {selectedAbility.costs.length > 0 && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-400 mb-2">Costs</h4>
+                      <h4 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-2">Costs</h4>
                       <div className="flex gap-4">
                         {selectedAbility.costs.map((cost, i) => (
                           <div key={i} className="px-3 py-1 bg-gray-800 rounded text-sm">
-                            <span className="text-gray-400">{cost.attribute}:</span>
-                            <span className="text-red-400 ml-1">-{cost.value}</span>
+                            <span className="text-[var(--aethel-text-tertiary)]">{cost.attribute}:</span>
+                            <span className="text-[var(--aethel-error)] ml-1">-{cost.value}</span>
                           </div>
                         ))}
                       </div>
@@ -584,7 +584,7 @@ export function AbilityEditor({
 
       {/* Right Panel - Preview */}
       <div className="w-64 border-l border-gray-700 p-4">
-        <h3 className="text-sm font-medium text-gray-400 mb-4">Live Preview</h3>
+        <h3 className="text-sm font-medium text-[var(--aethel-text-tertiary)] mb-4">Live Preview</h3>
         
         <div className="space-y-4">
           <div className="aspect-square bg-gray-800 rounded-lg flex items-center justify-center">
@@ -596,14 +596,14 @@ export function AbilityEditor({
           </div>
 
           {selectedAbility && (
-            <button className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm transition">
+            <button className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-blue-700 rounded-lg text-white text-sm transition">
               Test Ability
             </button>
           )}
 
           <button
             onClick={handleSave}
-            className="w-full py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white text-sm transition flex items-center justify-center gap-2"
+            className="w-full py-2 bg-[var(--aethel-success)] hover:bg-green-700 rounded-lg text-white text-sm transition flex items-center justify-center gap-2"
           >
             <Icons.Save />
             Save Changes

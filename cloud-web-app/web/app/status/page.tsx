@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, Clock3, ShieldCheck } from 'lucide-react'
@@ -42,7 +42,7 @@ function stateStyles(state: SurfaceState) {
     case 'unhealthy':
       return 'border-rose-400/25 bg-rose-400/10 text-rose-100'
     default:
-      return 'border-white/10 bg-white/[0.04] text-slate-300'
+      return 'border-white/10 bg-white/[0.04] text-[var(--aethel-text-secondary)]'
   }
 }
 
@@ -313,7 +313,7 @@ export default function StatusPage() {
               <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
                 Status baseado em evidencia e leitura operacional de verdade.
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
                 Esta pagina nao inventa uptime rolling nem incidentes que nao existem no backend. Ela organiza o que os checks publicos conseguem provar agora.
               </p>
             </div>
@@ -335,7 +335,7 @@ export default function StatusPage() {
 
           <section className="grid gap-4 md:grid-cols-4">
             <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Checks totais</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Checks totais</p>
               <p className="mt-2 text-3xl font-semibold text-white">{SURFACE_CHECKS.length}</p>
             </div>
             <div className="rounded-[24px] border border-emerald-400/20 bg-emerald-400/10 p-5 text-emerald-100">
@@ -385,8 +385,8 @@ export default function StatusPage() {
 
           <section className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Como ler esta pagina</p>
-              <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Como ler esta pagina</p>
+              <ul className="mt-4 space-y-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
                 <li>- Operacional significa que o endpoint respondeu e o payload indicou disponibilidade real.</li>
                 <li>- Parcial significa que a superficie responde, mas depende de configuracao ou credencial ainda ausente.</li>
                 <li>- Bloqueado significa falha publica ou dependencia obrigatoria indisponivel.</li>
@@ -405,10 +405,10 @@ export default function StatusPage() {
 
           <section className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
             <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Verdade operacional</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Verdade operacional</p>
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 {operationalTruths.map((truth) => (
-                  <div key={truth} className="rounded-[22px] border border-white/10 bg-black/10 p-4 text-sm leading-6 text-slate-300">
+                  <div key={truth} className="rounded-[22px] border border-white/10 bg-black/10 p-4 text-sm leading-6 text-[var(--aethel-text-secondary)]">
                     {truth}
                   </div>
                 ))}
@@ -416,10 +416,10 @@ export default function StatusPage() {
             </div>
 
             <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Proxima melhor acao</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Proxima melhor acao</p>
               <div className="mt-4 space-y-3">
                 {nextActions.map((action) => (
-                  <div key={action} className="rounded-[22px] border border-white/10 bg-black/10 px-4 py-3 text-sm leading-6 text-slate-200">
+                  <div key={action} className="rounded-[22px] border border-white/10 bg-black/10 px-4 py-3 text-sm leading-6 text-[var(--aethel-text-primary)]">
                     {action}
                   </div>
                 ))}
@@ -469,7 +469,7 @@ export default function StatusPage() {
                           {stateLabel(surface.state)}
                         </span>
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">{surface.detail}</p>
+                      <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{surface.detail}</p>
                     </div>
                   ))
                 ) : (
@@ -487,3 +487,4 @@ export default function StatusPage() {
     </div>
   )
 }
+

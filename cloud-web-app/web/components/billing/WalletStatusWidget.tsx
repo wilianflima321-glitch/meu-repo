@@ -156,7 +156,7 @@ function getPlanBadgeClass(plan: string): string {
     case 'starter':
       return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
     default:
-      return 'bg-zinc-500/20 text-zinc-300 border-zinc-500/30';
+      return 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_20%,transparent)] text-[var(--aethel-text-secondary)] border-[color-mix(in_srgb,var(--aethel-text-tertiary)_35%,transparent)]';
   }
 }
 
@@ -218,8 +218,8 @@ export function WalletStatusWidget({
   if (isLoading) {
     return (
       <div className={`flex items-center gap-1.5 px-2 py-1 ${className}`}>
-        <Coins className="w-4 h-4 text-zinc-500 animate-pulse" />
-        <span className="text-xs text-zinc-500">...</span>
+        <Coins className="w-4 h-4 text-[var(--aethel-text-tertiary)] animate-pulse" />
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">...</span>
       </div>
     );
   }
@@ -229,8 +229,8 @@ export function WalletStatusWidget({
     return (
       <button
         onClick={() => mutate()}
-        className={`flex items-center gap-1.5 px-2 py-1 text-zinc-500 
-                   hover:text-zinc-400 transition-colors ${className}`}
+        className={`flex items-center gap-1.5 px-2 py-1 text-[var(--aethel-text-tertiary)] 
+                   hover:text-[var(--aethel-text-tertiary)] transition-colors ${className}`}
         title="Erro ao carregar saldo. Clique para tentar novamente."
       >
         <AlertTriangle className="w-4 h-4" />
@@ -249,8 +249,8 @@ export function WalletStatusWidget({
         onClick={() => setIsExpanded(!isExpanded)}
         className={`
           flex items-center gap-2 px-2.5 py-1 rounded-md transition-all
-          hover:bg-zinc-800 group
-          ${isExpanded ? 'bg-zinc-800' : ''}
+          hover:bg-[var(--aethel-surface-quaternary)] group
+          ${isExpanded ? 'bg-[var(--aethel-surface-quaternary)]' : ''}
           ${wallet.lowBalanceWarning ? 'animate-pulse' : ''}
         `}
       >
@@ -271,7 +271,7 @@ export function WalletStatusWidget({
         </div>
 
         {/* Separator */}
-        <div className="w-px h-4 bg-zinc-700" />
+        <div className="w-px h-4 bg-[var(--aethel-surface-tertiary)]" />
 
         {/* Plan badge */}
         <div className={`
@@ -284,8 +284,8 @@ export function WalletStatusWidget({
 
         {/* Expand indicator */}
         {isExpanded 
-          ? <ChevronUp className="w-3 h-3 text-zinc-500" />
-          : <ChevronDown className="w-3 h-3 text-zinc-500" />
+          ? <ChevronUp className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
+          : <ChevronDown className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
         }
       </button>
 
@@ -297,18 +297,18 @@ export function WalletStatusWidget({
       {/* Expanded Dropdown */}
       {isExpanded && (
         <div className="absolute bottom-full right-0 mb-2 w-72 
-                      bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl
+                      bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg shadow-xl
                       animate-in slide-in-from-bottom-2 fade-in duration-200">
           {/* Header */}
-          <div className="p-3 border-b border-zinc-800">
+          <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-white">Carteira</span>
               <button
                 onClick={() => mutate()}
-                className="p-1 hover:bg-zinc-800 rounded transition-colors"
+                className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
                 title="Atualizar"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-zinc-500" />
+                <RefreshCw className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
               </button>
             </div>
             
@@ -317,12 +317,12 @@ export function WalletStatusWidget({
               <span className={`text-2xl font-bold ${balanceColor}`}>
                 {wallet.available.toLocaleString('pt-BR')}
               </span>
-              <span className="text-sm text-zinc-500">créditos</span>
+              <span className="text-sm text-[var(--aethel-text-tertiary)]">créditos</span>
             </div>
             
             {/* Reserved indicator */}
             {wallet.reserved > 0 && (
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
                 <Clock className="w-3 h-3 inline mr-1" />
                 {wallet.reserved.toLocaleString('pt-BR')} reservados
               </p>
@@ -330,12 +330,12 @@ export function WalletStatusWidget({
           </div>
 
           {/* Usage bar */}
-          <div className="p-3 border-b border-zinc-800">
+          <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-zinc-400">Uso mensal</span>
-              <span className="text-zinc-300">{usagePercent}%</span>
+              <span className="text-[var(--aethel-text-tertiary)]">Uso mensal</span>
+              <span className="text-[var(--aethel-text-secondary)]">{usagePercent}%</span>
             </div>
-            <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
               <div 
                 className={`h-full transition-all duration-500 ${
                   usagePercent > 80 ? 'bg-red-500' :
@@ -344,19 +344,19 @@ export function WalletStatusWidget({
                 style={{ width: `${Math.min(usagePercent, 100)}%` }}
               />
             </div>
-            <p className="text-xs text-zinc-500 mt-1">
+            <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
               {wallet.monthlyUsage.toLocaleString('pt-BR')} / {wallet.monthlyLimit.toLocaleString('pt-BR')}
             </p>
           </div>
 
           {/* Recent transactions */}
           {transactions && transactions.length > 0 && (
-            <div className="p-3 border-b border-zinc-800">
-              <p className="text-xs text-zinc-500 mb-2">Histórico recente</p>
+            <div className="p-3 border-b border-[var(--aethel-border-primary)]">
+              <p className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Histórico recente</p>
               <div className="space-y-1.5">
                 {transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-400 truncate max-w-[160px]">
+                    <span className="text-[var(--aethel-text-tertiary)] truncate max-w-[160px]">
                       {tx.description}
                     </span>
                     <span className={tx.amount < 0 ? 'text-red-400' : 'text-emerald-400'}>
@@ -404,8 +404,8 @@ export function WalletStatusWidget({
                 onOpenWallet?.();
               }}
               className="flex-1 flex items-center justify-center gap-1.5 py-2
-                       bg-zinc-800 hover:bg-zinc-700 rounded-md
-                       text-sm text-zinc-300 transition-colors"
+                       bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] rounded-md
+                       text-sm text-[var(--aethel-text-secondary)] transition-colors"
             >
               Ver Detalhes
               <ExternalLink className="w-3.5 h-3.5" />
@@ -416,13 +416,13 @@ export function WalletStatusWidget({
 
       {/* Low Balance Modal (non-blocking) */}
       {showLowBalanceAlert && wallet.lowBalanceWarning && (
-        <div className="fixed bottom-20 right-4 w-80 bg-zinc-900 border border-red-500/30 
+        <div className="fixed bottom-20 right-4 w-80 bg-[var(--aethel-surface-secondary)] border border-red-500/30 
                       rounded-lg shadow-2xl p-4 animate-in slide-in-from-right-5 z-50">
           <button
             onClick={() => setShowLowBalanceAlert(false)}
-            className="absolute top-2 right-2 p-1 hover:bg-zinc-800 rounded"
+            className="absolute top-2 right-2 p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
           >
-            <X className="w-4 h-4 text-zinc-500" />
+            <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           </button>
           
           <div className="flex items-start gap-3">
@@ -431,7 +431,7 @@ export function WalletStatusWidget({
             </div>
             <div>
               <h4 className="font-medium text-white">Créditos acabando</h4>
-              <p className="text-sm text-zinc-400 mt-1">
+              <p className="text-sm text-[var(--aethel-text-tertiary)] mt-1">
                 Restam apenas {wallet.available.toLocaleString('pt-BR')} créditos. 
                 Recarregue para continuar criando.
               </p>
@@ -448,8 +448,8 @@ export function WalletStatusWidget({
                 </button>
                 <button
                   onClick={() => setShowLowBalanceAlert(false)}
-                  className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 
-                           rounded text-sm text-zinc-300 transition-colors"
+                  className="px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] 
+                           rounded text-sm text-[var(--aethel-text-secondary)] transition-colors"
                 >
                   Depois
                 </button>

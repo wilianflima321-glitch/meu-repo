@@ -142,15 +142,15 @@ export default function FileTreeExplorer() {
           onContextMenu={(e) => handleContextMenu(e, node)}
           className={`flex items-center gap-2 px-2 py-1 cursor-pointer transition-colors ${
             isSelected
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-300 hover:bg-slate-700'
+              ? 'bg-blue-600 text-[var(--aethel-text-primary)]'
+              : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
           }`}
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
         >
-          <span className="text-xs font-semibold text-slate-400 w-10 text-center flex-shrink-0">{getFileIcon(node)}</span>
+          <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] w-10 text-center flex-shrink-0">{getFileIcon(node)}</span>
           <span className="flex-1 truncate text-sm">{node.name}</span>
           {node.type === 'directory' && (
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-[var(--aethel-text-tertiary)]">
               {node.children?.length || 0}
             </span>
           )}
@@ -240,28 +240,28 @@ export default function FileTreeExplorer() {
   }
 
   return (
-    <div className="h-full bg-slate-900 text-white">
+    <div className="h-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Header */}
-      <div className="p-3 border-b border-slate-700 flex items-center justify-between">
-        <h3 className="font-semibold text-sm uppercase text-slate-400">Explorer</h3>
+      <div className="p-3 border-b border-[var(--aethel-border-primary)] flex items-center justify-between">
+        <h3 className="font-semibold text-sm uppercase text-[var(--aethel-text-tertiary)]">Explorer</h3>
         <div className="flex gap-1">
           <button
             onClick={handleNewFile}
-            className="p-1 hover:bg-slate-700 rounded transition-colors"
+            className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
             title="New File"
           >
             <span className="text-xs font-semibold">NF</span>
           </button>
           <button
             onClick={handleNewFolder}
-            className="p-1 hover:bg-slate-700 rounded transition-colors"
+            className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
             title="New Folder"
           >
             <span className="text-xs font-semibold">ND</span>
           </button>
           <button
             onClick={loadFileTree}
-            className="p-1 hover:bg-slate-700 rounded transition-colors"
+            className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
             title="Refresh"
           >
             <span className="text-xs font-semibold">REF</span>
@@ -272,12 +272,12 @@ export default function FileTreeExplorer() {
       {/* Tree */}
       <div className="overflow-y-auto h-[calc(100%-48px)]">
         {errorMessage ? (
-          <div className="p-4 text-sm text-slate-400">
-            <div className="font-semibold text-slate-300">Explorer unavailable</div>
+          <div className="p-4 text-sm text-[var(--aethel-text-tertiary)]">
+            <div className="font-semibold text-[var(--aethel-text-secondary)]">Explorer unavailable</div>
             <div className="mt-1">{errorMessage}</div>
           </div>
         ) : tree.length === 0 ? (
-          <div className="p-4 text-sm text-slate-400">Nenhum arquivo para exibir.</div>
+          <div className="p-4 text-sm text-[var(--aethel-text-tertiary)]">Nenhum arquivo para exibir.</div>
         ) : (
           tree.map(node => renderNode(node))
         )}
@@ -286,36 +286,36 @@ export default function FileTreeExplorer() {
       {/* Context Menu */}
       {contextMenu && (
         <div
-          className="fixed bg-slate-800 border border-slate-700 rounded-lg shadow-2xl py-1 z-50"
+          className="fixed bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl py-1 z-50"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
             onClick={handleNewFile}
-            className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 transition-colors"
+            className="w-full px-4 py-2 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors"
           >
             New File
           </button>
           <button
             onClick={handleNewFolder}
-            className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 transition-colors"
+            className="w-full px-4 py-2 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors"
           >
             New Folder
           </button>
-          <div className="border-t border-slate-700 my-1"></div>
+          <div className="border-t border-[var(--aethel-border-primary)] my-1"></div>
           <button
             onClick={handleRename}
-            className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 transition-colors"
+            className="w-full px-4 py-2 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors"
           >
             Rename
           </button>
           <button
             onClick={handleCopy}
-            className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 transition-colors"
+            className="w-full px-4 py-2 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors"
           >
             Copy Path
           </button>
-          <div className="border-t border-slate-700 my-1"></div>
+          <div className="border-t border-[var(--aethel-border-primary)] my-1"></div>
           <button
             onClick={handleDelete}
             className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-900/30 transition-colors"

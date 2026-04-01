@@ -24,11 +24,11 @@ export default function WorkbenchMissionBar({
   onBackToDashboard,
 }: WorkbenchMissionBarProps) {
   return (
-    <div className="border-b border-white/10 bg-[linear-gradient(135deg,rgba(79,70,229,0.08),rgba(14,165,233,0.06),rgba(255,255,255,0.02))] px-4 py-3">
+    <div className="border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,rgba(79,70,229,0.08),rgba(14,165,233,0.06),rgba(255,255,255,0.02))] px-4 py-3">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-100">
+            <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
               Handoff ativo
             </span>
             {source ? (
@@ -42,7 +42,7 @@ export default function WorkbenchMissionBar({
               </span>
             ) : null}
           </div>
-          <div className="mt-2 text-sm font-medium text-white">
+          <div className="mt-2 text-sm font-medium text-[var(--aethel-text-primary)]">
             {mission || 'Continue a implementacao com o mesmo contexto vindo do Studio.'}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-[var(--aethel-text-tertiary)]">
@@ -73,7 +73,7 @@ export default function WorkbenchMissionBar({
             onClick={onOpenCommandPalette}
             className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
           >
-            Command Palette
+            Paleta de comandos
           </button>
           <button
             type="button"
@@ -85,7 +85,7 @@ export default function WorkbenchMissionBar({
           <button
             type="button"
             onClick={onBackToDashboard}
-            className="rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-3 py-2 text-xs font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
+            className="rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
           >
             Voltar ao Studio
           </button>

@@ -36,7 +36,7 @@ export function CodebaseContextPanel({
             </div>
           )}
           {preview.incrementalReindex && (
-            <div className="mt-1 text-[10px] text-emerald-300">
+            <div className="mt-1 text-[10px] text-[var(--aethel-success)]">
               reindexacao incremental local ativa
             </div>
           )}
@@ -51,14 +51,14 @@ export function CodebaseContextPanel({
             type="button"
             onClick={onRefresh}
             disabled={preview.loading}
-            className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {preview.loading ? 'Atualizando...' : 'Atualizar contexto'}
           </button>
         </div>
       </div>
       {preview.error && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-200">
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-error)]">
           {preview.error}
         </div>
       )}
@@ -77,14 +77,14 @@ export function CodebaseContextPanel({
                 <button
                   type="button"
                   onClick={() => onCopy(result.filePath)}
-                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-white"
+                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
                   Copiar caminho
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenResult(result.filePath, result.startLine, result.endLine)}
-                  className="rounded border border-sky-500/40 px-2 py-0.5 text-[10px] text-sky-200 transition-colors hover:bg-sky-500/10"
+                  className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
                 >
                   Abrir
                 </button>
@@ -125,10 +125,10 @@ export function MentionContextPanel({
   if (!(preview.blocks.length > 0 || preview.loading || preview.error)) return null
 
   return (
-    <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-accent)_24%,transparent)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))] p-3">
+    <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))] p-3">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
-          <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-accent-light)]">
+          <div className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
             Contexto de mentions
           </div>
           <div className="text-[11px] text-[var(--aethel-text-tertiary)]">
@@ -137,7 +137,7 @@ export function MentionContextPanel({
         </div>
       </div>
       {preview.error ? (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[11px] text-rose-200">
+        <div className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-error)]">
           {preview.error}
         </div>
       ) : null}
@@ -145,7 +145,7 @@ export function MentionContextPanel({
         {preview.blocks.map((block) => (
           <div key={block.tag} className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] p-2.5">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-violet-200">
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-[var(--aethel-primary-light)]">
                 {block.tag}
               </span>
               <div className="flex items-center gap-2">
@@ -153,7 +153,7 @@ export function MentionContextPanel({
                   <button
                     type="button"
                     onClick={() => onOpenFileBlock(block)}
-                    className="rounded border border-violet-500/40 px-2 py-0.5 text-[10px] text-violet-200 transition-colors hover:bg-violet-500/10"
+                    className="rounded border border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-primary-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]"
                   >
                     Abrir
                   </button>
@@ -161,7 +161,7 @@ export function MentionContextPanel({
                 <button
                   type="button"
                   onClick={() => onCopy(block.content)}
-                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-accent)_35%,transparent)] hover:text-white"
+                  className="rounded border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
                   Copiar
                 </button>

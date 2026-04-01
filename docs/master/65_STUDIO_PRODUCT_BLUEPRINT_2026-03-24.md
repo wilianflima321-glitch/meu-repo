@@ -15,6 +15,23 @@ Este documento substitui intuicao local por uma arquitetura explicita de produto
 Documento complementar:
 - `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
 
+## Reality Correction (2026-03-25)
+This document remains a high-level product blueprint, but the implementation-grade interface authority now lives in:
+- `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/06_STUDIO_HOME.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/07_PROJECTS.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+
+### Current implementation limitations this blueprint must acknowledge
+- the live frontend still carries two shell identities inside `FullscreenIDE.tsx`
+- preview is conceptually unified, but `CanonicalPreviewSurface.tsx` still wraps older preview surfaces
+- the AI layer is stronger than before, but the runtime UI is still more chat-first than console-first
+- `Nexus` still behaves like a parallel center of gravity in the implementation, even though the product direction now treats it as contextual or specialized
+
+### Canonical interpretation rule
+If this document conflicts with the interface blueprint set on shell behavior, mode behavior, route identity, mobile degradation, or AI Console structure, the interface blueprint set wins.
+
 ## 2) Diagnostico Brutal
 O estado atual ainda tem 5 falhas de categoria:
 1. O produto parece varias ferramentas conectadas por navegacao, nao um sistema unico.

@@ -8,7 +8,7 @@ const SHORTCUT_CATEGORIES = [
     title: 'Geral',
     shortcuts: [
       { keys: ['Ctrl', 'Shift', 'P'], action: 'Abrir paleta de comandos' },
-      { keys: ['Ctrl', 'P'], action: 'Quick Open (Arquivo)' },
+      { keys: ['Ctrl', 'P'], action: 'Abrir rapido (Arquivo)' },
       { keys: ['Ctrl', 'Shift', 'N'], action: 'Nova janela' },
       { keys: ['Ctrl', ','], action: 'Abrir ajustes' },
       { keys: ['Ctrl', 'K', 'Ctrl', 'S'], action: 'Ver atalhos de teclado' },
@@ -43,8 +43,8 @@ const SHORTCUT_CATEGORIES = [
     shortcuts: [
       { keys: ['Ctrl', 'G'], action: 'Ir para linha' },
       { keys: ['Ctrl', 'Shift', 'O'], action: 'Ir para simbolo' },
-      { keys: ['F12'], action: 'Go to Definition' },
-      { keys: ['Alt', 'F12'], action: 'Peek Definition' },
+      { keys: ['F12'], action: 'Ir para definicao' },
+      { keys: ['Alt', 'F12'], action: 'Pre-visualizar definicao' },
       { keys: ['Ctrl', 'Shift', 'E'], action: 'Focar explorador de arquivos' },
       { keys: ['Ctrl', 'Shift', 'G'], action: 'Focar Git' },
       { keys: ['Ctrl', '`'], action: 'Abrir/fechar terminal' },
@@ -54,10 +54,10 @@ const SHORTCUT_CATEGORIES = [
     title: 'Depuracao',
     shortcuts: [
       { keys: ['F5'], action: 'Iniciar/continuar depuracao' },
-      { keys: ['F9'], action: 'Toggle breakpoint' },
-      { keys: ['F10'], action: 'Step over' },
-      { keys: ['F11'], action: 'Step into' },
-      { keys: ['Shift', 'F11'], action: 'Step out' },
+      { keys: ['F9'], action: 'Alternar breakpoint' },
+      { keys: ['F10'], action: 'Passo sobre' },
+      { keys: ['F11'], action: 'Entrar' },
+      { keys: ['Shift', 'F11'], action: 'Sair' },
     ],
   },
 ]
@@ -91,19 +91,19 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="relative mx-4 flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-950 shadow-2xl">
+      <div className="relative mx-4 flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-[var(--aethel-border-secondary)] px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]">
               <Codicon name="keyboard" />
             </div>
-            <h2 className="text-lg font-semibold text-white">Atalhos de Teclado</h2>
+            <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Atalhos de Teclado</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
             aria-label="Fechar"
           >
             <Codicon name="close" />
@@ -111,9 +111,9 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
         </div>
 
         {/* Search */}
-        <div className="border-b border-white/[0.06] px-5 py-3">
+        <div className="border-b border-[var(--aethel-border-secondary)] px-5 py-3">
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--aethel-text-tertiary)]">
               <Codicon name="search" />
             </span>
             <input
@@ -121,7 +121,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar atalho..."
-              className="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] py-2 pl-9 pr-4 text-sm text-white placeholder:text-zinc-600 focus:border-blue-500/40 focus:outline-none"
+              className="w-full rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] py-2 pl-9 pr-4 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] focus:outline-none"
               autoFocus
             />
           </div>
@@ -130,26 +130,26 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {filteredCategories.length === 0 ? (
-            <p className="py-8 text-center text-sm text-zinc-500">Nenhum atalho encontrado</p>
+            <p className="py-8 text-center text-sm text-[var(--aethel-text-tertiary)]">Nenhum atalho encontrado</p>
           ) : (
             <div className="space-y-6">
               {filteredCategories.map((cat) => (
                 <div key={cat.title}>
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">{cat.title}</h3>
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">{cat.title}</h3>
                   <div className="space-y-1">
                     {cat.shortcuts.map((s) => (
                       <div
                         key={s.action}
-                        className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:bg-white/[0.03]"
+                        className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
                       >
-                        <span className="text-sm text-zinc-300">{s.action}</span>
+                        <span className="text-sm text-[var(--aethel-text-secondary)]">{s.action}</span>
                         <div className="flex items-center gap-1">
                           {s.keys.map((key, i) => (
                             <span key={`${s.action}-${i}`}>
-                              <kbd className="inline-flex min-w-[24px] items-center justify-center rounded border border-zinc-700 bg-zinc-800 px-1.5 py-0.5 text-[11px] font-medium text-zinc-400">
+                              <kbd className="inline-flex min-w-[24px] items-center justify-center rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--aethel-text-tertiary)]">
                                 {key}
                               </kbd>
-                              {i < s.keys.length - 1 && <span className="mx-0.5 text-zinc-700">+</span>}
+                              {i < s.keys.length - 1 && <span className="mx-0.5 text-[var(--aethel-text-quaternary)]">+</span>}
                             </span>
                           ))}
                         </div>
@@ -163,12 +163,12 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
         </div>
 
         {/* Footer */}
-        <div className="border-t border-white/[0.06] px-5 py-3">
-          <p className="text-xs text-zinc-600">
-            Pressione <kbd className="rounded border border-zinc-700 bg-zinc-800 px-1 text-zinc-400">Ctrl</kbd> +{' '}
-            <kbd className="rounded border border-zinc-700 bg-zinc-800 px-1 text-zinc-400">K</kbd> +{' '}
-            <kbd className="rounded border border-zinc-700 bg-zinc-800 px-1 text-zinc-400">Ctrl</kbd> +{' '}
-            <kbd className="rounded border border-zinc-700 bg-zinc-800 px-1 text-zinc-400">S</kbd> para abrir esta lista
+        <div className="border-t border-[var(--aethel-border-secondary)] px-5 py-3">
+          <p className="text-xs text-[var(--aethel-text-quaternary)]">
+            Pressione <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">Ctrl</kbd> +{' '}
+            <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">K</kbd> +{' '}
+            <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">Ctrl</kbd> +{' '}
+            <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] px-1 text-[var(--aethel-text-tertiary)]">S</kbd> para abrir esta lista
           </p>
         </div>
       </div>

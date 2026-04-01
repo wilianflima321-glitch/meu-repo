@@ -992,7 +992,7 @@ export default function ClothSimulationEditor({
                 checked={config.selfCollision}
                 onChange={(e) => setConfig((p) => ({ ...p, selfCollision: e.target.checked }))}
                 className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)] 
-                         focus:ring-sky-500 focus:ring-offset-slate-900"
+                         focus:ring-[var(--aethel-primary)] focus:ring-offset-[var(--aethel-surface-primary)]"
               />
             </div>
           </CollapsibleSection>
@@ -1181,3 +1181,4 @@ export default function ClothSimulationEditor({
     </div>
   );
 }
+

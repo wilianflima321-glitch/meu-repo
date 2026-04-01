@@ -2,8 +2,8 @@
  * LowBalanceModal - Modal Não-Intrusivo de Saldo Baixo
  * 
  * Aparece quando o saldo do usuário está crítico.
- * Design não-bloqueante com opção de "depois".
- * Animações suaves e não-agressivas.
+ * Design nao-bloqueante com opção de "depois".
+ * Animações suaves e nao-agressivas.
  * 
  * @see ROADMAP_MONETIZACAO_XP_FINAL.md
  * 
@@ -64,29 +64,29 @@ export interface LowBalanceModalProps {
 // ============================================================================
 
 const DEFAULT_PACKAGES: CreditPackage[] = [
-  { id: 'starter', name: 'Starter', credits: 500, price: 9.99, currency: 'USD' },
+  { id: 'starter', name: 'Inicial', credits: 500, price: 9.99, currency: 'USD' },
   { id: 'popular', name: 'Popular', credits: 2000, price: 29.99, currency: 'USD', bonus: 200, popular: true, savings: 25 },
-  { id: 'pro', name: 'Pro Pack', credits: 5000, price: 59.99, currency: 'USD', bonus: 750, savings: 40 },
-  { id: 'enterprise', name: 'Enterprise', credits: 15000, price: 149.99, currency: 'USD', bonus: 3000, savings: 50 },
+  { id: 'pro', name: 'Pro', credits: 5000, price: 59.99, currency: 'USD', bonus: 750, savings: 40 },
+  { id: 'enterprise', name: 'Empresarial', credits: 15000, price: 149.99, currency: 'USD', bonus: 3000, savings: 50 },
 ];
 
 const BALANCE_MESSAGES: Record<BalanceLevel, { title: string; subtitle: string; color: string; icon: React.ReactNode }> = {
   low: {
-    title: 'Créditos acabando',
-    subtitle: 'Recarregue para continuar criando sem interrupções',
+    title: 'Creditos acabando',
+    subtitle: 'Recarregue para continuar criando sem interrupcoes',
     color: 'text-[var(--aethel-warning-light)]',
     icon: <Clock className="w-6 h-6" />,
   },
   critical: {
     title: 'Saldo muito baixo',
-    subtitle: 'Restam poucos créditos para operações de IA',
-    color: 'text-orange-400',
+    subtitle: 'Restam poucos creditos para operacoes de IA',
+    color: 'text-[var(--aethel-warning-light)]',
     icon: <AlertTriangle className="w-6 h-6" />,
   },
   empty: {
-    title: 'Créditos esgotados',
+    title: 'Creditos esgotados',
     subtitle: 'Recarregue para continuar usando recursos de IA',
-    color: 'text-red-400',
+    color: 'text-[var(--aethel-error)]',
     icon: <Coins className="w-6 h-6" />,
   },
 };
@@ -110,16 +110,16 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
       className={`
         relative p-4 rounded-xl border-2 transition-all text-left w-full
         ${isSelected 
-          ? 'border-violet-500 bg-violet-500/10' 
-          : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+          ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]' 
+          : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)]'
         }
-        ${pkg.popular ? 'ring-2 ring-sky-500/30' : ''}
+        ${pkg.popular ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : ''}
       `}
     >
       {/* Popular badge */}
       {pkg.popular && (
         <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 
-                      px-2 py-0.5 bg-violet-600 rounded-full
+                      px-2 py-0.5 bg-[var(--aethel-primary)] rounded-full
                       text-[10px] font-semibold uppercase tracking-wider">
           Mais Popular
         </div>
@@ -128,30 +128,30 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
       {/* Content */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-white">{pkg.name}</p>
+          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{pkg.name}</p>
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-2xl font-bold text-white">
+            <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">
               {pkg.credits.toLocaleString()}
             </span>
-            <span className="text-sm text-zinc-400">créditos</span>
+            <span className="text-sm text-[var(--aethel-text-tertiary)]">creditos</span>
           </div>
           
           {pkg.bonus && (
-            <div className="flex items-center gap-1 mt-1 text-emerald-400">
+            <div className="flex items-center gap-1 mt-1 text-[var(--aethel-success)]">
               <Gift className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">
-                +{pkg.bonus.toLocaleString()} bônus
+                +{pkg.bonus.toLocaleString()} bonus
               </span>
             </div>
           )}
         </div>
 
         <div className="text-right">
-          <p className="text-lg font-semibold text-white">
+          <p className="text-lg font-semibold text-[var(--aethel-text-primary)]">
             ${pkg.price.toFixed(2)}
           </p>
           {pkg.savings && (
-            <p className="text-xs text-emerald-400 font-medium">
+            <p className="text-xs text-[var(--aethel-success)] font-medium">
               {pkg.savings}% economia
             </p>
           )}
@@ -163,10 +163,10 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute top-2 right-2 w-5 h-5 bg-violet-600 rounded-full 
+          className="absolute top-2 right-2 w-5 h-5 bg-[var(--aethel-primary)] rounded-full 
                    flex items-center justify-center"
         >
-          <Check className="w-3 h-3 text-white" />
+          <Check className="w-3 h-3 text-[var(--aethel-text-primary)]" />
         </motion.div>
       )}
     </motion.button>
@@ -176,8 +176,8 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
 function UsageEstimate({ minutes }: { minutes: number }) {
   if (minutes <= 0) {
     return (
-      <p className="text-xs text-red-400">
-        Você não tem créditos para operações de IA
+      <p className="text-xs text-[var(--aethel-error)]">
+        Voce nao tem creditos para operacoes de IA
       </p>
     );
   }
@@ -186,7 +186,7 @@ function UsageEstimate({ minutes }: { minutes: number }) {
   const mins = minutes % 60;
 
   return (
-    <p className="text-xs text-zinc-400">
+    <p className="text-xs text-[var(--aethel-text-tertiary)]">
       Estimativa: {hours > 0 ? `${hours}h ${mins}min` : `${mins} minutos`} de trabalho restante
     </p>
   );
@@ -257,17 +257,17 @@ export function LowBalanceModal({
             className={`
               fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
               w-full max-w-lg max-h-[90vh] overflow-y-auto
-              bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl z-50
+              bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-2xl shadow-2xl z-50
               ${className}
             `}
           >
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 hover:bg-zinc-800 
+              className="absolute top-4 right-4 p-2 hover:bg-[var(--aethel-surface-quaternary)] 
                        rounded-lg transition-colors z-10"
             >
-              <X className="w-5 h-5 text-zinc-400" />
+              <X className="w-5 h-5 text-[var(--aethel-text-tertiary)]" />
             </button>
 
             {/* Header */}
@@ -276,8 +276,8 @@ export function LowBalanceModal({
                 {/* Icon with animation */}
                 <div className={`
                   relative w-14 h-14 rounded-2xl flex items-center justify-center
-                  ${balanceLevel === 'empty' ? 'bg-red-500/20' 
-                    : balanceLevel === 'critical' ? 'bg-orange-500/20' 
+                  ${balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]' 
+                    : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]' 
                     : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'}
                 `}>
                   <motion.div
@@ -297,8 +297,8 @@ export function LowBalanceModal({
                   {/* Pulse effect */}
                   <motion.div
                     className={`absolute inset-0 rounded-2xl ${
-                      balanceLevel === 'empty' ? 'bg-red-500/20'
-                        : balanceLevel === 'critical' ? 'bg-orange-500/20'
+                      balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]'
+                        : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'
                     }`}
                     animate={{ 
@@ -316,22 +316,22 @@ export function LowBalanceModal({
                   <h2 className={`text-xl font-bold ${balanceInfo.color}`}>
                     {balanceInfo.title}
                   </h2>
-                  <p className="text-sm text-zinc-400 mt-1">
+                  <p className="text-sm text-[var(--aethel-text-tertiary)] mt-1">
                     {balanceInfo.subtitle}
                   </p>
                 </div>
               </div>
 
               {/* Current balance display */}
-              <div className="mt-4 p-3 bg-zinc-800/50 rounded-xl">
+              <div className="mt-4 p-3 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] rounded-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-400">Saldo atual</span>
+                  <span className="text-sm text-[var(--aethel-text-tertiary)]">Saldo atual</span>
                   <div className="flex items-center gap-2">
                     <Coins className={`w-4 h-4 ${balanceInfo.color}`} />
-                    <span className="text-lg font-bold text-white">
+                    <span className="text-lg font-bold text-[var(--aethel-text-primary)]">
                       {currentBalance.toLocaleString()}
                     </span>
-                    <span className="text-sm text-zinc-500">créditos</span>
+                    <span className="text-sm text-[var(--aethel-text-tertiary)]">creditos</span>
                   </div>
                 </div>
                 <UsageEstimate minutes={estimatedUsage} />
@@ -340,8 +340,8 @@ export function LowBalanceModal({
 
             {/* Package selection */}
             <div className="p-6">
-              <p className="text-sm font-medium text-zinc-300 mb-3">
-                Escolha um pacote de créditos
+              <p className="text-sm font-medium text-[var(--aethel-text-secondary)] mb-3">
+                Escolha um pacote de creditos
               </p>
               
               <div className="grid grid-cols-2 gap-3">
@@ -356,7 +356,7 @@ export function LowBalanceModal({
               </div>
 
               {/* Trust badges */}
-              <div className="flex items-center justify-center gap-4 mt-4 text-xs text-zinc-500">
+              <div className="flex items-center justify-center gap-4 mt-4 text-xs text-[var(--aethel-text-tertiary)]">
                 <div className="flex items-center gap-1">
                   <Shield className="w-3.5 h-3.5" />
                   Pagamento seguro
@@ -378,9 +378,9 @@ export function LowBalanceModal({
                 onClick={handleContinue}
                 disabled={!selectedPackage || isProcessing}
                 className="w-full flex items-center justify-center gap-2 py-3
-                         bg-gradient-to-r from-blue-600 to-cyan-600
-                         hover:from-blue-500 hover:to-cyan-500
-                         rounded-xl text-white font-semibold transition-all
+                         bg-[linear-gradient(120deg,var(--aethel-primary),var(--aethel-info))]
+                         hover:brightness-110
+                         rounded-xl text-[var(--aethel-text-primary)] font-semibold transition-all
                          disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? (
@@ -408,7 +408,7 @@ export function LowBalanceModal({
 
               <button
                 onClick={handleRemindLater}
-                className="w-full py-2.5 text-sm text-zinc-400 hover:text-zinc-300
+                className="w-full py-2.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
                          transition-colors"
               >
                 Lembrar mais tarde
@@ -417,19 +417,19 @@ export function LowBalanceModal({
 
             {/* Upgrade suggestion for heavy users */}
             {balanceLevel === 'critical' && (
-              <div className="mx-6 mb-6 p-4 bg-gradient-to-r from-blue-900/30 to-cyan-900/30 
-                            border border-violet-500/20 rounded-xl">
+              <div className="mx-6 mb-6 p-4 bg-[linear-gradient(120deg,color-mix(in_srgb,var(--aethel-primary)_18%,transparent),color-mix(in_srgb,var(--aethel-info)_18%,transparent))] 
+                            border border-[var(--aethel-primary)]/20 rounded-xl">
                 <div className="flex items-start gap-3">
-                  <TrendingUp className="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5" />
+                  <TrendingUp className="w-5 h-5 text-[var(--aethel-primary)] flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-violet-300">
-                      Você usa muitos créditos?
+                    <p className="text-sm font-medium text-[var(--aethel-primary)]">
+                      Voce usa muitos creditos?
                     </p>
-                    <p className="text-xs text-violet-400/70 mt-1">
-                      Considere o plano Pro para créditos ilimitados por $49/mês
+                    <p className="text-xs text-[color-mix(in_srgb,var(--aethel-primary)_70%,transparent)] mt-1">
+                      Considere o plano Pro para creditos ilimitados por $49/mês
                     </p>
                     <button className="flex items-center gap-1 mt-2 text-xs font-medium 
-                                     text-violet-400 hover:text-violet-300 transition-colors">
+                                     text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
                       Ver planos
                       <ChevronRight className="w-3 h-3" />
                     </button>
@@ -475,7 +475,7 @@ export function LowBalanceModalAuto() {
           if (balance <= 0) level = 'empty';
           else if (balance < 50) level = 'critical';
           else if (balance < 200) level = 'low';
-          else return; // Saldo ok, não mostrar modal
+          else return; // Saldo ok, nao mostrar modal
 
           setBalanceLevel(level);
 
@@ -491,7 +491,7 @@ export function LowBalanceModalAuto() {
           }
         }
       } catch (e) {
-        // Silently fail - não interromper UX
+        // Silently fail - nao interromper UX
       }
     };
 
@@ -527,10 +527,12 @@ export function LowBalanceModalAuto() {
       onRemindLater={handleRemindLater}
       balanceLevel={balanceLevel}
       currentBalance={currentBalance}
-      estimatedUsage={Math.floor(currentBalance / 2)} // ~2 créditos/min estimado
+      estimatedUsage={Math.floor(currentBalance / 2)} // ~2 creditos/min estimado
     />
   );
 }
 
 export { LowBalanceModalAuto as LowBalanceModalWrapper };
 export default LowBalanceModal;
+
+

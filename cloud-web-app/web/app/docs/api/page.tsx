@@ -72,12 +72,12 @@ export default function APIDocsPage() {
     <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <PublicHeader />
       <main className="relative z-10 mx-auto max-w-5xl px-6 pt-12 pb-20">
-        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors">
+        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors">
           <ArrowLeft className="h-4 w-4" /> Back to Docs
         </Link>
 
         <h1 className="text-4xl font-bold">API Reference</h1>
-        <p className="mt-3 text-lg text-zinc-400">
+        <p className="mt-3 text-lg text-[var(--aethel-text-tertiary)]">
           Complete REST API documentation for Aethel Engine. All endpoints require authentication unless noted.
         </p>
 
@@ -85,17 +85,17 @@ export default function APIDocsPage() {
           <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
             <Key className="mb-2 h-5 w-5 text-[var(--aethel-primary-light)]" />
             <h3 className="text-sm font-semibold">Authentication</h3>
-            <p className="mt-1 text-xs text-zinc-400">Bearer token via Authorization header</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Bearer token via Authorization header</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
             <Zap className="mb-2 h-5 w-5 text-[var(--aethel-warning)]" />
             <h3 className="text-sm font-semibold">Rate Limits</h3>
-            <p className="mt-1 text-xs text-zinc-400">Plan-based. Check X-RateLimit-* headers.</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Plan-based. Check X-RateLimit-* headers.</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
             <Globe className="mb-2 h-5 w-5 text-[var(--aethel-success)]" />
             <h3 className="text-sm font-semibold">Base URL</h3>
-            <p className="mt-1 text-xs text-zinc-400 font-mono">https://aethel.dev/api</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)] font-mono">https://aethel.dev/api</p>
           </div>
         </div>
 
@@ -114,8 +114,8 @@ export default function APIDocsPage() {
                     <span className={`inline-flex w-16 justify-center rounded-md px-2 py-0.5 text-xs font-bold ${METHOD_COLORS[ep.method] || ''}`}>
                       {ep.method}
                     </span>
-                    <code className="flex-1 font-mono text-sm text-zinc-300">{ep.path}</code>
-                    <span className="text-sm text-zinc-500">{ep.description}</span>
+                    <code className="flex-1 font-mono text-sm text-[var(--aethel-text-secondary)]">{ep.path}</code>
+                    <span className="text-sm text-[var(--aethel-text-quaternary)]">{ep.description}</span>
                   </div>
                 ))}
               </div>
@@ -127,3 +127,4 @@ export default function APIDocsPage() {
     </div>
   )
 }
+

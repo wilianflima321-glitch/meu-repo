@@ -61,7 +61,7 @@ const STATUS_CONFIG: Record<JobStatus, { color: string; icon: React.ElementType;
   running: { color: 'bg-[var(--aethel-info)]/15 text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]', icon: Activity, label: 'Executando' },
   completed: { color: 'bg-[var(--aethel-success)]/15 text-[var(--aethel-success-light)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]', icon: CheckCircle2, label: 'Concluido' },
   failed: { color: 'bg-[var(--aethel-error)]/15 text-[var(--aethel-error-light)] border-rose-500/30', icon: XCircle, label: 'Falhou' },
-  paused: { color: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/30', icon: Pause, label: 'Pausado' },
+  paused: { color: 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_15%,transparent)] text-[var(--aethel-text-secondary)] border-[color-mix(in_srgb,var(--aethel-text-tertiary)_35%,transparent)]', icon: Pause, label: 'Pausado' },
 }
 
 const TYPE_CONFIG: Record<JobType, { color: string; label: string }> = {
@@ -70,7 +70,7 @@ const TYPE_CONFIG: Record<JobType, { color: string; label: string }> = {
   ai: { color: 'bg-[var(--aethel-info)]/15 text-[var(--aethel-info-light)]', label: 'AI' },
   export: { color: 'bg-[var(--aethel-success)]/15 text-[var(--aethel-success-light)]', label: 'Export' },
   import: { color: 'bg-blue-500/15 text-[var(--aethel-primary-light)]', label: 'Import' },
-  other: { color: 'bg-zinc-500/15 text-zinc-300', label: 'Outro' },
+  other: { color: 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_15%,transparent)] text-[var(--aethel-text-secondary)]', label: 'Outro' },
 }
 
 const StatusBadge: React.FC<{ status: JobStatus }> = ({ status }) => {
@@ -95,7 +95,7 @@ const ProgressBar: React.FC<{ progress: number; status: JobStatus }> = ({ progre
     running: 'bg-[var(--aethel-info-light)]',
     completed: 'bg-[var(--aethel-success-light)]',
     failed: 'bg-[var(--aethel-error-light)]',
-    paused: 'bg-zinc-400',
+    paused: 'bg-[var(--aethel-text-tertiary)]',
   }
 
   return (
@@ -122,7 +122,7 @@ const JobRow: React.FC<{
         className="flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.04]"
         onClick={onToggle}
       >
-        <button className="text-zinc-500">
+        <button className="text-[var(--aethel-text-tertiary)]">
           {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
 
@@ -133,7 +133,7 @@ const JobRow: React.FC<{
           </div>
           <div className="flex items-center gap-4">
             <ProgressBar progress={job.progress} status={job.status} />
-            <span className="whitespace-nowrap text-xs text-zinc-400">
+            <span className="whitespace-nowrap text-xs text-[var(--aethel-text-tertiary)]">
               {job.status === 'completed' ? '100%' : `${job.progress}%`}
             </span>
           </div>
@@ -197,20 +197,20 @@ const JobRow: React.FC<{
         <div className="border-t border-white/10 bg-white/[0.03] px-4 pb-3">
           <div className="grid gap-4 py-3 text-sm md:grid-cols-4">
             <div>
-              <p className="text-xs text-zinc-500">ID</p>
-              <p className="text-xs font-mono text-zinc-300">{job.id.slice(0, 16)}...</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">ID</p>
+              <p className="text-xs font-mono text-[var(--aethel-text-secondary)]">{job.id.slice(0, 16)}...</p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Criado</p>
-              <p className="text-sm text-zinc-300">{job.createdAt.toLocaleTimeString()}</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Criado</p>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">{job.createdAt.toLocaleTimeString()}</p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Prioridade</p>
-              <p className="text-sm text-zinc-300">{'*'.repeat(job.priority)}</p>
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Prioridade</p>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">{'*'.repeat(job.priority)}</p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Tentativas</p>
-              <p className="text-sm text-zinc-300">
+              <p className="text-xs text-[var(--aethel-text-tertiary)]">Tentativas</p>
+              <p className="text-sm text-[var(--aethel-text-secondary)]">
                 {job.retries}/{job.maxRetries}
               </p>
             </div>
@@ -235,10 +235,10 @@ const StatsCard: React.FC<{
 }> = ({ label, value, icon, color }) => (
   <div className={`aethel-card aethel-p-4 ${color}`}>
     <div className="flex items-center gap-3">
-      <div className="rounded-lg bg-white/[0.05] p-2 text-zinc-400">{icon}</div>
+      <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-2 text-[var(--aethel-text-tertiary)]">{icon}</div>
       <div>
         <p className="text-2xl font-semibold text-white">{value}</p>
-        <p className="text-sm text-zinc-500">{label}</p>
+        <p className="text-sm text-[var(--aethel-text-tertiary)]">{label}</p>
       </div>
     </div>
   </div>
@@ -364,7 +364,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
           <Layers className="h-5 w-5 text-[var(--aethel-info-light)]" />
           <div>
             <h2 className="text-base font-semibold text-white">Fila de jobs</h2>
-            <p className="text-xs text-zinc-500">{jobs.length} jobs no total</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">{jobs.length} jobs no total</p>
           </div>
         </div>
 
@@ -418,7 +418,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
 
       <div className="flex flex-wrap items-center gap-3 px-4 pb-4">
         <div className="relative min-w-[220px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--aethel-text-tertiary)]" />
           <input
             type="text"
             placeholder="Buscar jobs..."
@@ -429,7 +429,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Filter className="h-4 w-4 text-zinc-500" />
+          <Filter className="h-4 w-4 text-[var(--aethel-text-tertiary)]" />
           <select
             value={filterStatus}
             onChange={(event) => setFilterStatus(event.target.value as JobStatus | 'all')}
@@ -461,7 +461,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
       <div className="max-h-[500px] space-y-3 overflow-y-auto px-4 pb-4">
         {filteredJobs.length === 0 ? (
           <div className="aethel-state aethel-state-empty">
-            <HardDrive className="mb-2 h-10 w-10 text-zinc-500" />
+            <HardDrive className="mb-2 h-10 w-10 text-[var(--aethel-text-tertiary)]" />
             <p>Nenhum job encontrado.</p>
           </div>
         ) : (

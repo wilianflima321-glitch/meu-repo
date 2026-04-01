@@ -32,20 +32,20 @@ interface FileExplorerProps {
 // ============= File Icon Helper =============
 
 const FILE_ICONS: Record<string, { icon: CodiconName; color: string }> = {
-  ts: { icon: 'symbol-file', color: 'text-slate-300' },
-  tsx: { icon: 'symbol-file', color: 'text-slate-300' },
-  js: { icon: 'symbol-file', color: 'text-slate-300' },
-  jsx: { icon: 'symbol-file', color: 'text-slate-300' },
-  json: { icon: 'symbol-number', color: 'text-slate-400' },
-  md: { icon: 'symbol-file', color: 'text-slate-400' },
-  css: { icon: 'symbol-color', color: 'text-slate-400' },
-  scss: { icon: 'symbol-color', color: 'text-slate-400' },
-  html: { icon: 'symbol-file', color: 'text-slate-300' },
-  png: { icon: 'symbol-file', color: 'text-slate-400' },
-  jpg: { icon: 'symbol-file', color: 'text-slate-400' },
-  svg: { icon: 'symbol-file', color: 'text-slate-400' },
-  package: { icon: 'extensions', color: 'text-slate-400' },
-  config: { icon: 'gear', color: 'text-slate-400' },
+  ts: { icon: 'symbol-file', color: 'text-[var(--aethel-text-secondary)]' },
+  tsx: { icon: 'symbol-file', color: 'text-[var(--aethel-text-secondary)]' },
+  js: { icon: 'symbol-file', color: 'text-[var(--aethel-text-secondary)]' },
+  jsx: { icon: 'symbol-file', color: 'text-[var(--aethel-text-secondary)]' },
+  json: { icon: 'symbol-number', color: 'text-[var(--aethel-text-tertiary)]' },
+  md: { icon: 'symbol-file', color: 'text-[var(--aethel-text-tertiary)]' },
+  css: { icon: 'symbol-color', color: 'text-[var(--aethel-text-tertiary)]' },
+  scss: { icon: 'symbol-color', color: 'text-[var(--aethel-text-tertiary)]' },
+  html: { icon: 'symbol-file', color: 'text-[var(--aethel-text-secondary)]' },
+  png: { icon: 'symbol-file', color: 'text-[var(--aethel-text-tertiary)]' },
+  jpg: { icon: 'symbol-file', color: 'text-[var(--aethel-text-tertiary)]' },
+  svg: { icon: 'symbol-file', color: 'text-[var(--aethel-text-tertiary)]' },
+  package: { icon: 'extensions', color: 'text-[var(--aethel-text-tertiary)]' },
+  config: { icon: 'gear', color: 'text-[var(--aethel-text-tertiary)]' },
 }
 
 const WORKBENCH_PROJECT_STORAGE_KEY = 'aethel.workbench.lastProjectId'
@@ -65,7 +65,7 @@ function getFileIcon(name: string, isOpen = false) {
   if (name.includes('config')) return FILE_ICONS.config
   
   const ext = name.split('.').pop()?.toLowerCase() || ''
-  return FILE_ICONS[ext] || { icon: 'symbol-file' as CodiconName, color: 'text-slate-400' }
+  return FILE_ICONS[ext] || { icon: 'symbol-file' as CodiconName, color: 'text-[var(--aethel-text-tertiary)]' }
 }
 
 // ============= Workspace Tree =============
@@ -141,14 +141,14 @@ function FileTreeNode({
         className={`
           w-full density-row flex items-center gap-1.5 px-2 text-xs text-left
           hover:bg-white/5 active:bg-white/10 transition-colors
-          focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500
-          ${isSelected ? 'bg-slate-800 text-white' : 'text-slate-300'}
+          focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)]
+          ${isSelected ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}
         `}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
         {/* Chevron for folders */}
         {isFolder && (
-          <span className="w-3.5 h-3.5 flex items-center justify-center text-slate-500">
+          <span className="w-3.5 h-3.5 flex items-center justify-center text-[var(--aethel-text-tertiary)]">
             {isExpanded ? (
               <Codicon name="chevron-down" />
             ) : (
@@ -158,14 +158,14 @@ function FileTreeNode({
         )}
         
         {/* File/Folder icon */}
-        <Codicon name={nodeIcon} className={`${isFolder ? 'text-slate-300' : fileIcon.color}`} />
+        <Codicon name={nodeIcon} className={`${isFolder ? 'text-[var(--aethel-text-secondary)]' : fileIcon.color}`} />
         
         {/* Name */}
         <span className="flex-1 truncate">{node.name}</span>
         
         {/* Modified indicator */}
         {node.modified && (
-          <span className="w-2 h-2 bg-[var(--aethel-warning-light)] rounded-full" title="Modified" />
+          <span className="w-2 h-2 bg-[var(--aethel-warning-light)] rounded-full" title="Modificado" />
         )}
       </button>
 
@@ -284,14 +284,14 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
         role="menu"
         aria-label={`Context actions for ${file.name}`}
         onKeyDown={handleMenuKeyDown}
-        className="fixed z-50 min-w-48 py-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl"
+        className="fixed z-50 min-w-48 py-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg shadow-xl"
         style={{ left: menuPosition.left, top: menuPosition.top }}
       >
         {(() => {
           let actionPointer = -1
           return menuItems.map((item, i) => {
             if (item.divider) {
-              return <div key={`divider-${i}`} className="my-1 border-t border-slate-700" />
+              return <div key={`divider-${i}`} className="my-1 border-t border-[var(--aethel-border-secondary)]" />
             }
             actionPointer += 1
             const actionIndex = actionPointer
@@ -308,7 +308,7 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
                 }}
                 className={`
                   w-full flex items-center gap-2 px-3 py-1.5 text-xs
-                  ${item.danger ? 'text-red-400 hover:bg-red-500/20' : 'text-slate-300 hover:bg-slate-700'}
+                  ${item.danger ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'}
                 `}
               >
                 {item.icon && <Codicon name={item.icon} />}
@@ -483,62 +483,62 @@ export default function FileExplorerPro({
   return (
     <div className={`h-full flex flex-col ${className}`}>
       {/* Header */}
-      <div className="density-header flex items-center justify-between px-2 border-b border-slate-800">
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
+      <div className="density-header flex items-center justify-between px-2 border-b border-[var(--aethel-border-primary)]">
+        <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider truncate">
           {workspaceName}
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowSearch(!showSearch)}
-            aria-label="Toggle file search"
-            className={`p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 ${showSearch ? 'text-blue-300' : 'text-slate-400'}`}
+            aria-label="Alternar busca de arquivos"
+            className={`p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)] ${showSearch ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Buscar arquivos"
           >
             <Codicon name="search" />
           </button>
           <button
             onClick={() => onFileCreate?.('/', 'file')}
-              aria-label="Criar novo arquivo"
-              className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
-              title="Novo arquivo"
-            >
+            aria-label="Criar novo arquivo"
+            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)] text-[var(--aethel-text-tertiary)]"
+            title="Novo arquivo"
+          >
             <Codicon name="new-file" />
           </button>
           <button
             onClick={() => onFileCreate?.('/', 'folder')}
-              aria-label="Criar nova pasta"
-              className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
-              title="Nova pasta"
-            >
+            aria-label="Criar nova pasta"
+            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)] text-[var(--aethel-text-tertiary)]"
+            title="Nova pasta"
+          >
             <Codicon name="new-folder" />
           </button>
           <button
             onClick={handleRefresh}
-            aria-label="Refresh workspace files"
-            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 text-slate-400"
-            title="Refresh"
+            aria-label="Atualizar arquivos do workspace"
+            className="p-1 rounded hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-border-focus)] text-[var(--aethel-text-tertiary)]"
+            title="Atualizar"
           >
             <Codicon name="refresh" />
           </button>
         </div>
       </div>
       {lastSyncAt && (
-        <div className="px-2 py-1 border-b border-slate-800 text-[10px] text-slate-500" aria-live="polite">
-          Last sync: {new Date(lastSyncAt).toLocaleTimeString()}
+        <div className="px-2 py-1 border-b border-[var(--aethel-border-primary)] text-[10px] text-[var(--aethel-text-tertiary)]" aria-live="polite">
+          Ultima sincronizacao: {new Date(lastSyncAt).toLocaleTimeString()}
         </div>
       )}
 
       {/* Search */}
       {showSearch && (
-        <div className="px-2 py-2 border-b border-slate-800">
+        <div className="px-2 py-2 border-b border-[var(--aethel-border-primary)]">
           <div className="relative">
-            <Codicon name="search" className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Codicon name="search" className="absolute left-2 top-1/2 -translate-y-1/2 text-[var(--aethel-text-tertiary)]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar arquivos..."
-              className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-full pl-8 pr-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-xs text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]"
               autoFocus
             />
           </div>
@@ -557,7 +557,7 @@ export default function FileExplorerPro({
         {effectiveLoading && !effectiveError && (
           <div className="px-3 py-2" aria-live="polite">
             <div className="aethel-state aethel-state-loading text-xs">
-              <p className="aethel-state-title mb-2">Loading workspace tree...</p>
+              <p className="aethel-state-title mb-2">Carregando arvore do workspace...</p>
               <div className="space-y-1.5">
                 <div className="aethel-skeleton-line w-full" />
                 <div className="aethel-skeleton-line w-5/6" />
@@ -582,7 +582,7 @@ export default function FileExplorerPro({
         {filteredFiles.length === 0 && searchQuery && (
           <div className="px-3 py-3">
             <div className="aethel-state aethel-state-empty text-center text-xs">
-              <p className="aethel-state-title mb-1">No files matching this search</p>
+              <p className="aethel-state-title mb-1">Nenhum arquivo encontrado</p>
               <p>{`"${searchQuery}"`}</p>
             </div>
           </div>
@@ -590,20 +590,20 @@ export default function FileExplorerPro({
         {filteredFiles.length === 0 && !searchQuery && !effectiveLoading && !effectiveError && (
           <div className="h-full flex items-center justify-center px-4 text-center">
             <div className="max-w-xs">
-                <div className="text-xs font-medium text-slate-300 mb-1">Workspace vazio</div>
-                <div className="text-[11px] text-slate-500 mb-3">
+                <div className="text-xs font-medium text-[var(--aethel-text-secondary)] mb-1">Workspace vazio</div>
+                <div className="text-[11px] text-[var(--aethel-text-tertiary)] mb-3">
                   Crie um arquivo ou pasta para comecar a editar neste projeto.
                 </div>
               <div className="flex items-center justify-center gap-2">
                 <button
                   onClick={() => onFileCreate?.('/', 'file')}
-                  className="px-2.5 py-1.5 rounded border border-slate-700 bg-slate-800/70 text-[11px] text-slate-200 hover:bg-slate-700/80"
+                  className="px-2.5 py-1.5 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80"
                 >
                   Novo arquivo
                 </button>
                 <button
                   onClick={() => onFileCreate?.('/', 'folder')}
-                  className="px-2.5 py-1.5 rounded border border-slate-700 bg-slate-800/70 text-[11px] text-slate-200 hover:bg-slate-700/80"
+                  className="px-2.5 py-1.5 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80"
                 >
                   Nova pasta
                 </button>
@@ -626,5 +626,6 @@ export default function FileExplorerPro({
     </div>
   )
 }
+
 
 

@@ -66,6 +66,7 @@ Aethel has one preview engine with multiple surface types:
 - 3D viewport
 - media preview
 - research preview
+These are navigable faces of one project-bound preview context, not separate product families.
 
 ### Decision 5: Projects have connected flows
 A project may have:
@@ -103,6 +104,29 @@ Absorb:
 Source:
 - https://docs.replit.com/core-concepts/agent
 
+### Genspark
+Absorb:
+- one workspace that spans multiple output types
+- one-prompt to many-artifact ambition
+- workflow and team surfaces that keep AI work connected instead of scattered
+- guided modes and restore/save-point thinking for higher-stakes generation flows
+Source:
+- https://www.genspark.ai/
+- https://www.genspark.ai/helpcenter
+- https://www.genspark.ai/docs/ai_slides_changelog
+
+### Manus
+Absorb:
+- wide research as a first-class workflow for parallel subtasks
+- browser-assisted research as an execution mode, not only a text answer
+- evidence-oriented outputs that can become reports, dashboards, slides or structured tables
+- task decomposition and scale handling without collapsing output quality
+Source:
+- https://help.manus.im/en/articles/11960169-what-is-wide-research
+- https://manus.im/docs/features/wide-research
+- https://manus.im/docs/features/browser-operator
+- https://manus.im/docs/features/data-visualization
+
 ### Adobe Firefly Boards and Premiere
 Absorb:
 - canvas and board logic for visual ideation
@@ -118,6 +142,48 @@ Absorb:
 - toolbar grouped by intent
 - game view / scene preview distinction
 - preview controls by asset type
+
+## Benchmark Synthesis
+The benchmark set is not a mood board. Each product teaches a different discipline that Aethel must combine without inheriting their weaknesses.
+
+### What VS Code teaches better than the others
+- shell hierarchy must be obvious immediately
+- state restoration is part of professional trust, not a bonus
+- command palette, side bars, panel and editor groups must feel inevitable, not experimental
+
+### What Replit teaches better than the others
+- agent activity must be visible as execution, not buried in transcript history
+- a project can contain multiple outputs without becoming multiple products
+- plan, build, test and publish should feel like one loop
+
+### What Genspark teaches better than the others
+- users respond strongly to one-workspace, many-output positioning
+- AI orchestration feels powerful when the user can move from prompt to docs, slides, research and app outputs without context loss
+- guided creation modes and restore/save-point thinking help higher-stakes output feel less reckless
+
+### What Manus teaches better than the others
+- advanced research becomes convincing when it is parallel, evidence-heavy and structurally organized
+- browser execution, extraction and deliverable generation should remain connected to the same task context
+- research should end in usable artifacts, not only a long answer
+
+### What Aethel must reject from the benchmark set
+- VS Code without stronger multimodal preview and AI operations is not enough
+- Replit without stricter shell discipline risks feeling chat-led
+- Genspark without a harder production shell risks feeling like an AI workspace more than an IDE-grade studio
+
+### Canonical benchmark fusion rule
+Aethel should feel like:
+- VS Code in shell discipline
+- Replit in visible execution and multi-artifact momentum
+- Genspark in one-workspace, many-output ambition
+- Manus in research depth, parallelism and evidence-to-artifact flow
+- Unreal in preview seriousness
+
+But it must still be unmistakably Aethel:
+- one production shell
+- one AI operational layer
+- one preview engine
+- one connected project model
 Source:
 - https://dev.epicgames.com/documentation/en-us/unreal-engine/viewport-toolbar
 
@@ -207,12 +273,32 @@ Treat these as context-specific extensions, not separate product centers:
 A single terminal family must survive.
 The blueprints assume one integrated bottom dock terminal, not four competing ones.
 
+The final canonical terminal must merge:
+- real PTY and session behavior from the strongest runtime implementation
+- one consistent dock chrome and tab model
+- one canonical theme family aligned to `--aethel-*`
+
+Current reality check:
+- `TerminalWidget.tsx` plus `useTerminal.ts` appears closer to the real PTY path
+- `XTerminal.tsx` appears stronger in presentation depth and shell ambition
+- the canonical answer is not to keep both forever; it is to merge the strongest runtime spine and the strongest dock UX into one terminal family
+
 
 ## Canonical Design System Decisions
 ### Token source of truth
 - CSS variables are the canonical runtime source of truth
 - JS token objects are adapters, not the source of truth
 - use a single namespace: `--aethel-*`
+
+### Visual direction correction
+- the system must lean darker, calmer and more graphite-heavy than it does today
+- dark mode is the primary professional surface language
+- grey and blue should dominate the runtime palette
+- purple may exist only as a rare supporting accent, never as the default emotional color
+- surfaces must feel like a serious IDE/workbench, not a neon AI product
+- the default emotional read should be graphite, slate, steel and cold blue - never candy gradients
+- contrast should come from value separation, typography and edge definition, not glow
+- chrome should feel machined and quiet; cards should not look like floating marketing tiles
 
 ### Token namespaces to retire from canonical thinking
 - generic `--bg-*` as primary system namespace
@@ -233,6 +319,14 @@ The blueprints assume one integrated bottom dock terminal, not four competing on
 - `--aethel-shadow-*`
 - `--aethel-motion-*`
 - `--aethel-z-*`
+
+### Dark theme fidelity rules
+- canvas, sidebar, dock and overlay must each occupy different but closely related dark values
+- panels should separate primarily through depth and border discipline, not heavy shadows
+- active state should read through blue emphasis and structural clarity, not saturation spikes
+- warning and error colors must stay readable without turning the interface warm overall
+- blue should signal focus, active preview, selection and live system state
+- neutral gray should carry chrome, separators, tab beds, inactive rails and non-critical metadata
 
 ### Typography
 - display style is reserved for public hero moments and major section headers
@@ -685,27 +779,31 @@ These values exist to stop Figma and frontend from inventing separate visual sys
 If a surface needs an exception, it must still derive from this table.
 
 ### Color Tokens
-- `--aethel-surface-canvas`: `#07111F`
-- `--aethel-surface-panel`: `#0D1728`
-- `--aethel-surface-elevated`: `#122036`
-- `--aethel-surface-overlay`: `rgba(4, 10, 19, 0.82)`
-- `--aethel-surface-muted`: `#18253B`
+- `--aethel-surface-canvas`: `#0A0D12`
+- `--aethel-surface-panel`: `#11161D`
+- `--aethel-surface-elevated`: `#161D26`
+- `--aethel-surface-overlay`: `rgba(7, 10, 15, 0.84)`
+- `--aethel-surface-muted`: `#1E2631`
+- `--aethel-surface-sidebar`: `#0F141B`
+- `--aethel-surface-dock`: `#121821`
+- `--aethel-surface-input`: `#151B24`
 - `--aethel-surface-danger-soft`: `#2A1520`
-- `--aethel-border-default`: `rgba(154, 176, 211, 0.18)`
-- `--aethel-border-strong`: `rgba(154, 176, 211, 0.32)`
-- `--aethel-border-active`: `rgba(93, 168, 255, 0.52)`
+- `--aethel-border-default`: `rgba(148, 163, 184, 0.16)`
+- `--aethel-border-strong`: `rgba(148, 163, 184, 0.28)`
+- `--aethel-border-active`: `rgba(96, 165, 250, 0.48)`
+- `--aethel-border-handle`: `rgba(125, 148, 178, 0.24)`
 - `--aethel-text-primary`: `#F5F7FB`
-- `--aethel-text-secondary`: `#B5C2D9`
-- `--aethel-text-tertiary`: `#7E90AD`
-- `--aethel-text-disabled`: `#62718B`
-- `--aethel-primary-500`: `#67B2FF`
-- `--aethel-primary-600`: `#479EFF`
-- `--aethel-primary-700`: `#2A86E8`
-- `--aethel-accent-500`: `#8E7CFF`
+- `--aethel-text-secondary`: `#B8C0CE`
+- `--aethel-text-tertiary`: `#8893A7`
+- `--aethel-text-disabled`: `#5F697A`
+- `--aethel-primary-500`: `#6AA9FF`
+- `--aethel-primary-600`: `#4D96F3`
+- `--aethel-primary-700`: `#357AD1`
+- `--aethel-accent-500`: `#6F8FB4`
 - `--aethel-success-500`: `#3DDC97`
 - `--aethel-warning-500`: `#F2B94B`
 - `--aethel-error-500`: `#F36A7F`
-- `--aethel-info-500`: `#69C7FF`
+- `--aethel-info-500`: `#73BDF7`
 
 ### Typography Tokens
 - `--aethel-font-display`: `Sora, Space Grotesk, ui-sans-serif, sans-serif`
@@ -757,6 +855,38 @@ If a surface needs an exception, it must still derive from this table.
 - `--aethel-sidebar-width-default`: `300 px`
 - `--aethel-right-rail-width-default`: `380 px`
 - `--aethel-bottom-dock-height-default`: `260 px`
+- `--aethel-resize-handle-hit-area`: `8 px`
+- `--aethel-resize-handle-visual-width`: `2 px`
+
+## Resize and Edge Drag Contract
+Workbench must support direct manipulation of visibility through drag handles on structural seams.
+
+### Required draggable seams
+- between Left Sidebar and Center Workspace
+- between Center Workspace and Right Rail
+- between Center Workspace and Bottom Dock
+- between split editor groups when split view is active
+- between preview and editor columns when both are visible in Build Mode
+
+### Resize handle rules
+- every draggable seam must expose an invisible hit area of `8 px`
+- visible handle line should stay subtle at `2 px`
+- hover state strengthens the handle before drag begins
+- drag feedback is immediate and mechanical, never eased
+- double-click on a seam resets that panel to canonical default width/height
+- dragging a seam must preserve content continuity; the user should never lose current artifact, preview or AI context
+- the handle should privilege the surface the user is actively working in by allowing it to expand without hiding critical adjacent state completely
+
+### Cursor rules
+- vertical seam: `col-resize`
+- horizontal seam: `row-resize`
+- split editor seam: match the split axis
+
+### Visibility protection rules
+- Left Sidebar may collapse, but must not disappear accidentally during small drags
+- Right Rail may shrink, but must never become too narrow to support real AI Console operation
+- Bottom Dock may compress to tab strip, but only through explicit collapse or deliberate drag
+- active preview or active diff must not be fully obscured by expanding an adjacent rail
 
 ## Density Tier Map
 ### Public
@@ -802,6 +932,14 @@ States:
 - active
 - disabled
 - loading
+
+Usage hierarchy rules:
+- one primary button per local decision area
+- secondary buttons support the same goal without visually competing with the primary
+- tertiary buttons are for low-friction utilities, not for core commit actions
+- destructive buttons must never sit adjacent to primary buttons without spacing or visual separation
+- canvas/viewport chrome should prefer compact secondary and tertiary controls over repeated primaries
+- approval surfaces may elevate one primary plus one destructive action, but not a wall of equal-emphasis buttons
 
 ### Input Fields
 Sizes:
@@ -853,6 +991,74 @@ Families:
 - domain
 - role
 - usage warning
+
+## Critical IDE Component Gap Register
+The following components are required for a true professional IDE/workbench feel.
+If they are missing, weak, or inconsistent, the product will continue to feel below benchmark.
+
+### Shell and navigation components
+- Top Bar command/search entry with recent commands and recent files
+- explicit Breadcrumb row under editor chrome
+- Activity Rail item badges with active and blocked states
+- collapsible Left Sidebar sections with remembered expansion state
+- Right Rail tab strip with clear active state and pinned priority
+- Bottom Dock tab strip with counts and blocked-state emphasis
+- persistent Status Bar slots with factual low-noise ordering
+
+### Editor and code workflow components
+- editor split handles and split-group management
+- tab overflow handling, pinning and dirty-state indicators
+- draggable split seams with reset behavior and remembered layout
+- editor breadcrumbs with symbol-aware truncation
+- editor toolbar row for split, compare, pin and open-in-preview actions
+- symbols/outline panel
+- find/replace and result grouping
+- command palette recent-files and recent-commands sections
+- quick-open with file path weighting and symbol search
+- inline diagnostics with quick-fix affordance
+- hover cards for symbol info, type info or runtime issue context
+- peek/inspect overlay for definition or diff snippets
+- diff viewer and before/after review surface
+- sticky approval bar when AI changes are waiting
+- quick open / command palette / recent files path
+
+### Preview and validation components
+- Preview Deck as a first-class surface, not an optional widget
+- preview header per surface type with grouped intent controls
+- surface-specific device/route/camera selectors
+- explicit freshness state: `outdated`, `updating`, `degraded`, `blocked`
+- compare mode for two preview outputs
+- recovery card near the failing preview context
+
+### AI operational components
+- visible Plan checklist
+- Run cards with cost, time and blockers
+- Approval cards with semantic diff and rollback
+- Memory/Context scope chips
+- current artifact scope chips above the composer
+- agent stack cards for multi-agent runs
+
+### Diagnostics and runtime components
+- Problems list with severity grouping
+- Output panel
+- Logs panel
+- Ports panel
+- Runtime drawer
+- terminal session tabs and lifecycle states
+- environment/runtime target indicator
+- preview health indicator with stale/outdated propagation
+- background-task or run progress strip that does not steal shell focus
+- recovery card with `Retry`, `Rollback`, `Open logs` and `Inspect diff`
+
+### Project/context components
+- connected flow chips in top bar and project surfaces
+- flow state badges
+- asset usage map
+- stale/outdated propagation indicators across flows
+
+Rule:
+Missing any one of these does not automatically fail the product.
+But missing several of them at once is exactly how the product stops feeling like an elite IDE-grade production shell.
 
 ## Component Ownership Rules
 - one canonical component family per concept
@@ -1054,11 +1260,12 @@ Reference-only, not canonical shell contract:
 
 ### Terminal family
 Canonical terminal direction:
-- `XTerminal.tsx` integrated into the Bottom Dock
+- one integrated Bottom Dock terminal family built from the strongest PTY runtime spine and the strongest dock UX layer
 
 Reference-only ideas:
 - `IntegratedTerminal.tsx`
 - `TerminalWidget.tsx`
+- `XTerminal.tsx`
 
 Rule:
 Product architecture must present one terminal identity, one dock identity, and one command surface for terminal work.

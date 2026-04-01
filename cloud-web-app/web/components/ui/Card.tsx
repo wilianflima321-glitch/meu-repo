@@ -12,37 +12,37 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 const variantClasses: Record<string, string> = {
   default: `
-    bg-slate-900/70 
-    border border-slate-800/80 
+    bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] 
+    border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] 
     shadow-lg shadow-black/10
   `,
   elevated: `
-    bg-gradient-to-b from-slate-800/90 to-slate-900/90 
+    bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] 
     shadow-2xl shadow-black/30 
-    border border-slate-700/40
+    border border-[color-mix(in_srgb,var(--aethel-border-secondary)_40%,transparent)]
   `,
   bordered: `
-    bg-slate-900/40 
-    border-2 border-slate-700/60 
-    hover:border-slate-600/80
+    bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] 
+    border-2 border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] 
+    hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]
   `,
   gradient: `
-    bg-gradient-to-br from-slate-800/80 via-slate-850/80 to-slate-900/90 
-    border border-slate-700/50
+    bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] via-[color-mix(in_srgb,var(--aethel-surface-secondary)_85%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] 
+    border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)]
     shadow-xl shadow-black/20
   `,
   glass: `
-    bg-slate-900/40 
+    bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] 
     backdrop-blur-xl backdrop-saturate-150 
-    border border-slate-700/30
+    border border-[color-mix(in_srgb,var(--aethel-border-secondary)_30%,transparent)]
     shadow-2xl shadow-black/20
   `,
   glow: `
-    bg-gradient-to-b from-slate-800/90 to-slate-900/90 
-    border border-sky-500/20
+    bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] 
+    border border-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]
     shadow-[0_0_30px_rgba(99,102,241,0.15)]
     hover:shadow-[0_0_40px_rgba(99,102,241,0.25)]
-    hover:border-sky-500/40
+    hover:border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]
   `,
 }
 
@@ -80,8 +80,8 @@ export function Card({
         ${paddingClasses[padding]}
         ${hoverable ? `
           hover:translate-y-[-2px] 
-          hover:shadow-2xl hover:shadow-sky-500/10 
-          hover:border-sky-500/30 
+          hover:shadow-2xl hover:shadow-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] 
+          hover:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] 
           cursor-pointer
           active:translate-y-0 active:shadow-xl
         ` : ''}
@@ -127,18 +127,18 @@ export function CardHeader({
         <>
           <div className="flex items-start gap-3 min-w-0">
             {icon && (
-              <div className="flex-shrink-0 p-2 rounded-lg bg-sky-500/10 text-sky-400">
+              <div className="flex-shrink-0 p-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info)]">
                 {icon}
               </div>
             )}
             <div className="min-w-0">
               {title && (
-                <h3 className={`${headerSizes[size].title} text-slate-100 leading-tight`}>
+                <h3 className={`${headerSizes[size].title} text-[var(--aethel-text-primary)] leading-tight`}>
                   {title}
                 </h3>
               )}
               {description && (
-                <p className={`mt-1 ${headerSizes[size].desc} text-slate-400 leading-relaxed`}>
+                <p className={`mt-1 ${headerSizes[size].desc} text-[var(--aethel-text-tertiary)] leading-relaxed`}>
                   {description}
                 </p>
               )}
@@ -152,11 +152,11 @@ export function CardHeader({
 }
 
 export function CardTitle({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <h3 className={`text-lg font-semibold text-slate-100 ${className}`}>{children}</h3>;
+  return <h3 className={`text-lg font-semibold text-[var(--aethel-text-primary)] ${className}`}>{children}</h3>;
 }
 
 export function CardDescription({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <p className={`text-sm text-slate-400 ${className}`}>{children}</p>;
+  return <p className={`text-sm text-[var(--aethel-text-tertiary)] ${className}`}>{children}</p>;
 }
 
 export interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {
@@ -181,7 +181,7 @@ export function CardFooter({
     <div
       className={`
         mt-6 pt-5 
-        border-t border-slate-800/80 
+        border-t border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] 
         flex items-center ${justifyClasses[justify]} gap-3 
         ${className}
       `}
@@ -198,10 +198,11 @@ export interface CardContentProps extends HTMLAttributes<HTMLDivElement> {
 
 export function CardContent({ children, className = '', ...props }: CardContentProps) {
   return (
-    <div className={`text-slate-300 ${className}`} {...props}>
+    <div className={`text-[var(--aethel-text-secondary)] ${className}`} {...props}>
       {children}
     </div>
   )
 }
 
 export default Card
+

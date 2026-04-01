@@ -2446,3 +2446,5 @@ Impact:
 2. Capability remains `PARTIAL` (intentional): control path exists, but broader studio runtime remains gated by policy/evidence.
 
 
+
+## 0.14 Delta Update 2026-04-01 (L5 UX hardening)`nImplemented in code:`n- IDE Git panel, chat stack, preview surfaces, and editor UI were localized to PT-BR with explicit state messaging.`n- Aethel token enforcement replaced template palettes across core UI primitives and IDE components.`n- Preview/runtime status language aligned to avoid false-healthy states.`n`nExecution stance:`n- Continue token enforcement and PT-BR normalization for any newly touched surfaces.`n- Do not claim production readiness without verified provider credentials and runtime health.`n

@@ -49,7 +49,7 @@ export default function FilmsDocsPage() {
     <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <PublicHeader />
       <main className="relative z-10 mx-auto max-w-4xl px-6 pt-12 pb-20">
-        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
           <ArrowLeft className="h-4 w-4" /> Back to Docs
         </Link>
 
@@ -57,7 +57,7 @@ export default function FilmsDocsPage() {
           L2 Experimental
         </div>
         <h1 className="text-4xl font-bold">Films Module</h1>
-        <p className="mt-3 text-lg text-zinc-400">
+        <p className="mt-3 text-lg text-[var(--aethel-text-tertiary)]">
           AI-assisted filmmaking tools. From storyboarding to shot descriptions and basic NLE capabilities.
         </p>
 
@@ -78,12 +78,12 @@ export default function FilmsDocsPage() {
                   <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
                     cap.status === 'available' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' :
                     cap.status === 'experimental' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]' :
-                    'bg-zinc-500/20 text-zinc-400'
+                    'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_20%,transparent)] text-[var(--aethel-text-tertiary)]'
                   }`}>
                     {cap.status}
                   </span>
                 </div>
-                <p className="text-sm text-zinc-400">{cap.description}</p>
+                <p className="text-sm text-[var(--aethel-text-tertiary)]">{cap.description}</p>
               </div>
             )
           })}
@@ -93,3 +93,4 @@ export default function FilmsDocsPage() {
     </div>
   )
 }
+

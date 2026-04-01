@@ -734,53 +734,53 @@ export function VideoTimeline({
   }, [onToolChange, selectedClipId, onClipDelete, onRippleDelete, onTimeChange, duration, currentTime, clips, onMarkerAdd, markers.length]);
 
   return (
-    <div className="flex flex-col bg-slate-900 rounded-lg overflow-hidden">
+    <div className="flex flex-col bg-[var(--aethel-surface-primary)] rounded-lg overflow-hidden">
       {/* Professional Toolbar */}
-      <div className="flex items-center gap-1 p-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         {/* Transport controls */}
-        <div className="flex items-center gap-1 pr-2 border-r border-slate-600">
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Go to Start (Home)">
+        <div className="flex items-center gap-1 pr-2 border-r border-[var(--aethel-border-secondary)]">
+          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Go to Start (Home)">
             
           </button>
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Previous Frame ()">
+          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Previous Frame ()">
             
           </button>
-          <button className="p-1.5 bg-red-600 rounded text-sm hover:bg-red-500" title="Play/Pause (Space)">
+          <button className="p-1.5 bg-[var(--aethel-error)] rounded text-sm hover:brightness-110" title="Play/Pause (Space)">
             
           </button>
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Next Frame ()">
+          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Next Frame ()">
             
           </button>
-          <button className="p-1.5 bg-slate-700 rounded text-sm hover:bg-slate-600" title="Go to End (End)">
+          <button className="p-1.5 bg-[var(--aethel-surface-quaternary)] rounded text-sm hover:bg-[var(--aethel-surface-quaternary)]" title="Go to End (End)">
             
           </button>
         </div>
         
         {/* Tool buttons */}
-        <div className="flex items-center gap-1 px-2 border-r border-slate-600">
+        <div className="flex items-center gap-1 px-2 border-r border-[var(--aethel-border-secondary)]">
           <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'select' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'select' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('select')}
             title="Selection Tool (V)"
           >
             
           </button>
           <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'razor' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'razor' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('razor')}
             title="Razor Tool (C)"
           >
             
           </button>
           <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'ripple' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'ripple' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('ripple')}
             title="Ripple Edit (B)"
           >
             
           </button>
           <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'slip' ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+            className={`px-2 py-1 rounded text-xs font-medium ${tool === 'slip' ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             onClick={() => onToolChange?.('slip')}
             title="Slip Tool (Y)"
           >
@@ -789,9 +789,9 @@ export function VideoTimeline({
         </div>
         
         {/* Snap toggle */}
-        <div className="flex items-center gap-1 px-2 border-r border-slate-600">
+        <div className="flex items-center gap-1 px-2 border-r border-[var(--aethel-border-secondary)]">
           <button 
-            className={`px-2 py-1 rounded text-xs font-medium ${snapEnabled ? 'bg-green-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+            className={`px-2 py-1 rounded text-xs font-medium ${snapEnabled ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
             title="Snapping (S)"
           >
             
@@ -799,60 +799,60 @@ export function VideoTimeline({
         </div>
         
         {/* Timecode */}
-        <span className="px-2 text-sm text-slate-300 font-mono bg-slate-900 rounded">
+        <span className="px-2 text-sm text-[var(--aethel-text-secondary)] font-mono bg-[var(--aethel-surface-primary)] rounded">
           {formatTimecode(currentTime)}
         </span>
-        <span className="text-slate-500">/</span>
-        <span className="text-sm text-slate-400 font-mono">
+        <span className="text-[var(--aethel-text-tertiary)]">/</span>
+        <span className="text-sm text-[var(--aethel-text-tertiary)] font-mono">
           {formatTimecode(duration)}
         </span>
         
         {/* Zoom */}
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-slate-400">Zoom:</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Zoom:</span>
           <input
             type="range"
             min="10"
             max="200"
             value={zoom}
-            className="w-24 accent-blue-500"
+            className="w-24 accent-[var(--aethel-info)]"
             readOnly
           />
-          <span className="text-xs text-slate-400 w-8">{zoom}%</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)] w-8">{zoom}%</span>
         </div>
       </div>
 
       {/* Track headers + Timeline */}
       <div className="flex">
         {/* Track Headers */}
-        <div className="w-36 flex-shrink-0 bg-slate-800">
-          <div className="h-[25px] border-b border-slate-700 flex items-center px-2">
-            <span className="text-[10px] text-slate-500">TRACKS</span>
+        <div className="w-36 flex-shrink-0 bg-[var(--aethel-surface-secondary)]">
+          <div className="h-[25px] border-b border-[var(--aethel-border-primary)] flex items-center px-2">
+            <span className="text-[10px] text-[var(--aethel-text-tertiary)]">TRACKS</span>
           </div>
           {tracks.map((track) => (
             <div 
               key={track.id}
-              className="h-[60px] flex items-center gap-1 px-2 border-b border-slate-700 group"
+              className="h-[60px] flex items-center gap-1 px-2 border-b border-[var(--aethel-border-primary)] group"
             >
               <button 
-                className={`w-5 h-5 rounded text-[10px] ${track.muted ? 'bg-red-600' : 'bg-slate-600 hover:bg-slate-500'}`}
+                className={`w-5 h-5 rounded text-[10px] ${track.muted ? 'bg-[var(--aethel-error)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 title="Mute"
               >
                 M
               </button>
               <button 
-                className={`w-5 h-5 rounded text-[10px] ${track.solo ? 'bg-yellow-600' : 'bg-slate-600 hover:bg-slate-500'}`}
+                className={`w-5 h-5 rounded text-[10px] ${track.solo ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 title="Solo"
               >
                 S
               </button>
               <button 
-                className={`w-5 h-5 rounded text-[10px] ${track.locked ? 'bg-orange-600' : 'bg-slate-600 hover:bg-slate-500'}`}
+                className={`w-5 h-5 rounded text-[10px] ${track.locked ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 title="Lock"
               >
                 
               </button>
-              <span className="text-sm text-slate-300 truncate flex-1">{track.name}</span>
+              <span className="text-sm text-[var(--aethel-text-secondary)] truncate flex-1">{track.name}</span>
             </div>
           ))}
         </div>
@@ -963,7 +963,7 @@ export function VideoPreview({
           onLoadedMetadata={handleLoadedMetadata}
         />
       ) : (
-        <div className="flex items-center justify-center h-full text-slate-500">
+        <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
           Nenhum video selecionado
         </div>
       )}

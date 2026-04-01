@@ -4,49 +4,44 @@ Status: CANONICAL
 
 ## Purpose
 This file defines the canonical source of truth for Aethel.
-The canonical directory is `docs/master/`.
-Any Markdown outside `docs/master/` is historical unless explicitly referenced by a canonical document.
+The canonical governance layer lives in `docs/master/`.
+The canonical interface layer lives in `AETHEL_INTERFACE_BLUEPRINTS/` when explicitly referenced by `docs/master/`.
+Any Markdown outside those chains is historical unless explicitly referenced by a canonical document.
 
 ## Mandatory First Read
 1. `docs/master/00_INDEX.md`
 2. `docs/master/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
-3. `docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
-4. `docs/master/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
+3. `docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md`
+4. `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
+5. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+6. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
 
 ## Canonical Documents (Execution Scope)
-- `FULL_AUDIT.md`
-- `DUPLICATIONS_AND_CONFLICTS.md`
-- `LIMITATIONS.md`
-- `COMPETITIVE_GAP.md`
-- `WORKBENCH_SPEC.md`
-- `AI_SYSTEM_SPEC.md`
-- `EXECUTION_PLAN.md`
-- `8_ADMIN_SYSTEM_SPEC.md`
-- `9_BACKEND_SYSTEM_SPEC.md`
-- `00_REALITY_MATRIX_2026-02-04.md`
-- `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
-- `11_WEB_USER_OWNER_TRIAGE_2026-02-11.md`
-- `12_INTERFACE_SYSTEMS_REFACTOR_CONTRACT_2026-02-11.md`
-- `13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
-- `14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
-- `15_AI_LIMITATIONS_SUBSYSTEMS_EXECUTION_2026-02-16.md`
-- `16_AI_GAMES_FILMS_APPS_SUBSYSTEM_BLUEPRINT_2026-02-16.md`
-- `17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
-- `18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
-- `19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
-- `20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
-- `22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`
-- `23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md`
-- `24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
-- `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
-- `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
-- `27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md`
-- `28_UX_SUPERIORITY_MANUAL_2026-02-28.md`
-- `29_AUDITORIA_360_P0_HUNT_2026-02-28.md`
-- `30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md`
-- `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
-- `32_GLOBAL_GAP_REGISTER_2026-03-01.md`
-- `33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
+- `docs/master/00_INDEX.md`
+- `docs/master/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
+- `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
+- `docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
+- `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
+- `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
+- `docs/master/41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
+- `docs/master/43_ADMIN_SYSTEM_SPEC_2026-03-22.md`
+- `docs/master/44_BACKEND_SYSTEM_SPEC_2026-03-22.md`
+- `docs/master/45_AI_SYSTEM_SPEC_2026-03-22.md`
+- `docs/master/46_LIMITATIONS_2026-03-22.md`
+- `docs/master/48_WORKBENCH_SPEC_2026-03-22.md`
+- `docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md`
+- `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
+- `docs/master/68_L5_UX_HARDENING_DELTA_2026-04-01.md`
+
+## Canonical Interface Layer
+The interface, UX, shell, mode, state, and component source of truth is:
+- `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+
+These files are not optional references.
+They are the active implementation-grade interface contract for Aethel.
 
 ## Historical note
 - `Relatorio_de_Continuacao_Auditoria_Multi-Agente.md` is historical and contains legacy external-path references; do not use it for current execution decisions.
@@ -55,12 +50,17 @@ Any Markdown outside `docs/master/` is historical unless explicitly referenced b
 - `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md` is the single execution master.
 - `11` and `12` remain historical compatibility records and are superseded by `10`.
 - New execution deltas must be appended to `10` and reflected in `13/14/17/18/20` when applicable.
+- `65` and `66` define the product and AI-operational experience direction.
+- `AETHEL_INTERFACE_BLUEPRINTS/` defines the canonical interface layer.
+- If an older UX or workbench document conflicts with the blueprint set, the blueprint set wins for interface decisions.
 
 ## Non-Negotiable Rules
 - No mock, placeholder, or fake success in critical user journeys.
 - Unavailable capability must remain explicit (`NOT_IMPLEMENTED`, `DEPRECATED_ROUTE`, etc.).
 - Conflicts between docs are resolved by `00_INDEX` + `10` + latest dated delta.
 - Active numerical baseline conflicts are resolved by `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` until a newer baseline file exists.
+- Legacy non-numbered docs in `docs/master/` are not canonical if a numbered replacement exists.
+- Legacy non-numbered docs outside the explicit canonical chain are compatibility artifacts only.
 - External benchmark claims only enter canonical docs as `EXTERNAL_BENCHMARK_ASSUMPTION` until verified in-repo.
 - Operational UX/market claims must align with `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`.
 - Repo-wide factual gap counts must align with `32_GLOBAL_GAP_REGISTER_2026-03-01.md`.

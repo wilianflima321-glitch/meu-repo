@@ -84,7 +84,7 @@ export function ContextMenuContent({
     <div
       ref={contentRef}
       className={cn(
-        'fixed z-50 min-w-[180px] rounded-lg border border-slate-700 bg-slate-800 p-1 shadow-xl',
+        'fixed z-50 min-w-[180px] rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-1 shadow-xl',
         className
       )}
       style={{ top: position.y, left: position.x }}
@@ -104,7 +104,7 @@ export function ContextMenuItem({
       role="menuitem"
       tabIndex={0}
       className={cn(
-        'flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-slate-700',
+        'flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]',
         className
       )}
       {...props}
@@ -115,7 +115,8 @@ export function ContextMenuItem({
 }
 
 export function ContextMenuSeparator({ className }: { className?: string }) {
-  return <div className={cn('my-1 h-px bg-slate-700', className)} />;
+  return <div className={cn('my-1 h-px bg-[var(--aethel-surface-quaternary)]', className)} />;
 }
 
 export default ContextMenu;
+

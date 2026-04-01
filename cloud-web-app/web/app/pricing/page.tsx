@@ -33,7 +33,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Games e Films estao incluidos?',
-    a: 'As superficies existem, mas o foco comercial do produto hoje continua em Apps + Research. Games e Films seguem em maturidade experimental.',
+    a: 'As superficies existem, mas o foco comercial do produto hoje continua em Apps + Pesquisa. Games e Films seguem em maturidade experimental.',
   },
   {
     q: 'O billing ja esta funcionando ponta a ponta?',
@@ -71,7 +71,7 @@ export default function PricingPage() {
   const corePlans = plans.filter((plan) => plan.id !== 'enterprise')
 
   return (
-    <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-[var(--aethel-primary-dark)]/[0.07] blur-[150px]" />
         <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[var(--aethel-info)]/[0.05] blur-[150px]" />
@@ -87,10 +87,10 @@ export default function PricingPage() {
                 Planos transparentes
               </div>
               <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
-                Pricing claro para builders e equipes.
+                Planos claros para builders e equipes.
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--aethel-text-secondary)]">
-                Apps + Research sao o foco atual. Os planos escalam por volume, contexto e colaboracao.
+                Apps + Pesquisa sao o foco atual. Os planos escalam por volume, contexto e colaboracao.
               </p>
 
               <div className="mt-8 flex flex-wrap justify-start gap-3">
@@ -113,7 +113,7 @@ export default function PricingPage() {
                   type="button"
                   onClick={() => setBillingCycle('month')}
                   className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                    billingCycle === 'month' ? 'bg-white text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+                    billingCycle === 'month' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   Mensal
@@ -122,7 +122,7 @@ export default function PricingPage() {
                   type="button"
                   onClick={() => setBillingCycle('year')}
                   className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                    billingCycle === 'year' ? 'bg-white text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+                    billingCycle === 'year' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   Anual
@@ -133,18 +133,18 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <aside className="overflow-hidden rounded-[28px] border border-white/10 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
-              <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+            <aside className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
+              <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-5 py-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Produto real</p>
                   <p className="mt-1 text-sm text-[var(--aethel-text-primary)]">Dashboard e workbench na mesma narrativa</p>
                 </div>
                 <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium text-emerald-200">
-                  Apps + Research
+                  Apps + Pesquisa
                 </div>
               </div>
 
-              <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
+              <div className="relative aspect-[16/10] overflow-hidden bg-[var(--aethel-surface-primary)]">
                 <Image
                   src="/screenshots/dashboard.png"
                   alt="Dashboard do Aethel Studio"
@@ -153,7 +153,7 @@ export default function PricingPage() {
                   className="object-cover object-top"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[color-mix(in_srgb,var(--aethel-surface-primary)_75%,transparent)] via-transparent to-transparent" />
               </div>
 
               <div className="space-y-4 px-5 py-5">
@@ -161,9 +161,9 @@ export default function PricingPage() {
                   O plano certo depende do ritmo do time e do quanto do fluxo principal voce quer usar desde o primeiro dia.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Studio home</span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Workbench</span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Readiness visivel</span>
+                  <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Studio home</span>
+                  <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Workbench</span>
+                  <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Readiness visivel</span>
                 </div>
               </div>
             </aside>
@@ -177,12 +177,12 @@ export default function PricingPage() {
                 key={plan.id}
                 className={`relative flex h-full flex-col rounded-[24px] border p-5 transition-all ${
                   plan.popular
-                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-blue-500/[0.10] to-transparent shadow-xl shadow-blue-500/10'
+                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] to-transparent shadow-xl shadow-[rgba(79,70,229,0.18)]'
                     : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'
                 }`}
               >
                 {plan.popular ? (
-                  <div className="absolute -top-3.5 left-6 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-1 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-500/30">
+                  <div className="absolute -top-3.5 left-6 rounded-full bg-[linear-gradient(135deg,rgba(79,70,229,0.96),rgba(14,165,233,0.92))] px-4 py-1 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-[rgba(79,70,229,0.24)]">
                     Melhor equilibrio
                   </div>
                 ) : null}
@@ -204,9 +204,9 @@ export default function PricingPage() {
                 <div className="mb-5 grid grid-cols-2 gap-2">
                   {[
                     { label: 'Projetos', value: formatLimit(plan.limits.projects) },
-                    { label: 'Storage', value: formatStorage(plan.limits.storage) },
+                    { label: 'Armazenamento', value: formatStorage(plan.limits.storage) },
                     { label: 'Tokens/dia', value: formatLimit(plan.limits.tokensPerDay) },
-                    { label: 'Collab', value: formatLimit(plan.limits.collaborators) },
+                    { label: 'Colaboracao', value: formatLimit(plan.limits.collaborators) },
                   ].map((item) => (
                     <div key={item.label} className="rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3">
                       <p className="text-[9px] font-semibold uppercase tracking-wider text-[var(--aethel-text-tertiary)]">{item.label}</p>
@@ -244,31 +244,31 @@ export default function PricingPage() {
             <article className="overflow-hidden rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[linear-gradient(135deg,rgba(30,41,59,0.9),rgba(15,23,42,0.72))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
               <div className="grid gap-8 p-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:p-8">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-200/80">Enterprise</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">Enterprise</p>
                   <h2 className="mt-3 text-3xl font-bold text-white">Contrato para operacao maior, governanca e integracao customizada</h2>
-                  <p className="mt-4 text-sm leading-7 text-slate-300">
+                  <p className="mt-4 text-sm leading-7 text-[var(--aethel-text-secondary)]">
                     Quando a decisao envolve equipe, compliance, SSO, quota e trilha operacional, a conversa deixa de ser self-serve e vira arquitetura de rollout.
                   </p>
                   <div className="mt-6 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[11px] font-medium text-white">SSO + SAML</span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[11px] font-medium text-white">Audit logs</span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[11px] font-medium text-white">Support 24/7</span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[11px] font-medium text-white">Custom rollout</span>
+                    <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-white">SSO + SAML</span>
+                    <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-white">Trilhas de auditoria</span>
+                    <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-white">Suporte 24/7</span>
+                    <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-white">Rollout guiado</span>
                   </div>
                 </div>
 
-                <div className="grid gap-4 rounded-[24px] border border-white/10 bg-black/20 p-5 md:grid-cols-2">
+                <div className="grid gap-4 rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_68%,transparent)] p-5 md:grid-cols-2">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Preco base</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Preco base</p>
                     <p className="mt-2 text-3xl font-bold text-white">R${enterprisePlan.displayPriceBRL}</p>
-                    <p className="mt-1 text-xs text-slate-400">US${enterprisePlan.displayPrice}/{isAnnual ? 'ano' : 'mes'}</p>
+                    <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">US${enterprisePlan.displayPrice}/{isAnnual ? 'ano' : 'mes'}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Capacidade</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">{formatLimit(enterprisePlan.limits.projects)} projetos, {formatStorage(enterprisePlan.limits.storage)} storage, requests enterprise e rollout guiado.</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Capacidade</p>
+                    <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{formatLimit(enterprisePlan.limits.projects)} projetos, {formatStorage(enterprisePlan.limits.storage)} de armazenamento, requests enterprise e rollout guiado.</p>
                   </div>
                   <div className="md:col-span-2">
-                    <ul className="space-y-2 text-sm text-slate-300">
+                    <ul className="space-y-2 text-sm text-[var(--aethel-text-secondary)]">
                       {enterprisePlan.features.slice(0, 6).map((feature) => (
                         <li key={feature} className="flex items-start gap-2">
                           <span className="mt-0.5 shrink-0 text-emerald-300">
@@ -289,8 +289,8 @@ export default function PricingPage() {
         ) : null}
 
         <section className="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.86),rgba(2,6,23,0.86))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
-            <div className="border-b border-white/10 px-6 py-5">
+          <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.86),rgba(2,6,23,0.86))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
+            <div className="border-b border-[var(--aethel-border-primary)] px-6 py-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
                 Comparativo rapido
               </p>
@@ -373,3 +373,4 @@ export default function PricingPage() {
     </div>
   )
 }
+

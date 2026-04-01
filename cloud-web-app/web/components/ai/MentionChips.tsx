@@ -67,12 +67,12 @@ const icons: Record<MentionChipIcon, React.ReactNode> = {
 };
 
 const colorClasses: Record<MentionChipColor, { bg: string; text: string; border: string }> = {
-  violet: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20' },
-  blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
-  green: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
-  amber: { bg: 'bg-[var(--aethel-warning)]/10', text: 'text-[var(--aethel-warning-light)]', border: 'border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)]' },
-  red: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
-  slate: { bg: 'bg-slate-500/10', text: 'text-slate-400', border: 'border-slate-500/20' },
+  violet: { bg: 'bg-[color-mix(in_srgb,var(--aethel-primary)_14%,transparent)]', text: 'text-[var(--aethel-primary-light)]', border: 'border-[color-mix(in_srgb,var(--aethel-primary)_25%,transparent)]' },
+  blue: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)]', text: 'text-[var(--aethel-info-light)]', border: 'border-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)]' },
+  green: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_14%,transparent)]', text: 'text-[var(--aethel-success-light)]', border: 'border-[color-mix(in_srgb,var(--aethel-success)_25%,transparent)]' },
+  amber: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_14%,transparent)]', text: 'text-[var(--aethel-warning-light)]', border: 'border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)]' },
+  red: { bg: 'bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)]', text: 'text-[var(--aethel-error-light)]', border: 'border-[color-mix(in_srgb,var(--aethel-error)_25%,transparent)]' },
+  slate: { bg: 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]', text: 'text-[var(--aethel-text-tertiary)]', border: 'border-[var(--aethel-border-primary)]' },
 };
 
 // ============================================================================
@@ -98,7 +98,7 @@ export function MentionChip({
         border transition-all duration-150
         ${colors.bg} ${colors.text} ${colors.border}
         hover:brightness-125 cursor-pointer
-        focus:outline-none focus:ring-1 focus:ring-cyan-500
+        focus:outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]
       `}
       title={data.tag}
       aria-label={`Mention: ${data.label}`}
@@ -152,14 +152,14 @@ export function MentionPreviewPanel({
         </div>
         <button
           onClick={onClose}
-          className="text-slate-500 hover:text-slate-300 text-xs"
-          aria-label="Close preview"
+          className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] text-xs"
+          aria-label="Fechar preview"
         >
-          âœ•
+          x
         </button>
       </div>
       {chip.content && (
-        <pre className="text-xs text-slate-400 whitespace-pre-wrap max-h-40 overflow-y-auto font-mono leading-relaxed">
+        <pre className="text-xs text-[var(--aethel-text-tertiary)] whitespace-pre-wrap max-h-40 overflow-y-auto font-mono leading-relaxed">
           {chip.content}
         </pre>
       )}
@@ -172,13 +172,13 @@ export function MentionPreviewPanel({
 // ============================================================================
 
 const MENTION_TRIGGERS = [
-  { trigger: '@Codebase', tag: '@codebase', icon: 'code' as const, color: 'violet' as const, description: 'Full codebase context' },
-  { trigger: '@Docs', tag: '@docs:', icon: 'search' as const, color: 'blue' as const, description: 'Search documentation' },
-  { trigger: '@File', tag: '@file:', icon: 'file' as const, color: 'green' as const, description: 'Include specific file' },
-  { trigger: '@Folder', tag: '@folder:', icon: 'folder' as const, color: 'amber' as const, description: 'List folder contents' },
-  { trigger: '@Diff', tag: '@diff', icon: 'diff' as const, color: 'amber' as const, description: 'Working tree diff' },
-  { trigger: '@Error', tag: '@error', icon: 'bug' as const, color: 'red' as const, description: 'Build/lint diagnostics' },
-  { trigger: '@Git', tag: '@git:', icon: 'git' as const, color: 'amber' as const, description: 'Git status/diff/log' },
+  { trigger: '@Codebase', tag: '@codebase', icon: 'code' as const, color: 'violet' as const, description: 'Contexto completo da base de codigo' },
+  { trigger: '@Docs', tag: '@docs:', icon: 'search' as const, color: 'blue' as const, description: 'Pesquisar documentacao' },
+  { trigger: '@File', tag: '@file:', icon: 'file' as const, color: 'green' as const, description: 'Incluir arquivo especifico' },
+  { trigger: '@Folder', tag: '@folder:', icon: 'folder' as const, color: 'amber' as const, description: 'Listar conteudo da pasta' },
+  { trigger: '@Diff', tag: '@diff', icon: 'diff' as const, color: 'amber' as const, description: 'Diff do workspace' },
+  { trigger: '@Error', tag: '@error', icon: 'bug' as const, color: 'red' as const, description: 'Diagnostico de build/lint' },
+  { trigger: '@Git', tag: '@git:', icon: 'git' as const, color: 'amber' as const, description: 'Status e logs do Git' },
 ];
 
 export function MentionSuggestionList({
@@ -201,19 +201,19 @@ export function MentionSuggestionList({
   if (filtered.length === 0) return null;
 
   return (
-    <div className="absolute bottom-full left-0 mb-1 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-1 min-w-[200px] z-50">
+    <div className="absolute bottom-full left-0 mb-1 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-xl p-1 min-w-[200px] z-50">
       {filtered.map((item) => {
         const colors = colorClasses[item.color];
         return (
           <button
             key={item.trigger}
             onClick={() => onSelect(item.tag)}
-            className="flex items-center gap-2 w-full px-2 py-1.5 text-left rounded-md hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-2 w-full px-2 py-1.5 text-left rounded-md hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] transition-colors"
           >
             <span className={colors.text}>{icons[item.icon]}</span>
             <div>
-              <span className="text-xs text-slate-200">{item.trigger}</span>
-              <span className="text-[10px] text-slate-500 ml-2">{item.description}</span>
+              <span className="text-xs text-[var(--aethel-text-secondary)]">{item.trigger}</span>
+              <span className="text-[10px] text-[var(--aethel-text-quaternary)] ml-2">{item.description}</span>
             </div>
           </button>
         );

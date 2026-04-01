@@ -248,7 +248,7 @@ const VariablesPanel: React.FC<{
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Variables</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
+          className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
@@ -270,7 +270,7 @@ const VariablesPanel: React.FC<{
               </div>
               <button
                 onClick={() => onDelete(v.id)}
-                className="text-red-500 hover:text-red-400"
+                className="text-red-500 hover:text-[var(--aethel-error)]"
               >
                 ×
               </button>
@@ -327,7 +327,7 @@ const ComponentsPanel: React.FC<{
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Components</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
+          className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
@@ -361,7 +361,7 @@ const FunctionsPanel: React.FC<{
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Functions</span>
         <button
           onClick={onAdd}
-          className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
+          className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-green-700 rounded text-[var(--aethel-text-primary)]"
         >
           + Add
         </button>
@@ -386,7 +386,7 @@ const FunctionsPanel: React.FC<{
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(f.id); }}
-                className="text-red-500 hover:text-red-400"
+                className="text-red-500 hover:text-[var(--aethel-error)]"
               >
                 ×
               </button>
@@ -716,7 +716,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           <div className="flex items-center gap-2">
             <button
               onClick={handleCompile}
-              className="px-4 py-1.5 bg-green-600 hover:bg-green-700 rounded text-sm font-medium"
+              className="px-4 py-1.5 bg-[var(--aethel-success)] hover:bg-green-700 rounded text-sm font-medium"
             >
               Compile
             </button>

@@ -41,7 +41,7 @@ export function SkeletonBox({
 
   return (
     <div
-      className={`bg-zinc-800 ${roundedClasses[rounded]} ${animate ? 'animate-pulse' : ''} ${className}`}
+      className={`bg-[var(--aethel-surface-tertiary)] ${roundedClasses[rounded]} ${animate ? 'animate-pulse' : ''} ${className}`}
       style={{
         width: typeof width === 'number' ? `${width}px` : width,
         height: typeof height === 'number' ? `${height}px` : height,
@@ -102,7 +102,7 @@ export function SkeletonAvatar({ size = 40, className = '' }: SkeletonAvatarProp
 
 export function SkeletonAssetCard() {
   return (
-    <div className="bg-zinc-800/50 rounded-xl overflow-hidden">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded-xl overflow-hidden">
       {/* Thumbnail */}
       <SkeletonBox height={120} rounded="none" />
       
@@ -138,10 +138,10 @@ export function SkeletonContentBrowser({
   const totalCards = columns * rows;
 
   return (
-    <div className="h-full flex flex-col bg-zinc-900 rounded-xl overflow-hidden">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-secondary)] rounded-xl overflow-hidden">
       {/* Header */}
       {showHeader && (
-        <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center gap-3">
             <SkeletonBox width={32} height={32} rounded="lg" />
             <SkeletonBox width={120} height={20} rounded="md" />
@@ -156,7 +156,7 @@ export function SkeletonContentBrowser({
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         {showSidebar && (
-          <div className="w-48 p-3 border-r border-zinc-800 space-y-2">
+          <div className="w-48 p-3 border-r border-[var(--aethel-border-primary)] space-y-2">
             <SkeletonBox height={12} width="60%" rounded="sm" className="mb-4" />
             {Array.from({ length: 6 }).map((_, i) => (
               <SkeletonBox key={i} height={32} rounded="lg" />
@@ -196,7 +196,7 @@ export function SkeletonContentBrowser({
 
 export function SkeletonProjectCard() {
   return (
-    <div className="bg-zinc-800/50 rounded-2xl overflow-hidden">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded-2xl overflow-hidden">
       {/* Thumbnail */}
       <SkeletonBox height={180} rounded="none" />
       
@@ -235,7 +235,7 @@ export function SkeletonDashboard() {
       {/* Stats Row */}
       <div className="grid grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-zinc-800/50 rounded-xl p-4 space-y-3">
+          <div key={i} className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between">
               <SkeletonBox width={40} height={40} rounded="lg" />
               <SkeletonBox width={60} height={20} rounded="md" />
@@ -272,7 +272,7 @@ export function SkeletonChatMessage({ isUser = false }: { isUser?: boolean }) {
       <SkeletonAvatar size={36} />
       <div className={`flex-1 max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
         <SkeletonBox height={14} width={80} rounded="sm" className="mb-2" />
-        <div className="bg-zinc-800/50 rounded-2xl p-4 space-y-2">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded-2xl p-4 space-y-2">
           <SkeletonBox height={14} width="100%" rounded="sm" />
           <SkeletonBox height={14} width="90%" rounded="sm" />
           <SkeletonBox height={14} width="60%" rounded="sm" />
@@ -288,9 +288,9 @@ export function SkeletonChatMessage({ isUser = false }: { isUser?: boolean }) {
 
 export function SkeletonChatPanel() {
   return (
-    <div className="h-full flex flex-col bg-zinc-900 rounded-xl overflow-hidden">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-secondary)] rounded-xl overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-zinc-800">
+      <div className="flex items-center gap-3 p-4 border-b border-[var(--aethel-border-primary)]">
         <SkeletonAvatar size={40} />
         <div className="flex-1">
           <SkeletonBox height={16} width={120} rounded="sm" />
@@ -307,7 +307,7 @@ export function SkeletonChatPanel() {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-zinc-800">
+      <div className="p-4 border-t border-[var(--aethel-border-primary)]">
         <SkeletonBox height={48} rounded="xl" />
       </div>
     </div>
@@ -320,9 +320,9 @@ export function SkeletonChatPanel() {
 
 export function SkeletonEditorPanel() {
   return (
-    <div className="h-full flex flex-col bg-zinc-900 rounded-xl overflow-hidden">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-secondary)] rounded-xl overflow-hidden">
       {/* Tabs */}
-      <div className="flex items-center gap-1 p-2 border-b border-zinc-800">
+      <div className="flex items-center gap-1 p-2 border-b border-[var(--aethel-border-primary)]">
         <SkeletonBox width={120} height={32} rounded="lg" />
         <SkeletonBox width={100} height={32} rounded="lg" />
         <SkeletonBox width={90} height={32} rounded="lg" />
@@ -393,7 +393,7 @@ export function SkeletonPropertiesPanel() {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-3 pb-3 border-b border-zinc-800">
+      <div className="flex items-center gap-3 pb-3 border-b border-[var(--aethel-border-primary)]">
         <SkeletonBox width={24} height={24} rounded="lg" />
         <SkeletonBox height={18} width="60%" rounded="sm" />
       </div>
@@ -422,9 +422,9 @@ export function SkeletonPropertiesPanel() {
 
 export function SkeletonIDELayout() {
   return (
-    <div className="h-screen flex flex-col bg-zinc-950">
+    <div className="h-screen flex flex-col bg-[var(--aethel-surface-primary)]">
       {/* Top Bar */}
-      <div className="h-12 flex items-center justify-between px-4 border-b border-zinc-800">
+      <div className="h-12 flex items-center justify-between px-4 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-4">
           <SkeletonBox width={32} height={32} rounded="lg" />
           <div className="flex items-center gap-2">
@@ -443,7 +443,7 @@ export function SkeletonIDELayout() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar */}
-        <div className="w-64 border-r border-zinc-800 p-2">
+        <div className="w-64 border-r border-[var(--aethel-border-primary)] p-2">
           <SkeletonHierarchyTree />
         </div>
 
@@ -451,23 +451,23 @@ export function SkeletonIDELayout() {
         <div className="flex-1 flex flex-col">
           {/* Viewport */}
           <div className="flex-1 p-2">
-            <SkeletonBox height="100%" rounded="xl" className="bg-zinc-800/30" />
+            <SkeletonBox height="100%" rounded="xl" className="bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_30%,transparent)]" />
           </div>
           
           {/* Bottom Panel */}
-          <div className="h-48 border-t border-zinc-800">
+          <div className="h-48 border-t border-[var(--aethel-border-primary)]">
             <SkeletonEditorPanel />
           </div>
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-72 border-l border-zinc-800">
+        <div className="w-72 border-l border-[var(--aethel-border-primary)]">
           <SkeletonPropertiesPanel />
         </div>
       </div>
 
       {/* Status Bar */}
-      <div className="h-8 flex items-center justify-between px-4 border-t border-zinc-800 bg-zinc-900">
+      <div className="h-8 flex items-center justify-between px-4 border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
         <div className="flex items-center gap-4">
           <SkeletonBox width={80} height={14} rounded="sm" />
           <SkeletonBox width={60} height={14} rounded="sm" />

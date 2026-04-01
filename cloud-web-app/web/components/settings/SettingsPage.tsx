@@ -834,7 +834,7 @@ function SettingToggle({ setting, value, onChange }: SettingInputProps) {
     <button
       onClick={() => onChange(!value)}
       className={`relative w-11 h-6 rounded-full transition-colors ${
-        value ? 'bg-sky-600' : 'bg-slate-600'
+        value ? 'bg-sky-600' : 'bg-[var(--aethel-surface-quaternary)]'
       }`}
     >
       <span
@@ -851,7 +851,7 @@ function SettingSelect({ setting, value, onChange }: SettingInputProps) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white min-w-[200px]"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-white min-w-[200px]"
     >
       {setting.options?.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -871,7 +871,7 @@ function SettingNumber({ setting, value, onChange }: SettingInputProps) {
       min={setting.min}
       max={setting.max}
       step={setting.step || 1}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white w-24"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-white w-24"
     />
   )
 }
@@ -882,7 +882,7 @@ function SettingText({ setting, value, onChange }: SettingInputProps) {
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm text-white min-w-[300px]"
+      className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-white min-w-[300px]"
     />
   )
 }
@@ -899,7 +899,7 @@ function SettingSlider({ setting, value, onChange }: SettingInputProps) {
         step={setting.step || 1}
         className="w-32 accent-sky-500"
       />
-      <span className="text-sm text-slate-400 w-12">{value}</span>
+      <span className="text-sm text-[var(--aethel-text-tertiary)] w-12">{value}</span>
     </div>
   )
 }
@@ -922,7 +922,7 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
   }[setting.type] || SettingText
 
   return (
-    <div className="flex items-start justify-between py-4 border-b border-slate-800 group">
+    <div className="flex items-start justify-between py-4 border-b border-[var(--aethel-border-primary)] group">
       <div className="flex-1 pr-8">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-white">{setting.label}</span>
@@ -937,8 +937,8 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-500 mt-0.5">{setting.description}</p>
-        <p className="text-[10px] text-slate-600 font-mono mt-1">{setting.id}</p>
+        <p className="text-xs text-[var(--aethel-text-quaternary)] mt-0.5">{setting.description}</p>
+        <p className="text-[10px] text-[var(--aethel-text-quaternary)] font-mono mt-1">{setting.id}</p>
       </div>
 
       <div className="flex items-center gap-2">
@@ -950,7 +950,7 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
         {isModified && (
           <button
             onClick={onReset}
-            className="p-1 text-slate-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="p-1 text-[var(--aethel-text-quaternary)] hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
             title="Reset to default"
           >
             <RotateCcw className="w-4 h-4" />
@@ -1042,7 +1042,7 @@ export default function SettingsPage() {
   }, [settings])
 
   return (
-    <div className="flex h-full bg-slate-900">
+    <div className="flex h-full bg-[var(--aethel-surface-primary)]">
       <SettingsSidebar
         categories={CATEGORIES}
         modifiedCount={modifiedCount}
@@ -1081,3 +1081,4 @@ export default function SettingsPage() {
     </div>
   )
 }
+

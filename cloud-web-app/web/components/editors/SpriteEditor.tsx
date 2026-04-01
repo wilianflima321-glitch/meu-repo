@@ -213,8 +213,8 @@ function ToolButton({ icon, active, onClick, tooltip, shortcut }: ToolButtonProp
       onClick={onClick}
       className={`p-2 rounded transition-colors ${
         active 
-          ? 'bg-sky-600 text-white' 
-          : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+          ? 'bg-[var(--aethel-info)] text-white' 
+          : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)]'
       }`}
       title={`${tooltip}${shortcut ? ` (${shortcut})` : ''}`}
     >
@@ -248,7 +248,7 @@ function ColorSwatch({ color, selected, onClick, onRightClick, size = 'md' }: Co
         onRightClick?.()
       }}
       className={`${sizeClass} rounded border-2 ${
-        selected ? 'border-white' : 'border-slate-600'
+        selected ? 'border-white' : 'border-[var(--aethel-border-secondary)]'
       }`}
       style={{ backgroundColor: colorToRgba(color) }}
       title={colorToHex(color)}
@@ -282,15 +282,15 @@ function LayerPanel({
   onMoveLayer,
 }: LayerPanelProps) {
   return (
-    <div className="flex flex-col h-full bg-slate-800 border-l border-slate-700">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)]">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <span className="text-sm font-medium text-white flex items-center gap-2">
           <Layers className="w-4 h-4" />
           Layers
         </span>
         <button
           onClick={onAddLayer}
-          className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-white"
+          className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           title="Add Layer"
         >
           <Plus className="w-4 h-4" />
@@ -301,8 +301,8 @@ function LayerPanel({
         {[...layers].reverse().map((layer, idx) => (
           <div
             key={layer.id}
-            className={`flex items-center gap-2 px-2 py-1.5 border-b border-slate-700 cursor-pointer ${
-              layer.id === currentLayerId ? 'bg-sky-600/20' : 'hover:bg-slate-700/50'
+            className={`flex items-center gap-2 px-2 py-1.5 border-b border-[var(--aethel-border-primary)] cursor-pointer ${
+              layer.id === currentLayerId ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)]'
             }`}
             onClick={() => onSelectLayer(layer.id)}
           >
@@ -311,7 +311,7 @@ function LayerPanel({
                 e.stopPropagation()
                 onToggleVisibility(layer.id)
               }}
-              className="p-1 hover:bg-slate-600 rounded text-slate-400"
+              className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
             >
               {layer.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
             </button>
@@ -321,7 +321,7 @@ function LayerPanel({
                 e.stopPropagation()
                 onToggleLock(layer.id)
               }}
-              className="p-1 hover:bg-slate-600 rounded text-slate-400"
+              className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
             >
               {layer.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
             </button>
@@ -334,7 +334,7 @@ function LayerPanel({
                   e.stopPropagation()
                   onDuplicateLayer(layer.id)
                 }}
-                className="p-1 hover:bg-slate-600 rounded text-slate-400"
+                className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
                 title="Duplicate"
               >
                 <Copy className="w-3 h-3" />
@@ -344,7 +344,7 @@ function LayerPanel({
                   e.stopPropagation()
                   onDeleteLayer(layer.id)
                 }}
-                className="p-1 hover:bg-slate-600 rounded text-red-400"
+                className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-error)]"
                 title="Delete"
               >
                 <Trash2 className="w-3 h-3" />
@@ -389,12 +389,12 @@ function Timeline({
   onSetFrameDuration,
 }: TimelineProps) {
   return (
-    <div className="flex flex-col bg-slate-800 border-t border-slate-700">
+    <div className="flex flex-col bg-[var(--aethel-surface-secondary)] border-t border-[var(--aethel-border-primary)]">
       {/* Playback controls */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <button
           onClick={onPrevFrame}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Previous Frame"
         >
           <SkipBack className="w-4 h-4" />
@@ -402,7 +402,7 @@ function Timeline({
         
         <button
           onClick={isPlaying ? onPause : onPlay}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -410,13 +410,13 @@ function Timeline({
         
         <button
           onClick={onNextFrame}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Next Frame"
         >
           <SkipForward className="w-4 h-4" />
         </button>
         
-        <span className="text-xs text-slate-500 ml-2">
+        <span className="text-xs text-[var(--aethel-text-tertiary)] ml-2">
           Frame {currentFrameIndex + 1} / {frames.length}
         </span>
         
@@ -424,7 +424,7 @@ function Timeline({
         
         <button
           onClick={onAddFrame}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Add Frame"
         >
           <Plus className="w-4 h-4" />
@@ -439,18 +439,18 @@ function Timeline({
             className={`relative flex-shrink-0 w-16 h-16 rounded border-2 cursor-pointer ${
               idx === currentFrameIndex 
                 ? 'border-sky-500' 
-                : 'border-slate-600 hover:border-slate-500'
+                : 'border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
             }`}
             onClick={() => onSelectFrame(idx)}
           >
             {/* Mini preview would go here */}
-            <div className="absolute inset-0 bg-slate-700 flex items-center justify-center">
-              <span className="text-xs text-slate-400">{idx + 1}</span>
+            <div className="absolute inset-0 bg-[var(--aethel-surface-quaternary)] flex items-center justify-center">
+              <span className="text-xs text-[var(--aethel-text-tertiary)]">{idx + 1}</span>
             </div>
             
             {/* Frame duration */}
             <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-center">
-              <span className="text-[10px] text-slate-300">{frame.duration}ms</span>
+              <span className="text-[10px] text-[var(--aethel-text-secondary)]">{frame.duration}ms</span>
             </div>
           </div>
         ))}
@@ -875,22 +875,22 @@ export default function SpriteEditor() {
   }, [])
   
   return (
-    <div className="flex flex-col h-full bg-slate-900">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-primary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-white">Sprite Editor</span>
-          <span className="text-xs text-slate-500">{state.width} × {state.height}</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{state.width} × {state.height}</span>
         </div>
         
         <div className="flex items-center gap-2">
-          <button className="p-1.5 hover:bg-slate-700 rounded text-slate-400" title="Export">
+          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Export">
             <Download className="w-4 h-4" />
           </button>
-          <button className="p-1.5 hover:bg-slate-700 rounded text-slate-400" title="Import">
+          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Import">
             <Upload className="w-4 h-4" />
           </button>
-          <button className="p-1.5 hover:bg-slate-700 rounded text-slate-400" title="Settings">
+          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Settings">
             <Settings className="w-4 h-4" />
           </button>
         </div>
@@ -898,7 +898,7 @@ export default function SpriteEditor() {
       
       <div className="flex-1 flex overflow-hidden">
         {/* Left toolbar */}
-        <div className="flex flex-col gap-1 p-2 bg-slate-800 border-r border-slate-700">
+        <div className="flex flex-col gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)]">
           <ToolButton icon={<Pencil className="w-4 h-4" />} active={state.tool === 'pencil'} onClick={() => setState(s => ({ ...s, tool: 'pencil' }))} tooltip="Pencil" shortcut="B" />
           <ToolButton icon={<Eraser className="w-4 h-4" />} active={state.tool === 'eraser'} onClick={() => setState(s => ({ ...s, tool: 'eraser' }))} tooltip="Eraser" shortcut="E" />
           <ToolButton icon={<PaintBucket className="w-4 h-4" />} active={state.tool === 'fill'} onClick={() => setState(s => ({ ...s, tool: 'fill' }))} tooltip="Fill" shortcut="G" />
@@ -906,12 +906,12 @@ export default function SpriteEditor() {
           <ToolButton icon={<Square className="w-4 h-4" />} active={state.tool === 'rectangle'} onClick={() => setState(s => ({ ...s, tool: 'rectangle' }))} tooltip="Rectangle" shortcut="R" />
           <ToolButton icon={<Circle className="w-4 h-4" />} active={state.tool === 'circle'} onClick={() => setState(s => ({ ...s, tool: 'circle' }))} tooltip="Circle" shortcut="C" />
           
-          <div className="h-px bg-slate-700 my-2" />
+          <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
           
           <ToolButton icon={<Undo className="w-4 h-4" />} active={false} onClick={() => {}} tooltip="Undo" shortcut="Ctrl+Z" />
           <ToolButton icon={<Redo className="w-4 h-4" />} active={false} onClick={() => {}} tooltip="Redo" shortcut="Ctrl+Y" />
           
-          <div className="h-px bg-slate-700 my-2" />
+          <div className="h-px bg-[var(--aethel-surface-quaternary)] my-2" />
           
           <ToolButton icon={<ZoomIn className="w-4 h-4" />} active={false} onClick={() => setState(s => ({ ...s, zoom: Math.min(32, s.zoom + 2) }))} tooltip="Zoom In" shortcut="+" />
           <ToolButton icon={<ZoomOut className="w-4 h-4" />} active={false} onClick={() => setState(s => ({ ...s, zoom: Math.max(2, s.zoom - 2) }))} tooltip="Zoom Out" shortcut="-" />
@@ -929,7 +929,7 @@ export default function SpriteEditor() {
         </div>
         
         {/* Canvas area */}
-        <div className="flex-1 flex items-center justify-center bg-slate-950 overflow-auto">
+        <div className="flex-1 flex items-center justify-center bg-[var(--aethel-surface-primary)] overflow-auto">
           <canvas
             ref={canvasRef}
             width={state.width * state.zoom}
@@ -946,9 +946,9 @@ export default function SpriteEditor() {
         {/* Right panel - Layers & Palette */}
         <div className="w-64 flex flex-col">
           {/* Palette */}
-          <div className="p-3 bg-slate-800 border-b border-slate-700">
+          <div className="p-3 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center gap-2 mb-2">
-              <Palette className="w-4 h-4 text-slate-400" />
+              <Palette className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
               <span className="text-sm font-medium text-white">Palette</span>
             </div>
             <div className="grid grid-cols-8 gap-1">

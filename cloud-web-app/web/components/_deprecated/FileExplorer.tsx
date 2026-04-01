@@ -78,7 +78,7 @@ export default function FileExplorer() {
           style={indent}
           onClick={() => console.log('Open file:', node.path)}
         >
-          <DocumentIcon className="aethel-file-tree-icon text-slate-400" />
+          <DocumentIcon className="aethel-file-tree-icon text-[var(--aethel-text-tertiary)]" />
           <span className="text-sm truncate">{node.name}</span>
         </div>
       );
@@ -92,12 +92,12 @@ export default function FileExplorer() {
           onClick={() => toggleFolder(node.path)}
         >
           {node.expanded ? (
-            <ChevronDownIcon className="aethel-file-tree-icon text-slate-400" />
+            <ChevronDownIcon className="aethel-file-tree-icon text-[var(--aethel-text-tertiary)]" />
           ) : (
-            <ChevronRightIcon className="aethel-file-tree-icon text-slate-400" />
+            <ChevronRightIcon className="aethel-file-tree-icon text-[var(--aethel-text-tertiary)]" />
           )}
           <FolderIcon className={`aethel-file-tree-icon ${
-            node.expanded ? 'text-emerald-400' : 'text-slate-400'
+            node.expanded ? 'text-emerald-400' : 'text-[var(--aethel-text-tertiary)]'
           }`} />
           <span className="text-sm font-medium">{node.name}</span>
         </div>
@@ -114,7 +114,7 @@ export default function FileExplorer() {
     <div className="aethel-panel aethel-flex aethel-items-center aethel-justify-center aethel-p-8">
       <div className="aethel-flex aethel-flex-col aethel-items-center aethel-gap-3">
         <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-        <span className="text-sm text-slate-400">Loading file structure...</span>
+        <span className="text-sm text-[var(--aethel-text-tertiary)]">Loading file structure...</span>
       </div>
     </div>
   );
@@ -124,7 +124,7 @@ export default function FileExplorer() {
       <div className="aethel-panel-header aethel-flex aethel-items-center aethel-justify-between">
         <div className="aethel-flex aethel-items-center aethel-gap-3">
           <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-teal-500 rounded aethel-flex aethel-items-center aethel-justify-center">
-            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 text-[var(--aethel-text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v0M8 5a2 2 0 012-2h4a2 2 0 012 2v0" />
             </svg>
@@ -153,7 +153,7 @@ export default function FileExplorer() {
       <div className="aethel-panel-content p-0">
         <div className="aethel-file-tree">
           {errorMessage ? (
-            <div className="aethel-p-4 text-sm text-slate-400">{errorMessage}</div>
+            <div className="aethel-p-4 text-sm text-[var(--aethel-text-tertiary)]">{errorMessage}</div>
           ) : (
             files.map(node => renderNode(node))
           )}

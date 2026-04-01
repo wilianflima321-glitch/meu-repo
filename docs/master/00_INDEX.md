@@ -6,43 +6,37 @@ Status: CANONICAL ENTRYPOINT
 1. `docs/master/00_INDEX.md`
 2. `docs/master/00_FONTE_CANONICA.md`
 3. `docs/master/10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md`
-4. `docs/master/13_CRITICAL_AGENT_LIMITATIONS_QUALITIES_2026-02-13.md`
-5. `docs/master/14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13.md`
-6. `docs/master/17_CAPABILITY_ENDPOINT_MATRIX_2026-02-16.md`
-7. `docs/master/18_INTERFACE_SURFACE_MAP_FOR_CLAUDE_2026-02-17.md`
-8. `docs/master/20_P1_P2_PRIORITY_EXECUTION_LIST_2026-02-17.md`
-9. `docs/master/22_REPO_CONNECTIVITY_MATRIX_2026-02-27.md`
-10. `docs/master/23_CRITICAL_LIMITATIONS_AND_MARKET_SUPERIORITY_PLAN_2026-02-28.md`
-11. `docs/master/24_GAMES_FILMS_APPS_GAP_ALIGNMENT_MATRIX_2026-02-28.md`
-12. `docs/master/25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md`
-13. `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
-14. `docs/master/27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md`
-15. `docs/master/28_UX_SUPERIORITY_MANUAL_2026-02-28.md`
-16. `docs/master/29_AUDITORIA_360_P0_HUNT_2026-02-28.md`
-17. `docs/master/30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md`
-18. `docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
-19. `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
-20. `docs/master/15_AI_LIMITATIONS_SUBSYSTEMS_EXECUTION_2026-02-16.md`
-21. `docs/master/16_AI_GAMES_FILMS_APPS_SUBSYSTEM_BLUEPRINT_2026-02-16.md`
-22. `docs/master/19_RUNTIME_ENV_WARNING_RUNBOOK_2026-02-17.md`
-23. `docs/master/43_ADMIN_SYSTEM_SPEC_2026-03-22.md`
-24. `docs/master/44_BACKEND_SYSTEM_SPEC_2026-03-22.md`
-25. `docs/master/45_AI_SYSTEM_SPEC_2026-03-22.md`
-26. `docs/master/46_LIMITATIONS_2026-03-22.md`
-27. `docs/master/41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
-28. `docs/master/48_WORKBENCH_SPEC_2026-03-22.md`
-29. `docs/master/33_L4_L5_CORE_LOOP_PROMOTION_PROGRAM_2026-03-03.md`
-30. `docs/master/34_EXECUTIVE_TEXT_VERIFICATION_ALIGNMENT_2026-03-04.md`
-31. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
-32. `docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md`
-33. `docs/master/37_AVALIACAO_TECNICA_DEFINITIVA_2026-03-08.md`
-34. `docs/master/38_L5_EXECUTION_BOARD_2026-03-10.md`
-35. `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
-36. `docs/master/40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md`
-37. `docs/master/41_AUDITORIA_MAXIMA_2026-03-20.md`
-38. `docs/master/42_RELATORIO_COMPLETO_PENDENCIAS_2026-03-20.md`
-39. `docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md`
-40. `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
+4. `docs/master/26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md`
+5. `docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
+6. `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
+7. `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
+8. `docs/master/41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
+9. `docs/master/43_ADMIN_SYSTEM_SPEC_2026-03-22.md`
+10. `docs/master/44_BACKEND_SYSTEM_SPEC_2026-03-22.md`
+11. `docs/master/45_AI_SYSTEM_SPEC_2026-03-22.md`
+12. `docs/master/46_LIMITATIONS_2026-03-22.md`
+13. `docs/master/48_WORKBENCH_SPEC_2026-03-22.md`
+14. `docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md`
+15. `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
+16. `docs/master/68_L5_UX_HARDENING_DELTA_2026-04-01.md`
+17. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+18. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+19. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+20. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+
+## Canonical Interface Layer
+The interface source of truth no longer lives only inside `docs/master`.
+The canonical UI/UX, shell, mode, state, and component contracts now live in:
+
+- `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+
+Rules:
+- `docs/master/65_*` and `66_*` define product and AI-experience direction.
+- `AETHEL_INTERFACE_BLUEPRINTS/` defines the implementation-grade interface layer.
+- If an older UX or workbench document conflicts with the blueprint set, the blueprint set wins for interface decisions.
 
 ## Canonical Numbered Set
 | Doc | Role | Status |
@@ -66,7 +60,7 @@ Status: CANONICAL ENTRYPOINT
 | `25_MARKET_LIMITATIONS_PARITY_PLAYBOOK_2026-02-28.md` | Market parity/superiority comparison playbook | ACTIVE |
 | `26_CANONICAL_ALIGNMENT_BASELINE_2026-02-28.md` | Canonical active baseline override | ACTIVE |
 | `27_DOMAIN_READINESS_SCORECARDS_2026-02-28.md` | Domain readiness thresholds | ACTIVE |
-| `28_UX_SUPERIORITY_MANUAL_2026-02-28.md` | UX superiority guidelines | ACTIVE |
+| `28_UX_SUPERIORITY_MANUAL_2026-02-28.md` | UX superiority guidelines | REFERENCE (SUPERSEDED BY `65`, `66`, AND `AETHEL_INTERFACE_BLUEPRINTS/`) |
 | `29_AUDITORIA_360_P0_HUNT_2026-02-28.md` | Critical 360 audit & P0 hunt | ACTIVE |
 | `30_AETHEL_ENGINE_FINAL_STATE_2026-02-28.md` | Final state & roadmap | ACTIVE |
 | `31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md` | Executive gap reality + closure order | ACTIVE |
@@ -79,9 +73,10 @@ Status: CANONICAL ENTRYPOINT
 | `38_L5_EXECUTION_BOARD_2026-03-10.md` | Master tracking board for L4/L5 execution | ACTIVE |
 | `39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md` | Unified Studio information architecture and navigation contract | ACTIVE |
 | `40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md` | Consolidated L5 execution plan and dependency graph | ACTIVE |
-| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificação) | ACTIVE (DRAFT) |
+| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificação) | HISTORICAL DRAFT (NUMBER COLLISION; DO NOT USE AS PRIMARY AUTHORITY) |
 | `65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for navigation, layers, screens and handoffs | ACTIVE |
 | `66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for multi-agent UX, status, cost, confidence, approvals, memory and context | ACTIVE |
+| `68_L5_UX_HARDENING_DELTA_2026-04-01.md` | L5 UX hardening sweep summary | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -90,7 +85,7 @@ Status: CANONICAL ENTRYPOINT
 | `51_DUPLICATIONS_AND_CONFLICTS_2026-03-22.md` | Duplication/conflict execution map | ACTIVE (REFRESHED 2026-03-07) |
 | `46_LIMITATIONS_2026-03-22.md` | Non-negotiable technical limits | ACTIVE |
 | `47_COMPETITIVE_GAP_2026-03-22.md` | Competitive decomposition | MIXED FACTS+ASSUMPTIONS |
-| `48_WORKBENCH_SPEC_2026-03-22.md` | Workbench contract | ACTIVE |
+| `48_WORKBENCH_SPEC_2026-03-22.md` | Workbench contract | ACTIVE (TECHNICAL REFERENCE; INTERFACE AUTHORITY NOW IN `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`) |
 | `45_AI_SYSTEM_SPEC_2026-03-22.md` | AI system contract | ACTIVE |
 | `49_EXECUTION_PLAN_2026-03-22.md` | Execution reference | PARTIALLY SUPERSEDED BY `10` |
 | `43_ADMIN_SYSTEM_SPEC_2026-03-22.md` | Admin scope | ACTIVE |
@@ -191,6 +186,11 @@ Status: CANONICAL ENTRYPOINT
   - billing runtime now green in local test mode (Stripe CLI webhook secret configured),
   - operator readiness green end-to-end,
   - latest production probe metrics: `sampleSize=115`, `feedback_coverage=0.8957`.
+- Delta 2026-04-01:
+  - L5 UX hardening across IDE/chat/preview/editor and core UI primitives,
+  - localization sweep to PT-BR on critical flows,
+  - Aethel token enforcement on formerly template-driven palettes,
+  - explicit state honesty for preview/runtime and Git UI empty/error/loading states.
 
 ## External Benchmark Absorption Rule
 - External claims are directional only.
@@ -202,6 +202,7 @@ Status: CANONICAL ENTRYPOINT
 - Always start from this file.
 - Do not use `docs/archive/` as source of truth.
 - Do not claim completion without file-level evidence.
+- Do not treat legacy non-numbered docs in `docs/master/` as canonical if a numbered replacement or blueprint exists.
 
 
 

@@ -62,12 +62,12 @@ export default function IDEDocsPage() {
     <div className="min-h-screen bg-black text-[var(--aethel-text-primary)]">
       <PublicHeader />
       <main className="relative z-10 mx-auto max-w-4xl px-6 pt-12 pb-20">
-        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
           <ArrowLeft className="h-4 w-4" /> Back to Docs
         </Link>
 
         <h1 className="text-4xl font-bold">IDE / Workbench</h1>
-        <p className="mt-3 text-lg text-zinc-400">
+        <p className="mt-3 text-lg text-[var(--aethel-text-tertiary)]">
           Full-featured cloud IDE with AI assistance, live preview, and integrated terminal.
         </p>
 
@@ -81,12 +81,12 @@ export default function IDEDocsPage() {
                   <Icon className="h-5 w-5 text-[var(--aethel-primary-light)]" />
                   <h3 className="font-semibold">{feature.title}</h3>
                   {feature.shortcut && (
-                    <kbd className="ml-auto rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400">
+                    <kbd className="ml-auto rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-[var(--aethel-text-tertiary)]">
                       {feature.shortcut}
                     </kbd>
                   )}
                 </div>
-                <p className="text-sm text-zinc-400">{feature.description}</p>
+                <p className="text-sm text-[var(--aethel-text-tertiary)]">{feature.description}</p>
               </div>
             )
           })}
@@ -101,8 +101,8 @@ export default function IDEDocsPage() {
                 i < KEYBOARD_SHORTCUTS.length - 1 ? 'border-b border-white/5' : ''
               }`}
             >
-              <span className="text-sm text-zinc-300">{shortcut.action}</span>
-              <kbd className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-xs font-mono text-zinc-400">
+              <span className="text-sm text-[var(--aethel-text-secondary)]">{shortcut.action}</span>
+              <kbd className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-xs font-mono text-[var(--aethel-text-tertiary)]">
                 {shortcut.key}
               </kbd>
             </div>
@@ -111,7 +111,7 @@ export default function IDEDocsPage() {
 
         <h2 className="mt-10 text-2xl font-semibold">AI Context Mentions</h2>
         <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-6">
-          <p className="text-sm text-zinc-400 mb-4">
+          <p className="text-sm text-[var(--aethel-text-tertiary)] mb-4">
             Use @mentions in the AI chat to inject specific context:
           </p>
           <div className="grid gap-2">
@@ -124,7 +124,7 @@ export default function IDEDocsPage() {
             ].map((item) => (
               <div key={item.mention} className="flex items-center gap-3 rounded-lg bg-white/[0.02] px-3 py-2">
                 <code className="text-sm font-mono font-semibold text-[var(--aethel-primary-light)]">{item.mention}</code>
-                <span className="text-sm text-zinc-400">{item.desc}</span>
+                <span className="text-sm text-[var(--aethel-text-tertiary)]">{item.desc}</span>
               </div>
             ))}
           </div>
@@ -134,3 +134,4 @@ export default function IDEDocsPage() {
     </div>
   )
 }
+

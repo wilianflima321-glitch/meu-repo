@@ -317,15 +317,15 @@ export function PeekWidget({
   return (
     <div
       ref={widgetRef}
-      className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden max-w-3xl"
+      className="bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden max-w-3xl"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-3 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <FileCode className="w-4 h-4 text-[var(--aethel-primary-light)]" />
-          <span className="text-sm font-medium text-white">{config.title}</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{config.title}</span>
           {config.definitions.length > 1 && (
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-[var(--aethel-text-tertiary)]">
               ({selectedIndex + 1} of {config.definitions.length})
             </span>
           )}
@@ -333,16 +333,16 @@ export function PeekWidget({
         <div className="flex items-center gap-1">
           <button
             onClick={() => onNavigate(selectedDefinition)}
-            className="p-1 hover:bg-slate-700 rounded"
+            className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
             title="Go to definition"
           >
-            <ExternalLink className="w-4 h-4 text-slate-400" />
+            <ExternalLink className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           </button>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-slate-700 rounded"
+            className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
-            <X className="w-4 h-4 text-slate-400" />
+            <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           </button>
         </div>
       </div>
@@ -350,21 +350,21 @@ export function PeekWidget({
       <div className="flex">
         {/* Definitions List (if multiple) */}
         {config.definitions.length > 1 && (
-          <div className="w-48 border-r border-slate-700 max-h-80 overflow-y-auto">
+          <div className="w-48 border-r border-[var(--aethel-border-primary)] max-h-80 overflow-y-auto">
             {config.definitions.map((def, index) => (
               <button
                 key={`${def.uri}-${def.range.startLine}`}
                 onClick={() => setSelectedIndex(index)}
                 className={`w-full px-3 py-2 text-left text-sm transition-colors ${
                   index === selectedIndex
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)] text-white'
-                    : 'hover:bg-slate-800 text-slate-300'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)] text-[var(--aethel-text-primary)]'
+                    : 'hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]'
                 }`}
               >
                 <div className="font-medium truncate">
                   {def.name || getFileName(def.uri)}
                 </div>
-                <div className="text-xs text-slate-500 truncate">
+                <div className="text-xs text-[var(--aethel-text-quaternary)] truncate">
                   {getRelativePath(def.uri)}:{def.range.startLine}
                 </div>
               </button>
@@ -375,9 +375,9 @@ export function PeekWidget({
         {/* Preview */}
         <div className="flex-1 max-h-80 overflow-auto">
           {/* File path */}
-          <div className="sticky top-0 flex items-center gap-2 px-3 py-1.5 bg-slate-850 border-b border-slate-700 text-xs">
-            <span className="text-slate-400">{getRelativePath(selectedDefinition.uri)}</span>
-            <span className="text-slate-600">:</span>
+          <div className="sticky top-0 flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border-b border-[var(--aethel-border-primary)] text-xs">
+            <span className="text-[var(--aethel-text-tertiary)]">{getRelativePath(selectedDefinition.uri)}</span>
+            <span className="text-[var(--aethel-text-quaternary)]">:</span>
             <span className="text-[var(--aethel-primary-light)]">{selectedDefinition.range.startLine}</span>
           </div>
 
@@ -395,33 +395,33 @@ export function PeekWidget({
                     className={`flex ${isTargetLine ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)]' : ''}`}
                   >
                     <span className={`w-10 pr-2 text-right select-none ${
-                      isTargetLine ? 'text-[var(--aethel-primary-light)]' : 'text-slate-600'
+                      isTargetLine ? 'text-[var(--aethel-primary-light)]' : 'text-[var(--aethel-text-quaternary)]'
                     }`}>
                       {lineNumber}
                     </span>
-                    <span className="text-slate-300 whitespace-pre">
+                    <span className="text-[var(--aethel-text-secondary)] whitespace-pre">
                       {line}
                     </span>
                   </div>
                 );
               })
             ) : (
-              <div className="text-slate-500">Loading preview...</div>
+              <div className="text-[var(--aethel-text-quaternary)]">Loading preview...</div>
             )}
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="px-3 py-1.5 bg-slate-800 border-t border-slate-700 text-xs text-slate-500 flex items-center gap-4">
+      <div className="px-3 py-1.5 bg-[var(--aethel-surface-secondary)] border-t border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-quaternary)] flex items-center gap-4">
         <span>
-          <kbd className="px-1 bg-slate-700 rounded">Enter</kbd> to go
+          <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Enter</kbd> to go
         </span>
         <span>
-          <kbd className="px-1 bg-slate-700 rounded">↑↓</kbd> navigate
+          <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">↑↓</kbd> navigate
         </span>
         <span>
-          <kbd className="px-1 bg-slate-700 rounded">Esc</kbd> close
+          <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Esc</kbd> close
         </span>
       </div>
     </div>
@@ -500,34 +500,34 @@ export function ReferencesPanel({
   );
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Search className="w-4 h-4 text-[var(--aethel-primary-light)]" />
-          <span className="text-sm font-medium text-white">
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">
             {totalRefs} reference{totalRefs !== 1 ? 's' : ''}
           </span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-[var(--aethel-text-quaternary)]">
             in {Object.keys(filteredGroupedRefs).length} file{Object.keys(filteredGroupedRefs).length !== 1 ? 's' : ''}
           </span>
         </div>
         <button
           onClick={onClose}
-          className="p-1 hover:bg-slate-800 rounded"
+          className="p-1 hover:bg-[var(--aethel-surface-secondary)] rounded"
         >
-          <X className="w-4 h-4 text-slate-400" />
+          <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         </button>
       </div>
 
       {/* Filter */}
-      <div className="px-3 py-2 border-b border-slate-800">
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <input
           type="text"
           value={filter}
           onChange={e => setFilter(e.target.value)}
           placeholder="Filter references..."
-          className="w-full px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]"
+          className="w-full px-2 py-1 text-sm bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]"
         />
       </div>
 
@@ -538,27 +538,27 @@ export function ReferencesPanel({
           const isCurrentFile = uri === currentUri;
 
           return (
-            <div key={uri} className="border-b border-slate-800/50">
+            <div key={uri} className="border-b border-[var(--aethel-border-primary)]/50">
               {/* File header */}
               <button
                 onClick={() => toggleFile(uri)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-slate-800/50 transition-colors ${
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-secondary)]/50 transition-colors ${
                   isCurrentFile ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_10%,transparent)]' : ''
                 }`}
               >
                 {isExpanded ? (
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                  <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                 )}
                 <FileCode className="w-4 h-4 text-sky-400" />
-                <span className="text-sm text-white font-medium">
+                <span className="text-sm text-[var(--aethel-text-primary)] font-medium">
                   {getFileName(uri)}
                 </span>
-                <span className="text-xs text-slate-500 truncate">
+                <span className="text-xs text-[var(--aethel-text-quaternary)] truncate">
                   {getRelativePath(uri)}
                 </span>
-                <span className="ml-auto text-xs text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">
+                <span className="ml-auto text-xs text-[var(--aethel-text-quaternary)] bg-[var(--aethel-surface-secondary)] px-1.5 py-0.5 rounded">
                   {refs.length}
                 </span>
               </button>
@@ -570,15 +570,15 @@ export function ReferencesPanel({
                     <button
                       key={`${ref.range.startLine}-${ref.range.startColumn}-${index}`}
                       onClick={() => onNavigate(ref)}
-                      className="w-full flex items-start gap-2 px-6 py-1.5 text-left hover:bg-slate-800/50 group"
+                      className="w-full flex items-start gap-2 px-6 py-1.5 text-left hover:bg-[var(--aethel-surface-secondary)]/50 group"
                     >
-                      <span className="text-xs text-slate-500 w-8 text-right flex-shrink-0">
+                      <span className="text-xs text-[var(--aethel-text-quaternary)] w-8 text-right flex-shrink-0">
                         {ref.range.startLine}
                       </span>
-                      <span className="text-xs text-slate-300 font-mono truncate">
+                      <span className="text-xs text-[var(--aethel-text-secondary)] font-mono truncate">
                         {ref.preview || '...'}
                       </span>
-                      <ArrowRight className="w-3 h-3 text-slate-600 opacity-0 group-hover:opacity-100 ml-auto flex-shrink-0" />
+                      <ArrowRight className="w-3 h-3 text-[var(--aethel-text-quaternary)] opacity-0 group-hover:opacity-100 ml-auto flex-shrink-0" />
                     </button>
                   ))}
                 </div>
@@ -588,7 +588,7 @@ export function ReferencesPanel({
         })}
 
         {totalRefs === 0 && (
-          <div className="px-4 py-8 text-center text-slate-500 text-sm">
+          <div className="px-4 py-8 text-center text-[var(--aethel-text-quaternary)] text-sm">
             No references found
           </div>
         )}
@@ -660,9 +660,9 @@ export function GoToLineDialog({
 
       {/* Dialog */}
       <div className="fixed top-[20%] left-1/2 -translate-x-1/2 w-96 z-50">
-        <div className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
+        <div className="bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden">
           <div className="p-4">
-            <label className="block text-sm text-slate-400 mb-2">
+            <label className="block text-sm text-[var(--aethel-text-tertiary)] mb-2">
               Go to Line{maxLine ? ` (1-${maxLine})` : ''}
             </label>
             <input
@@ -672,11 +672,11 @@ export function GoToLineDialog({
               onChange={e => setValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Line:Column (e.g., 42 or 42:10)"
-              className="w-full px-3 py-2 bg-slate-800 text-white placeholder-slate-500 rounded-lg outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]"
+              className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded-lg outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]"
             />
-            <div className="mt-2 text-xs text-slate-500">
-              Press <kbd className="px-1 bg-slate-700 rounded">Enter</kbd> to go,{' '}
-              <kbd className="px-1 bg-slate-700 rounded">Esc</kbd> to cancel
+            <div className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">
+              Press <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Enter</kbd> to go,{' '}
+              <kbd className="px-1 bg-[var(--aethel-surface-tertiary)] rounded">Esc</kbd> to cancel
             </div>
           </div>
         </div>
@@ -717,3 +717,4 @@ export function useNavigationShortcuts() {
 }
 
 export default NavigationProvider;
+

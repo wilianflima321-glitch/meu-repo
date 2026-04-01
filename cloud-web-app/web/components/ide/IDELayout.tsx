@@ -555,9 +555,9 @@ export default function IDELayout({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium text-emerald-200 lg:flex">
+          <div className="hidden items-center gap-1 rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-1 text-[10px] font-medium text-[var(--aethel-success)] lg:flex">
             <Codicon name="pulse" className="text-[11px]" />
-            Pronto para apply
+            Pronto para aplicar
           </div>
           <div className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-2 py-1 text-[10px] text-[var(--aethel-text-tertiary)] xl:flex">
             <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
@@ -742,11 +742,11 @@ export default function IDELayout({
           <span className="text-[var(--aethel-text-quaternary)]">UTF-8</span>
           <span className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
             <Codicon name="comment-discussion" className="text-[11px]" />
-            Ready
+            Pronto
           </span>
-          <span className="flex items-center gap-1 text-emerald-300">
+          <span className="flex items-center gap-1 text-[var(--aethel-success)]">
             <Codicon name="circle-filled" className="text-[8px]" />
-            Synced
+            Sincronizado
           </span>
         </div>
       </footer>

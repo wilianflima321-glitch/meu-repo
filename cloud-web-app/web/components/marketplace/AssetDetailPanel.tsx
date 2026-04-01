@@ -151,7 +151,7 @@ function ModelPreview({ modelUrl }: { modelUrl: string }) {
     const [autoRotate, setAutoRotate] = useState(true);
 
     return (
-        <div className="relative w-full h-full min-h-[400px] bg-gradient-to-b from-slate-900 to-slate-800 rounded-lg overflow-hidden">
+        <div className="relative w-full h-full min-h-[400px] bg-gradient-to-b from-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)] rounded-lg overflow-hidden">
             <Canvas 
                 camera={{ position: [0, 0, 5], fov: 50 }}
                 shadows
@@ -801,3 +801,4 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         </div>
     );
 }
+

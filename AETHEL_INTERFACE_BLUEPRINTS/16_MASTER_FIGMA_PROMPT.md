@@ -1,4 +1,4 @@
-# 16_MASTER_FIGMA_PROMPT
+﻿# 16_MASTER_FIGMA_PROMPT
 Date: 2026-03-25
 Status: EXECUTION ARTIFACT
 Surface Type: Figma / Design Generation Master Prompt
@@ -38,7 +38,7 @@ Do not design generic SaaS dashboards.
 Do not design a chat-first product.
 Do not create disconnected screens that look like separate tools.
 Do not invent extra core surfaces.
-Do not create heavy decorative gradients, purple-on-black clich�s, or futuristic clutter.
+Do not create heavy decorative gradients, purple-on-black clichés, or futuristic clutter.
 Do not over-explain the product with text.
 Do not let cards, panels and banners compete equally for attention.
 
@@ -98,6 +98,18 @@ From Replit Agent:
 - approvals, runs and deployment as workflow moments
 Do not reduce this to a chat transcript.
 
+From Genspark:
+- one-workspace, many-output ambition
+- confidence that AI can move from prompt to multiple artifact types without context loss
+- guided creation and save-point mentality for risky generation flows
+Do not let this degrade into a loose AI workspace with weak shell discipline or too many top-level tools.
+
+From Manus:
+- advanced research should feel parallel, evidence-heavy and connected to deliverables
+- browser-assisted collection, extraction and structured outputs should remain in the same task context
+- research should be able to feed real artifacts, not end as a transcript
+Do not let research become a dead-end reading pane or a detached AI report page.
+
 From Unreal Viewport:
 - viewport as a first-class surface
 - toolbar grouped by user intent
@@ -113,36 +125,43 @@ Do not turn these into separate products; they are modes inside the same Workben
 GLOBAL VISUAL DIRECTION
 Design a premium, calm, high-density system with:
 - dark, controlled surfaces
+- graphite-heavy chrome
+- gray and blue as the dominant runtime palette
+- purple only as a rare supporting accent, never as the emotional default
 - clear hierarchy
 - intentional negative space
 - strong typographic scale
 - visible depth through surface layers, not noisy effects
+- borders and separators that feel machined, not glossy
 - zero toy-like motion
 - zero over-ornamentation
 
 FOUNDATION TOKENS
 Use the following as canonical design-system truth.
 Color tokens:
-- --aethel-surface-canvas: #07111F
-- --aethel-surface-panel: #0D1728
-- --aethel-surface-elevated: #122036
-- --aethel-surface-overlay: rgba(4, 10, 19, 0.82)
-- --aethel-surface-muted: #18253B
-- --aethel-border-default: rgba(154, 176, 211, 0.18)
-- --aethel-border-strong: rgba(154, 176, 211, 0.32)
-- --aethel-border-active: rgba(93, 168, 255, 0.52)
+- --aethel-surface-canvas: #0A0D12
+- --aethel-surface-panel: #11161D
+- --aethel-surface-elevated: #161D26
+- --aethel-surface-overlay: rgba(7, 10, 15, 0.84)
+- --aethel-surface-muted: #1E2631
+- --aethel-surface-sidebar: #0F141B
+- --aethel-surface-dock: #121821
+- --aethel-surface-input: #151B24
+- --aethel-border-default: rgba(148, 163, 184, 0.16)
+- --aethel-border-strong: rgba(148, 163, 184, 0.28)
+- --aethel-border-active: rgba(96, 165, 250, 0.48)
 - --aethel-text-primary: #F5F7FB
-- --aethel-text-secondary: #B5C2D9
-- --aethel-text-tertiary: #7E90AD
-- --aethel-text-disabled: #62718B
-- --aethel-primary-500: #67B2FF
-- --aethel-primary-600: #479EFF
-- --aethel-primary-700: #2A86E8
-- --aethel-accent-500: #8E7CFF
+- --aethel-text-secondary: #B8C0CE
+- --aethel-text-tertiary: #8893A7
+- --aethel-text-disabled: #5F697A
+- --aethel-primary-500: #6AA9FF
+- --aethel-primary-600: #4D96F3
+- --aethel-primary-700: #357AD1
+- --aethel-accent-500: #6F8FB4
 - --aethel-success-500: #3DDC97
 - --aethel-warning-500: #F2B94B
 - --aethel-error-500: #F36A7F
-- --aethel-info-500: #69C7FF
+- --aethel-info-500: #73BDF7
 
 Typography tokens:
 - Display/headline family: Sora or Space Grotesk style tone
@@ -202,6 +221,16 @@ Strict geometry:
 - Bottom Dock: 260px default height
 - Status Bar: 28px
 
+EDGE DRAG AND RESIZE CONTRACT
+- every structural seam must be draggable
+- hit area for seam drag: 8px
+- visible divider: subtle 2px line
+- seams must exist between sidebar and center, center and right rail, center and bottom dock, and split editor groups
+- dragging a seam must immediately increase visibility of the surface the user is working in
+- double-click on a seam resets the associated panel to canonical default size
+- resize feedback must be mechanical and immediate, never springy
+- expanding one surface must not fully destroy adjacent critical context
+
 Top Bar exact order:
 1. workspace switcher
 2. project identity
@@ -235,12 +264,14 @@ Preview mode:
 - Preview Deck attached to preview context
 - AI Console or Approval Details in Right Rail
 - runtime/logs available in Bottom Dock
+- viewport/monitor chrome must feel closer to Unreal and Adobe monitor discipline than to a generic iframe wrapper
 
 Canvas mode:
 - canvas is sovereign
 - left sidebar becomes structure/layers
 - right rail defaults to Properties
 - AI remains available, not dominant by default
+- a compact tool palette may sit near the canvas edge for high-frequency actions only
 
 Review mode:
 - compare/approval is sovereign
@@ -259,6 +290,32 @@ Recommended tab order:
 3. Memory
 4. Linked Assets
 5. Approval Details
+
+MISSING IDE-GRADE COMPONENTS THAT MUST BE DESIGNED
+- shell resize handles
+- breadcrumbs row
+- split editor controls
+- tab overflow and pinning
+- active group focus treatment
+- panel snap states and remembered resize ratios
+- command palette with recent files and recent commands
+- outline/symbols panel
+- inline diagnostics and quick-fix affordances
+- diff viewer
+- approval bar
+- Preview Deck
+- compare mode
+- Problems / Output / Logs / Ports / Runtime dock tabs
+- terminal session tabs
+- recovery cards for preview/runtime failure
+- stale/outdated state badges
+- memory/context scope chips
+- run cards
+- approval cards
+- cost/confidence capsules
+
+Do not hand-wave these away as implementation details.
+They must appear as real components in the design system and in the Workbench frames.
 
 AI CONSOLE CONTRACT
 The AI Console is not a simple chat panel.
@@ -303,6 +360,62 @@ Memory / Context:
 - connected flows in scope
 - active rules/SOPs
 - linked artifacts and assets
+
+AI CONSOLE <-> PREVIEW UNITY CONTRACT
+The AI Console and the active preview/viewport must feel like one working pair.
+Rules:
+- changing the active preview target updates AI scope chips immediately
+- selecting a route, object, shot or source enriches AI context without resetting conversation
+- prompts that affect the visible output must be inspectable in the current preview context
+- prompts that affect another connected flow must surface that change through the Preview Deck
+- approvals affecting a visible output must keep that output reachable beside or behind the approval state
+- long chat history must never bury preview-critical actions or approval truth
+
+Surface-aware AI quick actions:
+- Web Preview: fix visible issue, adjust layout, compare breakpoint, open changed component
+- 3D Viewport: focus selected, adjust camera, change lighting, apply transform suggestion
+- Media Preview: revise shot, trim beat, adjust pacing, compare take
+- Research Preview: extract findings, compare sources, create brief, attach to flow
+
+AI CONSOLE BY MODE
+Build:
+- Conversation + Plan lead
+- compact Runs visible
+- approvals interrupt only when directly blocking current work
+
+Preview:
+- surface-aware Conversation stays tied to the visible output
+- compact Approvals and Runs stay reachable
+
+Canvas:
+- Properties remains primary in the right rail
+- AI acts as contextual generator/assistant for the current selection
+
+Review:
+- Approvals lead
+- semantic summary and expected result stay above raw detail
+- conversation is secondary support
+
+Assets:
+- AI emphasizes insertion scope, dependency impact, generation and replace-usage decisions
+
+CANVAS EDITING RULES
+- direct manipulation leads, property editing supports
+- compact tool palette is allowed only for high-frequency tools such as Select, Insert, Transform, Inspect
+- floating palettes must stay compact and contextual; they cannot replace the properties rail
+- selection state must be unmistakable before transform, compare or generate actions appear
+- canvas-specific buttons should prefer compact secondary and tertiary controls instead of a wall of primaries
+
+RESEARCH PREVIEW CONTRACT
+Research Preview is part of the same preview engine, not a detached report tool.
+It must support:
+- source selector or source rail
+- compare references
+- visible provenance
+- extract queue or notes tray
+- attach-to-flow and create-artifact actions
+
+Research Preview should learn from Manus in depth and evidence flow, and from Adobe boards in visual compare and reference handling.
 - include/exclude/pin controls
 
 APPROVAL CARD CONTRACT
@@ -322,6 +435,7 @@ Rules:
 - risk cannot rely on color only
 - rollback remains reachable from the same run lineage
 - pending approval must be visible from AI Console and Review mode
+- if the approval affects a visible output, that output must remain reachable in the same review context
 
 PREVIEW ENGINE CONTRACT
 There is one preview engine with four surface variants:
@@ -329,6 +443,30 @@ There is one preview engine with four surface variants:
 2. 3D Viewport
 3. Media Preview
 4. Research Preview
+
+UNIFIED PREVIEW CONTEXT RULE
+All of these are faces and layers of the same project-bound preview context.
+The user must be able to remain inside one project and one Workbench shell while:
+- inspecting the active output
+- comparing another connected flow
+- opening references/research
+- watching AI/browser-assisted research progress
+- returning to the active output without losing scope
+
+Allowed preview layers inside the same context:
+- active output
+- reference/source
+- compare
+- research/browser-operator
+- approval overlay
+
+Do not design these as separate top-level products or disconnected pages.
+
+Preview UX goals:
+- learn viewport sovereignty from Unreal
+- learn monitor precision and compare literacy from Adobe
+- learn evidence-rich research flow from Manus
+- never feel like a generic embed or a detached report panel
 
 Preview toolbar intent groups:
 Group 1 Navigation:
@@ -355,6 +493,41 @@ Group 4 Diagnostics:
 - runtime drawer shortcut
 - affected flow freshness state
 
+Viewport and monitor rules:
+- the active output must remain visually dominant
+- source/reference context must be distinguishable from the active output
+- controls with high repetition value must stay visible
+- overflow is for low-frequency actions only
+- toolbar chrome should feel attached to the surface, not to the whole app shell
+
+3D Viewport anatomy:
+- viewport header with camera, transform, view mode and runtime controls
+- dominant viewport canvas
+- nearby selection/focus actions
+- optional compact diagnostics strip
+
+Media Preview anatomy:
+- monitor header with sequence/shot context
+- dominant monitor surface
+- transport bar with play/pause, scrubber and frame/time readout
+- zoom/fit controls
+- audio state cluster
+- compare/source toggle when relevant
+
+Research Preview anatomy:
+- source rail or source switcher
+- dominant reference/board/output surface
+- visible provenance row
+- extract queue or structured notes tray
+- compare lane or compare toggle
+- attach-to-flow and create-artifact actions
+
+Research run behavior:
+- show subtask progress
+- show source collection status
+- show evidence readiness
+- end in usable outputs, not only prose
+
 PREVIEW DECK CONTRACT
 The Preview Deck is mandatory.
 It represents parallel flows inside the same project.
@@ -377,6 +550,12 @@ Card states:
 - pinned
 - outdated
 - conflict
+
+Preview Deck UX rules:
+- treat the deck more like a serious filmstrip/reference strip than a gallery carousel
+- selected state must be obvious in peripheral vision
+- pinned cards must preserve spatial stability
+- compare entry must be explicit and reversible
 
 CONNECTED FLOW DATA CONTRACT
 Connected flows are part of one shared project model.
@@ -780,3 +959,4 @@ Use this checklist against the generated design:
 - Does mobile preserve continuity instead of imitating desktop badly?
 - Are tokens, spacing and motion consistent across all frames?
 - Could a developer implement this without inventing major architecture?
+

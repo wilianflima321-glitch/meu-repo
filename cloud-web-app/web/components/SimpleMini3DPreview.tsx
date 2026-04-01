@@ -72,7 +72,7 @@ function Scene() {
 
 export default function SimpleMini3DPreview() {
   return (
-    <div className="w-full h-full bg-gradient-to-b from-slate-950 to-slate-900">
+    <div className="w-full h-full bg-gradient-to-b from-[var(--aethel-surface-primary)] to-[var(--aethel-surface-secondary)]">
       <Canvas
         shadows
         camera={{ position: [4, 3, 4], fov: 50 }}
@@ -85,16 +85,17 @@ export default function SimpleMini3DPreview() {
       </Canvas>
       
       {/* Overlay com informações */}
-      <div className="absolute bottom-2 left-2 text-xs text-slate-500 pointer-events-none">
+      <div className="absolute bottom-2 left-2 text-xs text-[var(--aethel-text-quaternary)] pointer-events-none">
         <div className="flex items-center gap-1">
           <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
           Preview Ativo
         </div>
       </div>
       
-      <div className="absolute top-2 right-2 text-xs text-slate-600 pointer-events-none">
+      <div className="absolute top-2 right-2 text-xs text-[var(--aethel-text-quaternary)] pointer-events-none">
         Use o mouse para rotacionar
       </div>
     </div>
   )
 }
+

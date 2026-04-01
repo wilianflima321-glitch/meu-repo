@@ -99,19 +99,19 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
   }, [mode]);
 
   return (
-    <div className="w-full h-full bg-slate-900 relative">
+    <div className="w-full h-full bg-[var(--aethel-surface-primary)] relative">
       {/* Toolbar Overlay */}
       <div className="absolute top-4 left-4 z-10 flex gap-2">
-        <div className="bg-slate-800/80 backdrop-blur p-2 rounded border border-slate-700 text-xs text-white">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur p-2 rounded border border-[var(--aethel-border-primary)] text-xs text-white">
           Mode: <span className="font-bold text-sky-400 uppercase">{mode}</span>
         </div>
-        <div className="bg-slate-800/80 backdrop-blur p-2 rounded border border-slate-700 text-xs text-green-400 flex items-center gap-1">
+        <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur p-2 rounded border border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-success)] flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/> 
           {Physics ? 'Rapier Physics v3' : 'No Physics (Rapier not installed)'}
         </div>
         <button 
           onClick={() => setBoxes(prev => [...prev, [(Math.random() - 0.5) * 5, 10, (Math.random() - 0.5) * 5]])}
-          className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1 rounded text-xs font-bold transition"
+          className="bg-[var(--aethel-info)] hover:bg-sky-700 text-white px-3 py-1 rounded text-xs font-bold transition"
         >
           Spawn Cube
         </button>
@@ -155,3 +155,4 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
     </div>
   );
 }
+

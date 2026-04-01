@@ -787,7 +787,7 @@ export function MonacoEditorPro({
     onSave?.(nextDocument);
     setInlineEditFeedback({
       type: 'success',
-      message: 'Patch applied and persisted.',
+      message: 'Patch aplicado e persistido.',
     });
     setInlineEditNeedsFullAccess(false);
     return true;
@@ -799,8 +799,8 @@ export function MonacoEditorPro({
         <div
           className={`absolute right-2 top-2 z-30 max-w-[420px] rounded border px-2 py-1 text-xs ${
             inlineEditFeedback.type === 'error'
-              ? 'border-red-500/40 bg-red-500/10 text-red-200'
-              : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
+              ? 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]'
+              : 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
           }`}
           role="status"
           aria-live="polite"

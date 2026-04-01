@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 /**
  * Aethel Engine - Advanced Debug Components
@@ -155,11 +155,11 @@ export function BreakpointEditor({
 
   return (
     <div
-      className="absolute z-50 w-80 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden"
+      className="absolute z-50 w-80 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden"
       style={position ? { left: position.x, top: position.y } : undefined}
     >
       {/* Type selector */}
-      <div className="flex border-b border-slate-700">
+      <div className="flex border-b border-[var(--aethel-border-primary)]">
         {[
           { value: 'breakpoint', label: 'Breakpoint', icon: Circle },
           { value: 'conditional', label: 'Conditional', icon: CircleDot },
@@ -171,7 +171,7 @@ export function BreakpointEditor({
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs transition-colors ${
               type === value
                 ? 'bg-sky-600/20 text-sky-400 border-b-2 border-sky-500'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
             <Icon className="w-3.5 h-3.5" />
@@ -184,7 +184,7 @@ export function BreakpointEditor({
         {/* Conditional expression */}
         {type === 'conditional' && (
           <div>
-            <label className="block text-xs text-slate-400 mb-1">
+            <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">
               Expression (break when true)
             </label>
             <input
@@ -193,7 +193,7 @@ export function BreakpointEditor({
               value={condition}
               onChange={e => setCondition(e.target.value)}
               placeholder="e.g., i > 10 && user.name === 'test'"
-              className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
+              className="w-full px-2 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
             />
           </div>
         )}
@@ -201,7 +201,7 @@ export function BreakpointEditor({
         {/* Log message */}
         {type === 'logpoint' && (
           <div>
-            <label className="block text-xs text-slate-400 mb-1">
+            <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">
               Log message (use {'{expression}'} for values)
             </label>
             <input
@@ -210,9 +210,9 @@ export function BreakpointEditor({
               value={logMessage}
               onChange={e => setLogMessage(e.target.value)}
               placeholder="e.g., Value: {myVar}, Count: {count}"
-              className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
+              className="w-full px-2 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
             />
-            <div className="mt-1 text-xs text-slate-500">
+            <div className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
               Logs to console without pausing
             </div>
           </div>
@@ -220,7 +220,7 @@ export function BreakpointEditor({
 
         {/* Hit condition (for all types) */}
         <div>
-          <label className="block text-xs text-slate-400 mb-1">
+          <label className="block text-xs text-[var(--aethel-text-tertiary)] mb-1">
             Hit Count (optional)
           </label>
           <input
@@ -228,7 +228,7 @@ export function BreakpointEditor({
             value={hitCondition}
             onChange={e => setHitCondition(e.target.value)}
             placeholder="e.g., >= 10, == 5, % 2 == 0"
-            className="w-full px-2 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
+            className="w-full px-2 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
           />
         </div>
 
@@ -236,13 +236,13 @@ export function BreakpointEditor({
         <div className="flex items-center justify-end gap-2 pt-2">
           <button
             onClick={onCancel}
-            className="px-3 py-1.5 text-sm text-slate-400 hover:text-white transition-colors"
+            className="px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-500 text-white rounded transition-colors"
+            className="px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-500 text-[var(--aethel-text-primary)] rounded transition-colors"
           >
             {breakpoint?.id ? 'Update' : 'Add'}
           </button>
@@ -290,8 +290,8 @@ export function BreakpointsPanel({
   };
 
   const getBreakpointColor = (bp: Breakpoint) => {
-    if (!bp.enabled) return 'text-slate-500';
-    if (!bp.verified) return 'text-slate-400';
+    if (!bp.enabled) return 'text-[var(--aethel-text-tertiary)]';
+    if (!bp.verified) return 'text-[var(--aethel-text-tertiary)]';
     if (bp.type === 'logpoint') return 'text-[var(--aethel-warning-light)]';
     return 'text-red-500';
   };
@@ -308,20 +308,20 @@ export function BreakpointsPanel({
   }, [breakpoints]);
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-secondary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Bug className="w-4 h-4 text-red-400" />
-          <span className="text-sm font-medium text-white">Breakpoints</span>
-          <span className="text-xs text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Breakpoints</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)] bg-[var(--aethel-surface-tertiary)] px-1.5 py-0.5 rounded">
             {breakpoints.length}
           </span>
         </div>
         {onRemoveAll && breakpoints.length > 0 && (
           <button
             onClick={onRemoveAll}
-            className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-red-400"
+            className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)]"
             title="Remove all breakpoints"
           >
             <Trash2 className="w-4 h-4" />
@@ -333,10 +333,10 @@ export function BreakpointsPanel({
       <div className="flex-1 overflow-y-auto">
         {/* Exception Breakpoints */}
         {exceptionBreakpoints && exceptionBreakpoints.length > 0 && (
-          <div className="border-b border-slate-800">
+          <div className="border-b border-[var(--aethel-border-primary)]">
             <button
               onClick={() => setShowExceptions(!showExceptions)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800/50"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {showExceptions ? (
                 <ChevronDown className="w-4 h-4" />
@@ -352,19 +352,19 @@ export function BreakpointsPanel({
                 {exceptionBreakpoints.map(ex => (
                   <label
                     key={ex.id}
-                    className="flex items-center gap-2 px-6 py-1 text-sm hover:bg-slate-800/50 cursor-pointer"
+                    className="flex items-center gap-2 px-6 py-1 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] cursor-pointer"
                   >
                     <input
                       type="checkbox"
                       checked={ex.enabled}
                       onChange={() => onToggleException?.(ex.id)}
-                      className="rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+                      className="rounded border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-info)] focus:ring-[var(--aethel-info)]"
                     />
-                    <span className={ex.enabled ? 'text-white' : 'text-slate-500'}>
+                    <span className={ex.enabled ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)]'}>
                       {ex.label}
                     </span>
                     {ex.description && (
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[var(--aethel-text-tertiary)]">
                         - {ex.description}
                       </span>
                     )}
@@ -377,8 +377,8 @@ export function BreakpointsPanel({
 
         {/* Breakpoints by file */}
         {Array.from(groupedBreakpoints.entries()).map(([filePath, bps]) => (
-          <div key={filePath} className="border-b border-slate-800/50">
-            <div className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-500 bg-slate-800/30">
+          <div key={filePath} className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)]">
+            <div className="flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--aethel-text-tertiary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_30%,transparent)]">
               <FileCode className="w-3.5 h-3.5" />
               <span className="truncate">{getFileName(filePath)}</span>
             </div>
@@ -390,7 +390,7 @@ export function BreakpointsPanel({
               return (
                 <div
                   key={bp.id}
-                  className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-800/50 group"
+                  className="flex items-center gap-2 px-3 py-1.5 hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group"
                 >
                   {/* Toggle */}
                   <button
@@ -406,7 +406,7 @@ export function BreakpointsPanel({
                     onClick={() => onNavigateToBreakpoint(bp)}
                     className="flex-1 flex items-center gap-2 text-left min-w-0"
                   >
-                    <span className="text-sm text-slate-300">
+                    <span className="text-sm text-[var(--aethel-text-secondary)]">
                       Line {bp.line}
                     </span>
                     {bp.condition && (
@@ -420,13 +420,13 @@ export function BreakpointsPanel({
                       </span>
                     )}
                     {bp.hitCondition && (
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[var(--aethel-text-tertiary)]">
                         (hit: {bp.hitCondition})
                       </span>
                     )}
                     {bp.hitCount !== undefined && bp.hitCount > 0 && (
                       <span className="text-xs text-sky-400">
-                        Ã—{bp.hitCount}
+                        ×{bp.hitCount}
                       </span>
                     )}
                   </button>
@@ -435,17 +435,17 @@ export function BreakpointsPanel({
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     <button
                       onClick={() => onEditBreakpoint(bp)}
-                      className="p-1 hover:bg-slate-700 rounded"
+                      className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                       title="Edit breakpoint"
                     >
-                      <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+                      <Edit2 className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
                     </button>
                     <button
                       onClick={() => onRemoveBreakpoint(bp.id)}
-                      className="p-1 hover:bg-slate-700 rounded"
+                      className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                       title="Remove breakpoint"
                     >
-                      <X className="w-3.5 h-3.5 text-slate-400" />
+                      <X className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
                     </button>
                   </div>
                 </div>
@@ -456,7 +456,7 @@ export function BreakpointsPanel({
 
         {/* Empty state */}
         {breakpoints.length === 0 && (
-          <div className="px-4 py-8 text-center text-slate-500 text-sm">
+          <div className="px-4 py-8 text-center text-[var(--aethel-text-tertiary)] text-sm">
             <Bug className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>No breakpoints set</p>
             <p className="text-xs mt-1">
@@ -522,7 +522,7 @@ export function WatchPanel({
     return (
       <div key={expr.id}>
         <div
-          className={`flex items-center gap-2 px-2 py-1 hover:bg-slate-800/50 group ${
+          className={`flex items-center gap-2 px-2 py-1 hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group ${
             disabled ? 'opacity-50' : ''
           }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
@@ -535,9 +535,9 @@ export function WatchPanel({
               disabled={disabled}
             >
               {expr.expanded ? (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                <ChevronRight className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
               )}
             </button>
           ) : (
@@ -559,14 +559,14 @@ export function WatchPanel({
                   setEditValue('');
                 }
               }}
-              className="flex-1 px-1 py-0.5 text-sm bg-slate-800 text-white rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
+              className="flex-1 px-1 py-0.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
             />
           ) : (
             <>
               <span className="text-sm text-sky-400 font-mono">
                 {expr.expression}
               </span>
-              <span className="text-slate-600">:</span>
+              <span className="text-[var(--aethel-text-quaternary)]">:</span>
               {expr.error ? (
                 <span className="text-sm text-red-400 truncate">
                   {expr.error}
@@ -577,12 +577,12 @@ export function WatchPanel({
                     expr.type === 'string' ? 'text-emerald-400' :
                     expr.type === 'number' ? 'text-[var(--aethel-warning-light)]' :
                     expr.type === 'boolean' ? 'text-blue-400' :
-                    'text-slate-300'
+                    'text-[var(--aethel-text-secondary)]'
                   }`}>
                     {expr.value ?? 'undefined'}
                   </span>
                   {expr.type && (
-                    <span className="text-xs text-slate-500 ml-1">
+                    <span className="text-xs text-[var(--aethel-text-tertiary)] ml-1">
                       {expr.type}
                     </span>
                   )}
@@ -595,24 +595,24 @@ export function WatchPanel({
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 ml-auto">
             <button
               onClick={() => handleEdit(expr)}
-              className="p-1 hover:bg-slate-700 rounded"
+              className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Edit"
             >
-              <Edit2 className="w-3 h-3 text-slate-400" />
+              <Edit2 className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
             </button>
             <button
               onClick={() => navigator.clipboard.writeText(expr.value || '')}
-              className="p-1 hover:bg-slate-700 rounded"
+              className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Copy value"
             >
-              <Copy className="w-3 h-3 text-slate-400" />
+              <Copy className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
             </button>
             <button
               onClick={() => onRemoveExpression(expr.id)}
-              className="p-1 hover:bg-slate-700 rounded"
+              className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Remove"
             >
-              <X className="w-3 h-3 text-slate-400" />
+              <X className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
             </button>
           </div>
         </div>
@@ -624,40 +624,40 @@ export function WatchPanel({
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-secondary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-sky-400" />
-          <span className="text-sm font-medium text-white">Watch</span>
+          <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Watch</span>
         </div>
         {onRefresh && (
           <button
             onClick={onRefresh}
-            className="p-1 hover:bg-slate-800 rounded"
+            className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
             title="Refresh all"
             disabled={disabled}
           >
-            <RotateCcw className="w-4 h-4 text-slate-400" />
+            <RotateCcw className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           </button>
         )}
       </div>
 
       {/* Add expression */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-800">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <input
           type="text"
           value={newExpression}
           onChange={e => setNewExpression(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleAdd()}
           placeholder="Add expression..."
-          className="flex-1 px-2 py-1 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500 font-mono"
+          className="flex-1 px-2 py-1 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
           disabled={disabled}
         />
         <button
           onClick={handleAdd}
           disabled={disabled || !newExpression.trim()}
-          className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white disabled:opacity-50"
+          className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] disabled:opacity-50"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -666,7 +666,7 @@ export function WatchPanel({
       {/* Expressions */}
       <div className="flex-1 overflow-y-auto">
         {expressions.length === 0 ? (
-          <div className="px-4 py-8 text-center text-slate-500 text-sm">
+          <div className="px-4 py-8 text-center text-[var(--aethel-text-tertiary)] text-sm">
             <Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>No watch expressions</p>
             <p className="text-xs mt-1">
@@ -723,18 +723,18 @@ export function CallStackPanel({
       case 'label':
         return 'text-[var(--aethel-warning-light)]';
       case 'subtle':
-        return 'text-slate-500 italic';
+        return 'text-[var(--aethel-text-tertiary)] italic';
       default:
-        return 'text-slate-300';
+        return 'text-[var(--aethel-text-secondary)]';
     }
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-secondary)]">
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-800">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <Hash className="w-4 h-4 text-[var(--aethel-warning-light)]" />
-        <span className="text-sm font-medium text-white">Call Stack</span>
+        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Call Stack</span>
       </div>
 
       {/* Content */}
@@ -742,27 +742,27 @@ export function CallStackPanel({
         {threads && threads.length > 1 ? (
           // Multi-threaded view
           threads.map(thread => (
-            <div key={thread.id} className="border-b border-slate-800/50">
+            <div key={thread.id} className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)]">
               <button
                 onClick={() => {
                   toggleThread(thread.id);
                   onSelectThread?.(thread.id);
                 }}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-800/50 ${
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] ${
                   selectedThreadId === thread.id ? 'bg-sky-600/10' : ''
                 }`}
               >
                 {expandedThreads.has(thread.id) ? (
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
+                  <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                 )}
-                <span className={thread.stopped ? 'text-[var(--aethel-warning-light)]' : 'text-slate-400'}>
-                  {thread.stopped ? 'â¸' : 'â–¶'}
+                <span className={thread.stopped ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-text-tertiary)]'}>
+                  {thread.stopped ? '⏸' : '▶'}
                 </span>
-                <span className="text-white">{thread.name}</span>
+                <span className="text-[var(--aethel-text-primary)]">{thread.name}</span>
                 {thread.stoppedReason && (
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-[var(--aethel-text-tertiary)]">
                     ({thread.stoppedReason})
                   </span>
                 )}
@@ -799,7 +799,7 @@ export function CallStackPanel({
         )}
 
         {frames.length === 0 && (
-          <div className="px-4 py-8 text-center text-slate-500 text-sm">
+          <div className="px-4 py-8 text-center text-[var(--aethel-text-tertiary)] text-sm">
             <Hash className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>No call stack</p>
             <p className="text-xs mt-1">
@@ -830,21 +830,21 @@ function StackFrameItem({
       case 'label':
         return 'text-[var(--aethel-warning-light)]';
       case 'subtle':
-        return 'text-slate-500 italic';
+        return 'text-[var(--aethel-text-tertiary)] italic';
       default:
-        return 'text-slate-300';
+        return 'text-[var(--aethel-text-secondary)]';
     }
   };
 
   return (
     <button
       onClick={onSelect}
-      className={`w-full flex items-center gap-2 px-4 py-1.5 text-sm text-left hover:bg-slate-800/50 group ${
+      className={`w-full flex items-center gap-2 px-4 py-1.5 text-sm text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group ${
         isSelected ? 'bg-sky-600/20' : ''
       }`}
     >
       {/* Frame number */}
-      <span className="w-5 text-right text-xs text-slate-600">
+      <span className="w-5 text-right text-xs text-[var(--aethel-text-quaternary)]">
         {index}
       </span>
 
@@ -855,7 +855,7 @@ function StackFrameItem({
 
       {/* Source info */}
       {frame.source && (
-        <span className="text-xs text-slate-500 truncate max-w-32">
+        <span className="text-xs text-[var(--aethel-text-tertiary)] truncate max-w-32">
           {frame.source.name}:{frame.line}
         </span>
       )}
@@ -867,10 +867,10 @@ function StackFrameItem({
             e.stopPropagation();
             onRestart();
           }}
-          className="p-1 hover:bg-slate-700 rounded opacity-0 group-hover:opacity-100"
+          className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded opacity-0 group-hover:opacity-100"
           title="Restart frame"
         >
-          <RotateCcw className="w-3 h-3 text-slate-400" />
+          <RotateCcw className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
         </button>
       )}
     </button>
@@ -946,7 +946,7 @@ export function DebugToolbar({
   ];
 
   return (
-    <div className="flex items-center gap-1 px-2 py-1 bg-slate-800 rounded-lg">
+    <div className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded-lg">
       {buttons.map(({ icon: Icon, label, action, disabled, primary, danger }, index) => (
         <button
           key={label}
@@ -955,12 +955,12 @@ export function DebugToolbar({
           title={label}
           className={`p-1.5 rounded transition-colors ${
             disabled
-              ? 'text-slate-600 cursor-not-allowed'
+              ? 'text-[var(--aethel-text-quaternary)] cursor-not-allowed'
               : primary
                 ? 'text-emerald-400 hover:bg-emerald-600/20'
                 : danger
                   ? 'text-red-400 hover:bg-red-600/20'
-                  : 'text-slate-300 hover:bg-slate-700'
+                  : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
           }`}
         >
           <Icon className="w-4 h-4" fill={primary && !disabled ? 'currentColor' : 'none'} />
@@ -971,3 +971,4 @@ export function DebugToolbar({
 }
 
 export default BreakpointsPanel;
+

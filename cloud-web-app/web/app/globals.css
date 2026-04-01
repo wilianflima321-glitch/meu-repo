@@ -6,7 +6,7 @@
 /*
  * AETHEL ENGINE - UNIFIED DESIGN SYSTEM V2
  * SOURCE: AETHEL_DESIGN_MANIFESTO_2026.md
- * THEME: Deep Space Dark (Zinc 950)
+ * THEME: Deep Space Dark (Aethel)
  */
 
 @layer base {
@@ -47,6 +47,7 @@
     --aethel-success: #22c55e;
     --aethel-warning: #f59e0b;
     --aethel-warning-light: #fcd34d;
+    --aethel-warning-dark: #d97706;
     --aethel-error: #ef4444;
 
     /* Backwards-compatible aliases */
@@ -110,13 +111,13 @@
 
 @layer utilities {
   /* Grid Background Effect */
-  .bg-grid-zinc-700 {
+  .bg-grid-aethel {
     background-size: 40px 40px;
     background-position: center;
-    background-color: var(--bg-primary);
+    background-color: var(--aethel-surface-primary);
     background-image:
-      linear-gradient(rgba(39, 39, 42, 0.14) 1px, transparent 1px),
-      linear-gradient(to right, rgba(39, 39, 42, 0.14) 1px, transparent 1px);
+      linear-gradient(color-mix(in srgb, var(--aethel-border-secondary) 70%, transparent) 1px, transparent 1px),
+      linear-gradient(to right, color-mix(in srgb, var(--aethel-border-secondary) 70%, transparent) 1px, transparent 1px);
   }
 
   .aethel-panel-soft {

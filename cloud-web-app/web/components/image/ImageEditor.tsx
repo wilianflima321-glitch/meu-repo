@@ -374,15 +374,15 @@ export function ImageEditor({
   };
 
   return (
-    <div className="flex h-full bg-slate-900">
+    <div className="flex h-full bg-[var(--aethel-surface-primary)]">
       {/* Toolbar */}
-      <div className="w-12 bg-slate-800 border-r border-slate-700 flex flex-col items-center py-2 gap-1">
+      <div className="w-12 bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)] flex flex-col items-center py-2 gap-1">
         {(['brush', 'eraser', 'fill', 'eyedropper', 'move'] as Tool[]).map(t => (
           <button
             key={t}
             onClick={() => setTool(t)}
             className={`w-10 h-10 rounded flex items-center justify-center text-lg ${
-              tool === t ? 'bg-blue-600' : 'hover:bg-slate-700'
+              tool === t ? 'bg-[var(--aethel-primary)]' : 'hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
             title={t.charAt(0).toUpperCase() + t.slice(1)}
           >
@@ -401,7 +401,7 @@ export function ImageEditor({
             onChange={(e) => setBrush(prev => ({ ...prev, color: e.target.value }))}
             className="w-8 h-8 cursor-pointer"
           />
-          <span className="text-xs text-slate-400">Color</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">Color</span>
         </div>
       </div>
 
@@ -415,7 +415,7 @@ export function ImageEditor({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
-          className="border border-slate-600 cursor-crosshair"
+          className="border border-[var(--aethel-border-secondary)] cursor-crosshair"
           style={{ 
             cursor: tool === 'eyedropper' ? 'crosshair' : 
                    tool === 'move' ? 'grab' : 
@@ -425,12 +425,12 @@ export function ImageEditor({
       </div>
 
       {/* Brush Settings */}
-      <div className="w-48 bg-slate-800 border-l border-slate-700 p-3">
-        <h3 className="text-sm font-semibold text-white mb-3">Brush</h3>
+      <div className="w-48 bg-[var(--aethel-surface-secondary)] border-l border-[var(--aethel-border-primary)] p-3">
+        <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] mb-3">Brush</h3>
         
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-slate-400">Size: {brush.size}px</label>
+            <label className="text-xs text-[var(--aethel-text-tertiary)]">Size: {brush.size}px</label>
             <input
               type="range"
               min="1"
@@ -442,7 +442,7 @@ export function ImageEditor({
           </div>
           
           <div>
-            <label className="text-xs text-slate-400">Opacity: {brush.opacity}%</label>
+            <label className="text-xs text-[var(--aethel-text-tertiary)]">Opacity: {brush.opacity}%</label>
             <input
               type="range"
               min="1"
@@ -454,11 +454,11 @@ export function ImageEditor({
           </div>
         </div>
 
-        <h3 className="text-sm font-semibold text-white mt-6 mb-3">Layers</h3>
+        <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] mt-6 mb-3">Layers</h3>
         
         <button
           onClick={addLayer}
-          className="w-full py-1 bg-blue-600 rounded text-sm mb-2 hover:bg-blue-500"
+          className="w-full py-1 bg-[var(--aethel-primary)] rounded text-sm mb-2 hover:bg-blue-500"
         >
           + Add Layer
         </button>
@@ -469,7 +469,7 @@ export function ImageEditor({
               key={layer.id}
               onClick={() => setActiveLayerId(layer.id)}
               className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
-                activeLayerId === layer.id ? 'bg-slate-600' : 'hover:bg-slate-700'
+                activeLayerId === layer.id ? 'bg-[var(--aethel-surface-quaternary)]' : 'hover:bg-[var(--aethel-surface-tertiary)]'
               }`}
             >
               <input
@@ -483,7 +483,7 @@ export function ImageEditor({
                 }}
                 className="w-4 h-4"
               />
-              <span className="text-sm text-white flex-1 truncate">{layer.name}</span>
+              <span className="text-sm text-[var(--aethel-text-primary)] flex-1 truncate">{layer.name}</span>
               {layers.length > 1 && (
                 <button
                   onClick={(e) => {
@@ -511,3 +511,5 @@ export function ImageEditor({
 }
 
 export default ImageEditor;
+
+

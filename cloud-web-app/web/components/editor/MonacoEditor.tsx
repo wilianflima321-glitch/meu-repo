@@ -105,9 +105,9 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
   };
 
   return (
-    <div className="w-full h-full overflow-hidden rounded-md border border-slate-700">
+    <div className="w-full h-full overflow-hidden rounded-md border border-[var(--aethel-border-primary)]">
       {loading ? (
-        <div className="flex items-center justify-center h-full text-slate-400">
+        <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
           Carregando arquivo...
         </div>
       ) : loadError ? (
@@ -129,7 +129,7 @@ const MonacoEditor: React.FC<MonacoEditorProps> = ({
             padding: { top: 16, bottom: 16 },
           }}
           loading={
-            <div className="flex items-center justify-center h-full text-slate-400">
+            <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               Carregando Editor...
             </div>
           }

@@ -44,12 +44,12 @@ export default function Debugger() {
       <h3 className="font-bold mb-2">Debugger</h3>
 
       {status === 'checking' ? (
-        <div className="text-sm text-slate-600 dark:text-slate-300">{message}</div>
+        <div className="text-sm text-[var(--aethel-text-quaternary)] dark:text-[var(--aethel-text-secondary)]">{message}</div>
       ) : (
-        <div className="text-sm text-slate-700 dark:text-slate-200">
+        <div className="text-sm text-[var(--aethel-text-quaternary)] dark:text-[var(--aethel-text-primary)]">
           <div className="font-semibold">Recurso indisponível</div>
           <div className="mt-1">{message}</div>
-          <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          <div className="mt-3 text-xs text-[var(--aethel-text-tertiary)] dark:text-[var(--aethel-text-tertiary)]">
             Quando o backend DAP estiver implementado, este painel passará a consumir os endpoints em <span className="font-mono">/api/dap/*</span>.
           </div>
         </div>

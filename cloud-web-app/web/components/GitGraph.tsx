@@ -145,7 +145,7 @@ export default function GitGraph() {
   }
 
   return (
-    <div className="h-full bg-gradient-to-br from-slate-900 via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-slate-900">
+    <div className="h-full bg-gradient-to-br from-[var(--aethel-surface-primary)] via-[color-mix(in_srgb,var(--aethel-accent)_40%,black)] to-[var(--aethel-surface-primary)]">
       <div className="flex h-full">
         {/* Graph Canvas */}
         <div className="flex-1 overflow-auto p-4">
@@ -154,7 +154,7 @@ export default function GitGraph() {
               ref={canvasRef}
               width={800}
               height={Math.max(600, nodes.length * 60 + 100)}
-              className="bg-slate-800/50 backdrop-blur-sm rounded-lg"
+              className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg"
             />
             
             {/* Commit Labels */}
@@ -170,16 +170,16 @@ export default function GitGraph() {
                 >
                   <button
                     onClick={() => handleCommitClick(node.commit)}
-                    className="text-left hover:bg-slate-700/50 rounded px-2 py-1 transition-colors"
+                    className="text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded px-2 py-1 transition-colors"
                   >
-                    <div className="text-sm text-white font-mono">
+                    <div className="text-sm text-[var(--aethel-text-primary)] font-mono">
                       {node.commit.hash.substring(0, 7)}
                     </div>
-                    <div className="text-xs text-slate-300 max-w-xs truncate">
+                    <div className="text-xs text-[var(--aethel-text-secondary)] max-w-xs truncate">
                       {node.commit.message.split('\n')[0]}
                     </div>
-                    <div className="text-xs text-slate-500">
-                      {node.commit.author} â€¢ {formatDate(node.commit.date)}
+                    <div className="text-xs text-[var(--aethel-text-tertiary)]">
+                      {node.commit.author} - {formatDate(node.commit.date)}
                     </div>
                   </button>
                 </div>
@@ -190,47 +190,47 @@ export default function GitGraph() {
 
         {/* Commit Details Panel */}
         {selectedCommit && (
-          <div className="w-96 bg-slate-800/50 backdrop-blur-sm border-l border-slate-700 p-6 overflow-y-auto">
+          <div className="w-96 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm border-l border-[var(--aethel-border-primary)] p-6 overflow-y-auto">
             <div className="mb-4">
               <button
                 onClick={() => setSelectedCommit(null)}
-                className="text-slate-400 hover:text-white mb-4"
+                className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] mb-4"
               >
                 â† Back
               </button>
-              <h3 className="text-xl font-bold text-white mb-2">Commit Details</h3>
+              <h3 className="text-xl font-bold text-[var(--aethel-text-primary)] mb-2">Commit Details</h3>
             </div>
 
             <div className="space-y-4">
               {/* Hash */}
               <div>
-                <div className="text-sm text-slate-400 mb-1">Commit</div>
-                <div className="text-white font-mono text-sm bg-slate-900 p-2 rounded">
+                <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Commit</div>
+                <div className="text-[var(--aethel-text-primary)] font-mono text-sm bg-[var(--aethel-surface-primary)] p-2 rounded">
                   {selectedCommit.hash}
                 </div>
               </div>
 
               {/* Author */}
               <div>
-                <div className="text-sm text-slate-400 mb-1">Author</div>
-                <div className="text-white">
+                <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Author</div>
+                <div className="text-[var(--aethel-text-primary)]">
                   {selectedCommit.author}
-                  <div className="text-sm text-slate-400">{selectedCommit.email}</div>
+                  <div className="text-sm text-[var(--aethel-text-tertiary)]">{selectedCommit.email}</div>
                 </div>
               </div>
 
               {/* Date */}
               <div>
-                <div className="text-sm text-slate-400 mb-1">Date</div>
-                <div className="text-white">
+                <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Date</div>
+                <div className="text-[var(--aethel-text-primary)]">
                   {selectedCommit.date.toLocaleString()}
                 </div>
               </div>
 
               {/* Message */}
               <div>
-                <div className="text-sm text-slate-400 mb-1">Message</div>
-                <div className="text-white whitespace-pre-wrap bg-slate-900 p-3 rounded">
+                <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Message</div>
+                <div className="text-[var(--aethel-text-primary)] whitespace-pre-wrap bg-[var(--aethel-surface-primary)] p-3 rounded">
                   {selectedCommit.message}
                 </div>
               </div>
@@ -238,12 +238,12 @@ export default function GitGraph() {
               {/* Parents */}
               {selectedCommit.parents.length > 0 && (
                 <div>
-                  <div className="text-sm text-slate-400 mb-1">Parents</div>
+                  <div className="text-sm text-[var(--aethel-text-tertiary)] mb-1">Parents</div>
                   <div className="space-y-1">
                     {selectedCommit.parents.map(parent => (
                       <div
                         key={parent}
-                        className="text-white font-mono text-sm bg-slate-900 p-2 rounded"
+                        className="text-[var(--aethel-text-primary)] font-mono text-sm bg-[var(--aethel-surface-primary)] p-2 rounded"
                       >
                         {parent.substring(0, 7)}
                       </div>
@@ -253,14 +253,14 @@ export default function GitGraph() {
               )}
 
               {/* Actions */}
-              <div className="pt-4 border-t border-slate-700 space-y-2">
-                <button className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+              <div className="pt-4 border-t border-[var(--aethel-border-primary)] space-y-2">
+                <button className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[var(--aethel-text-primary)] rounded-lg transition-colors">
                   View Changes
                 </button>
-                <button className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
+                <button className="w-full px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
                   Checkout
                 </button>
-                <button className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
+                <button className="w-full px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
                   Create Branch
                 </button>
               </div>

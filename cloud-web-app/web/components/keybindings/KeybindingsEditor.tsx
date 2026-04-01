@@ -206,23 +206,23 @@ function KeyRecorder({ value, onChange, onCancel }: KeyRecorderProps) {
   return (
     <div className="flex items-center gap-2 p-2 bg-sky-900/50 rounded border border-sky-500">
       <Keyboard className="w-4 h-4 text-sky-400" />
-      <span className="text-sm text-white">
+      <span className="text-sm text-[var(--aethel-text-primary)]">
         {recording.length > 0 ? (
           recording.map((key, idx) => (
             <span key={idx}>
               {idx > 0 && '+'}
-              <kbd className="px-1.5 py-0.5 bg-slate-700 rounded text-xs">{key}</kbd>
+              <kbd className="px-1.5 py-0.5 bg-[var(--aethel-surface-tertiary)] rounded text-xs">{key}</kbd>
             </span>
           ))
         ) : (
-          <span className="text-slate-400">Press keys...</span>
+          <span className="text-[var(--aethel-text-tertiary)]">Press keys...</span>
         )}
       </span>
       <button
         onClick={onCancel}
-        className="ml-auto p-1 hover:bg-slate-700 rounded"
+        className="ml-auto p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
       >
-        <X className="w-4 h-4 text-slate-400" />
+        <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
       </button>
     </div>
   )
@@ -446,9 +446,9 @@ export default function KeybindingsEditor({
   }, [searchQuery, groupedKeybindings])
   
   return (
-    <div className="h-full flex flex-col bg-slate-900 text-white">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
           <Keyboard className="w-5 h-5 text-sky-400" />
           <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
@@ -462,21 +462,21 @@ export default function KeybindingsEditor({
         <div className="flex items-center gap-2">
           <button
             onClick={handleImport}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
             <Upload className="w-4 h-4" />
             Import
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
             <Download className="w-4 h-4" />
             Export
           </button>
           <button
             onClick={resetAll}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
             <RotateCcw className="w-4 h-4" />
             Reset All
@@ -493,7 +493,7 @@ export default function KeybindingsEditor({
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+              className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
             >
               <X className="w-5 h-5" />
             </button>
@@ -502,15 +502,15 @@ export default function KeybindingsEditor({
       </div>
       
       {/* Search & Filters */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-700">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search keybindings..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-500"
+            className="w-full pl-10 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:outline-none focus:border-[var(--aethel-primary)]"
           />
         </div>
         
@@ -518,8 +518,8 @@ export default function KeybindingsEditor({
           onClick={() => setShowOnlyModified(!showOnlyModified)}
           className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
             showOnlyModified
-              ? 'bg-sky-600 text-white'
-              : 'bg-slate-800 text-slate-400 hover:text-white'
+              ? 'bg-sky-600 text-[var(--aethel-text-primary)]'
+              : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
           }`}
         >
           <Filter className="w-4 h-4" />
@@ -542,7 +542,7 @@ export default function KeybindingsEditor({
       {/* Keybindings List */}
       <div className="flex-1 overflow-y-auto">
         {/* Table Header */}
-        <div className="sticky top-0 grid grid-cols-[1fr_200px_120px_80px] gap-4 px-4 py-2 bg-slate-800 border-b border-slate-700 text-xs font-semibold text-slate-400 uppercase">
+        <div className="sticky top-0 grid grid-cols-[1fr_200px_120px_80px] gap-4 px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)] text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase">
           <div>Command</div>
           <div>Keybinding</div>
           <div>When</div>
@@ -555,15 +555,15 @@ export default function KeybindingsEditor({
             {/* Category Header */}
             <button
               onClick={() => toggleCategory(category)}
-              className="w-full flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-800 text-left"
+              className="w-full flex items-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:bg-[var(--aethel-surface-secondary)] text-left"
             >
               {expandedCategories.has(category) ? (
-                <ChevronDown className="w-4 h-4 text-slate-500" />
+                <ChevronDown className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-slate-500" />
+                <ChevronRight className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />
               )}
-              <span className="text-sm font-medium text-slate-300">{category}</span>
-              <span className="text-xs text-slate-500">({kbs.length})</span>
+              <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">{category}</span>
+              <span className="text-xs text-[var(--aethel-text-quaternary)]">({kbs.length})</span>
             </button>
             
             {/* Keybindings */}
@@ -588,7 +588,7 @@ export default function KeybindingsEditor({
         
         {/* Empty State */}
         {filteredKeybindings.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+          <div className="flex flex-col items-center justify-center py-12 text-[var(--aethel-text-quaternary)]">
             <Keyboard className="w-12 h-12 mb-4 opacity-50" />
             <p className="text-lg">No keybindings found</p>
             <p className="text-sm">Try a different search term</p>
@@ -597,7 +597,7 @@ export default function KeybindingsEditor({
       </div>
       
       {/* Footer */}
-      <div className="px-4 py-2 border-t border-slate-700 text-xs text-slate-500">
+      <div className="px-4 py-2 border-t border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-quaternary)]">
         <span>
           {filteredKeybindings.length} keybinding(s) •{' '}
           {keybindings.filter((kb) => kb.source === 'user').length} customized
@@ -632,14 +632,14 @@ function KeybindingRow({
   
   return (
     <div
-      className={`grid grid-cols-[1fr_200px_120px_80px] gap-4 px-4 py-2 border-b border-slate-800 hover:bg-slate-800/30 items-center ${
+      className={`grid grid-cols-[1fr_200px_120px_80px] gap-4 px-4 py-2 border-b border-[var(--aethel-border-primary)] hover:bg-[var(--aethel-surface-secondary)]/30 items-center ${
         hasConflict ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)]' : ''
       }`}
     >
       {/* Command */}
       <div>
-        <div className="text-sm text-white">{keybinding.label}</div>
-        <div className="text-xs text-slate-500">{keybinding.command}</div>
+        <div className="text-sm text-[var(--aethel-text-primary)]">{keybinding.label}</div>
+        <div className="text-xs text-[var(--aethel-text-quaternary)]">{keybinding.command}</div>
       </div>
       
       {/* Keybinding */}
@@ -653,30 +653,30 @@ function KeybindingRow({
         ) : (
           <div className="flex items-center gap-2 group">
             {keybinding.keybinding ? (
-              <kbd className={`px-2 py-1 bg-slate-700 rounded text-xs ${
-                hasConflict ? 'text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]' : 'text-slate-300'
+              <kbd className={`px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs ${
+                hasConflict ? 'text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]' : 'text-[var(--aethel-text-secondary)]'
               }`}>
                 {keybinding.keybinding}
               </kbd>
             ) : (
-              <span className="text-sm text-slate-600">-</span>
+              <span className="text-sm text-[var(--aethel-text-quaternary)]">-</span>
             )}
             
             <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
               <button
                 onClick={onEdit}
-                className="p-1 hover:bg-slate-700 rounded"
+                className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
                 title="Edit keybinding"
               >
-                <Edit3 className="w-3 h-3 text-slate-400" />
+                <Edit3 className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
               </button>
               {isModified && (
                 <button
                   onClick={onReset}
-                  className="p-1 hover:bg-slate-700 rounded"
+                  className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
                   title="Reset to default"
                 >
-                  <RotateCcw className="w-3 h-3 text-slate-400" />
+                  <RotateCcw className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
                 </button>
               )}
             </div>
@@ -691,11 +691,11 @@ function KeybindingRow({
       {/* When */}
       <div>
         {keybinding.when ? (
-          <code className="px-2 py-0.5 bg-slate-800 rounded text-xs text-slate-400">
+          <code className="px-2 py-0.5 bg-[var(--aethel-surface-secondary)] rounded text-xs text-[var(--aethel-text-tertiary)]">
             {keybinding.when}
           </code>
         ) : (
-          <span className="text-sm text-slate-600">-</span>
+          <span className="text-sm text-[var(--aethel-text-quaternary)]">-</span>
         )}
       </div>
       
@@ -707,7 +707,7 @@ function KeybindingRow({
               ? 'bg-sky-500/20 text-sky-400'
               : keybinding.source === 'extension'
               ? 'bg-blue-500/20 text-blue-400'
-              : 'bg-slate-700 text-slate-400'
+              : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
           }`}
         >
           {keybinding.source}
@@ -750,3 +750,4 @@ export function useKeybindings(customBindings?: Keybinding[]) {
   
   return { keybindings, getKeybinding, executeCommand }
 }
+

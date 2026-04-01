@@ -123,20 +123,20 @@ function CollapsibleSection({ title, icon, defaultOpen = true, badge, children }
   const [isOpen, setIsOpen] = useState(defaultOpen)
   
   return (
-    <div className="border-b border-slate-700">
+    <div className="border-b border-[var(--aethel-border-secondary)]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full px-3 py-2 hover:bg-slate-700/50 text-sm"
+        className="flex items-center gap-2 w-full px-3 py-2 hover:bg-[var(--aethel-surface-quaternary)]/50 text-sm"
       >
         {isOpen ? (
-          <ChevronDown className="w-4 h-4 text-slate-400" />
+          <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         ) : (
-          <ChevronRight className="w-4 h-4 text-slate-400" />
+          <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         )}
         {icon}
-        <span className="font-medium text-white">{title}</span>
+        <span className="font-medium text-[var(--aethel-text-primary)]">{title}</span>
         {badge !== undefined && badge > 0 && (
-          <span className="ml-auto px-1.5 py-0.5 text-xs bg-slate-600 rounded">
+          <span className="ml-auto px-1.5 py-0.5 text-xs bg-[var(--aethel-surface-quaternary)] rounded">
             {badge}
           </span>
         )}
@@ -174,7 +174,7 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
       {variables.map((variable, idx) => (
         <div key={`${variable.name}-${idx}`}>
           <div
-            className={`flex items-center gap-1 px-3 py-0.5 hover:bg-slate-700/50 cursor-pointer ${
+            className={`flex items-center gap-1 px-3 py-0.5 hover:bg-[var(--aethel-surface-quaternary)]/50 cursor-pointer ${
               variable.changed ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]' : ''
             }`}
             style={{ paddingLeft: `${depth * 16 + 12}px` }}
@@ -183,22 +183,22 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
           >
             {variable.expandable ? (
               expanded.has(variable.name) ? (
-                <ChevronDown className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                <ChevronDown className="w-3 h-3 text-[var(--aethel-text-tertiary)] flex-shrink-0" />
               ) : (
-                <ChevronRight className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                <ChevronRight className="w-3 h-3 text-[var(--aethel-text-tertiary)] flex-shrink-0" />
               )
             ) : (
               <span className="w-3" />
             )}
             
-            <span className={`${variable.changed ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-sky-300'}`}>
+            <span className={`${variable.changed ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-[var(--aethel-info-light)]'}`}>
               {variable.name}
             </span>
-            <span className="text-slate-500">:</span>
+            <span className="text-[var(--aethel-text-tertiary)]">:</span>
             <span className={`ml-1 truncate ${getTypeColor(variable.type)}`}>
               {formatValue(variable.value, variable.type)}
             </span>
-            <span className="ml-auto text-slate-600 text-[10px]">
+            <span className="ml-auto text-[var(--aethel-text-quaternary)] text-[10px]">
               {variable.type}
             </span>
           </div>
@@ -218,15 +218,15 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
 
 function getTypeColor(type: string): string {
   switch (type) {
-    case 'string': return 'text-emerald-300'
-    case 'number': return 'text-blue-300'
-    case 'boolean': return 'text-blue-300'
+    case 'string': return 'text-[var(--aethel-success-light)]'
+    case 'number': return 'text-[var(--aethel-info-light)]'
+    case 'boolean': return 'text-[var(--aethel-info-light)]'
     case 'null':
-    case 'undefined': return 'text-slate-500'
+    case 'undefined': return 'text-[var(--aethel-text-tertiary)]'
     case 'function': return 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]'
     case 'object':
-    case 'array': return 'text-cyan-300'
-    default: return 'text-slate-300'
+    case 'array': return 'text-[var(--aethel-primary-light)]'
+    default: return 'text-[var(--aethel-text-secondary)]'
   }
 }
 
@@ -250,23 +250,23 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
   return (
     <div className="text-xs">
       {breakpoints.length === 0 ? (
-        <div className="px-3 py-2 text-slate-500 text-center">
-          No breakpoints
+        <div className="px-3 py-2 text-[var(--aethel-text-tertiary)] text-center">
+          Nenhum breakpoint
         </div>
       ) : (
         breakpoints.map(bp => (
           <div
             key={bp.id}
-            className="flex items-center gap-2 px-3 py-1 hover:bg-slate-700/50 group"
+            className="flex items-center gap-2 px-3 py-1 hover:bg-[var(--aethel-surface-quaternary)]/50 group"
           >
             <button
               onClick={() => onToggle(bp.id)}
               className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
                 bp.enabled
                   ? bp.verified
-                    ? 'bg-red-500 border-red-500'
-                    : 'bg-slate-500 border-slate-500'
-                  : 'border-slate-600'
+                    ? 'bg-[var(--aethel-success)] border-[var(--aethel-success)]'
+                    : 'bg-[var(--aethel-text-tertiary)] border-[var(--aethel-border-secondary)]'
+                  : 'border-[var(--aethel-border-secondary)]'
               }`}
             />
             
@@ -274,23 +274,23 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
               onClick={() => onNavigate(bp)}
               className="flex-1 min-w-0 text-left"
             >
-              <div className="text-white truncate">
+              <div className="text-[var(--aethel-text-primary)] truncate">
                 {bp.filePath.split('/').pop()}:{bp.line}
               </div>
               {bp.condition && (
-                <div className="text-slate-500 truncate">
+                <div className="text-[var(--aethel-text-tertiary)] truncate">
                   when: {bp.condition}
                 </div>
               )}
             </button>
             
             {bp.hitCount !== undefined && bp.hitCount > 0 && (
-              <span className="text-slate-500">{bp.hitCount}×</span>
+              <span className="text-[var(--aethel-text-tertiary)]">{bp.hitCount}×</span>
             )}
             
             <button
               onClick={() => onRemove(bp.id)}
-              className="p-1 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100"
+              className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] opacity-0 group-hover:opacity-100"
             >
               <Trash2 className="w-3 h-3" />
             </button>
@@ -313,8 +313,8 @@ function CallStack({ frames, selectedFrameId, onSelectFrame }: CallStackProps) {
   return (
     <div className="text-xs">
       {frames.length === 0 ? (
-        <div className="px-3 py-2 text-slate-500 text-center">
-          Not paused
+        <div className="px-3 py-2 text-[var(--aethel-text-tertiary)] text-center">
+          Nao pausado
         </div>
       ) : (
         frames.map((frame, idx) => (
@@ -323,13 +323,13 @@ function CallStack({ frames, selectedFrameId, onSelectFrame }: CallStackProps) {
             onClick={() => onSelectFrame(frame)}
             className={`flex items-center gap-2 w-full px-3 py-1 text-left ${
               frame.id === selectedFrameId
-                ? 'bg-sky-600/30'
-                : 'hover:bg-slate-700/50'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)]'
+                : 'hover:bg-[var(--aethel-surface-quaternary)]/50'
             }`}
           >
             <FunctionSquare className="w-3 h-3 text-[var(--aethel-warning-light)] flex-shrink-0" />
-            <span className="text-white truncate">{frame.name}</span>
-            <span className="ml-auto text-slate-500 text-[10px]">
+            <span className="text-[var(--aethel-text-primary)] truncate">{frame.name}</span>
+            <span className="ml-auto text-[var(--aethel-text-tertiary)] text-[10px]">
               {frame.filePath.split('/').pop()}:{frame.line}
             </span>
           </button>
@@ -369,12 +369,12 @@ function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpress
           value={newExpression}
           onChange={(e) => setNewExpression(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          placeholder="Add expression..."
-          className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-slate-600"
+          placeholder="Adicionar expressao..."
+          className="flex-1 bg-transparent border-none outline-none text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)]"
         />
         <button
           onClick={handleAdd}
-          className="p-1 text-slate-400 hover:text-white"
+          className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
         >
           <Plus className="w-3 h-3" />
         </button>
@@ -384,22 +384,22 @@ function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpress
       {expressions.map(expr => (
         <div
           key={expr.id}
-          className="flex items-start gap-2 px-3 py-1 hover:bg-slate-700/50 group"
+          className="flex items-start gap-2 px-3 py-1 hover:bg-[var(--aethel-surface-quaternary)]/50 group"
         >
-          <Eye className="w-3 h-3 text-slate-400 mt-0.5 flex-shrink-0" />
+          <Eye className="w-3 h-3 text-[var(--aethel-text-tertiary)] mt-0.5 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <div className="text-sky-300">{expr.expression}</div>
+            <div className="text-[var(--aethel-info-light)]">{expr.expression}</div>
             {expr.error ? (
-              <div className="text-red-400 truncate">{expr.error}</div>
+              <div className="text-[var(--aethel-error)] truncate">{expr.error}</div>
             ) : expr.result !== undefined ? (
-              <div className="text-slate-300 truncate">{expr.result}</div>
+              <div className="text-[var(--aethel-text-secondary)] truncate">{expr.result}</div>
             ) : (
-              <div className="text-slate-600">not available</div>
+              <div className="text-[var(--aethel-text-quaternary)]">indisponivel</div>
             )}
           </div>
           <button
             onClick={() => onRemove(expr.id)}
-            className="p-1 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] opacity-0 group-hover:opacity-100"
           >
             <Trash2 className="w-3 h-3" />
           </button>
@@ -442,49 +442,49 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
   
   const getMessageIcon = (type: ConsoleMessage['type']) => {
     switch (type) {
-      case 'error': return <XCircle className="w-3 h-3 text-red-400" />
+      case 'error': return <XCircle className="w-3 h-3 text-[var(--aethel-error)]" />
       case 'warn': return <AlertCircle className="w-3 h-3 text-[var(--aethel-warning-light)]" />
-      case 'info': return <Info className="w-3 h-3 text-blue-400" />
-      case 'debug': return <Code className="w-3 h-3 text-slate-400" />
-      default: return <ChevronRight className="w-3 h-3 text-slate-500" />
+      case 'info': return <Info className="w-3 h-3 text-[var(--aethel-info-light)]" />
+      case 'debug': return <Code className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
+      default: return <ChevronRight className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
     }
   }
   
   const getMessageColor = (type: ConsoleMessage['type']) => {
     switch (type) {
-      case 'error': return 'text-red-300 bg-red-500/10'
+      case 'error': return 'text-[var(--aethel-error)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]'
       case 'warn': return 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]'
-      case 'info': return 'text-blue-300'
-      default: return 'text-slate-300'
+      case 'info': return 'text-[var(--aethel-info-light)]'
+      default: return 'text-[var(--aethel-text-secondary)]'
     }
   }
   
   return (
     <div className="flex flex-col h-full">
       {/* Console toolbar */}
-      <div className="flex items-center gap-2 px-2 py-1 border-b border-slate-700">
+      <div className="flex items-center gap-2 px-2 py-1 border-b border-[var(--aethel-border-secondary)]">
         <button
           onClick={onClear}
-          className="p-1 text-slate-400 hover:text-white"
-          title="Clear console"
+          className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
+          title="Limpar console"
         >
           <Trash2 className="w-3 h-3" />
         </button>
         <button
           onClick={() => setShowFilter(!showFilter)}
-          className={`p-1 ${showFilter ? 'text-sky-400' : 'text-slate-400'} hover:text-white`}
-          title="Filter"
+          className={`p-1 ${showFilter ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'} hover:text-[var(--aethel-text-primary)]`}
+          title="Filtro"
         >
           <Filter className="w-3 h-3" />
         </button>
-        <span className="text-xs text-slate-500 ml-auto">
-          {filteredMessages.length} messages
+        <span className="text-xs text-[var(--aethel-text-tertiary)] ml-auto">
+          {filteredMessages.length} mensagens
         </span>
       </div>
       
       {/* Filter bar */}
       {showFilter && (
-        <div className="flex items-center gap-2 px-2 py-1 bg-slate-800 border-b border-slate-700">
+        <div className="flex items-center gap-2 px-2 py-1 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-secondary)]">
           {(['log', 'warn', 'error', 'info', 'debug'] as const).map(type => (
             <button
               key={type}
@@ -501,8 +501,8 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
               }}
               className={`px-2 py-0.5 text-xs rounded ${
                 typeFilter.has(type)
-                  ? 'bg-sky-600 text-white'
-                  : 'bg-slate-700 text-slate-400'
+                  ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+                  : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
               }`}
             >
               {type}
@@ -516,12 +516,12 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
         {filteredMessages.map(msg => (
           <div
             key={msg.id}
-            className={`flex items-start gap-2 px-2 py-1 border-b border-slate-800 ${getMessageColor(msg.type)}`}
+            className={`flex items-start gap-2 px-2 py-1 border-b border-[var(--aethel-border-primary)] ${getMessageColor(msg.type)}`}
           >
             {getMessageIcon(msg.type)}
             <span className="flex-1 whitespace-pre-wrap break-all">{msg.message}</span>
             {msg.source && (
-              <span className="text-slate-600 text-[10px]">
+              <span className="text-[var(--aethel-text-quaternary)] text-[10px]">
                 {msg.source}:{msg.line}
               </span>
             )}
@@ -635,23 +635,23 @@ export default function DebugPanel({
   const isRunning = demoSession.state === 'running'
   
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-white">
+    <div className="flex flex-col h-full bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]">
       {/* Debug toolbar */}
-      <div className="flex items-center gap-1 px-3 py-2 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-secondary)]">
         {/* Play/Pause */}
         {isPaused ? (
           <button
             onClick={onPlay}
-            className="p-1.5 bg-emerald-600 hover:bg-emerald-500 rounded text-white"
-            title="Continue (F5)"
+            className="p-1.5 bg-[var(--aethel-success)] hover:brightness-110 rounded text-[var(--aethel-text-primary)]"
+            title="Continuar (F5)"
           >
             <Play className="w-4 h-4" />
           </button>
         ) : (
           <button
             onClick={onPause}
-            className="p-1.5 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] rounded text-white"
-            title="Pause (F6)"
+            className="p-1.5 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] rounded text-[var(--aethel-text-primary)]"
+            title="Pausar (F6)"
           >
             <Pause className="w-4 h-4" />
           </button>
@@ -660,8 +660,8 @@ export default function DebugPanel({
         {/* Stop */}
         <button
           onClick={onStop}
-          className="p-1.5 hover:bg-slate-700 rounded text-red-400"
-          title="Stop (Shift+F5)"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-error)]"
+          title="Parar (Shift+F5)"
         >
           <Square className="w-4 h-4" />
         </button>
@@ -669,20 +669,20 @@ export default function DebugPanel({
         {/* Restart */}
         <button
           onClick={onRestart}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400"
-          title="Restart (Ctrl+Shift+F5)"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
+          title="Reiniciar (Ctrl+Shift+F5)"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
         
-        <div className="w-px h-4 bg-slate-700 mx-1" />
+        <div className="w-px h-4 bg-[var(--aethel-surface-quaternary)] mx-1" />
         
         {/* Step controls */}
         <button
           onClick={onStepOver}
           disabled={!isPaused}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400 disabled:opacity-50"
-          title="Step Over (F10)"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] disabled:opacity-50"
+          title="Passo sobre (F10)"
         >
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -690,8 +690,8 @@ export default function DebugPanel({
         <button
           onClick={onStepInto}
           disabled={!isPaused}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400 disabled:opacity-50"
-          title="Step Into (F11)"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] disabled:opacity-50"
+          title="Entrar (F11)"
         >
           <ArrowDown className="w-4 h-4" />
         </button>
@@ -699,8 +699,8 @@ export default function DebugPanel({
         <button
           onClick={onStepOut}
           disabled={!isPaused}
-          className="p-1.5 hover:bg-slate-700 rounded text-slate-400 disabled:opacity-50"
-          title="Step Out (Shift+F11)"
+          className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] disabled:opacity-50"
+          title="Sair (Shift+F11)"
         >
           <ArrowUp className="w-4 h-4" />
         </button>
@@ -708,13 +708,13 @@ export default function DebugPanel({
         <div className="flex-1" />
         
         {/* Session info */}
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">
           {demoSession.name}
         </span>
         <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
           isPaused ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]' :
-          isRunning ? 'bg-emerald-500/20 text-emerald-400' :
-          'bg-slate-700 text-slate-400'
+          isRunning ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]' :
+          'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
         }`}>
           {demoSession.state}
         </span>
@@ -722,10 +722,10 @@ export default function DebugPanel({
       
       <div className="flex-1 flex overflow-hidden">
         {/* Left panel - Breakpoints, Call Stack, Variables */}
-        <div className="w-72 border-r border-slate-700 overflow-y-auto">
+        <div className="w-72 border-r border-[var(--aethel-border-secondary)] overflow-y-auto">
           <CollapsibleSection
-            title="Breakpoints"
-            icon={<Circle className="w-4 h-4 text-red-400" />}
+            title="Pontos de parada"
+            icon={<Circle className="w-4 h-4 text-[var(--aethel-error)]" />}
             badge={demoSession.breakpoints.filter(b => b.enabled).length}
           >
             <BreakpointList
@@ -738,8 +738,8 @@ export default function DebugPanel({
           </CollapsibleSection>
           
           <CollapsibleSection
-            title="Call Stack"
-            icon={<Layers className="w-4 h-4 text-blue-400" />}
+            title="Pilha de chamadas"
+            icon={<Layers className="w-4 h-4 text-[var(--aethel-info-light)]" />}
             badge={demoSession.callStack.length}
           >
             <CallStack
@@ -753,12 +753,12 @@ export default function DebugPanel({
           </CollapsibleSection>
           
           <CollapsibleSection
-            title="Variables"
-            icon={<Variable className="w-4 h-4 text-emerald-400" />}
+            title="Variaveis"
+            icon={<Variable className="w-4 h-4 text-[var(--aethel-success-light)]" />}
           >
             {currentFrame?.scopes.map(scope => (
               <div key={scope.name} className="mb-2">
-                <div className="px-3 py-1 text-xs text-slate-500 uppercase">
+                <div className="px-3 py-1 text-xs text-[var(--aethel-text-tertiary)] uppercase">
                   {scope.name}
                 </div>
                 <VariableTree variables={scope.variables} />
@@ -767,8 +767,8 @@ export default function DebugPanel({
           </CollapsibleSection>
           
           <CollapsibleSection
-            title="Watch"
-            icon={<Eye className="w-4 h-4 text-blue-400" />}
+            title="Observacao"
+            icon={<Eye className="w-4 h-4 text-[var(--aethel-info-light)]" />}
             badge={demoSession.watchExpressions.length}
           >
             <WatchExpressions
@@ -783,13 +783,13 @@ export default function DebugPanel({
         {/* Right panel - Console */}
         <div className="flex-1 flex flex-col">
           {/* Tabs */}
-          <div className="flex items-center gap-1 px-2 py-1 bg-slate-800 border-b border-slate-700">
+          <div className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-secondary)]">
             <button
               onClick={() => setActiveTab('console')}
               className={`px-3 py-1 text-xs rounded ${
                 activeTab === 'console'
-                  ? 'bg-sky-600 text-white'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
               <Terminal className="w-3 h-3 inline mr-1" />
@@ -809,3 +809,5 @@ export default function DebugPanel({
     </div>
   )
 }
+
+

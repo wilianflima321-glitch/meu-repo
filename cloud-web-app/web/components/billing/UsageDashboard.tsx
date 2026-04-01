@@ -165,7 +165,7 @@ export function UsageDashboard() {
         <div>
           <h2 className="text-xl font-bold text-[var(--aethel-text-primary)]">Seu consumo</h2>
           <p className="text-sm text-[var(--aethel-text-tertiary)]">
-            Plano <span className="text-[var(--aethel-info)] font-medium">{usage.plan.name}</span> â€¢ 
+            Plano <span className="text-[var(--aethel-info)] font-medium">{usage.plan.name}</span> - 
             Renova em {daysUntilRenewal} dias
           </p>
         </div>
@@ -349,7 +349,7 @@ function UsageError() {
       </p>
       <button 
         onClick={() => window.location.reload()}
-        className="px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-slate-600 text-[var(--aethel-text-primary)] rounded-lg transition-colors"
+        className="px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
       >
         Recarregar
       </button>

@@ -207,14 +207,14 @@ export default function AIChatPanelContainer() {
         {
           id: `system-research-${Date.now()}`,
           role: 'system',
-          content: `Research context imported from Nexus.\n\n${contextPrompt}`,
+          content: `Contexto de pesquisa importado do Nexus.\n\n${contextPrompt}`,
           timestamp: new Date(),
         },
         {
           id: `assistant-research-${Date.now() + 1}`,
           role: 'assistant',
           content:
-            'Research handoff loaded. Send your next message to transform this into implementation steps. Tip: use @studio @web for deep multi-agent analysis.',
+            'Handoff de pesquisa carregado. Envie sua proxima mensagem para transformar isso em passos de implementacao. Dica: use @studio @web para uma analise multiagente mais profunda.',
           timestamp: new Date(),
           model: currentModel,
         },
@@ -271,7 +271,7 @@ export default function AIChatPanelContainer() {
 
       const usage = consumeLocalDemoUsage(providerStatus?.demoDailyLimit)
       if (!usage.allowed) {
-        const limitMessage = `DEMO_LIMIT_REACHED: local demo daily limit reached (${usage.used}/${usage.limit}). Configure a provider in /settings?tab=api or retry after ${usage.resetAt}.`
+        const limitMessage = `DEMO_LIMIT_REACHED: limite diario do demo local atingido (${usage.used}/${usage.limit}). Configure um provider em /settings?tab=api ou tente novamente em ${usage.resetAt}.`
         setMessages((prev) => [
           ...prev,
           {
@@ -363,8 +363,8 @@ export default function AIChatPanelContainer() {
             id: `assistant-${Date.now()}`,
             role: 'assistant',
             content:
-              `MENTION_NOT_SUPPORTED: ${unsupportedList} ainda nao esta suportado nesta superficie.\n` +
-              'Suportado no momento: @studio, @delivery, @fast, @web e @agents:1|2|3.',
+              `${unsupportedList} ainda nao e suportado nesta superficie.\n` +
+              'Disponivel no momento: @studio, @delivery, @fast, @web e @agents:1|2|3.',
             timestamp: new Date(),
             model: currentModel,
           },
@@ -391,7 +391,7 @@ export default function AIChatPanelContainer() {
           {
             id: `assistant-${Date.now()}`,
             role: 'assistant',
-            content: 'Attachments are gated in this release phase. Use text-only prompts in P0.',
+            content: 'Anexos ainda nao estao disponiveis nesta superficie. Use prompts apenas de texto por enquanto.',
             timestamp: new Date(),
             model: currentModel,
           },
@@ -552,9 +552,9 @@ export default function AIChatPanelContainer() {
   return (
     <div className="flex h-full flex-col">
       {(mission || source || projectId) && (
-        <div className="mx-3 mt-3 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(79,70,229,0.12),rgba(14,165,233,0.08),rgba(15,23,42,0.78))] p-4">
+        <div className="mx-3 mt-3 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_14%,transparent),color-mix(in_srgb,var(--aethel-info)_10%,transparent),rgba(15,23,42,0.78))] p-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-100">
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
               Sessao de trabalho
             </span>
             {source ? (
@@ -568,7 +568,7 @@ export default function AIChatPanelContainer() {
               </span>
             ) : null}
           </div>
-          <div className="mt-2 text-sm font-medium text-white">
+          <div className="mt-2 text-sm font-medium text-[var(--aethel-text-primary)]">
             {mission || 'Continue a partir do contexto do studio sem perder o handoff atual.'}
           </div>
           <div className="mt-3 grid gap-2">
@@ -577,7 +577,7 @@ export default function AIChatPanelContainer() {
                 key={intent.id}
                 type="button"
                 onClick={() => void handleSendMessage(intent.buildPrompt(mission))}
-                className="rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-left transition hover:border-white/20 hover:bg-white/[0.05]"
+                className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-4 py-3 text-left transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)]"
               >
                 <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{intent.label}</p>
                 <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{intent.description}</p>
@@ -596,7 +596,7 @@ export default function AIChatPanelContainer() {
             settingsHref={providerGate.setupUrl}
           />
           {!providerStatus?.configured && !providerStatus?.demoModeEnabled && (
-            <div className="rounded border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-[11px] text-sky-100">
+            <div className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-info-light)]">
               Demo local disponivel: voce pode enviar ate{' '}
               {typeof providerStatus?.demoDailyLimit === 'number' ? providerStatus.demoDailyLimit : 5} mensagens por dia
               com resposta guiada sem provider real.
@@ -609,9 +609,9 @@ export default function AIChatPanelContainer() {
           <button
             type="button"
             onClick={handleStopGenerating}
-            className="aethel-button aethel-button-ghost text-[11px] border border-rose-500/40 text-rose-200 hover:bg-rose-500/20"
+            className="aethel-button aethel-button-ghost text-[11px] border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]"
           >
-            Stop generating
+            Parar resposta
           </button>
         </div>
       )}

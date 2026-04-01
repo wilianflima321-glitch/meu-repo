@@ -60,6 +60,27 @@ Absorb:
 - continuous execution tied to current project state
 - AI and preview always attached to the same active context
 
+### From Genspark-style AI workspace patterns
+Absorb:
+- confidence that one mobile context can still access multiple output types
+- fast jump from notification or prompt intent into the exact artifact that needs attention
+
+Reject:
+- turning mobile into a generic AI prompt launcher
+- letting a broad AI workspace replace tight approval and preview tasks
+- flooding the handheld surface with tool-choice decisions before the current task is clear
+
+### From Unreal / Adobe / Manus
+Absorb:
+- Unreal: viewport sovereignty even on constrained screens; keep camera/view controls close to the surface
+- Adobe: monitor-first playback clarity with precise transport and compare behavior
+- Manus: evidence-aware research with visible provenance and extractable findings
+
+Reject:
+- shrinking desktop preview chrome into unreadable mobile clutter
+- hiding source/reference context behind separate pages
+- letting research collapse into a plain chat transcript on mobile
+
 ### What to avoid
 - trying to replicate full desktop panel density
 - chat history dominating the screen over the current task
@@ -206,6 +227,14 @@ Rules:
 - preview remains visually sovereign
 - runtime internals stay behind a sheet
 - deck cards must support selected, updating, blocked and compared states
+- viewport or monitor controls should feel closer to a serious monitor/viewport than a generic mobile media embed
+- source/reference context must remain distinguishable from the active output
+
+Preview UX rules:
+- web preview should privilege route/device clarity over decorative framing
+- 3D preview should keep camera and view-mode access near the viewport
+- media preview should keep transport, frame/time and mute controls persistently readable
+- research preview should preserve provenance and compare behavior even on a constrained screen
 
 ### 3. Review
 Mission:
@@ -223,12 +252,14 @@ Approval Card anatomy:
 - `Approve`
 - `Reject`
 - `Inspect deeper`
+- `Rollback` when lineage exists
 
 Rules:
 - decision CTAs are large and obvious
 - risk must be explicit before the action row
 - diff is semantic-first, code-second
 - pending approval state outranks background conversation history
+- if the approval concerns a preview-visible change, the active output should remain reachable without losing the decision state
 
 ### 4. Assets Lite
 Mission:
@@ -268,6 +299,16 @@ Rules:
 - scope chips must be visible before sending input
 - pending approvals rise above long chat history
 - live voice expands the same composer; it never creates a separate product mode family
+
+## Mobile AI <-> Preview Contract
+On mobile, chat and preview must feel tightly coupled because screen space is scarce.
+
+Rules:
+- the composer must always know whether the user is acting on an active output, a reference/source, or an approval state
+- if the user is in Preview mode, prompts should target the visible preview by default unless scope is changed explicitly
+- if a prompt updates a non-visible connected flow, the Preview Deck must surface that state immediately
+- opening a preview detail, approval detail or source detail must not discard the draft prompt
+- review decisions should keep the affected output reachable in one gesture, not behind a full mode reset
 
 ## Preview Deck Mobile
 The Preview Deck is a horizontal swipe strip for parallel flows inside the same project.

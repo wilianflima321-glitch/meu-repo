@@ -389,12 +389,12 @@ export default function SettingsEditor() {
     switch (setting.type) {
       case 'boolean':
         return (
-          <label className="flex items-center gap-2 text-xs text-zinc-300">
+          <label className="flex items-center gap-2 text-xs text-[var(--aethel-text-secondary)]">
             <input
               type="checkbox"
               checked={value}
               onChange={(event) => updateSetting(setting.key, event.target.checked)}
-              className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 text-sky-400 focus:ring-2 focus:ring-sky-400"
+              className="h-4 w-4 rounded border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] text-[var(--aethel-primary)] focus:ring-2 focus:ring-[var(--aethel-primary)]"
             />
             {value ? 'Ativado' : 'Desativado'}
           </label>
@@ -436,12 +436,12 @@ export default function SettingsEditor() {
         )
 
       default:
-        return <span className="text-xs text-zinc-500">Tipo nao suportado: {setting.type}</span>
+        return <span className="text-xs text-[var(--aethel-text-quaternary)]">Tipo nao suportado: {setting.type}</span>
     }
   }
 
   return (
-    <div className="flex h-full bg-transparent text-white">
+    <div className="flex h-full bg-transparent text-[var(--aethel-text-primary)]">
       <div className="w-72 border-r border-white/10">
         <div className="border-b border-white/10 p-4">
           <input
@@ -480,13 +480,13 @@ export default function SettingsEditor() {
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
-                selectedCategory === category.id ? 'bg-white/[0.06] text-white' : 'text-zinc-400 hover:bg-white/[0.04]'
+                selectedCategory === category.id ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
               }`}
             >
-              <span className="rounded-md bg-white/5 px-2 py-1 text-[11px] text-zinc-400">{category.icon}</span>
+              <span className="rounded-md bg-white/5 px-2 py-1 text-[11px] text-[var(--aethel-text-tertiary)]">{category.icon}</span>
               <div className="flex-1">
                 <div className="text-sm font-medium">{category.label}</div>
-                <div className="text-xs text-zinc-500">{category.settings.length} configuracoes</div>
+                <div className="text-xs text-[var(--aethel-text-quaternary)]">{category.settings.length} configuracoes</div>
               </div>
             </button>
           ))}
@@ -503,10 +503,10 @@ export default function SettingsEditor() {
         <div className="mx-auto max-w-4xl p-8">
           <div className="mb-8">
             <h1 className="flex items-center gap-3 text-2xl font-semibold">
-              <span className="rounded-md bg-white/5 px-2 py-1 text-sm text-zinc-300">{currentCategory?.icon}</span>
+              <span className="rounded-md bg-white/5 px-2 py-1 text-sm text-[var(--aethel-text-secondary)]">{currentCategory?.icon}</span>
               {currentCategory?.label}
             </h1>
-            <p className="text-sm text-zinc-500">{currentCategory?.settings.length} configuracoes</p>
+            <p className="text-sm text-[var(--aethel-text-quaternary)]">{currentCategory?.settings.length} configuracoes</p>
           </div>
 
           <div className="space-y-6">
@@ -518,15 +518,15 @@ export default function SettingsEditor() {
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="mb-1 flex items-center gap-2">
-                        <h3 className="text-sm font-semibold text-white">{setting.title}</h3>
+                        <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{setting.title}</h3>
                         {isModified && (
                           <span className="rounded-full bg-sky-500/20 px-2 py-0.5 text-[11px] text-sky-200">
                             Alterado
                           </span>
                         )}
                       </div>
-                      <p className="mb-2 text-xs text-zinc-500">{setting.description}</p>
-                      <code className="text-[11px] text-zinc-600">{setting.key}</code>
+                      <p className="mb-2 text-xs text-[var(--aethel-text-quaternary)]">{setting.description}</p>
+                      <code className="text-[11px] text-[var(--aethel-text-quaternary)]">{setting.key}</code>
                     </div>
                     {isModified && (
                       <button
@@ -553,3 +553,4 @@ export default function SettingsEditor() {
     </div>
   )
 }
+

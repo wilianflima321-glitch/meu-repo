@@ -24,6 +24,55 @@ It is the continuity layer between the public product and the Workbench.
 The current dashboard family has enough tabs and utilities to easily become a fragmented control center.
 This blueprint forces the page back to its real role: orient, prioritize, and send the user into Workbench.
 
+## Implementation Reality Check (2026-03-25)
+The repo already contains enough dashboard and studio pieces to support this page, but there is still drift risk.
+
+### Current implementation reality
+- dashboard surfaces still carry too many tabs and helper utilities
+- preview and AI cues already appear outside Workbench in useful ways, but they can still become too operationally heavy for Studio Home
+- the current implementation is closer to a broad control center than to a disciplined mission-control page
+
+Concrete implementation gaps:
+- dashboard-level preview is already strong enough to start competing with Workbench if not kept summary-only
+- `DashboardCreationWorkbench.tsx` behaves like a partial secondary workbench inside the dashboard family
+- AI and live-preview helper flows in dashboard logic risk turning Studio Home into an execution surface instead of a continuity surface
+
+### Critical limitation
+If Studio Home keeps absorbing workflow detail that belongs in Workbench, the product center becomes ambiguous again.
+
+### Non-negotiable page rule
+Studio Home may summarize:
+- mission
+- connected flows
+- active runs
+- blockers
+- next action
+
+Studio Home may not become the place where the user performs deep preview, deep AI work, or dense multi-panel production tasks.
+
+## Benchmark Alignment
+### From VS Code
+Absorb:
+- recent-work and restore-state seriousness
+- fast re-entry into the exact working context
+- orientation that favors continuity over marketing
+
+### From Replit
+Absorb:
+- active execution awareness
+- project-to-output continuity
+- visible sense of what is currently running and what needs attention
+
+### From Genspark
+Absorb:
+- one workspace feeling that keeps multiple AI-created outputs connected
+- clear next-step orientation instead of forcing the user to restart from a blank prompt
+
+Reject:
+- turning Studio Home into a prompt-first AI hub
+- using Studio Home as a substitute for Projects or Workbench
+- showing too many workflow tools at equal weight
+
 ## Primary CTA
 - `Continue Work`
 
@@ -222,6 +271,7 @@ It should restore:
 - clicking a ConnectedFlowCard changes the next Workbench entry scope
 - clicking a recent item can open directly into file, scene, run, or preview focus
 - clicking `Open AI Console` should open Workbench with AI console expanded and the relevant run selected
+- clicking `Open Preview` or a preview-oriented flow should preserve the related AI/review context instead of opening a disconnected viewer
 - RuntimeSummaryMatrix rows should deep-link to Status or a Workbench drawer, not spawn detached pages
 
 ## Microinteractions
@@ -467,6 +517,14 @@ Every line must justify why it deserves to sit next to the primary CTA.
 - updating
 - blocked
 - no recent output
+- outdated
+- evidence-ready or research-heavy when the flow is primarily driven by references/research
+
+### Preview and research rules
+- if a connected flow has a visible output, the card should hint at its preview nature without turning into a thumbnail gallery
+- `outdated` must appear when upstream assets or research findings invalidate the current flow output
+- research-heavy flows should expose provenance or evidence-readiness cues, not only a generic updated timestamp
+- the card should help the user infer whether the best resume target is Build, Preview or Review
 
 ## LiveStrip Detailed Anatomy
 ### Pill order

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {
@@ -69,17 +69,17 @@ function getStatusIcon(status: GitFile['status']) {
     case 'modified':
       return { icon: FileDiff, color: 'text-[var(--aethel-warning-light)]', label: 'M' }
     case 'added':
-      return { icon: FilePlus, color: 'text-emerald-400', label: 'A' }
+      return { icon: FilePlus, color: 'text-[var(--aethel-success-light)]', label: 'A' }
     case 'deleted':
-      return { icon: FileX, color: 'text-red-400', label: 'D' }
+      return { icon: FileX, color: 'text-[var(--aethel-error)]', label: 'D' }
     case 'renamed':
-      return { icon: FileCode, color: 'text-blue-400', label: 'R' }
+      return { icon: FileCode, color: 'text-[var(--aethel-info-light)]', label: 'R' }
     case 'untracked':
-      return { icon: FilePlus, color: 'text-slate-400', label: 'U' }
+      return { icon: FilePlus, color: 'text-[var(--aethel-text-tertiary)]', label: 'U' }
     case 'conflicted':
-      return { icon: AlertCircle, color: 'text-red-500', label: 'C' }
+      return { icon: AlertCircle, color: 'text-[var(--aethel-error)]', label: 'C' }
     default:
-      return { icon: FileCode, color: 'text-slate-400', label: '?' }
+      return { icon: FileCode, color: 'text-[var(--aethel-text-tertiary)]', label: '?' }
   }
 }
 
@@ -141,7 +141,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
   const dirPath = file.path.split('/').slice(0, -1).join('/')
 
   return (
-    <div className="group flex items-center gap-1 px-2 py-1 hover:bg-slate-800/50 rounded text-sm">
+    <div className="group flex items-center gap-1 px-2 py-1 hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded text-sm">
       {/* Status indicator */}
       <span className={`w-4 text-center font-mono text-xs ${status.color}`}>
         {status.label}
@@ -152,17 +152,17 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
         onClick={onOpenDiff}
         className="flex-1 flex items-center gap-1 text-left truncate"
       >
-        <span className="text-slate-300 truncate">{fileName}</span>
+        <span className="text-[var(--aethel-text-secondary)] truncate">{fileName}</span>
         {dirPath && (
-          <span className="text-slate-500 text-xs truncate">{dirPath}</span>
+          <span className="text-[var(--aethel-text-tertiary)] text-xs truncate">{dirPath}</span>
         )}
       </button>
 
       {/* Stats */}
       {(file.additions || file.deletions) && (
         <div className="flex items-center gap-1 text-xs">
-          {file.additions && <span className="text-emerald-400">+{file.additions}</span>}
-          {file.deletions && <span className="text-red-400">-{file.deletions}</span>}
+          {file.additions && <span className="text-[var(--aethel-success-light)]">+{file.additions}</span>}
+          {file.deletions && <span className="text-[var(--aethel-error)]">-{file.deletions}</span>}
         </div>
       )}
 
@@ -170,7 +170,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={onOpenDiff}
-          className="p-1 rounded hover:bg-slate-700 text-slate-400"
+          className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
           title="Ver diff"
         >
           <Eye className="w-3.5 h-3.5" />
@@ -178,8 +178,8 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
         {!file.staged && file.status !== 'untracked' && (
           <button
             onClick={onDiscard}
-            className="p-1 rounded hover:bg-slate-700 text-slate-400"
-            title="Discard Changes"
+            className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
+            title="Descartar alteracoes"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
@@ -187,16 +187,16 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
         {file.staged ? (
           <button
             onClick={onUnstage}
-            className="p-1 rounded hover:bg-slate-700 text-slate-400"
-            title="Unstage"
+            className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
+            title="Desfazer stage"
           >
             <Minus className="w-3.5 h-3.5" />
           </button>
         ) : (
           <button
             onClick={onStage}
-            className="p-1 rounded hover:bg-slate-700 text-slate-400"
-            title="Stage"
+            className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
+            title="Adicionar ao stage"
           >
             <Plus className="w-3.5 h-3.5" />
           </button>
@@ -247,7 +247,7 @@ export default function GitPanelPro({
       setAhead(status.ahead)
       setBehind(status.behind)
     } catch (err) {
-      setError('Failed to fetch git status')
+      setError('Falha ao carregar status do Git')
       console.error('Git status error:', err)
     } finally {
       setLoading(false)
@@ -347,11 +347,11 @@ export default function GitPanelPro({
   const handlePush = async () => {
     // Request consent for push operation
     const request = createConsentRequest('git.push', {
-      description: `Push ${ahead} commits to remote repository`,
+      description: `Enviar ${ahead} commits para o repositorio remoto`,
       details: [
         `Branch: ${currentBranch}`,
-        `Commits ahead: ${ahead}`,
-        'This will upload your changes to the remote repository'
+        `Commits pendentes: ${ahead}`,
+        'Isso vai enviar suas mudancas para o repositorio remoto'
       ]
     })
 
@@ -432,8 +432,20 @@ export default function GitPanelPro({
   // Loading state
   if (loading) {
     return (
-      <div className={`h-full flex items-center justify-center ${className}`}>
-        <Loader2 className="w-6 h-6 animate-spin text-sky-400" />
+      <div className={`flex h-full items-center justify-center p-6 ${className}`}>
+        <div
+          className="flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-6 py-5 text-center shadow-[0_18px_48px_rgba(2,6,23,0.24)]"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="h-7 w-7 animate-spin text-[var(--aethel-info-light)]" />
+          <div>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Carregando painel Git</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
+              Buscando branch atual, alteracoes locais e historico recente.
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -441,15 +453,26 @@ export default function GitPanelPro({
   // Error state
   if (error) {
     return (
-      <div className={`h-full flex flex-col items-center justify-center gap-2 ${className}`}>
-        <AlertCircle className="w-8 h-8 text-red-400" />
-        <p className="text-sm text-red-400">{error}</p>
-        <button
-          onClick={fetchStatus}
-          className="text-sm text-sky-400 hover:underline"
+      <div className={`flex h-full items-center justify-center p-6 ${className}`}>
+        <div
+          className="flex max-w-sm flex-col items-center gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-6 py-5 text-center"
+          role="alert"
         >
-          Retry
-        </button>
+          <AlertCircle className="h-8 w-8 text-[var(--aethel-error)]" />
+          <div>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Nao foi possivel ler o repositorio</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{error}</p>
+          </div>
+          <p className="text-[11px] text-[var(--aethel-text-quaternary)]">
+            Verifique se o workspace atual possui um `.git` acessivel e tente novamente.
+          </p>
+          <button
+            onClick={fetchStatus}
+            className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_86%,transparent)] px-3 py-1.5 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+          >
+            Tentar novamente
+          </button>
+        </div>
       </div>
     )
   }
@@ -457,46 +480,46 @@ export default function GitPanelPro({
   return (
     <div className={`h-full flex flex-col ${className}`}>
       {/* Branch Selector */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <button
           onClick={() => setShowBranches(!showBranches)}
-          className="flex items-center gap-2 text-sm hover:text-white transition-colors"
+          className="flex items-center gap-2 text-sm transition-colors hover:text-[var(--aethel-text-primary)]"
         >
-          <GitBranch className="w-4 h-4 text-sky-400" />
+          <GitBranch className="w-4 h-4 text-[var(--aethel-info-light)]" />
           <span>{currentBranch}</span>
           {ahead > 0 && (
-            <span className="text-xs text-emerald-400">↑{ahead}</span>
+            <span className="text-xs text-[var(--aethel-success-light)]">+{ahead}</span>
           )}
           {behind > 0 && (
-            <span className="text-xs text-[var(--aethel-warning-light)]">↓{behind}</span>
+            <span className="text-xs text-[var(--aethel-warning-light)]">-{behind}</span>
           )}
         </button>
         <div className="flex items-center gap-1">
           <button
             onClick={handleFetch}
-            className="p-1 rounded hover:bg-slate-800 text-slate-400"
-            title="Fetch"
+            className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
+            title="Buscar atualizacoes"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
             onClick={handlePull}
-            className="p-1 rounded hover:bg-slate-800 text-slate-400"
-            title="Pull"
+            className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
+            title="Baixar mudancas"
           >
             <Download className="w-4 h-4" />
           </button>
           <button
             onClick={handlePush}
-            className="p-1 rounded hover:bg-slate-800 text-slate-400"
-            title="Push"
+            className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
+            title="Enviar mudancas"
           >
             <Upload className="w-4 h-4" />
           </button>
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className={`p-1 rounded hover:bg-slate-800 ${showHistory ? 'text-sky-400' : 'text-slate-400'}`}
-            title="History"
+            className={`p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] ${showHistory ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
+            title="Historico"
           >
             <History className="w-4 h-4" />
           </button>
@@ -505,10 +528,10 @@ export default function GitPanelPro({
 
       {/* Branch List */}
       {showBranches && (
-        <div className="border-b border-slate-800 max-h-48 overflow-y-auto">
+        <div className="border-b border-[var(--aethel-border-primary)] max-h-48 overflow-y-auto">
           <div className="px-3 py-2">
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              Branches
+            <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider mb-2">
+              Branches locais
             </div>
             {branches.filter(b => !b.remote).map(branch => (
               <button
@@ -516,7 +539,7 @@ export default function GitPanelPro({
                 onClick={() => handleCheckout(branch.name)}
                 className={`
                   w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm
-                  ${branch.current ? 'bg-sky-500/20 text-sky-300' : 'hover:bg-slate-800 text-slate-300'}
+                  ${branch.current ? 'border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]' : 'hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}
                 `}
               >
                 <GitBranch className="w-4 h-4" />
@@ -524,14 +547,14 @@ export default function GitPanelPro({
                 {branch.current && <Check className="w-4 h-4" />}
               </button>
             ))}
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-3 mb-2">
-              Remote
+            <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider mt-3 mb-2">
+              Branches remotas
             </div>
             {branches.filter(b => b.remote).map(branch => (
               <button
                 key={branch.name}
                 onClick={() => handleCheckout(branch.name)}
-                className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-slate-800 text-slate-400"
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
               >
                 <GitBranch className="w-4 h-4" />
                 <span className="flex-1 text-left">{branch.name}</span>
@@ -543,24 +566,24 @@ export default function GitPanelPro({
 
       {/* Commit History */}
       {showHistory && (
-        <div className="border-b border-slate-800 max-h-64 overflow-y-auto">
+        <div className="border-b border-[var(--aethel-border-primary)] max-h-64 overflow-y-auto">
           <div className="px-3 py-2">
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              Recent Commits
+            <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider mb-2">
+              Commits recentes
             </div>
             {commits.map(commit => (
               <div
                 key={commit.hash}
-                className="flex items-start gap-2 px-2 py-2 rounded hover:bg-slate-800/50"
+                className="flex items-start gap-2 px-2 py-2 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
               >
-                <GitCommit className="w-4 h-4 text-slate-500 mt-0.5" />
+                <GitCommit className="w-4 h-4 text-[var(--aethel-text-tertiary)] mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm text-slate-300 truncate">{commit.message}</div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                  <div className="text-sm text-[var(--aethel-text-secondary)] truncate">{commit.message}</div>
+                  <div className="mt-0.5 flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)]">
                     <span className="font-mono">{commit.hash}</span>
-                    <span>•</span>
+                    <span>-</span>
                     <span>{commit.author.split('@')[0]}</span>
-                    <span>•</span>
+                    <span>-</span>
                     <span>{formatRelativeTime(commit.date)}</span>
                   </div>
                 </div>
@@ -572,40 +595,40 @@ export default function GitPanelPro({
 
       {/* Conflicted Files Warning */}
       {conflictedFiles.length > 0 && (
-        <div className="px-3 py-2 bg-red-500/10 border-b border-red-500/30">
-          <div className="flex items-center gap-2 text-red-400 text-sm">
+        <div className="border-b border-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2">
+          <div className="flex items-center gap-2 text-[var(--aethel-error)] text-sm">
             <AlertCircle className="w-4 h-4" />
-            <span>{conflictedFiles.length} file(s) with merge conflicts</span>
+            <span>{conflictedFiles.length} arquivo(s) com conflito de merge</span>
           </div>
         </div>
       )}
 
       {/* Commit Message Input */}
-      <div className="px-3 py-2 border-b border-slate-800">
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <textarea
           ref={inputRef}
           value={commitMessage}
           onChange={(e) => setCommitMessage(e.target.value)}
-          placeholder="Commit message..."
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 resize-none"
+          placeholder="Descreva este commit..."
+          className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:border-[var(--aethel-info)] resize-none"
           rows={3}
         />
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-xs text-slate-500">
-            {stagedFiles.length} staged file{stagedFiles.length !== 1 ? 's' : ''}
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">
+            {stagedFiles.length} arquivo(s) em stage
           </span>
           <button
             onClick={handleCommit}
             disabled={!commitMessage.trim() || stagedFiles.length === 0}
             className={`
-              px-3 py-1.5 rounded text-sm font-medium transition-colors
+              rounded px-3 py-1.5 text-sm font-medium transition-colors
               ${commitMessage.trim() && stagedFiles.length > 0
-                ? 'bg-sky-600 hover:bg-sky-500 text-white'
-                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] hover:brightness-110'
+                : 'cursor-not-allowed bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
               }
             `}
           >
-            Commit (⌘↵)
+            Commit (Ctrl+Enter)
           </button>
         </div>
       </div>
@@ -617,17 +640,17 @@ export default function GitPanelPro({
           <div>
             <button
               onClick={() => toggleSection('staged')}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider hover:bg-slate-800/50"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.staged ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-              <span className="flex-1 text-left">Staged Changes ({stagedFiles.length})</span>
+              <span className="flex-1 text-left">Em stage ({stagedFiles.length})</span>
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   handleUnstageAll()
                 }}
-                className="p-1 rounded hover:bg-slate-700"
-                title="Unstage All"
+                className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)]"
+                title="Remover tudo do stage"
               >
                 <Minus className="w-3 h-3" />
               </button>
@@ -654,17 +677,17 @@ export default function GitPanelPro({
           <div>
             <button
               onClick={() => toggleSection('changes')}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider hover:bg-slate-800/50"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.changes ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-              <span className="flex-1 text-left">Changes ({changedFiles.length})</span>
+              <span className="flex-1 text-left">Alteracoes ({changedFiles.length})</span>
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   handleStageAll()
                 }}
-                className="p-1 rounded hover:bg-slate-700"
-                title="Stage All"
+                className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)]"
+                title="Colocar tudo em stage"
               >
                 <Plus className="w-3 h-3" />
               </button>
@@ -691,10 +714,10 @@ export default function GitPanelPro({
           <div>
             <button
               onClick={() => toggleSection('untracked')}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider hover:bg-slate-800/50"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.untracked ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-              <span className="flex-1 text-left">Untracked ({untrackedFiles.length})</span>
+              <span className="flex-1 text-left">Nao rastreados ({untrackedFiles.length})</span>
             </button>
             {expandedSections.untracked && (
               <div className="px-1">
@@ -715,9 +738,20 @@ export default function GitPanelPro({
 
         {/* Empty state */}
         {files.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-            <Check className="w-12 h-12 mb-2 opacity-30" />
-            <p className="text-sm">No changes to commit</p>
+          <div className="flex flex-col items-center justify-center px-6 py-12 text-center text-[var(--aethel-text-tertiary)]" role="status" aria-live="polite">
+            <div className="mb-3 rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] p-3">
+              <Check className="h-8 w-8 text-[var(--aethel-success-light)]" />
+            </div>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Workspace limpo</p>
+            <p className="mt-1 max-w-xs text-xs text-[var(--aethel-text-tertiary)]">
+              Nenhuma alteracao pendente para stage ou commit neste momento.
+            </p>
+            <button
+              onClick={fetchStatus}
+              className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_86%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              Atualizar status
+            </button>
           </div>
         )}
       </div>
@@ -734,9 +768,9 @@ function formatRelativeTime(date: Date): string {
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
 
-  if (minutes < 1) return 'just now'
-  if (minutes < 60) return `${minutes}m ago`
-  if (hours < 24) return `${hours}h ago`
-  if (days < 7) return `${days}d ago`
+  if (minutes < 1) return 'agora'
+  if (minutes < 60) return `${minutes} min atras`
+  if (hours < 24) return `${hours} h atras`
+  if (days < 7) return `${days} d atras`
   return date.toLocaleDateString()
 }

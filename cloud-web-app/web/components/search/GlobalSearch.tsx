@@ -195,7 +195,7 @@ export function SearchProvider({
       setState(prev => ({
         ...prev,
         searching: false,
-        error: error instanceof Error ? error.message : 'Search failed',
+        error: error instanceof Error ? error.message : 'Falha ao buscar',
       }));
     }
   }, [query, options, onSearch]);
@@ -395,7 +395,7 @@ function SearchInput({
   return (
     <div className="relative">
       <div className="relative">
-        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--aethel-text-quaternary)]" />
         <input
           ref={inputRef}
           type="text"
@@ -405,21 +405,23 @@ function SearchInput({
           onFocus={() => showHistory && setShowDropdown(true)}
           onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-8 py-1.5 text-sm bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
+          className="w-full pl-10 pr-8 py-1.5 text-sm bg-[var(--aethel-surface-secondary)] text-white placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
         />
         {value && (
           <button
+            type="button"
             onClick={() => onChange('')}
+            aria-label="Limpar campo"
             className="absolute right-3 top-1/2 -translate-y-1/2"
           >
-            <X className="w-4 h-4 text-slate-500 hover:text-white" />
+            <X className="w-4 h-4 text-[var(--aethel-text-quaternary)] hover:text-white" />
           </button>
         )}
       </div>
 
       {/* History dropdown */}
       {showDropdown && history && history.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded shadow-lg z-50 max-h-48 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded shadow-lg z-50 max-h-48 overflow-y-auto">
           {history.map((item, index) => (
             <button
               key={index}
@@ -428,9 +430,9 @@ function SearchInput({
                 onHistorySelect?.(item);
                 setShowDropdown(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 text-left"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] text-left"
             >
-              <History className="w-3.5 h-3.5 text-slate-500" />
+              <History className="w-3.5 h-3.5 text-[var(--aethel-text-quaternary)]" />
               <span className="truncate">{item}</span>
             </button>
           ))}
@@ -461,8 +463,8 @@ function OptionButton({
       title={title}
       className={`p-1 rounded transition-colors ${
         active
-          ? 'bg-sky-600/20 text-sky-400'
-          : 'text-slate-500 hover:text-white hover:bg-slate-800'
+          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+          : 'text-[var(--aethel-text-quaternary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)]'
       }`}
     >
       <Icon className="w-4 h-4" />
@@ -493,21 +495,21 @@ function SearchResultFile({
   const dirPath = result.path.replace(/\/[^/]+$/, '');
 
   return (
-    <div className="border-b border-slate-800/50">
+    <div className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_60%,transparent)]">
       {/* File header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-slate-800/50 group"
+        className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] group"
       >
         {result.collapsed ? (
-          <ChevronRight className="w-4 h-4 text-slate-500" />
+          <ChevronRight className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-slate-500" />
+          <ChevronDown className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />
         )}
-        <FileCode className="w-4 h-4 text-sky-400" />
+        <FileCode className="w-4 h-4 text-[var(--aethel-info-light)]" />
         <span className="text-sm text-white">{fileName}</span>
-        <span className="text-xs text-slate-500 truncate">{dirPath}</span>
-        <span className="ml-auto text-xs text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">
+        <span className="text-xs text-[var(--aethel-text-quaternary)] truncate">{dirPath}</span>
+        <span className="ml-auto text-xs text-[var(--aethel-text-quaternary)] bg-[var(--aethel-surface-secondary)] px-1.5 py-0.5 rounded">
           {result.matches.length}
         </span>
         {showReplace && onReplaceAll && (
@@ -516,8 +518,8 @@ function SearchResultFile({
               e.stopPropagation();
               onReplaceAll();
             }}
-            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded text-xs text-[var(--aethel-warning-light)]"
-            title="Replace all in file"
+            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-xs text-[var(--aethel-warning-light)]"
+            title="Substituir tudo no arquivo"
           >
             <Replace className="w-3.5 h-3.5" />
           </button>
@@ -531,12 +533,12 @@ function SearchResultFile({
             <button
               key={`${match.line}-${match.column}-${index}`}
               onClick={() => onNavigate(match)}
-              className="w-full flex items-center gap-3 px-3 py-1 hover:bg-slate-800/50 text-left group"
+              className="w-full flex items-center gap-3 px-3 py-1 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-left group"
             >
-              <span className="text-xs text-slate-500 w-8 text-right flex-shrink-0">
+              <span className="text-xs text-[var(--aethel-text-quaternary)] w-8 text-right flex-shrink-0">
                 {match.line}
               </span>
-              <span className="text-sm text-slate-400 truncate flex-1">
+              <span className="text-sm text-[var(--aethel-text-tertiary)] truncate flex-1">
                 {/* Preview with highlight */}
                 {match.preview.slice(0, match.previewHighlight.start)}
                 <span className="bg-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] text-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]">
@@ -553,10 +555,10 @@ function SearchResultFile({
                     e.stopPropagation();
                     onReplace(match);
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded"
-                  title="Replace"
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
+                  title="Substituir"
                 >
-                  <Check className="w-3 h-3 text-emerald-400" />
+                  <Check className="w-3 h-3 text-[var(--aethel-success)]" />
                 </button>
               )}
             </button>
@@ -631,37 +633,37 @@ export function GlobalSearchPanel({
   }, []);
 
   return (
-    <div className={`h-full flex flex-col bg-slate-900 ${className || ''}`}>
+    <div className={`h-full flex flex-col bg-[var(--aethel-surface-primary)] ${className || ''}`}>
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
-          <Search className="w-4 h-4 text-sky-400" />
-          <span className="text-sm font-medium text-white">Search</span>
+          <Search className="w-4 h-4 text-[var(--aethel-info-light)]" />
+          <span className="text-sm font-medium text-white">Buscar</span>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowReplace(!showReplace)}
             className={`p-1 rounded transition-colors ${
               showReplace
-                ? 'bg-sky-600/20 text-sky-400'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)]'
             }`}
-            title="Toggle Replace (Ctrl+Shift+H)"
+            title="Alternar substituicao (Ctrl+Shift+H)"
           >
             <Replace className="w-4 h-4" />
           </button>
           <button
             onClick={() => search()}
             disabled={state.searching}
-            className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded disabled:opacity-50"
-            title="Refresh Search"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded disabled:opacity-50"
+            title="Atualizar busca"
           >
             <RefreshCw className={`w-4 h-4 ${state.searching ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={clearResults}
-            className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded"
-            title="Clear Results"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded"
+            title="Limpar resultados"
           >
             <X className="w-4 h-4" />
           </button>
@@ -669,7 +671,7 @@ export function GlobalSearchPanel({
       </div>
 
       {/* Search inputs */}
-      <div className="p-3 space-y-2 border-b border-slate-800">
+      <div className="p-3 space-y-2 border-b border-[var(--aethel-border-primary)]">
         {/* Search input */}
         <div className="flex items-center gap-2">
           <div className="flex-1">
@@ -677,7 +679,7 @@ export function GlobalSearchPanel({
               value={state.query}
               onChange={setQuery}
               onSubmit={search}
-              placeholder="Search"
+              placeholder="Buscar"
               showHistory
               history={history}
             />
@@ -687,19 +689,19 @@ export function GlobalSearchPanel({
               icon={CaseSensitive}
               active={state.options.caseSensitive}
               onClick={() => setOptions({ caseSensitive: !state.options.caseSensitive })}
-              title="Match Case"
+              title="Diferenciar maiusculas"
             />
             <OptionButton
               icon={WholeWord}
               active={state.options.wholeWord}
               onClick={() => setOptions({ wholeWord: !state.options.wholeWord })}
-              title="Match Whole Word"
+              title="Palavra inteira"
             />
             <OptionButton
               icon={Regex}
               active={state.options.useRegex}
               onClick={() => setOptions({ useRegex: !state.options.useRegex })}
-              title="Use Regular Expression"
+              title="Usar expressao regular"
             />
           </div>
         </div>
@@ -711,7 +713,7 @@ export function GlobalSearchPanel({
               <SearchInput
                 value={state.replaceText}
                 onChange={setReplaceText}
-                placeholder="Replace"
+                placeholder="Substituir"
                 icon={Replace}
               />
             </div>
@@ -720,15 +722,15 @@ export function GlobalSearchPanel({
                 icon={CaseSensitive}
                 active={state.options.preserveCase}
                 onClick={() => setOptions({ preserveCase: !state.options.preserveCase })}
-                title="Preserve Case"
+                title="Preservar maiusculas"
               />
               <button
                 onClick={replaceAll}
                 disabled={state.totalMatches === 0}
-                className="px-2 py-1 text-xs bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] disabled:bg-slate-700 disabled:text-slate-500 text-white rounded transition-colors"
-                title="Replace All"
+                className="px-2 py-1 text-xs bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] disabled:bg-[var(--aethel-surface-tertiary)] disabled:text-[var(--aethel-text-quaternary)] text-white rounded transition-colors"
+                title="Substituir tudo"
               >
-                Replace All
+                Substituir tudo
               </button>
             </div>
           </div>
@@ -737,10 +739,10 @@ export function GlobalSearchPanel({
         {/* File filters */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-1 text-xs text-slate-400 hover:text-white"
+          className="flex items-center gap-1 text-xs text-[var(--aethel-text-tertiary)] hover:text-white"
         >
           <MoreVertical className="w-3 h-3" />
-          files to include/exclude
+          arquivos a incluir/excluir
           {showFilters ? (
             <ChevronDown className="w-3 h-3" />
           ) : (
@@ -754,15 +756,15 @@ export function GlobalSearchPanel({
               type="text"
               value={state.options.includePattern}
               onChange={e => setOptions({ includePattern: e.target.value })}
-              placeholder="files to include (e.g., *.ts, src/**)"
-              className="w-full px-2 py-1 text-xs bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
+              placeholder="arquivos a incluir (ex.: *.ts, src/**)"
+              className="w-full px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] text-white placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
             />
             <input
               type="text"
               value={state.options.excludePattern}
               onChange={e => setOptions({ excludePattern: e.target.value })}
-              placeholder="files to exclude"
-              className="w-full px-2 py-1 text-xs bg-slate-800 text-white placeholder-slate-500 rounded outline-none focus:ring-1 focus:ring-sky-500"
+              placeholder="arquivos a excluir"
+              className="w-full px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] text-white placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
             />
           </div>
         )}
@@ -770,15 +772,15 @@ export function GlobalSearchPanel({
 
       {/* Results summary */}
       {state.totalMatches > 0 && (
-        <div className="px-3 py-2 text-xs text-slate-400 border-b border-slate-800">
-          {state.totalMatches} result{state.totalMatches > 1 ? 's' : ''} in{' '}
-          {state.results.length} file{state.results.length > 1 ? 's' : ''}
+        <div className="px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] border-b border-[var(--aethel-border-primary)]">
+          {state.totalMatches} resultado{state.totalMatches > 1 ? 's' : ''} em{' '}
+          {state.results.length} arquivo{state.results.length > 1 ? 's' : ''}
         </div>
       )}
 
       {/* Error message */}
       {state.error && (
-        <div className="px-3 py-2 text-sm text-red-400 bg-red-900/20 border-b border-red-900/50 flex items-center gap-2">
+        <div className="px-3 py-2 text-sm text-[var(--aethel-error)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] border-b border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 flex-shrink-0" />
           {state.error}
         </div>
@@ -788,22 +790,22 @@ export function GlobalSearchPanel({
       <div className="flex-1 overflow-y-auto">
         {state.searching ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 text-sky-400 animate-spin" />
+            <Loader2 className="w-6 h-6 text-[var(--aethel-info-light)] animate-spin" />
           </div>
         ) : state.results.length === 0 && state.query ? (
-          <div className="px-4 py-12 text-center text-slate-500">
+          <div className="px-4 py-12 text-center text-[var(--aethel-text-quaternary)]">
             <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No results found</p>
+            <p>Nenhum resultado encontrado</p>
             <p className="text-xs mt-1">
-              Try different search terms or adjust filters
+              Tente outros termos ou ajuste os filtros
             </p>
           </div>
         ) : state.results.length === 0 ? (
-          <div className="px-4 py-12 text-center text-slate-500">
+          <div className="px-4 py-12 text-center text-[var(--aethel-text-quaternary)]">
             <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Search across all files</p>
+            <p>Busque em todos os arquivos</p>
             <p className="text-xs mt-1">
-              Type at least 2 characters to search
+              Digite pelo menos 2 caracteres para buscar
             </p>
           </div>
         ) : (
@@ -823,19 +825,19 @@ export function GlobalSearchPanel({
 
       {/* Navigation footer */}
       {state.totalMatches > 0 && (
-        <div className="flex items-center justify-between px-3 py-2 border-t border-slate-800">
+        <div className="flex items-center justify-between px-3 py-2 border-t border-[var(--aethel-border-primary)]">
           <button
-            className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded"
-            title="Previous Match (F3)"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded"
+            title="Resultado anterior (F3)"
           >
             <ArrowUp className="w-4 h-4" />
           </button>
-          <span className="text-xs text-slate-500">
-            Navigate with F3 / Shift+F3
+          <span className="text-xs text-[var(--aethel-text-quaternary)]">
+            Navegue com F3 / Shift+F3
           </span>
           <button
-            className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded"
-            title="Next Match (Shift+F3)"
+            className="p-1 text-[var(--aethel-text-tertiary)] hover:text-white hover:bg-[var(--aethel-surface-secondary)] rounded"
+            title="Proximo resultado (Shift+F3)"
           >
             <ArrowDown className="w-4 h-4" />
           </button>
@@ -846,3 +848,4 @@ export function GlobalSearchPanel({
 }
 
 export default GlobalSearchPanel;
+

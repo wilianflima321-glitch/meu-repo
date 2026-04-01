@@ -13,11 +13,11 @@ export function Progress({ value = 0, className, indicatorClassName, ...props }:
 
   return (
     <div
-      className={cn('h-2 w-full rounded-full bg-slate-800', className)}
+      className={cn('h-2 w-full rounded-full bg-[var(--aethel-surface-secondary)]', className)}
       {...props}
     >
       <div
-        className={cn('h-full rounded-full bg-sky-500 transition-all', indicatorClassName)}
+        className={cn('h-full rounded-full bg-[var(--aethel-info)] transition-all', indicatorClassName)}
         style={{ width: `${clamped}%` }}
       />
     </div>

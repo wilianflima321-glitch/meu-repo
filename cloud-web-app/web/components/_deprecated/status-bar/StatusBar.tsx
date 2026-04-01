@@ -217,7 +217,7 @@ export default function StatusBar({
   }
   
   return (
-    <div className="h-6 flex items-center justify-between bg-sky-600 text-white text-xs select-none border-t border-sky-700">
+    <div className="h-6 flex items-center justify-between bg-sky-600 text-[var(--aethel-text-primary)] text-xs select-none border-t border-sky-700">
       {/* Left Section */}
       <div className="flex items-center h-full">
         {/* Panel Toggles */}
@@ -282,7 +282,7 @@ export default function StatusBar({
         
         {/* AI Status */}
         <StatusBarButton onClick={onToggleAI} title="AI Copilot">
-          <Sparkles className={`w-3.5 h-3.5 ${aiEnabled ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-slate-400'}`} />
+          <Sparkles className={`w-3.5 h-3.5 ${aiEnabled ? 'text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]' : 'text-[var(--aethel-text-tertiary)]'}`} />
           <span className={aiEnabled ? '' : 'opacity-50'}>
             {aiEnabled ? aiModel : 'AI Off'}
           </span>
@@ -327,7 +327,7 @@ export default function StatusBar({
         </StatusBarButton>
         
         {/* Separator */}
-        <div className="w-px h-4 bg-sky-500 mx-1" />
+        <div className="w-px h-4 bg-[var(--aethel-info)] mx-1" />
         
         {/* Performance */}
         <StatusBarButton title="Performance">
@@ -354,7 +354,7 @@ export default function StatusBar({
         )}
         
         {/* Separator */}
-        <div className="w-px h-4 bg-sky-500 mx-1" />
+        <div className="w-px h-4 bg-[var(--aethel-info)] mx-1" />
         
         {/* Online Status */}
         <StatusBarButton title={isOnline ? 'Online' : 'Offline'}>
@@ -379,7 +379,7 @@ export default function StatusBar({
           {notifications > 0 ? (
             <>
               <Bell className="w-3.5 h-3.5" />
-              <span className="bg-red-500 text-white text-[10px] px-1 rounded-full min-w-[16px] text-center">
+              <span className="bg-red-500 text-[var(--aethel-text-primary)] text-[10px] px-1 rounded-full min-w-[16px] text-center">
                 {notifications > 99 ? '99+' : notifications}
               </span>
             </>
@@ -460,7 +460,7 @@ export function MiniStatusBar({
   isReadOnly = false,
 }: MiniStatusBarProps) {
   return (
-    <div className="h-5 flex items-center justify-between px-2 bg-slate-800 text-slate-400 text-[10px] border-t border-slate-700">
+    <div className="h-5 flex items-center justify-between px-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-tertiary)] text-[10px] border-t border-[var(--aethel-border-primary)]">
       <div className="flex items-center gap-2">
         {isDirty && (
           <Circle className="w-2 h-2 fill-[var(--aethel-warning-light)] text-[var(--aethel-warning-light)]" />
@@ -514,7 +514,7 @@ export function FloatingStatus({
     success: 'border-green-500/50 bg-green-500/10',
     warning: 'border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]',
     error: 'border-red-500/50 bg-red-500/10',
-    loading: 'border-sky-500/50 bg-sky-500/10',
+    loading: 'border-sky-500/50 bg-[var(--aethel-info)]/10',
   }
   
   return (
@@ -523,7 +523,7 @@ export function FloatingStatus({
         fixed bottom-10 left-1/2 transform -translate-x-1/2
         flex items-center gap-2 px-4 py-2
         rounded-lg border shadow-lg
-        text-sm text-white
+        text-sm text-[var(--aethel-text-primary)]
         ${colors[type]}
         animate-fade-in-up
       `}

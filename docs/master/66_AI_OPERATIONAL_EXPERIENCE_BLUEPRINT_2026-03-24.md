@@ -6,6 +6,20 @@ Scope: Canonical blueprint for AI operational UX, multi-agent orchestration, mem
 Companion document:
 - `docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md`
 
+## Reality Correction (2026-03-25)
+This document remains the active strategic authority for AI operational UX, but the implementation-grade surface contracts now live in:
+- `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+- `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+
+### Current implementation limitations this blueprint must acknowledge
+- the current main AI family is still structurally closer to an advanced chat stack than to the full canonical AI Console
+- `AIChatPanelContainer.tsx` is the best canonical foothold, but the runtime composition still centers heavily on `AIChatPanelPro.tsx`
+- `Plan`, `Runs`, `Approvals`, and `Memory / Context` are clearer in the blueprints than in the live UI hierarchy
+- `NexusChatMultimodal.tsx` still behaves like a parallel AI center outside the main Workbench contract
+
+### Canonical interpretation rule
+If this document conflicts with the implementation-grade interface blueprint set on console anatomy, section priority, approval surfacing, mobile AI behavior, or route strategy, the interface blueprint set wins.
+
 ## 1. Product Thesis
 
 The Aethel AI layer must stop behaving like a side chat and start behaving like an operational system.

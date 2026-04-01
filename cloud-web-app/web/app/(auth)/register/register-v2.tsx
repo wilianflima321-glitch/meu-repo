@@ -118,7 +118,7 @@ export default function RegisterPageV2() {
       >
         Ir para formulario de cadastro
       </a>
-      <div className="pointer-events-none absolute inset-0 bg-grid-zinc-700/[0.12]" />
+      <div className="pointer-events-none absolute inset-0 bg-grid-aethel" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.22),transparent_55%)]" />
 
       <div className="relative z-10 w-full max-w-6xl">
@@ -142,7 +142,7 @@ export default function RegisterPageV2() {
                   width={36}
                   height={36}
                   sizes="36px"
-                  className="rounded-lg ring-1 ring-zinc-700/70"
+                  className="rounded-lg ring-1 ring-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]"
                   priority
                 />
                 <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-info-light)]/90">Aethel Studio</span>
@@ -313,3 +313,4 @@ export default function RegisterPageV2() {
     </main>
   )
 }
+

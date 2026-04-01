@@ -929,11 +929,11 @@ function IDEContent() {
                   <TabBar />
                   <div className="flex-1 overflow-hidden">
                     {isReadingFile && (
-                      <div className="h-full flex items-center justify-center text-zinc-400">Loading file...</div>
+                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Loading file...</div>
                     )}
                     {!isReadingFile && fileError && (
                       <div className="h-full flex items-center justify-center px-6">
-                        <div className="max-w-xl rounded border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">{fileError}</div>
+                        <div className="max-w-xl rounded border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">{fileError}</div>
                       </div>
                     )}
                     {!isReadingFile && !fileError && activeFile && (
@@ -965,13 +965,13 @@ function IDEContent() {
                       </div>
                     )}
                     {!isReadingFile && !fileError && !activeFile && (
-                      <div className="h-full flex items-center justify-center text-zinc-500">Select a file to start editing.</div>
+                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Select a file to start editing.</div>
                     )}
                   </div>
                 </div>
               ),
               preview: (
-                <div className="h-full min-h-0 bg-zinc-950 flex flex-col">
+                <div className="h-full min-h-0 bg-[var(--aethel-surface-primary)] flex flex-col">
                   <PreviewRuntimeToolbar
                     previewRuntimeUrl={previewRuntimeUrl}
                     runtimeHealthStatus={runtimeHealth.status}
@@ -1048,7 +1048,7 @@ function IDEContent() {
                       />
                     </div>
                   ) : (
-                    <div className="flex-1 flex items-center justify-center text-zinc-500">Select a file to preview.</div>
+                    <div className="flex-1 flex items-center justify-center text-[var(--aethel-text-tertiary)]">Select a file to preview.</div>
                   )}
                 </div>
               ),
@@ -1077,7 +1077,7 @@ function IDEContent() {
             studioRightSlot={
               <Link
                 href={projectId && projectId !== 'default' ? `/dashboard?projectId=${encodeURIComponent(projectId)}` : "/dashboard"}
-                className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-white/20 hover:text-white"
+                className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-white/20 hover:text-[var(--aethel-text-primary)]"
               >
                 Voltar ao dashboard
               </Link>
@@ -1156,14 +1156,14 @@ function IDEContent() {
               )}
               <div className="flex-1 overflow-hidden">
                 {isReadingFile && (
-                  <div className="h-full flex items-center justify-center text-zinc-400">
+                  <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
                     Loading file...
                   </div>
                 )}
 
                 {!isReadingFile && fileError && (
                   <div className="h-full flex items-center justify-center px-6">
-                    <div className="max-w-xl rounded border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    <div className="max-w-xl rounded border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">
                       {fileError}
                     </div>
                   </div>
@@ -1171,7 +1171,7 @@ function IDEContent() {
 
                 {!isReadingFile && !fileError && activeFile && (
                   <div className={`h-full min-h-0 ${previewEnabled ? "grid grid-cols-1 xl:grid-cols-2" : ""}`}>
-                    <div className={`h-full min-h-0 ${previewEnabled ? "border-r border-zinc-800" : ""}`}>
+                    <div className={`h-full min-h-0 ${previewEnabled ? "border-r border-[var(--aethel-border-primary)]" : ""}`}>
                       <MonacoEditorPro
                         path={activeFile.path}
                         value={activeFile.content}
@@ -1198,7 +1198,7 @@ function IDEContent() {
                       />
                     </div>
                     {previewEnabled && (
-                      <div className="h-full min-h-0 bg-zinc-950">
+                      <div className="h-full min-h-0 bg-[var(--aethel-surface-primary)]">
                         <CanonicalPreviewSurface
                           key={`${activeFile.path}:${previewRefreshTick}`}
                           variant="runtime"
@@ -1218,13 +1218,13 @@ function IDEContent() {
                 )}
 
                 {!isReadingFile && !fileError && !activeFile && (
-                  <div className="h-full flex items-center justify-center text-zinc-500">
+                  <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
                     Select a file to start editing.
                   </div>
                 )}
               </div>
               {activeFile && (
-                <div className="h-7 border-t border-zinc-800 bg-zinc-950 px-3 flex items-center justify-between text-xs text-zinc-400">
+                <div className="h-7 border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
                   <span>
                     {isSavingFile
                       ? "Saving..."
@@ -1257,7 +1257,7 @@ function IDEContent() {
                         className={`rounded border px-2 py-0.5 text-[10px] disabled:opacity-60 ${
                           fullAccessActiveGrant
                             ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20'
-                            : 'border-zinc-600 bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
+                            : 'border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
                         }`}
                         title={
                           fullAccessActiveGrant
@@ -1290,4 +1290,5 @@ export default function FullscreenIDE() {
     </Suspense>
   );
 }
+
 

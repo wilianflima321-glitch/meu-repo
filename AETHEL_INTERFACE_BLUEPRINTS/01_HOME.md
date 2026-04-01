@@ -254,10 +254,23 @@ Absorb:
 - product-first proof instead of decorative abstraction
 - workflow continuity as the main story, not model count or features
 
+### From Genspark
+Absorb:
+- immediate sense that one workspace can produce many artifact types
+- confidence that AI is connected to real deliverables, not only conversation
+- directness in showing what the system can output
+
+Reject:
+- homepage language that over-centers "ask anything" without proving structural depth
+- too many top-level tool promises competing with the core product story
+- AI-workspace mystique without a clear production shell visible in the hero
+
 ### What to avoid copying
 - endless social proof walls
 - gradient-heavy noise replacing hierarchy
 - multi-hero layouts that force the user to assemble the story themselves
+- generic "all-in-one AI" claims with weak visual proof
+- shipping a homepage that feels smarter than the actual Workbench
 
 ## Exact Component Geometry
 ### PublicHeader

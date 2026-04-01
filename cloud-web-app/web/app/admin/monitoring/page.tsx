@@ -464,9 +464,9 @@ export default function AdminMonitoringPage() {
               { label: 'Falhas de health check', threshold: 'Qualquer critica', current: metrics ? `${metrics.healthChecks.filter(h => h.status === 'down').length} indisponivel` : '...' },
             ].map((alert) => (
               <div key={alert.label} className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-3">
-                <div className="text-xs text-zinc-500">{alert.label}</div>
+                <div className="text-xs text-[var(--aethel-text-tertiary)]">{alert.label}</div>
                 <div className="mt-1 text-sm font-medium">{alert.current}</div>
-                <div className="mt-0.5 text-xs text-zinc-600">Limiar: {alert.threshold}</div>
+                <div className="mt-0.5 text-xs text-[var(--aethel-text-quaternary)]">Limiar: {alert.threshold}</div>
               </div>
             ))}
           </div>
@@ -475,3 +475,4 @@ export default function AdminMonitoringPage() {
     </div>
   )
 }
+

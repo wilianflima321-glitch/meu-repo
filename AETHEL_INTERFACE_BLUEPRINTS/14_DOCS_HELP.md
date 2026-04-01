@@ -44,6 +44,17 @@ Absorb:
 - contextual in-product help links
 - article layouts with sticky outline and adjacent next steps
 
+### From Manus-style research experiences
+Absorb:
+- evidence-aware summaries instead of vague article intros
+- clearer transitions from exploration to structured outputs
+- stronger support for compare, extract and task decomposition in research-heavy guides
+
+Apply to Aethel docs/help:
+- guides about research, AI Console and connected flows should show source-aware examples
+- advanced guides should privilege actionable structures such as checklists, comparison tables and output patterns
+- help content should bridge directly into Workbench research and preview flows
+
 ### What to avoid copying
 - giant undifferentiated wiki homepages
 - knowledge-base taxonomies that require the user to learn the system before solving a task
@@ -218,6 +229,11 @@ Structure:
 - sticky outline right rail
 - related guides panel
 - product action panel
+
+Research-heavy article rules:
+- use comparison tables when contrasting flows, preview types or AI behaviors
+- use evidence or source-aware callouts when the guide depends on research workflows
+- end advanced articles with clear "apply in Workbench" actions rather than passive reading stops
 
 Metadata may include:
 - updated date

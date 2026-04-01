@@ -181,7 +181,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
   const totalObjectives = data.objectives.length;
   
   const stateColors: Record<QuestState, string> = {
-    unavailable: 'border-slate-600 bg-slate-800/50',
+    unavailable: 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]',
     available: 'border-yellow-500 bg-yellow-900/20',
     active: 'border-blue-500 bg-blue-900/20',
     completed: 'border-green-500 bg-green-900/20',
@@ -189,7 +189,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
   };
   
   const stateIcons: Record<QuestState, React.ReactNode> = {
-    unavailable: <Unlink className="w-4 h-4 text-slate-500" />,
+    unavailable: <Unlink className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />,
     available: <Star className="w-4 h-4 text-yellow-400" />,
     active: <Play className="w-4 h-4 text-blue-400" />,
     completed: <CheckCircle2 className="w-4 h-4 text-green-400" />,
@@ -202,7 +202,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
         selected ? 'ring-2 ring-white' : ''
       }`}
     >
-      <Handle type="target" position={Position.Top} className="!bg-slate-400" />
+      <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-text-tertiary)]" />
       
       {/* Header */}
       <div 
@@ -215,23 +215,23 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
             <span className="font-medium text-sm text-white truncate">{data.title}</span>
             {data.isMainQuest && <Star className="w-3 h-3 text-yellow-400 flex-shrink-0" />}
           </div>
-          <div className="text-[10px] text-slate-400">Lvl {data.level} • {category?.name}</div>
+          <div className="text-[10px] text-[var(--aethel-text-tertiary)]">Lvl {data.level} • {category?.name}</div>
         </div>
         {stateIcons[data.state]}
       </div>
       
       {/* Description */}
-      <div className="px-3 py-2 text-xs text-slate-300 line-clamp-2 border-b border-slate-700/50">
+      <div className="px-3 py-2 text-xs text-[var(--aethel-text-secondary)] line-clamp-2 border-b border-[var(--aethel-border-primary)]/50">
         {data.description}
       </div>
       
       {/* Objectives preview */}
       <div className="px-3 py-2">
-        <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+        <div className="flex items-center justify-between text-[10px] text-[var(--aethel-text-tertiary)] mb-1">
           <span>Objectives</span>
           <span>{completedObjectives}/{totalObjectives}</span>
         </div>
-        <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all"
             style={{ width: `${totalObjectives > 0 ? (completedObjectives / totalObjectives) * 100 : 0}%` }}
@@ -244,7 +244,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
             <div 
               key={obj.id}
               className={`flex items-center gap-1.5 text-[10px] ${
-                obj.currentCount >= obj.targetCount ? 'text-green-400' : 'text-slate-400'
+                obj.currentCount >= obj.targetCount ? 'text-green-400' : 'text-[var(--aethel-text-tertiary)]'
               }`}
             >
               {OBJECTIVE_ICONS[obj.type]}
@@ -253,7 +253,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
             </div>
           ))}
           {data.objectives.length > 2 && (
-            <div className="text-[10px] text-slate-500 italic">
+            <div className="text-[10px] text-[var(--aethel-text-quaternary)] italic">
               +{data.objectives.length - 2} more...
             </div>
           )}
@@ -262,12 +262,12 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
       
       {/* Rewards preview */}
       {data.rewards.length > 0 && (
-        <div className="px-3 py-2 border-t border-slate-700/50">
+        <div className="px-3 py-2 border-t border-[var(--aethel-border-primary)]/50">
           <div className="flex items-center gap-2 flex-wrap">
             {data.rewards.map((reward) => (
               <div 
                 key={reward.id}
-                className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-700/50 rounded text-[10px]"
+                className="flex items-center gap-1 px-1.5 py-0.5 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] rounded text-[10px]"
               >
                 {reward.type === 'xp' && <Star className="w-3 h-3 text-blue-400" />}
                 {reward.type === 'gold' && <Coins className="w-3 h-3 text-yellow-400" />}
@@ -280,7 +280,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
         </div>
       )}
       
-      <Handle type="source" position={Position.Bottom} className="!bg-slate-400" />
+      <Handle type="source" position={Position.Bottom} className="!bg-[var(--aethel-text-tertiary)]" />
     </div>
   );
 }
@@ -399,12 +399,12 @@ interface ObjectiveEditorProps {
 
 function ObjectiveEditor({ objective, onUpdate, onDelete }: ObjectiveEditorProps) {
   return (
-    <div className="bg-slate-800/50 rounded p-3 mb-2">
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-3 mb-2">
       <div className="flex items-center gap-2 mb-2">
         <select
           value={objective.type}
           onChange={(e) => onUpdate({ ...objective, type: e.target.value as ObjectiveType })}
-          className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm"
+          className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-sm"
         >
           {Object.keys(OBJECTIVE_ICONS).map((type) => (
             <option key={type} value={type}>{type}</option>
@@ -434,26 +434,26 @@ function ObjectiveEditor({ objective, onUpdate, onDelete }: ObjectiveEditorProps
       <input
         value={objective.description}
         onChange={(e) => onUpdate({ ...objective, description: e.target.value })}
-        className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-1.5 text-sm mb-2"
+        className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm mb-2"
         placeholder="Objective description..."
       />
       
       <div className="flex gap-2">
         <div className="flex-1">
-          <label className="text-[10px] text-slate-400 block mb-1">Target ID</label>
+          <label className="text-[10px] text-[var(--aethel-text-tertiary)] block mb-1">Target ID</label>
           <input
             value={objective.targetId || ''}
             onChange={(e) => onUpdate({ ...objective, targetId: e.target.value })}
-            className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+            className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
           />
         </div>
         <div className="w-20">
-          <label className="text-[10px] text-slate-400 block mb-1">Count</label>
+          <label className="text-[10px] text-[var(--aethel-text-tertiary)] block mb-1">Count</label>
           <input
             type="number"
             value={objective.targetCount}
             onChange={(e) => onUpdate({ ...objective, targetCount: parseInt(e.target.value) || 1 })}
-            className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+            className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
             min={1}
           />
         </div>
@@ -474,11 +474,11 @@ interface RewardEditorProps {
 
 function RewardEditor({ reward, onUpdate, onDelete }: RewardEditorProps) {
   return (
-    <div className="flex items-center gap-2 bg-slate-800/50 rounded p-2 mb-2">
+    <div className="flex items-center gap-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-2 mb-2">
       <select
         value={reward.type}
         onChange={(e) => onUpdate({ ...reward, type: e.target.value as RewardType })}
-        className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+        className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
       >
         <option value="xp">XP</option>
         <option value="gold">Gold</option>
@@ -492,7 +492,7 @@ function RewardEditor({ reward, onUpdate, onDelete }: RewardEditorProps) {
         <input
           value={reward.itemId || ''}
           onChange={(e) => onUpdate({ ...reward, itemId: e.target.value })}
-          className="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+          className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
           placeholder="Item ID"
         />
       )}
@@ -501,7 +501,7 @@ function RewardEditor({ reward, onUpdate, onDelete }: RewardEditorProps) {
         type="number"
         value={reward.amount}
         onChange={(e) => onUpdate({ ...reward, amount: parseInt(e.target.value) || 0 })}
-        className="w-20 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+        className="w-20 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
         min={0}
       />
       
@@ -540,7 +540,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
   
   if (!node) {
     return (
-      <div className="p-4 text-center text-slate-500">
+      <div className="p-4 text-center text-[var(--aethel-text-quaternary)]">
         <Scroll className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-sm">Select a quest to edit</p>
       </div>
@@ -569,31 +569,31 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
         {openSections.basic && (
           <div className="pl-6 space-y-3">
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Title</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Title</label>
               <input
                 value={data.title}
                 onChange={(e) => updateData({ title: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm"
               />
             </div>
             
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Description</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Description</label>
               <textarea
                 value={data.description}
                 onChange={(e) => updateData({ description: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm resize-none"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm resize-none"
                 rows={3}
               />
             </div>
             
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Category</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Category</label>
                 <select
                   value={data.category}
                   onChange={(e) => updateData({ category: e.target.value })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 >
                   {QUEST_CATEGORIES.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -602,12 +602,12 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
               </div>
               
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Level</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Level</label>
                 <input
                   type="number"
                   value={data.level}
                   onChange={(e) => updateData({ level: parseInt(e.target.value) || 1 })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                   min={1}
                 />
               </div>
@@ -615,11 +615,11 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
             
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">State</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">State</label>
                 <select
                   value={data.state}
                   onChange={(e) => updateData({ state: e.target.value as QuestState })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 >
                   <option value="unavailable">Unavailable</option>
                   <option value="available">Available</option>
@@ -644,20 +644,20 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
             
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Quest Giver</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Quest Giver</label>
                 <input
                   value={data.giver || ''}
                   onChange={(e) => updateData({ giver: e.target.value })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 />
               </div>
               
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Location</label>
+                <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Location</label>
                 <input
                   value={data.location || ''}
                   onChange={(e) => updateData({ location: e.target.value })}
-                  className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                  className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 />
               </div>
             </div>
@@ -781,7 +781,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
         {openSections.prerequisites && (
           <div className="pl-6">
             {data.prerequisites.map((prereq, i) => (
-              <div key={i} className="flex items-center gap-2 bg-slate-800/50 rounded p-2 mb-2">
+              <div key={i} className="flex items-center gap-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-2 mb-2">
                 <select
                   value={prereq.type}
                   onChange={(e) => {
@@ -789,7 +789,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                     prerequisites[i] = { ...prereq, type: e.target.value as QuestPrerequisite['type'] };
                     updateData({ prerequisites });
                   }}
-                  className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+                  className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
                 >
                   <option value="quest">Quest</option>
                   <option value="level">Level</option>
@@ -806,7 +806,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                       prerequisites[i] = { ...prereq, questId: e.target.value };
                       updateData({ prerequisites });
                     }}
-                    className="flex-1 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+                    className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
                     placeholder="Quest ID"
                   />
                 )}
@@ -820,7 +820,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                       prerequisites[i] = { ...prereq, level: parseInt(e.target.value) || 1 };
                       updateData({ prerequisites });
                     }}
-                    className="w-16 bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs"
+                    className="w-16 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1 text-xs"
                     min={1}
                   />
                 )}
@@ -859,42 +859,42 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.advanced ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <Settings className="w-4 h-4 text-slate-400" />
+          <Settings className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           Advanced
         </button>
         
         {openSections.advanced && (
           <div className="pl-6 space-y-3">
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Time Limit (seconds)</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Time Limit (seconds)</label>
               <input
                 type="number"
                 value={data.timeLimit || ''}
                 onChange={(e) => updateData({ timeLimit: parseInt(e.target.value) || undefined })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 placeholder="No limit"
                 min={0}
               />
             </div>
             
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Repeatable After (seconds)</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Repeatable After (seconds)</label>
               <input
                 type="number"
                 value={data.repeatableAfter || ''}
                 onChange={(e) => updateData({ repeatableAfter: parseInt(e.target.value) || undefined })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-2 py-1.5 text-sm"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-sm"
                 placeholder="Not repeatable"
                 min={0}
               />
             </div>
             
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Journal Entry</label>
+              <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-1">Journal Entry</label>
               <textarea
                 value={data.journalEntry || ''}
                 onChange={(e) => updateData({ journalEntry: e.target.value })}
-                className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm resize-none"
+                className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-2 text-sm resize-none"
                 rows={3}
                 placeholder="Extended journal entry..."
               />
@@ -949,41 +949,41 @@ function QuestStats({ nodes }: QuestStatsProps) {
   }, [nodes]);
   
   return (
-    <div className="bg-slate-800/50 rounded p-3 text-xs space-y-2">
-      <div className="font-medium text-slate-300 mb-2">Quest Statistics</div>
+    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded p-3 text-xs space-y-2">
+      <div className="font-medium text-[var(--aethel-text-secondary)] mb-2">Quest Statistics</div>
       
       <div className="flex justify-between">
-        <span className="text-slate-400">Total Quests:</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Total Quests:</span>
         <span>{stats.total}</span>
       </div>
       
       <div className="flex justify-between">
-        <span className="text-slate-400">Main Quests:</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Main Quests:</span>
         <span className="text-yellow-400">{stats.mainQuests}</span>
       </div>
       
       <div className="flex justify-between">
-        <span className="text-slate-400">Total Objectives:</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Total Objectives:</span>
         <span>{stats.totalObjectives}</span>
       </div>
       
-      <div className="h-px bg-slate-700 my-2" />
+      <div className="h-px bg-[var(--aethel-surface-tertiary)] my-2" />
       
       <div className="flex items-center gap-1">
         <span className="w-2 h-2 rounded-full bg-yellow-400" />
-        <span className="text-slate-400">Available:</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Available:</span>
         <span className="ml-auto">{stats.byState.available}</span>
       </div>
       
       <div className="flex items-center gap-1">
         <span className="w-2 h-2 rounded-full bg-blue-400" />
-        <span className="text-slate-400">Active:</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Active:</span>
         <span className="ml-auto">{stats.byState.active}</span>
       </div>
       
       <div className="flex items-center gap-1">
         <span className="w-2 h-2 rounded-full bg-green-400" />
-        <span className="text-slate-400">Completed:</span>
+        <span className="text-[var(--aethel-text-tertiary)]">Completed:</span>
         <span className="ml-auto">{stats.byState.completed}</span>
       </div>
     </div>
@@ -1074,7 +1074,7 @@ export default function QuestEditor({
   }, [setNodes]);
   
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-200">
+    <div className="flex h-full w-full bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Main Flow */}
       <div className="flex-1 relative">
         <ReactFlow
@@ -1090,9 +1090,9 @@ export default function QuestEditor({
           snapGrid={[20, 20]}
         >
           <Background color="#334155" gap={20} />
-          <Controls className="!bg-slate-800 !border-slate-700" />
+          <Controls className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]" />
           <MiniMap 
-            className="!bg-slate-800 !border-slate-700"
+            className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]"
             nodeColor={(node) => {
               const data = node.data as QuestNodeData;
               return QUEST_CATEGORIES.find((c) => c.id === data.category)?.color || '#64748b';
@@ -1118,13 +1118,13 @@ export default function QuestEditor({
           <Panel position="top-right" className="flex gap-2">
             <button
               onClick={() => onExport?.('json')}
-              className="flex items-center gap-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Download className="w-4 h-4" />
               Export
             </button>
             <button
-              className="flex items-center gap-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Upload className="w-4 h-4" />
               Import
@@ -1139,10 +1139,10 @@ export default function QuestEditor({
       </div>
       
       {/* Right Panel - Inspector */}
-      <div className="w-80 border-l border-slate-700 flex flex-col">
-        <div className="p-3 border-b border-slate-700">
+      <div className="w-80 border-l border-[var(--aethel-border-primary)] flex flex-col">
+        <div className="p-3 border-b border-[var(--aethel-border-primary)]">
           <h2 className="text-sm font-semibold flex items-center gap-2">
-            <Settings className="w-4 h-4 text-slate-400" />
+            <Settings className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             Quest Inspector
           </h2>
         </div>
@@ -1156,11 +1156,11 @@ export default function QuestEditor({
         </div>
         
         {/* Legend */}
-        <div className="border-t border-slate-700 p-3">
-          <div className="text-xs text-slate-400 mb-2">Legend</div>
+        <div className="border-t border-[var(--aethel-border-primary)] p-3">
+          <div className="text-xs text-[var(--aethel-text-tertiary)] mb-2">Legend</div>
           <div className="grid grid-cols-2 gap-1 text-[10px]">
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-slate-500" />
+              <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]" />
               Unavailable
             </div>
             <div className="flex items-center gap-1">
@@ -1185,3 +1185,4 @@ export default function QuestEditor({
     </div>
   );
 }
+

@@ -228,7 +228,7 @@ function GhostTextOverlay({ text, position, onAccept, onReject, visible }: Ghost
         {lines.map((line, i) => (
           <div 
             key={i} 
-            className="text-slate-500 opacity-60"
+            className="text-[var(--aethel-text-tertiary)] opacity-60"
             style={{ 
               whiteSpace: 'pre',
               fontStyle: 'italic',
@@ -241,13 +241,13 @@ function GhostTextOverlay({ text, position, onAccept, onReject, visible }: Ghost
       
       {/* Hint tooltip */}
       <div 
-        className="absolute -top-6 left-0 flex items-center gap-1 px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-xs text-slate-400 pointer-events-auto whitespace-nowrap"
+        className="absolute -top-6 left-0 flex items-center gap-1 px-2 py-0.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-xs text-[var(--aethel-text-tertiary)] pointer-events-auto whitespace-nowrap"
       >
-        <kbd className="px-1 py-0.5 bg-slate-700 rounded text-[10px]">Tab</kbd>
-        <span>accept</span>
-        <span className="mx-1 text-slate-600">|</span>
-        <kbd className="px-1 py-0.5 bg-slate-700 rounded text-[10px]">Esc</kbd>
-        <span>dismiss</span>
+        <kbd className="px-1 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded text-[10px]">Tab</kbd>
+        <span>aceitar</span>
+        <span className="mx-1 text-[var(--aethel-text-quaternary)]">|</span>
+        <kbd className="px-1 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded text-[10px]">Esc</kbd>
+        <span>dispensar</span>
       </div>
     </div>
   )
@@ -264,8 +264,8 @@ function CompletionLoading({ position }: { position: { top: number; left: number
         left: position.left,
       }}
     >
-      <Sparkles className="w-3 h-3 text-sky-400 animate-pulse" />
-      <span className="text-xs text-slate-500">Thinking...</span>
+      <Sparkles className="w-3 h-3 text-[var(--aethel-info)] animate-pulse" />
+      <span className="text-xs text-[var(--aethel-text-tertiary)]">Analisando...</span>
     </div>
   )
 }
@@ -454,22 +454,22 @@ export function CompletionStatusBar({
         onClick={onToggle}
         className={`flex items-center gap-1 px-2 py-1 rounded ${
           enabled 
-            ? 'bg-sky-500/20 text-sky-400' 
-            : 'bg-slate-800 text-slate-500'
+            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]' 
+            : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
         }`}
       >
         <Sparkles className="w-3 h-3" />
-        <span>Copilot {enabled ? 'ON' : 'OFF'}</span>
+        <span>Copilot {enabled ? 'ATIVO' : 'DESLIGADO'}</span>
       </button>
       
       {enabled && (
         <>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-400">{currentModel}</span>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-400">{suggestions} suggestions</span>
-          <span className="text-slate-500">|</span>
-          <span className="text-emerald-400">{(acceptRate * 100).toFixed(0)}% accepted</span>
+          <span className="text-[var(--aethel-text-tertiary)]">|</span>
+          <span className="text-[var(--aethel-text-tertiary)]">{currentModel}</span>
+          <span className="text-[var(--aethel-text-tertiary)]">|</span>
+          <span className="text-[var(--aethel-text-tertiary)]">{suggestions} sugestoes</span>
+          <span className="text-[var(--aethel-text-tertiary)]">|</span>
+          <span className="text-[var(--aethel-success)]">{(acceptRate * 100).toFixed(0)}% aceitos</span>
         </>
       )}
     </div>
@@ -492,15 +492,15 @@ interface CompletionSettingsProps {
 export function CompletionSettings({ settings, onSettingsChange }: CompletionSettingsProps) {
   return (
     <div className="p-4 space-y-4">
-      <h3 className="text-sm font-semibold text-white">Ajustes de completacao IA</h3>
+      <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Ajustes de completacao IA</h3>
       
       {/* Enable toggle */}
       <div className="flex items-center justify-between">
-        <label className="text-sm text-slate-400">Enable Inline Completions</label>
+        <label className="text-sm text-[var(--aethel-text-tertiary)]">Ativar completacao inline</label>
         <button
           onClick={() => onSettingsChange({ ...settings, enabled: !settings.enabled })}
           className={`w-10 h-5 rounded-full transition-colors ${
-            settings.enabled ? 'bg-sky-600' : 'bg-slate-700'
+            settings.enabled ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'
           }`}
         >
           <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
@@ -511,11 +511,11 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
       
       {/* Model selector */}
       <div>
-        <label className="text-sm text-slate-400 block mb-1">Model</label>
+        <label className="text-sm text-[var(--aethel-text-tertiary)] block mb-1">Modelo</label>
         <select
           value={settings.model}
           onChange={(e) => onSettingsChange({ ...settings, model: e.target.value })}
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white"
+          className="w-full px-3 py-2 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-primary)]"
         >
           {OPENROUTER_BUDGET_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -527,8 +527,8 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
       
       {/* Debounce */}
       <div>
-        <label className="text-sm text-slate-400 block mb-1">
-          Delay: {settings.debounceMs}ms
+        <label className="text-sm text-[var(--aethel-text-tertiary)] block mb-1">
+          Atraso: {settings.debounceMs}ms
         </label>
         <input
           type="range"
@@ -537,14 +537,14 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
           step={100}
           value={settings.debounceMs}
           onChange={(e) => onSettingsChange({ ...settings, debounceMs: parseInt(e.target.value) })}
-          className="w-full accent-sky-600"
+          className="w-full accent-[var(--aethel-info)]"
         />
       </div>
       
       {/* Temperature */}
       <div>
-        <label className="text-sm text-slate-400 block mb-1">
-          Creativity: {settings.temperature.toFixed(1)}
+        <label className="text-sm text-[var(--aethel-text-tertiary)] block mb-1">
+          Criatividade: {settings.temperature.toFixed(1)}
         </label>
         <input
           type="range"
@@ -553,11 +553,11 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
           step={0.1}
           value={settings.temperature}
           onChange={(e) => onSettingsChange({ ...settings, temperature: parseFloat(e.target.value) })}
-          className="w-full accent-sky-600"
+          className="w-full accent-[var(--aethel-info)]"
         />
-        <div className="flex justify-between text-[10px] text-slate-500">
-          <span>Precise</span>
-          <span>Creative</span>
+        <div className="flex justify-between text-[10px] text-[var(--aethel-text-tertiary)]">
+          <span>Preciso</span>
+          <span>Criativo</span>
         </div>
       </div>
     </div>

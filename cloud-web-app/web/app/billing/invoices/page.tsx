@@ -336,7 +336,7 @@ export default function InvoicesPage() {
           </div>
           {billingData?.invoices && billingData.invoices.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-800">
+              <table className="min-w-full divide-y divide-[var(--aethel-border-primary)]">
                 <thead className="bg-[var(--aethel-surface-primary)]/60">
                   <tr className="text-left text-xs uppercase tracking-wide text-[var(--aethel-text-secondary)]">
                     <th className="px-6 py-3">Fatura</th>
@@ -346,7 +346,7 @@ export default function InvoicesPage() {
                     <th className="px-6 py-3 text-right">Acoes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800">
+                <tbody className="divide-y divide-[var(--aethel-border-primary)]">
                   {billingData.invoices.map((invoice) => (
                     <tr key={invoice.id} className="hover:bg-[var(--aethel-surface-primary)]/60">
                       <td className="px-6 py-4 text-sm text-[var(--aethel-text-primary)]">{invoice.number || invoice.id.slice(-8)}</td>
@@ -392,3 +392,4 @@ export default function InvoicesPage() {
     </main>
   )
 }
+

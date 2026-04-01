@@ -152,7 +152,7 @@ interface DialogDescriptionProps {
 }
 
 export const DialogDescription: React.FC<DialogDescriptionProps> = ({ children, className = '' }) => (
-  <p className={`text-sm text-gray-400 mt-1 ${className}`}>{children}</p>
+  <p className={`text-sm text-[var(--aethel-text-tertiary)] mt-1 ${className}`}>{children}</p>
 );
 
 interface DialogBodyProps {
@@ -186,7 +186,7 @@ export const DialogClose: React.FC<DialogCloseProps> = ({ children, className = 
   
   return (
     <button
-      className={`absolute top-4 right-4 p-1 rounded hover:bg-white/10 text-gray-400 hover:text-[var(--aethel-text-primary)] ${className}`}
+      className={`absolute top-4 right-4 p-1 rounded hover:bg-white/10 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] ${className}`}
       onClick={() => context?.onOpenChange(false)}
       aria-label="Close"
     >
@@ -255,7 +255,7 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
         px-4 py-2 text-sm font-medium transition-colors relative
         ${isSelected 
           ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary)] -mb-px' 
-          : 'text-gray-400 hover:text-gray-200'
+          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${className}
@@ -378,7 +378,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ item, depth }) => {
       <div
         className={`
           flex items-center gap-1 px-2 py-1 cursor-pointer select-none
-          ${isSelected ? 'bg-blue-600/30 text-[var(--aethel-text-primary)]' : 'text-gray-300 hover:bg-white/5'}
+          ${isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:bg-white/5'}
           ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}
         `}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
@@ -402,9 +402,9 @@ const TreeNode: React.FC<TreeNodeProps> = ({ item, depth }) => {
             }}
           >
             {isExpanded ? (
-              <ChevronDown size={14} className="text-gray-400" />
+              <ChevronDown size={14} className="text-[var(--aethel-text-tertiary)]" />
             ) : (
-              <ChevronRight size={14} className="text-gray-400" />
+              <ChevronRight size={14} className="text-[var(--aethel-text-tertiary)]" />
             )}
           </button>
         ) : (
@@ -513,8 +513,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, onSelect, child
                   ${item.disabled 
                     ? 'opacity-50 cursor-not-allowed' 
                     : item.danger 
-                      ? 'hover:bg-red-500/20 text-red-400' 
-                      : 'hover:bg-white/5 text-gray-300'
+                      ? 'hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]' 
+                      : 'hover:bg-white/5 text-[var(--aethel-text-secondary)]'
                   }
                 `}
                 onClick={() => !item.disabled && handleSelect(item.id)}
@@ -524,9 +524,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, onSelect, child
                 {item.icon && <span className="w-4 flex-shrink-0">{item.icon}</span>}
                 <span className="flex-1">{item.label}</span>
                 {item.shortcut && (
-                  <span className="text-xs text-gray-500 ml-auto">{item.shortcut}</span>
+                  <span className="text-xs text-[var(--aethel-text-quaternary)] ml-auto">{item.shortcut}</span>
                 )}
-                {item.submenu && <ChevronRight size={14} className="text-gray-500" />}
+                {item.submenu && <ChevronRight size={14} className="text-[var(--aethel-text-quaternary)]" />}
               </button>
             )
           ))}
@@ -678,7 +678,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     default: 'bg-[var(--aethel-primary)]',
     success: 'bg-green-500',
     warning: 'bg-yellow-500',
-    error: 'bg-red-500',
+    error: 'bg-[var(--aethel-error)]',
   };
   
   return (
@@ -696,7 +696,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         />
       </div>
       {showLabel && (
-        <div className="text-xs text-gray-400 mt-1 text-right">
+        <div className="text-xs text-[var(--aethel-text-tertiary)] mt-1 text-right">
           {Math.round(percentage)}%
         </div>
       )}
@@ -798,7 +798,7 @@ export const Select: React.FC<SelectProps> = ({
           w-full flex items-center justify-between gap-2 px-3 py-2
           bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-left
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--aethel-surface-quaternary)]'}
-          focus:outline-none focus:ring-1 focus:ring-blue-500
+          focus:outline-none focus:ring-1 focus:ring-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]
         `}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
@@ -806,10 +806,10 @@ export const Select: React.FC<SelectProps> = ({
         aria-expanded={isOpen}
         id={id}
       >
-        <span className={selectedOption ? 'text-gray-200' : 'text-gray-500'}>
+        <span className={selectedOption ? 'text-[var(--aethel-text-secondary)]' : 'text-[var(--aethel-text-quaternary)]'}>
           {selectedOption?.label || placeholder}
         </span>
-        <ChevronDown size={16} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown size={16} className={`text-[var(--aethel-text-tertiary)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       
       {isOpen && (
@@ -825,7 +825,7 @@ export const Select: React.FC<SelectProps> = ({
               className={`
                 w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left
                 ${option.disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/5'}
-                ${option.value === value ? 'bg-blue-600/30 text-[var(--aethel-text-primary)]' : 'text-gray-300'}
+                ${option.value === value ? 'bg-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}
               `}
               onClick={() => {
                 if (option.disabled) return;
@@ -836,7 +836,7 @@ export const Select: React.FC<SelectProps> = ({
               role="option"
               aria-selected={option.value === value}
             >
-              {option.value === value && <Check size={14} className="text-blue-400" />}
+              {option.value === value && <Check size={14} className="text-[var(--aethel-info)]" />}
               <span className={option.value !== value ? 'ml-5' : ''}>{option.label}</span>
             </button>
           ))}
@@ -888,7 +888,7 @@ export const Switch: React.FC<SwitchProps> = ({
         className={`
           ${sizes[size].track} rounded-full relative transition-colors
           ${checked ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-border-secondary)]'}
-          focus:outline-none focus:ring-2 focus:ring-blue-500/50
+          focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)]
         `}
       >
         <span
@@ -899,7 +899,7 @@ export const Switch: React.FC<SwitchProps> = ({
           `}
         />
       </button>
-      {label && <span className="text-sm text-gray-300">{label}</span>}
+      {label && <span className="text-sm text-[var(--aethel-text-secondary)]">{label}</span>}
     </label>
   );
 };
@@ -964,7 +964,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
           )}
         </div>
       </div>
-      {label && <span className="text-sm text-gray-300">{label}</span>}
+      {label && <span className="text-sm text-[var(--aethel-text-secondary)]">{label}</span>}
     </label>
   );
 };

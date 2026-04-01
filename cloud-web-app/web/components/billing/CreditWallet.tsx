@@ -1,5 +1,5 @@
 ﻿/**
- * CreditWallet - UI Completa de Carteira de créditos
+ * CreditWallet - UI Completa de Carteira de creditos
  * 
  * Painel que mostra saldo, histórico e opções de recarga.
  * Integra com /api/wallet/* endpoints.
@@ -71,20 +71,20 @@ interface CreditWalletProps {
 }
 
 // ============================================================================
-// PACOTES DE CRÁ‰DITOS
+// PACOTES DE CREDITOS
 // ============================================================================
 
 const CREDIT_PACKAGES: CreditPackage[] = [
   {
     id: 'pack-500',
-    name: 'Starter Pack',
+    name: 'Pacote inicial',
     credits: 500,
     price: 9.99,
     bonus: 0,
   },
   {
     id: 'pack-1500',
-    name: 'Creator Pack',
+    name: 'Pacote criador',
     credits: 1500,
     price: 24.99,
     bonus: 100,
@@ -92,7 +92,7 @@ const CREDIT_PACKAGES: CreditPackage[] = [
   },
   {
     id: 'pack-5000',
-    name: 'Pro Pack',
+    name: 'Pacote pro',
     credits: 5000,
     price: 74.99,
     bonus: 500,
@@ -100,7 +100,7 @@ const CREDIT_PACKAGES: CreditPackage[] = [
   },
   {
     id: 'pack-15000',
-    name: 'Studio Pack',
+    name: 'Pacote studio',
     credits: 15000,
     price: 199.99,
     bonus: 2000,
@@ -122,17 +122,17 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, subValue, trend, color = 'default' }: StatCardProps) {
   const colorClasses = {
-    default: 'bg-zinc-800 border-zinc-700',
+    default: 'bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)]',
     warning: 'bg-[var(--aethel-warning)]/10 border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]',
-    success: 'bg-green-500/10 border-green-500/30',
-    danger: 'bg-red-500/10 border-red-500/30',
+    success: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
+    danger: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
   };
 
   const iconColors = {
-    default: 'text-zinc-400',
+    default: 'text-[var(--aethel-text-tertiary)]',
     warning: 'text-[var(--aethel-warning-light)]',
     success: 'text-[var(--aethel-success-light)]',
-    danger: 'text-red-400',
+    danger: 'text-[var(--aethel-error)]',
   };
 
   return (
@@ -140,14 +140,14 @@ function StatCard({ icon, label, value, subValue, trend, color = 'default' }: St
       <div className="flex items-center justify-between mb-2">
         <span className={iconColors[color]}>{icon}</span>
         {trend && (
-          <span className={trend === 'up' ? 'text-[var(--aethel-success-light)]' : trend === 'down' ? 'text-red-400' : 'text-zinc-500'}>
+          <span className={trend === 'up' ? 'text-[var(--aethel-success-light)]' : trend === 'down' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'}>
             {trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-sm text-zinc-500">{label}</p>
-      {subValue && <p className="text-xs text-zinc-600 mt-1">{subValue}</p>}
+      <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">{value}</p>
+      <p className="text-sm text-[var(--aethel-text-tertiary)]">{label}</p>
+      {subValue && <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">{subValue}</p>}
     </div>
   );
 }
@@ -174,22 +174,22 @@ function TransactionItem({ transaction }: TransactionItemProps) {
   const statusColors = {
     completed: 'text-[var(--aethel-success-light)]',
     pending: 'text-[var(--aethel-warning-light)]',
-    failed: 'text-red-400',
+    failed: 'text-[var(--aethel-error)]',
   };
 
   return (
-    <div className="flex items-center justify-between py-3 border-b border-zinc-800 last:border-0">
+    <div className="flex items-center justify-between py-3 border-b border-[var(--aethel-border-primary)] last:border-0">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-[var(--aethel-surface-tertiary)] flex items-center justify-center">
           {typeIcons[transaction.type]}
         </div>
         <div>
-          <p className="text-sm text-white">{transaction.description}</p>
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
+          <p className="text-sm text-[var(--aethel-text-primary)]">{transaction.description}</p>
+          <div className="flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)]">
             <span>{new Date(transaction.timestamp).toLocaleDateString()}</span>
             {transaction.operation && (
               <>
-                <span>â€¢</span>
+                <span>-</span>
                 <span>{transaction.operation}</span>
               </>
             )}
@@ -197,11 +197,11 @@ function TransactionItem({ transaction }: TransactionItemProps) {
         </div>
       </div>
       <div className="text-right">
-        <p className={`font-medium ${isPositive ? 'text-[var(--aethel-success-light)]' : 'text-zinc-300'}`}>
+        <p className={`font-medium ${isPositive ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-text-secondary)]'}`}>
           {isPositive ? '+' : '-'}{Math.abs(transaction.amount)}
         </p>
         <p className={`text-xs ${statusColors[transaction.status]}`}>
-          {transaction.status === 'completed' ? 'Concluído' : transaction.status === 'pending' ? 'Pendente' : 'Falhou'}
+          {transaction.status === 'completed' ? 'Concluido' : transaction.status === 'pending' ? 'Pendente' : 'Falhou'}
         </p>
       </div>
     </div>
@@ -229,7 +229,7 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
           ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' 
           : pkg.bestValue 
           ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
-          : 'bg-zinc-800 border-zinc-700 hover:border-zinc-600'
+          : 'bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-secondary)]'
         }
       `}
     >
@@ -245,10 +245,10 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
 
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h4 className="font-semibold text-white">{pkg.name}</h4>
-          <p className="text-2xl font-bold text-white mt-1">
+          <h4 className="font-semibold text-[var(--aethel-text-primary)]">{pkg.name}</h4>
+          <p className="text-2xl font-bold text-[var(--aethel-text-primary)] mt-1">
             {pkg.credits.toLocaleString()}
-            <span className="text-sm font-normal text-zinc-400 ml-1">créditos</span>
+            <span className="text-sm font-normal text-[var(--aethel-text-tertiary)] ml-1">creditos</span>
           </p>
         </div>
         <Coins className={`w-8 h-8 ${pkg.popular ? 'text-[var(--aethel-info-light)]' : pkg.bestValue ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-warning-light)]'}`} />
@@ -257,15 +257,15 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
       {pkg.bonus > 0 && (
         <div className="flex items-center gap-1 text-sm text-[var(--aethel-success-light)] mb-3">
           <Gift className="w-4 h-4" />
-          +{pkg.bonus} bônus
+          +{pkg.bonus} bonus
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-3 border-t border-zinc-700">
-        <span className="text-xl font-bold text-white">
+      <div className="flex items-center justify-between pt-3 border-t border-[var(--aethel-border-primary)]">
+        <span className="text-xl font-bold text-[var(--aethel-text-primary)]">
           ${pkg.price.toFixed(2)}
         </span>
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">
           ${(pkg.price / (pkg.credits + pkg.bonus) * 100).toFixed(2)}/100cr
         </span>
       </div>
@@ -314,7 +314,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       });
 
       if (!response.ok) {
-        throw new Error('Purchase failed');
+        throw new Error('Compra falhou');
       }
 
       const { checkoutUrl } = await response.json();
@@ -328,7 +328,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       
       if (onPurchase) onPurchase(packageId);
     } catch (err) {
-      console.error('Purchase error:', err);
+      console.error('Erro de compra:', err);
     } finally {
       setIsPurchasing(false);
       setSelectedPackage(null);
@@ -338,13 +338,13 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
   // Loading state
   if (!wallet && !walletError) {
     return (
-      <div className={`bg-zinc-900 rounded-xl p-6 ${className}`}>
+      <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-6 ${className}`}>
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-zinc-800 rounded w-1/3" />
+          <div className="h-8 bg-[var(--aethel-surface-tertiary)] rounded w-1/3" />
           <div className="grid grid-cols-3 gap-4">
-            <div className="h-24 bg-zinc-800 rounded-xl" />
-            <div className="h-24 bg-zinc-800 rounded-xl" />
-            <div className="h-24 bg-zinc-800 rounded-xl" />
+            <div className="h-24 bg-[var(--aethel-surface-tertiary)] rounded-xl" />
+            <div className="h-24 bg-[var(--aethel-surface-tertiary)] rounded-xl" />
+            <div className="h-24 bg-[var(--aethel-surface-tertiary)] rounded-xl" />
           </div>
         </div>
       </div>
@@ -354,8 +354,8 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
   // Error state
   if (walletError) {
     return (
-      <div className={`bg-zinc-900 rounded-xl p-6 ${className}`}>
-        <div className="flex items-center gap-3 text-red-400">
+      <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-6 ${className}`}>
+        <div className="flex items-center gap-3 text-[var(--aethel-error)]">
           <AlertCircle className="w-5 h-5" />
           <p>Erro ao carregar carteira</p>
           <button onClick={() => refreshWallet()} className="text-sm underline">
@@ -367,16 +367,16 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
   }
 
   return (
-    <div className={`bg-zinc-900 rounded-xl overflow-hidden ${className}`}>
+    <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+      <div className="flex items-center justify-between p-4 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] flex items-center justify-center">
             <Wallet className="w-5 h-5 text-[var(--aethel-warning-light)]" />
           </div>
           <div>
-            <h2 className="font-semibold text-white">Carteira de créditos</h2>
-            <p className="text-xs text-zinc-500">Plano {wallet?.plan}</p>
+            <h2 className="font-semibold text-[var(--aethel-text-primary)]">Carteira de creditos</h2>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Plano {wallet?.plan}</p>
           </div>
         </div>
         
@@ -390,10 +390,10 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-zinc-800">
+      <div className="flex border-b border-[var(--aethel-border-primary)]">
         {[
           { id: 'overview', label: 'Resumo', icon: <Coins className="w-4 h-4" /> },
-          { id: 'history', label: 'Histórico', icon: <Clock className="w-4 h-4" /> },
+          { id: 'history', label: 'Historico', icon: <Clock className="w-4 h-4" /> },
           { id: 'purchase', label: 'Comprar', icon: <CreditCard className="w-4 h-4" /> },
         ].map((tab) => (
           <button
@@ -402,8 +402,8 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             className={`
               flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors
               ${activeTab === tab.id
-                ? 'text-white border-b-2 border-[var(--aethel-primary)]'
-                : 'text-zinc-500 hover:text-zinc-300'
+                ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary)]'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }
             `}
           >
@@ -422,7 +422,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <div className="grid grid-cols-3 gap-4">
               <StatCard
                 icon={<Coins className="w-5 h-5" />}
-                label="Disponível"
+                label="Disponivel"
                 value={wallet.available.toLocaleString()}
                 subValue={wallet.reserved > 0 ? `${wallet.reserved} reservados` : undefined}
                 color={isLowBalance ? 'warning' : 'default'}
@@ -437,28 +437,28 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
               />
               <StatCard
                 icon={<Gift className="w-5 h-5" />}
-                label="bônus"
+                label="bonus"
                 value={wallet.bonusCredits.toLocaleString()}
                 color="success"
               />
             </div>
 
             {/* Usage Progress */}
-            <div className="p-4 bg-zinc-800 rounded-xl">
+            <div className="p-4 bg-[var(--aethel-surface-tertiary)] rounded-xl">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-zinc-400">Uso mensal do plano</span>
-                <span className="text-sm font-medium text-white">{usagePercent}%</span>
+                <span className="text-sm text-[var(--aethel-text-tertiary)]">Uso mensal do plano</span>
+                <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{usagePercent}%</span>
               </div>
-              <div className="h-2 bg-zinc-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
-                    usagePercent > 90 ? 'bg-red-500' : usagePercent > 70 ? 'bg-[var(--aethel-warning)]' : 'bg-green-500'
+                    usagePercent > 90 ? 'bg-[var(--aethel-error)]' : usagePercent > 70 ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]'
                   }`}
                   style={{ width: `${Math.min(usagePercent, 100)}%` }}
                 />
               </div>
-              <p className="text-xs text-zinc-500 mt-2">
-                {wallet.monthlyLimit - wallet.monthlyUsage} créditos restantes neste ciclo
+              <p className="text-xs text-[var(--aethel-text-tertiary)] mt-2">
+                {wallet.monthlyLimit - wallet.monthlyUsage} creditos restantes neste ciclo
               </p>
             </div>
 
@@ -466,15 +466,15 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setActiveTab('purchase')}
-                className="flex items-center justify-center gap-2 p-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-medium transition-colors"
+                className="flex items-center justify-center gap-2 p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-xl text-white font-medium transition-colors"
               >
                 <Sparkles className="w-5 h-5" />
-                Comprar créditos
+                Comprar creditos
               </button>
               {onUpgrade && (
                 <button
                   onClick={onUpgrade}
-                  className="flex items-center justify-center gap-2 p-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-white font-medium transition-colors"
+                  className="flex items-center justify-center gap-2 p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl text-[var(--aethel-text-primary)] font-medium transition-colors"
                 >
                   <Crown className="w-5 h-5 text-[var(--aethel-warning-light)]" />
                   Upgrade de Plano
@@ -488,9 +488,9 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
         {activeTab === 'history' && (
           <div>
             {transactions.length === 0 ? (
-              <div className="text-center py-8 text-zinc-500">
+              <div className="text-center py-8 text-[var(--aethel-text-tertiary)]">
                 <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>Nenhuma transação ainda</p>
+                <p>Nenhuma transacao ainda</p>
               </div>
             ) : (
               <div className="space-y-1">
@@ -505,8 +505,8 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
         {/* Purchase Tab */}
         {activeTab === 'purchase' && (
           <div className="space-y-4">
-            <p className="text-sm text-zinc-400">
-              Escolha um pacote de créditos para recarregar sua carteira.
+            <p className="text-sm text-[var(--aethel-text-tertiary)]">
+              Escolha um pacote de creditos para recarregar sua carteira.
             </p>
             
             <div className="grid grid-cols-2 gap-4">
@@ -520,15 +520,15 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
               ))}
             </div>
 
-            <div className="p-4 bg-zinc-800 rounded-xl">
+            <div className="p-4 bg-[var(--aethel-surface-tertiary)] rounded-xl">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-zinc-500 mt-0.5" />
-                <div className="text-sm text-zinc-400">
-                  <p className="font-medium text-zinc-300 mb-1">Sobre os créditos</p>
+                <AlertCircle className="w-5 h-5 text-[var(--aethel-text-tertiary)] mt-0.5" />
+                <div className="text-sm text-[var(--aethel-text-tertiary)]">
+                  <p className="font-medium text-[var(--aethel-text-secondary)] mb-1">Sobre os creditos</p>
                   <ul className="space-y-1 text-xs">
-                    <li>â€¢ créditos não expiram enquanto a conta estiver ativa</li>
-                    <li>â€¢ Chat simples: 1 crédito / Squad Task: ~20 créditos</li>
-                    <li>â€¢ bônus são adicionados automaticamente na compra</li>
+                    <li>- creditos não expiram enquanto a conta estiver ativa</li>
+                    <li>- Chat simples: 1 crédito / Squad Task: ~20 creditos</li>
+                    <li>- bonus são adicionados automaticamente na compra</li>
                   </ul>
                 </div>
               </div>
@@ -541,3 +541,6 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
 }
 
 export default CreditWallet;
+
+
+

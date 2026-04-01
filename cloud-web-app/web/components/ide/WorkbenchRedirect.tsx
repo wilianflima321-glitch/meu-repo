@@ -18,7 +18,7 @@ export default function WorkbenchRedirect({
         <div className="flex items-center justify-center gap-3">
           <Link
             href="/ide"
-            className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-medium text-white shadow-[0_16px_36px_rgba(56,189,248,0.24)] transition hover:brightness-110"
+            className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] shadow-[0_16px_36px_rgba(56,189,248,0.24)] transition hover:brightness-110"
           >
             Abrir Workbench
           </Link>

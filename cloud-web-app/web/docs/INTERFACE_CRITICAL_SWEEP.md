@@ -1,8 +1,8 @@
 # Interface Critical Sweep
 
-- Generated at: `2026-03-22T01:25:52.652Z`
+- Generated at: `2026-04-01T00:46:23.605Z`
 - Scope: `app/`, `components/`
-- Files scanned: `755`
+- Files scanned: `766`
 
 ## Summary
 
@@ -85,3 +85,6 @@
 - Medium severity metrics must have owner + ETA in the execution contract.
 - INFO metrics remain explicit but must stay accurate to runtime behavior.
 
+## Post-sweep note (2026-04-01)
+- Additional manual hardening applied after this scan (chat, preview, editor, UI primitives).
+- Scanner not re-run; counts above reflect the last automated sweep only.

@@ -200,7 +200,7 @@ export function usePreviewRuntimeManager({
       const provisionResult = await provisionPreviewRuntime(projectId)
       const runtimeUrl = provisionResult.runtimeUrl
       if (!runtimeUrl) {
-        throw new Error('Runtime provision endpoint returned empty runtime URL.')
+        throw new Error('Endpoint de provisionamento retornou URL de runtime vazia.')
       }
 
       setPreviewRuntimeUrl(runtimeUrl)
@@ -388,21 +388,28 @@ export function usePreviewRuntimeManager({
               ? 'Runtime URL invalida/bloqueada. Corrija para usar dev-server.'
               : 'Sem runtime externo configurado (modo inline).'
 
+  const managedProviderLabel =
+    runtimeReadiness?.managedProviderLabel || runtimeReadiness?.managedProvider || null
+
   const runtimeStrategyLabel =
     runtimeReadiness?.strategy === 'managed'
-      ? 'sandbox gerenciado'
+      ? `sandbox gerenciado${managedProviderLabel ? ` (${managedProviderLabel})` : ''}`
       : runtimeReadiness?.strategy === 'local'
         ? 'servidor local'
-        : 'inline'
+        : runtimeReadiness?.strategy === 'browser-side'
+        ? 'webcontainer (navegador)'
+          : 'inline'
 
   const runtimeStrategyHint =
     runtimeReadiness?.strategy === 'managed'
       ? runtimeReadiness.readyForManagedProvision
-        ? 'Managed preview configurado; provisionamento pode ser usado como caminho principal.'
-        : 'Managed preview foi detectado, mas ainda ha bloqueios de runtime.'
+        ? 'Preview gerenciado configurado; provisionamento pode ser usado como caminho principal.'
+        : 'Preview gerenciado detectado, mas ainda ha bloqueios de runtime.'
       : runtimeReadiness?.strategy === 'local'
-        ? 'Nenhum sandbox gerenciado padrao foi detectado; fallback atual depende de dev-server local.'
-        : 'Sem sandbox gerenciado ou runtime local detectado; preview fica em modo inline.'
+        ? 'Runtime local detectado; o preview depende do dev-server rodando na sua maquina.'
+        : runtimeReadiness?.strategy === 'browser-side'
+          ? 'Runtime no navegador; sem sandbox remoto ou servidor local.'
+          : 'Sem sandbox gerenciado ou runtime local detectado; preview fica em modo inline.'
 
   const runtimePrimaryAction =
     runtimeReadiness?.recommendedAction === 'provision'
@@ -424,7 +431,7 @@ export function usePreviewRuntimeManager({
     setRuntimeHealth({ status: 'idle' })
     setRuntimeHealthCheckedAt(null)
     setRuntimeDiscoveryTone('info')
-    setRuntimeDiscoveryMessage('Modo inline fallback ativo.')
+    setRuntimeDiscoveryMessage('Modo inline ativo.')
     persistPreviewRuntimeUrl(null, PREVIEW_RUNTIME_URL_STORAGE_KEY)
     setPreviewSandboxId(null)
     persistPreviewSandboxId(null, PREVIEW_RUNTIME_SANDBOX_ID_STORAGE_KEY)

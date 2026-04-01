@@ -127,8 +127,8 @@ const STATUS_ICONS: Record<FileStatus, React.ReactNode> = {
   added: <FilePlus className="w-4 h-4 text-green-400" />,
   deleted: <FileMinus className="w-4 h-4 text-red-400" />,
   renamed: <FileText className="w-4 h-4 text-blue-400" />,
-  untracked: <FileQuestion className="w-4 h-4 text-slate-400" />,
-  ignored: <EyeOff className="w-4 h-4 text-slate-600" />,
+  untracked: <FileQuestion className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />,
+  ignored: <EyeOff className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />,
   conflicted: <AlertTriangle className="w-4 h-4 text-red-500" />,
 }
 
@@ -322,9 +322,9 @@ export default function GitPanel({
   }
   
   return (
-    <div className="h-full flex flex-col bg-slate-900 text-white">
+    <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
           <GitBranch className="w-5 h-5 text-sky-400" />
           <span className="text-sm font-medium">Source Control</span>
@@ -333,28 +333,28 @@ export default function GitPanel({
         <div className="flex items-center gap-1">
           <button
             onClick={onFetch}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
             title="Fetch"
           >
             <Download className="w-4 h-4" />
           </button>
           <button
             onClick={onPull}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
             title="Pull"
           >
             <Download className="w-4 h-4" />
           </button>
           <button
             onClick={onPush}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
             title="Push"
           >
             <Upload className="w-4 h-4" />
           </button>
           <button
             onClick={handleSync}
-            className={`p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded ${
+            className={`p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded ${
               isSyncing ? 'animate-spin' : ''
             }`}
             title="Sync"
@@ -362,7 +362,7 @@ export default function GitPanel({
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+            className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
             title="More actions"
           >
             <MoreHorizontal className="w-4 h-4" />
@@ -371,12 +371,12 @@ export default function GitPanel({
       </div>
       
       {/* Branch Selector */}
-      <div className="px-3 py-2 border-b border-slate-700">
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <button
           onClick={() => setShowBranchDialog(true)}
-          className="w-full flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-left"
+          className="w-full flex items-center gap-2 px-3 py-1.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-left"
         >
-          <GitBranch className="w-4 h-4 text-slate-400" />
+          <GitBranch className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           <span className="text-sm font-medium flex-1">{currentBranch}</span>
           {currentBranchInfo?.ahead !== undefined && currentBranchInfo.ahead > 0 && (
             <span className="px-1.5 py-0.5 bg-green-500/20 text-green-400 text-xs rounded">
@@ -388,30 +388,30 @@ export default function GitPanel({
               ↓{currentBranchInfo.behind}
             </span>
           )}
-          <ChevronDown className="w-4 h-4 text-slate-500" />
+          <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         </button>
       </div>
       
       {/* Tabs */}
-      <div className="flex border-b border-slate-700">
+      <div className="flex border-b border-[var(--aethel-border-primary)]">
         {(['changes', 'branches', 'history', 'stashes'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`flex-1 px-3 py-2 text-sm font-medium capitalize transition-colors ${
               activeTab === tab
-                ? 'text-white border-b-2 border-sky-500'
-                : 'text-slate-400 hover:text-white'
+                ? 'text-[var(--aethel-text-primary)] border-b-2 border-sky-500'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
             }`}
           >
             {tab}
             {tab === 'changes' && files.length > 0 && (
-              <span className="ml-1.5 px-1.5 py-0.5 bg-slate-700 rounded text-xs">
+              <span className="ml-1.5 px-1.5 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded text-xs">
                 {files.length}
               </span>
             )}
             {tab === 'stashes' && stashes.length > 0 && (
-              <span className="ml-1.5 px-1.5 py-0.5 bg-slate-700 rounded text-xs">
+              <span className="ml-1.5 px-1.5 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded text-xs">
                 {stashes.length}
               </span>
             )}
@@ -531,28 +531,28 @@ function ChangesTab({
   return (
     <div className="flex flex-col h-full">
       {/* Commit Input */}
-      <div className="p-3 border-b border-slate-700">
+      <div className="p-3 border-b border-[var(--aethel-border-primary)]">
         <textarea
           value={commitMessage}
           onChange={(e) => onCommitMessageChange(e.target.value)}
           placeholder="Commit message..."
-          className="w-full h-20 px-3 py-2 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 resize-none focus:outline-none focus:border-sky-500"
+          className="w-full h-20 px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] resize-none focus:outline-none focus:border-sky-500"
         />
         <div className="flex items-center gap-3 mt-2">
           <button
             onClick={onCommit}
             disabled={!commitMessage.trim() || stagedFiles.length === 0}
-            className="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-700 disabled:bg-slate-700 disabled:text-slate-500 rounded text-sm font-medium transition-colors"
+            className="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-700 disabled:bg-[var(--aethel-surface-quaternary)] disabled:text-[var(--aethel-text-tertiary)] rounded text-sm font-medium transition-colors"
           >
             <Check className="w-4 h-4 inline mr-2" />
             Commit{stagedFiles.length > 0 && ` (${stagedFiles.length})`}
           </button>
-          <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-[var(--aethel-text-tertiary)] cursor-pointer">
             <input
               type="checkbox"
               checked={isAmend}
               onChange={(e) => onAmendChange(e.target.checked)}
-              className="rounded border-slate-600"
+              className="rounded border-[var(--aethel-border-secondary)]"
             />
             Amend
           </label>
@@ -578,7 +578,7 @@ function ChangesTab({
             stagedFiles.length > 0 && (
               <button
                 onClick={onUnstageAll}
-                className="p-1 text-slate-400 hover:text-white"
+                className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 title="Unstage all"
               >
                 <Minus className="w-4 h-4" />
@@ -604,7 +604,7 @@ function ChangesTab({
             unstagedFiles.length > 0 && (
               <button
                 onClick={onStageAll}
-                className="p-1 text-slate-400 hover:text-white"
+                className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 title="Stage all"
               >
                 <Plus className="w-4 h-4" />
@@ -671,15 +671,15 @@ function FileSection({
       {/* Section Header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-slate-800/50 text-left"
+        className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[var(--aethel-surface-secondary)]/50 text-left"
       >
         {isExpanded ? (
-          <ChevronDown className="w-4 h-4 text-slate-500" />
+          <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         ) : (
-          <ChevronRight className="w-4 h-4 text-slate-500" />
+          <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         )}
-        <span className="text-xs font-semibold text-slate-400 uppercase">{title}</span>
-        <span className="text-xs text-slate-500">({files.length})</span>
+        <span className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase">{title}</span>
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">({files.length})</span>
         <div className="flex-1" />
         {headerAction}
       </button>
@@ -690,16 +690,16 @@ function FileSection({
           {files.map((file) => (
             <div
               key={file.path}
-              className="group flex items-center gap-2 px-3 py-1 hover:bg-slate-800/50"
+              className="group flex items-center gap-2 px-3 py-1 hover:bg-[var(--aethel-surface-secondary)]/50"
             >
               {STATUS_ICONS[file.status]}
               
               <button
                 onClick={() => onOpenFile?.(file.path)}
-                className="flex-1 text-left text-sm text-slate-300 hover:text-white truncate"
+                className="flex-1 text-left text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] truncate"
               >
                 {file.path.split('/').pop()}
-                <span className="ml-2 text-slate-600">{file.path}</span>
+                <span className="ml-2 text-[var(--aethel-text-quaternary)]">{file.path}</span>
               </button>
               
               {/* Stats */}
@@ -716,7 +716,7 @@ function FileSection({
                 {onShowDiff && file.status !== 'untracked' && (
                   <button
                     onClick={() => onShowDiff(file.path)}
-                    className="p-1 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+                    className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
                     title="Show diff"
                   >
                     <Eye className="w-3 h-3" />
@@ -724,14 +724,14 @@ function FileSection({
                 )}
                 <button
                   onClick={() => onDiscardFile(file.path)}
-                  className="p-1 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded"
+                  className="p-1 text-[var(--aethel-text-tertiary)] hover:text-red-400 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                   title="Discard changes"
                 >
                   <RotateCcw className="w-3 h-3" />
                 </button>
                 <button
                   onClick={() => onStageFile(file.path)}
-                  className="p-1 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+                  className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
                   title={stageAction === 'stage' ? 'Stage' : 'Unstage'}
                 >
                   {actionIcon}
@@ -749,7 +749,7 @@ function FileSection({
                     ? 'bg-red-500/20 text-red-400'
                     : file.status === 'conflicted'
                     ? 'bg-red-600/20 text-red-500'
-                    : 'bg-slate-700 text-slate-400'
+                    : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
                 }`}
               >
                 {STATUS_LABELS[file.status]}
@@ -787,10 +787,10 @@ function BranchesTab({
   return (
     <div>
       {/* Actions */}
-      <div className="px-3 py-2 border-b border-slate-700">
+      <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <button
           onClick={onCreateBranch}
-          className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
+          className="flex items-center gap-2 px-3 py-1.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
         >
           <Plus className="w-4 h-4" />
           New Branch
@@ -799,16 +799,16 @@ function BranchesTab({
       
       {/* Local Branches */}
       <div className="px-3 py-2">
-        <div className="text-xs font-semibold text-slate-500 uppercase mb-2">Local</div>
+        <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Local</div>
         {localBranches.map((branch) => (
           <div
             key={branch.name}
-            className={`group flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800 ${
-              branch.isCurrent ? 'bg-slate-800' : ''
+            className={`group flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] ${
+              branch.isCurrent ? 'bg-[var(--aethel-surface-secondary)]' : ''
             }`}
           >
-            <GitBranch className={`w-4 h-4 ${branch.isCurrent ? 'text-green-400' : 'text-slate-500'}`} />
-            <span className={`flex-1 text-sm ${branch.isCurrent ? 'text-white font-medium' : 'text-slate-300'}`}>
+            <GitBranch className={`w-4 h-4 ${branch.isCurrent ? 'text-green-400' : 'text-[var(--aethel-text-tertiary)]'}`} />
+            <span className={`flex-1 text-sm ${branch.isCurrent ? 'text-[var(--aethel-text-primary)] font-medium' : 'text-[var(--aethel-text-secondary)]'}`}>
               {branch.name}
             </span>
             {branch.ahead !== undefined && branch.ahead > 0 && (
@@ -821,21 +821,21 @@ function BranchesTab({
               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
                 <button
                   onClick={() => onCheckout?.(branch.name)}
-                  className="p-1 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+                  className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
                   title="Checkout"
                 >
                   <Check className="w-3 h-3" />
                 </button>
                 <button
                   onClick={() => onMerge?.(branch.name)}
-                  className="p-1 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+                  className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
                   title="Merge into current"
                 >
                   <GitMerge className="w-3 h-3" />
                 </button>
                 <button
                   onClick={() => onDeleteBranch?.(branch.name)}
-                  className="p-1 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded"
+                  className="p-1 text-[var(--aethel-text-tertiary)] hover:text-red-400 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                   title="Delete"
                 >
                   <Trash2 className="w-3 h-3" />
@@ -848,18 +848,18 @@ function BranchesTab({
       
       {/* Remote Branches */}
       {remoteBranches.length > 0 && (
-        <div className="px-3 py-2 border-t border-slate-800">
-          <div className="text-xs font-semibold text-slate-500 uppercase mb-2">Remote</div>
+        <div className="px-3 py-2 border-t border-[var(--aethel-border-primary)]">
+          <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2">Remote</div>
           {remoteBranches.map((branch) => (
             <div
               key={branch.name}
-              className="group flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-800"
+              className="group flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--aethel-surface-secondary)]"
             >
-              <GitBranch className="w-4 h-4 text-slate-600" />
-              <span className="flex-1 text-sm text-slate-400">{branch.name}</span>
+              <GitBranch className="w-4 h-4 text-[var(--aethel-text-quaternary)]" />
+              <span className="flex-1 text-sm text-[var(--aethel-text-tertiary)]">{branch.name}</span>
               <button
                 onClick={() => onCheckout?.(branch.name)}
-                className="p-1 text-slate-500 hover:text-white hover:bg-slate-700 rounded opacity-0 group-hover:opacity-100"
+                className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded opacity-0 group-hover:opacity-100"
                 title="Checkout"
               >
                 <Check className="w-3 h-3" />
@@ -885,23 +885,23 @@ function HistoryTab({ commits, formatDate }: HistoryTabProps) {
       {commits.map((commit, idx) => (
         <div
           key={commit.hash}
-          className="flex gap-3 px-3 py-2 hover:bg-slate-800/50 border-b border-slate-800"
+          className="flex gap-3 px-3 py-2 hover:bg-[var(--aethel-surface-secondary)]/50 border-b border-[var(--aethel-border-primary)]"
         >
           {/* Graph line */}
           <div className="flex flex-col items-center">
-            <div className="w-3 h-3 rounded-full bg-sky-500 ring-2 ring-slate-900" />
+            <div className="w-3 h-3 rounded-full bg-[var(--aethel-info)] ring-2 ring-[var(--aethel-border-secondary)]" />
             {idx < commits.length - 1 && (
-              <div className="w-0.5 flex-1 bg-slate-700 my-1" />
+              <div className="w-0.5 flex-1 bg-[var(--aethel-surface-quaternary)] my-1" />
             )}
           </div>
           
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start gap-2">
-              <p className="text-sm text-white flex-1 line-clamp-2">{commit.message}</p>
-              <code className="text-xs text-slate-500 font-mono">{commit.shortHash}</code>
+              <p className="text-sm text-[var(--aethel-text-primary)] flex-1 line-clamp-2">{commit.message}</p>
+              <code className="text-xs text-[var(--aethel-text-tertiary)] font-mono">{commit.shortHash}</code>
             </div>
-            <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+            <div className="flex items-center gap-3 mt-1 text-xs text-[var(--aethel-text-tertiary)]">
               <span className="flex items-center gap-1">
                 <User className="w-3 h-3" />
                 {commit.author}
@@ -938,18 +938,18 @@ function StashesTab({ stashes, onStash, onStashPop, formatDate }: StashesTabProp
   return (
     <div>
       {/* Create Stash */}
-      <div className="p-3 border-b border-slate-700">
+      <div className="p-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex gap-2">
           <input
             type="text"
             value={newStashMessage}
             onChange={(e) => setNewStashMessage(e.target.value)}
             placeholder="Stash message (optional)"
-            className="flex-1 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500"
+            className="flex-1 px-3 py-1.5 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)]"
           />
           <button
             onClick={handleStash}
-            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-sm"
+            className="px-3 py-1.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
           >
             <Archive className="w-4 h-4" />
           </button>
@@ -958,7 +958,7 @@ function StashesTab({ stashes, onStash, onStashPop, formatDate }: StashesTabProp
       
       {/* Stash List */}
       {stashes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+        <div className="flex flex-col items-center justify-center py-12 text-[var(--aethel-text-tertiary)]">
           <Archive className="w-12 h-12 mb-4 opacity-50" />
           <p className="text-sm">No stashes</p>
         </div>
@@ -967,20 +967,20 @@ function StashesTab({ stashes, onStash, onStashPop, formatDate }: StashesTabProp
           {stashes.map((stash) => (
             <div
               key={stash.id}
-              className="group flex items-center gap-3 px-3 py-2 hover:bg-slate-800/50 border-b border-slate-800"
+              className="group flex items-center gap-3 px-3 py-2 hover:bg-[var(--aethel-surface-secondary)]/50 border-b border-[var(--aethel-border-primary)]"
             >
-              <Archive className="w-4 h-4 text-slate-500" />
+              <Archive className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white truncate">
+                <p className="text-sm text-[var(--aethel-text-primary)] truncate">
                   stash@{`{${stash.id}}`}: {stash.message}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--aethel-text-tertiary)]">
                   On {stash.branch} • {formatDate(stash.date)}
                 </p>
               </div>
               <button
                 onClick={() => onStashPop?.(stash.id)}
-                className="px-2 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded opacity-0 group-hover:opacity-100"
+                className="px-2 py-1 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded opacity-0 group-hover:opacity-100"
               >
                 Pop
               </button>
@@ -1023,19 +1023,19 @@ function BranchDialog({
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
-      <div className="relative w-[400px] bg-slate-800 rounded-lg shadow-2xl border border-slate-700 overflow-hidden">
+      <div className="relative w-[400px] bg-[var(--aethel-surface-secondary)] rounded-lg shadow-2xl border border-[var(--aethel-border-primary)] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-700">
-          <GitBranch className="w-5 h-5 text-slate-400" />
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
+          <GitBranch className="w-5 h-5 text-[var(--aethel-text-tertiary)]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search or create branch..."
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] focus:outline-none"
             autoFocus
           />
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white">
+          <button onClick={onClose} className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -1047,10 +1047,10 @@ function BranchDialog({
               onNewBranchNameChange(searchQuery)
               onCreateBranch()
             }}
-            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-700 text-left"
+            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-[var(--aethel-surface-quaternary)] text-left"
           >
             <Plus className="w-4 h-4 text-green-400" />
-            <span className="text-sm text-white">Create branch "{searchQuery}"</span>
+            <span className="text-sm text-[var(--aethel-text-primary)]">Create branch "{searchQuery}"</span>
           </button>
         )}
         
@@ -1067,11 +1067,11 @@ function BranchDialog({
               }}
               disabled={branch.isCurrent}
               className={`w-full flex items-center gap-3 px-4 py-2 text-left ${
-                branch.isCurrent ? 'bg-slate-700/50' : 'hover:bg-slate-700'
+                branch.isCurrent ? 'bg-[var(--aethel-surface-quaternary)]/50' : 'hover:bg-[var(--aethel-surface-quaternary)]'
               }`}
             >
-              <GitBranch className={`w-4 h-4 ${branch.isCurrent ? 'text-green-400' : 'text-slate-500'}`} />
-              <span className={`flex-1 text-sm ${branch.isCurrent ? 'text-white' : 'text-slate-300'}`}>
+              <GitBranch className={`w-4 h-4 ${branch.isCurrent ? 'text-green-400' : 'text-[var(--aethel-text-tertiary)]'}`} />
+              <span className={`flex-1 text-sm ${branch.isCurrent ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}`}>
                 {branch.name}
               </span>
               {branch.isCurrent && (

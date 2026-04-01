@@ -6,6 +6,24 @@ Owner: Product + UX + Platform
 ## 1) Objetivo
 Consolidar a experiencia do Aethel em um fluxo unico de Studio, reduzindo navegacao fragmentada entre superfices criticas (billing, settings, profile, dashboard, ide, nexus).
 
+## Reality Correction (2026-03-25)
+This document remains active for navigation normalization and shell consistency, but it is no longer the highest-precedence interface authority.
+
+Canonical precedence for current interface decisions is:
+1. `docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md`
+2. `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
+3. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+4. `AETHEL_INTERFACE_BLUEPRINTS/06_STUDIO_HOME.md`
+5. `AETHEL_INTERFACE_BLUEPRINTS/07_PROJECTS.md`
+6. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+
+### Current limitation of this document
+- it still lists `/nexus` as part of the Studio core route family at the same conceptual level as `/dashboard` and `/ide`
+- it predates the stronger decision that `Workbench` is the main production surface and `Nexus` should not compete with it as a parallel product center
+- it was written before the interface blueprint set became the implementation-grade UX authority
+
+Use this document for navigation consistency and historical shell consolidation context, not as the final authority on product-center hierarchy.
+
 ## 2) Fluxo Canonico de Superfices
 1. Public web: `/`, `/pricing`, `/docs`, `/status`, `/contact-sales`
 2. Auth: `/login`, `/register`

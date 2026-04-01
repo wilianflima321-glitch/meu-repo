@@ -218,7 +218,7 @@ export default function OnboardingAdminPage() {
           />
         </div>
         {filteredActions.length > 0 ? (
-          <ul className="divide-y divide-zinc-800/70">
+          <ul className="divide-y divide-[color-mix(in_srgb,var(--aethel-border-primary)_70%,transparent)]">
             {filteredActions.map(([action, count]) => (
               <li key={action} className="flex items-center justify-between py-2 text-sm">
                 <span className="text-[var(--aethel-text-secondary)]">{action}</span>
@@ -233,3 +233,4 @@ export default function OnboardingAdminPage() {
     </div>
   )
 }
+

@@ -44,14 +44,14 @@ export default function PublicHeader() {
                 priority
               />
               <div className="flex items-center gap-2">
-                <span className="text-lg font-bold tracking-tight text-white">Aethel</span>
+                <span className="text-lg font-bold tracking-tight text-[var(--aethel-text-primary)]">Aethel</span>
                 <span className="hidden rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)] sm:inline-flex">
                   Studio
                 </span>
               </div>
             </Link>
             <div className="hidden xl:flex items-center gap-2 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
-              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="inline-flex h-2 w-2 rounded-full bg-[var(--aethel-success)]" />
               {isStudioSurface ? 'Surface ativa' : 'Apps + Research'}
             </div>
           </div>
@@ -66,8 +66,8 @@ export default function PublicHeader() {
                   href={link.href}
                   className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-white/10 text-white'
-                      : 'text-[var(--aethel-text-tertiary)] hover:bg-white/[0.05] hover:text-white'
+                      ? 'bg-white/10 text-[var(--aethel-text-primary)]'
+                      : 'text-[var(--aethel-text-tertiary)] hover:bg-white/[0.05] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   {link.label}
@@ -79,7 +79,7 @@ export default function PublicHeader() {
           <div className="hidden items-center gap-3 md:flex">
             <Link
               href="/contact-sales"
-              className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-white"
+              className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)]"
             >
               Falar com vendas
             </Link>
@@ -101,7 +101,7 @@ export default function PublicHeader() {
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-white md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/10 hover:text-[var(--aethel-text-primary)] md:hidden"
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
             aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -132,8 +132,8 @@ export default function PublicHeader() {
                   href={link.href}
                   className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-white/10 text-white'
-                      : 'text-[var(--aethel-text-tertiary)] hover:bg-white/[0.05] hover:text-white'
+                      ? 'bg-white/10 text-[var(--aethel-text-primary)]'
+                      : 'text-[var(--aethel-text-tertiary)] hover:bg-white/[0.05] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   {link.label}
@@ -143,7 +143,7 @@ export default function PublicHeader() {
             <div className="my-3 h-px bg-white/[0.06]" />
             <Link
               href="/contact-sales"
-              className="block rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/[0.05] hover:text-white"
+              className="block rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-white/[0.05] hover:text-[var(--aethel-text-primary)]"
             >
               Falar com vendas
             </Link>

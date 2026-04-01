@@ -17,6 +17,45 @@ Help the user find, create, sort and resume projects without noise.
 - a reporting table first
 - a dumping ground for templates and onboarding copy
 
+## Implementation Reality Check (2026-03-25)
+The repo has project-like views spread across dashboard, onboarding, and other studio surfaces, but this page is still not the uncontested canonical catalog of work.
+
+### Current implementation reality
+- project access is still partially distributed across dashboard-oriented surfaces
+- the stronger restore and context behavior is defined in the blueprints more clearly than in the live project browsing experience
+- project cards and project opening behavior still risk feeling like dashboard utilities rather than first-class work containers
+
+### Critical limitation
+Until Projects becomes the undisputed portfolio surface, users will continue to discover work through mixed dashboard and contextual routes, which weakens the product hierarchy.
+
+### Non-negotiable page rule
+Projects must remain:
+- the clean portfolio catalog
+- the fastest route to the right Workbench state
+- the place where domain, phase, connected flows, preview state, and AI activity are legible at a glance
+
+## Benchmark Alignment
+### From VS Code
+Absorb:
+- "recent/open work" clarity
+- quick return into the exact project context
+- list-first scan efficiency when many work units exist
+
+### From Replit
+Absorb:
+- project identity tied to real outputs and active execution
+- easy movement from project browser into live build/preview context
+
+### From Genspark
+Absorb:
+- confidence that one project can contain multiple output types
+- stronger sense that docs, slides, apps and research-like artifacts can belong to one workspace
+
+Reject:
+- decorative project galleries without operational metadata
+- generic AI-workspace cards that hide domain, state and connected flows
+- forcing the user to discover projects through dashboard tabs instead of a clear catalog
+
 ## Primary CTA
 - `New Project`
 
@@ -89,6 +128,7 @@ Must support:
 - opening preview should preserve project context and choose the last useful preview surface
 - filters must affect both grid and list view identically
 - connected flow chips inside cards can focus a specific flow on Workbench open
+- opening AI-oriented or review-oriented projects should preserve pending run/approval context rather than dropping the user into a neutral chat state
 
 ## Microinteractions
 - card hover reveals stronger quick action affordance
@@ -158,6 +198,12 @@ Opinion:
 These cards must feel like live work containers, not gallery tiles.
 The objective line is critical because it tells the user why the project still matters now.
 
+Preview/research rules:
+- preview state in the meta row should distinguish `healthy`, `outdated`, `updating`, `blocked`
+- research-heavy projects should surface evidence-readiness or source-linked status rather than generic "AI active"
+- if a project's most important output is media or viewport-based, the card should still remain structurally consistent with app/site projects
+- the card should imply whether `Open Workbench` or `Open Preview` is the more likely next action
+
 ### ProjectListRow
 Exact columns:
 1. project identity
@@ -177,6 +223,8 @@ Behavior:
 - show up to three key chips plus overflow count
 - clicking a chip opens Workbench with that flow preselected
 - if a flow is blocked, chip includes a compact warning marker
+- if a flow is outdated, chip includes a freshness warning marker
+- research/reference flows should be labeled clearly enough that users understand they feed downstream production work
 
 ### QuickActions Footer
 Desktop order:

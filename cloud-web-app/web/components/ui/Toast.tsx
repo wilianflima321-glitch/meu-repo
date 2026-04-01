@@ -46,28 +46,28 @@ const icons: Record<ToastType, ReactNode> = {
 
 const toastStyles: Record<ToastType, { bg: string; icon: string; border: string; progress: string }> = {
   success: {
-    bg: 'bg-slate-900/95',
-    icon: 'text-emerald-400',
-    border: 'border-emerald-500/30',
-    progress: 'bg-emerald-500',
+    bg: 'bg-[var(--aethel-surface-primary)]/95',
+    icon: 'text-[var(--aethel-success)]',
+    border: 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]',
+    progress: 'bg-[var(--aethel-success)]',
   },
   error: {
-    bg: 'bg-slate-900/95',
-    icon: 'text-red-400',
-    border: 'border-red-500/30',
-    progress: 'bg-red-500',
+    bg: 'bg-[var(--aethel-surface-primary)]/95',
+    icon: 'text-[var(--aethel-error)]',
+    border: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]',
+    progress: 'bg-[var(--aethel-error)]',
   },
   warning: {
-    bg: 'bg-slate-900/95',
+    bg: 'bg-[var(--aethel-surface-primary)]/95',
     icon: 'text-[var(--aethel-warning-light)]',
     border: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]',
     progress: 'bg-[var(--aethel-warning)]',
   },
   info: {
-    bg: 'bg-slate-900/95',
-    icon: 'text-blue-400',
-    border: 'border-blue-500/30',
-    progress: 'bg-blue-500',
+    bg: 'bg-[var(--aethel-surface-primary)]/95',
+    icon: 'text-[var(--aethel-info)]',
+    border: 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]',
+    progress: 'bg-[var(--aethel-info)]',
   },
 }
 
@@ -128,11 +128,11 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-slate-100 leading-tight">
+        <p className="text-sm font-semibold text-[var(--aethel-text-primary)] leading-tight">
           {toast.title}
         </p>
         {toast.description && (
-          <p className="mt-1 text-sm text-slate-400 leading-relaxed">
+          <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)] leading-relaxed">
             {toast.description}
           </p>
         )}
@@ -142,7 +142,7 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
               toast.action?.onClick()
               handleClose()
             }}
-            className="mt-2 text-sm font-medium text-sky-400 hover:text-sky-300 transition-colors"
+            className="mt-2 text-sm font-medium text-[var(--aethel-info)] hover:text-[var(--aethel-info-light)] transition-colors"
           >
             {toast.action.label}
           </button>
@@ -154,17 +154,17 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
         onClick={handleClose}
         className="
           flex-shrink-0 p-1.5 -m-1 rounded-lg
-          text-slate-400 hover:text-slate-200
-          hover:bg-slate-700/50
+          text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
+          hover:bg-[var(--aethel-surface-quaternary)]/50
           transition-all duration-200
         "
-        aria-label="Fechar notificação"
+        aria-label="Fechar notificacao"
       >
         <X className="h-4 w-4" />
       </button>
 
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-800">
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--aethel-surface-secondary)]">
         <div
           className={`h-full ${styles.progress} transition-all duration-50 ease-linear`}
           style={{ width: `${progress}%` }}

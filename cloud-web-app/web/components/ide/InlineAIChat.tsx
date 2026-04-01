@@ -73,8 +73,8 @@ export function InlineAIChat({
       id: 'welcome',
       role: 'system',
       content: activeFile 
-        ? `I can see you're working on **${activeFile.path}**. How can I help you with this file?`
-        : 'Hello! I\'m your AI coding assistant. Open a file or ask me anything about your project.',
+        ? `Estou vendo que voce esta trabalhando em **${activeFile.path}**. Como posso ajudar com este arquivo?`
+        : 'Ola! Sou seu assistente de IA para codigo. Abra um arquivo ou me pergunte qualquer coisa sobre o projeto.',
       timestamp: new Date(),
     },
   ]);
@@ -134,35 +134,35 @@ export function InlineAIChat({
     ? [
         { 
           icon: <Code2 size={14} />, 
-          label: 'Explain this code', 
-          prompt: 'Can you explain what this code does?' 
+          label: 'Explicar este codigo', 
+          prompt: 'Pode explicar o que este codigo faz?' 
         },
         { 
           icon: <Sparkles size={14} />, 
-          label: 'Refactor', 
-          prompt: 'Can you refactor this code to make it cleaner?' 
+          label: 'Refatorar', 
+          prompt: 'Pode refatorar este codigo para ficar mais limpo?' 
         },
         { 
           icon: <FileText size={14} />, 
-          label: 'Add docs', 
-          prompt: 'Can you add documentation to this code?' 
+          label: 'Adicionar docs', 
+          prompt: 'Pode adicionar documentacao a este codigo?' 
         },
         { 
           icon: <Check size={14} />, 
-          label: 'Find bugs', 
-          prompt: 'Can you find any bugs or issues in this code?' 
+          label: 'Encontrar bugs', 
+          prompt: 'Pode encontrar bugs ou problemas neste codigo?' 
         },
       ]
     : [
         { 
           icon: <Sparkles size={14} />, 
-          label: 'New feature', 
-          prompt: 'Help me create a new feature' 
+          label: 'Nova feature', 
+          prompt: 'Ajude-me a criar uma nova feature' 
         },
         { 
           icon: <Code2 size={14} />, 
-          label: 'Code review', 
-          prompt: 'Can you review my project structure?' 
+          label: 'Revisar codigo', 
+          prompt: 'Pode revisar a estrutura do meu projeto?' 
         },
       ];
 
@@ -185,7 +185,7 @@ export function InlineAIChat({
           justifyContent: 'space-between',
           padding: `${tokens.spacing['3']} ${tokens.spacing['4']}`,
           borderBottom: `1px solid ${tokens.colors.border.light}`,
-          background: 'rgba(255, 255, 255, 0.02)',
+          background: 'color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)',
           cursor: 'pointer',
         }}
         onClick={() => setIsExpanded(!isExpanded)}
@@ -199,7 +199,7 @@ export function InlineAIChat({
               width: '28px',
               height: '28px',
               borderRadius: tokens.radius.md,
-              background: `linear-gradient(135deg, ${tokens.colors.accent.cyan}, ${tokens.colors.accent.indigo})`,
+              background: 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))',
             }}
           >
             <Bot size={16} color={tokens.colors.text.inverse} />
@@ -212,7 +212,7 @@ export function InlineAIChat({
                 color: tokens.colors.text.primary,
               }}
             >
-              AI Assistant
+              Assistente de IA
             </div>
             {activeFile && (
               <div
@@ -226,7 +226,7 @@ export function InlineAIChat({
                 }}
               >
                 <FileText size={10} />
-                Context: {activeFile.path}
+                Contexto: {activeFile.path}
               </div>
             )}
           </div>
@@ -239,7 +239,7 @@ export function InlineAIChat({
             }}
             style={{
               padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
-              background: showContext ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+              background: showContext ? 'color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)' : 'transparent',
               border: `1px solid ${tokens.colors.border.light}`,
               borderRadius: tokens.radius.md,
               color: tokens.colors.text.muted,
@@ -247,7 +247,7 @@ export function InlineAIChat({
               cursor: 'pointer',
             }}
           >
-            Context
+            Contexto
           </button>
           <button
             onClick={(e) => {
@@ -273,34 +273,34 @@ export function InlineAIChat({
         <div
           style={{
             padding: tokens.spacing['3'],
-            background: 'rgba(6, 182, 212, 0.05)',
+            background: 'color-mix(in_srgb,var(--aethel-info)_8%,transparent)',
             borderBottom: `1px solid ${tokens.colors.border.light}`,
             fontSize: tokens.typography.fontSize.xs,
           }}
         >
           <div style={{ marginBottom: tokens.spacing['2'], color: tokens.colors.accent.cyan, fontWeight: tokens.typography.fontWeight.medium }}>
-            Active Context
+            Contexto ativo
           </div>
           {activeFile ? (
             <>
               <div style={{ color: tokens.colors.text.secondary, marginBottom: tokens.spacing['1'] }}>
-                <strong>File:</strong> {activeFile.path}
+                <strong>Arquivo:</strong> {activeFile.path}
               </div>
               <div style={{ color: tokens.colors.text.secondary, marginBottom: tokens.spacing['1'] }}>
-                <strong>Language:</strong> {activeFile.language}
+                <strong>Linguagem:</strong> {activeFile.language}
               </div>
               <div style={{ color: tokens.colors.text.secondary }}>
-                <strong>Size:</strong> {activeFile.content.length} characters
+                <strong>Tamanho:</strong> {activeFile.content.length} caracteres
               </div>
             </>
           ) : (
             <div style={{ color: tokens.colors.text.muted }}>
-              No file open. Open a file to enable context-aware assistance.
+              Nenhum arquivo aberto. Abra um arquivo para habilitar a assistencia contextual.
             </div>
           )}
           {projectContext && (
             <div style={{ marginTop: tokens.spacing['2'], color: tokens.colors.text.secondary }}>
-              <strong>Project:</strong> {projectContext.name} ({projectContext.files.length} files)
+              <strong>Projeto:</strong> {projectContext.name} ({projectContext.files.length} arquivos)
             </div>
           )}
         </div>
@@ -337,7 +337,7 @@ export function InlineAIChat({
                 }}
               >
                 <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                AI is thinking...
+                A IA esta pensando...
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -365,7 +365,7 @@ export function InlineAIChat({
                   alignItems: 'center',
                   gap: tokens.spacing['2'],
                   padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
-                  background: 'rgba(255, 255, 255, 0.05)',
+                  background: 'color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)',
                   border: `1px solid ${tokens.colors.border.light}`,
                   borderRadius: tokens.radius.full,
                   color: tokens.colors.text.secondary,
@@ -375,11 +375,11 @@ export function InlineAIChat({
                   transition: `all ${tokens.animation.duration.fast}`,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.background = 'color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)';
                   e.currentTarget.style.borderColor = tokens.colors.border.medium;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.background = 'color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)';
                   e.currentTarget.style.borderColor = tokens.colors.border.light;
                 }}
               >
@@ -394,7 +394,7 @@ export function InlineAIChat({
             style={{
               padding: tokens.spacing['4'],
               borderTop: `1px solid ${tokens.colors.border.light}`,
-              background: 'rgba(255, 255, 255, 0.02)',
+              background: 'color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)',
             }}
           >
             <div
@@ -422,7 +422,7 @@ export function InlineAIChat({
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask me anything about your code..."
+                placeholder="Pergunte qualquer coisa sobre o seu codigo..."
                 style={{
                   flex: 1,
                   background: 'transparent',
@@ -444,7 +444,7 @@ export function InlineAIChat({
                 style={{
                   padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
                   background: input.trim() && !isLoading
-                    ? `linear-gradient(135deg, ${tokens.colors.accent.cyan}, ${tokens.colors.accent.indigo})`
+                    ? 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))'
                     : tokens.colors.bg.elevated,
                   border: 'none',
                   borderRadius: tokens.radius.lg,
@@ -468,7 +468,7 @@ export function InlineAIChat({
                 textAlign: 'center',
               }}
             >
-              Press Enter to send, Shift+Enter for new line
+              Enter para enviar, Shift+Enter para nova linha
             </div>
           </div>
         </>
@@ -511,7 +511,7 @@ function MessageBubble({ message, onApplyCode }: MessageBubbleProps) {
           flexShrink: 0,
           background: isUser
             ? tokens.colors.bg.elevated
-            : `linear-gradient(135deg, ${tokens.colors.accent.cyan}, ${tokens.colors.accent.indigo})`,
+            : 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))',
         }}
       >
         {isUser ? (
@@ -527,11 +527,11 @@ function MessageBubble({ message, onApplyCode }: MessageBubbleProps) {
           maxWidth: '85%',
           padding: isSystem ? 0 : tokens.spacing['3'],
           background: isUser
-            ? `linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(99, 102, 241, 0.1))`
+            ? 'linear-gradient(135deg, color-mix(in_srgb,var(--aethel-info)_16%,transparent), color-mix(in_srgb,var(--aethel-primary)_10%,transparent))'
             : isSystem
             ? 'transparent'
-            : 'rgba(255, 255, 255, 0.05)',
-          border: isSystem ? 'none' : `1px solid ${isUser ? 'rgba(6, 182, 212, 0.2)' : tokens.colors.border.light}`,
+            : 'color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)',
+          border: isSystem ? 'none' : `1px solid ${isUser ? 'color-mix(in_srgb,var(--aethel-info)_24%,transparent)' : tokens.colors.border.light}`,
           borderRadius: tokens.radius.lg,
         }}
       >
@@ -595,7 +595,7 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'color-mix(in_srgb,var(--aethel-surface-secondary)_76%,transparent)',
           borderBottom: `1px solid ${tokens.colors.border.light}`,
         }}
       >
@@ -625,14 +625,14 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
             }}
           >
             {copied ? <Check size={12} /> : <Copy size={12} />}
-            {copied ? 'Copied' : 'Copy'}
+            {copied ? 'Copiado' : 'Copiar'}
           </button>
           {onApply && (
             <button
               onClick={() => onApply(code)}
               style={{
                 padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
-                background: `linear-gradient(135deg, ${tokens.colors.accent.cyan}, ${tokens.colors.accent.indigo})`,
+                background: 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))',
                 border: 'none',
                 borderRadius: tokens.radius.md,
                 color: tokens.colors.text.primary,
@@ -644,7 +644,7 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
               }}
             >
               <Sparkles size={12} />
-              Apply
+              Aplicar
             </button>
           )}
         </div>
@@ -697,20 +697,20 @@ function extractCodeBlocks(content: string): Array<{ language: string; code: str
 function generateMockResponse(input: string, activeFile?: { path: string; language: string }): string {
   // Mock responses for demo purposes
   if (input.toLowerCase().includes('explain')) {
-    return `This code defines a **React component** that manages state using the \`useState\` hook. Here's what's happening:
+    return `Este codigo define um **componente React** que gerencia estado com o hook \`useState\`. O fluxo principal e este:
 
-1. The component initializes with a default state
-2. It provides handlers for user interactions  
-3. The UI updates reactively based on state changes
+1. O componente inicia com um estado padrao
+2. Ele expoe handlers para interacoes do usuario
+3. A interface reage automaticamente as mudancas de estado
 
-Would you like me to refactor it or add error handling?`;
+Quer que eu refatore isso ou adicione tratamento de erro?`;
   }
 
   if (input.toLowerCase().includes('refactor')) {
-    return `Here's a refactored version with better separation of concerns:
+    return `Aqui esta uma versao refatorada com melhor separacao de responsabilidades:
 
 \`\`\`typescript
-// Extract logic into custom hook
+// Extrai a logica para um hook customizado
 export function useProjectState() {
   const [state, setState] = useState(initialState);
   
@@ -724,16 +724,16 @@ export function useProjectState() {
 }
 \`\`\`
 
-This approach makes the code more testable and reusable.`;
+Essa abordagem deixa o codigo mais testavel e reutilizavel.`;
   }
 
-  return `I understand you're asking about "${input}". ${activeFile ? `I can see you're working in **${activeFile.path}**.` : ''}
+  return `Entendi que voce esta perguntando sobre "${input}". ${activeFile ? `Estou vendo que voce esta trabalhando em **${activeFile.path}**.` : ''}
 
-How can I help you with this? I can:
-- Explain code concepts
-- Suggest improvements
-- Generate new code
-- Debug issues`;
+Como posso ajudar com isso? Eu posso:
+- Explicar conceitos de codigo
+- Sugerir melhorias
+- Gerar novo codigo
+- Depurar problemas`;
 }
 
 export default InlineAIChat;
