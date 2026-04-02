@@ -1,4 +1,4 @@
-﻿﻿# Implementation Summary — 2026-04-01
+﻿﻿﻿# Implementation Summary — 2026-04-01
 
 ## Estado executivo
 - PT-BR e tokens Aethel aplicados em layout global, terminal, workspace e extensões.
@@ -64,6 +64,21 @@ Lista detalhada de top arquivos com botões sem type e cores hardcoded está em 
 - Billing readiness público permanece parcial quando runtime não responde.
 - Marketplace ainda requer backend de instalação para paridade ponta a ponta.
 - Documento canônico ausente: `docs/master/31_INTERFACE_UX_GAP_EXECUTION_PLAN_2026-03-01.md`.
+
+## Alinhamento de execução (Core Truth)
+**Estado real confirmado:**
+- Apply/rollback reais existem e escrevem no workspace (com ledger e rollback).
+  - Evidência: `cloud-web-app/web/app/api/ai/change/apply/route.ts`, `cloud-web-app/web/app/api/ai/change/rollback/route.ts`.
+- Runtime de arquivos, terminal e build já existem.
+  - Evidência: `cloud-web-app/web/lib/server/filesystem-runtime.ts`, `terminal-pty-runtime.ts`, `build-runtime.ts`.
+
+**Faltas críticas para “execução real end-to-end”:**
+- Task system persistente ainda **não** implementado (endpoints de studio tasks retornam `studioNotImplemented`).
+- Agent mode sem persistência de estado (sessions em memória apenas).
+- QA não bloqueia execução global (scripts existem, sem gate obrigatório).
+- Modo sandbox ainda retorna “simulation completed”.
+
+**Referência detalhada:** seção “Alinhamento de execução (Core Truth)” em `docs/EXECUTION_UPDATE_2026-04-01.md`.
 
 ## Validações
 - Build/lint/testes **não executados nesta rodada**.

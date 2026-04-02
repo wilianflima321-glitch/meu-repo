@@ -1,4 +1,4 @@
-﻿﻿# EXECUTION UPDATE — 2026-04-01
+﻿﻿﻿# EXECUTION UPDATE — 2026-04-01
 
 Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
 
@@ -128,6 +128,57 @@ Nota: `rg` bloqueado neste ambiente; scan parcial via Python (top 15). Usar como
 - Microcopy PT-BR ainda incompleta em várias superfícies (hotspots listados acima).
 - Dívida de acessibilidade: grande volume de botões sem type explícito.
 - Documento canônico ausente: `docs/master/31_INTERFACE_UX_GAP_EXECUTION_PLAN_2026-03-01.md`.
+
+## Alinhamento de execução (Core Truth)
+**Meta:** eliminar simulação e garantir execução real com validação bloqueante.
+
+### Componentes reais já presentes (com evidência)
+- Runtime de arquivos real: `cloud-web-app/web/lib/server/filesystem-runtime.ts`.
+- Execução de build real: `cloud-web-app/web/lib/server/build-runtime.ts`.
+- Runtime de terminal PTY: `cloud-web-app/web/lib/server/terminal-pty-runtime.ts`.
+- Validação determinística de mudança: `cloud-web-app/web/lib/server/change-validation.ts`.
+- Ledger de execução e rollback: `cloud-web-app/web/lib/server/change-run-ledger.ts`, `cloud-web-app/web/lib/server/change-rollback-store.ts`.
+- Apply/rollback reais via API:
+  - `cloud-web-app/web/app/api/ai/change/apply/route.ts`
+  - `cloud-web-app/web/app/api/ai/change/rollback/route.ts`
+  - `cloud-web-app/web/app/api/ai/change/validate/route.ts`
+
+### Gaps críticos confirmados (execução real ainda não end-to-end)
+- **Task system persistente inexistente** (stateful): `cloud-web-app/web/app/api/studio/tasks/*` retorna `studioNotImplemented`.
+  - Evidência: `cloud-web-app/web/app/api/studio/tasks/plan/route.ts`, `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`.
+- **Agent mode sem persistência de estado**: sessões em memória.
+  - Evidência: `cloud-web-app/web/app/api/ai/agent/route.ts` usa `activeAgents` em memória.
+- **Execução com simulação ainda presente**: sandbox apply retorna "simulation completed".
+  - Evidência: `cloud-web-app/web/app/api/ai/change/apply/route.ts` (sandbox mode).
+- **QA não bloqueante global**: regras e scripts existem, mas não estão integrados como gate obrigatório de execução/merge.
+  - Evidência: `tools/check-button-types.mjs`, `tools/check-hardcoded-colors.mjs` ainda sem integração CI.
+- **Context engine sem persistência**: não há store único de contexto/estado do agente por task.
+  - Evidência: ausência de store em `cloud-web-app/web/lib/server` ou `cloud-web-app/web/lib/ai` para tasks.
+
+### No-simulation policy (estado atual)
+- Há resposta explícita de simulação no modo sandbox (capabilityStatus `PARTIAL`).
+- Ainda não existe bloqueio central que impeça outputs "simulados" de serem tratados como execução real.
+
+### Fluxo de execução alvo (textual)
+1) Task intake → 2) Context load → 3) Patch plan → 4) Validation gate → 5) Apply (workspace) → 6) Verify (tests/QA) → 7) Ledger + Task state update → 8) Result entregue com evidência.
+
+### Arquitetura alvo (proposta de implementação)
+**Novos módulos necessários (propostos):**
+- `cloud-web-app/web/lib/server/execution-engine.ts` (orquestra task → patch → validate → apply → verify).
+- `cloud-web-app/web/lib/server/task-store.ts` (persistência de tasks: id, status, steps, logs, resultados).
+- `cloud-web-app/web/lib/server/qa-gate.ts` (QA blocking engine + regras).
+- `cloud-web-app/web/lib/server/patch-engine.ts` (geração de diff estruturado e aplicação segura).
+- `cloud-web-app/web/lib/server/execution-context.ts` (contexto carregado, dependências, snapshot).
+
+**Endpoints necessários (propostos):**
+- `POST /api/studio/tasks/plan` → gerar plano real.
+- `POST /api/studio/tasks/[id]/run` → execução real com estado persistido.
+- `POST /api/studio/tasks/[id]/validate` → validação QA obrigatória.
+- `POST /api/studio/tasks/[id]/apply` → aplicação real com rollback.
+
+**Dependências de infraestrutura (propostas):**
+- Persistência (DB) para tasks e logs de execução.
+- Hook de CI para falha automática se QA falhar (scripts já criados).
 
 ## Validações
 - Build/lint/testes **não executados nesta rodada** (sem claim de sucesso).
