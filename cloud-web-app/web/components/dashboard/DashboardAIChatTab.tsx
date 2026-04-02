@@ -150,7 +150,7 @@ export function DashboardAIChatTab({
             onClick={() => onChatModeChange('chat')}
             className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'chat'
-                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-sky-400/30'
+                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
                 : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
             }`}
           >
@@ -161,7 +161,7 @@ export function DashboardAIChatTab({
             onClick={() => onChatModeChange('agent')}
             className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'agent'
-                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-sky-400/30'
+                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
                 : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
             }`}
           >
@@ -172,7 +172,7 @@ export function DashboardAIChatTab({
             onClick={() => onChatModeChange('canvas')}
             className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
               chatMode === 'canvas'
-                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-sky-400/30'
+                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
                 : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
             }`}
           >

@@ -164,7 +164,7 @@ export function FeatureFlagAdmin() {
 
   if (loading) {
     return (
-      <div className="p-4 text-neutral-400">
+      <div className="p-4 text-[var(--aethel-text-tertiary)]">
         Carregando feature flags...
       </div>
     );
@@ -172,28 +172,28 @@ export function FeatureFlagAdmin() {
 
   return (
     <div className="p-4 space-y-4">
-      <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Feature Flags</h2>
+      <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Flags de recurso</h2>
 
       <div className="space-y-2">
         {localFlags.map(flag => (
           <div
             key={flag.key}
-            className="flex items-center justify-between p-3 bg-neutral-800 rounded-lg"
+            className="flex items-center justify-between p-3 bg-[var(--aethel-surface-tertiary)] rounded-lg"
           >
             <div>
               <div className="font-medium text-[var(--aethel-text-primary)]">{flag.name}</div>
-              <div className="text-sm text-neutral-400">
+              <div className="text-sm text-[var(--aethel-text-tertiary)]">
                 {flag.key} • {flag.type}
                 {flag.percentage !== undefined && ` • ${flag.percentage}%`}
               </div>
             </div>
 
-            <button
+            <button type="button"
               onClick={() => toggleFlag(flag.key)}
               className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                 flag.enabled
                   ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-                  : 'bg-neutral-600 text-neutral-300 hover:bg-neutral-500'
+                  : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
               }`}
             >
               {flag.enabled ? 'Ativo' : 'Inativo'}

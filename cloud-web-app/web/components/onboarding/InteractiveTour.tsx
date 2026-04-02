@@ -326,7 +326,7 @@ function TourOverlay() {
       {/* Spotlight border/highlight */}
       {targetRect && (
         <div
-          className="absolute border-2 border-sky-500 rounded-lg pointer-events-none animate-pulse"
+          className="absolute border-2 border-[var(--aethel-info)] rounded-lg pointer-events-none animate-pulse"
           style={{
             left: targetRect.left - spotlightPadding,
             top: targetRect.top - spotlightPadding,
@@ -350,12 +350,12 @@ function TourOverlay() {
         <div className="px-5 py-4 bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-sky-400" />
+              <Sparkles className="w-5 h-5 text-[var(--aethel-info-light)]" />
               <span className="text-xs text-[var(--aethel-text-tertiary)] font-medium">
                 Passo {currentStepIndex + 1} de {totalSteps}
               </span>
             </div>
-            <button
+            <button type="button"
               onClick={endTour}
               className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] rounded transition-colors"
               aria-label="Fechar tour"
@@ -376,9 +376,9 @@ function TourOverlay() {
 
           {/* Custom action button */}
           {currentStep.action && (
-            <button
+            <button type="button"
               onClick={currentStep.action.onClick}
-              className="mt-4 w-full px-4 py-2 bg-sky-500 hover:bg-sky-400 text-[var(--aethel-text-primary)] text-sm font-medium rounded-lg transition-colors"
+              className="mt-4 w-full px-4 py-2 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] text-sm font-medium rounded-lg transition-colors hover:brightness-110"
             >
               {currentStep.action.label}
             </button>
@@ -390,14 +390,14 @@ function TourOverlay() {
           {/* Progress dots */}
           <div className="flex gap-1.5">
             {Array.from({ length: totalSteps }).map((_, i) => (
-              <button
+              <button type="button"
                 key={i}
                 onClick={() => goToStep(i)}
                 className={`w-2 h-2 rounded-full transition-all ${
                   i === currentStepIndex
-                    ? 'bg-sky-500 w-4'
+                    ? 'bg-[var(--aethel-info)] w-4'
                     : i < currentStepIndex
-                    ? 'bg-sky-400/50'
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]'
                     : 'bg-[var(--aethel-surface-quaternary)]'
                 }`}
               />
@@ -407,7 +407,7 @@ function TourOverlay() {
           {/* Navigation buttons */}
           <div className="flex gap-2">
             {!isFirstStep && (
-              <button
+              <button type="button"
                 onClick={prevStep}
                 className="px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors flex items-center gap-1"
               >
@@ -415,9 +415,9 @@ function TourOverlay() {
                 Anterior
               </button>
             )}
-            <button
+            <button type="button"
               onClick={nextStep}
-              className="px-4 py-1.5 bg-sky-500 hover:bg-sky-400 text-[var(--aethel-text-primary)] text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
+              className="px-4 py-1.5 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] text-sm font-medium rounded-lg transition-colors hover:brightness-110 flex items-center gap-1"
             >
               {isLastStep ? (
                 <>

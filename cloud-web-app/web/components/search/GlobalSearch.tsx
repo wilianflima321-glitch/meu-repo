@@ -310,7 +310,7 @@ function generateMockResults(query: string, options: SearchOptions): FileSearchR
   const mockFiles = [
     { path: 'src/App.tsx', content: 'function App() { return <div>Hello World</div> }' },
     { path: 'src/index.tsx', content: 'ReactDOM.render(<App />, document.getElementById("root"))' },
-    { path: 'src/components/Button.tsx', content: 'export function Button({ onClick }) { return <button onClick={onClick}>Click</button> }' },
+    { path: 'src/components/Button.tsx', content: 'export function Button({ onClick }) { return <button type="button" onClick={onClick}>Click</button> }' },
     { path: 'src/hooks/useAuth.ts', content: 'export function useAuth() { const [user, setUser] = useState(null) }' },
     { path: 'src/utils/helpers.ts', content: 'export function formatDate(date: Date) { return date.toISOString() }' },
   ];
@@ -408,8 +408,7 @@ function SearchInput({
           className="w-full pl-10 pr-8 py-1.5 text-sm bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]"
         />
         {value && (
-          <button
-            type="button"
+          <button type="button"
             onClick={() => onChange('')}
             aria-label="Limpar campo"
             className="absolute right-3 top-1/2 -translate-y-1/2"
@@ -423,7 +422,7 @@ function SearchInput({
       {showDropdown && history && history.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded shadow-lg z-50 max-h-48 overflow-y-auto">
           {history.map((item, index) => (
-            <button
+            <button type="button"
               key={index}
               onClick={() => {
                 onChange(item);
@@ -458,7 +457,7 @@ function OptionButton({
   title: string;
 }) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       title={title}
       className={`p-1 rounded transition-colors ${
@@ -497,7 +496,7 @@ function SearchResultFile({
   return (
     <div className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_60%,transparent)]">
       {/* File header */}
-      <button
+      <button type="button"
         onClick={onToggle}
         className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] group"
       >
@@ -513,7 +512,7 @@ function SearchResultFile({
           {result.matches.length}
         </span>
         {showReplace && onReplaceAll && (
-          <button
+          <button type="button"
             onClick={e => {
               e.stopPropagation();
               onReplaceAll();
@@ -530,7 +529,7 @@ function SearchResultFile({
       {!result.collapsed && (
         <div className="pl-6">
           {result.matches.map((match, index) => (
-            <button
+            <button type="button"
               key={`${match.line}-${match.column}-${index}`}
               onClick={() => onNavigate(match)}
               className="w-full flex items-center gap-3 px-3 py-1 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-left group"
@@ -550,7 +549,7 @@ function SearchResultFile({
                 {match.preview.slice(match.previewHighlight.end)}
               </span>
               {showReplace && onReplace && (
-                <button
+                <button type="button"
                   onClick={e => {
                     e.stopPropagation();
                     onReplace(match);
@@ -641,7 +640,7 @@ export function GlobalSearchPanel({
           <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Buscar</span>
         </div>
         <div className="flex items-center gap-1">
-          <button
+          <button type="button"
             onClick={() => setShowReplace(!showReplace)}
             className={`p-1 rounded transition-colors ${
               showReplace
@@ -652,7 +651,7 @@ export function GlobalSearchPanel({
           >
             <Replace className="w-4 h-4" />
           </button>
-          <button
+          <button type="button"
             onClick={() => search()}
             disabled={state.searching}
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded disabled:opacity-50"
@@ -660,7 +659,7 @@ export function GlobalSearchPanel({
           >
             <RefreshCw className={`w-4 h-4 ${state.searching ? 'animate-spin' : ''}`} />
           </button>
-          <button
+          <button type="button"
             onClick={clearResults}
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
             title="Limpar resultados"
@@ -724,7 +723,7 @@ export function GlobalSearchPanel({
                 onClick={() => setOptions({ preserveCase: !state.options.preserveCase })}
                 title="Preservar maiusculas"
               />
-              <button
+              <button type="button"
                 onClick={replaceAll}
                 disabled={state.totalMatches === 0}
                 className="px-2 py-1 text-xs bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] disabled:bg-[var(--aethel-surface-tertiary)] disabled:text-[var(--aethel-text-quaternary)] text-[var(--aethel-text-primary)] rounded transition-colors"
@@ -737,7 +736,7 @@ export function GlobalSearchPanel({
         )}
 
         {/* File filters */}
-        <button
+        <button type="button"
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center gap-1 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
         >
@@ -826,7 +825,7 @@ export function GlobalSearchPanel({
       {/* Navigation footer */}
       {state.totalMatches > 0 && (
         <div className="flex items-center justify-between px-3 py-2 border-t border-[var(--aethel-border-primary)]">
-          <button
+          <button type="button"
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
             title="Resultado anterior (F3)"
           >
@@ -835,7 +834,7 @@ export function GlobalSearchPanel({
           <span className="text-xs text-[var(--aethel-text-quaternary)]">
             Navegue com F3 / Shift+F3
           </span>
-          <button
+          <button type="button"
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
             title="Proximo resultado (Shift+F3)"
           >

@@ -69,6 +69,8 @@
     "qa:wcag-critical": "npm --prefix cloud-web-app/web run qa:wcag-critical",
     "qa:dashboard-shell": "npm --prefix cloud-web-app/web run qa:dashboard-shell",
     "qa:mojibake": "npm --prefix cloud-web-app/web run qa:mojibake",
+    "qa:button-types": "node tools/check-button-types.mjs",
+    "qa:hardcoded-colors": "node tools/check-hardcoded-colors.mjs",
     "qa:enterprise-gate": "npm --prefix cloud-web-app/web run qa:enterprise-gate"
   },
   "devDependencies": {

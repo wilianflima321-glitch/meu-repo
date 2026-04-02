@@ -8,7 +8,7 @@
  * - Visual keybinding list
  * - Search & filter
  * - Record new keybinding
- * - Reset to default
+ * - Restaurar padr?o
  * - Conflict detection
  * - Export/Import
  * - INTEGRATED with KeybindingManager for real execution
@@ -204,8 +204,8 @@ function KeyRecorder({ value, onChange, onCancel }: KeyRecorderProps) {
   }, [isRecording, onChange])
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-sky-900/50 rounded border border-sky-500">
-      <Keyboard className="w-4 h-4 text-sky-400" />
+    <div className="flex items-center gap-2 p-2 bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] rounded border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]">
+      <Keyboard className="w-4 h-4 text-[var(--aethel-info-light)]" />
       <span className="text-sm text-[var(--aethel-text-primary)]">
         {recording.length > 0 ? (
           recording.map((key, idx) => (
@@ -215,10 +215,10 @@ function KeyRecorder({ value, onChange, onCancel }: KeyRecorderProps) {
             </span>
           ))
         ) : (
-          <span className="text-[var(--aethel-text-tertiary)]">Press keys...</span>
+          <span className="text-[var(--aethel-text-tertiary)]">Pressione as teclas...</span>
         )}
       </span>
-      <button
+      <button type="button"
         onClick={onCancel}
         className="ml-auto p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
       >
@@ -382,8 +382,8 @@ export default function KeybindingsEditor({
 
   // Save and register with manager
   const handleSave = useCallback(() => {
-    const customized = keybindings.filter((kb) => kb.source === 'user')
-    localStorage.setItem('keybindings', JSON.stringify(customized))
+    const personalizado(s) = keybindings.filter((kb) => kb.source === 'user')
+    localStorage.setItem('keybindings', JSON.stringify(personalizado(s)))
 
     // Re-register all keybindings with the manager
     const manager = getKeybindingManager()
@@ -450,48 +450,48 @@ export default function KeybindingsEditor({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
-          <Keyboard className="w-5 h-5 text-sky-400" />
-          <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
+          <Keyboard className="w-5 h-5 text-[var(--aethel-info-light)]" />
+          <h2 className="text-lg font-semibold">Atalhos de teclado</h2>
           {hasChanges && (
             <span className="px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] text-xs rounded">
-              Unsaved changes
+              Alterações não salvas
             </span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={handleImport}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
             <Upload className="w-4 h-4" />
-            Import
+            Importar
           </button>
-          <button
+          <button type="button"
             onClick={handleExport}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
             <Download className="w-4 h-4" />
-            Export
+            Exportar
           </button>
-          <button
+          <button type="button"
             onClick={resetAll}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
             <RotateCcw className="w-4 h-4" />
-            Reset All
+            Restaurar tudo
           </button>
           {hasChanges && (
-            <button
+            <button type="button"
               onClick={handleSave}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-700 rounded"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[var(--aethel-info)] rounded transition-colors hover:brightness-110"
             >
               <Check className="w-4 h-4" />
-              Save
+              Salvar
             </button>
           )}
           {onClose && (
-            <button
+            <button type="button"
               onClick={onClose}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
             >
@@ -509,21 +509,21 @@ export default function KeybindingsEditor({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search keybindings..."
+            placeholder="Buscar atalhos..."
             className="w-full pl-10 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:outline-none focus:border-[var(--aethel-primary)]"
           />
         </div>
 
-        <button
+        <button type="button"
           onClick={() => setShowOnlyModified(!showOnlyModified)}
           className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
             showOnlyModified
-              ? 'bg-sky-600 text-[var(--aethel-text-primary)]'
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] text-[var(--aethel-text-primary)]'
               : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
           }`}
         >
           <Filter className="w-4 h-4" />
-          Modified Only
+          Somente modificados
         </button>
       </div>
 
@@ -533,7 +533,7 @@ export default function KeybindingsEditor({
           <div className="flex items-center gap-2 text-[var(--aethel-warning-light)] text-sm">
             <AlertTriangle className="w-4 h-4" />
             <span>
-              {Object.keys(conflicts).length} keybinding conflict(s) detected
+              {Object.keys(conflicts).length} conflito(s) de atalho detectado(s)
             </span>
           </div>
         </div>
@@ -543,17 +543,17 @@ export default function KeybindingsEditor({
       <div className="flex-1 overflow-y-auto">
         {/* Table Header */}
         <div className="sticky top-0 grid grid-cols-[1fr_200px_120px_80px] gap-4 px-4 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)] text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase">
-          <div>Command</div>
-          <div>Keybinding</div>
-          <div>When</div>
-          <div>Source</div>
+          <div>Comando</div>
+          <div>Atalho</div>
+          <div>Quando</div>
+          <div>Origem</div>
         </div>
 
         {/* Categories */}
         {Object.entries(groupedKeybindings).map(([category, kbs]) => (
           <div key={category}>
             {/* Category Header */}
-            <button
+            <button type="button"
               onClick={() => toggleCategory(category)}
               className="w-full flex items-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:bg-[var(--aethel-surface-secondary)] text-left"
             >
@@ -590,8 +590,8 @@ export default function KeybindingsEditor({
         {filteredKeybindings.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-[var(--aethel-text-quaternary)]">
             <Keyboard className="w-12 h-12 mb-4 opacity-50" />
-            <p className="text-lg">No keybindings found</p>
-            <p className="text-sm">Try a different search term</p>
+            <p className="text-lg">Nenhum atalho encontrado</p>
+            <p className="text-sm">Tente outro termo de busca</p>
           </div>
         )}
       </div>
@@ -599,8 +599,8 @@ export default function KeybindingsEditor({
       {/* Footer */}
       <div className="px-4 py-2 border-t border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-quaternary)]">
         <span>
-          {filteredKeybindings.length} keybinding(s) •{' '}
-          {keybindings.filter((kb) => kb.source === 'user').length} customized
+          {filteredKeybindings.length} atalho(s) •{' '}
+          {keybindings.filter((kb) => kb.source === 'user').length} personalizado(s)
         </span>
       </div>
     </div>
@@ -663,18 +663,18 @@ function KeybindingRow({
             )}
 
             <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
-              <button
+              <button type="button"
                 onClick={onEdit}
                 className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
-                title="Edit keybinding"
+                title="Editar atalho"
               >
                 <Edit3 className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
               </button>
               {isModified && (
-                <button
+                <button type="button"
                   onClick={onReset}
                   className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
-                  title="Reset to default"
+                  title="Restaurar padr?o"
                 >
                   <RotateCcw className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
                 </button>
@@ -682,7 +682,7 @@ function KeybindingRow({
             </div>
 
             {hasConflict && (
-              <span title="Keybinding conflict"><AlertTriangle className="w-4 h-4 text-[var(--aethel-warning-light)]" /></span>
+              <span title="Conflito de atalho"><AlertTriangle className="w-4 h-4 text-[var(--aethel-warning-light)]" /></span>
             )}
           </div>
         )}
@@ -704,7 +704,7 @@ function KeybindingRow({
         <span
           className={`px-2 py-0.5 rounded text-xs ${
             keybinding.source === 'user'
-              ? 'bg-sky-500/20 text-sky-400'
+              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
               : keybinding.source === 'extension'
               ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
               : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'

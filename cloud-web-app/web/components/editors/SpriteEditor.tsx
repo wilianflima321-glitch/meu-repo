@@ -209,7 +209,7 @@ interface ToolButtonProps {
 
 function ToolButton({ icon, active, onClick, tooltip, shortcut }: ToolButtonProps) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className={`p-2 rounded transition-colors ${
         active
@@ -241,7 +241,7 @@ function ColorSwatch({ color, selected, onClick, onRightClick, size = 'md' }: Co
   }[size]
 
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       onContextMenu={(e) => {
         e.preventDefault()
@@ -288,7 +288,7 @@ function LayerPanel({
           <Layers className="w-4 h-4" />
           Layers
         </span>
-        <button
+        <button type="button"
           onClick={onAddLayer}
           className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           title="Add Layer"
@@ -306,7 +306,7 @@ function LayerPanel({
             }`}
             onClick={() => onSelectLayer(layer.id)}
           >
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 onToggleVisibility(layer.id)
@@ -316,7 +316,7 @@ function LayerPanel({
               {layer.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
             </button>
 
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation()
                 onToggleLock(layer.id)
@@ -329,7 +329,7 @@ function LayerPanel({
             <span className="flex-1 text-sm text-[var(--aethel-text-primary)] truncate">{layer.name}</span>
 
             <div className="flex items-center gap-1">
-              <button
+              <button type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   onDuplicateLayer(layer.id)
@@ -339,7 +339,7 @@ function LayerPanel({
               >
                 <Copy className="w-3 h-3" />
               </button>
-              <button
+              <button type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   onDeleteLayer(layer.id)
@@ -392,7 +392,7 @@ function Timeline({
     <div className="flex flex-col bg-[var(--aethel-surface-secondary)] border-t border-[var(--aethel-border-primary)]">
       {/* Playback controls */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={onPrevFrame}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Previous Frame"
@@ -400,7 +400,7 @@ function Timeline({
           <SkipBack className="w-4 h-4" />
         </button>
 
-        <button
+        <button type="button"
           onClick={isPlaying ? onPause : onPlay}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title={isPlaying ? 'Pause' : 'Play'}
@@ -408,7 +408,7 @@ function Timeline({
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </button>
 
-        <button
+        <button type="button"
           onClick={onNextFrame}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Next Frame"
@@ -422,7 +422,7 @@ function Timeline({
 
         <div className="flex-1" />
 
-        <button
+        <button type="button"
           onClick={onAddFrame}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Add Frame"
@@ -884,13 +884,13 @@ export default function SpriteEditor() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Export">
+          <button type="button" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Export">
             <Download className="w-4 h-4" />
           </button>
-          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Import">
+          <button type="button" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Import">
             <Upload className="w-4 h-4" />
           </button>
-          <button className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Settings">
+          <button type="button" className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]" title="Settings">
             <Settings className="w-4 h-4" />
           </button>
         </div>

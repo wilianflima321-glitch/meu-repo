@@ -629,7 +629,7 @@ function NumberSetting({
             min={definition.minimum}
             max={definition.maximum}
             step={definition.maximum <= 1 ? 0.01 : 1}
-            className="flex-1 accent-sky-500"
+          className="flex-1 accent-[var(--aethel-info)]"
           />
         )}
       </div>
@@ -706,7 +706,7 @@ function ArraySetting({
               }}
               className="flex-1 px-3 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
             />
-            <button
+            <button type="button"
               onClick={() => removeItem(index)}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
             >
@@ -723,7 +723,7 @@ function ArraySetting({
             placeholder="Add item..."
             className="flex-1 px-3 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
           />
-          <button
+          <button type="button"
             onClick={addItem}
             disabled={!newItem.trim()}
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-success)] hover:bg-[var(--aethel-surface-tertiary)] rounded disabled:opacity-50"
@@ -790,7 +790,7 @@ function SettingLabel({
             {displayName}
           </span>
           {modified && (
-            <span className="w-2 h-2 bg-sky-500 rounded-full" title="Modified" />
+            <span className="w-2 h-2 bg-[var(--aethel-info)] rounded-full" title="Modificado" />
           )}
           {definition.deprecationMessage && (
             <span title={definition.deprecationMessage}>
@@ -806,10 +806,10 @@ function SettingLabel({
         </p>
       </div>
       {modified && (
-        <button
+        <button type="button"
           onClick={onReset}
           className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
-          title="Reset to default"
+          title="Restaurar padrão"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
@@ -961,26 +961,26 @@ export function SettingsUI({
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
           <Settings className="w-5 h-5 text-[var(--aethel-text-tertiary)]" />
-          <span className="text-lg font-medium text-[var(--aethel-text-primary)]">Settings</span>
+          <span className="text-lg font-medium text-[var(--aethel-text-primary)]">Configurações</span>
         </div>
         {/* Scope toggle */}
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setScope('user')}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition-colors ${
               scope === 'user'
-                ? 'bg-sky-600/20 text-sky-400'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
             <User className="w-4 h-4" />
-            User
+            Usuário
           </button>
-          <button
+          <button type="button"
             onClick={() => setScope('workspace')}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition-colors ${
               scope === 'workspace'
-                ? 'bg-sky-600/20 text-sky-400'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
@@ -988,14 +988,14 @@ export function SettingsUI({
             Workspace
           </button>
           <div className="w-px h-6 bg-[var(--aethel-surface-quaternary)] mx-1" />
-          <button
+          <button type="button"
             onClick={() => setShowJSON(!showJSON)}
             className={`p-1.5 rounded transition-colors ${
               showJSON
-                ? 'bg-sky-600/20 text-sky-400'
+                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
             }`}
-            title="Open Settings (JSON)"
+            title="Abrir configurações (JSON)"
           >
             <FileJson className="w-4 h-4" />
           </button>
@@ -1010,11 +1010,11 @@ export function SettingsUI({
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search settings..."
+            placeholder="Buscar configurações..."
             className="w-full pl-10 pr-8 py-2 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded-lg outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
           />
           {searchQuery && (
-            <button
+            <button type="button"
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2"
             >
@@ -1024,7 +1024,7 @@ export function SettingsUI({
         </div>
         {searchQuery && (
           <div className="mt-2 text-xs text-[var(--aethel-text-tertiary)]">
-            {filteredSettings.length} settings found
+            {filteredSettings.length} configurações encontradas
           </div>
         )}
       </div>
@@ -1034,7 +1034,7 @@ export function SettingsUI({
         <div className="w-56 border-r border-[var(--aethel-border-primary)] overflow-y-auto">
           {categories.map(category => (
             <div key={category.id}>
-              <button
+              <button type="button"
                 onClick={() => toggleCategory(category.id)}
                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]/50"
               >
@@ -1048,7 +1048,7 @@ export function SettingsUI({
               {expandedCategories.has(category.id) && category.children && (
                 <div className="pl-6 pb-1">
                   {category.children.map(child => (
-                    <button
+                    <button type="button"
                       key={child.id}
                       onClick={() => {
                         const el = document.getElementById(`setting-category-${category.id}-${child.id}`);
@@ -1069,7 +1069,7 @@ export function SettingsUI({
           {showJSON ? (
             <div className="space-y-4">
               <p className="text-sm text-[var(--aethel-text-tertiary)]">
-                {scope === 'user' ? 'User Settings (JSON)' : 'Workspace Settings (JSON)'}
+                {scope === 'user' ? 'Configurações do usuário (JSON)' : 'Configurações do workspace (JSON)'}
               </p>
               <pre className="p-4 bg-[var(--aethel-surface-tertiary)] rounded-lg text-sm text-[var(--aethel-text-secondary)] font-mono overflow-x-auto">
                 {JSON.stringify(
@@ -1108,7 +1108,7 @@ export function SettingsUI({
               {filteredSettings.length === 0 && (
                 <div className="text-center py-12 text-[var(--aethel-text-tertiary)]">
                   <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No settings found matching {`"${searchQuery}"`}</p>
+                  <p>Nenhuma configuração encontrada para {`"${searchQuery}"`}</p>
                 </div>
               )}
             </div>
@@ -1129,8 +1129,8 @@ export function QuickSettingsPopup({
   return (
     <div className="absolute bottom-full right-0 mb-2 w-64 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
-        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Quick Settings</span>
-        <button onClick={onClose} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
+        <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Ajustes rápidos</span>
+        <button type="button" onClick={onClose} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
           <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         </button>
       </div>

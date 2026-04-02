@@ -216,7 +216,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
 
   return (
     <div className="mb-4">
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
@@ -470,7 +470,7 @@ function Toolbar({
   return (
     <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Simulation controls */}
-      <button
+      <button type="button"
         onClick={onToggleSimulation}
         className={`p-2 rounded transition-colors ${
           isSimulating
@@ -482,7 +482,7 @@ function Toolbar({
         {isSimulating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
       </button>
 
-      <button
+      <button type="button"
         onClick={onReset}
         className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
         title="Reset Simulation"
@@ -494,7 +494,7 @@ function Toolbar({
 
       {/* Tools */}
       {tools.map((tool) => (
-        <button
+        <button type="button"
           key={tool.id}
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
@@ -801,7 +801,7 @@ export default function FluidSimulationEditor({
 
         {/* View toggles */}
         <div className="absolute top-4 right-80 flex flex-col gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] p-2 rounded">
-          <button
+          <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showBoundary: !p.showBoundary }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
               editorState.showBoundary ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
@@ -809,7 +809,7 @@ export default function FluidSimulationEditor({
           >
             <Box className="w-3 h-3" /> Boundary
           </button>
-          <button
+          <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showFlowArrows: !p.showFlowArrows }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
               editorState.showFlowArrows ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
@@ -817,7 +817,7 @@ export default function FluidSimulationEditor({
           >
             <Wind className="w-3 h-3" /> Flow
           </button>
-          <button
+          <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showVelocityColors: !p.showVelocityColors }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
               editorState.showVelocityColors ? 'bg-orange-600 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
@@ -825,7 +825,7 @@ export default function FluidSimulationEditor({
           >
             <Zap className="w-3 h-3" /> Velocity
           </button>
-          <button
+          <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showDensityColors: !p.showDensityColors }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
               editorState.showDensityColors ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
@@ -846,14 +846,14 @@ export default function FluidSimulationEditor({
               Fluid Simulation
             </h2>
             <div className="flex gap-1">
-              <button
+              <button type="button"
                 onClick={handleImport}
                 className="p-1.5 rounded bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
                 title="Import Configuration"
               >
                 <Upload className="w-4 h-4" />
               </button>
-              <button
+              <button type="button"
                 onClick={handleExport}
                 className="p-1.5 rounded bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] transition-colors"
                 title="Export Configuration"
@@ -867,7 +867,7 @@ export default function FluidSimulationEditor({
           <CollapsibleSection title="Fluid Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
               {FLUID_PRESETS.map((preset) => (
-                <button
+                <button type="button"
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded transition-colors text-left ${
@@ -1003,19 +1003,19 @@ export default function FluidSimulationEditor({
 
             {/* Quick gravity presets */}
             <div className="grid grid-cols-3 gap-1 mt-2">
-              <button
+              <button type="button"
                 onClick={() => updateParam('gravity', { x: 0, y: -9.81, z: 0 })}
                 className="p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded"
               >
                 Earth
               </button>
-              <button
+              <button type="button"
                 onClick={() => updateParam('gravity', { x: 0, y: -1.62, z: 0 })}
                 className="p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded"
               >
                 Moon
               </button>
-              <button
+              <button type="button"
                 onClick={() => updateParam('gravity', { x: 0, y: 0, z: 0 })}
                 className="p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded"
               >
@@ -1088,7 +1088,7 @@ export default function FluidSimulationEditor({
               tooltip="Higher = smoother but slower"
             />
 
-            <button
+            <button type="button"
               onClick={bakeToMesh}
               disabled={isBaking}
               className="w-full mt-3 p-2 rounded bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)]

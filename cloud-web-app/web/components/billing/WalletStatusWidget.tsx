@@ -139,9 +139,9 @@ function getPlanIcon(plan: string): React.ReactNode {
     case 'enterprise':
       return <Crown className="w-3.5 h-3.5 text-[var(--aethel-warning-light)]" />;
     case 'pro':
-      return <Zap className="w-3.5 h-3.5 text-violet-400" />;
+      return <Zap className="w-3.5 h-3.5 text-[var(--aethel-accent-light)]" />;
     case 'starter':
-      return <Sparkles className="w-3.5 h-3.5 text-sky-400" />;
+      return <Sparkles className="w-3.5 h-3.5 text-[var(--aethel-info-light)]" />;
     default:
       return null;
   }
@@ -152,9 +152,9 @@ function getPlanBadgeClass(plan: string): string {
     case 'enterprise':
       return 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]';
     case 'pro':
-      return 'bg-violet-500/20 text-violet-300 border-violet-500/30';
+      return 'bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[var(--aethel-accent-light)] border-[color-mix(in_srgb,var(--aethel-accent)_35%,transparent)]';
     case 'starter':
-      return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+      return 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]';
     default:
       return 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_20%,transparent)] text-[var(--aethel-text-secondary)] border-[color-mix(in_srgb,var(--aethel-text-tertiary)_35%,transparent)]';
   }
@@ -227,7 +227,7 @@ export function WalletStatusWidget({
   // Error state - show minimal UI
   if (error || !wallet) {
     return (
-      <button
+      <button type="button"
         onClick={() => mutate()}
         className={`flex items-center gap-1.5 px-2 py-1 text-[var(--aethel-text-tertiary)]
                    hover:text-[var(--aethel-text-tertiary)] transition-colors ${className}`}
@@ -245,7 +245,7 @@ export function WalletStatusWidget({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {/* Main Widget Button */}
-      <button
+      <button type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className={`
           flex items-center gap-2 px-2.5 py-1 rounded-md transition-all
@@ -303,7 +303,7 @@ export function WalletStatusWidget({
           <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Carteira</span>
-              <button
+              <button type="button"
                 onClick={() => mutate()}
                 className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
                 title="Atualizar"
@@ -386,19 +386,19 @@ export function WalletStatusWidget({
 
           {/* Actions */}
           <div className="p-3 flex gap-2">
-            <button
+            <button type="button"
               onClick={() => {
                 setIsExpanded(false);
                 onRecharge?.();
               }}
               className="flex-1 flex items-center justify-center gap-1.5 py-2
-                       bg-violet-600 hover:bg-violet-500 rounded-md
-                       text-sm font-medium transition-colors"
+                       bg-[var(--aethel-accent)] rounded-md
+                       text-sm font-medium transition-colors hover:brightness-110"
             >
               <CreditCard className="w-4 h-4" />
               Recarregar
             </button>
-            <button
+            <button type="button"
               onClick={() => {
                 setIsExpanded(false);
                 onOpenWallet?.();
@@ -418,7 +418,7 @@ export function WalletStatusWidget({
       {showLowBalanceAlert && wallet.lowBalanceWarning && (
         <div className="fixed bottom-20 right-4 w-80 bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]
                       rounded-lg shadow-2xl p-4 animate-in slide-in-from-right-5 z-50">
-          <button
+          <button type="button"
             onClick={() => setShowLowBalanceAlert(false)}
             className="absolute top-2 right-2 p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
           >
@@ -436,17 +436,17 @@ export function WalletStatusWidget({
                 Recarregue para continuar criando.
               </p>
               <div className="flex gap-2 mt-3">
-                <button
+                <button type="button"
                   onClick={() => {
                     setShowLowBalanceAlert(false);
                     onRecharge?.();
                   }}
-                  className="px-3 py-1.5 bg-violet-600 hover:bg-violet-500
-                           rounded text-sm font-medium transition-colors"
+                  className="px-3 py-1.5 bg-[var(--aethel-accent)]
+                           rounded text-sm font-medium transition-colors hover:brightness-110"
                 >
                   Recarregar agora
                 </button>
-                <button
+                <button type="button"
                   onClick={() => setShowLowBalanceAlert(false)}
                   className="px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)]
                            rounded text-sm text-[var(--aethel-text-secondary)] transition-colors"

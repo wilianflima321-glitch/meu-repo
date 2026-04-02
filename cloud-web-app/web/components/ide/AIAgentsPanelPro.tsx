@@ -283,7 +283,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
         {/* Quick Actions */}
         <div className="flex items-center gap-1">
           {agent.status === 'idle' && (
-            <button
+            <button type="button"
               onClick={(e) => { e.stopPropagation(); onStart() }}
               className="p-1.5 rounded bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]"
               title="Iniciar agente"
@@ -293,14 +293,14 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
           )}
           {agent.status === 'running' && (
             <>
-              <button
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); onPause() }}
                 className="p-1.5 rounded bg-[var(--aethel-warning)] hover:brightness-110 text-[var(--aethel-text-primary)]"
                 title="Pausar agente"
               >
                 <Pause className="w-3 h-3" />
               </button>
-              <button
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); onStop() }}
                 className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
                 title="Parar agente"
@@ -311,14 +311,14 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
           )}
           {agent.status === 'paused' && (
             <>
-              <button
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); onStart() }}
                 className="p-1.5 rounded bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]"
                 title="Retomar agente"
               >
                 <Play className="w-3 h-3" />
               </button>
-              <button
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); onStop() }}
                 className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
                 title="Parar agente"
@@ -327,7 +327,7 @@ function AgentCard({ agent, isExpanded, onToggleExpand, onStart, onPause, onStop
               </button>
             </>
           )}
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onConfigure() }}
             className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)]"
             title="Configurar"
@@ -529,7 +529,7 @@ function WorkflowBuilder({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Etapas do workflow</span>
-          <button
+          <button type="button"
             onClick={addStep}
             className="flex items-center gap-1 px-2 py-1 text-xs bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded"
           >
@@ -560,7 +560,7 @@ function WorkflowBuilder({
                       <option key={a.id} value={a.id}>{a.icon} {a.name}</option>
                     ))}
                   </select>
-                  <button
+                  <button type="button"
                     onClick={() => removeStep(index)}
                     className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)]"
                   >
@@ -580,7 +580,7 @@ function WorkflowBuilder({
         )}
       </div>
 
-      <button
+      <button type="button"
         onClick={() => onCreateWorkflow(steps)}
         disabled={steps.length === 0 || !objective}
         className={`
@@ -695,7 +695,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
         </div>
         <div className="flex items-center gap-1">
           {runningAgents === 0 ? (
-            <button
+            <button type="button"
               onClick={startAllAgents}
               className="p-1.5 rounded bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]"
               title="Iniciar todos"
@@ -703,7 +703,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
               <Play className="w-4 h-4" />
             </button>
           ) : (
-            <button
+            <button type="button"
               onClick={stopAllAgents}
               className="p-1.5 rounded bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)]"
               title="Parar todos"
@@ -717,7 +717,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       {/* Tabs */}
       <div className="flex gap-1 p-2 border-b border-[var(--aethel-border-primary)]">
         {(['agents', 'workflow', 'history'] as const).map(tab => (
-          <button
+          <button type="button"
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`
@@ -772,14 +772,14 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
       {/* Quick Actions Footer */}
       <div className="p-3 border-t border-[var(--aethel-border-primary)]">
         <div className="grid grid-cols-2 gap-2">
-          <button
+          <button type="button"
             onClick={() => onSendToChat?.('Criar uma nova feature usando agentes de IA')}
             className="flex items-center justify-center gap-2 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm text-[var(--aethel-text-secondary)]"
           >
             <MessageSquare className="w-4 h-4" />
             Conversar com agentes
           </button>
-          <button
+          <button type="button"
             className="flex items-center justify-center gap-2 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm text-[var(--aethel-text-primary)]"
           >
             <Zap className="w-4 h-4" />
@@ -796,7 +796,7 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
               <h3 className="font-semibold text-[var(--aethel-text-primary)]">
                 Configurar {agents.find(a => a.id === showAgentConfig)?.name}
               </h3>
-              <button
+              <button type="button"
                 onClick={() => setShowAgentConfig(null)}
                 className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
               >
@@ -848,13 +848,13 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
             </div>
 
             <div className="flex gap-2 mt-4">
-              <button
+              <button type="button"
                 onClick={() => setShowAgentConfig(null)}
                 className="flex-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm text-[var(--aethel-text-secondary)]"
               >
                 Cancelar
               </button>
-              <button
+              <button type="button"
                 onClick={() => setShowAgentConfig(null)}
                 className="flex-1 px-3 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded text-sm text-[var(--aethel-text-primary)]"
               >

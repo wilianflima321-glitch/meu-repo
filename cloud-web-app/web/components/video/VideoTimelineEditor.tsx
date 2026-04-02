@@ -79,7 +79,7 @@ function TrackHeader({
       </div>
       {/* Track controls */}
       <div style={{ display: 'flex', gap: '4px' }}>
-        <button
+        <button type="button"
           onClick={onToggleVisible}
           style={{
             width: '20px',
@@ -95,7 +95,7 @@ function TrackHeader({
         >
 
         </button>
-        <button
+        <button type="button"
           onClick={onToggleMute}
           style={{
             width: '20px',
@@ -112,7 +112,7 @@ function TrackHeader({
           M
         </button>
         {track.type === 'audio' && (
-          <button
+          <button type="button"
             onClick={onToggleSolo}
             style={{
               width: '20px',
@@ -129,7 +129,7 @@ function TrackHeader({
             S
           </button>
         )}
-        <button
+        <button type="button"
           onClick={onToggleLock}
           style={{
             width: '20px',
@@ -482,7 +482,7 @@ function PlaybackControls({
       </div>
       {/* Transport controls */}
       <div style={{ display: 'flex', gap: '4px' }}>
-        <button
+        <button type="button"
           onClick={onGoToStart}
           style={{
             width: '32px',
@@ -498,7 +498,7 @@ function PlaybackControls({
         >
 
         </button>
-        <button
+        <button type="button"
           onClick={onStepBackward}
           style={{
             width: '32px',
@@ -514,7 +514,7 @@ function PlaybackControls({
         >
 
         </button>
-        <button
+        <button type="button"
           onClick={isPlaying ? onPause : onPlay}
           style={{
             width: '40px',
@@ -530,7 +530,7 @@ function PlaybackControls({
         >
           {isPlaying ? '' : ''}
         </button>
-        <button
+        <button type="button"
           onClick={onStepForward}
           style={{
             width: '32px',
@@ -546,7 +546,7 @@ function PlaybackControls({
         >
 
         </button>
-        <button
+        <button type="button"
           onClick={onGoToEnd}
           style={{
             width: '32px',
@@ -795,7 +795,7 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
                 />
                 <span style={{ color: 'var(--aethel-text-primary)', fontSize: '12px' }}>{effect.name}</span>
               </div>
-              <button
+              <button type="button"
                 onClick={() => onRemoveEffect(effect.id)}
                 style={{
                   background: 'transparent',
@@ -817,7 +817,7 @@ function EffectsPanel({ clip, onAddEffect, onRemoveEffect, onUpdateEffect }: Eff
       </h4>
       <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
         {filteredEffects.map((effect) => (
-          <button
+          <button type="button"
             key={effect.type}
             onClick={() => clip && onAddEffect(effect.type)}
             disabled={!clip}
@@ -1008,7 +1008,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
             {project.resolution.width}x{project.resolution.height} @ {project.frameRate}fps
           </span>
           {/* Zoom controls */}
-          <button
+          <button type="button"
             onClick={() => setZoom(z => Math.max(0.1, z / 1.5))}
             style={{
               background: 'var(--aethel-surface-tertiary)',
@@ -1025,7 +1025,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
           <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px', width: '40px', textAlign: 'center' }}>
             {Math.round(zoom * 100)}%
           </span>
-          <button
+          <button type="button"
             onClick={() => setZoom(z => Math.min(10, z * 1.5))}
             style={{
               background: 'var(--aethel-surface-tertiary)',
@@ -1127,7 +1127,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
         }}>
           {/* Panel tabs */}
           <div style={{ display: 'flex', borderBottom: '1px solid var(--aethel-surface-tertiary)' }}>
-            <button
+            <button type="button"
               onClick={() => setActivePanel('inspector')}
               style={{
                 flex: 1,
@@ -1141,7 +1141,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
             >
               Inspector
             </button>
-            <button
+            <button type="button"
               onClick={() => setActivePanel('effects')}
               style={{
                 flex: 1,

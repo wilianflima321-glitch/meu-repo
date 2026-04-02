@@ -325,7 +325,7 @@ export default function ProfilePage() {
                   profile.name.charAt(0).toUpperCase()
                 )}
               </div>
-              <button className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+              <button type="button" className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                 <Camera className="w-6 h-6" />
               </button>
             </div>
@@ -342,17 +342,17 @@ export default function ProfilePage() {
                       className="bg-[var(--aethel-surface-tertiary)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] rounded px-2 py-1 text-xl font-bold"
                       autoFocus
                     />
-                    <button onClick={saveName} className="text-[var(--aethel-success)] hover:text-[var(--aethel-success-light)]">
+                    <button type="button" onClick={saveName} className="text-[var(--aethel-success)] hover:text-[var(--aethel-success-light)]">
                       <Check className="w-5 h-5" />
                     </button>
-                    <button onClick={() => setEditingName(false)} className="text-[var(--aethel-error)] hover:text-[var(--aethel-error-light)]">
+                    <button type="button" onClick={() => setEditingName(false)} className="text-[var(--aethel-error)] hover:text-[var(--aethel-error-light)]">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
                 ) : (
                   <>
                     <h1 className="text-2xl font-bold">{profile.name}</h1>
-                    <button
+                    <button type="button"
                       onClick={() => { setTempName(profile.name); setEditingName(true); }}
                       className="text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
                     >
@@ -375,7 +375,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Actions */}
-            <button
+            <button type="button"
               onClick={() => router.push('/dashboard')}
               className="px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded-lg transition-colors"
             >
@@ -394,7 +394,7 @@ export default function ProfilePage() {
               { id: 'security', label: 'Seguranca', icon: Shield },
               { id: 'preferences', label: 'Preferencias', icon: Palette },
             ].map((tab) => (
-              <button
+              <button type="button"
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-4 border-b-2 transition-colors ${
@@ -423,7 +423,7 @@ export default function ProfilePage() {
                 label="Nome"
                 value={profile.name}
                 action={
-                  <button
+                  <button type="button"
                     onClick={() => { setTempName(profile.name); setEditingName(true); }}
                     className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-text-primary)]"
                   >
@@ -436,7 +436,7 @@ export default function ProfilePage() {
                 label="E-mail"
                 value={profile.email}
                 action={
-                  <button className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-text-primary)]">
+                  <button type="button" className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-text-primary)]">
                     Alterar
                   </button>
                 }
@@ -458,7 +458,7 @@ export default function ProfilePage() {
                 label="Plano atual"
                 value={planLabels[profile.plan] -- profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                 action={
-                  <button
+                  <button type="button"
                     onClick={() => router.push('/billing')}
                     className="px-3 py-1 text-sm bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] rounded-lg transition-colors"
                   >
@@ -479,7 +479,7 @@ export default function ProfilePage() {
                 label="Senha"
                 value="Ultima alteracao ha 30 dias"
                 action={
-                  <button className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-text-primary)]">
+                  <button type="button" className="text-sm text-[var(--aethel-primary-light)] hover:text-[var(--aethel-text-primary)]">
                     Alterar senha
                   </button>
                 }
@@ -489,7 +489,7 @@ export default function ProfilePage() {
                 label="Autenticacao de dois fatores"
                 value={profile.twoFactorEnabled - 'Ativada' : 'Desativada'}
                 action={
-                  <button
+                  <button type="button"
                     onClick={() => {
                       if (profile.twoFactorEnabled) {
                         setTwoFactorModal('disable')
@@ -520,7 +520,7 @@ export default function ProfilePage() {
                 value="Esta acao nao pode ser desfeita"
                 danger
                 action={
-                  <button
+                  <button type="button"
                     onClick={() => setShowDeleteConfirm(true)}
                     className="px-3 py-1 text-sm bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)] rounded-lg transition-colors"
                   >
@@ -582,7 +582,7 @@ export default function ProfilePage() {
                 icon={Bell}
                 label="Notificacoes por e-mail"
                 action={
-                  <button
+                  <button type="button"
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, email: !profile.notifications.email }
                     })}
@@ -600,7 +600,7 @@ export default function ProfilePage() {
                 icon={Bell}
                 label="Notificacoes push"
                 action={
-                  <button
+                  <button type="button"
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, push: !profile.notifications.push }
                     })}
@@ -618,7 +618,7 @@ export default function ProfilePage() {
                 icon={Mail}
                 label="E-mails de marketing"
                 action={
-                  <button
+                  <button type="button"
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, marketing: !profile.notifications.marketing }
                     })}
@@ -721,7 +721,7 @@ export default function ProfilePage() {
             )}
 
             <div className="mt-6 flex gap-3">
-              <button
+              <button type="button"
                 onClick={() => {
                   setTwoFactorModal(null)
                   setTwoFactorError(null)
@@ -730,7 +730,7 @@ export default function ProfilePage() {
               >
                 Cancelar
               </button>
-              <button
+              <button type="button"
                 onClick={twoFactorModal === 'setup' - confirmTwoFactorSetup : confirmTwoFactorDisable}
                 disabled={twoFactorLoading}
                 className="flex-1 px-4 py-2 bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] rounded-lg transition-colors"
@@ -759,13 +759,13 @@ export default function ProfilePage() {
             </p>
 
             <div className="flex gap-3">
-              <button
+              <button type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded-lg transition-colors"
               >
                 Cancelar
               </button>
-              <button
+              <button type="button"
                 onClick={deleteAccount}
                 className="flex-1 px-4 py-2 bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)] rounded-lg transition-colors"
               >

@@ -28,7 +28,7 @@ export default function AuthExperiencePanel({
   return (
     <aside className="relative overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(9,14,24,0.96),rgba(8,11,19,0.92))] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.45)] sm:p-8">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-10%] top-[-12%] h-56 w-56 rounded-full bg-sky-500/15 blur-3xl" />
+        <div className="absolute left-[-10%] top-[-12%] h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] blur-3xl" />
         <div className="absolute bottom-[-18%] right-[-8%] h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] blur-3xl" />
       </div>
 
@@ -43,12 +43,12 @@ export default function AuthExperiencePanel({
             className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-1.5 shadow-[0_10px_30px_rgba(56,189,248,0.18)]"
           />
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/80">{eyebrow}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[color-mix(in_srgb,var(--aethel-info-light)_80%,transparent)]">{eyebrow}</p>
             <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Aethel Studio</p>
           </div>
         </div>
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-100">
+        <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
           {domainLabel}
         </div>
 

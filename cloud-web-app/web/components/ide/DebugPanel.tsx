@@ -124,7 +124,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, badge, children }
 
   return (
     <div className="border-b border-[var(--aethel-border-secondary)]">
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full px-3 py-2 hover:bg-[var(--aethel-surface-quaternary)]/50 text-sm"
       >
@@ -259,7 +259,7 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
             key={bp.id}
             className="flex items-center gap-2 px-3 py-1 hover:bg-[var(--aethel-surface-quaternary)]/50 group"
           >
-            <button
+            <button type="button"
               onClick={() => onToggle(bp.id)}
               className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
                 bp.enabled
@@ -270,7 +270,7 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
               }`}
             />
 
-            <button
+            <button type="button"
               onClick={() => onNavigate(bp)}
               className="flex-1 min-w-0 text-left"
             >
@@ -288,7 +288,7 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
               <span className="text-[var(--aethel-text-tertiary)]">{bp.hitCount}×</span>
             )}
 
-            <button
+            <button type="button"
               onClick={() => onRemove(bp.id)}
               className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] opacity-0 group-hover:opacity-100"
             >
@@ -318,7 +318,7 @@ function CallStack({ frames, selectedFrameId, onSelectFrame }: CallStackProps) {
         </div>
       ) : (
         frames.map((frame, idx) => (
-          <button
+          <button type="button"
             key={frame.id}
             onClick={() => onSelectFrame(frame)}
             className={`flex items-center gap-2 w-full px-3 py-1 text-left ${
@@ -372,7 +372,7 @@ function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpress
           placeholder="Adicionar expressao..."
           className="flex-1 bg-transparent border-none outline-none text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)]"
         />
-        <button
+        <button type="button"
           onClick={handleAdd}
           className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
         >
@@ -397,7 +397,7 @@ function WatchExpressions({ expressions, onAdd, onRemove, onEdit }: WatchExpress
               <div className="text-[var(--aethel-text-quaternary)]">indisponivel</div>
             )}
           </div>
-          <button
+          <button type="button"
             onClick={() => onRemove(expr.id)}
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] opacity-0 group-hover:opacity-100"
           >
@@ -463,14 +463,14 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
     <div className="flex flex-col h-full">
       {/* Console toolbar */}
       <div className="flex items-center gap-2 px-2 py-1 border-b border-[var(--aethel-border-secondary)]">
-        <button
+        <button type="button"
           onClick={onClear}
           className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           title="Limpar console"
         >
           <Trash2 className="w-3 h-3" />
         </button>
-        <button
+        <button type="button"
           onClick={() => setShowFilter(!showFilter)}
           className={`p-1 ${showFilter ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'} hover:text-[var(--aethel-text-primary)]`}
           title="Filtro"
@@ -486,7 +486,7 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
       {showFilter && (
         <div className="flex items-center gap-2 px-2 py-1 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-secondary)]">
           {(['log', 'warn', 'error', 'info', 'debug'] as const).map(type => (
-            <button
+            <button type="button"
               key={type}
               onClick={() => {
                 setTypeFilter(prev => {
@@ -640,7 +640,7 @@ export default function DebugPanel({
       <div className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-secondary)]">
         {/* Play/Pause */}
         {isPaused ? (
-          <button
+          <button type="button"
             onClick={onPlay}
             className="p-1.5 bg-[var(--aethel-success)] hover:brightness-110 rounded text-[var(--aethel-text-primary)]"
             title="Continuar (F5)"
@@ -648,7 +648,7 @@ export default function DebugPanel({
             <Play className="w-4 h-4" />
           </button>
         ) : (
-          <button
+          <button type="button"
             onClick={onPause}
             className="p-1.5 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning)] rounded text-[var(--aethel-text-primary)]"
             title="Pausar (F6)"
@@ -658,7 +658,7 @@ export default function DebugPanel({
         )}
 
         {/* Stop */}
-        <button
+        <button type="button"
           onClick={onStop}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-error)]"
           title="Parar (Shift+F5)"
@@ -667,7 +667,7 @@ export default function DebugPanel({
         </button>
 
         {/* Restart */}
-        <button
+        <button type="button"
           onClick={onRestart}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
           title="Reiniciar (Ctrl+Shift+F5)"
@@ -678,7 +678,7 @@ export default function DebugPanel({
         <div className="w-px h-4 bg-[var(--aethel-surface-quaternary)] mx-1" />
 
         {/* Step controls */}
-        <button
+        <button type="button"
           onClick={onStepOver}
           disabled={!isPaused}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] disabled:opacity-50"
@@ -687,7 +687,7 @@ export default function DebugPanel({
           <ArrowRight className="w-4 h-4" />
         </button>
 
-        <button
+        <button type="button"
           onClick={onStepInto}
           disabled={!isPaused}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] disabled:opacity-50"
@@ -696,7 +696,7 @@ export default function DebugPanel({
           <ArrowDown className="w-4 h-4" />
         </button>
 
-        <button
+        <button type="button"
           onClick={onStepOut}
           disabled={!isPaused}
           className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] disabled:opacity-50"
@@ -784,7 +784,7 @@ export default function DebugPanel({
         <div className="flex-1 flex flex-col">
           {/* Tabs */}
           <div className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-secondary)]">
-            <button
+            <button type="button"
               onClick={() => setActiveTab('console')}
               className={`px-3 py-1 text-xs rounded ${
                 activeTab === 'console'

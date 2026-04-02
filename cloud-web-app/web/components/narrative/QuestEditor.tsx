@@ -423,7 +423,7 @@ function ObjectiveEditor({ objective, onUpdate, onDelete }: ObjectiveEditorProps
           Optional
         </label>
 
-        <button
+        <button type="button"
           onClick={onDelete}
           className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
         >
@@ -505,7 +505,7 @@ function RewardEditor({ reward, onUpdate, onDelete }: RewardEditorProps) {
         min={0}
       />
 
-      <button
+      <button type="button"
         onClick={onDelete}
         className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
       >
@@ -557,7 +557,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
     <div className="p-4 space-y-4">
       {/* Basic Info */}
       <div>
-        <button
+        <button type="button"
           onClick={() => toggleSection('basic')}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
@@ -667,7 +667,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
 
       {/* Objectives */}
       <div>
-        <button
+        <button type="button"
           onClick={() => toggleSection('objectives')}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
@@ -695,7 +695,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
               />
             ))}
 
-            <button
+            <button type="button"
               onClick={() => {
                 const newObj: QuestObjective = {
                   id: `obj_${Date.now()}`,
@@ -720,7 +720,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
 
       {/* Rewards */}
       <div>
-        <button
+        <button type="button"
           onClick={() => toggleSection('rewards')}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
@@ -748,7 +748,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
               />
             ))}
 
-            <button
+            <button type="button"
               onClick={() => {
                 const newReward: QuestReward = {
                   id: `reward_${Date.now()}`,
@@ -769,7 +769,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
 
       {/* Prerequisites */}
       <div>
-        <button
+        <button type="button"
           onClick={() => toggleSection('prerequisites')}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
@@ -825,7 +825,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                   />
                 )}
 
-                <button
+                <button type="button"
                   onClick={() => {
                     const prerequisites = [...data.prerequisites];
                     prerequisites.splice(i, 1);
@@ -838,7 +838,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
               </div>
             ))}
 
-            <button
+            <button type="button"
               onClick={() => {
                 const newPrereq: QuestPrerequisite = { type: 'quest', questId: '' };
                 updateData({ prerequisites: [...data.prerequisites, newPrereq] });
@@ -854,7 +854,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
 
       {/* Advanced */}
       <div>
-        <button
+        <button type="button"
           onClick={() => toggleSection('advanced')}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
@@ -904,7 +904,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
       </div>
 
       {/* Delete */}
-      <button
+      <button type="button"
         onClick={() => onDelete(node.id)}
         className="flex items-center justify-center gap-2 w-full p-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded text-[var(--aethel-error-light)] text-sm"
       >
@@ -1102,7 +1102,7 @@ export default function QuestEditor({
           {/* Add Quest Buttons */}
           <Panel position="top-left" className="flex gap-2 flex-wrap">
             {QUEST_CATEGORIES.map((cat) => (
-              <button
+              <button type="button"
                 key={cat.id}
                 onClick={() => addQuest(cat.id)}
                 className="flex items-center gap-1 px-3 py-2 rounded text-sm"
@@ -1116,14 +1116,14 @@ export default function QuestEditor({
 
           {/* Actions */}
           <Panel position="top-right" className="flex gap-2">
-            <button
+            <button type="button"
               onClick={() => onExport?.('json')}
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Download className="w-4 h-4" />
               Export
             </button>
-            <button
+            <button type="button"
               className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded text-sm"
             >
               <Upload className="w-4 h-4" />
