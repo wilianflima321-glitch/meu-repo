@@ -22,6 +22,8 @@
 
 - Agent mode agora persiste snapshots locais de execução (`.aethel/agents`) e retorna estado mesmo após perda de memória em runtime.
 
+- Preflight local (2026-04-03): preview/billing **ready**; produção local **partial** por `APP_RUNTIME_UNREACHABLE`.
+
 - Nenhuma claim de backend novo, runtime externo ou conclusão operacional sem evidência local.
 
 

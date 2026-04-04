@@ -421,6 +421,7 @@ Nota: `rg` bloqueado neste ambiente; scan parcial via Python (top 15). Usar como
 ## Benchmark Aethel Engine vs Líderes de Mercado 2026 (fornecido pelo usuário; pendente de validação)
 
 **Aviso de escopo:** todo o conteúdo abaixo foi fornecido pelo solicitante e **não foi validado nesta execução**. Deve ser tratado como **baseline de planejamento** até nova checagem com evidência no repositório e/ou testes reais. Os números podem divergir das contagens locais desta execução.
+**Reconciliação local (2026-04-03):** preflight indica preview/billing **ready** (env completo), mas runtime local continua sem validação final (APP_RUNTIME_UNREACHABLE).
 
 **Data da auditoria:** 2026-04-01
 **Versão:** v2.0.0
@@ -433,6 +434,11 @@ Nota: `rg` bloqueado neste ambiente; scan parcial via Python (top 15). Usar como
 - Gaps P0: 120+ botões sem `type="button"`, 160+ linhas com cores hardcoded
 - Microcopy PT-BR: drift de inglês em 200+ ocorrências (Preview, Refresh, Loading, etc.)
 - Blockers operacionais: `node_modules` ausente, `STRIPE_WEBHOOK_SECRET` missing, Docker daemon
+
+**Reconciliação local (2026-04-03)**
+- `.env.local` e `.env` contêm chaves de preview/billing/AI (preflight confirma **preview/billing ready**).
+- `node_modules` ausente na raiz, mas presente em `cloud-web-app/web/node_modules`.
+- Produção local ainda **não** está pronta: `APP_RUNTIME_UNREACHABLE` em `http://localhost:3000` durante o probe.
 
 **Comparação com líderes (percentuais fornecidos)**
 - Preview/Runtime: 65%
@@ -601,6 +607,7 @@ Nota: `rg` bloqueado neste ambiente; scan parcial via Python (top 15). Usar como
 
 **Blocker operacional (fornecido)**
 - `STRIPE_WEBHOOK_SECRET` sem configuração real.
+  - Reconciliação local (2026-04-03): preflight de billing passou com STRIPE_* e price IDs configurados; ainda falta validação de checkout/webhook em runtime.
 
 **Ações para paridade (fornecidas)**
 - [P0] Configurar `STRIPE_WEBHOOK_SECRET` via Stripe CLI/Dashboard.
@@ -753,6 +760,11 @@ Aethel Engine v2.0.0 demonstra fundação sólida com arquitetura bem pensada e 
 ## Validações
 
 - Build/lint/testes **não executados nesta rodada** (sem claim de sucesso).
+- Preflight local executado (2026-04-03):
+  - Preview runtime: **ready** (env e2b completo).
+  - Billing runtime: **ready** (Stripe keys + price IDs completos).
+  - Production runtime: **partial** (APP_RUNTIME_UNREACHABLE em `http://localhost:3000`).
+  - Nota: readiness valida env/closure; ainda requer validação de runtime em UI (checkout, webhook, preview toolbar).
 
 
 
