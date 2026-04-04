@@ -860,7 +860,7 @@ function NodePalette({ onAddNode }: { onAddNode: (type: string) => void }) {
               const def = NODE_DEFINITIONS[type];
               if (!def) return null;
               return (
-                <button
+                <button type="button"
                   key={type}
                   onClick={() => onAddNode(type)}
                   className="w-full text-left px-2 py-1.5 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
@@ -1057,13 +1057,13 @@ export function MaterialEditor() {
 
         <Panel position="top-left">
           <div className="flex gap-2">
-            <button
+            <button type="button"
               onClick={() => setShowPalette(!showPalette)}
               className="px-3 py-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded hover:bg-[var(--aethel-surface-secondary)]"
             >
               {showPalette ? 'Hide Palette' : 'Show Palette'}
             </button>
-            <button
+            <button type="button"
               onClick={compileShader}
               className="px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
             >

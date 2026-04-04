@@ -150,13 +150,13 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
             </div>
 
             <div className="flex border-t border-[var(--aethel-border-primary)]">
-              <button
+              <button type="button"
                 onClick={handleDismiss}
                 className="flex-1 px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] transition-colors"
               >
                 Mais tarde
               </button>
-              <button
+              <button type="button"
                 onClick={handleUpdate}
                 className="flex-1 px-4 py-3 text-sm font-medium text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors border-l border-[var(--aethel-border-primary)]"
               >
@@ -220,7 +220,7 @@ export function InstallPrompt() {
               Acesse rapidamente do seu desktop
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={handleInstall}
             className="px-3 py-1.5 bg-sky-500 text-[var(--aethel-text-primary)] text-sm rounded font-medium hover:bg-sky-400 transition-colors"
           >

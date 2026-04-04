@@ -107,7 +107,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
               <p className="text-[10px] text-[var(--aethel-text-tertiary)]">Operacoes</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden" aria-label="Fechar menu lateral">
+          <button type="button" onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden" aria-label="Fechar menu lateral">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -163,7 +163,7 @@ function Header({
   return (
     <header className="flex h-12 items-center justify-between border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(16,19,26,0.96),rgba(10,12,17,0.98))] px-3 shadow-[0_12px_32px_rgba(0,0,0,0.3)]">
       <div className="flex items-center gap-3">
-        <button onClick={onMenuClick} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden" aria-label="Abrir menu lateral">
+        <button type="button" onClick={onMenuClick} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] lg:hidden" aria-label="Abrir menu lateral">
           <Menu className="h-4 w-4" />
         </button>
         {systemStatus && (

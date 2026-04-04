@@ -77,7 +77,7 @@ export default function AITraining() {
           <h1 className='text-3xl font-bold'>Treinamento de IA</h1>
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Crie tarefas e acompanhe status, custos e eficiência.</p>
         </div>
-        <button onClick={fetchJobs} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
+        <button type="button" onClick={fetchJobs} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
         </button>
       </div>
@@ -124,7 +124,7 @@ export default function AITraining() {
             />
           </div>
         </div>
-        <button
+        <button type="button"
           onClick={handleCreate}
           disabled={saving}
           className='mt-4 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50'

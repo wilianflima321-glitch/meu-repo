@@ -18,7 +18,7 @@ function CodeBlock({ code, language = 'bash' }: { code: string; language?: strin
     <div className="group relative my-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]">
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-subtle)] px-4 py-2">
         <span className="text-xs font-mono text-[var(--aethel-text-quaternary)]">{language}</span>
-        <button onClick={copy} className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] transition-colors">
+        <button type="button" onClick={copy} className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] transition-colors">
           {copied ? <Check className="h-4 w-4 text-[var(--aethel-success)]" /> : <Copy className="h-4 w-4" />}
         </button>
       </div>

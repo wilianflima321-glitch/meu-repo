@@ -354,7 +354,7 @@ export default function PreviewPanel({
             </span>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={() => {
             if (canUseDevRuntime) setRuntimeReloadTick((prev) => prev + 1)
             onRefresh?.()

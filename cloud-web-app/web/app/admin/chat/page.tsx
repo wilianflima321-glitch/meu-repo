@@ -77,7 +77,7 @@ export default function Chat() {
           <h1 className='text-3xl font-bold'>Chat Prioritário com IA</h1>
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Histórico persistente e prioridade operacional.</p>
         </div>
-        <button onClick={fetchMessages} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
+        <button type="button" onClick={fetchMessages} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
         </button>
       </div>
@@ -100,7 +100,7 @@ export default function Chat() {
           placeholder='Digite sua mensagem...'
           className='p-2 border rounded flex-1'
         />
-        <button
+        <button type="button"
           onClick={sendMessage}
           disabled={sending}
           className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
@@ -125,7 +125,7 @@ export default function Chat() {
       </div>
 
       <div className='mt-4'>
-        <button onClick={exportHistory} className='px-4 py-2 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded'>Exportar Histórico</button>
+        <button type="button" onClick={exportHistory} className='px-4 py-2 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded'>Exportar Histórico</button>
       </div>
     </div>
   );

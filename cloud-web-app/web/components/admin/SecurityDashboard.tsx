@@ -104,7 +104,7 @@ const ErrorState: React.FC<{ message: string; onRetry: () => void }> = ({ messag
     <AlertCircle className="mb-4 h-12 w-12 text-[var(--aethel-error-light)]" />
     <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Erro ao carregar dados</h3>
     <p className="mb-4 max-w-md text-sm text-[var(--aethel-text-tertiary)]">{message}</p>
-    <button onClick={onRetry} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
+    <button type="button" onClick={onRetry} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
       <RefreshCw className="h-4 w-4" />
       Tentar novamente
     </button>
@@ -237,7 +237,7 @@ const EventRow: React.FC<{
         </div>
 
         <div className="flex items-center gap-1">
-          <button
+          <button type="button"
             onClick={onInvestigate}
             className="aethel-button aethel-button-ghost rounded-md p-2 text-[var(--aethel-info-light)]"
             title="Investigar"
@@ -245,7 +245,7 @@ const EventRow: React.FC<{
             <Eye className="h-4 w-4" />
           </button>
           {!event.blocked && (
-            <button
+            <button type="button"
               onClick={onBloquear}
               className="aethel-button aethel-button-ghost rounded-md p-2 text-[var(--aethel-error-light)]"
               title="Bloquear IP"
@@ -406,7 +406,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
             {stats.activeAttacks > 0 ? `${stats.activeAttacks} ataques ativos` : 'Sistema seguro'}
           </div>
 
-          <button
+          <button type="button"
             onClick={fetchEvents}
             disabled={isRefreshing}
             className="aethel-button aethel-button-primary flex items-center gap-2 text-xs"

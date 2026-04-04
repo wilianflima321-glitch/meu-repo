@@ -176,7 +176,7 @@ function TreeItem({
         }}
       >
         {/* Expand Arrow */}
-        <button
+        <button type="button"
           onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
           style={{
             width: '16px',
@@ -258,7 +258,7 @@ function TreeItem({
         )}
 
         {/* Visibility Toggle */}
-        <button
+        <button type="button"
           onClick={(e) => { e.stopPropagation(); onToggleVisibility(); }}
           style={{
             width: '20px',
@@ -278,7 +278,7 @@ function TreeItem({
         </button>
 
         {/* Bloquear Toggle */}
-        <button
+        <button type="button"
           onClick={(e) => { e.stopPropagation(); onToggleBloquear(); }}
           style={{
             width: '20px',
@@ -365,7 +365,7 @@ function OutlinerContextMenu({
     >
       {items.map((item) => (
         <React.Fragment key={item.id}>
-          <button
+          <button type="button"
             onClick={() => {
               onAction(item.id);
               onClose();
@@ -437,7 +437,7 @@ function OutlinerFilterBar({
 
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
-        <button
+        <button type="button"
           onClick={() => setMostrarTypeFilter(!showTypeFilter)}
           style={{
             padding: '4px 8px',
@@ -497,7 +497,7 @@ function OutlinerFilterBar({
       </div>
 
       {/* Recolher tudo */}
-      <button
+      <button type="button"
         onClick={onCollapseAll}
         style={{
           padding: '4px 8px',
@@ -514,7 +514,7 @@ function OutlinerFilterBar({
       </button>
 
       {/* Expandir tudo */}
-      <button
+      <button type="button"
         onClick={onExpandAll}
         style={{
           padding: '4px 8px',

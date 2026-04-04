@@ -20,6 +20,8 @@
 
 - Rotas de IA agora bloqueiam fallback demo/partial quando `AETHEL_DISABLE_SIMULATION` está ativo.
 
+- Codemod aplicado: adiciona `type="button"` em `<button>` com `onClick` sem type (varredura em app/components/lib).
+
 - Agent mode agora persiste snapshots locais de execução (`.aethel/agents`) e retorna estado mesmo após perda de memória em runtime.
 
 - Preflight local (2026-04-03): preview/billing **ready**; produção local **partial** por `APP_RUNTIME_UNREACHABLE`.
@@ -125,11 +127,13 @@
 
 ## Dívida objetiva (varredura local)
 
-- Botões sem type="button": **1245**
+- Botões sem type="button": **75** (scan Python após codemod `onClick`)
 
-- Utilitários de cor hardcoded: **248**
+- Utilitários de cor hardcoded: **134** (scan Python)
 
-- Hotspots de microcopy em inglês: **7642**
+- Hotspots de microcopy em inglês: **1463** (scan Python por padrões-chave)
+
+Observação: `tools/check-button-types.mjs` não rodou aqui por falta de `glob` em `node_modules` raiz; contagens acima obtidas via scan Python.
 
 
 

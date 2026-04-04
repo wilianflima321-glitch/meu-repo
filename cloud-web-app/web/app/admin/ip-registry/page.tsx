@@ -131,8 +131,8 @@ export default function AdminIpRegistryPage() {
           <p className="text-sm text-[var(--aethel-text-tertiary)]">Controle de permissões e licenças com auditoria.</p>
         </div>
         <div className="flex gap-2">
-          <button className="px-3 py-1 bg-[var(--aethel-surface-secondary)] rounded" onClick={fetchRegistry}>Atualizar</button>
-          <button className="px-3 py-1 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded" onClick={saveRegistry}>Salvar</button>
+          <button type="button" className="px-3 py-1 bg-[var(--aethel-surface-secondary)] rounded" onClick={fetchRegistry}>Atualizar</button>
+          <button type="button" className="px-3 py-1 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded" onClick={saveRegistry}>Salvar</button>
         </div>
       </div>
 
@@ -149,13 +149,13 @@ export default function AdminIpRegistryPage() {
                 className="border p-2 rounded text-sm flex-1"
                 placeholder="Adicionar identificador"
               />
-              <button className="px-3 py-2 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded" onClick={addAllowed}>Adicionar</button>
+              <button type="button" className="px-3 py-2 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded" onClick={addAllowed}>Adicionar</button>
             </div>
             <ul className="list-disc pl-5 space-y-1">
               {allowedList.map(ip => (
                 <li key={ip} className="flex items-center gap-2">
                   <span>{ip}</span>
-                  <button className="text-xs text-[var(--aethel-primary)] underline" onClick={() => ingestIp(ip)}>Ingerir RAG</button>
+                  <button type="button" className="text-xs text-[var(--aethel-primary)] underline" onClick={() => ingestIp(ip)}>Ingerir RAG</button>
                 </li>
               ))}
             </ul>
@@ -204,7 +204,7 @@ export default function AdminIpRegistryPage() {
                 value={licenseForm.notes}
                 onChange={(e) => setLicenseForm((prev) => ({ ...prev, notes: e.target.value }))}
               />
-              <button className="px-3 py-2 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded" onClick={addLicense}>Adicionar</button>
+              <button type="button" className="px-3 py-2 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded" onClick={addLicense}>Adicionar</button>
             </div>
             <ul className="space-y-2">
               {licensesList.map(([ip, lic]) => (

@@ -47,7 +47,7 @@ export default function TemplatesTab({ templates, onSelect }: TemplatesTabProps)
               </ul>
             </div>
 
-            <button
+            <button type="button"
               onClick={() => onSelect(template.id)}
               className="aethel-button aethel-button-secondary w-full mt-6"
             >

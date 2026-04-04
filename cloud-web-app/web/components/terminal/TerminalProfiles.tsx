@@ -195,7 +195,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
   return (
     <div style={{ position: 'relative' }}>
       {/* Trigger Button */}
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         style={{
           display: 'flex',
@@ -259,7 +259,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
               }}
             >
               {(['all', 'development', 'monitoring', 'tools'] as const).map((f) => (
-                <button
+                <button type="button"
                   key={f}
                   onClick={() => setFilter(f)}
                   style={{
@@ -283,7 +283,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
             {/* Profile List */}
             <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
               {filteredProfiles.map((profile) => (
-                <button
+                <button type="button"
                   key={profile.id}
                   onClick={() => {
                     onSelect(profile);
@@ -356,7 +356,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
 
             {/* Custom Profile */}
             <div style={{ padding: '8px' }}>
-              <button
+              <button type="button"
                 onClick={() => {
                   // Open custom profile dialog
                   setIsOpen(false);
@@ -454,7 +454,7 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
         {terminal.status !== 'running' && (
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               onRestart();
@@ -476,7 +476,7 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
           </button>
         )}
 
-        <button
+        <button type="button"
           onClick={(e) => {
             e.stopPropagation();
             onClose();

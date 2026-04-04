@@ -86,7 +86,7 @@ export default function Backup() {
           <h1 className='text-3xl font-bold'>Backup e recuperação</h1>
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Controle de backups com auditoria e restauração controlada.</p>
         </div>
-        <button onClick={fetchBackups} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
+        <button type="button" onClick={fetchBackups} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
 
       {error && (
@@ -104,7 +104,7 @@ export default function Backup() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <button onClick={requestBackup} disabled={working} className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'>
+          <button type="button" onClick={requestBackup} disabled={working} className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'>
             {working ? 'Solicitando...' : 'Iniciar Backup Manual'}
           </button>
         </div>
@@ -149,7 +149,7 @@ export default function Backup() {
                   ) : (
                     <span className='text-xs text-[var(--aethel-text-tertiary)] mr-2'>Sem arquivo</span>
                   )}
-                  <button
+                  <button type="button"
                     onClick={() => requestRestore(b.id)}
                     className='px-2 py-1 bg-[var(--aethel-error)] text-[var(--aethel-text-primary)] rounded text-sm'
                   >

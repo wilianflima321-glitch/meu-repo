@@ -351,7 +351,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
     <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       {/* Toolbar */}
       <div className="flex items-center gap-1 p-2 border-b border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={status === 'paused' ? handleContinue : handlePause}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title={status === 'paused' ? 'Continue (F5)' : 'Pause (F6)'}
@@ -360,7 +360,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
           {status === 'paused' ? <Play size={16} className="text-[var(--aethel-success-light)]" /> : <Pause size={16} />}
         </button>
 
-        <button
+        <button type="button"
           onClick={handleStop}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Stop (Shift+F5)"
@@ -369,7 +369,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
           <Square size={16} className="text-[var(--aethel-error-light)]" />
         </button>
 
-        <button
+        <button type="button"
           onClick={handleRestart}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Restart (Ctrl+Shift+F5)"
@@ -380,7 +380,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
 
         <div className="w-px h-4 bg-[var(--aethel-border-primary)] mx-1" />
 
-        <button
+        <button type="button"
           onClick={handleStepOver}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Step Over (F10)"
@@ -389,7 +389,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
           <SkipForward size={16} />
         </button>
 
-        <button
+        <button type="button"
           onClick={handleStepInto}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Step Into (F11)"
@@ -398,7 +398,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
           <ArrowDown size={16} />
         </button>
 
-        <button
+        <button type="button"
           onClick={handleStepOut}
           className="p-1.5 hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Step Out (Shift+F11)"
@@ -421,7 +421,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
       {/* Tabs */}
       <div className="flex border-b border-[var(--aethel-border-primary)]">
         {tabs.map(tab => (
-          <button
+          <button type="button"
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
@@ -495,7 +495,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   placeholder="Add expression..."
                   className="flex-1 bg-[var(--aethel-border-primary)] rounded px-2 py-1 text-sm outline-none focus:ring-1 ring-[var(--aethel-primary-light)]"
                 />
-                <button
+                <button type="button"
                   onClick={addWatch}
                   className="p-1.5 bg-[var(--aethel-border-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
                 >
@@ -514,7 +514,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                   <span className={watch.error ? 'text-[var(--aethel-error-light)]' : 'text-[var(--aethel-success-light)]'}>
                     {watch.error || watch.result}
                   </span>
-                  <button
+                  <button type="button"
                     onClick={() => removeWatch(watch.expression)}
                     className="ml-auto opacity-0 group-hover:opacity-100 p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                   >

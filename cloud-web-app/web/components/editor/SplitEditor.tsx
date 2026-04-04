@@ -174,7 +174,7 @@ const Tab: React.FC<TabProps> = ({
       )}
 
       {/* Close button */}
-      <button
+      <button type="button"
         className={`
           flex-shrink-0 p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]
           ${isActive || tab.dirty ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
@@ -201,32 +201,32 @@ const Tab: React.FC<TabProps> = ({
                      rounded-md shadow-xl z-50 py-1"
           onClick={(e) => e.stopPropagation()}
         >
-          <button
+          <button type="button"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => { onTabClose(); setShowMenu(false); }}
           >
             Close
           </button>
-          <button
+          <button type="button"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close Others
           </button>
-          <button
+          <button type="button"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close All
           </button>
-          <button
+          <button type="button"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close to the Right
           </button>
           <div className="border-t border-[var(--aethel-border-secondary)] my-1" />
-          <button
+          <button type="button"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] flex items-center gap-2"
             onClick={() => { onTabPin(); setShowMenu(false); }}
           >
@@ -234,19 +234,19 @@ const Tab: React.FC<TabProps> = ({
             {tab.pinned ? 'Unpin' : 'Pin'}
           </button>
           <div className="border-t border-[var(--aethel-border-secondary)] my-1" />
-          <button
+          <button type="button"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Copy Path
           </button>
-          <button
+          <button type="button"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Copy Relative Path
           </button>
-          <button
+          <button type="button"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
@@ -377,7 +377,7 @@ const TabBar: React.FC<TabBarProps> = ({
 
       {/* Actions */}
       <div className="flex items-center gap-0.5 px-1 border-l border-[var(--aethel-border-secondary)]">
-        <button
+        <button type="button"
           className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
           onClick={() => onSplit('horizontal')}
           title="Split Editor Right"
@@ -385,7 +385,7 @@ const TabBar: React.FC<TabBarProps> = ({
         >
           <SplitSquareHorizontal size={14} className="text-[var(--aethel-text-tertiary)]" />
         </button>
-        <button
+        <button type="button"
           className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
           onClick={() => onSplit('vertical')}
           title="Split Editor Down"
@@ -394,7 +394,7 @@ const TabBar: React.FC<TabBarProps> = ({
           <SplitSquareVertical size={14} className="text-[var(--aethel-text-tertiary)]" />
         </button>
         {canClose && (
-          <button
+          <button type="button"
             className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
             onClick={onGroupClose}
             title="Close Editor Group"

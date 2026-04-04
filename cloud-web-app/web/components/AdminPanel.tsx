@@ -166,7 +166,7 @@ export default function AdminPanel() {
             { id: 'financial', label: 'Financeiro', icon: '' },
             { id: 'system', label: 'Sistema', icon: '' }
           ].map((tab) => (
-            <button
+            <button type="button"
               key={tab.id}
               onClick={() => setActiveAdminTab(tab.id as any)}
               className={`flex-1 aethel-button rounded-lg px-3 py-2 text-xs font-semibold ${
@@ -345,7 +345,7 @@ export default function AdminPanel() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="aethel-flex space-x-2">
-                          <button
+                          <button type="button"
                             onClick={async () => {
                               const amount = await openPromptDialog({
                                 title: 'Adicionar creditos',
@@ -367,14 +367,14 @@ export default function AdminPanel() {
                             Adicionar Creditos
                           </button>
                           {user.is_active ? (
-                            <button
+                            <button type="button"
                               onClick={() => handleSuspendUser(user.id)}
                               className="aethel-button aethel-button-danger text-xs"
                             >
                               Suspender
                             </button>
                           ) : (
-                            <button
+                            <button type="button"
                               onClick={() => handleActivateUser(user.id)}
                               className="aethel-button aethel-button-secondary text-xs"
                             >
@@ -395,7 +395,7 @@ export default function AdminPanel() {
                 Mostrando {users.length} de {totalUsers} usuarios
               </span>
               <div className="aethel-flex aethel-gap-2">
-                <button
+                <button type="button"
                   onClick={() => setUserPage(Math.max(1, userPage - 1))}
                   disabled={userPage === 1}
                   className="aethel-button aethel-button-secondary text-xs disabled:opacity-50"
@@ -405,7 +405,7 @@ export default function AdminPanel() {
                 <span className="px-3 py-1 text-sm text-[var(--aethel-text-tertiary)]">
                   Pagina {userPage}
                 </span>
-                <button
+                <button type="button"
                   onClick={() => setUserPage(userPage + 1)}
                   disabled={users.length < 20}
                   className="aethel-button aethel-button-secondary text-xs disabled:opacity-50"

@@ -28,6 +28,8 @@ Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
 
   - `package.json` com `qa:button-types` e `qa:hardcoded-colors`.
 
+- Codemod aplicado: adiciona `type="button"` em `<button>` com `onClick` sem type (varredura em app/components/lib).
+
 - Correções adicionais de PT-BR e tokens Aethel em onboarding, billing, settings, dashboard e auth.
 - Task system real implementado (persistência em arquivo local) com endpoints `studio/tasks` e validação/aplicação real via API.
 - QA Gate agora bloqueia apply quando checks falham (sem simulação).
@@ -158,17 +160,17 @@ Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
 
 ## Varredura local de dívida (app/components/lib)
 
-- Botões sem type="button": **1245** ocorrências.
+- Botões sem type="button": **75** ocorrências (scan Python após codemod `onClick`).
 
-- Utilitários de cor hardcoded (bg/text/border/from/to): **248** ocorrências.
+- Utilitários de cor hardcoded (bg/text/border/from/to): **134** ocorrências (scan Python).
 
-- Hotspots de microcopy em inglês: **7642** ocorrências.
+- Hotspots de microcopy em inglês: **1463** ocorrências (scan Python por padrões-chave).
 
-- Uso de tokens `var(--aethel-*)`: **15323** ocorrências.
+- Uso de tokens `var(--aethel-*)`: **15323** ocorrências (última contagem registrada).
 
 
 
-Observação: as contagens acima refletem a última varredura local registrada nesta execução.
+Observação: `tools/check-button-types.mjs` não rodou aqui por falta de `glob` em `node_modules` raiz; as contagens acima foram obtidas via scan Python no workspace.
 
 
 

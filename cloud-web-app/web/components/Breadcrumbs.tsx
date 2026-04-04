@@ -24,7 +24,7 @@ export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           {index > 0 && (
             <span className="mx-2 text-[var(--aethel-text-quaternary)]">›</span>
           )}
-          <button
+          <button type="button"
             onClick={() => handleClick(item)}
             disabled={!item.path}
             className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${

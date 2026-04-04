@@ -94,7 +94,7 @@ export default function DownloadTab({ onDownload }: DownloadTabProps) {
                 <span>Versão:</span>
                 <span>{option.version}</span>
               </div>
-              <button
+              <button type="button"
                 onClick={() => onDownload(option.platform)}
                 className="aethel-button aethel-button-primary w-full mt-4"
               >

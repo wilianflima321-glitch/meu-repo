@@ -249,7 +249,7 @@ function PlanCard({
             Plano atual
           </Button>
         ) : (
-          <Button
+          <button type="button"
             variant={isPopular ? 'primary' : 'secondary'}
             fullWidth
             disabled={disabled}
@@ -550,7 +550,7 @@ export function BillingTab({
                 </div>
               </div>
             </div>
-            <Button
+            <button type="button"
               variant="secondary"
               loading={billingActionBusy === 'portal'}
               disabled={billingReadiness?.portalReady === false}

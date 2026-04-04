@@ -105,7 +105,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
       <div className="search-header">
         <h2>Search</h2>
         {onClose && (
-          <button className="close-button" onClick={onClose}>
+          <button type="button" className="close-button" onClick={onClose}>
             ×
           </button>
         )}
@@ -122,28 +122,28 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
         />
 
         <div className="search-options">
-          <button
+          <button type="button"
             className={`option-button ${options.isCaseSensitive ? 'active' : ''}`}
             onClick={() => setOptions({ ...options, isCaseSensitive: !options.isCaseSensitive })}
             title="Match Case"
           >
             Aa
           </button>
-          <button
+          <button type="button"
             className={`option-button ${options.isWholeWord ? 'active' : ''}`}
             onClick={() => setOptions({ ...options, isWholeWord: !options.isWholeWord })}
             title="Match Whole Word"
           >
             ab
           </button>
-          <button
+          <button type="button"
             className={`option-button ${options.isRegex ? 'active' : ''}`}
             onClick={() => setOptions({ ...options, isRegex: !options.isRegex })}
             title="Use Regular Expression"
           >
             .*
           </button>
-          <button
+          <button type="button"
             className="option-button"
             onClick={() => setShowReplace(!showReplace)}
             title="Toggle Replace"
@@ -163,14 +163,14 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
             onChange={(e) => setReplacement(e.target.value)}
           />
           <div className="replace-buttons">
-            <button
+            <button type="button"
               className="replace-button"
               onClick={() => selectedResult !== null && handleReplace(results[selectedResult])}
               disabled={selectedResult === null}
             >
               Replace
             </button>
-            <button
+            <button type="button"
               className="replace-all-button"
               onClick={handleReplaceAll}
               disabled={results.length === 0}

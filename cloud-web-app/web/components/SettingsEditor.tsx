@@ -455,7 +455,7 @@ export default function SettingsEditor() {
 
         <div className="border-b border-[var(--aethel-border-primary)] p-4">
           <div className="flex gap-2">
-            <button
+            <button type="button"
               onClick={() => setScope('user')}
               className={`aethel-button flex-1 text-xs ${
                 scope === 'user' ? 'aethel-button-primary' : 'aethel-button-secondary'
@@ -463,7 +463,7 @@ export default function SettingsEditor() {
             >
               Usuario
             </button>
-            <button
+            <button type="button"
               onClick={() => setScope('workspace')}
               className={`aethel-button flex-1 text-xs ${
                 scope === 'workspace' ? 'aethel-button-primary' : 'aethel-button-secondary'
@@ -476,7 +476,7 @@ export default function SettingsEditor() {
 
         <div className="flex-1 overflow-y-auto">
           {filteredCategories.map((category) => (
-            <button
+            <button type="button"
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
@@ -493,7 +493,7 @@ export default function SettingsEditor() {
         </div>
 
         <div className="border-t border-[var(--aethel-border-primary)] p-4">
-          <button onClick={resetAllSettings} className="aethel-button aethel-button-danger w-full text-xs">
+          <button type="button" onClick={resetAllSettings} className="aethel-button aethel-button-danger w-full text-xs">
             Redefinir todas as configuracoes
           </button>
         </div>
@@ -529,7 +529,7 @@ export default function SettingsEditor() {
                       <code className="text-[11px] text-[var(--aethel-text-quaternary)]">{setting.key}</code>
                     </div>
                     {isModified && (
-                      <button
+                      <button type="button"
                         onClick={() => resetSetting(setting.key)}
                         className="aethel-button aethel-button-ghost text-xs"
                       >

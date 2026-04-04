@@ -249,7 +249,7 @@ function ContextMenu({
     >
       {items.map((item) => (
         <React.Fragment key={item.id}>
-          <button
+          <button type="button"
             onClick={() => {
               onAction(item.id);
               onClose();
@@ -422,7 +422,7 @@ function ImportModal({
           alignItems: 'center',
         }}>
           <h2 style={{ margin: 0, fontSize: '18px', color: 'var(--aethel-text-primary)' }}>Import Assets</h2>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               background: 'none',
@@ -488,7 +488,7 @@ function ImportModal({
               }}>
                 <span style={{ color: 'var(--aethel-text-primary)' }}>{file.name}</span>
                 <span style={{ color: 'var(--aethel-text-muted)' }}>{formatFileSize(file.size)}</span>
-                <button
+                <button type="button"
                   onClick={() => setFiles(files.filter((_, j) => j !== i))}
                   style={{
                     background: 'none',
@@ -566,7 +566,7 @@ function ImportModal({
           justifyContent: 'flex-end',
           gap: '12px',
         }}>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               padding: '8px 24px',
@@ -580,7 +580,7 @@ function ImportModal({
           >
             Cancel
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               onImport(files, options);
               onClose();
@@ -936,7 +936,7 @@ export default function ContentBrowser({
             }}>
               <div style={{ fontSize: '64px', marginBottom: '16px' }}>📭</div>
               <div>No assets found</div>
-              <button
+              <button type="button"
                 onClick={() => setShowImportModal(true)}
                 style={{
                   marginTop: '16px',

@@ -87,7 +87,7 @@ export default function AdminUsers() {
         subtitle='Gerencie perfis, planos e status de ativação.'
         meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
         actions={(
-          <button
+          <button type="button"
             onClick={fetchUsers}
             className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
           >
@@ -116,7 +116,7 @@ export default function AdminUsers() {
         />
         <div className="flex items-center gap-2 flex-wrap">
           {(['all', 'starter', 'basic', 'pro', 'studio', 'enterprise'] as const).map((plan) => (
-            <button
+            <button type="button"
               key={plan}
               onClick={() => setPlanFilter(plan)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
@@ -160,7 +160,7 @@ export default function AdminUsers() {
                 <td className='p-3'>
                   <div className="flex items-center gap-2">
                     <span>{user.email}</span>
-                    <button
+                    <button type="button"
                       onClick={() => navigator.clipboard.writeText(user.email)}
                       className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
                     >

@@ -166,13 +166,13 @@ export class GameScene {
       <div style={{ padding: '12px 16px', borderBottom: '1px solid #1a1f3a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: '18px', fontWeight: 'bold' }}>⚡ The Forge (Aethel Engine)</div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => addTab('editor')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
+          <button type="button" onClick={() => addTab('editor')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
             + Editor
           </button>
-          <button onClick={() => addTab('canvas')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
+          <button type="button" onClick={() => addTab('canvas')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
             + Canvas
           </button>
-          <button onClick={() => addTab('chat')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
+          <button type="button" onClick={() => addTab('chat')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
             + Chat
           </button>
         </div>
@@ -196,7 +196,7 @@ export class GameScene {
             }}
           >
             <span>{tab.name}</span>
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 closeTab(tab.id);
@@ -276,10 +276,10 @@ export class GameScene {
 
               {/* Toolbar */}
               <div style={{ padding: '8px 12px', borderTop: '1px solid #1a1f3a', display: 'flex', gap: '8px' }}>
-                <button onClick={executeCode} style={{ padding: '6px 12px', background: '#00ff88', color: '#000', border: 'none', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold' }}>
+                <button type="button" onClick={executeCode} style={{ padding: '6px 12px', background: '#00ff88', color: '#000', border: 'none', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold' }}>
                   ▶ Run
                 </button>
-                <button onClick={validateCode} style={{ padding: '6px 12px', background: '#1a1f3a', color: '#00ff88', border: '1px solid #00ff88', cursor: 'pointer', borderRadius: '4px' }}>
+                <button type="button" onClick={validateCode} style={{ padding: '6px 12px', background: '#1a1f3a', color: '#00ff88', border: '1px solid #00ff88', cursor: 'pointer', borderRadius: '4px' }}>
                   ✓ Validate
                 </button>
               </div>

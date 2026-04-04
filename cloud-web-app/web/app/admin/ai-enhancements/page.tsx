@@ -94,7 +94,7 @@ export default function AIEnhancements() {
           <h1 className='text-3xl font-bold'>Melhorias Avançadas de IA</h1>
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Roadmap operacional com controle de status e aprovação.</p>
         </div>
-        <button onClick={fetchEnhancements} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
+        <button type="button" onClick={fetchEnhancements} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
         </button>
       </div>
@@ -131,7 +131,7 @@ export default function AIEnhancements() {
             onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
           />
         </div>
-        <button
+        <button type="button"
           onClick={handleCreate}
           disabled={saving || !form.name.trim()}
           className='mt-4 px-4 py-2 rounded bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
@@ -180,7 +180,7 @@ export default function AIEnhancements() {
                     {statusLabels[item.status] || item.status}
                   </span>
                 </div>
-                <button
+                <button type="button"
                   onClick={() => toggleApplied(item)}
                   className='mt-3 px-3 py-2 rounded bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] text-sm'
                 >

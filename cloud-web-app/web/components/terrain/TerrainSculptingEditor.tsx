@@ -269,7 +269,7 @@ function Toolbar({ selectedTool, onToolChange }: ToolbarProps) {
           </h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
             {category.tools.map(tool => (
-              <button
+              <button type="button"
                 key={tool.id}
                 onClick={() => onToolChange(tool.id as TerrainToolType)}
                 title={tool.label}
@@ -374,7 +374,7 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
         </label>
         <div style={{ display: 'flex', gap: '8px' }}>
           {(['circle', 'square'] as BrushShape[]).map(shape => (
-            <button
+            <button type="button"
               key={shape}
               onClick={() => update('shape', shape)}
               style={{
@@ -446,7 +446,7 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
         <h3 style={{ color: 'white', fontSize: '14px' }}>Terrain Layers</h3>
-        <button
+        <button type="button"
           onClick={onAdd}
           style={{
             background: 'var(--aethel-primary)',
@@ -510,7 +510,7 @@ function LayersPanel({ layers, selectedLayer, onSelect, onAdd, onRemove, onUpdat
               {index + 1}
             </div>
             {/* Delete */}
-            <button
+            <button type="button"
               onClick={(e) => { e.stopPropagation(); onRemove(layer.id); }}
               style={{
                 background: 'transparent',
@@ -711,7 +711,7 @@ function ErosionPanel({ settings, onChange, onApply }: ErosionPanelProps) {
           />
         </div>
       )}
-      <button
+      <button type="button"
         onClick={onApply}
         style={{
           width: '100%',
@@ -1062,7 +1062,7 @@ export function TerrainSculptingEditor({
           display: 'flex',
           gap: '8px',
         }}>
-          <button
+          <button type="button"
             onClick={() => setShowStats(s => !s)}
             style={{
               background: showStats ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
@@ -1076,7 +1076,7 @@ export function TerrainSculptingEditor({
           >
             📊 Stats
           </button>
-          <button
+          <button type="button"
             onClick={() => setShowErosion(s => !s)}
             style={{
               background: showErosion ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',

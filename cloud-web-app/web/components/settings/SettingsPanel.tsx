@@ -229,7 +229,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
         </div>
 
         {isModified && (
-          <button
+          <button type="button"
             onClick={onReset}
             style={{
               padding: '4px 8px',
@@ -319,7 +319,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onActivate
           )}
 
           {profile.id !== 'default' && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
@@ -506,7 +506,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
             }}
           />
           {searchQuery && (
-            <button
+            <button type="button"
               onClick={() => setSearchQuery('')}
               style={{
                 background: 'transparent',
@@ -533,7 +533,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
             { id: 'profiles' as const, label: 'Perfis', icon: User },
             { id: 'sync' as const, label: 'Sincronizar', icon: Cloud },
           ].map((tab) => (
-            <button
+            <button type="button"
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
@@ -577,7 +577,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
               >
                 {filteredSettings.map((category) => (
                   <div key={category.id}>
-                    <button
+                    <button type="button"
                       onClick={() => toggleCategory(category.id)}
                       style={{
                         display: 'flex',
@@ -666,7 +666,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                       fontSize: '14px',
                     }}
                   />
-                  <button
+                  <button type="button"
                     onClick={handleCreateProfile}
                     style={{
                       display: 'flex',
@@ -762,7 +762,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   <div style={{ display: 'flex', gap: '8px' }}>
                     {syncState.enabled ? (
                       <>
-                        <button
+                        <button type="button"
                           onClick={handleSync}
                           disabled={syncState.status === 'syncing'}
                           style={{
@@ -785,7 +785,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                           />
                           {syncState.status === 'syncing' ? 'Sincronizando...' : 'Sincronizar Agora'}
                         </button>
-                        <button
+                        <button type="button"
                           onClick={handleDisableSync}
                           style={{
                             padding: '8px 16px',
@@ -800,7 +800,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                         </button>
                       </>
                     ) : (
-                      <button
+                      <button type="button"
                         onClick={handleEnableSync}
                         style={{
                           padding: '8px 16px',
@@ -879,7 +879,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                   Importar / Exportar
                 </h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
+                  <button type="button"
                     onClick={handleExport}
                     style={{
                       display: 'flex',
@@ -896,7 +896,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     <Download size={16} />
                     Exportar Configurações
                   </button>
-                  <button
+                  <button type="button"
                     onClick={handleImport}
                     style={{
                       display: 'flex',

@@ -149,13 +149,13 @@ export default function BillingPage() {
             </p>
           </div>
           <div className="aethel-flex aethel-gap-2">
-            <button
+            <button type="button"
               onClick={() => setCurrency('BRL')}
               className={`px-4 py-2 aethel-rounded ${currency === 'BRL' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
             >
               BRL
             </button>
-            <button
+            <button type="button"
               onClick={() => setCurrency('USD')}
               className={`px-4 py-2 aethel-rounded ${currency === 'USD' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
             >
@@ -171,13 +171,13 @@ export default function BillingPage() {
 
         <div className="mb-6">
           <div className="inline-flex aethel-items-center aethel-gap-2 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] aethel-p-1">
-            <button
+            <button type="button"
               onClick={() => setBillingCycle('month')}
               className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'month' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}`}
             >
               Mensal
             </button>
-            <button
+            <button type="button"
               onClick={() => setBillingCycle('year')}
               className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'year' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}`}
             >
@@ -189,7 +189,7 @@ export default function BillingPage() {
         <div className="mb-8">
           <div className="aethel-flex aethel-items-center aethel-justify-between mb-3">
             <h2 className="text-xl font-bold">Uso atual</h2>
-            <button
+            <button type="button"
               onClick={() => setShowUsage((prev) => !prev)}
               className="text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
             >

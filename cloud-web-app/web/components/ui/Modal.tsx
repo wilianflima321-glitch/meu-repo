@@ -111,7 +111,7 @@ export function Modal({
                 )}
               </div>
               {showCloseButton && (
-                <button
+                <button type="button"
                   onClick={onClose}
                   className="
                     flex-shrink-0 p-2 rounded-lg
@@ -187,10 +187,10 @@ export function ConfirmModal({
       size="sm"
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} disabled={loading}>
+          <button type="button" variant="ghost" onClick={onClose} disabled={loading}>
             {cancelText}
           </Button>
-          <Button
+          <button type="button"
             variant={confirmVariant}
             onClick={onConfirm}
             loading={loading}

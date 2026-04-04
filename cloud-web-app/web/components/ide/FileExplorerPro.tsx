@@ -120,7 +120,7 @@ function FileTreeNode({
 
   return (
     <>
-      <button
+      <button type="button"
         onClick={() => isFolder ? onToggle(node.id) : onSelect(node)}
         onContextMenu={(e) => onContextMenu(e, node)}
         onKeyDown={(event) => {
@@ -599,13 +599,13 @@ export default function FileExplorerPro({
                   Crie um arquivo ou pasta para comecar a editar neste projeto.
                 </div>
               <div className="flex items-center justify-center gap-2">
-                <button
+                <button type="button"
                   onClick={() => onFileCreate?.('/', 'file')}
                   className="px-2.5 py-1.5 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80"
                 >
                   Novo arquivo
                 </button>
-                <button
+                <button type="button"
                   onClick={() => onFileCreate?.('/', 'folder')}
                   className="px-2.5 py-1.5 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80"
                 >

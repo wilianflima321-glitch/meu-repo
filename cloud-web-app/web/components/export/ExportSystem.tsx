@@ -635,7 +635,7 @@ export function ExportarDialog({
           justifyContent: 'space-between'
         }}>
           <h2 style={{ color: 'var(--aethel-text-primary)', margin: 0, fontSize: 16 }}>Exportar Media</h2>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               background: 'transparent',
@@ -666,7 +666,7 @@ export function ExportarDialog({
                   {category}
                 </div>
                 {presets.map(preset => (
-                  <button
+                  <button type="button"
                     key={preset.id}
                     onClick={() => {
                       setSelectedPreset(preset)
@@ -860,7 +860,7 @@ export function ExportarDialog({
               </div>
             </div>
             {/* Advanced toggle */}
-            <button
+            <button type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
               style={{
                 background: 'transparent',
@@ -956,7 +956,7 @@ export function ExportarDialog({
           justifyContent: 'flex-end',
           gap: 12
         }}>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               padding: '8px 20px',
@@ -970,7 +970,7 @@ export function ExportarDialog({
           >
             Cancelar
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               onExportar(customSettings)
               onClose()
@@ -1088,7 +1088,7 @@ export function ExportarQueuePanel({ jobs, onCancelar, onRemover }: ExportarQueu
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             {job.status === 'processing' && (
-              <button
+              <button type="button"
                 onClick={() => onCancelar(job.id)}
                 style={{
                   padding: '4px 12px',
@@ -1104,7 +1104,7 @@ export function ExportarQueuePanel({ jobs, onCancelar, onRemover }: ExportarQueu
               </button>
             )}
             {['completed', 'failed', 'cancelled'].includes(job.status) && (
-              <button
+              <button type="button"
                 onClick={() => onRemover(job.id)}
                 style={{
                   padding: '4px 12px',

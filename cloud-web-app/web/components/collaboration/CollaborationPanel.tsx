@@ -184,7 +184,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, isHost, isCurrentUser
         )}
 
         {!isCurrentUser && onFollow && (
-          <button
+          <button type="button"
             onClick={onFollow}
             style={{
               padding: '4px',
@@ -256,7 +256,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           {Object.keys(message.reactions).length > 0 && (
             <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
               {Object.entries(message.reactions).map(([emoji, users]) => (
-                <button
+                <button type="button"
                   key={emoji}
                   onClick={() => onReaction(emoji)}
                   style={{
@@ -281,7 +281,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 
         {/* Actions */}
         <div style={{ position: 'relative' }}>
-          <button
+          <button type="button"
             onClick={() => setShowReactions(!showReactions)}
             style={{
               padding: '4px',
@@ -312,7 +312,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               }}
             >
               {reactionEmojis.map((emoji) => (
-                <button
+                <button type="button"
                   key={emoji}
                   onClick={() => {
                     onReaction(emoji);
@@ -489,7 +489,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
               fontSize: '12px',
             }}
           />
-          <button
+          <button type="button"
             onClick={handleCopyLink}
             style={{
               display: 'flex',
@@ -511,7 +511,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-          <button
+          <button type="button"
             onClick={() => setActiveTab('users')}
             style={{
               flex: 1,
@@ -530,7 +530,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             <Users size={16} />
             Users ({users.length})
           </button>
-          <button
+          <button type="button"
             onClick={() => setActiveTab('chat')}
             style={{
               flex: 1,
@@ -585,7 +585,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
               )}
 
               {/* Invite button */}
-              <button
+              <button type="button"
                 onClick={handleCopyLink}
                 style={{
                   display: 'flex',
@@ -681,7 +681,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
                       fontSize: '14px',
                     }}
                   />
-                  <button
+                  <button type="button"
                     onClick={handleSendMessage}
                     disabled={!inputMessage.trim()}
                     style={{
@@ -711,7 +711,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
           justifyContent: 'space-between',
         }}
       >
-        <button
+        <button type="button"
           onClick={handleLeaveSession}
           style={{
             display: 'flex',

@@ -54,7 +54,7 @@ export default function Compliance() {
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={fetchPolicies}
           className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
         >

@@ -81,7 +81,7 @@ export default function BillingCheckoutPage() {
         <div className='max-w-lg w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-6'>
           <h1 className='text-xl font-semibold mb-2'>Checkout indisponível</h1>
           <p className='text-sm text-[var(--aethel-text-secondary)] mb-4'>{error || 'Não foi possível iniciar o checkout.'}</p>
-          <button
+          <button type="button"
             onClick={() => router.push('/billing')}
             className='px-4 py-2 rounded bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] text-sm'
           >

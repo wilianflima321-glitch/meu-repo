@@ -172,7 +172,7 @@ function ColorEditor({
               cursor: 'pointer',
             }}
           />
-          <button
+          <button type="button"
             onClick={() => setShowPicker(false)}
             style={{
               display: 'block',
@@ -351,7 +351,7 @@ function AssetSelector({
           fontSize: '12px',
         }}
       />
-      <button
+      <button type="button"
         onClick={() => {/* Open asset browser */}}
         disabled={readOnly}
         style={{
@@ -367,7 +367,7 @@ function AssetSelector({
         📂
       </button>
       {value && (
-        <button
+        <button type="button"
           onClick={() => onChange(null)}
           disabled={readOnly}
           style={{
@@ -559,7 +559,7 @@ function ComponentSection({
         </div>
         {/* Remove button */}
         {component.removable && (
-          <button
+          <button type="button"
             onClick={async (e) => {
               e.stopPropagation();
               const shouldRemove = await openConfirmDialog({
@@ -612,7 +612,7 @@ function ComponentSection({
           ))}
           {/* Advanced toggle */}
           {advancedProps.length > 0 && (
-            <button
+            <button type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
               style={{
                 width: '100%',
@@ -678,7 +678,7 @@ function TransformSection({
           Transform
         </span>
         {/* Reset button */}
-        <button
+        <button type="button"
           onClick={(e) => {
             e.stopPropagation();
             onChange({
@@ -711,7 +711,7 @@ function TransformSection({
               marginBottom: '4px',
             }}>
               <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Position</span>
-              <button
+              <button type="button"
                 onClick={() => onChange({ ...transform, position: new THREE.Vector3() })}
                 style={{
                   background: 'none',
@@ -738,7 +738,7 @@ function TransformSection({
               marginBottom: '4px',
             }}>
               <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Rotation</span>
-              <button
+              <button type="button"
                 onClick={() => onChange({ ...transform, rotation: new THREE.Euler() })}
                 style={{
                   background: 'none',
@@ -776,7 +776,7 @@ function TransformSection({
               marginBottom: '4px',
             }}>
               <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Scale</span>
-              <button
+              <button type="button"
                 onClick={() => onChange({ ...transform, scale: new THREE.Vector3(1, 1, 1) })}
                 style={{
                   background: 'none',
@@ -1103,7 +1103,7 @@ export default function DetailsPanel({
         ))}
         {/* Add Component Button */}
         <div style={{ position: 'relative' }}>
-          <button
+          <button type="button"
             onClick={() => setShowAddComponent(!showAddComponent)}
             style={{
               width: '100%',
@@ -1139,7 +1139,7 @@ export default function DetailsPanel({
               zIndex: 100,
             }}>
               {availableComponents.map((comp) => (
-                <button
+                <button type="button"
                   key={comp.type}
                   onClick={() => {
                     onAddComponent?.(comp.type);

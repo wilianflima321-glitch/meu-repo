@@ -271,7 +271,7 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
                 const isSelected = index === selectedIndex;
 
                 return (
-                  <button
+                  <button type="button"
                     key={file.path}
                     onClick={() => openFile(file)}
                     onMouseEnter={() => setSelectedIndex(index)}

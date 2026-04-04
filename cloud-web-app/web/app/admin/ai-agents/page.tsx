@@ -72,7 +72,7 @@ export default function AIAgentsPage() {
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={fetchWorkflows}
           className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
@@ -137,7 +137,7 @@ export default function AIAgentsPage() {
         ) : error ? (
           <div>
             <p className="text-sm text-[var(--aethel-error)]">{error}</p>
-            <button className="mt-3 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-3 py-1 rounded" onClick={fetchWorkflows}>
+            <button type="button" className="mt-3 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-3 py-1 rounded" onClick={fetchWorkflows}>
               Tentar novamente
             </button>
           </div>

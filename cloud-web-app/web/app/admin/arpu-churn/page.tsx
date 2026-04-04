@@ -50,7 +50,7 @@ export default function ArpuChurnPage() {
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">ARPU e churn</h1>
         <p className="text-sm text-[var(--aethel-error)]">{error}</p>
-        <button className="mt-4 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-4 py-2 rounded" onClick={fetchMetrics}>
+        <button type="button" className="mt-4 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-4 py-2 rounded" onClick={fetchMetrics}>
           Tentar novamente
         </button>
       </div>

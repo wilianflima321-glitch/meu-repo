@@ -427,7 +427,7 @@ function Toolbar({
       borderBottom: '1px solid var(--aethel-border-primary)',
     }}>
       {/* Brush Active Toggle */}
-      <button
+      <button type="button"
         onClick={() => onBrushActiveChange(!brushActive)}
         style={{
           padding: '8px 16px',
@@ -448,7 +448,7 @@ function Toolbar({
       {/* Mode Buttons */}
       <div style={{ display: 'flex', gap: '4px' }}>
         {modes.map(({ mode, icon, label }) => (
-          <button
+          <button type="button"
             key={mode}
             onClick={() => onBrushSettingsChange({ ...brushSettings, mode })}
             style={{
@@ -473,7 +473,7 @@ function Toolbar({
           <div style={{ width: '1px', height: '24px', background: 'var(--aethel-surface-quaternary)' }} />
           <div style={{ display: 'flex', gap: '4px' }}>
             {operations.map(({ op, icon, label }) => (
-              <button
+              <button type="button"
                 key={op}
                 onClick={() => onBrushSettingsChange({ ...brushSettings, operation: op })}
                 style={{
@@ -498,7 +498,7 @@ function Toolbar({
 
       {/* Generate Menu */}
       <div style={{ position: 'relative' }}>
-        <button
+        <button type="button"
           style={{
             padding: '6px 12px',
             background: 'var(--aethel-surface-primary)',
@@ -532,7 +532,7 @@ function Toolbar({
           }}
         >
           {['flat', 'hills', 'mountains', 'valley', 'island', 'canyon'].map((type) => (
-            <button
+            <button type="button"
               key={type}
               onClick={() => {
                 onGenerateTerrain(type);
@@ -561,7 +561,7 @@ function Toolbar({
       </div>
 
       {/* Import/Export */}
-      <button
+      <button type="button"
         onClick={onImport}
         style={{
           padding: '6px 12px',
@@ -575,7 +575,7 @@ function Toolbar({
       >
         📥 Import
       </button>
-      <button
+      <button type="button"
         onClick={onExport}
         style={{
           padding: '6px 12px',
@@ -707,7 +707,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
             { name: 'Hard', size: 5, strength: 0.8, falloff: 0.5 },
             { name: 'Large', size: 30, strength: 0.2, falloff: 3 },
           ].map((preset) => (
-            <button
+            <button type="button"
               key={preset.name}
               onClick={() => onBrushSettingsChange({
                 ...brushSettings,
@@ -773,7 +773,7 @@ function LayersPanel({
         alignItems: 'center',
       }}>
         🎨 Terrain Layers
-        <button
+        <button type="button"
           onClick={onAddLayer}
           style={{
             padding: '4px 8px',
@@ -814,7 +814,7 @@ function LayersPanel({
               <span style={{ flex: 1, color: 'var(--aethel-text-primary)', fontSize: '13px' }}>{layer.name}</span>
               <span style={{ color: 'var(--aethel-text-muted)', fontSize: '11px' }}>#{index}</span>
               {layers.length > 1 && (
-                <button
+                <button type="button"
                   onClick={(e) => { e.stopPropagation(); onRemoveLayer(layer.id); }}
                   style={{
                     background: 'none',
@@ -1125,7 +1125,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
             borderBottom: '1px solid var(--aethel-border-primary)',
           }}>
             {(['brush', 'layers'] as const).map((panel) => (
-              <button
+              <button type="button"
                 key={panel}
                 onClick={() => setActivePanel(panel)}
                 style={{

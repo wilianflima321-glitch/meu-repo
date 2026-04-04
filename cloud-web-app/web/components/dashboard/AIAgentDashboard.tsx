@@ -329,7 +329,7 @@ export function AIAgentDashboard({
             </span>
           </div>
 
-          <button
+          <button type="button"
             onClick={refresh}
             disabled={isRefreshing}
             className="aethel-button aethel-button-ghost rounded-lg p-2"
@@ -343,7 +343,7 @@ export function AIAgentDashboard({
         {/* Tabs */}
         <div className="flex gap-1 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
           {(['agents', 'history', 'metrics'] as const).map((tab) => (
-            <button
+            <button type="button"
               key={tab}
               onClick={() => setView(tab)}
               className={`flex-1 aethel-button rounded-lg px-3 py-1.5 text-xs font-semibold ${
@@ -395,7 +395,7 @@ export function AIAgentDashboard({
                       {agent.status}
                     </span>
                     {(agent.status === 'running' || agent.status === 'waiting') && (
-                      <button
+                      <button type="button"
                         onClick={(e) => {
                           e.stopPropagation()
                           handleKillAgent(agent.id)

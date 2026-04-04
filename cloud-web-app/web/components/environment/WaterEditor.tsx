@@ -311,7 +311,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
 
   return (
     <div className="mb-4">
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
@@ -660,7 +660,7 @@ export default function WaterEditor({
 
         {/* Export button */}
         <div className="absolute top-4 right-4">
-          <button
+          <button type="button"
             onClick={() => onExport?.(params)}
             className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] rounded"
           >
@@ -683,7 +683,7 @@ export default function WaterEditor({
             <label className="text-xs text-[var(--aethel-text-tertiary)] block mb-2">Water Type</label>
             <div className="grid grid-cols-3 gap-1">
               {(['ocean', 'lake', 'river', 'pond', 'pool'] as WaterType[]).map((type) => (
-                <button
+                <button type="button"
                   key={type}
                   onClick={() => updateParam('type', type)}
                   className={`p-2 rounded text-xs capitalize flex flex-col items-center gap-1 ${
@@ -703,7 +703,7 @@ export default function WaterEditor({
           <CollapsibleSection title="Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
               {WATER_PRESETS.map((preset) => (
-                <button
+                <button type="button"
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded text-left ${

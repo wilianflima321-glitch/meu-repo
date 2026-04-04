@@ -322,7 +322,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
   switch (setting.type) {
     case 'toggle':
       return (
-        <button
+        <button type="button"
           onClick={() => onChange(!setting.value)}
           className={`
             w-11 h-6 rounded-full transition-colors relative
@@ -465,7 +465,7 @@ export default function EngineSettingsPage() {
         <div className="flex-1 overflow-y-auto py-2">
           {SETTING_SECTIONS.map(section => (
             <div key={section.id}>
-              <button
+              <button type="button"
                 onClick={() => {
                   setActiveSection(section.id)
                   if (section.subsections) {
@@ -488,7 +488,7 @@ export default function EngineSettingsPage() {
               {activeSection === section.id && section.subsections && (
                 <div className="ml-4 pl-4 border-l border-[var(--aethel-border-primary)]">
                   {section.subsections.map(sub => (
-                    <button
+                    <button type="button"
                       key={sub.id}
                       onClick={() => setActiveSubsection(sub.id)}
                       className={`
@@ -525,14 +525,14 @@ export default function EngineSettingsPage() {
           <div className="flex items-center gap-2">
             {hasChanges && (
               <>
-                <button
+                <button type="button"
                   onClick={handleReset}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Redefinir
                 </button>
-                <button
+                <button type="button"
                   onClick={handleSave}
                   className="flex items-center gap-2 px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
                 >

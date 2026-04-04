@@ -182,7 +182,7 @@ const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({
           <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{service.name}</span>
         </div>
         {service.status === 'offline' && onFix && (
-          <button onClick={onFix} className="aethel-button aethel-button-secondary text-xs">
+          <button type="button" onClick={onFix} className="aethel-button aethel-button-secondary text-xs">
             Corrigir
           </button>
         )}
@@ -304,7 +304,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={(event) => {
               event.stopPropagation()
               checkAllServices()
@@ -317,7 +317,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
           </button>
 
           {onSettingsClick && (
-            <button
+            <button type="button"
               onClick={(event) => {
                 event.stopPropagation()
                 onSettingsClick()
@@ -369,14 +369,14 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
             <div className="border-t border-[var(--aethel-border-subtle)] pt-4">
               <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--aethel-text-tertiary)]">Acoes rapidas</h4>
               <div className="flex flex-wrap gap-2">
-                <button
+                <button type="button"
                   onClick={handleFixOllama}
                   className="aethel-button aethel-button-secondary flex items-center gap-2 text-xs"
                 >
                   <Download className="h-4 w-4" />
                   Baixar Ollama
                 </button>
-                <button
+                <button type="button"
                   onClick={handleFixBlender}
                   className="aethel-button aethel-button-secondary flex items-center gap-2 text-xs"
                 >

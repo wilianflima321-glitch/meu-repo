@@ -245,13 +245,13 @@ export function MixerChannel({
 
       {/* Buttons */}
       <div className="flex gap-1">
-        <button
+        <button type="button"
           onClick={onMuteToggle}
           className={`px-2 py-1 text-xs rounded ${muted ? 'bg-[var(--aethel-error-dark)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
         >
           M
         </button>
-        <button
+        <button type="button"
           onClick={onSoloToggle}
           className={`px-2 py-1 text-xs rounded ${solo ? 'bg-[var(--aethel-warning-dark)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
         >

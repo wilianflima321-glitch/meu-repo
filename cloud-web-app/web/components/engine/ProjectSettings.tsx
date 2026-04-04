@@ -595,7 +595,7 @@ function PathEditor({ setting, value, onChange }: SettingEditorProps) {
           padding: '8px 12px',
         }}
       />
-      <button
+      <button type="button"
         onClick={() => {/* Open file picker */}}
         style={{
           padding: '8px 16px',
@@ -639,7 +639,7 @@ function KeybindEditor({ setting, value, onChange }: SettingEditorProps) {
   }, [handleKeyDown]);
 
   return (
-    <button
+    <button type="button"
       onClick={startListening}
       style={{
         padding: '8px 16px',
@@ -829,7 +829,7 @@ export default function ProjectSettings() {
 
         <div style={{ width: '1px', height: '24px', background: 'var(--aethel-border-primary)' }} />
 
-        <button
+        <button type="button"
           onClick={handleImport}
           style={{
             padding: '8px 16px',
@@ -843,7 +843,7 @@ export default function ProjectSettings() {
           📥 Import
         </button>
 
-        <button
+        <button type="button"
           onClick={handleExport}
           style={{
             padding: '8px 16px',
@@ -857,7 +857,7 @@ export default function ProjectSettings() {
           📤 Export
         </button>
 
-        <button
+        <button type="button"
           onClick={handleReset}
           style={{
             padding: '8px 16px',
@@ -871,7 +871,7 @@ export default function ProjectSettings() {
           🔄 Reset
         </button>
 
-        <button
+        <button type="button"
           onClick={handleSave}
           disabled={!hasChanges}
           style={{
@@ -899,7 +899,7 @@ export default function ProjectSettings() {
           overflowY: 'auto',
         }}>
           {categories.map((category) => (
-            <button
+            <button type="button"
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               style={{

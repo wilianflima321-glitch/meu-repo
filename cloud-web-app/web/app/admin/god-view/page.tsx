@@ -502,7 +502,7 @@ export default function GodViewPage() {
           </select>
 
           {/* Pause/Play */}
-          <button
+          <button type="button"
             onClick={() => setPaused(!paused)}
             className={`p-2 rounded-lg border ${
               paused
@@ -515,7 +515,7 @@ export default function GodViewPage() {
           </button>
 
           {/* Manual Refresh */}
-          <button
+          <button type="button"
             onClick={fetchSessions}
             className="p-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >

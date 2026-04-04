@@ -61,7 +61,7 @@ export default function MultiTenancyPage() {
             Visão por domínio (derivado de usuários reais). Gestão manual de locatários não está habilitada.
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={fetchTenants}
           className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >

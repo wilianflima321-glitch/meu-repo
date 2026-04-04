@@ -196,7 +196,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {step > 1 && (
-              <button
+              <button type="button"
                 onClick={handleBack}
                 className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
                 aria-label={`Voltar para a etapa ${step - 1}: ${STEP_LABELS[step - 2]}`}
@@ -272,7 +272,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
             {DOMAINS.map((domain) => {
               const Icon = domain.icon
               return (
-                <button
+                <button type="button"
                   key={domain.id}
                   onClick={() => handleDomainSelect(domain.id)}
                   onKeyDown={(e) => handleCardKeyDown(e, () => handleDomainSelect(domain.id))}
@@ -299,7 +299,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
             })}
           </div>
           {onSkip && (
-            <button
+            <button type="button"
               onClick={onSkip}
               className="text-sm text-[var(--aethel-text-quaternary)] underline underline-offset-2 transition-colors hover:text-[var(--aethel-text-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
             >
@@ -331,7 +331,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
             aria-label="Selecao de template"
           >
             {filteredTemplates.map((template) => (
-              <button
+              <button type="button"
                 key={template.id}
                 onClick={() => handleTemplateSelect(template)}
                 onKeyDown={(e) => handleCardKeyDown(e, () => handleTemplateSelect(template))}
@@ -420,7 +420,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
           </div>
 
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <button
+            <button type="button"
               onClick={handleStart}
               className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] px-8 py-3.5 text-base font-semibold text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] transition-all hover:shadow-xl hover:shadow-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary-light)] sm:w-auto sm:text-lg"
               aria-label={`Comece a construir o projeto ${selectedTemplate.name}`}
@@ -428,7 +428,7 @@ export default function OnboardingWizard({ onComplete, onSkip }: OnboardingWizar
               Comecar agora
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </button>
-            <button
+            <button type="button"
               onClick={handleBack}
               className="text-sm text-[var(--aethel-text-quaternary)] underline underline-offset-2 transition-colors hover:text-[var(--aethel-text-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
             >

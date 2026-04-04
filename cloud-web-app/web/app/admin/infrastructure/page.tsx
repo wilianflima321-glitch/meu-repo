@@ -301,7 +301,7 @@ export default function InfrastructureDashboard() {
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <XCircle className="w-12 h-12 text-[var(--aethel-error)]" />
         <p className="text-[var(--aethel-error)]">{error || 'Sem dados disponíveis'}</p>
-        <button
+        <button type="button"
           onClick={fetchData}
           className="px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
         >
@@ -333,7 +333,7 @@ export default function InfrastructureDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
+          <button type="button"
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
               autoRefresh

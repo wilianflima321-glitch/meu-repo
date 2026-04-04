@@ -88,7 +88,7 @@ export default function AdminAI() {
               <option value='staging'>Homologação</option>
               <option value='production'>Produção</option>
             </select>
-            <button
+            <button type="button"
               onClick={fetchSettings}
               className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
             >
@@ -180,7 +180,7 @@ export default function AdminAI() {
             rows={3}
           />
         </div>
-        <button
+        <button type="button"
           onClick={handleUpdate}
           disabled={saving}
           className='bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50'

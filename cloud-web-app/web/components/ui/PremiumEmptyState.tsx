@@ -470,7 +470,7 @@ export function FirstValueGuide({ steps, currentStep }: FirstValueGuideProps) {
               <p className="mt-0.5 text-xs text-[var(--aethel-text-tertiary)]">{step.description}</p>
 
               {index === currentStep && step.action && (
-                <button
+                <button type="button"
                   onClick={step.action}
                   className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary)] transition-colors"
                 >

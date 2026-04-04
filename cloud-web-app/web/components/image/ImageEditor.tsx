@@ -378,7 +378,7 @@ export function ImageEditor({
       {/* Toolbar */}
       <div className="w-12 bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)] flex flex-col items-center py-2 gap-1">
         {(['brush', 'eraser', 'fill', 'eyedropper', 'move'] as Tool[]).map(t => (
-          <button
+          <button type="button"
             key={t}
             onClick={() => setTool(t)}
             className={`w-10 h-10 rounded flex items-center justify-center text-lg ${
@@ -456,7 +456,7 @@ export function ImageEditor({
 
         <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)] mt-6 mb-3">Layers</h3>
 
-        <button
+        <button type="button"
           onClick={addLayer}
           className="w-full py-1 bg-[var(--aethel-primary)] rounded text-sm mb-2 hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
         >
@@ -485,7 +485,7 @@ export function ImageEditor({
               />
               <span className="text-sm text-[var(--aethel-text-primary)] flex-1 truncate">{layer.name}</span>
               {layers.length > 1 && (
-                <button
+                <button type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteLayer(layer.id);
@@ -499,7 +499,7 @@ export function ImageEditor({
           ))}
         </div>
 
-        <button
+        <button type="button"
           onClick={handleSave}
           className="w-full py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-sm mt-4 hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]"
         >

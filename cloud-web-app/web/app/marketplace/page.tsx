@@ -209,7 +209,7 @@ export default function MarketplacePage() {
 
             <div className="mt-4 flex flex-wrap gap-2">
               {categories.map((category) => (
-                <button
+                <button type="button"
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
@@ -263,7 +263,7 @@ export default function MarketplacePage() {
                   <div className="mt-5 flex gap-2">
                     {ext.installed ? (
                       <>
-                        <button
+                        <button type="button"
                           onClick={() => handleUninstall(ext.id)}
                           className="aethel-button aethel-button-danger w-full rounded-xl px-3 py-2 text-xs font-semibold"
                         >
@@ -274,7 +274,7 @@ export default function MarketplacePage() {
                         </button>
                       </>
                     ) : (
-                      <button
+                      <button type="button"
                         onClick={() => handleInstall(ext.id)}
                         className="aethel-button aethel-button-primary w-full rounded-xl px-3 py-2 text-xs font-semibold"
                       >

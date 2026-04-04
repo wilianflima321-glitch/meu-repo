@@ -375,7 +375,7 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
       }}>
         <span style={{ color: '#c1c2c5', fontSize: 12, fontWeight: 600 }}>History</span>
         <div style={{ display: 'flex', gap: 4 }}>
-          <button
+          <button type="button"
             onClick={undo}
             disabled={!canUndo}
             title={undoName ? `Undo: ${undoName}` : 'Nothing to undo'}
@@ -391,7 +391,7 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
           >
             ↶
           </button>
-          <button
+          <button type="button"
             onClick={redo}
             disabled={!canRedo}
             title={redoName ? `Redo: ${redoName}` : 'Nothing to redo'}
@@ -407,7 +407,7 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
           >
             ↷
           </button>
-          <button
+          <button type="button"
             onClick={clear}
             title="Clear history"
             style={{

@@ -862,7 +862,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {presets.map(preset => (
-                <button
+                <button type="button"
                   key={preset.label}
                   onClick={() => {
                     setWidth(preset.width)
@@ -955,7 +955,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
 
         {/* Actions */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 24 }}>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               padding: '8px 16px',
@@ -968,7 +968,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
           >
             Cancel
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               onCreate(name, {
                 resolution: { width, height },

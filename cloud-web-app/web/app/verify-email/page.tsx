@@ -115,7 +115,7 @@ function VerifyEmailContent() {
               <h1 className="text-xl font-semibold">Confirme seu email</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Abra o link enviado para ativar sua conta.</p>
               <div className="mt-5 space-y-3">
-                <button
+                <button type="button"
                   onClick={resendVerification}
                   disabled={isResending}
                   className="aethel-button aethel-button-primary w-full rounded-xl px-4 py-2 text-sm font-semibold"
@@ -142,7 +142,7 @@ function VerifyEmailContent() {
               <h1 className="text-xl font-semibold">Falha na verificacao</h1>
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">{error || 'Link invalido ou expirado.'}</p>
               <div className="mt-5 space-y-3">
-                <button
+                <button type="button"
                   onClick={resendVerification}
                   disabled={isResending}
                   className="aethel-button aethel-button-primary w-full rounded-xl px-4 py-2 text-sm font-semibold"

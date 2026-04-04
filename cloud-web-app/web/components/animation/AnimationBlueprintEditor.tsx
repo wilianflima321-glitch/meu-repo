@@ -127,7 +127,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
           transition: 'opacity 0.2s',
         }}
       >
-        <button
+        <button type="button"
           onClick={(e) => { e.stopPropagation(); onEdit(state); }}
           style={{
             background: 'var(--aethel-surface-quaternary)',
@@ -142,7 +142,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
           Edit
         </button>
         {!isDefault && state.type === 'state' && (
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onSetDefault(state.id); }}
             style={{
               background: 'var(--aethel-surface-quaternary)',
@@ -310,7 +310,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
               />
             )}
             {param.type === 'trigger' && (
-              <button
+              <button type="button"
                 onClick={() => {
                   onValueChange(param.id, true);
                   setTimeout(() => onValueChange(param.id, false), 100);
@@ -333,7 +333,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
               {typeof param.value === 'boolean' ? (param.value ? 'true' : 'false') : param.value.toFixed(2)}
             </span>
             {/* Delete */}
-            <button
+            <button type="button"
               onClick={() => removeParameter(param.id)}
               style={{
                 background: 'transparent',
@@ -382,7 +382,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
           <option value="bool">Bool</option>
           <option value="trigger">Trigger</option>
         </select>
-        <button
+        <button type="button"
           onClick={addParameter}
           style={{
             background: 'var(--aethel-primary)',
@@ -569,7 +569,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
         </div>
         {/* Actions */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               background: 'var(--aethel-surface-quaternary)',
@@ -582,7 +582,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
           >
             Cancel
           </button>
-          <button
+          <button type="button"
             onClick={() => onSave(editedState)}
             style={{
               background: 'var(--aethel-primary)',
@@ -729,7 +729,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Conditions</label>
-            <button
+            <button type="button"
               onClick={addCondition}
               style={{
                 background: 'var(--aethel-primary)',
@@ -807,7 +807,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                   fontSize: '11px',
                 }}
               />
-              <button
+              <button type="button"
                 onClick={() => removeCondition(index)}
                 style={{
                   background: 'transparent',
@@ -823,7 +823,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         </div>
         {/* Actions */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               background: 'var(--aethel-surface-quaternary)',
@@ -836,7 +836,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
           >
             Cancel
           </button>
-          <button
+          <button type="button"
             onClick={() => onSave(editedTransition)}
             style={{
               background: 'var(--aethel-primary)',
@@ -1061,7 +1061,7 @@ export function AnimationBlueprintEditor({
           onValueChange={handleParameterValueChange}
         />
         <div style={{ marginTop: '16px' }}>
-          <button
+          <button type="button"
             onClick={addState}
             style={{
               width: '100%',

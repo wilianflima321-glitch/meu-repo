@@ -262,7 +262,7 @@ export function LowBalanceModal({
             `}
           >
             {/* Close button */}
-            <button
+            <button type="button"
               onClick={onClose}
               className="absolute top-4 right-4 p-2 hover:bg-[var(--aethel-surface-quaternary)]
                        rounded-lg transition-colors z-10"
@@ -374,7 +374,7 @@ export function LowBalanceModal({
 
             {/* Actions */}
             <div className="p-6 pt-0 space-y-3">
-              <button
+              <button type="button"
                 onClick={handleContinue}
                 disabled={!selectedPackage || isProcessing}
                 className="w-full flex items-center justify-center gap-2 py-3
@@ -406,7 +406,7 @@ export function LowBalanceModal({
                 )}
               </button>
 
-              <button
+              <button type="button"
                 onClick={handleRemindLater}
                 className="w-full py-2.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
                          transition-colors"

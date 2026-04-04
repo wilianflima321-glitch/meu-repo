@@ -195,7 +195,7 @@ export function MobileSidebarOverlay({
               {title}
             </h2>
           )}
-          <button
+          <button type="button"
             onClick={onClose}
             className="ml-auto flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]"
             aria-label="Fechar menu"

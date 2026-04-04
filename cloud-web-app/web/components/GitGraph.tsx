@@ -168,7 +168,7 @@ export default function GitGraph() {
                     top: `${node.y - 10}px`
                   }}
                 >
-                  <button
+                  <button type="button"
                     onClick={() => handleCommitClick(node.commit)}
                     className="text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded px-2 py-1 transition-colors"
                   >
@@ -192,7 +192,7 @@ export default function GitGraph() {
         {selectedCommit && (
           <div className="w-96 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm border-l border-[var(--aethel-border-primary)] p-6 overflow-y-auto">
             <div className="mb-4">
-              <button
+              <button type="button"
                 onClick={() => setSelectedCommit(null)}
                 className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] mb-4"
               >

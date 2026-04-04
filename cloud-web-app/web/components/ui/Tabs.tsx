@@ -139,7 +139,7 @@ export function TabTrigger({
   const size = 'md'
 
   return (
-    <button
+    <button type="button"
       role="tab"
       aria-selected={isActive}
       aria-controls={`panel-${value}`}

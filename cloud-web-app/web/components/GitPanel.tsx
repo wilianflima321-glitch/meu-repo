@@ -143,13 +143,13 @@ export default function GitPanel() {
               Git - {status?.branch || 'main'}
             </h2>
             <div className="flex gap-2">
-              <button
+              <button type="button"
                 onClick={handlePull}
                 className="px-4 py-2 bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded-lg transition-colors"
               >
                 Pull
               </button>
-              <button
+              <button type="button"
                 onClick={handlePush}
                 disabled={!status?.ahead || status.ahead === 0}
                 className="px-4 py-2 bg-[var(--aethel-success)] hover:brightness-110 disabled:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
@@ -181,7 +181,7 @@ export default function GitPanel() {
             <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-[var(--aethel-text-primary)]">Staged Changes ({status.staged.length})</h3>
-                <button
+                <button type="button"
                   onClick={() => handleUnstage(status.staged.map(f => f.path))}
                   className="text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
@@ -214,7 +214,7 @@ export default function GitPanel() {
             <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-[var(--aethel-text-primary)]">Changes ({status.unstaged.length})</h3>
-                <button
+                <button type="button"
                   onClick={() => handleStage(status.unstaged.map(f => f.path))}
                   className="text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
@@ -288,7 +288,7 @@ export default function GitPanel() {
               className="w-full p-3 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg mb-3 resize-none focus:outline-none focus:ring-2 focus:ring-[var(--aethel-info)]"
               rows={3}
             />
-            <button
+            <button type="button"
               onClick={handleCommit}
               disabled={!commitMessage.trim()}
               className="w-full px-4 py-2 bg-[var(--aethel-primary)] hover:brightness-110 disabled:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"

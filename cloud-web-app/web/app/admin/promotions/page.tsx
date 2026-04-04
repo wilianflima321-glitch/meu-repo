@@ -155,7 +155,7 @@ export default function PromotionsPage() {
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={fetchPromotions}
           className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
@@ -229,7 +229,7 @@ export default function PromotionsPage() {
           )}
         </div>
         {formError && <p className="text-sm text-[var(--aethel-error)] mt-2">{formError}</p>}
-        <button
+        <button type="button"
           onClick={handleCreate}
           disabled={creating}
           className="mt-4 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-60"
@@ -250,7 +250,7 @@ export default function PromotionsPage() {
           />
           <div className="flex items-center gap-2">
             {(['all', 'active', 'inactive'] as const).map((status) => (
-              <button
+              <button type="button"
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
@@ -296,14 +296,14 @@ export default function PromotionsPage() {
                   >
                     {promo.active ? 'Ativa' : 'Inativa'}
                   </span>
-                  <button
+                  <button type="button"
                     onClick={() => handleToggle(promo)}
                     className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]"
                   >
                     {promo.active ? 'Desativar' : 'Ativar'}
                   </button>
                   {promo.code && (
-                    <button
+                    <button type="button"
                       onClick={() => navigator.clipboard.writeText(promo.code || '')}
                       className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]"
                     >

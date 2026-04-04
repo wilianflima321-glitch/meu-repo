@@ -207,7 +207,7 @@ function ErrorState({
         <div className="flex flex-col items-center justify-center py-8 gap-4">
             <AlertCircle className="w-10 h-10 text-destructive" />
             <p className="text-sm text-muted-foreground text-center">{message}</p>
-            <Button variant="outline" size="sm" onClick={onRetry}>
+            <button type="button" variant="outline" size="sm" onClick={onRetry}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Tentar novamente
             </Button>
@@ -851,7 +851,7 @@ export default function CreatorDashboard() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" onClick={handleRefetchAll} disabled={isRefreshing}>
+                        <button type="button" variant="outline" onClick={handleRefetchAll} disabled={isRefreshing}>
                             <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                             Atualizar
                         </Button>

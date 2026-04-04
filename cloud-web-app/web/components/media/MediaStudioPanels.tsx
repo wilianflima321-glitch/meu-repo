@@ -48,20 +48,20 @@ export function MediaStudioToolbar({
     <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
       <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">Media Studio</div>
 
-      <button
+      <button type="button"
         className="ml-3 px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         onClick={onTogglePlay}
       >
         {isPlaying ? 'Pausar' : 'Tocar'}
       </button>
-      <button
+      <button type="button"
         className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         onClick={onStop}
       >
         Parar
       </button>
 
-      <button
+      <button type="button"
         className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)] disabled:opacity-50"
         onClick={onExport}
         disabled={exporting}
@@ -123,7 +123,7 @@ export function MediaStudioAssetBin({ assets, selectedAssetId, onSelectAsset }: 
           </div>
         ) : (
           assets.map((asset) => (
-            <button
+            <button type="button"
               key={asset.id}
               onClick={() => onSelectAsset(asset.id)}
               className={
@@ -202,13 +202,13 @@ export function MediaStudioPreviewPanel({
               onSeek={onAudioSeek}
             />
             <div className="mt-2 flex gap-2">
-              <button
+              <button type="button"
                 className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
                 onClick={onAudioPlay}
               >
                 Tocar audio
               </button>
-              <button
+              <button type="button"
                 className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
                 onClick={onAudioPause}
               >

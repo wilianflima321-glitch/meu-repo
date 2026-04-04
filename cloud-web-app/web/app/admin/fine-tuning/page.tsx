@@ -129,7 +129,7 @@ export default function FineTuningPage() {
           <h1 className="text-2xl font-bold">Ajuste fino detalhado</h1>
           <p className="text-sm text-[var(--aethel-text-tertiary)]">Pipeline de conjuntos de dados e tarefas com auditoria.</p>
         </div>
-        <button onClick={() => Promise.all([fetchDatasets(), fetchJobs()])} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
+        <button type="button" onClick={() => Promise.all([fetchDatasets(), fetchJobs()])} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
       </div>
 
       {error && <div className="bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4">{error}</div>}
@@ -153,7 +153,7 @@ export default function FineTuningPage() {
             }}
             className="border p-2"
           />
-          <button onClick={handleUpload} disabled={loading} className="bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">Enviar</button>
+          <button type="button" onClick={handleUpload} disabled={loading} className="bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">Enviar</button>
         </div>
       </div>
 
@@ -178,7 +178,7 @@ export default function FineTuningPage() {
             <input type="number" step="0.001" value={learningRate} onChange={(e) => setLearningRate(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
-        <button onClick={handleStartTraining} disabled={loading || !selectedDataset} className="mt-4 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">Iniciar treinamento</button>
+        <button type="button" onClick={handleStartTraining} disabled={loading || !selectedDataset} className="mt-4 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">Iniciar treinamento</button>
       </div>
 
       <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 rounded-lg shadow mb-6">

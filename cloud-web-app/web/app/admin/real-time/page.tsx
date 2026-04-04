@@ -85,7 +85,7 @@ export default function RealTimePage() {
           )}
         </div>
         <div className="flex items-center gap-3">
-          <button
+          <button type="button"
             onClick={() => setAutoRefresh((prev) => !prev)}
             className={`px-3 py-2 rounded text-sm ${
               autoRefresh ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
@@ -93,7 +93,7 @@ export default function RealTimePage() {
           >
             {autoRefresh ? 'Auto: ativado' : 'Auto: desativado'}
           </button>
-          <button
+          <button type="button"
             onClick={fetchMetrics}
             className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
           >

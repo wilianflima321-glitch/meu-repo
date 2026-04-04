@@ -200,7 +200,7 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
         }
       `}>
         {/* Header */}
-        <button
+        <button type="button"
           onClick={() => setExpanded(!expanded)}
           className="w-full flex items-center justify-between p-3 text-left"
           aria-expanded={expanded}
@@ -246,7 +246,7 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
               <div className="mt-3 relative">
                 <div className="flex items-center justify-between bg-[var(--aethel-surface-tertiary)] rounded-t-lg px-3 py-1.5 border border-b-0 border-[var(--aethel-border-primary)]">
                   <span className="text-xs text-[var(--aethel-text-quaternary)]">codigo</span>
-                  <button
+                  <button type="button"
                     onClick={handleCopy}
                     className="text-xs text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] flex items-center gap-1"
                     aria-label={copied ? 'Codigo copiado' : 'Copiar codigo'}
@@ -328,7 +328,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
               )}
             </div>
           </div>
-          <button
+          <button type="button"
             onClick={() => setExpanded(!expanded)}
             className="p-1 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
             aria-expanded={expanded}
@@ -389,7 +389,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 mt-4">
-                <button
+                <button type="button"
                   onClick={onApply}
                   className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded-lg text-sm font-medium text-[var(--aethel-text-primary)] transition-colors"
                   aria-label="Revisar proposta"
@@ -397,7 +397,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
                   <Play className="w-4 h-4" />
                   Revisar proposta
                 </button>
-                <button
+                <button type="button"
                   onClick={onReject}
                   className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] rounded-lg text-sm text-[var(--aethel-text-secondary)] transition-colors"
                   aria-label="Descartar proposta"
@@ -416,7 +416,7 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
                 <X className="w-5 h-5" />
                 <span className="font-medium">Erro na tarefa</span>
               </div>
-              <button
+              <button type="button"
                 onClick={onRetry}
                 className="mt-2 flex items-center gap-2 rounded-lg bg-[var(--aethel-error)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110"
               >
@@ -789,7 +789,7 @@ export function SystemPanel() {
             disabled={isProcessing}
             aria-label="Descreva sua tarefa para o squad de IA"
           />
-          <button
+          <button type="button"
             onClick={handleSubmit}
             disabled={!input.trim() || isProcessing}
             className={`

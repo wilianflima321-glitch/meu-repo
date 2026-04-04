@@ -443,7 +443,7 @@ export default function AgentMonitorPage() {
               )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <button
+              <button type="button"
                 onClick={() => setIsPaused((prev) => !prev)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
                   isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
@@ -453,7 +453,7 @@ export default function AgentMonitorPage() {
                 {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
                 {isPaused ? 'Retomar' : 'Pausar stream'}
               </button>
-              <button
+              <button type="button"
                 onClick={() => void refreshCalls()}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]"
                 type="button"
@@ -461,7 +461,7 @@ export default function AgentMonitorPage() {
                 <RefreshCw className="w-4 h-4" />
                 Atualizar
               </button>
-              <button
+              <button type="button"
                 onClick={() => void runCoreLoopDrill()}
                 disabled={isRunningDrill}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] text-[var(--aethel-info-light)] disabled:opacity-60"
@@ -470,7 +470,7 @@ export default function AgentMonitorPage() {
                 <Zap className="w-4 h-4" />
                 {isRunningDrill ? 'Rodando drill...' : 'Run Drill'}
               </button>
-              <button
+              <button type="button"
                 onClick={() => void runProductionProbe()}
                 disabled={isRunningProductionProbe}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] text-[var(--aethel-success)] disabled:opacity-60"

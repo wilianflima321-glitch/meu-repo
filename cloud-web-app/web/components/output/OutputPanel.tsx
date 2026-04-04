@@ -84,14 +84,14 @@ export const OutputPanel: React.FC = () => {
         </select>
 
         <div className="output-actions">
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleClear}
             title="Clear output"
           >
             Clear
           </button>
-          <button
+          <button type="button"
             className={`action-button ${autoScroll ? 'active' : ''}`}
             onClick={() => setAutoScroll(!autoScroll)}
             title="Toggle auto scroll"

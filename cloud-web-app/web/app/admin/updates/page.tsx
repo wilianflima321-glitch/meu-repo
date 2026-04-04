@@ -73,13 +73,13 @@ export default function Updates() {
           )}
         </div>
         <div className='flex gap-2'>
-          <button
+          <button type="button"
             onClick={fetchUpdates}
             className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
           >
             Buscar atualizações
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               const blob = new Blob([JSON.stringify(data?.items || [], null, 2)], { type: 'application/json' });
               const url = URL.createObjectURL(blob);

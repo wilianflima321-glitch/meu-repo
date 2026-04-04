@@ -476,7 +476,7 @@ function HierarchyPanel({
         </span>
         <span style={{ flex: 1, fontSize: '13px' }}>{obj.name}</span>
         {obj.id === selectedId && (
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(obj.id);
@@ -516,7 +516,7 @@ function HierarchyPanel({
       }}>
         <span style={{ fontWeight: 'bold', color: '#fff' }}>Hierarquia</span>
         <div style={{ position: 'relative' }}>
-          <button
+          <button type="button"
             onClick={() => setShowAddMenu(!showAddMenu)}
             style={{
               background: '#4a90d9',
@@ -546,7 +546,7 @@ function HierarchyPanel({
                 3D Objects
               </div>
               {Object.keys(PRIMITIVE_GEOMETRIES).map(geom => (
-                <button
+                <button type="button"
                   key={geom}
                   onClick={() => {
                     onAdd('mesh', geom);
@@ -570,7 +570,7 @@ function HierarchyPanel({
               <div style={{ padding: '4px 12px', color: '#888', fontSize: '11px' }}>
                 Lights
               </div>
-              <button
+              <button type="button"
                 onClick={() => { onAdd('light'); setShowAddMenu(false); }}
                 style={{
                   display: 'block',
@@ -586,7 +586,7 @@ function HierarchyPanel({
                 💡 Point Light
               </button>
               <div style={{ borderTop: '1px solid #444', margin: '8px 0' }} />
-              <button
+              <button type="button"
                 onClick={() => { onAdd('camera'); setShowAddMenu(false); }}
                 style={{
                   display: 'block',
@@ -601,7 +601,7 @@ function HierarchyPanel({
               >
                 📷 Camera
               </button>
-              <button
+              <button type="button"
                 onClick={() => { onAdd('empty'); setShowAddMenu(false); }}
                 style={{
                   display: 'block',
@@ -1025,21 +1025,21 @@ function Toolbar({
     }}>
       {/* Transform tools */}
       <div style={{ display: 'flex', gap: '4px' }}>
-        <button
+        <button type="button"
           onClick={() => onModeChange('translate')}
           style={buttonStyle(transformMode === 'translate')}
           title="Move (W)"
         >
           ↔️ Move
         </button>
-        <button
+        <button type="button"
           onClick={() => onModeChange('rotate')}
           style={buttonStyle(transformMode === 'rotate')}
           title="Rotate (E)"
         >
           🔄 Rotate
         </button>
-        <button
+        <button type="button"
           onClick={() => onModeChange('scale')}
           style={buttonStyle(transformMode === 'scale')}
           title="Scale (R)"
@@ -1049,7 +1049,7 @@ function Toolbar({
       </div>
       <div style={{ width: '1px', height: '24px', background: '#444' }} />
       {/* View options */}
-      <button
+      <button type="button"
         onClick={onToggleGrid}
         style={buttonStyle(showGrid)}
       >
@@ -1057,7 +1057,7 @@ function Toolbar({
       </button>
       <div style={{ flex: 1 }} />
       {/* Play button */}
-      <button
+      <button type="button"
         onClick={onPlay}
         style={{
           ...buttonStyle(isPlaying),

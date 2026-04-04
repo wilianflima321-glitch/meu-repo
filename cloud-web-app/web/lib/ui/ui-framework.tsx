@@ -831,7 +831,7 @@ export function Button({
   };
   
   return (
-    <button
+    <button type="button"
       className={className}
       style={combinedStyles}
       disabled={disabled || loading}

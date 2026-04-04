@@ -306,13 +306,13 @@ export default function IDESettings() {
           )}
         </div>
         <div className='flex gap-2'>
-          <button
+          <button type="button"
             onClick={fetchSettings}
             className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
           >
             Atualizar
           </button>
-          <button
+          <button type="button"
             onClick={handleExport}
             className='px-3 py-2 rounded bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] text-sm'
           >
@@ -380,14 +380,14 @@ export default function IDESettings() {
             </select>
           </div>
           <div className='flex gap-2'>
-            <button
+            <button type="button"
               onClick={handleResetDefaults}
               className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
             >
               Restaurar padrões
             </button>
             {environment === 'staging' && (
-              <button
+              <button type="button"
                 onClick={handlePublish}
                 disabled={publishing}
                 className='px-3 py-2 rounded bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
@@ -395,7 +395,7 @@ export default function IDESettings() {
                 {publishing ? 'Publicando...' : 'Publicar em produção'}
               </button>
             )}
-            <button
+            <button type="button"
               onClick={handleSave}
               disabled={saving || loading || !hasChanges}
               className='px-3 py-2 rounded bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
@@ -436,7 +436,7 @@ export default function IDESettings() {
       <div className='bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] rounded-lg shadow p-4'>
         <div className='flex items-center justify-between mb-4'>
           <h2 className='text-xl font-semibold'>Histórico de Mudanças</h2>
-          <button
+          <button type="button"
             onClick={fetchHistory}
             className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'
           >

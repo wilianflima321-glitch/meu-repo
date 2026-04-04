@@ -364,7 +364,7 @@ export default function VFXGraphEditor() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setIsPlaying(!isPlaying)}
             className={`px-3 py-1 rounded text-sm font-medium ${
               isPlaying ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : 'bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
@@ -372,21 +372,21 @@ export default function VFXGraphEditor() {
           >
             {isPlaying ? ' Stop' : ' Play'}
           </button>
-          <button
+          <button type="button"
             className="px-3 py-1 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
             onClick={() => setShowAddMenu(true)}
           >
             + Add Node
           </button>
           <div className="flex items-center gap-1 ml-4">
-            <button
+            <button type="button"
               className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-xs"
               onClick={() => setZoom(z => Math.max(0.25, z - 0.25))}
             >
               -
             </button>
             <span className="text-[var(--aethel-text-primary)] text-xs w-12 text-center">{Math.round(zoom * 100)}%</span>
-            <button
+            <button type="button"
               className="px-2 py-1 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-xs"
               onClick={() => setZoom(z => Math.min(2, z + 0.25))}
             >
@@ -479,7 +479,7 @@ export default function VFXGraphEditor() {
                       {type}
                     </div>
                     {keys.map((key) => (
-                      <button
+                      <button type="button"
                         key={key}
                         className="w-full px-3 py-1 text-left text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]"
                         onClick={() => addNode(key)}
@@ -563,7 +563,7 @@ export default function VFXGraphEditor() {
                 ))}
               </div>
 
-              <button
+              <button type="button"
                 onClick={deleteSelectedNode}
                 className="mt-4 w-full px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)] rounded text-sm"
               >

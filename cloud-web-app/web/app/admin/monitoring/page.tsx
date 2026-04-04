@@ -197,7 +197,7 @@ export default function AdminMonitoringPage() {
                     Ultima atualizacao: {new Date(lastRefresh).toLocaleTimeString('pt-BR')}
                   </span>
                 )}
-                <button
+                <button type="button"
                   onClick={refresh}
                   disabled={loading}
                   className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] disabled:opacity-50 transition-colors"

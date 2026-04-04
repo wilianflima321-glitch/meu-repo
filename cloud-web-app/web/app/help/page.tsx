@@ -248,7 +248,7 @@ export default function HelpPage() {
                 key={category.name}
                 className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)]"
               >
-                <button
+                <button type="button"
                   onClick={() =>
                     setExpandedCategory(expandedCategory === category.name ? null : category.name)
                   }
@@ -270,7 +270,7 @@ export default function HelpPage() {
                   <div className="border-t border-[var(--aethel-border-subtle)]">
                     {category.faqs.map((faq) => (
                       <div key={faq.question} className="border-b border-[var(--aethel-border-subtle)] last:border-0">
-                        <button
+                        <button type="button"
                           onClick={() =>
                             setExpandedFaq(expandedFaq === faq.question ? null : faq.question)
                           }
@@ -289,7 +289,7 @@ export default function HelpPage() {
                             <p className="text-sm text-[var(--aethel-text-secondary)]">{faq.answer}</p>
                             <div className="mt-4 flex items-center gap-4 border-t border-[var(--aethel-border-subtle)] pt-4">
                               <span className="text-xs text-[var(--aethel-text-tertiary)]">Esta resposta foi ?til?</span>
-                              <button
+                              <button type="button"
                                 onClick={() => handleHelpful(faq.question, true)}
                                 className={`rounded-lg p-2 transition-colors ${
                                   helpful[faq.question] === true
@@ -299,7 +299,7 @@ export default function HelpPage() {
                               >
                                 <ThumbsUp className="h-4 w-4" />
                               </button>
-                              <button
+                              <button type="button"
                                 onClick={() => handleHelpful(faq.question, false)}
                                 className={`rounded-lg p-2 transition-colors ${
                                   helpful[faq.question] === false

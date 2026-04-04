@@ -64,7 +64,7 @@ export default function OutputPanel() {
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)]">
         <div className="flex">
           {channels.map(channel => (
-            <button
+            <button type="button"
               key={channel}
               onClick={() => setActiveChannel(channel)}
               className={`px-4 py-2 text-sm transition-colors border-b-2 ${
@@ -86,7 +86,7 @@ export default function OutputPanel() {
             onChange={(e) => setFilter(e.target.value)}
             className="px-3 py-1 bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] text-sm rounded focus:outline-none focus:ring-2 focus:ring-[var(--aethel-info)]"
           />
-          <button
+          <button type="button"
             onClick={clearMessages}
             className="rounded px-2 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]"
             title="Limpar saida"

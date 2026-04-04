@@ -220,7 +220,7 @@ interface PackageCardProps {
 
 function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
   return (
-    <button
+    <button type="button"
       onClick={onSelect}
       disabled={isLoading}
       className={`
@@ -358,7 +358,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
         <div className="flex items-center gap-3 text-[var(--aethel-error)]">
           <AlertCircle className="w-5 h-5" />
           <p>Erro ao carregar carteira</p>
-          <button onClick={() => refreshWallet()} className="text-sm underline">
+          <button type="button" onClick={() => refreshWallet()} className="text-sm underline">
             Tentar novamente
           </button>
         </div>
@@ -396,7 +396,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
           { id: 'history', label: 'Historico', icon: <Clock className="w-4 h-4" /> },
           { id: 'purchase', label: 'Comprar', icon: <CreditCard className="w-4 h-4" /> },
         ].map((tab) => (
-          <button
+          <button type="button"
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             className={`
@@ -464,7 +464,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-3">
-              <button
+              <button type="button"
                 onClick={() => setActiveTab('purchase')}
                 className="flex items-center justify-center gap-2 p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-xl text-[var(--aethel-text-primary)] font-medium transition-colors"
               >
@@ -472,7 +472,7 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
                 Comprar creditos
               </button>
               {onUpgrade && (
-                <button
+                <button type="button"
                   onClick={onUpgrade}
                   className="flex items-center justify-center gap-2 p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl text-[var(--aethel-text-primary)] font-medium transition-colors"
                 >

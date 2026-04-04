@@ -258,7 +258,7 @@ export function ExtensionManagerPanel({
         {/* View tabs */}
         <div className="mt-3 flex gap-1">
           {(['installed', 'marketplace', 'updates'] as ViewMode[]).map(mode => (
-            <button
+            <button type="button"
               key={mode}
               onClick={() => setViewMode(mode)}
               className={`
@@ -303,13 +303,13 @@ export function ExtensionManagerPanel({
           </select>
 
           <div className="ml-auto flex gap-1">
-            <button
+            <button type="button"
               onClick={() => setDisplayMode('list')}
               className={`p-1.5 rounded ${displayMode === 'list' ? 'bg-[var(--aethel-surface-secondary)]' : ''}`}
             >
               <List size={16} />
             </button>
-            <button
+            <button type="button"
               onClick={() => setDisplayMode('grid')}
               className={`p-1.5 rounded ${displayMode === 'grid' ? 'bg-[var(--aethel-surface-secondary)]' : ''}`}
             >
@@ -408,7 +408,7 @@ export function ExtensionManagerPanel({
                       <span className="text-sm text-[var(--aethel-text-tertiary)]">
                         {updates.length} update{updates.length !== 1 ? 's' : ''} available
                       </span>
-                      <button
+                      <button type="button"
                         onClick={() => updates.forEach(u => handleInstall(u.id, u.latestVersion))}
                         className="px-3 py-1.5 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded-lg text-sm font-medium"
                       >
@@ -538,7 +538,7 @@ function InstalledExtensionCard({
       </div>
 
       <div className="flex items-center gap-1">
-        <button
+        <button type="button"
           onClick={(e) => {
             e.stopPropagation();
             isActive ? onDeactivate() : onActivate();
@@ -548,7 +548,7 @@ function InstalledExtensionCard({
         >
           {isActive ? <Square size={14} /> : <Play size={14} />}
         </button>
-        <button
+        <button type="button"
           onClick={(e) => {
             e.stopPropagation();
             onUninstall();
@@ -616,7 +616,7 @@ function MarketplaceExtensionCard({
               {formatNumber(extension.downloads)}
             </span>
           </div>
-          <button
+          <button type="button"
             onClick={onInstall}
             disabled={installing}
             className="px-3 py-1 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded text-xs font-medium disabled:opacity-50"
@@ -663,7 +663,7 @@ function MarketplaceExtensionCard({
         </p>
       </div>
 
-      <button
+      <button type="button"
         onClick={onInstall}
         disabled={installing}
         className="px-3 py-1.5 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded text-sm font-medium disabled:opacity-50"
@@ -696,7 +696,7 @@ function UpdateCard({
         </p>
       </div>
 
-      <button
+      <button type="button"
         onClick={onUpdate}
         disabled={installing}
         className="px-3 py-1.5 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] rounded text-sm font-medium disabled:opacity-50"

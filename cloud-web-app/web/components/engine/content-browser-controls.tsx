@@ -23,7 +23,7 @@ export function BreadcrumbNav({
       borderBottom: '1px solid var(--aethel-border-primary)',
       fontSize: '13px',
     }}>
-      <button
+      <button type="button"
         onClick={() => onNavigate('/')}
         style={{
           background: 'none',
@@ -44,7 +44,7 @@ export function BreadcrumbNav({
         return (
           <React.Fragment key={fullPath}>
             <span style={{ color: 'var(--aethel-text-muted)' }}>/</span>
-            <button
+            <button type="button"
               onClick={() => onNavigate(fullPath)}
               style={{
                 background: 'none',
@@ -116,7 +116,7 @@ export function FilterBar({
 
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
-        <button
+        <button type="button"
           onClick={() => setShowTypeFilter(!showTypeFilter)}
           style={{
             padding: '6px 12px',
@@ -175,7 +175,7 @@ export function FilterBar({
       </div>
 
       {/* Starred Filter */}
-      <button
+      <button type="button"
         onClick={() => onFilterChange({ ...filter, starred: !filter.starred })}
         style={{
           padding: '6px 12px',
@@ -220,7 +220,7 @@ export function FilterBar({
       {/* View Mode */}
       <div style={{ display: 'flex', gap: '2px' }}>
         {(['grid', 'list', 'columns'] as const).map((mode) => (
-          <button
+          <button type="button"
             key={mode}
             onClick={() => onViewModeChange(mode)}
             style={{

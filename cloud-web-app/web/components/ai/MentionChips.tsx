@@ -91,7 +91,7 @@ export function MentionChip({
   const colors = colorClasses[data.color];
 
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className={`
         inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs
@@ -150,7 +150,7 @@ export function MentionPreviewPanel({
           <span className={colors.text}>{icons[chip.icon]}</span>
           <span className={`text-xs font-medium ${colors.text}`}>{chip.tag}</span>
         </div>
-        <button
+        <button type="button"
           onClick={onClose}
           className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] text-xs"
           aria-label="Fechar preview"
@@ -205,7 +205,7 @@ export function MentionSuggestionList({
       {filtered.map((item) => {
         const colors = colorClasses[item.color];
         return (
-          <button
+          <button type="button"
             key={item.trigger}
             onClick={() => onSelect(item.tag)}
             className="flex items-center gap-2 w-full px-2 py-1.5 text-left rounded-md hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] transition-colors"

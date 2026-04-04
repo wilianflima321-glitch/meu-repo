@@ -71,7 +71,7 @@ export default function Admin() {
         title='Admin Enterprise Console'
         subtitle='Operação central de usuários, billing, segurança e integrações.'
         actions={(
-          <button
+          <button type="button"
             onClick={() => mutate()}
             className='rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
           >

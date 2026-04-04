@@ -280,7 +280,7 @@ export function PremiumLock({
       {showModal && (
         <div className="premium-modal-backdrop" onClick={() => setShowModal(false)}>
           <div className="premium-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="premium-modal-close" onClick={() => setShowModal(false)}>
+            <button type="button" className="premium-modal-close" onClick={() => setShowModal(false)}>
               <X className="w-5 h-5" />
             </button>
             <div className="premium-modal-icon">
@@ -308,7 +308,7 @@ export function PremiumLock({
                 {PLAN_PRICES[minPlan]}
               </div>
             </div>
-            <button className="premium-modal-upgrade" onClick={handleUpgradeClick}>
+            <button type="button" className="premium-modal-upgrade" onClick={handleUpgradeClick}>
               Fazer Upgrade
               <ArrowRight className="w-4 h-4" />
             </button>

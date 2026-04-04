@@ -75,7 +75,7 @@ export default function Deploy() {
           <h1 className='text-3xl font-bold'>CI/CD e implantação</h1>
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Pipelines auditáveis para build e lançamento.</p>
         </div>
-        <button onClick={fetchPipelines} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
+        <button type="button" onClick={fetchPipelines} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
 
       {error && (
@@ -102,7 +102,7 @@ export default function Deploy() {
             <option value='github'>GitHub Actions</option>
             <option value='gitlab'>GitLab CI</option>
           </select>
-          <button
+          <button type="button"
             onClick={createPipeline}
             disabled={saving || !form.name.trim()}
             className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
@@ -143,7 +143,7 @@ export default function Deploy() {
                   {d.lastRunAt ? new Date(d.lastRunAt).toLocaleString() : '—'}
                 </td>
                 <td className='p-2'>
-                  <button onClick={() => runPipeline(d.id)} className='px-2 py-1 bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] rounded mr-2 text-sm'>Executar</button>
+                  <button type="button" onClick={() => runPipeline(d.id)} className='px-2 py-1 bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] rounded mr-2 text-sm'>Executar</button>
                 </td>
               </tr>
             ))

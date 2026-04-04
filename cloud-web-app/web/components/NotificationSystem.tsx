@@ -278,7 +278,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
             <p className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">{notification.message}</p>
           )}
           {notification.action && (
-            <button
+            <button type="button"
               onClick={notification.action.onClick}
               className="mt-2 text-sm font-medium text-sky-400 hover:text-sky-300 transition-colors"
             >
@@ -287,7 +287,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
           )}
         </div>
         {notification.dismissible && (
-          <button
+          <button type="button"
             onClick={handleDismiss}
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors rounded"
           >

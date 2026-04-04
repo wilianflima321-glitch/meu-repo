@@ -208,7 +208,7 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                         </div>
                         <div className="text-[var(--aethel-error-light)] font-medium">Connection Failed</div>
                         <div className="text-[var(--aethel-text-secondary)] text-sm max-w-xs">{error}</div>
-                        <Button
+                        <button type="button"
                             onClick={onRetry}
                             variant="outline"
                             className="mt-4"
@@ -233,7 +233,7 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                         <div className="text-[var(--aethel-text-secondary)] text-sm max-w-xs">
                             Stream AAA graphics from cloud GPU directly to your browser
                         </div>
-                        <Button
+                        <button type="button"
                             onClick={onConnect}
                             className="mt-4 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700"
                             size="lg"
@@ -297,7 +297,7 @@ const ControlsBar = memo(function ControlsBar({
                 {/* Left controls */}
                 <div className="flex items-center gap-2">
                     <Tooltip content="Stop Stream">
-                        <Button
+                        <button type="button"
                             variant="ghost"
                             size="icon"
                             className="text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
@@ -308,7 +308,7 @@ const ControlsBar = memo(function ControlsBar({
                     </Tooltip>
 
                     <Tooltip content={isMuted ? 'Unmute' : 'Mute'}>
-                        <Button
+                        <button type="button"
                             variant="ghost"
                             size="icon"
                             className="text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
@@ -339,7 +339,7 @@ const ControlsBar = memo(function ControlsBar({
                 {/* Right controls */}
                 <div className="flex items-center gap-2">
                     <Tooltip content="Toggle Stats">
-                        <Button
+                        <button type="button"
                             variant="ghost"
                             size="icon"
                             className={cn(
@@ -384,7 +384,7 @@ const ControlsBar = memo(function ControlsBar({
                     </DropdownMenu>
 
                     <Tooltip content={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}>
-                        <Button
+                        <button type="button"
                             variant="ghost"
                             size="icon"
                             className="text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"

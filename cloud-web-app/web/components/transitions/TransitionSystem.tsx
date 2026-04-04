@@ -414,7 +414,7 @@ export function TransitionSelector({
   return (
     <div style={{ position: 'relative' }}>
       {/* Current selection button */}
-      <button
+      <button type="button"
         onClick={() => setShowPicker(!showPicker)}
         style={{
           display: 'flex',
@@ -488,7 +488,7 @@ export function TransitionSelector({
                   {(Object.entries(TRANSITION_PRESETS) as [TransitionType, typeof TRANSITION_PRESETS[TransitionType]][])
                     .filter(([, preset]) => preset.category === category)
                     .map(([type, preset]) => (
-                      <button
+                      <button type="button"
                         key={type}
                         onClick={() => {
                           onChange(type)

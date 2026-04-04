@@ -275,7 +275,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                                 className="w-full h-full object-cover"
                             />
                             {onViewFull && (
-                                <button
+                                <button type="button"
                                     onClick={() => onViewFull(job.thumbnail!)}
                                     className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
                                 >
@@ -340,7 +340,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                 {/* Actions */}
                 <div className="flex items-center gap-1">
                     {canPause && (
-                        <button
+                        <button type="button"
                             onClick={() => onPause(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Pausar"
@@ -350,7 +350,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canResume && (
-                        <button
+                        <button type="button"
                             onClick={() => onResume(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Retomar"
@@ -360,7 +360,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canCancel && (
-                        <button
+                        <button type="button"
                             onClick={() => onCancel(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Cancelar"
@@ -370,7 +370,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canRetry && (
-                        <button
+                        <button type="button"
                             onClick={() => onRetry(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Tentar novamente"
@@ -380,7 +380,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canDownload && (
-                        <button
+                        <button type="button"
                             onClick={() => onDownload(job.id, job.output!)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Download"
@@ -390,7 +390,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {!compact && (
-                        <button
+                        <button type="button"
                             onClick={() => setExpanded(!expanded)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                         >
@@ -529,7 +529,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
                 </div>
 
                 {completedJobs.length > 0 && onClearCompleted && (
-                    <button
+                    <button type="button"
                         onClick={onClearCompleted}
                         className="text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                     >

@@ -108,7 +108,7 @@ function MessageBubble({
           {!isUser && (
             <>
               <span>•</span>
-              <button
+              <button type="button"
                 onClick={handleCopy}
                 className="hover:text-[var(--aethel-text-secondary)] transition-colors"
               >
@@ -225,7 +225,7 @@ export function AIChatTab({
             align="right"
             width="lg"
           />
-          <Button variant="secondary" size="sm" onClick={onNewThread}>
+          <button type="button" variant="secondary" size="sm" onClick={onNewThread}>
             <Plus className="w-4 h-4 mr-2" />
             Nova
           </Button>
@@ -291,21 +291,21 @@ export function AIChatTab({
         {/* Quick Actions */}
         <div className="flex items-center gap-2 mt-3">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Sugestões:</span>
-          <button
+          <button type="button"
             onClick={() => setInputValue('Explique este código: ')}
             className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >
             <Code className="w-3 h-3 inline mr-1" />
             Explicar código
           </button>
-          <button
+          <button type="button"
             onClick={() => setInputValue('Refatore este código para: ')}
             className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >
             <RefreshCw className="w-3 h-3 inline mr-1" />
             Refatorar
           </button>
-          <button
+          <button type="button"
             onClick={() => setInputValue('Crie um teste para: ')}
             className="px-3 py-1 text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] rounded-full transition-colors"
           >

@@ -249,7 +249,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
 
         <div className="ml-auto flex items-center gap-1">
           {(job.status === 'failed' || job.status === 'cancelled') && (
-            <button
+            <button type="button"
               onClick={(event) => {
                 event.stopPropagation()
                 onRetry(job.id)
@@ -261,7 +261,7 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
             </button>
           )}
           {(job.status === 'pending' || job.status === 'running') && (
-            <button
+            <button type="button"
               onClick={(event) => {
                 event.stopPropagation()
                 onCancel(job.id)
@@ -475,7 +475,7 @@ export function JobQueueDashboard({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={handleToggleQueue}
             className={`aethel-button rounded-lg px-3 py-2 text-xs font-semibold ${
               isQueueRunning ? 'aethel-button-secondary' : 'aethel-button-primary'
@@ -486,7 +486,7 @@ export function JobQueueDashboard({
               {isQueueRunning ? 'Pausar fila' : 'Iniciar fila'}
             </span>
           </button>
-          <button
+          <button type="button"
             onClick={fetchData}
             className="aethel-button aethel-button-ghost rounded-lg p-2"
             title="Atualizar"
@@ -575,7 +575,7 @@ export function JobQueueDashboard({
       </div>
 
       <div className="flex items-center justify-between border-t border-[var(--aethel-border-subtle)] px-4 py-3">
-        <button
+        <button type="button"
           onClick={() => setPage(Math.max(1, page - 1))}
           disabled={page === 1}
           className="aethel-button aethel-button-ghost text-xs disabled:opacity-50"
@@ -583,7 +583,7 @@ export function JobQueueDashboard({
           &lt; Anterior
         </button>
         <span className="text-xs text-[var(--aethel-text-tertiary)]">Pagina {page}</span>
-        <button
+        <button type="button"
           onClick={() => setPage(page + 1)}
           disabled={filteredJobs.length < pageSize}
           className="aethel-button aethel-button-ghost text-xs disabled:opacity-50"

@@ -137,7 +137,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
             {/* Actions */}
             <div className="space-y-3">
-              <button
+              <button type="button"
                 onClick={this.handleRetry}
                 className="w-full px-4 py-2.5 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
               >
@@ -154,7 +154,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
               </Link>
 
               {process.env.NODE_ENV === 'development' && (
-                <button
+                <button type="button"
                   onClick={this.handleReportError}
                   className="w-full px-4 py-2.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] font-medium rounded-lg transition-colors text-sm border border-[var(--aethel-border-primary)]"
                 >

@@ -57,7 +57,7 @@ export default function RateLimitingPage() {
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={fetchLimits}
           className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
@@ -83,7 +83,7 @@ export default function RateLimitingPage() {
         ) : error ? (
           <div>
             <p className="text-sm text-[var(--aethel-error)]">{error}</p>
-            <button className="mt-3 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-3 py-1 rounded" onClick={fetchLimits}>
+            <button type="button" className="mt-3 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-3 py-1 rounded" onClick={fetchLimits}>
               Tentar novamente
             </button>
           </div>
@@ -102,7 +102,7 @@ export default function RateLimitingPage() {
                     <span className="px-2 py-1 rounded text-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">
                       {limit.limit} requisições / {limit.window}s
                     </span>
-                    <button
+                    <button type="button"
                       onClick={() => navigator.clipboard.writeText(limit.identifier)}
                       className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]"
                     >

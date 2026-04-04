@@ -174,7 +174,7 @@ const PathInput: React.FC<{
           />
         </div>
 
-        <button
+        <button type="button"
           onClick={onValidate}
           disabled={isValidating || !value}
           className="aethel-button aethel-button-primary text-xs disabled:opacity-60"
@@ -182,7 +182,7 @@ const PathInput: React.FC<{
           Verificar
         </button>
 
-        <button
+        <button type="button"
           onClick={() => onChange('')}
           className="aethel-button aethel-button-ghost text-xs"
           title="Limpar"
@@ -196,7 +196,7 @@ const PathInput: React.FC<{
           <p className="mb-1 text-[11px] text-[var(--aethel-text-tertiary)]">Caminhos comuns:</p>
           <div className="flex flex-wrap gap-1">
             {config.defaultPaths.slice(0, 2).map((path, idx) => (
-              <button
+              <button type="button"
                 key={idx}
                 onClick={() => onChange(path)}
                 className="rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] px-2 py-1 text-[11px] font-mono text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_45%,transparent)]"
@@ -315,7 +315,7 @@ export const SettingsPathConfig: React.FC<{
             </div>
           </div>
 
-          <button onClick={onClose} className="aethel-button aethel-button-ghost rounded-lg p-2">
+          <button type="button" onClick={onClose} className="aethel-button aethel-button-ghost rounded-lg p-2">
             <X className="h-5 w-5 text-[var(--aethel-text-tertiary)]" />
           </button>
         </div>
@@ -326,7 +326,7 @@ export const SettingsPathConfig: React.FC<{
               <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Deteccao automatica</p>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Deixe o Aethel encontrar os programas por voce</p>
             </div>
-            <button
+            <button type="button"
               onClick={handleAutoDetect}
               disabled={validatingIds.size > 0}
               className="aethel-button aethel-button-primary flex items-center gap-2 text-xs disabled:opacity-60"
@@ -354,10 +354,10 @@ export const SettingsPathConfig: React.FC<{
           </div>
 
           <div className="flex gap-2">
-            <button onClick={onClose} className="aethel-button aethel-button-ghost text-xs">
+            <button type="button" onClick={onClose} className="aethel-button aethel-button-ghost text-xs">
               Cancelar
             </button>
-            <button
+            <button type="button"
               onClick={handleSave}
               disabled={!isDirty}
               className="aethel-button aethel-button-primary flex items-center gap-2 text-xs disabled:opacity-60"

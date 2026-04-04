@@ -267,7 +267,7 @@ function ToastItem({
           {toast.title && <div style={titleStyle}>{toast.title}</div>}
           <div style={messageStyle}>{toast.message}</div>
           {toast.action && (
-            <button
+            <button type="button"
               onClick={toast.action.onClick}
               style={{
                 marginTop: tokens.spacing['2'],
@@ -288,7 +288,7 @@ function ToastItem({
             </button>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={handleDismiss}
           style={closeButtonStyle}
           onMouseEnter={(e) => (e.currentTarget.style.color = tokens.colors.text.primary)}

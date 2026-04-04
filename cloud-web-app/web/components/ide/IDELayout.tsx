@@ -511,7 +511,7 @@ export default function IDELayout({
               <nav ref={menuRef} className="relative hidden items-center gap-1 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)] px-1 py-1 text-xs md:flex">
                 {menuConfigs.map((menu) => (
                   <div key={menu.label} className="relative">
-                    <button
+                    <button type="button"
                       onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
                       className={`rounded-lg px-2 py-1.5 transition-colors ${
                         activeMenu === menu.label
@@ -527,7 +527,7 @@ export default function IDELayout({
                           item.separator ? (
                             <div key={idx} className="my-1 border-t border-[var(--aethel-border-subtle)]" />
                           ) : (
-                            <button
+                            <button type="button"
                               key={idx}
                               onClick={() => {
                                 item.action?.()
@@ -567,7 +567,7 @@ export default function IDELayout({
             <span className="h-3 w-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]" />
             <span>Workspace local</span>
           </div>
-          <button
+          <button type="button"
             onClick={() => onCommandPalette?.()}
             className="hidden items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_4%,transparent)] px-3 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] md:flex"
             title="Paleta de comandos (Ctrl+Shift+P)"
@@ -576,7 +576,7 @@ export default function IDELayout({
             <span>Paleta de comandos</span>
             <span className="rounded-md border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_20%,transparent)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--aethel-text-quaternary)]">Ctrl+Shift+P</span>
           </button>
-          <button
+          <button type="button"
             onClick={toggleLeftSidebar}
             className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.leftSidebar ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Alternar sidebar"
@@ -584,7 +584,7 @@ export default function IDELayout({
           >
             <Codicon name="layout-sidebar-left" />
           </button>
-          <button
+          <button type="button"
             onClick={toggleBottomPanel}
             className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.bottomPanel ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Alternar painel"
@@ -592,7 +592,7 @@ export default function IDELayout({
           >
             <Codicon name="layout-panel" />
           </button>
-          <button
+          <button type="button"
             onClick={toggleRightSidebar}
             className={`rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] ${panels.rightSidebar ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Alternar painel de IA"
@@ -606,7 +606,7 @@ export default function IDELayout({
       <div className="flex flex-1 overflow-hidden">
         <div className="flex w-12 flex-col items-center border-r border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_95%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_98%,transparent))] py-2 shadow-[inset_-1px_0_0_rgba(255,255,255,0.03)]">
           {SIDEBAR_TABS.map((tab) => (
-            <button
+            <button type="button"
               key={tab.id}
               onClick={() => {
                 setActiveSidebarTab(tab.id)
@@ -638,7 +638,7 @@ export default function IDELayout({
                 <span>{SIDEBAR_TABS.find((t) => t.id === activeSidebarTab)?.label}</span>
                 <span className="text-[9px] font-normal tracking-[0.08em] text-[var(--aethel-text-muted)]">Studio surface</span>
               </div>
-              <button onClick={toggleLeftSidebar} className="rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-secondary)]">
+              <button type="button" onClick={toggleLeftSidebar} className="rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-secondary)]">
                 <Codicon name="chevron-left" />
               </button>
             </div>
@@ -677,7 +677,7 @@ export default function IDELayout({
               />
               <div className="density-header flex items-center gap-0.5 border-b border-[var(--aethel-border-subtle)] px-1.5">
                 {BOTTOM_TABS.map((tab) => (
-                  <button
+                  <button type="button"
                     key={tab.id}
                     onClick={() => setActiveBottomTab(tab.id)}
                     className={`density-row flex items-center gap-1.5 rounded-lg px-2.5 text-[11px] transition-colors ${
@@ -694,13 +694,13 @@ export default function IDELayout({
 
                 <div className="flex-1" />
 
-                <button
+                <button type="button"
                   onClick={() => setBottomPanelHeight((h) => (h === 260 ? 380 : 260))}
                   className="rounded-lg p-1 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)]"
                 >
                   {bottomPanelHeight === 260 ? <Codicon name="fold-down" /> : <Codicon name="fold-up" />}
                 </button>
-                <button onClick={toggleBottomPanel} className="rounded-lg p-1 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)]">
+                <button type="button" onClick={toggleBottomPanel} className="rounded-lg p-1 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)]">
                   <Codicon name="x" />
                 </button>
               </div>
@@ -716,7 +716,7 @@ export default function IDELayout({
                 <span>AI Copilot</span>
                 <span className="text-[9px] font-normal tracking-[0.08em] text-[var(--aethel-text-muted)]">Plans  edits  critique</span>
               </div>
-              <button onClick={toggleRightSidebar} className="rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-secondary)]">
+              <button type="button" onClick={toggleRightSidebar} className="rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-secondary)]">
                 <Codicon name="chevron-right" />
               </button>
             </div>

@@ -143,7 +143,7 @@ const JobRow: React.FC<{
 
         <div className="flex items-center gap-1">
           {job.status === 'failed' && (
-            <button
+            <button type="button"
               onClick={(event) => {
                 event.stopPropagation()
                 onRetry()
@@ -155,7 +155,7 @@ const JobRow: React.FC<{
             </button>
           )}
           {job.status === 'running' && (
-            <button
+            <button type="button"
               onClick={(event) => {
                 event.stopPropagation()
                 onPause()
@@ -167,7 +167,7 @@ const JobRow: React.FC<{
             </button>
           )}
           {job.status === 'paused' && (
-            <button
+            <button type="button"
               onClick={(event) => {
                 event.stopPropagation()
                 onPause()
@@ -179,7 +179,7 @@ const JobRow: React.FC<{
             </button>
           )}
           {(job.status === 'pending' || job.status === 'running') && (
-            <button
+            <button type="button"
               onClick={(event) => {
                 event.stopPropagation()
                 onCancelar()
@@ -370,7 +370,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
           </div>
         </div>
 
-        <button
+        <button type="button"
           onClick={fetchJobs}
           disabled={isRefreshing}
           className="aethel-button aethel-button-primary flex items-center gap-2 text-xs"

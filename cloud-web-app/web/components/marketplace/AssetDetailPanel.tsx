@@ -172,7 +172,7 @@ function ModelPreview({ modelUrl }: { modelUrl: string }) {
 
             {/* Controls overlay */}
             <div className="absolute bottom-4 right-4 flex gap-2">
-                <Button
+                <button type="button"
                     size="sm"
                     variant="secondary"
                     onClick={() => setAutoRotate(!autoRotate)}
@@ -206,7 +206,7 @@ function ImageGallery({ images }: { images: string[] }) {
                 {/* Navigation arrows */}
                 {images.length > 1 && (
                     <>
-                        <Button
+                        <button type="button"
                             size="icon"
                             variant="secondary"
                             className="absolute left-2 top-1/2 -translate-y-1/2"
@@ -216,7 +216,7 @@ function ImageGallery({ images }: { images: string[] }) {
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </Button>
-                        <Button
+                        <button type="button"
                             size="icon"
                             variant="secondary"
                             className="absolute right-2 top-1/2 -translate-y-1/2"
@@ -234,7 +234,7 @@ function ImageGallery({ images }: { images: string[] }) {
             {images.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto pb-2">
                     {images.map((image, index) => (
-                        <button
+                        <button type="button"
                             key={index}
                             onClick={() => setCurrentIndex(index)}
                             className={cn(
@@ -321,7 +321,7 @@ function ReviewCard({ review }: { review: Review }) {
                     </p>
 
                     <div className="flex items-center gap-4 mt-3">
-                        <Button
+                        <button type="button"
                             variant="ghost"
                             size="sm"
                             onClick={() => setIsHelpful(!isHelpful)}
@@ -492,7 +492,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         return (
             <div className="flex flex-col items-center justify-center h-full">
                 <p className="text-muted-foreground">Asset nao encontrado</p>
-                <Button variant="outline" className="mt-4" onClick={onClose}>
+                <button type="button" variant="outline" className="mt-4" onClick={onClose}>
                     Voltar
                 </Button>
             </div>
@@ -503,13 +503,13 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
         <div className="h-full flex flex-col">
             {/* Header */}
             <header className="flex items-center justify-between px-6 py-4 border-b">
-                <Button variant="ghost" onClick={onClose}>
+                <button type="button" variant="ghost" onClick={onClose}>
                     <ChevronLeft className="w-4 h-4 mr-2" />
                     Voltar ao Marketplace
                 </Button>
 
                 <div className="flex items-center gap-2">
-                    <Button
+                    <button type="button"
                         variant="outline"
                         size="icon"
                         onClick={() => favoriteMutation.mutate()}
@@ -682,7 +682,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
 
                                     {/* Action buttons */}
                                     {asset.isOwned ? (
-                                        <Button
+                                        <button type="button"
                                             className="w-full"
                                             size="lg"
                                             onClick={() => downloadMutation.mutate()}
@@ -696,7 +696,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                             Baixar
                                         </Button>
                                     ) : asset.price === 0 ? (
-                                        <Button
+                                        <button type="button"
                                             className="w-full"
                                             size="lg"
                                             onClick={() => downloadMutation.mutate()}
@@ -711,7 +711,7 @@ export default function AssetDetailPanel({ assetId, onClose }: AssetDetailPanelP
                                         </Button>
                                     ) : (
                                         <div className="space-y-2">
-                                            <Button
+                                            <button type="button"
                                                 className="w-full"
                                                 size="lg"
                                                 onClick={() => purchaseMutation.mutate()}

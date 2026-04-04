@@ -238,7 +238,7 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
       </div>
       {Array.from(filteredCategories).map(([category, nodes]) => (
         <div key={category}>
-          <button
+          <button type="button"
             onClick={() =>
               setExpandedCategory(expandedCategory === category ? null : category)
             }
@@ -261,7 +261,7 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
           {expandedCategory === category && (
             <div style={{ padding: '4px 8px' }}>
               {nodes.map((node) => (
-                <button
+                <button type="button"
                   key={node.type}
                   onClick={() => onAddNode(node)}
                   style={{
@@ -397,7 +397,7 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
               </div>
             ) : (
               filteredNodes.map((node) => (
-                <button
+                <button type="button"
                   key={node.type}
                   onClick={() => handleAddNode(node)}
                   style={{
@@ -425,7 +425,7 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
         ) : (
           Array.from(categories).map(([category, nodes]) => (
             <div key={category}>
-              <button
+              <button type="button"
                 onClick={() =>
                   setExpandedCategory(expandedCategory === category ? null : category)
                 }
@@ -451,7 +451,7 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
               {expandedCategory === category && (
                 <div style={{ padding: '6px 10px', background: ui.surfaceDeep }}>
                   {nodes.map((node) => (
-                    <button
+                    <button type="button"
                       key={node.type}
                       onClick={() => handleAddNode(node)}
                       style={{
@@ -611,7 +611,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
           />
           <Panel position="top-right">
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button
+              <button type="button"
                 onClick={() => {
                   const json = JSON.stringify(compileScript(), null, 2);
                   console.log('Compiled Script:', json);
@@ -622,7 +622,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
               >
                 Salvar
               </button>
-              <button
+              <button type="button"
                 onClick={handleClearGraph}
                 className="aethel-button aethel-button-danger"
                 style={{ padding: '8px 16px' }}

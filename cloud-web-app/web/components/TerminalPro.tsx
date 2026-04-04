@@ -325,7 +325,7 @@ Press Ctrl+C to cancel running command
           {/* Quick Tasks */}
           <div className="hidden sm:flex items-center gap-1 mr-4">
             {QUICK_TASKS.map(task => (
-              <button
+              <button type="button"
                 key={task.command}
                 onClick={() => handleQuickTask(task.command)}
                 disabled={isExecuting}
@@ -341,7 +341,7 @@ Press Ctrl+C to cancel running command
             ))}
           </div>
 
-          <button
+          <button type="button"
             onClick={() => setIsMaximized(!isMaximized)}
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
           >
@@ -351,7 +351,7 @@ Press Ctrl+C to cancel running command
               <Maximize2 className="w-4 h-4" />
             )}
           </button>
-          <button
+          <button type="button"
             onClick={() => setLines([])}
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
           >
@@ -388,7 +388,7 @@ Press Ctrl+C to cancel running command
         {showSuggestions && (
           <div className="absolute bottom-full left-4 right-4 mb-1 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg overflow-hidden shadow-xl">
             {suggestions.map((suggestion, index) => (
-              <button
+              <button type="button"
                 key={suggestion}
                 onClick={() => {
                   setInput(suggestion)

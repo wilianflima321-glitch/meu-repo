@@ -127,7 +127,7 @@ export default function DownloadPage() {
               const isSelected = selectedPlatform === platform
               const isDetected = detectedPlatform === platform
               return (
-                <button
+                <button type="button"
                   key={platform}
                   onClick={() => setSelectedPlatform(platform)}
                   className={`flex items-center gap-3 rounded-2xl border px-5 py-4 text-left transition-all ${

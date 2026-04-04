@@ -106,7 +106,7 @@ export default function NexusChatMultimodal() {
       {/* Agent Selector */}
       <div className="flex items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4 overflow-x-auto no-scrollbar">
         {AGENTS.map((agent) => (
-          <button
+          <button type="button"
             key={agent.id}
             onClick={() => setActiveAgent(agent)}
             className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 ${

@@ -169,7 +169,7 @@ export function GamesAndFilmsModule() {
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={() => setActiveTab('games')}
           className={`px-4 py-3 font-medium text-sm transition-all ${
             activeTab === 'games'
@@ -182,7 +182,7 @@ export function GamesAndFilmsModule() {
             Jogos ({games.length})
           </div>
         </button>
-        <button
+        <button type="button"
           onClick={() => setActiveTab('films')}
           className={`px-4 py-3 font-medium text-sm transition-all ${
             activeTab === 'films'
@@ -330,7 +330,7 @@ function GameCard({
 
       {/* Actions */}
       <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={() => onPublish(game)}
           disabled={game.status === 'published'}
           className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
@@ -338,7 +338,7 @@ function GameCard({
           <Play size={14} />
           Publicar
         </button>
-        <button
+        <button type="button"
           onClick={() => onDelete(game.id)}
           className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
@@ -384,7 +384,7 @@ function FilmCard({
 
       {/* Actions */}
       <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={() => onPublish(film)}
           disabled={film.status === 'published'}
           className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[var(--aethel-accent-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-accent)_30%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"
@@ -392,7 +392,7 @@ function FilmCard({
           <Play size={14} />
           Publicar
         </button>
-        <button
+        <button type="button"
           onClick={() => onDelete(film.id)}
           className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
@@ -460,7 +460,7 @@ function CreateProjectDialog({
                 </GlassButton>
               </div>
 
-              <button
+              <button type="button"
                 onClick={onClose}
                 className="w-full px-4 py-2 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
               >

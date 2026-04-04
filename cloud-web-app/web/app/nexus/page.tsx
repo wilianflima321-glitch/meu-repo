@@ -30,7 +30,7 @@ export default function NexusPage() {
   const actions = (
     <div className="flex items-center gap-4">
       <div className="mr-4 flex items-center rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-1">
-        <button
+        <button type="button"
           onClick={() => setRightPanelMode('chat')}
           className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
             rightPanelMode === 'chat' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -38,7 +38,7 @@ export default function NexusPage() {
         >
           Nexus Chat
         </button>
-        <button
+        <button type="button"
           onClick={() => setRightPanelMode('research')}
           className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
             rightPanelMode === 'research' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -46,7 +46,7 @@ export default function NexusPage() {
         >
           Pesquisa
         </button>
-        <button
+        <button type="button"
           onClick={() => setRightPanelMode('director')}
           className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
             rightPanelMode === 'director' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'

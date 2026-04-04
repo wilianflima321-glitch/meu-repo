@@ -148,7 +148,7 @@ const FileItem: React.FC<FileItemProps> = ({
 
       <div style={{ display: 'flex', gap: '2px' }} onClick={(e) => e.stopPropagation()}>
         {onView && (
-          <button
+          <button type="button"
             onClick={onView}
             style={{
               padding: '4px',
@@ -165,7 +165,7 @@ const FileItem: React.FC<FileItemProps> = ({
         )}
 
         {staged && onUnstage && (
-          <button
+          <button type="button"
             onClick={onUnstage}
             style={{
               padding: '4px',
@@ -182,7 +182,7 @@ const FileItem: React.FC<FileItemProps> = ({
         )}
 
         {!staged && onStage && (
-          <button
+          <button type="button"
             onClick={onStage}
             style={{
               padding: '4px',
@@ -199,7 +199,7 @@ const FileItem: React.FC<FileItemProps> = ({
         )}
 
         {!staged && onDiscard && (
-          <button
+          <button type="button"
             onClick={onDiscard}
             style={{
               padding: '4px',
@@ -331,7 +331,7 @@ const BranchItem: React.FC<BranchItemProps> = ({ branch, onCheckout, onDelete })
 
       {!branch.isHead && !branch.isRemote && (
         <div style={{ display: 'flex', gap: '4px' }}>
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               onCheckout();
@@ -348,7 +348,7 @@ const BranchItem: React.FC<BranchItemProps> = ({ branch, onCheckout, onDelete })
           >
             Trocar
           </button>
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
@@ -519,7 +519,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
           </div>
 
           <div style={{ display: 'flex', gap: '4px' }}>
-            <button
+            <button type="button"
               onClick={refresh}
               style={{
                 padding: '6px',
@@ -533,7 +533,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             >
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
             </button>
-            <button
+            <button type="button"
               onClick={handleFetch}
               style={{
                 padding: '6px',
@@ -547,7 +547,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             >
               <Download size={16} />
             </button>
-            <button
+            <button type="button"
               onClick={handlePull}
               style={{
                 padding: '6px',
@@ -561,7 +561,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             >
               <ArrowDown size={16} />
             </button>
-            <button
+            <button type="button"
               onClick={handlePush}
               style={{
                 padding: '6px',
@@ -601,7 +601,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             { id: 'branches' as const, label: 'Branches', count: branches.length },
             { id: 'stashes' as const, label: 'Stashes', count: stashes.length },
           ].map((tab) => (
-            <button
+            <button type="button"
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
@@ -650,7 +650,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                     resize: 'vertical',
                   }}
                 />
-                <button
+                <button type="button"
                   onClick={handleCommit}
                   disabled={!commitMessage.trim() || status.staged.length === 0}
                   style={{
@@ -685,7 +685,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                   {expandedSections.has('staged') ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   <span style={{ fontWeight: 500 }}>Staged Changes ({status.staged.length})</span>
                   {status.staged.length > 0 && (
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleUnstageAll();
@@ -734,7 +734,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                   {expandedSections.has('changes') ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   <span style={{ fontWeight: 500 }}>Changes ({status.unstaged.length})</span>
                   {status.unstaged.length > 0 && (
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleStageAll();

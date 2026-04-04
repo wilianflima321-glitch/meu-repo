@@ -89,7 +89,7 @@ export default function AdminSecurity() {
         subtitle='Visão operacional de hardening, eventos críticos e trilha de auditoria.'
         meta={lastUpdated ? <>Atualizado em {lastUpdated.toLocaleString()}</> : null}
         actions={(
-          <button
+          <button type="button"
             onClick={fetchSecurity}
             className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
           >

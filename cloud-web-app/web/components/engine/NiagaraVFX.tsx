@@ -629,7 +629,7 @@ function EffectPresetsPanel({ onSelect }: EffectPresetsPanelProps) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
         {presets.map((preset) => (
-          <button
+          <button type="button"
             key={preset.id}
             onClick={() => onSelect(preset.id)}
             style={{
@@ -852,7 +852,7 @@ export default function NiagaraVFX() {
         gap: '8px',
       }}>
         <span style={{ fontWeight: 'bold', marginRight: '16px' }}>🎆 Niagara VFX Editor</span>
-        <button
+        <button type="button"
           onClick={handlePlayPause}
           style={{
             padding: '6px 12px',
@@ -868,7 +868,7 @@ export default function NiagaraVFX() {
         >
           {isPlaying ? '⏸️ Pause' : '▶️ Play'}
         </button>
-        <button
+        <button type="button"
           onClick={handleRestart}
           style={{
             padding: '6px 12px',
@@ -1009,7 +1009,7 @@ export default function NiagaraVFX() {
           {/* Tabs */}
           <div style={{ display: 'flex', borderBottom: '1px solid var(--aethel-border-primary)' }}>
             {(['parameters', 'presets', 'timeline'] as const).map((tab) => (
-              <button
+              <button type="button"
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{

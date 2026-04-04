@@ -623,14 +623,14 @@ const ChatComponent: React.FC = () => {
             <option value="__new__">+ Novo trabalho</option>
           </select>
 
-          <button
+          <button type="button"
             onClick={() => void renameWorkflow()}
             disabled={!activeWorkflowId || isLoading || isStreaming}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
           >
             Renomear
           </button>
-          <button
+          <button type="button"
             onClick={() => void archiveWorkflow()}
             disabled={!activeWorkflowId || isLoading || isStreaming}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -655,7 +655,7 @@ const ChatComponent: React.FC = () => {
               ))}
           </select>
 
-          <button
+          <button type="button"
             onClick={() => void copyHistoryFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -664,7 +664,7 @@ const ChatComponent: React.FC = () => {
             {connectBusy ? 'Processando…' : 'Copiar histórico'}
           </button>
 
-          <button
+          <button type="button"
             onClick={() => void importContextFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -673,7 +673,7 @@ const ChatComponent: React.FC = () => {
             {connectBusy ? 'Processando…' : 'Importar contexto'}
           </button>
 
-          <button
+          <button type="button"
             onClick={() => void mergeFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -752,14 +752,14 @@ const ChatComponent: React.FC = () => {
             disabled={isLoading || isStreaming}
           />
           <div className="flex flex-col gap-2">
-            <button
+            <button type="button"
               onClick={handleStreamMessage}
               disabled={isLoading || isStreaming || !input.trim()}
               className="bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
             >
               {isStreaming ? 'Pausar' : 'Transmitir'}
             </button>
-            <button
+            <button type="button"
               onClick={handleSendMessage}
               disabled={isLoading || isStreaming || !input.trim()}
               className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"

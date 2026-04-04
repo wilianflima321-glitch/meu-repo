@@ -903,7 +903,7 @@ export function AdvancedProfiler({
           <h2 style={{ color: 'white', fontSize: '18px' }}>📊 Advanced Profiler</h2>
 
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button
+            <button type="button"
               onClick={() => setIsRecording(!isRecording)}
               style={{
                 background: isRecording ? '#ef4444' : '#22c55e',
@@ -919,7 +919,7 @@ export function AdvancedProfiler({
               {isRecording ? '⏹ Stop' : '⏺ Record'}
             </button>
 
-            <button
+            <button type="button"
               onClick={() => {
                 setSession({
                   id: crypto.randomUUID(),
@@ -950,7 +950,7 @@ export function AdvancedProfiler({
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
           {(['timeline', 'memory', 'gpu'] as const).map(tab => (
-            <button
+            <button type="button"
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{

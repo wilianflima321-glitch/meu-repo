@@ -262,7 +262,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
 
   return (
     <div className="mb-4">
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
@@ -599,7 +599,7 @@ function Toolbar({
   return (
     <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Simulation controls */}
-      <button
+      <button type="button"
         onClick={onToggleSimulation}
         className={`p-2 rounded transition-colors ${
           isSimulating
@@ -611,7 +611,7 @@ function Toolbar({
         {isSimulating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
       </button>
 
-      <button
+      <button type="button"
         onClick={onReset}
         className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
         title="Reset Simulation"
@@ -623,7 +623,7 @@ function Toolbar({
 
       {/* Tools */}
       {tools.map((tool) => (
-        <button
+        <button type="button"
           key={tool.id}
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
@@ -907,7 +907,7 @@ export default function ClothSimulationEditor({
               <Layers className="w-5 h-5 text-[var(--aethel-info)]" />
               Cloth Settings
             </h2>
-            <button
+            <button type="button"
               onClick={handleExport}
               className="p-1.5 rounded bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] transition-colors"
               title="Export Configuration"
@@ -920,7 +920,7 @@ export default function ClothSimulationEditor({
           <CollapsibleSection title="Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
               {CLOTH_PRESETS.map((preset) => (
-                <button
+                <button type="button"
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded text-left transition-colors ${
@@ -1046,19 +1046,19 @@ export default function ClothSimulationEditor({
           {/* Colliders */}
           <CollapsibleSection title="Colliders" icon={<Box className="w-4 h-4 text-orange-400" />}>
             <div className="flex gap-1 mb-3">
-              <button
+              <button type="button"
                 onClick={() => addCollider('sphere')}
                 className="flex-1 p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded transition-colors"
               >
                 + Sphere
               </button>
-              <button
+              <button type="button"
                 onClick={() => addCollider('box')}
                 className="flex-1 p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded transition-colors"
               >
                 + Box
               </button>
-              <button
+              <button type="button"
                 onClick={() => addCollider('plane')}
                 className="flex-1 p-1.5 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded transition-colors"
               >
@@ -1078,7 +1078,7 @@ export default function ClothSimulationEditor({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs capitalize">{collider.type}</span>
-                  <button
+                  <button type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setColliders((prev) => prev.filter((_, i) => i !== index));

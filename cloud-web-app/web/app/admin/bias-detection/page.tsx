@@ -166,7 +166,7 @@ export default function BiasDetectionPage() {
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={fetchItems}
           className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
@@ -220,7 +220,7 @@ export default function BiasDetectionPage() {
               <option value="urgent">Prioridade urgente</option>
             </select>
           </div>
-          <button
+          <button type="button"
             onClick={handleAnalyze}
             disabled={submitting || !newOutput.trim()}
             className="bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-60"
@@ -269,7 +269,7 @@ export default function BiasDetectionPage() {
           />
           <div className="flex flex-wrap items-center gap-2">
             {(['all', 'pending', 'resolved'] as const).map((status) => (
-              <button
+              <button type="button"
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
@@ -282,7 +282,7 @@ export default function BiasDetectionPage() {
               </button>
             ))}
             {(['all', 'high', 'medium', 'low', 'none'] as const).map((bias) => (
-              <button
+              <button type="button"
                 key={bias}
                 onClick={() => setBiasFilter(bias)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
@@ -345,13 +345,13 @@ export default function BiasDetectionPage() {
                   </div>
                 )}
                 <div className="mt-3 flex items-center gap-2">
-                  <button
+                  <button type="button"
                     onClick={() => handleModerationAction(item.id, 'approve')}
                     className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]"
                   >
                     Aprovar
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => handleModerationAction(item.id, 'reject')}
                     className="px-3 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]"
                   >

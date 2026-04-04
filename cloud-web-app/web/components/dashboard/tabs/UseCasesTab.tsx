@@ -47,7 +47,7 @@ export default function UseCasesTab({ useCases, onSelect }: UseCasesTabProps) {
               </ul>
             </div>
 
-            <button
+            <button type="button"
               onClick={() => onSelect(useCase.id)}
               className="aethel-button aethel-button-secondary w-full mt-6"
             >

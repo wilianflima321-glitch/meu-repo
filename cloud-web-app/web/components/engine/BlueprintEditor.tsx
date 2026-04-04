@@ -199,7 +199,7 @@ const NodePalette: React.FC<{
       <div className="flex-1 overflow-y-auto">
         {Array.from(filteredCategories).map(([category, nodes]) => (
           <div key={category}>
-            <button
+            <button type="button"
               onClick={() => toggleCategory(category)}
               className="w-full px-3 py-2 flex items-center justify-between text-sm font-medium text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)] border-b border-[var(--aethel-border-primary)]"
             >
@@ -210,7 +210,7 @@ const NodePalette: React.FC<{
             {expandedCats.has(category) && (
               <div className="py-1">
                 {nodes.map(node => (
-                  <button
+                  <button type="button"
                     key={node.type}
                     onClick={() => onAddNode(node.type)}
                     className="w-full px-4 py-1.5 text-left text-xs text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)] flex items-center gap-2"
@@ -246,7 +246,7 @@ const VariablesPanel: React.FC<{
     <div className="p-3 border-b border-[var(--aethel-border-primary)]">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Variables</span>
-        <button
+        <button type="button"
           onClick={onAdd}
           className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
@@ -268,7 +268,7 @@ const VariablesPanel: React.FC<{
                 <span className="text-[var(--aethel-text-primary)]">{v.name}</span>
                 <span className="text-[var(--aethel-text-secondary)]">({v.type})</span>
               </div>
-              <button
+              <button type="button"
                 onClick={() => onDelete(v.id)}
                 className="text-[var(--aethel-error-light)] hover:text-[var(--aethel-error)]"
               >
@@ -325,7 +325,7 @@ const ComponentsPanel: React.FC<{
     <div className="p-3 border-b border-[var(--aethel-border-primary)]">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Components</span>
-        <button
+        <button type="button"
           onClick={onAdd}
           className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
@@ -359,7 +359,7 @@ const FunctionsPanel: React.FC<{
     <div className="p-3">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-[var(--aethel-text-secondary)]">Functions</span>
-        <button
+        <button type="button"
           onClick={onAdd}
           className="px-2 py-1 text-xs bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-[var(--aethel-text-primary)]"
         >
@@ -384,7 +384,7 @@ const FunctionsPanel: React.FC<{
                 <span>{f.isEvent ? '⚡' : 'ƒ'}</span>
                 <span>{f.name}</span>
               </div>
-              <button
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); onDelete(f.id); }}
                 className="text-[var(--aethel-error-light)] hover:text-[var(--aethel-error)]"
               >
@@ -714,20 +714,20 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           <div className="flex-1" />
 
           <div className="flex items-center gap-2">
-            <button
+            <button type="button"
               onClick={handleCompile}
               className="px-4 py-1.5 bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded text-sm font-medium"
             >
               Compile
             </button>
-            <button
+            <button type="button"
               onClick={handleSave}
               className="px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded text-sm font-medium"
             >
               Save
             </button>
             {onClose && (
-              <button
+              <button type="button"
                 onClick={onClose}
                 className="px-4 py-1.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded text-sm font-medium"
               >
@@ -739,7 +739,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
 
         {/* Tab Bar */}
         <div className="h-8 border-b border-[var(--aethel-border-primary)] flex items-center px-2 gap-1 bg-[var(--aethel-surface-tertiary)]">
-          <button
+          <button type="button"
             onClick={() => setActiveTab('eventGraph')}
             className={`px-3 py-1 text-xs rounded ${
               activeTab === 'eventGraph'
@@ -749,7 +749,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           >
             Event Graph
           </button>
-          <button
+          <button type="button"
             onClick={() => setActiveTab('constructionScript')}
             className={`px-3 py-1 text-xs rounded ${
               activeTab === 'constructionScript'

@@ -320,7 +320,7 @@ const ProjectCard: React.FC<{
         )}
 
         {/* Favorite */}
-        <button
+        <button type="button"
           onClick={(e) => {
             e.stopPropagation();
             onToggleFavorite();
@@ -378,7 +378,7 @@ const ProjectCard: React.FC<{
 
           {/* Menu */}
           <div style={{ position: 'relative' }}>
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowMenu(!showMenu);
@@ -470,7 +470,7 @@ const MenuButton: React.FC<{
   onClick: () => void;
   danger?: boolean;
 }> = ({ icon, label, onClick, danger }) => (
-  <button
+  <button type="button"
     onClick={(e) => {
       e.stopPropagation();
       onClick();
@@ -779,7 +779,7 @@ export const ProjectsDashboard: React.FC = () => {
             </p>
           </div>
 
-          <button
+          <button type="button"
             onClick={() => setShowCreateModal(true)}
             style={{
               display: 'flex',
@@ -883,7 +883,7 @@ export const ProjectsDashboard: React.FC = () => {
               border: `1px solid ${colors.border}`,
             }}
           >
-            <button
+            <button type="button"
               onClick={() => setView('grid')}
               style={{
                 padding: '6px 10px',
@@ -896,7 +896,7 @@ export const ProjectsDashboard: React.FC = () => {
             >
               <Grid size={16} />
             </button>
-            <button
+            <button type="button"
               onClick={() => setView('list')}
               style={{
                 padding: '6px 10px',
@@ -934,7 +934,7 @@ export const ProjectsDashboard: React.FC = () => {
                 : 'Crie um novo projeto e comece a desenvolver sua proxima grande ideia.'}
             </p>
             {!search && (
-              <button
+              <button type="button"
                 onClick={() => setShowCreateModal(true)}
                 style={{
                   display: 'inline-flex',

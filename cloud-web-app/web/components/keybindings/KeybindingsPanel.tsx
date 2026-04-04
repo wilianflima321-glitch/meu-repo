@@ -366,13 +366,13 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
           )}
         </div>
         <div style={styles.modalFooter}>
-          <button
+          <button type="button"
             style={{ ...styles.button, ...styles.secondaryButton }}
             onClick={onClose}
           >
             Cancelar
           </button>
-          <button
+          <button type="button"
             style={{ ...styles.button, ...styles.primaryButton }}
             onClick={() => {
               if (recordedKey) {
@@ -444,11 +444,11 @@ const KeybindingRow: React.FC<KeybindingRowProps> = ({ keybinding, onEdit, onRes
         ...styles.actionsColumn,
         ...(isHovered ? styles.actionsVisible : {}),
       }}>
-        <button style={styles.iconButton} onClick={onEdit} title="Editar">
+        <button type="button" style={styles.iconButton} onClick={onEdit} title="Editar">
 
         </button>
         {keybinding.source === 'user' && (
-          <button style={styles.iconButton} onClick={onReset} title="Resetar">
+          <button type="button" style={styles.iconButton} onClick={onReset} title="Resetar">
 
           </button>
         )}
@@ -561,7 +561,7 @@ export const KeybindingsPanel: React.FC = () => {
 
       <div style={styles.toolbar}>
         {(['all', 'default', 'user', 'extension'] as FilterType[]).map(f => (
-          <button
+          <button type="button"
             key={f}
             style={{
               ...styles.filterButton,
@@ -575,10 +575,10 @@ export const KeybindingsPanel: React.FC = () => {
 
         <div style={{ flex: 1 }} />
 
-        <button style={styles.filterButton} onClick={handleImport}>
+        <button type="button" style={styles.filterButton} onClick={handleImport}>
            Importar
         </button>
-        <button style={styles.filterButton} onClick={handleExport}>
+        <button type="button" style={styles.filterButton} onClick={handleExport}>
            Exportar
         </button>
       </div>

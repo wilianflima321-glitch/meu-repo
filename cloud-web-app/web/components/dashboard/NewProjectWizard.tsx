@@ -357,7 +357,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       {/* Genre Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 flex-1">
         {GENRES.map((genre) => (
-          <button
+          <button type="button"
             key={genre.id}
             onClick={() => handleGenreSelect(genre.id)}
             onMouseEnter={() => handleGenreHover(genre.id)}
@@ -415,7 +415,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={onCancel}
           className="px-4 py-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
         >
@@ -424,14 +424,14 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
         <div className="flex items-center gap-3">
           {/* Mute toggle */}
-          <button
+          <button type="button"
             onClick={() => setIsMuted(!isMuted)}
             className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >
             {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
           </button>
 
-          <button
+          <button type="button"
             onClick={handleNext}
             disabled={!selectedGenre}
             className={`
@@ -469,7 +469,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
       {/* Style Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 flex-1">
         {STYLES.map((style) => (
-          <button
+          <button type="button"
             key={style.id}
             onClick={() => handleStyleSelect(style.id)}
             className={`
@@ -550,7 +550,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={handleBack}
           className="flex items-center gap-2 px-4 py-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
         >
@@ -558,7 +558,7 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           Voltar
         </button>
 
-        <button
+        <button type="button"
           onClick={handleNext}
           disabled={!selectedStyle || !projectName.trim()}
           className={`

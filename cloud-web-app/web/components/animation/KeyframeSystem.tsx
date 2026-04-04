@@ -812,7 +812,7 @@ export function KeyframeControls({
       <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, minWidth: 80 }}>{property.name}</span>
 
       {/* Keyframe toggle button */}
-      <button
+      <button type="button"
         onClick={() => {
           if (hasKeyframeAtTime && currentKeyframe) {
             onRemove(currentKeyframe.id)
@@ -870,7 +870,7 @@ export function KeyframeControls({
       )}
 
       {/* Navigation to prev/next keyframe */}
-      <button
+      <button type="button"
         onClick={() => {
           const prevKf = [...property.keyframes]
             .filter(kf => kf.time < currentTime - 0.01)
@@ -889,7 +889,7 @@ export function KeyframeControls({
       >
         &lt;
       </button>
-      <button
+      <button type="button"
         onClick={() => {
           const nextKf = [...property.keyframes]
             .filter(kf => kf.time > currentTime + 0.01)

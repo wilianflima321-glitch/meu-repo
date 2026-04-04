@@ -73,7 +73,7 @@ export default function IndexingPage() {
           <h1 className="text-2xl font-bold">Indexação avançada</h1>
           <p className="text-sm text-[var(--aethel-text-tertiary)]">Controle de indexação RAG com auditoria.</p>
         </div>
-        <button onClick={fetchData} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
+        <button type="button" onClick={fetchData} className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm">Atualizar</button>
       </div>
 
       {error && <div className="bg-[color-mix(in_srgb,var(--aethel-error)_8%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)] p-3 rounded mb-4">{error}</div>}
@@ -88,7 +88,7 @@ export default function IndexingPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="border p-2 flex-1"
           />
-          <button onClick={fetchData} className="bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded">Buscar</button>
+          <button type="button" onClick={fetchData} className="bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded">Buscar</button>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export default function IndexingPage() {
             <input type="number" value={maxFileSizeMb} onChange={(e) => setMaxFileSizeMb(Number(e.target.value))} className="border p-2 w-full" />
           </div>
         </div>
-        <button onClick={updateConfig} disabled={saving} className="mt-4 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">
+        <button type="button" onClick={updateConfig} disabled={saving} className="mt-4 bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50">
           {saving ? 'Salvando...' : 'Atualizar configurações'}
         </button>
       </div>
@@ -124,7 +124,7 @@ export default function IndexingPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-1 rounded text-xs bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">{file.indexed ? 'Indexado' : 'Não Indexado'}</span>
-                  <button onClick={() => toggleIndex(file)} className="bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] px-3 py-1 rounded text-sm">Alternar</button>
+                  <button type="button" onClick={() => toggleIndex(file)} className="bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] px-3 py-1 rounded text-sm">Alternar</button>
                 </div>
               </li>
             ))}

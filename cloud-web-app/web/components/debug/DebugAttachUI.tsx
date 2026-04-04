@@ -273,7 +273,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
         {/* Actions */}
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {isAttached ? (
-            <button
+            <button type="button"
               onClick={onDetach}
               style={{
                 display: 'flex',
@@ -292,7 +292,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
               Detach
             </button>
           ) : (
-            <button
+            <button type="button"
               onClick={onAttach}
               disabled={isAttaching || process.status === 'stopped'}
               style={{
@@ -572,7 +572,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button
+          <button type="button"
             onClick={refreshProcesses}
             disabled={resolvedRefreshing}
             style={{
@@ -797,7 +797,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
               {resolvedProcesses.find((p) => p.id === resolvedAttachedId)?.name}
             </span>
           </div>
-          <button
+          <button type="button"
             onClick={() => handleDetach(resolvedAttachedId)}
             style={{
               padding: '4px 8px',
@@ -827,7 +827,7 @@ const QuickConnectButton: React.FC<{
   color: string;
   onClick: () => void;
 }> = ({ icon, label, color, onClick }) => (
-  <button
+  <button type="button"
     onClick={onClick}
     style={{
       display: 'flex',

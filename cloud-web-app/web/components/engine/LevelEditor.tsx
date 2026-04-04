@@ -388,7 +388,7 @@ function Toolbar({
       {/* Transform Mode */}
       <div style={{ display: 'flex', gap: '2px', marginRight: '8px' }}>
         {(['translate', 'rotate', 'scale'] as TransformMode[]).map((mode) => (
-          <button
+          <button type="button"
             key={mode}
             onClick={() => onTransformModeChange(mode)}
             title={mode.charAt(0).toUpperCase() + mode.slice(1) + ' (W/E/R)'}
@@ -472,7 +472,7 @@ function Toolbar({
       <div style={{ flex: 1 }} />
 
       {/* Play/Pause */}
-      <button
+      <button type="button"
         onClick={onPlayPause}
         style={{
           padding: '6px 16px',
@@ -493,7 +493,7 @@ function Toolbar({
       <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
 
       {/* Save & Build */}
-      <button
+      <button type="button"
         onClick={onSave}
         style={{
           padding: '6px 12px',
@@ -508,7 +508,7 @@ function Toolbar({
         💾 Save
       </button>
 
-      <button
+      <button type="button"
         onClick={onBuild}
         style={{
           padding: '6px 12px',
@@ -585,13 +585,13 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
             <span style={{ flex: 1, fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {obj.name}
             </span>
-            <button
+            <button type="button"
               onClick={(e) => { e.stopPropagation(); onToggleVisibility(obj.id); }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', opacity: 0.6 }}
             >
               {obj.visible ? '👁' : '👁‍🗨'}
             </button>
-            <button
+            <button type="button"
               onClick={(e) => { e.stopPropagation(); onToggleLock(obj.id); }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', opacity: 0.6 }}
             >
@@ -1143,7 +1143,7 @@ export default function LevelEditor() {
             display: 'flex',
             gap: '8px',
           }}>
-            <button
+            <button type="button"
               onClick={() => setShowGrid(!showGrid)}
               style={{
                 padding: '4px 8px',
@@ -1157,7 +1157,7 @@ export default function LevelEditor() {
             >
               Grid
             </button>
-            <button
+            <button type="button"
               onClick={() => setShowStats(!showStats)}
               style={{
                 padding: '4px 8px',

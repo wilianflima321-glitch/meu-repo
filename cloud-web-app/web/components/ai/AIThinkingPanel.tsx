@@ -345,7 +345,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
         <NeuralPulse active={step.status === 'active'} />
 
         {/* Header */}
-        <button
+        <button type="button"
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center gap-3 p-3"
         >
@@ -417,7 +417,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
                       <pre className="text-[var(--aethel-text-secondary)]">
                         {step.metadata.codePreview}
                       </pre>
-                      <button
+                      <button type="button"
                         onClick={handleCopy}
                         className="absolute top-2 right-2 p-1 bg-[var(--aethel-surface-tertiary)]
                                  hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
@@ -554,7 +554,7 @@ export function AIThinkingPanel({
           <ProgressRing progress={progress} />
 
           {/* Toggle collapse */}
-          <button
+          <button type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
           >
@@ -566,7 +566,7 @@ export function AIThinkingPanel({
           </button>
 
           {/* Maximize */}
-          <button
+          <button type="button"
             onClick={() => setIsMaximized(!isMaximized)}
             className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
           >
@@ -579,7 +579,7 @@ export function AIThinkingPanel({
 
           {/* Close */}
           {onClose && (
-            <button
+            <button type="button"
               onClick={onClose}
               className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
             >

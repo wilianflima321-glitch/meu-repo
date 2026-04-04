@@ -255,7 +255,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
       `}
     >
       {/* Header */}
-      <button
+      <button type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-start gap-3 p-3"
       >
@@ -331,7 +331,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
 
               {/* Reference */}
               {note.reference && (
-                <button
+                <button type="button"
                   onClick={() => onJumpTo?.(note.reference)}
                   className="ml-11 flex items-center gap-2 px-2 py-1.5
                            bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
@@ -346,7 +346,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
               {/* Examples toggle */}
               {note.examples && note.examples.length > 0 && (
                 <div className="ml-11">
-                  <button
+                  <button type="button"
                     onClick={() => setShowExamples(!showExamples)}
                     className="flex items-center gap-1.5 text-xs text-[var(--aethel-text-tertiary)]
                              hover:text-[var(--aethel-text-secondary)] transition-colors"
@@ -395,7 +395,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
               {/* Actions */}
               <div className="ml-11 flex items-center gap-2">
                 {note.autoFixAvailable && note.status !== 'applied' && (
-                  <button
+                  <button type="button"
                     onClick={handleApplyFix}
                     disabled={isApplying}
                     className="flex items-center gap-1.5 px-3 py-1.5
@@ -427,7 +427,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
 
                 {/* Feedback buttons */}
                 <div className="flex items-center gap-1 ml-auto">
-                  <button
+                  <button type="button"
                     onClick={() => onFeedback?.(note.id, 'helpful')}
                     className={`p-1.5 rounded transition-colors ${
                       note.feedback === 'helpful'
@@ -438,7 +438,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                   >
                     <ThumbsUp className="w-3.5 h-3.5" />
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => onFeedback?.(note.id, 'not_helpful')}
                     className={`p-1.5 rounded transition-colors ${
                       note.feedback === 'not_helpful'
@@ -449,7 +449,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => onDismiss?.(note.id)}
                     className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] transition-colors"
                     title="Dispensar"
@@ -601,7 +601,7 @@ export function DirectorNotePanel({
 
         {/* Actions */}
         <div className="flex items-center gap-2 mt-3">
-          <button
+          <button type="button"
             onClick={requestAnalysis}
             disabled={isAnalyzing}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-quaternary)]
@@ -612,7 +612,7 @@ export function DirectorNotePanel({
             {isAnalyzing ? 'Analisando...' : 'Nova analise'}
           </button>
 
-          <button
+          <button type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="ml-auto p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
           >
@@ -639,7 +639,7 @@ export function DirectorNotePanel({
                 { key: 'recommendation' as const, label: `Recom. (${counts.recommendation})` },
                 { key: 'suggestion' as const, label: `Sugest. (${counts.suggestion})` },
               ].map(({ key, label }) => (
-                <button
+                <button type="button"
                   key={key}
                   onClick={() => setActiveFilter(key)}
                   className={`

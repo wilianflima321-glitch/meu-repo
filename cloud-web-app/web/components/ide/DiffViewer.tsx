@@ -288,14 +288,14 @@ function DiffHunkComponent({ hunk, onAccept, onReject, showLineNumbers }: DiffHu
 
         {hasChanges && hunk.accepted === null && (
           <div className="flex items-center gap-1">
-            <button
+            <button type="button"
               onClick={onAccept}
               className="flex items-center gap-1 px-2 py-0.5 bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-xs"
             >
               <Check className="w-3 h-3" />
               Aceitar
             </button>
-            <button
+            <button type="button"
               onClick={onReject}
               className="flex items-center gap-1 px-2 py-0.5 bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-xs"
             >
@@ -505,13 +505,13 @@ export default function DiffViewer({
         <div className="flex items-center gap-2">
           {/* View mode toggle */}
           <div className="flex items-center bg-[var(--aethel-surface-quaternary)] rounded overflow-hidden">
-            <button
+            <button type="button"
               onClick={() => setViewMode('unified')}
               className={`px-2 py-1 text-xs ${viewMode === 'unified' ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'}`}
             >
               Unificado
             </button>
-            <button
+            <button type="button"
               onClick={() => setViewMode('side-by-side')}
               className={`px-2 py-1 text-xs ${viewMode === 'side-by-side' ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'}`}
             >
@@ -520,21 +520,21 @@ export default function DiffViewer({
           </div>
 
           {/* Actions */}
-          <button
+          <button type="button"
             onClick={handleCopy}
             className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
             title="Copiar alterado"
           >
             <Copy className="w-4 h-4" />
           </button>
-          <button
+          <button type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
             title="Alternar tela cheia"
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
-          <button
+          <button type="button"
             onClick={onClose}
             className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)]"
             title="Fechar"
@@ -576,21 +576,21 @@ export default function DiffViewer({
       {/* Footer actions */}
       <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-tertiary)] border-t border-[var(--aethel-border-secondary)]">
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={handleAcceptAll}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-sm"
           >
             <Check className="w-4 h-4" />
             Aceitar tudo
           </button>
-          <button
+          <button type="button"
             onClick={handleRejectAll}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-error)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded text-sm"
           >
             <X className="w-4 h-4" />
             Rejeitar tudo
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               setHunks(prev => prev.map(h => ({ ...h, accepted: null })))
             }}
@@ -605,7 +605,7 @@ export default function DiffViewer({
           <span className="text-xs text-[var(--aethel-text-tertiary)]">
             {stats.accepted}/{stats.hunks} mudancas aceitas
           </span>
-          <button
+          <button type="button"
             onClick={handleApply}
             disabled={stats.pending > 0}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm font-medium ${

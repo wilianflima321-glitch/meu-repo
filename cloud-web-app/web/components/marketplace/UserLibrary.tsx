@@ -196,7 +196,7 @@ function AssetCard({
 
                         {/* Actions */}
                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
+                            <button type="button"
                                 size="sm"
                                 onClick={handleDownload}
                                 disabled={isDownloading}
@@ -287,7 +287,7 @@ function AssetCard({
 
                         {/* Quick download */}
                         <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Button onClick={handleDownload} disabled={isDownloading}>
+                            <button type="button" onClick={handleDownload} disabled={isDownloading}>
                                 <Download className="w-4 h-4 mr-2" />
                                 {isDownloading ? 'Baixando...' : 'Baixar'}
                             </Button>
@@ -556,7 +556,7 @@ export default function UserLibrary() {
 
                         {/* View toggle */}
                         <div className="flex border rounded-md">
-                            <Button
+                            <button type="button"
                                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                                 size="icon"
                                 className="rounded-r-none"
@@ -564,7 +564,7 @@ export default function UserLibrary() {
                             >
                                 <Grid className="w-4 h-4" />
                             </Button>
-                            <Button
+                            <button type="button"
                                 variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                                 size="icon"
                                 className="rounded-l-none"
@@ -729,10 +729,10 @@ export default function UserLibrary() {
                                             onChange={(e) => setNewCollectionName(e.target.value)}
                                         />
                                         <DialogFooter>
-                                            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                                            <button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                                                 Cancelar
                                             </Button>
-                                            <Button onClick={handleCreateCollection}>
+                                            <button type="button" onClick={handleCreateCollection}>
                                                 Criar
                                             </Button>
                                         </DialogFooter>
@@ -748,7 +748,7 @@ export default function UserLibrary() {
                                     title="Nenhuma colecao ainda"
                                     description="Crie uma colecao para organizar seus assets"
                                     action={
-                                        <Button onClick={() => setIsCreateDialogOpen(true)}>
+                                        <button type="button" onClick={() => setIsCreateDialogOpen(true)}>
                                             <Plus className="w-4 h-4 mr-2" />
                                             Criar colecao
                                         </Button>

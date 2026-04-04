@@ -57,7 +57,7 @@ export function Dropdown({ trigger, items, align = 'right', width = 'auto' }: Dr
 
   return (
     <div className="relative inline-block" ref={dropdownRef}>
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="focus:outline-none"
         aria-expanded={isOpen}
@@ -110,7 +110,7 @@ export function Dropdown({ trigger, items, align = 'right', width = 'auto' }: Dr
             }
 
             return (
-              <button
+              <button type="button"
                 key={item.id}
                 onClick={() => {
                   if (!item.disabled) {

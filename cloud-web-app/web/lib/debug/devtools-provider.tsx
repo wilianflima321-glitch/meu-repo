@@ -443,7 +443,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 {!isMinimized && (
                   <div className="flex items-center">
                     {tabs.map(tab => (
-                      <button
+                      <button type="button"
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-colors ${
@@ -483,7 +483,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     </div>
                     
                     {/* Recording */}
-                    <button
+                    <button type="button"
                       onClick={toggleRecording}
                       className={`p-1.5 rounded-md transition-colors ${
                         isRecording ? 'text-red-400 bg-red-500/20' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -494,7 +494,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     </button>
                     
                     {/* Clear */}
-                    <button
+                    <button type="button"
                       onClick={clearAll}
                       className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] rounded-md transition-colors"
                       title="Clear All"
@@ -503,7 +503,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     </button>
                     
                     {/* Export */}
-                    <button
+                    <button type="button"
                       onClick={exportLogs}
                       className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] rounded-md transition-colors"
                       title="Export Logs"
@@ -514,7 +514,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 )}
                 
                 {/* Minimize */}
-                <button
+                <button type="button"
                   onClick={onMinimize}
                   className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] rounded-md transition-colors"
                   title={isMinimized ? 'Expand' : 'Minimize'}
@@ -523,7 +523,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 </button>
                 
                 {/* Close */}
-                <button
+                <button type="button"
                   onClick={toggle}
                   className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-red-400 rounded-md transition-colors"
                   title="Close DevTools"
@@ -577,7 +577,7 @@ function StateTab({ snapshots, searchQuery }: { snapshots: StateSnapshot[]; sear
     <div className="h-full overflow-auto p-2 space-y-1">
       {filtered.map(snapshot => (
         <div key={snapshot.id} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded-lg overflow-hidden">
-          <button
+          <button type="button"
             onClick={() => setExpandedId(expandedId === snapshot.id ? null : snapshot.id)}
             className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-tertiary)]/50 transition-colors"
           >
@@ -632,7 +632,7 @@ function ActionsTab({ actions, searchQuery }: { actions: ActionLog[]; searchQuer
         
         return (
           <div key={action.id} className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] rounded-lg overflow-hidden">
-            <button
+            <button type="button"
               onClick={() => setExpandedId(expandedId === action.id ? null : action.id)}
               className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-tertiary)]/50 transition-colors"
             >

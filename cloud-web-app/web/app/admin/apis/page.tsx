@@ -215,7 +215,7 @@ export default function APIs() {
             <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={fetchIntegrations}
           aria-label='Atualizar status de integracoes'
           className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
@@ -531,7 +531,7 @@ export default function APIs() {
         />
         <div className='flex items-center gap-2'>
           {(['all', 'configured', 'missing'] as const).map((status) => (
-            <button
+            <button type="button"
               key={status}
               onClick={() => setStatusFilter(status)}
               aria-pressed={statusFilter === status}

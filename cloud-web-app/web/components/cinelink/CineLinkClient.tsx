@@ -368,7 +368,7 @@ export function CineLinkClient({
             Live
           </span>
         )}
-        <button
+        <button type="button"
           onClick={() => setIsMinimized(false)}
           className="p-1 hover:bg-[var(--aethel-surface-secondary)] rounded"
         >
@@ -393,13 +393,13 @@ export function CineLinkClient({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setShowSettings(!showSettings)}
             className="p-1.5 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition"
           >
             <Settings className="w-4 h-4 text-[var(--aethel-text-secondary)]" />
           </button>
-          <button
+          <button type="button"
             onClick={() => setIsMinimized(true)}
             className="p-1.5 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition"
           >
@@ -413,7 +413,7 @@ export function CineLinkClient({
         <div className="p-4 bg-[var(--aethel-surface-secondary)]/50 border-b border-[var(--aethel-border-primary)] space-y-4">
           <div className="flex justify-between items-center">
             <h4 className="text-sm font-medium text-[var(--aethel-text-primary)]">Settings</h4>
-            <button onClick={() => setShowSettings(false)}>
+            <button type="button" onClick={() => setShowSettings(false)}>
               <X className="w-4 h-4 text-[var(--aethel-text-secondary)]" />
             </button>
           </div>
@@ -493,7 +493,7 @@ export function CineLinkClient({
                 readOnly
                 className="flex-1 px-3 py-2 text-xs bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-secondary)] truncate"
               />
-              <button
+              <button type="button"
                 onClick={copyUrl}
                 className="p-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg hover:bg-[var(--aethel-surface-secondary)] transition"
               >
@@ -554,14 +554,14 @@ export function CineLinkClient({
 
             {/* Actions */}
             <div className="flex gap-2">
-              <button
+              <button type="button"
                 onClick={resetCamera}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="text-sm">Reset</span>
               </button>
-              <button
+              <button type="button"
                 onClick={disconnect}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-lg transition"
               >
@@ -587,7 +587,7 @@ export function CineLinkClient({
         </div>
 
         {!state.isConnected && (
-          <button
+          <button type="button"
             onClick={connect}
             className="flex items-center gap-1 px-3 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded transition"
           >
@@ -709,7 +709,7 @@ export function CineLinkMobile({ serverUrl }: CineLinkMobileProps): JSX.Element 
 
         {/* Status */}
         {!isStreaming ? (
-          <button
+          <button type="button"
             onClick={startStreaming}
             className="w-full py-4 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-xl text-lg font-medium transition flex items-center justify-center gap-3"
           >
@@ -747,7 +747,7 @@ export function CineLinkMobile({ serverUrl }: CineLinkMobileProps): JSX.Element 
             </div>
 
             {/* Stop button */}
-            <button
+            <button type="button"
               onClick={stopStreaming}
               className="w-full py-4 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-xl text-lg font-medium transition flex items-center justify-center gap-3"
             >

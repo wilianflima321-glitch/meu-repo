@@ -305,7 +305,7 @@ const AssetCard: React.FC<AssetCardProps> = ({
         <span style={{ color: colors.textDim, fontSize: '11px' }}>
           {asset.size ? `${(asset.size / 1024).toFixed(1)} KB` : '-'}
         </span>
-        <button
+        <button type="button"
           onClick={(e) => {
             e.stopPropagation();
             onToggleFavorite();
@@ -469,7 +469,7 @@ const MenuButton: React.FC<{
   onClick: () => void;
   danger?: boolean;
 }> = ({ icon, label, onClick, danger }) => (
-  <button
+  <button type="button"
     onClick={onClick}
     style={{
       display: 'flex',
@@ -727,7 +727,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           }}
         >
           <span style={{ fontWeight: 600, color: colors.text }}>Folders</span>
-          <button
+          <button type="button"
             onClick={() => onCreateFolder?.(selectedPath || '/Content', 'New Folder')}
             style={{
               background: 'transparent',
@@ -1088,7 +1088,7 @@ export const ContentBrowser: React.FC<ContentBrowserProps> = ({
           }}
         >
           <div style={{ fontWeight: 600, color: colors.text }}>Preview</div>
-          <button
+          <button type="button"
             onClick={() => setLowPolyPreview((prev) => !prev)}
             style={{
               padding: '4px 10px',

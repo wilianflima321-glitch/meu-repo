@@ -55,7 +55,7 @@ export function AdvancedSettingsPanel() {
           { id: 'webhooks', label: 'Webhooks', icon: Webhook },
           { id: 'team', label: 'Time', icon: Users },
         ].map(({ id, label, icon: Icon }) => (
-          <button
+          <button type="button"
             key={id}
             onClick={() => setActiveTab(id as any)}
             className={`px-4 py-3 font-medium text-sm transition-all flex items-center gap-2 ${
@@ -231,13 +231,13 @@ function APIKeyCard({
             readOnly
             className="flex-1 px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)] text-sm font-mono"
           />
-          <button
+          <button type="button"
             onClick={() => onCopy(apiKey.key)}
             className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
             <Copy size={16} />
           </button>
-          <button
+          <button type="button"
             onClick={() => setShowSecret(!showSecret)}
             className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
@@ -254,7 +254,7 @@ function APIKeyCard({
       )}
 
       <div className="flex gap-2 pt-2 border-t border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={() => onRevoke(apiKey.id)}
           disabled={apiKey.status === 'revoked'}
           className="flex-1 px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] disabled:opacity-50 transition-colors flex items-center justify-center gap-1"

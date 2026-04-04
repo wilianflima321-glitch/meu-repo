@@ -120,7 +120,7 @@ function ProjectCard({
           </div>
 
           <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-            <button
+            <button type="button"
               onClick={onToggleStar}
               className={`p-1.5 rounded-lg transition-colors ${
                 project.starred
@@ -269,7 +269,7 @@ export function ProjectsTab({
               <p className="text-[var(--aethel-text-secondary)] mb-4">
                 Tente ajustar seus filtros de busca
               </p>
-              <Button
+              <button type="button"
                 variant="secondary"
                 onClick={() => {
                   setSearchQuery('')

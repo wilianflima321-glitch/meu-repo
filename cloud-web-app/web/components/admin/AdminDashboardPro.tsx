@@ -254,7 +254,7 @@ export default function AdminDashboardPro() {
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
+                <button type="button"
                   onClick={() => runOpsAction('backup')}
                   disabled={runningAction !== null}
                   className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
@@ -262,7 +262,7 @@ export default function AdminDashboardPro() {
                   <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Backup de database</p>
                   <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Ultimo backup: 2 horas</p>
                 </button>
-                <button
+                <button type="button"
                   onClick={() => runOpsAction('cache_flush')}
                   disabled={runningAction !== null}
                   className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
@@ -270,7 +270,7 @@ export default function AdminDashboardPro() {
                   <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Limpar cache</p>
                   <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Limpar dados em cache</p>
                 </button>
-                <button
+                <button type="button"
                   onClick={() => runOpsAction('logs_export')}
                   disabled={runningAction !== null}
                   className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
@@ -278,7 +278,7 @@ export default function AdminDashboardPro() {
                   <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Exportar logs</p>
                   <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Baixar logs do sistema</p>
                 </button>
-                <button
+                <button type="button"
                   onClick={() => runOpsAction('feature_flags')}
                   disabled={runningAction !== null}
                   className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"

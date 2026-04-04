@@ -233,7 +233,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
 
   return (
     <div className="mb-4">
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
@@ -269,7 +269,7 @@ function PatternSelector({ value, onChange }: PatternSelectorProps) {
     <div className="space-y-1.5">
       <label className="text-xs text-[var(--aethel-text-secondary)] block mb-2">Fracture Pattern</label>
       {patterns.map((pattern) => (
-        <button
+        <button type="button"
           key={pattern.id}
           onClick={() => onChange(pattern.id)}
           className={`w-full p-2 rounded flex items-center gap-2 transition-colors ${
@@ -540,7 +540,7 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
   return (
     <div className="flex flex-col gap-1 p-2 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)] rounded-lg">
       {/* Action buttons */}
-      <button
+      <button type="button"
         onClick={onPreviewDestruction}
         className="p-2 rounded bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)] transition-colors"
         title="Test Destruction"
@@ -548,7 +548,7 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
         <Bomb className="w-4 h-4" />
       </button>
 
-      <button
+      <button type="button"
         onClick={onReset}
         className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors"
         title="Reset"
@@ -560,7 +560,7 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
 
       {/* Tools */}
       {tools.map((tool) => (
-        <button
+        <button type="button"
           key={tool.id}
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
@@ -771,7 +771,7 @@ export default function DestructionEditor({
               <Hammer className="w-5 h-5 text-[var(--aethel-error)]" />
               Destruction
             </h2>
-            <button
+            <button type="button"
               onClick={handleExport}
               className="p-1.5 rounded bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)] transition-colors"
               title="Export Configuration"
@@ -784,7 +784,7 @@ export default function DestructionEditor({
           <CollapsibleSection title="Material Presets" icon={<Zap className="w-4 h-4 text-[var(--aethel-warning)]" />}>
             <div className="grid grid-cols-2 gap-1.5">
               {DESTRUCTION_PRESETS.map((preset) => (
-                <button
+                <button type="button"
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
                   className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]
@@ -848,7 +848,7 @@ export default function DestructionEditor({
             {/* Quick damage buttons */}
             <div className="mt-3 grid grid-cols-4 gap-1">
               {[10, 25, 50, 100].map((dmg) => (
-                <button
+                <button type="button"
                   key={dmg}
                   onClick={() => applyDamage(dmg)}
                   className="p-1.5 text-xs bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] rounded
@@ -958,7 +958,7 @@ export default function DestructionEditor({
                   unit=" N"
                   onChange={(v) => setImpactPoint((p) => p ? { ...p, force: v } : null)}
                 />
-                <button
+                <button type="button"
                   onClick={() => setImpactPoint(null)}
                   className="w-full p-1.5 mt-2 text-xs bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded"
                 >

@@ -92,10 +92,10 @@ export const SnippetEditor: React.FC<SnippetEditorProps> = ({
       </div>
 
       <div className="editor-footer">
-        <button className="btn-cancel" onClick={onCancel}>
+        <button type="button" className="btn-cancel" onClick={onCancel}>
           Cancel
         </button>
-        <button
+        <button type="button"
           className="btn-save"
           onClick={handleSave}
           disabled={!prefix || !body}

@@ -331,14 +331,14 @@ export function PeekWidget({
           )}
         </div>
         <div className="flex items-center gap-1">
-          <button
+          <button type="button"
             onClick={() => onNavigate(selectedDefinition)}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
             title="Go to definition"
           >
             <ExternalLink className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
           </button>
-          <button
+          <button type="button"
             onClick={onClose}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
@@ -352,7 +352,7 @@ export function PeekWidget({
         {config.definitions.length > 1 && (
           <div className="w-48 border-r border-[var(--aethel-border-primary)] max-h-80 overflow-y-auto">
             {config.definitions.map((def, index) => (
-              <button
+              <button type="button"
                 key={`${def.uri}-${def.range.startLine}`}
                 onClick={() => setSelectedIndex(index)}
                 className={`w-full px-3 py-2 text-left text-sm transition-colors ${
@@ -512,7 +512,7 @@ export function ReferencesPanel({
             in {Object.keys(filteredGroupedRefs).length} file{Object.keys(filteredGroupedRefs).length !== 1 ? 's' : ''}
           </span>
         </div>
-        <button
+        <button type="button"
           onClick={onClose}
           className="p-1 hover:bg-[var(--aethel-surface-secondary)] rounded"
         >
@@ -540,7 +540,7 @@ export function ReferencesPanel({
           return (
             <div key={uri} className="border-b border-[var(--aethel-border-primary)]/50">
               {/* File header */}
-              <button
+              <button type="button"
                 onClick={() => toggleFile(uri)}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-secondary)]/50 transition-colors ${
                   isCurrentFile ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_10%,transparent)]' : ''
@@ -567,7 +567,7 @@ export function ReferencesPanel({
               {isExpanded && (
                 <div className="pb-1">
                   {refs.map((ref, index) => (
-                    <button
+                    <button type="button"
                       key={`${ref.range.startLine}-${ref.range.startColumn}-${index}`}
                       onClick={() => onNavigate(ref)}
                       className="w-full flex items-start gap-2 px-6 py-1.5 text-left hover:bg-[var(--aethel-surface-secondary)]/50 group"

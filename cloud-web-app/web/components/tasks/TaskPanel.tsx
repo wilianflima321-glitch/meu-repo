@@ -296,7 +296,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, isRunning, onRun, onStop, onS
         <span style={styles.taskCommand}>{task.command} {task.args?.join(' ') || ''}</span>
       </div>
       <div style={styles.taskControls}>
-        <button
+        <button type="button"
           style={{ ...styles.button, ...styles.buttonGhost }}
           onClick={(e) => { e.stopPropagation(); onShowConfig(); }}
           title="View Configuration"
@@ -304,14 +304,14 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, isRunning, onRun, onStop, onS
           ⚙️
         </button>
         {isRunning ? (
-          <button
+          <button type="button"
             style={{ ...styles.button, ...styles.buttonDanger }}
             onClick={(e) => { e.stopPropagation(); onStop(); }}
           >
             ⬛ Stop
           </button>
         ) : (
-          <button
+          <button type="button"
             style={{ ...styles.button, ...styles.buttonPrimary }}
             onClick={(e) => { e.stopPropagation(); onRun(); }}
           >
@@ -400,7 +400,7 @@ const TaskConfigView: React.FC<TaskConfigViewProps> = ({ task, onClose }) => {
     <div style={styles.configView}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
         <h4 style={{ margin: 0, color: theme.primary }}>Task Configuration</h4>
-        <button style={{ ...styles.button, ...styles.buttonGhost }} onClick={onClose}>✕</button>
+        <button type="button" style={{ ...styles.button, ...styles.buttonGhost }} onClick={onClose}>✕</button>
       </div>
       <div style={styles.configItem}>
         <span style={styles.configLabel}>Label</span>
@@ -646,13 +646,13 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                       </span>
                     </div>
                     <div style={styles.taskControls}>
-                      <button
+                      <button type="button"
                         style={{ ...styles.button, ...styles.buttonWarning }}
                         onClick={() => handleRestartTask(execution)}
                       >
                         🔄 Restart
                       </button>
-                      <button
+                      <button type="button"
                         style={{ ...styles.button, ...styles.buttonDanger }}
                         onClick={() => handleStopTask(execution.id)}
                       >
@@ -715,7 +715,7 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                           )}
                         </div>
                       </div>
-                      <button
+                      <button type="button"
                         style={{ ...styles.button, ...styles.buttonPrimary }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -761,7 +761,7 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
 
       <div style={styles.tabs}>
         {(['available', 'running', 'history'] as TabType[]).map((tab) => (
-          <button
+          <button type="button"
             key={tab}
             style={{
               ...styles.tab,

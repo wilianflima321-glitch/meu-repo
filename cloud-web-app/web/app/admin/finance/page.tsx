@@ -334,7 +334,7 @@ export default function FinanceDashboard() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-[var(--aethel-error)]">{error || 'Sem dados disponíveis'}</p>
-        <button
+        <button type="button"
           onClick={fetchMetrics}
           className="px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
         >
@@ -359,7 +359,7 @@ export default function FinanceDashboard() {
           {/* Date Range */}
           <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-1">
             {(['today', '7d', '30d', 'mtd'] as const).map((range) => (
-              <button
+              <button type="button"
                 key={range}
                 onClick={() => setDateRange(range)}
                 className={`px-3 py-1 text-xs rounded ${
@@ -374,7 +374,7 @@ export default function FinanceDashboard() {
           </div>
 
           {/* Auto Refresh Toggle */}
-          <button
+          <button type="button"
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`p-2 rounded-lg border ${
               autoRefresh

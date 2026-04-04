@@ -165,7 +165,7 @@ export default function Payments() {
           <p className='text-[var(--aethel-text-secondary)]'>Gateway controlado por admin e transações reais registradas.</p>
           {lastUpdated && <p className='text-xs text-[var(--aethel-text-tertiary)]'>Atualizado em {lastUpdated.toLocaleString()}</p>}
         </div>
-        <button onClick={fetchPayments} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
+        <button type="button" onClick={fetchPayments} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>
           Atualizar
         </button>
       </div>
@@ -221,7 +221,7 @@ export default function Payments() {
             Permitir redirecionamento da IDE local para web
           </label>
 
-          <button
+          <button type="button"
             onClick={saveGateway}
             disabled={savingGateway}
             className='px-3 py-2 rounded bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-60'
@@ -278,7 +278,7 @@ export default function Payments() {
         />
         <div className='flex items-center gap-2'>
           {(['all', 'succeeded', 'pending', 'failed'] as const).map((status) => (
-            <button
+            <button type="button"
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${

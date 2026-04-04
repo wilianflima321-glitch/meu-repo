@@ -831,7 +831,7 @@ interface SettingInputProps {
 
 function SettingToggle({ setting, value, onChange }: SettingInputProps) {
   return (
-    <button
+    <button type="button"
       onClick={() => onChange(!value)}
       className={`relative w-11 h-6 rounded-full transition-colors ${
         value ? 'bg-sky-600' : 'bg-[var(--aethel-surface-quaternary)]'
@@ -948,7 +948,7 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
           onChange={(v) => onChange(setting.id, v)}
         />
         {isModified && (
-          <button
+          <button type="button"
             onClick={onReset}
             className="p-1 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] opacity-0 group-hover:opacity-100 transition-opacity"
             title="Reset to default"

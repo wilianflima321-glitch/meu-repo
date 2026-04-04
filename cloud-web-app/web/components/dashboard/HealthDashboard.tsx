@@ -213,7 +213,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
           <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Desconectado</h3>
           <p className="mb-4 text-sm text-[var(--aethel-text-tertiary)]">Nao foi possivel conectar ao servidor</p>
           {onRefresh && (
-            <button onClick={onRefresh} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
+            <button type="button" onClick={onRefresh} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
               <RefreshCw size={16} />
               Reconectar
             </button>
@@ -258,7 +258,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
             {health.status.toUpperCase()}
           </span>
           {onRefresh && (
-            <button onClick={onRefresh} className="aethel-button aethel-button-ghost rounded-lg p-2" title="Atualizar">
+            <button type="button" onClick={onRefresh} className="aethel-button aethel-button-ghost rounded-lg p-2" title="Atualizar">
               <RefreshCw size={18} className="text-[var(--aethel-text-secondary)]" />
             </button>
           )}

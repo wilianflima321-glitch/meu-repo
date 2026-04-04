@@ -246,7 +246,7 @@ function VariablesPanel({
         <span style={{ fontWeight: 'bold', fontSize: '12px', color: 'var(--aethel-text-primary)' }}>
           📊 Variables
         </span>
-        <button
+        <button type="button"
           onClick={() => setShowAdd(!showAdd)}
           style={{
             padding: '4px 8px',
@@ -304,7 +304,7 @@ function VariablesPanel({
               <option value="int">Int</option>
               <option value="bool">Bool</option>
             </select>
-            <button
+            <button type="button"
               onClick={() => {
                 if (newVar.name) {
                   onAddVariable({
@@ -384,7 +384,7 @@ function VariablesPanel({
             />
           )}
 
-          <button
+          <button type="button"
             onClick={() => onRemoveVariable(variable.name)}
             style={{
               background: 'none',
@@ -659,7 +659,7 @@ function TransitionInspector({
           marginBottom: '8px',
         }}>
           <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Conditions</span>
-          <button
+          <button type="button"
             onClick={() => {
               const newCondition: TransitionCondition = {
                 variable: variables[0]?.name || '',
@@ -766,7 +766,7 @@ function TransitionInspector({
               }}
             />
 
-            <button
+            <button type="button"
               onClick={() => {
                 const newConditions = transition.conditions.filter((_, j) => j !== i);
                 onUpdate({ conditions: newConditions });
@@ -1000,7 +1000,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           borderRadius: '6px',
           border: '1px solid var(--aethel-border-primary)',
         }}>
-          <button
+          <button type="button"
             onClick={() => handleAddState('state')}
             style={{
               padding: '6px 12px',
@@ -1014,7 +1014,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           >
             🎭 Add State
           </button>
-          <button
+          <button type="button"
             onClick={() => handleAddState('conduit')}
             style={{
               padding: '6px 12px',
@@ -1028,7 +1028,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           >
             ⚡ Add Conduit
           </button>
-          <button
+          <button type="button"
             onClick={() => handleAddState('blend')}
             style={{
               padding: '6px 12px',
@@ -1043,7 +1043,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
             🔀 Add Blend
           </button>
           {(selectedState || selectedTransition) && (
-            <button
+            <button type="button"
               onClick={handleDeleteSelected}
               style={{
                 padding: '6px 12px',
@@ -1165,7 +1165,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           padding: '12px',
           borderTop: '1px solid var(--aethel-border-primary)',
         }}>
-          <button
+          <button type="button"
             onClick={() => onSave?.({ states, transitions, variables })}
             style={{
               width: '100%',

@@ -101,13 +101,13 @@ export default function AuditLogsPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={handleExport}
             className="px-3 py-2 rounded bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] text-sm"
           >
             Exportar
           </button>
-          <button
+          <button type="button"
             onClick={fetchLogs}
             className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
           >

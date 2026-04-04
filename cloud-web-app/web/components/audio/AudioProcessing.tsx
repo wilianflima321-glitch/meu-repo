@@ -929,7 +929,7 @@ export function EffectRack({
                 </span>
 
                 {/* Bypass toggle */}
-                <button
+                <button type="button"
                   onClick={e => {
                     e.stopPropagation()
                     onChange(effects.map(eff =>
@@ -950,7 +950,7 @@ export function EffectRack({
                 </button>
 
                 {/* Remove button */}
-                <button
+                <button type="button"
                   onClick={e => {
                     e.stopPropagation()
                     onRemove(effect.id)

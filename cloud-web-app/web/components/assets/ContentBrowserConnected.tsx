@@ -211,7 +211,7 @@ function AssetPreviewModal({
           fontSize: '14px',
         }}>
           <div style={{ fontWeight: 600 }}>{asset.name}</div>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               background: 'transparent',
@@ -569,7 +569,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         <AlertCircle size={48} />
         <span>Erro ao carregar assets</span>
         <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>{error.message}</span>
-        <button
+        <button type="button"
           onClick={refresh}
           style={{
             padding: '8px 16px',

@@ -442,7 +442,7 @@ export function StatusSelector() {
 
   return (
     <div className="relative">
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] rounded-lg hover:bg-[var(--aethel-surface-quaternary)] transition-colors"
       >
@@ -453,7 +453,7 @@ export function StatusSelector() {
       {isOpen && (
         <div className="absolute top-full mt-1 right-0 w-40 bg-[var(--aethel-surface-tertiary)] rounded-lg shadow-xl border border-[var(--aethel-border-primary)] overflow-hidden z-50">
           {statuses.map(status => (
-            <button
+            <button type="button"
               key={status.value}
               onClick={() => {
                 updateStatus(status.value);

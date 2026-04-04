@@ -467,7 +467,7 @@ export function BottomSheet({
             >
               {title}
             </span>
-            <button
+            <button type="button"
               onClick={onClose}
               style={{
                 background: 'transparent',
@@ -522,7 +522,7 @@ export function MobileNavBar({ items }: MobileNavBarProps) {
   return (
     <nav style={barStyle}>
       {items.map((item) => (
-        <button
+        <button type="button"
           key={item.id}
           onClick={item.onClick}
           style={{
@@ -621,7 +621,7 @@ export function MobileFAB({
   };
 
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       style={buttonStyle}
       onTouchStart={(e) => {

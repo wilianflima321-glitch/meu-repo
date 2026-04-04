@@ -110,7 +110,7 @@ export default function AdminEmergencyPage() {
             Opera o modo de contingencia para cargas criticas sem estado fake.
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={() => mutate()}
           className="rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]"
         >
@@ -171,7 +171,7 @@ export default function AdminEmergencyPage() {
             placeholder="Ex: pico de custo IA fora do budget, mitigação temporária ativada."
           />
 
-          <button
+          <button type="button"
             onClick={activateEmergency}
             disabled={pending !== null}
             className="inline-flex items-center gap-2 rounded bg-[var(--aethel-warning-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-warning)] disabled:cursor-not-allowed disabled:opacity-60"
@@ -189,7 +189,7 @@ export default function AdminEmergencyPage() {
           <p className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
             Desativa o modo de contingência e restaura as políticas normais de execução.
           </p>
-          <button
+          <button type="button"
             onClick={deactivateEmergency}
             disabled={!isActive || pending !== null}
             className="inline-flex items-center gap-2 rounded bg-[var(--aethel-error-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)] disabled:cursor-not-allowed disabled:opacity-60"

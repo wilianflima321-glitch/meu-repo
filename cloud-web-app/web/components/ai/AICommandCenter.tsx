@@ -234,7 +234,7 @@ export function AICommandCenter() {
             <p className="mb-3 text-sm text-[var(--aethel-text-tertiary)]">Sugestoes de comandos:</p>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               {COMMAND_SUGGESTIONS.map((suggestion, i) => (
-                <button
+                <button type="button"
                   key={i}
                   onClick={() => handleSuggestion(suggestion)}
                   className="group rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-3 text-left transition-colors hover:border-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_85%,transparent)]"
@@ -355,7 +355,7 @@ function ExecutionPanel({
 
   return (
     <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]">
-      <button
+      <button type="button"
         onClick={() => setExpanded(!expanded)}
         className="flex w-full items-center justify-between px-4 py-2 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
         aria-expanded={expanded}

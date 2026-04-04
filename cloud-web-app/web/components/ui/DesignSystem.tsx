@@ -185,7 +185,7 @@ export const DialogClose: React.FC<DialogCloseProps> = ({ children, className = 
   const context = useContext(DialogContext);
 
   return (
-    <button
+    <button type="button"
       className={`absolute top-4 right-4 p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] ${className}`}
       onClick={() => context?.onOpenChange(false)}
       aria-label="Close"
@@ -250,7 +250,7 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
   const isSelected = context?.value === value;
 
   return (
-    <button
+    <button type="button"
       className={`
         px-4 py-2 text-sm font-medium transition-colors relative
         ${isSelected
@@ -394,7 +394,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ item, depth }) => {
         aria-selected={isSelected}
       >
         {hasChildren ? (
-          <button
+          <button type="button"
             className="p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
             onClick={(e) => {
               e.stopPropagation();
@@ -506,7 +506,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, onSelect, child
             item.separator ? (
               <div key={index} className="border-t border-[var(--aethel-border-primary)] my-1" role="separator" />
             ) : (
-              <button
+              <button type="button"
                 key={item.id}
                 className={`
                   w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left
@@ -793,7 +793,7 @@ export const Select: React.FC<SelectProps> = ({
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      <button
+      <button type="button"
         className={`
           w-full flex items-center justify-between gap-2 px-3 py-2
           bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-sm text-left
@@ -820,7 +820,7 @@ export const Select: React.FC<SelectProps> = ({
           aria-labelledby={id}
         >
           {options.map(option => (
-            <button
+            <button type="button"
               key={option.value}
               className={`
                 w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left
@@ -879,7 +879,7 @@ export const Switch: React.FC<SwitchProps> = ({
       className={`inline-flex items-center gap-2 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
       htmlFor={id}
     >
-      <button
+      <button type="button"
         id={id}
         role="switch"
         aria-checked={checked}

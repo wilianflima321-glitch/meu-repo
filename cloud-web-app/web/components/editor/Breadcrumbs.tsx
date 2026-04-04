@@ -271,7 +271,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-[var(--aethel-surface-secondary)] transition-colors"
       >
@@ -310,7 +310,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                   const colorClass = SYMBOL_COLORS[symbol.kind] || 'text-[var(--aethel-text-tertiary)]';
 
                   return (
-                    <button
+                    <button type="button"
                       key={`${symbol.name}-${symbol.range.startLine}`}
                       onClick={() => handleItemClick(item)}
                       className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-colors ${
@@ -333,7 +333,7 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                     : getFileIcon(segment.label);
 
                   return (
-                    <button
+                    <button type="button"
                       key={segment.id}
                       onClick={() => handleItemClick(item)}
                       className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-colors ${
@@ -523,7 +523,7 @@ export default function Breadcrumbs({
                 />
               </div>
             ) : (
-              <button
+              <button type="button"
                 onClick={() => handlePathClick(segment)}
                 className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded transition-colors ${
                   isLast
@@ -651,7 +651,7 @@ export function SymbolOutlinePanel({
 
     return (
       <div key={id}>
-        <button
+        <button type="button"
           onClick={() => {
             if (hasChildren) toggleExpanded(id);
             onNavigate?.(symbol);

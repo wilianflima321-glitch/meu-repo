@@ -190,7 +190,7 @@ export function OverviewTab({
             title="Projetos Recentes"
             description="Continue de onde parou"
             action={
-              <Button variant="ghost" size="sm" onClick={onCreateProject}>
+              <button type="button" variant="ghost" size="sm" onClick={onCreateProject}>
                 Ver todos
               </Button>
             }
@@ -201,7 +201,7 @@ export function OverviewTab({
           ) : (
             <div className="space-y-3">
               {recentProjects.map((project) => (
-                <button
+                <button type="button"
                   key={project.id}
                   onClick={() => onOpenProject?.(project.id)}
                   className="w-full flex items-center gap-4 p-4 rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] transition-colors text-left group"
@@ -275,11 +275,11 @@ export function OverviewTab({
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="secondary" onClick={onOpenChat}>
+            <button type="button" variant="secondary" onClick={onOpenChat}>
               <MessageSquare className="w-4 h-4 mr-2" />
               Chat AI
             </Button>
-            <Button onClick={onCreateProject}>
+            <button type="button" onClick={onCreateProject}>
               <FolderKanban className="w-4 h-4 mr-2" />
               Novo Projeto
             </Button>

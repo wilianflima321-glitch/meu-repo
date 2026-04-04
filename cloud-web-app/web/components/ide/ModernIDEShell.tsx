@@ -203,7 +203,7 @@ export function ModernIDEShell({
                     <MessageSquare size={14} />
                     Copiloto
                   </span>
-                  <button
+                  <button type="button"
                     onClick={() => togglePanel('chat')}
                     style={{
                       background: 'transparent',
@@ -282,7 +282,7 @@ export function ModernIDEShell({
                   <Play size={14} />
                   Preview
                 </span>
-                <button
+                <button type="button"
                   onClick={() => togglePanel('preview')}
                   style={{
                     background: 'transparent',
@@ -303,7 +303,7 @@ export function ModernIDEShell({
 
         {/* Collapsed Preview - Show Toggle */}
         {!panelState.preview.open && !isCompact && (
-          <button
+          <button type="button"
             onClick={() => togglePanel('preview')}
             style={{
               position: 'absolute',
@@ -375,7 +375,7 @@ function IDEHeader({
     <header style={headerStyle}>
       {/* Left: Project Info & Navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'] }}>
-        <button
+        <button type="button"
           onClick={onToggleSidebar}
           style={{
             background: 'transparent',
@@ -491,7 +491,7 @@ interface PanelToggleProps {
 
 function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       style={{
         display: 'flex',
@@ -546,7 +546,7 @@ function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
       {items.map((item) => {
         const isActive = panelState[item.id as keyof PanelState].open;
         return (
-          <button
+          <button type="button"
             key={item.id}
             onClick={() => onTogglePanel(item.id as keyof PanelState)}
             style={{

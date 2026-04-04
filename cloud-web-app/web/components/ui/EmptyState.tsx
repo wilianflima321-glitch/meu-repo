@@ -59,12 +59,12 @@ export function EmptyState({
       {(action || secondaryAction) && (
         <div className="flex items-center gap-3">
           {action && (
-            <Button variant="primary" onClick={action.onClick} icon={action.icon}>
+            <button type="button" variant="primary" onClick={action.onClick} icon={action.icon}>
               {action.label}
             </Button>
           )}
           {secondaryAction && (
-            <Button variant="ghost" onClick={secondaryAction.onClick}>
+            <button type="button" variant="ghost" onClick={secondaryAction.onClick}>
               {secondaryAction.label}
             </Button>
           )}

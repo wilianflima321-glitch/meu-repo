@@ -182,7 +182,7 @@ export function InlineEditModal({
                 ⌘K
               </kbd>
             </div>
-            <Button
+            <button type="button"
               variant="ghost"
               size="icon"
               onClick={onClose}
@@ -206,7 +206,7 @@ export function InlineEditModal({
           {/* Quick Actions */}
           <div className="flex gap-2 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
             {QUICK_ACTIONS.map((action) => (
-              <Button
+              <button type="button"
                 key={action.id}
                 variant="outline"
                 size="sm"
@@ -236,7 +236,7 @@ export function InlineEditModal({
                   }
                 }}
               />
-              <Button
+              <button type="button"
                 size="sm"
                 onClick={handleSubmit}
                 disabled={isProcessing || (!instruction.trim() && !selectedCode)}
@@ -259,7 +259,7 @@ export function InlineEditModal({
                 <div className="text-xs text-[var(--aethel-text-quaternary)] mb-2">Comandos recentes:</div>
                 <div className="flex flex-wrap gap-1.5">
                   {recentCommands.map((cmd, i) => (
-                    <button
+                    <button type="button"
                       key={i}
                       onClick={() => setInstruction(cmd)}
                       className="px-2 py-1 text-xs bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] rounded hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"
@@ -294,7 +294,7 @@ export function InlineEditModal({
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <Button
+                  <button type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowDiff(!showDiff)}
@@ -323,7 +323,7 @@ export function InlineEditModal({
 
               {/* Actions */}
               <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-tertiary)]">
-                <Button
+                <button type="button"
                   variant="ghost"
                   onClick={() => setSuggestion(null)}
                   className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
@@ -332,14 +332,14 @@ export function InlineEditModal({
                   Regenerar
                 </Button>
                 <div className="flex gap-2">
-                  <Button
+                  <button type="button"
                     variant="outline"
                     onClick={onClose}
                     className="border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)]"
                   >
                     Cancelar
                   </Button>
-                  <Button
+                  <button type="button"
                     onClick={() => void handleApply()}
                     className="bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)] text-[var(--aethel-text-primary)]"
                   >

@@ -106,13 +106,13 @@ export default function SearchReplace() {
         />
 
         <div className="flex gap-2">
-          <button
+          <button type="button"
             onClick={handleSearch}
             className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
           >
             Buscar
           </button>
-          <button
+          <button type="button"
             onClick={handleReplace}
             className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)] rounded hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]"
             disabled={!replaceQuery.trim()}

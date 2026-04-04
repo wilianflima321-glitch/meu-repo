@@ -281,7 +281,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
                 Arquivos alterados
               </p>
               {commit.changes.files.slice(0, 5).map((file, i) => (
-                <button
+                <button type="button"
                   key={i}
                   onClick={(e) => { e.stopPropagation(); onDiff(file); }}
                   className="w-full flex items-center gap-2 px-2 py-1
@@ -306,7 +306,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
 
             {/* Actions */}
             <div className="p-3 pt-0 flex gap-2">
-              <button
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); onPreview(); }}
                 className="flex-1 flex items-center justify-center gap-1.5 py-1.5
                          bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
@@ -315,7 +315,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
                 <Eye className="w-3.5 h-3.5" />
                 Preview
               </button>
-              <button
+              <button type="button"
                 onClick={(e) => { e.stopPropagation(); onDiff(); }}
                 className="flex-1 flex items-center justify-center gap-1.5 py-1.5
                          bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary)] rounded-lg
@@ -377,7 +377,7 @@ function TimelineBar({ commits, activeIndex, onSelect }: {
       {/* Commit dots */}
       <div className="absolute inset-0 flex items-center px-2">
         {commits.map((_, i) => (
-          <button
+          <button type="button"
             key={i}
             onClick={() => onSelect(i)}
             className={`
@@ -540,7 +540,7 @@ export function TimeMachineSlider({
 
         <div className="flex items-center gap-2">
           {/* Autoplay control */}
-          <button
+          <button type="button"
             onClick={() => setIsPlaying(!isPlaying)}
             className="p-2 hover:bg-[var(--aethel-surface-tertiary)] rounded-lg transition-colors"
             title={isPlaying ? 'Pausar' : 'Reproduzir'}
@@ -553,7 +553,7 @@ export function TimeMachineSlider({
           </button>
 
           {/* Fullscreen toggle */}
-          <button
+          <button type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="p-2 hover:bg-[var(--aethel-surface-tertiary)] rounded-lg transition-colors"
           >
@@ -597,7 +597,7 @@ export function TimeMachineSlider({
       {/* Navigation & actions */}
       <div className="p-4 pt-0 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))}
             disabled={activeIndex === 0}
             className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
@@ -610,7 +610,7 @@ export function TimeMachineSlider({
             {activeIndex + 1} / {commits.length}
           </span>
 
-          <button
+          <button type="button"
             onClick={() => setActiveIndex(prev => Math.min(commits.length - 1, prev + 1))}
             disabled={activeIndex === commits.length - 1}
             className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
@@ -622,7 +622,7 @@ export function TimeMachineSlider({
 
         <div className="flex items-center gap-2">
           {/* Preview current state */}
-          <button
+          <button type="button"
             onClick={() => handlePreview(activeCommit, activeIndex)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)]
                      hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-xs text-[var(--aethel-text-secondary)]
@@ -634,7 +634,7 @@ export function TimeMachineSlider({
 
           {/* Restore */}
           {onRestoreCommit && (
-            <button
+            <button type="button"
               onClick={handleRestore}
               className="flex items-center gap-1.5 px-3 py-1.5
                        bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary)] rounded-lg

@@ -271,7 +271,7 @@ const SymbolItem: React.FC<SymbolItemProps> = ({
       aria-selected={isActive}
     >
       {/* Expand/Collapse Toggle */}
-      <button
+      <button type="button"
         className={`
           p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors
           ${!hasChildren ? 'invisible' : ''}
@@ -426,7 +426,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
         Symbol Types
       </div>
       {allKinds.map((kind) => (
-        <button
+        <button type="button"
           key={kind}
           className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)]
                      hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
@@ -571,7 +571,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           Outline
         </span>
         <div className="flex items-center gap-1">
-          <button
+          <button type="button"
             className={`p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors ${followCursor ? 'text-[var(--aethel-info-light)]' : ''}`}
             onClick={() => setFollowCursor(!followCursor)}
             title="Follow Cursor"
@@ -579,7 +579,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           >
             <Eye size={14} />
           </button>
-          <button
+          <button type="button"
             className="p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
             onClick={cycleSortMode}
             title={`Sort by: ${sortMode}`}
@@ -588,7 +588,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
             <SortAsc size={14} />
           </button>
           <div className="relative">
-            <button
+            <button type="button"
               className={`p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors
                 ${visibleKinds.size < allKinds.length ? 'text-[var(--aethel-info-light)]' : ''}`}
               onClick={() => setShowFilterMenu(!showFilterMenu)}
@@ -605,7 +605,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
               />
             )}
           </div>
-          <button
+          <button type="button"
             className="p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
             onClick={onRefresh}
               title="Atualizar"
@@ -632,7 +632,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
             aria-label="Filter symbols"
           />
           {searchQuery && (
-            <button
+            <button type="button"
               className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]"
               onClick={() => setSearchQuery('')}
               aria-label="Clear search"
@@ -656,13 +656,13 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
 
       {/* Quick Actions */}
       <div className="px-2 py-1 border-b border-[var(--aethel-border-primary)] flex gap-1">
-        <button
+        <button type="button"
           className="text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)] px-2 py-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
           onClick={expandAll}
         >
           Expand All
         </button>
-        <button
+        <button type="button"
           className="text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)] px-2 py-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]"
           onClick={collapseAll}
         >

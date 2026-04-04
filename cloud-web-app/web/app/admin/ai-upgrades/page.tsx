@@ -130,7 +130,7 @@ export default function AIUpgrades() {
                     </p>
                     <p className="mt-2 text-[var(--aethel-text-secondary)]">{upgrade.description || 'Sem descrição'}</p>
                   </div>
-                  <button
+                  <button type="button"
                     onClick={() => applyUpgrade(upgrade)}
                     className={`mt-2 px-4 py-2 rounded-md font-semibold transition-colors ${upgrade.applied ? 'bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'}`}
                   >

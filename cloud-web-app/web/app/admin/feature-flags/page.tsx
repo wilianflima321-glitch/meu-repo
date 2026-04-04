@@ -97,7 +97,7 @@ export default function FeatureFlagsAdmin() {
           <h1 className='text-3xl font-bold'>Flags de recursos</h1>
           <p className='text-sm text-[var(--aethel-text-tertiary)]'>Controle de distribuição e habilitação por ambiente.</p>
         </div>
-        <button onClick={fetchFlags} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
+        <button type="button" onClick={fetchFlags} className='px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm'>Atualizar</button>
       </div>
 
       {error && (
@@ -145,7 +145,7 @@ export default function FeatureFlagsAdmin() {
               onChange={(e) => setForm((prev) => ({ ...prev, percentage: Number(e.target.value) }))}
             />
           )}
-          <button
+          <button type="button"
             onClick={createFlag}
             disabled={saving || !form.key.trim() || !form.name.trim()}
             className='px-4 py-2 bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded disabled:opacity-50'
@@ -196,7 +196,7 @@ export default function FeatureFlagsAdmin() {
                     </span>
                   </td>
                   <td className='p-2'>
-                    <button
+                    <button type="button"
                       onClick={() => toggleFlag(flag.key, flag.enabled)}
                       className='px-2 py-1 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded text-sm'
                     >

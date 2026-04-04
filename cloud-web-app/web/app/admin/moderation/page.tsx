@@ -233,7 +233,7 @@ function ItemCard({
       {/* Content Preview */}
       {item.contentSnapshot && (
         <div className="mb-3">
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); setShowContent(!showContent); }}
             className="flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
@@ -264,35 +264,35 @@ function ItemCard({
       {/* Quick Actions */}
       {isSelected && (
         <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--aethel-border-secondary)]">
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onAction('approve'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)] text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <CheckCircle className="w-4 h-4" />
             Aprovar (A)
           </button>
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onAction('reject'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <XCircle className="w-4 h-4" />
             Rejeitar (R)
           </button>
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onAction('escalate'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-warning-dark)] hover:bg-[var(--aethel-warning-dark)] text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <ArrowUp className="w-4 h-4" />
             Escalar (E)
           </button>
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onAction('shadowban'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] text-sm rounded"
           >
             <UserX className="w-4 h-4" />
             Banimento sombra (B)
           </button>
-          <button
+          <button type="button"
             onClick={(e) => { e.stopPropagation(); onAction('skip'); }}
             className="flex items-center gap-1 px-3 py-1.5 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] text-sm rounded ml-auto"
           >
@@ -314,7 +314,7 @@ function ShortcutsModal({ onClose }: { onClose: () => void }) {
             <Keyboard className="w-5 h-5" />
             Atalhos do teclado
           </h2>
-          <button onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
+          <button type="button" onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
             <XCircle className="w-5 h-5" />
           </button>
         </div>
@@ -504,7 +504,7 @@ export default function ModerationQueue() {
 
         <div className="flex items-center gap-3">
           {/* Shortcuts hint */}
-          <button
+          <button type="button"
             onClick={() => setShowShortcuts(true)}
             className="flex items-center gap-2 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
@@ -515,7 +515,7 @@ export default function ModerationQueue() {
           {/* Filter */}
           <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-1">
             {(['pending', 'urgent', 'all'] as const).map((f) => (
-              <button
+              <button type="button"
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1 text-xs rounded capitalize ${
@@ -539,7 +539,7 @@ export default function ModerationQueue() {
           />
 
           {/* Refresh */}
-          <button
+          <button type="button"
             onClick={fetchItems}
             className="p-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >

@@ -81,7 +81,7 @@ export default function Feedback() {
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Atualizado em {lastUpdated.toLocaleString()}</p>
           )}
         </div>
-        <button
+        <button type="button"
           onClick={fetchFeedbacks}
           className="px-3 py-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] text-sm"
         >
@@ -109,7 +109,7 @@ export default function Feedback() {
         />
         <div className="flex items-center gap-2 flex-wrap">
           {(['all', 'open', 'pending', 'resolved', 'closed'] as const).map((status) => (
-            <button
+            <button type="button"
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
@@ -164,7 +164,7 @@ export default function Feedback() {
                 <td className='p-2'>
                   <div className="flex items-center gap-2">
                     <span>{feedback.email}</span>
-                    <button
+                    <button type="button"
                       onClick={() => navigator.clipboard.writeText(feedback.email)}
                       className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
                     >

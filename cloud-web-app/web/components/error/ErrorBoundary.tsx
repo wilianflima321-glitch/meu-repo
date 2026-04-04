@@ -267,7 +267,7 @@ User Agent: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}
       </p>
 
       <div className="flex gap-3 mb-6">
-        <button
+        <button type="button"
           onClick={reset}
           className="flex items-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
         >
@@ -275,7 +275,7 @@ User Agent: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}
           Try Again
         </button>
 
-        <button
+        <button type="button"
           onClick={() => window.location.reload()}
           className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
         >
@@ -294,7 +294,7 @@ User Agent: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}
 
       {showDetails && (
         <div className="w-full max-w-2xl">
-          <button
+          <button type="button"
             onClick={() => setShowStack(!showStack)}
             className="flex items-center gap-2 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] text-sm mb-2"
             aria-expanded={showStack}
@@ -308,7 +308,7 @@ User Agent: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}
             <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg overflow-hidden">
               <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-secondary)]">
                 <span className="text-xs text-[var(--aethel-text-secondary)] font-mono">{error.name}</span>
-                <button
+                <button type="button"
                   onClick={copyErrorDetails}
                   className="flex items-center gap-1 px-2 py-1 text-xs text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
                 >
@@ -500,7 +500,7 @@ export const EditorErrorBoundary: React.FC<{ children: ReactNode }> = ({ childre
         <div className="flex flex-col items-center justify-center h-full p-4 bg-[var(--aethel-surface-secondary)]">
           <AlertTriangle className="w-8 h-8 text-[var(--aethel-warning-light)] mb-2" />
           <p className="text-sm text-[var(--aethel-text-secondary)] mb-3">Failed to render editor</p>
-          <button
+          <button type="button"
             onClick={reset}
             className="px-3 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded"
           >
@@ -530,7 +530,7 @@ export const PanelErrorBoundary: React.FC<{
           <span className="text-xs text-[var(--aethel-error-light)]">
             {panelName} error: {error.message}
           </span>
-          <button
+          <button type="button"
             onClick={reset}
             className="p-1 hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded"
           >
@@ -561,7 +561,7 @@ export const AsyncErrorBoundary: React.FC<{
           <div className="flex flex-col items-center justify-center p-4">
             <AlertTriangle className="w-6 h-6 text-[var(--aethel-error-light)] mb-2" />
             <p className="text-sm text-[var(--aethel-text-secondary)] mb-2">{error.message}</p>
-            <button
+            <button type="button"
               onClick={() => {
                 setIsRetrying(true);
                 reset();
@@ -601,7 +601,7 @@ export const ErrorToast: React.FC<{
         </p>
       </div>
 
-      <button
+      <button type="button"
         onClick={onClose}
         className="p-1 hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
         aria-label="Dismiss"

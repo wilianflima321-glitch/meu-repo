@@ -76,7 +76,7 @@ export function SettingsSidebar({
       <div className="flex-1 overflow-y-auto py-2">
         {categories.map((category) => (
           <div key={category.id}>
-            <button
+            <button type="button"
               onClick={() => onSelectCategory(category.id)}
               className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
                 selectedCategory === category.id && !selectedSubcategory
@@ -91,7 +91,7 @@ export function SettingsSidebar({
             {selectedCategory === category.id && category.subcategories && (
               <div className="ml-6 border-l border-[var(--aethel-border-primary)]">
                 {category.subcategories.map((subcategory) => (
-                  <button
+                  <button type="button"
                     key={subcategory.id}
                     onClick={() => onSelectSubcategory(subcategory.id)}
                     className={`w-full flex items-center gap-2 px-4 py-1.5 text-left text-sm transition-colors ${
@@ -114,14 +114,14 @@ export function SettingsSidebar({
           <span>{modifiedCount} modified</span>
         </div>
         <div className="flex gap-2">
-          <button
+          <button type="button"
             onClick={onResetAll}
             className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded text-xs"
           >
             <RotateCcw className="w-3 h-3" />
             Reset All
           </button>
-          <button
+          <button type="button"
             onClick={onExport}
             className="p-1.5 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded"
             title="Export settings"

@@ -47,7 +47,7 @@ export default function CookieConsent() {
             <div>
               <p className="text-sm text-[var(--aethel-text-secondary)]">
                 Usamos cookies para melhorar sua experiencia, proteger a sessao e entender o uso do produto.{' '}
-                <button
+                <button type="button"
                   onClick={() => setShowDetails(!showDetails)}
                   className="text-[var(--aethel-primary-light)] hover:text-[var(--aethel-primary)] underline underline-offset-2 transition-colors"
                 >
@@ -69,13 +69,13 @@ export default function CookieConsent() {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <button
+            <button type="button"
               onClick={() => accept('essential')}
               className="rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] transition-colors"
             >
               Apenas essenciais
             </button>
-            <button
+            <button type="button"
               onClick={() => accept('all')}
               className="rounded-lg bg-[var(--aethel-primary)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:brightness-110 transition-colors"
             >

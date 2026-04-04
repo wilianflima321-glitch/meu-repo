@@ -415,7 +415,7 @@ const TerminalTab: React.FC<TerminalTabProps> = ({
         <span className="flex-1 truncate text-sm">{session.name}</span>
       )}
 
-      <button
+      <button type="button"
         onClick={(e) => {
           e.stopPropagation();
           onClose();
@@ -472,7 +472,7 @@ const ShellSelector: React.FC<ShellSelectorProps> = ({ onSelect, selectedShell }
 
   return (
     <div className="relative" ref={menuRef}>
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1 px-2 py-1 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
         aria-haspopup="listbox"
@@ -491,7 +491,7 @@ const ShellSelector: React.FC<ShellSelectorProps> = ({ onSelect, selectedShell }
             New Terminal
           </div>
           {SHELL_OPTIONS.map((shell) => (
-            <button
+            <button type="button"
               key={shell.id}
               onClick={() => {
                 onSelect(shell);
@@ -578,7 +578,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           {matchCount > 0 ? `${currentMatch}/${matchCount}` : 'No results'}
         </span>
       )}
-      <button
+      <button type="button"
         onClick={onSearchPrevious}
         className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
         aria-label="Previous match"
@@ -586,7 +586,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       >
         <ChevronDown size={14} className="rotate-180" />
       </button>
-      <button
+      <button type="button"
         onClick={onSearchNext}
         className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
         aria-label="Next match"
@@ -594,7 +594,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       >
         <ChevronDown size={14} />
       </button>
-      <button
+      <button type="button"
         onClick={onClose}
         className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
         aria-label="Close search"
@@ -1036,7 +1036,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
             />
 
             {/* Search Toggle */}
-            <button
+            <button type="button"
               onClick={() => setShowSearch((prev) => !prev)}
               className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               aria-label="Toggle search"
@@ -1046,7 +1046,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
             </button>
 
             {/* Split */}
-            <button
+            <button type="button"
               onClick={() => createSession()}
               className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               aria-label="Split terminal"
@@ -1055,7 +1055,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
             </button>
 
             {/* Maximize */}
-            <button
+            <button type="button"
               onClick={() => setIsMaximized((prev) => !prev)}
               className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               aria-label={isMaximized ? 'Restore' : 'Maximize'}
@@ -1065,7 +1065,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
 
             {/* Close */}
             {onClose && (
-              <button
+              <button type="button"
                 onClick={onClose}
                 className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
                 aria-label="Close terminal panel"
@@ -1139,7 +1139,7 @@ export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
       {/* Toolbar */}
       <div className="flex items-center justify-between px-2 py-1 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={addTerminal}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
             aria-label="New terminal"
@@ -1147,7 +1147,7 @@ export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
             <Plus size={14} />
           </button>
 
-          <button
+          <button type="button"
             onClick={() => setSplitDirection(splitDirection === 'horizontal' ? 'vertical' : 'horizontal')}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
             aria-label="Toggle split direction"
@@ -1157,7 +1157,7 @@ export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
         </div>
 
         {onClose && (
-          <button
+          <button type="button"
             onClick={onClose}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
             aria-label="Close terminal panel"

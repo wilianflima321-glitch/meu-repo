@@ -121,7 +121,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
               </span>
             )}
           </div>
-          <button
+          <button type="button"
             onClick={onClose}
             className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >
@@ -132,7 +132,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
         {/* Filters */}
         <div className="flex gap-2">
           {(['all', 'info', 'success', 'warning', 'error'] as const).map(f => (
-            <button
+            <button type="button"
               key={f}
               onClick={() => setFilter(f)}
               className={`px-3 py-1 rounded text-xs transition-colors ${
@@ -150,13 +150,13 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
       {/* Actions */}
       {notifications.length > 0 && (
         <div className="p-3 border-b border-[var(--aethel-border-primary)] flex gap-2">
-          <button
+          <button type="button"
             onClick={markAllAsRead}
             className="flex-1 px-3 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] text-sm rounded transition-colors"
           >
             Mark All Read
           </button>
-          <button
+          <button type="button"
             onClick={clearAll}
             className="flex-1 px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-sm rounded transition-colors"
           >
@@ -193,7 +193,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                       <h3 className="font-semibold text-[var(--aethel-text-primary)]">
                         {notification.title}
                       </h3>
-                      <button
+                      <button type="button"
                         onClick={() => deleteNotification(notification.id)}
                         className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                       >
@@ -211,7 +211,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                       </span>
 
                       {!notification.read && (
-                        <button
+                        <button type="button"
                           onClick={() => markAsRead(notification.id)}
                           className="text-xs text-[var(--aethel-info-light)] hover:text-[var(--aethel-info-light)]"
                         >
@@ -223,7 +223,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                     {notification.actions && notification.actions.length > 0 && (
                       <div className="mt-3 flex gap-2">
                         {notification.actions.map((action, index) => (
-                          <button
+                          <button type="button"
                             key={index}
                             onClick={() => {
                               action.action();

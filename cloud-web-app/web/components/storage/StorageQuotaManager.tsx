@@ -352,7 +352,7 @@ export function StorageQuotaManager({
               <span>Persistente</span>
             </div>
           ) : (
-            <button
+            <button type="button"
               onClick={requestPersistence}
               className="aethel-button aethel-button-secondary text-xs"
               title="Solicitar armazenamento persistente para evitar limpeza automatica pelo navegador"
@@ -412,7 +412,7 @@ export function StorageQuotaManager({
       </div>
 
       <div className="border-t border-[var(--aethel-border-primary)]">
-        <button
+        <button type="button"
           onClick={() => setShowDetails(!showDetails)}
           className="flex w-full items-center justify-between p-3 text-xs text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
         >
@@ -470,7 +470,7 @@ export function StorageQuotaManager({
             )}
 
             <div className="flex flex-wrap gap-2">
-              <button
+              <button type="button"
                 onClick={clearSelectedCache}
                 disabled={selectedForCleanup.size === 0 || isClearing}
                 className="aethel-button aethel-button-primary flex-1 gap-2 text-xs disabled:opacity-50"
@@ -485,7 +485,7 @@ export function StorageQuotaManager({
                 <span>Limpar selecionados ({selectedForCleanup.size})</span>
               </button>
 
-              <button
+              <button type="button"
                 onClick={clearAllCache}
                 disabled={cacheEntries.length === 0 || isClearing}
                 className="aethel-button aethel-button-secondary text-xs disabled:opacity-50"

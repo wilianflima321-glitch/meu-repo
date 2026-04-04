@@ -347,7 +347,7 @@ function UsageError() {
       <p className="text-[var(--aethel-text-tertiary)] mb-4">
         Não foi possível carregar seus dados de consumo. Tente novamente.
       </p>
-      <button
+      <button type="button"
         onClick={() => window.location.reload()}
         className="px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
       >

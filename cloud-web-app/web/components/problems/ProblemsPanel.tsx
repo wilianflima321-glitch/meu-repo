@@ -112,19 +112,19 @@ export const ProblemsPanel: React.FC = () => {
           </select>
 
           <div className="filter-buttons">
-            <button
+            <button type="button"
               className={`filter-button ${!filter.severity ? 'active' : ''}`}
               onClick={() => handleFilterChange({ severity: undefined })}
             >
               All
             </button>
-            <button
+            <button type="button"
               className={`filter-button ${filter.severity === 'error' ? 'active' : ''}`}
               onClick={() => handleFilterChange({ severity: 'error' })}
             >
               Errors
             </button>
-            <button
+            <button type="button"
               className={`filter-button ${filter.severity === 'warning' ? 'active' : ''}`}
               onClick={() => handleFilterChange({ severity: 'warning' })}
             >
@@ -166,7 +166,7 @@ export const ProblemsPanel: React.FC = () => {
                     </div>
                   </div>
 
-                  <button
+                  <button type="button"
                     className="quick-fix-button"
                     onClick={(e) => {
                       e.stopPropagation();

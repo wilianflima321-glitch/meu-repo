@@ -449,7 +449,7 @@ const InviteLinkSection: React.FC<InviteLinkSectionProps> = ({
           </h3>
         </div>
 
-        <button
+        <button type="button"
           onClick={() => handleCreateLink('editor')}
           disabled={isCreating}
           style={{
@@ -512,7 +512,7 @@ const InviteLinkSection: React.FC<InviteLinkSectionProps> = ({
                   {isExpired ? 'Expirado' : `${Math.ceil((new Date(link.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))}d`}
                 </div>
 
-                <button
+                <button type="button"
                   onClick={() => copyLink(link.code, link.id)}
                   style={{
                     padding: '6px',
@@ -527,7 +527,7 @@ const InviteLinkSection: React.FC<InviteLinkSectionProps> = ({
                   {copiedId === link.id ? <Check size={14} /> : <Copy size={14} />}
                 </button>
 
-                <button
+                <button type="button"
                   onClick={() => onRevokeLink(link.id)}
                   style={{
                     padding: '6px',
@@ -634,7 +634,7 @@ const MemberListItem: React.FC<MemberListItemProps> = ({
 
       {canManage && (
         <div style={{ position: 'relative' }}>
-          <button
+          <button type="button"
             onClick={() => setShowMenu(!showMenu)}
             disabled={isLoading}
             style={{
@@ -682,7 +682,7 @@ const MemberListItem: React.FC<MemberListItemProps> = ({
                 }}
               >
                 {member.status === 'pending' && (
-                  <button
+                  <button type="button"
                     onClick={() => handleAction(() => onResendInvite(member.id))}
                     style={{
                       display: 'flex',
@@ -710,7 +710,7 @@ const MemberListItem: React.FC<MemberListItemProps> = ({
                       Alterar função
                     </div>
                     {(['admin', 'editor', 'viewer'] as const).filter(r => r !== member.role).map((role) => (
-                      <button
+                      <button type="button"
                         key={role}
                         onClick={() => handleAction(() => onChangeRole(member.id, role))}
                         style={{
@@ -738,7 +738,7 @@ const MemberListItem: React.FC<MemberListItemProps> = ({
                   </>
                 )}
 
-                <button
+                <button type="button"
                   onClick={() => handleAction(() => onRemove(member.id))}
                   style={{
                     display: 'flex',

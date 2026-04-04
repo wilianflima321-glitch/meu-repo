@@ -91,7 +91,7 @@ export function DashboardSidebar({
         {!collapsed && (
           <span className="font-semibold text-[var(--aethel-text-primary)]">Dashboard</span>
         )}
-        <button
+        <button type="button"
           onClick={onToggleCollapse}
           className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] transition-colors"
           aria-label={collapsed ? 'Expandir sidebar' : 'Recolher sidebar'}
@@ -110,7 +110,7 @@ export function DashboardSidebar({
           const isActive = activeTab === tab.id
 
           return (
-            <button
+            <button type="button"
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={`

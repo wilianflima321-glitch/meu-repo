@@ -232,7 +232,7 @@ export function InlineAIChat({
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'] }}>
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               setShowContext(!showContext);
@@ -249,7 +249,7 @@ export function InlineAIChat({
           >
             Contexto
           </button>
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               onClose?.();
@@ -354,7 +354,7 @@ export function InlineAIChat({
             }}
           >
             {suggestionChips.map((chip, index) => (
-              <button
+              <button type="button"
                 key={index}
                 onClick={() => {
                   setInput(chip.prompt);
@@ -438,7 +438,7 @@ export function InlineAIChat({
                 }}
                 rows={1}
               />
-              <button
+              <button type="button"
                 onClick={sendMessage}
                 disabled={!input.trim() || isLoading}
                 style={{
@@ -609,7 +609,7 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
           {language}
         </span>
         <div style={{ display: 'flex', gap: tokens.spacing['2'] }}>
-          <button
+          <button type="button"
             onClick={copyToClipboard}
             style={{
               padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
@@ -628,7 +628,7 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
             {copied ? 'Copiado' : 'Copiar'}
           </button>
           {onApply && (
-            <button
+            <button type="button"
               onClick={() => onApply(code)}
               style={{
                 padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,

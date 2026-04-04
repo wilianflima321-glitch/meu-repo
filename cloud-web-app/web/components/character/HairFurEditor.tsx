@@ -363,7 +363,7 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium text-[var(--aethel-text-secondary)]">Gradiente Raiz -> Ponta</label>
-        <button
+        <button type="button"
           onClick={addStop}
           className="px-2 py-1 text-xs bg-[var(--aethel-info)] hover:brightness-110 rounded text-[var(--aethel-text-primary)] transition-colors"
         >
@@ -410,7 +410,7 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
             />
           </div>
           <div className="flex items-end">
-            <button
+            <button type="button"
               onClick={() => removeStop(selectedStop)}
               disabled={gradient.length <= 2}
               className="w-full h-8 text-xs bg-[var(--aethel-error)] hover:bg-[var(--aethel-error)] disabled:bg-[var(--aethel-surface-quaternary)] disabled:cursor-not-allowed rounded text-[var(--aethel-text-primary)] transition-colors"
@@ -649,7 +649,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
         </div>
         {/* Viewport Overlay - Controls */}
         <div className="absolute bottom-4 left-4 flex gap-2">
-          <button
+          <button type="button"
             onClick={() => setAnimatePhysics(!animatePhysics)}
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
               animatePhysics
@@ -679,7 +679,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
           <label className="text-sm font-medium text-[var(--aethel-text-secondary)] block mb-2">Presets</label>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(HAIR_PRESETS) as HairPreset[]).map((p) => (
-              <button
+              <button type="button"
                 key={p}
                 onClick={() => applyPreset(p)}
                 className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
@@ -707,7 +707,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
             { id: 'lod', label: 'LOD' },
             { id: 'brush', label: 'Brush' },
           ].map((tab) => (
-            <button
+            <button type="button"
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex-1 px-3 py-2.5 text-sm font-medium transition-all ${
@@ -841,7 +841,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   <label className="text-sm text-[var(--aethel-text-secondary)] block mb-2">Tipo</label>
                   <div className="flex gap-2">
                     {(['wave', 'curl', 'coil'] as const).map((type) => (
-                      <button
+                      <button type="button"
                         key={type}
                         onClick={() => {
                           setCurl((prev) => ({ ...prev, type }));
@@ -1023,7 +1023,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 <h3 className="text-sm font-semibold text-[var(--aethel-info-light)] uppercase tracking-wider">Ferramentas de Groom</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {(Object.keys(brushIcons) as BrushTool[]).map((tool) => (
-                    <button
+                    <button type="button"
                       key={tool}
                       onClick={() => setBrush((prev) => ({ ...prev, tool }))}
                       className={`px-4 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
@@ -1063,7 +1063,7 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 />
               </div>
               <div className="pt-4">
-                <button
+                <button type="button"
                   onClick={() => setBrushActive(!brushActive)}
                   className={`w-full py-3 rounded-lg font-medium transition-all ${
                     brushActive
@@ -1086,14 +1086,14 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
         <div className="p-4 border-t border-[var(--aethel-border-primary)] space-y-3">
           <h3 className="text-sm font-semibold text-[var(--aethel-text-secondary)]">Exportar para Runtime</h3>
           <div className="flex gap-2">
-            <button
+            <button type="button"
               onClick={exportAsCards}
               className="flex-1 px-4 py-2.5 bg-[var(--aethel-warning)] hover:bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
               <span className="text-[var(--aethel-warning-light)]">Cards</span>
               <span>Cards</span>
             </button>
-            <button
+            <button type="button"
               onClick={exportAsStrands}
               className="flex-1 px-4 py-2.5 bg-[var(--aethel-info)] hover:brightness-110 text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
             >
