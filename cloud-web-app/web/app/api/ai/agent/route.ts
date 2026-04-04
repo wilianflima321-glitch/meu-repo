@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AutonomousAgent } from '@/lib/ai/agent-mode';
+import { aiService } from '@/lib/ai-service';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { consumeMeteredUsage } from '@/lib/metering';
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
+import {
+  loadAgentSnapshot,
+  saveAgentSnapshot,
+  type AgentSnapshot,
+} from '@/lib/server/agent-store';
 
 /**
  * API Route: Agent Mode Execution
@@ -59,6 +66,26 @@ export async function POST(req: NextRequest) {
     // Key única por usuário
     const agentKey = (sid: string) => `${auth.userId}:${sid}`;
     
+    const nowIso = () => new Date().toISOString();
+    const persistSnapshot = async (params: {
+      sessionId: string
+      status?: Record<string, unknown>
+      steps?: Array<Record<string, unknown>>
+    }) => {
+      const existing = await loadAgentSnapshot({ userId: auth.userId, sessionId: params.sessionId })
+      const snapshot: AgentSnapshot = {
+        sessionId: params.sessionId,
+        userId: auth.userId,
+        createdAt: existing?.createdAt || nowIso(),
+        updatedAt: nowIso(),
+        task: typeof task === 'string' ? task : existing?.task,
+        config: typeof config === 'object' && config ? config : existing?.config,
+        status: params.status ?? existing?.status,
+        steps: params.steps ?? existing?.steps,
+      }
+      await saveAgentSnapshot(snapshot)
+    }
+
     switch (action) {
       case 'start': {
         // Rate limit: verificar quantos agentes ativos o usuário tem
@@ -91,6 +118,16 @@ export async function POST(req: NextRequest) {
           throw error;
         }
         
+        if (aiService.getAvailableProviders().length === 0) {
+          const blocked = blockIfSimulationDisabled({
+            capability: 'AI_AGENT_MODE',
+            reason: 'AI_PROVIDER_NOT_CONFIGURED',
+            message: 'AI provider not configured. Configure a real provider to run agent mode.',
+            missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
+          })
+          if (blocked) return blocked
+        }
+
         // Create new agent
         const agent = new AutonomousAgent(config || {
           autonomyLevel: 'semi-autonomous',
@@ -103,6 +140,12 @@ export async function POST(req: NextRequest) {
           agent,
           userId: auth.userId,
           createdAt: new Date(),
+        });
+
+        await persistSnapshot({
+          sessionId: newSessionId,
+          status: agent.getStatus(),
+          steps: agent.getSteps(),
         });
         
         // Start task execution (non-blocking)
@@ -118,13 +161,28 @@ export async function POST(req: NextRequest) {
       case 'status': {
         const entry = activeAgents.get(agentKey(sessionId));
         if (!entry) {
-          return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+          const snapshot = await loadAgentSnapshot({ userId: auth.userId, sessionId })
+          if (!snapshot) {
+            return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+          }
+          return NextResponse.json({
+            sessionId,
+            active: false,
+            status: snapshot.status || {},
+            steps: snapshot.steps || [],
+            snapshotUpdatedAt: snapshot.updatedAt,
+          })
         }
-        
+
+        const status = entry.agent.getStatus()
+        const steps = entry.agent.getSteps()
+        await persistSnapshot({ sessionId, status, steps })
+
         return NextResponse.json({
           sessionId,
-          ...entry.agent.getStatus(),
-          steps: entry.agent.getSteps(),
+          active: true,
+          status,
+          steps,
         });
       }
       
@@ -135,6 +193,7 @@ export async function POST(req: NextRequest) {
         }
         
         entry.agent.pause();
+        await persistSnapshot({ sessionId, status: entry.agent.getStatus(), steps: entry.agent.getSteps() })
         return NextResponse.json({ status: 'paused' });
       }
       
@@ -145,6 +204,7 @@ export async function POST(req: NextRequest) {
         }
         
         entry.agent.resume();
+        await persistSnapshot({ sessionId, status: entry.agent.getStatus(), steps: entry.agent.getSteps() })
         return NextResponse.json({ status: 'resumed' });
       }
       
@@ -156,6 +216,7 @@ export async function POST(req: NextRequest) {
         
         entry.agent.stop();
         activeAgents.delete(agentKey(sessionId));
+        await persistSnapshot({ sessionId, status: entry.agent.getStatus(), steps: entry.agent.getSteps() })
         return NextResponse.json({ status: 'stopped' });
       }
       
@@ -166,6 +227,7 @@ export async function POST(req: NextRequest) {
         }
         
         entry.agent.provideInput(input);
+        await persistSnapshot({ sessionId, status: entry.agent.getStatus(), steps: entry.agent.getSteps() })
         return NextResponse.json({ status: 'input_received' });
       }
       
@@ -177,6 +239,7 @@ export async function POST(req: NextRequest) {
         
         // Emit approval event
         entry.agent.emit('approval_response', { approved: true });
+        await persistSnapshot({ sessionId, status: entry.agent.getStatus(), steps: entry.agent.getSteps() })
         return NextResponse.json({ status: 'approved' });
       }
       
@@ -187,6 +250,7 @@ export async function POST(req: NextRequest) {
         }
         
         entry.agent.emit('approval_response', { approved: false });
+        await persistSnapshot({ sessionId, status: entry.agent.getStatus(), steps: entry.agent.getSteps() })
         return NextResponse.json({ status: 'rejected' });
       }
       

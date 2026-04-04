@@ -36,6 +36,12 @@ jobs:
 
       - name: Canonical doc alignment gate
         run: npm run qa:canonical-doc-alignment
+      
+      - name: QA gate - button types
+        run: npm run qa:button-types
+
+      - name: QA gate - hardcoded colors
+        run: npm run qa:hardcoded-colors
 
       - name: Install dependencies
         working-directory: cloud-web-app/web

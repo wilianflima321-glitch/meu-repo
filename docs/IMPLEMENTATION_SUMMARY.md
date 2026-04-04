@@ -20,6 +20,8 @@
 
 - Rotas de IA agora bloqueiam fallback demo/partial quando `AETHEL_DISABLE_SIMULATION` está ativo.
 
+- Agent mode agora persiste snapshots locais de execução (`.aethel/agents`) e retorna estado mesmo após perda de memória em runtime.
+
 - Nenhuma claim de backend novo, runtime externo ou conclusão operacional sem evidência local.
 
 
@@ -101,6 +103,8 @@
 - `cloud-web-app/web/lib/server/patch-engine.ts`
 - `cloud-web-app/web/lib/server/execution-context.ts`
 - `cloud-web-app/web/lib/server/simulation-guard.ts`
+- `cloud-web-app/web/lib/server/agent-store.ts`
+- `.github/workflows/ci.yml`
 - `cloud-web-app/web/app/api/studio/tasks/plan/route.ts`
 - `cloud-web-app/web/app/api/studio/tasks/[id]/route.ts`
 - `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`

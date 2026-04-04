@@ -129,11 +129,14 @@ Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
   - `cloud-web-app/web/lib/server/patch-engine.ts`
   - `cloud-web-app/web/lib/server/execution-context.ts`
   - `cloud-web-app/web/lib/server/simulation-guard.ts`
+  - `cloud-web-app/web/lib/server/agent-store.ts`
   - `cloud-web-app/web/app/api/studio/tasks/plan/route.ts`
   - `cloud-web-app/web/app/api/studio/tasks/[id]/route.ts`
   - `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`
   - `cloud-web-app/web/app/api/studio/tasks/[id]/validate/route.ts`
   - `cloud-web-app/web/app/api/studio/tasks/[id]/apply/route.ts`
+- QA gate em CI:
+  - `.github/workflows/ci.yml` (qa:button-types + qa:hardcoded-colors)
 - Thinking stream:
   - `cloud-web-app/web/app/api/ai/thinking/[sessionId]/route.ts` (simulação bloqueada quando `AETHEL_DISABLE_SIMULATION` está ativo)
 - Guardas de simulação AI:
@@ -150,6 +153,7 @@ Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
   - `cloud-web-app/web/app/api/ai/agents/metrics/route.ts`
   - `cloud-web-app/web/app/api/ai/director/[projectId]/route.ts`
   - `cloud-web-app/web/app/api/ai/director/[projectId]/action/route.ts`
+  - `cloud-web-app/web/app/api/ai/agent/route.ts` (persistência local de sessão via `agent-store`)
 
 
 ## Varredura local de dívida (app/components/lib)
