@@ -16,6 +16,8 @@
 
 - Scripts de governança adicionados para botões sem type e cores hardcoded.
 
+- Thinking stream simulado agora bloqueado por `AETHEL_DISABLE_SIMULATION` (retorna 501 quando simulation é proibida).
+
 - Nenhuma claim de backend novo, runtime externo ou conclusão operacional sem evidência local.
 
 
@@ -101,6 +103,7 @@
 - `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`
 - `cloud-web-app/web/app/api/studio/tasks/[id]/validate/route.ts`
 - `cloud-web-app/web/app/api/studio/tasks/[id]/apply/route.ts`
+- `cloud-web-app/web/app/api/ai/thinking/[sessionId]/route.ts`
 - `tools/check-button-types.mjs`
 
 - `tools/check-hardcoded-colors.mjs`

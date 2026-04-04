@@ -11,6 +11,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
 export const dynamic = 'force-dynamic';
+const SIMULATION_DISABLED = process.env.AETHEL_DISABLE_SIMULATION !== 'false';
 
 interface ThinkingStep {
   id: string;
@@ -66,6 +67,22 @@ export async function GET(
     const user = requireAuth(req);
     const { sessionId } = await params;
 
+    if (SIMULATION_DISABLED) {
+      return NextResponse.json(
+        {
+          error: 'THINKING_SIMULATION_DISABLED',
+          message: 'Thinking stream requires runtime real. Simulation is disabled.',
+          capabilityStatus: 'BLOCKED',
+        },
+        {
+          status: 501,
+          headers: {
+            'x-aethel-capability-status': 'BLOCKED',
+          },
+        }
+      );
+    }
+
     const session = sessions.get(sessionId);
     
     if (!session) {
@@ -93,6 +110,22 @@ export async function POST(
     const user = requireAuth(req);
     const { sessionId } = await params;
     const body = await req.json();
+
+    if (SIMULATION_DISABLED) {
+      return NextResponse.json(
+        {
+          error: 'THINKING_SIMULATION_DISABLED',
+          message: 'Thinking stream requires runtime real. Simulation is disabled.',
+          capabilityStatus: 'BLOCKED',
+        },
+        {
+          status: 501,
+          headers: {
+            'x-aethel-capability-status': 'BLOCKED',
+          },
+        }
+      );
+    }
 
     // Criar nova sessão de pensamento
     const session: ThinkingSession = {
