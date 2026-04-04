@@ -92,7 +92,7 @@ Status atual do Aethel Engine
 - Sistema de tokens: `var(--aethel-*)` definido em `styles/globals.css` e `styles/design-tokens.css`
 - Gaps P0: 0 botões sem `type="button"`, 0 linhas com cores hardcoded (ajustado pós-sweep local)
 - Microcopy PT-BR: drift de inglês em 200+ ocorrências (Preview, Refresh, Loading, etc.)
-- Blockers operacionais: `node_modules` ausente, `STRIPE_WEBHOOK_SECRET` missing, Docker daemon
+- Blockers operacionais: `node_modules` raiz ausente (há `node_modules` em `cloud-web-app/web`), `STRIPE_WEBHOOK_SECRET` presente em `.env.local` mas sem validação de webhook real, Docker daemon não verificado
 
 Comparação com líderes (percentuais fornecidos)
 - Preview/Runtime: 65%
@@ -234,8 +234,8 @@ Roadmap de Marketplace
 | Proration | Automático | Sim | Não validado | P1 |
 | Billing Readiness UI | Dashboard | Settings page | PublicBillingReadiness.tsx | P2 |
 
-Ações para paridade billing
-- [P0] Configurar STRIPE_WEBHOOK_SECRET via Stripe CLI/Dashboard.
+ Ações para paridade billing
+- [P0] Validar STRIPE_WEBHOOK_SECRET com webhook real (Stripe CLI/Dashboard).
 - [P1] Implementar invoice auto-generation.
 - [P1] Adicionar proration logic.
 - [P2] Criar customer portal UI próprio.
@@ -295,7 +295,7 @@ P0 - Blockers críticos
 - Focus visible inconsistente
 - Contraste não validado
 - LSP real
-- STRIPE_WEBHOOK_SECRET
+- STRIPE_WEBHOOK_SECRET (validar assinatura real)
 - Extension publishing API
 - Hardcoded colors (resolvido nesta wave)
 - Termos em inglês
@@ -360,7 +360,7 @@ P2 - Backlog
 - Criar CLI de publishing (`aethel-ext publish`).
 
 6) Billing/Pricing
-- Configurar STRIPE_WEBHOOK_SECRET via Stripe CLI/Dashboard.
+- Validar STRIPE_WEBHOOK_SECRET via Stripe CLI/Dashboard (assinatura real).
 - Implementar invoice auto-generation.
 - Adicionar proration logic.
 - Criar customer portal UI próprio.

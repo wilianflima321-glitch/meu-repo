@@ -44,7 +44,7 @@
 - Criar sistema de permissões granulares.
 
 6) Billing/Pricing
-- Configurar STRIPE_WEBHOOK_SECRET via Stripe CLI/Dashboard.
+- Validar STRIPE_WEBHOOK_SECRET via Stripe CLI/Dashboard (assinatura real).
 - Implementar invoice auto-generation.
 
 7) Admin/Monitoring
