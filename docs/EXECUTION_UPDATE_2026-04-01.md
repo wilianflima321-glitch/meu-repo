@@ -315,6 +315,33 @@ Nota: `rg` bloqueado neste ambiente; scan parcial via Python (top 15). Usar como
 
   - Evidência: ausência de store em `cloud-web-app/web/lib/server` ou `cloud-web-app/web/lib/ai` para tasks.
 
+### Simulações/partial ainda presentes (evidência local)
+
+- **Thinking simulada**: `cloud-web-app/web/app/api/ai/thinking/[sessionId]/route.ts` contém `runtimeMode: 'simulated_preview'` e `simulateThinkingProgress(...)`.
+- **Sandbox apply com mensagens de simulação**: `cloud-web-app/web/app/api/ai/change/apply/route.ts` ainda contém texto de "sandbox simulation" (mesmo com bloqueio ativo).
+- **Modo não implementado**: `cloud-web-app/web/app/api/ai/3d/generate/route.ts` retorna 501 (`Mode not implemented`).
+- **CapabilityStatus PARTIAL em rotas AI** (exposição de execução parcial):
+  - `cloud-web-app/web/app/api/ai/agents/route.ts`
+  - `cloud-web-app/web/app/api/ai/agents/executions/route.ts`
+  - `cloud-web-app/web/app/api/ai/agents/metrics/route.ts`
+  - `cloud-web-app/web/app/api/ai/action/route.ts`
+  - `cloud-web-app/web/app/api/ai/chat/route.ts`
+  - `cloud-web-app/web/app/api/ai/chat-advanced/route.ts`
+  - `cloud-web-app/web/app/api/ai/complete/route.ts`
+  - `cloud-web-app/web/app/api/ai/context/search/route.ts`
+  - `cloud-web-app/web/app/api/ai/inline-completion/route.ts`
+  - `cloud-web-app/web/app/api/ai/inline-edit/route.ts`
+  - `cloud-web-app/web/app/api/ai/stream/route.ts`
+  - `cloud-web-app/web/app/api/ai/change/feedback/route.ts`
+  - `cloud-web-app/web/app/api/ai/change/readiness/route.ts`
+  - `cloud-web-app/web/app/api/ai/change/rollback/route.ts`
+  - `cloud-web-app/web/app/api/ai/change/runs/route.ts`
+  - `cloud-web-app/web/app/api/ai/director/[projectId]/route.ts`
+- **Studio gate parcial**:
+  - `cloud-web-app/web/app/api/studio/_lib/studio-gate.ts`
+  - `cloud-web-app/web/app/api/studio/access/full/route.ts`
+  - `cloud-web-app/web/app/api/studio/access/full/[id]/route.ts`
+
 
 
 ### No-simulation policy (estado atual)

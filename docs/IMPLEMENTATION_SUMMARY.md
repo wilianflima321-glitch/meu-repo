@@ -137,6 +137,8 @@ Lista detalhada de top arquivos com botões sem type e cores hardcoded está em 
 
 - Documento canônico ausente: `docs/master/31_INTERFACE_UX_GAP_EXECUTION_PLAN_2026-03-01.md`.
 
+- Simulações/partial ainda presentes em rotas `/api/ai/*` e `/api/studio/*` (detalhe e evidência em `docs/EXECUTION_UPDATE_2026-04-01.md`, seção "Simulações/partial ainda presentes").
+
 
 
 ## Alinhamento de execução (Core Truth)
