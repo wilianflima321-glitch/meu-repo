@@ -21,6 +21,7 @@ import {
 } from '@/lib/server/workspace-scope'
 import { analyzeDependencyImpact, type DependencyImpactAnalysis } from '@/lib/server/dependency-impact-guard'
 import { findActiveFullAccessGrant, type FullAccessGrantRecord } from '@/lib/server/full-access-ledger'
+import { runQaGate } from '@/lib/server/qa-gate'
 
 export const dynamic = 'force-dynamic'
 
@@ -658,11 +659,62 @@ export async function POST(request: NextRequest) {
     }
 
     if (executionMode === 'sandbox') {
-      return applyInSandbox({
-        runId,
+      await appendChangeRunLedgerEvent({
+        eventType: 'apply_blocked',
+        capability: 'AI_CHANGE_APPLY',
         userId: user.userId,
         projectId,
-        preparedChanges,
+        filePath: preparedChanges[0]?.virtualPath || 'sandbox',
+        outcome: 'blocked',
+        metadata: {
+          runId,
+          reason: 'SANDBOX_SIMULATION_DISABLED',
+          runSource: RUN_SOURCE,
+        },
+      }).catch(() => {})
+
+      return capabilityResponse({
+        error: 'SANDBOX_SIMULATION_DISABLED',
+        message: 'Sandbox simulation is disabled. Use executionMode=workspace for real apply.',
+        status: 423,
+        capability: CAPABILITY,
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          runId,
+          executionMode,
+          runSource: RUN_SOURCE,
+        },
+      })
+    }
+
+    const qaGate = await runQaGate()
+    if (!qaGate.ok) {
+      await appendChangeRunLedgerEvent({
+        eventType: 'apply_blocked',
+        capability: 'AI_CHANGE_APPLY',
+        userId: user.userId,
+        projectId,
+        filePath: preparedChanges[0]?.virtualPath || 'qa-gate',
+        outcome: 'blocked',
+        metadata: {
+          runId,
+          reason: 'QA_GATE_BLOCKED',
+          runSource: RUN_SOURCE,
+          qaGate,
+        },
+      }).catch(() => {})
+
+      return capabilityResponse({
+        error: 'QA_GATE_BLOCKED',
+        message: 'QA gate blocked apply. Resolve failures before retrying.',
+        status: 422,
+        capability: CAPABILITY,
+        capabilityStatus: 'PARTIAL',
+        metadata: {
+          runId,
+          runSource: RUN_SOURCE,
+          qaGate,
+        },
       })
     }
 
