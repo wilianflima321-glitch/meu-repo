@@ -605,6 +605,7 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
       <div style={{ padding: '8px', borderTop: '1px solid var(--aethel-border-primary)', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
         {['Cube', 'Sphere', 'Light', 'Camera', 'Empty'].map((type) => (
           <button
+            type="button"
             key={type}
             style={{
               padding: '4px 8px',
@@ -787,6 +788,7 @@ function DetailsPanelMini({ object, onChange }: DetailsPanelMiniProps) {
           ))}
 
           <button
+            type="button"
             style={{
               width: '100%',
               padding: '8px',

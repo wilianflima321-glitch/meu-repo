@@ -390,7 +390,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
 
     case 'keybinding':
       return (
-        <button className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] font-mono">
+        <button type="button" className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] font-mono">
           {setting.value}
         </button>
       )

@@ -269,7 +269,7 @@ export default function MarketplacePage() {
                         >
                           Desinstalar
                         </button>
-                        <button className="aethel-button aethel-button-secondary rounded-xl px-3 py-2 text-xs font-semibold">
+                        <button type="button" className="aethel-button aethel-button-secondary rounded-xl px-3 py-2 text-xs font-semibold">
                           Configurar
                         </button>
                       </>

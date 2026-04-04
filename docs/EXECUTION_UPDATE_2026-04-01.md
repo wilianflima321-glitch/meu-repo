@@ -64,7 +64,7 @@ Atualização: 2026-04-04
 
 ## Varredura local de dívida (app/components/lib)
 
-- Botões sem type="button": 57 ocorrências (último scan case-sensitive de `<button>`).
+- Botões sem type="button": 0 ocorrências (scan com glob via `cloud-web-app/web/node_modules`).
 - Utilitários de cor hardcoded (bg/text/border/from/to): 134 ocorrências.
 - Hotspots de microcopy em inglês: 1463 ocorrências.
 - Uso de tokens `var(--aethel-*)`: 15323 ocorrências (última contagem registrada).
@@ -72,11 +72,7 @@ Atualização: 2026-04-04
 Observação: `tools/check-button-types.mjs` não rodou aqui por falta de `glob` em `node_modules` raiz. As contagens acima foram obtidas por scan local do workspace.
 
 Amostra de arquivos com botões sem type (não exaustivo):
-- `cloud-web-app/web/components/nexus/DirectorMode.tsx`
-- `cloud-web-app/web/components/AdminPanel.tsx`
-- `cloud-web-app/web/app/nexus/page.tsx`
-- `cloud-web-app/web/components/GitGraph.tsx`
-- `cloud-web-app/web/components/materials/MaterialEditor.tsx`
+- Nenhuma ocorrência após o sweep atual.
 
 Amostra de arquivos com cores hardcoded (não exaustivo):
 - `cloud-web-app/web/components/video/VideoTimeline.tsx`

@@ -498,7 +498,7 @@ export function StorageQuotaManager({
       </div>
 
       <div className="border-t border-[var(--aethel-border-primary)] p-4">
-        <button className="aethel-button aethel-button-ghost w-full justify-center gap-2 text-xs">
+        <button type="button" className="aethel-button aethel-button-ghost w-full justify-center gap-2 text-xs">
           <Icons.Download />
           <span>Exportar assets locais</span>
         </button>

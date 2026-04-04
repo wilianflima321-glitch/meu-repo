@@ -731,6 +731,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
         </button>
 
         <button
+          type="button"
           style={{
             display: 'flex',
             alignItems: 'center',

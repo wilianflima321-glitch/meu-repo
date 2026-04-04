@@ -163,6 +163,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
       >
         {/* Expand toggle */}
         <button
+          type="button"
           style={{
             background: 'transparent',
             border: 'none',

@@ -77,6 +77,7 @@ export function DropdownMenuTrigger({
 
   return (
     <button
+      type="button"
       ref={triggerRef as React.RefObject<HTMLButtonElement>}
       type="button"
       {...props}

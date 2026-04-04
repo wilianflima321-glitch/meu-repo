@@ -297,6 +297,7 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
             const actionIndex = actionPointer
             return (
               <button
+                type="button"
                 key={item.id}
                 role="menuitem"
                 data-action-index={actionIndex}

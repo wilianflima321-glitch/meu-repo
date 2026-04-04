@@ -428,7 +428,7 @@ export function LowBalanceModal({
                     <p className="text-xs text-[color-mix(in_srgb,var(--aethel-primary)_70%,transparent)] mt-1">
                       Considere o plano Pro para creditos ilimitados por $49/mês
                     </p>
-                    <button className="flex items-center gap-1 mt-2 text-xs font-medium
+                    <button type="button" className="flex items-center gap-1 mt-2 text-xs font-medium
                                      text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
                       Ver planos
                       <ChevronRight className="w-3 h-3" />

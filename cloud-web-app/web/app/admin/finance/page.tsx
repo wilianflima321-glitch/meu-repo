@@ -240,7 +240,7 @@ function TransactionsTable({ transactions }: { transactions: FinanceMetrics['rec
           <CreditCard className="w-4 h-4" />
           Transações recentes
         </h3>
-        <button className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] flex items-center gap-1">
+        <button type="button" className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] flex items-center gap-1">
           <Download className="w-3 h-3" />
           Exportar
         </button>

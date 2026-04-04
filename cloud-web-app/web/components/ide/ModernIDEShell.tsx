@@ -445,6 +445,7 @@ function IDEHeader({
       {/* Right: Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'] }}>
         <button
+          type="button"
           style={{
             padding: `${tokens.spacing['1.5']} ${tokens.spacing['3']}`,
             background: gradients.brand,
@@ -463,6 +464,7 @@ function IDEHeader({
           Executar
         </button>
         <button
+          type="button"
           style={{
             padding: tokens.spacing['2'],
             background: 'transparent',

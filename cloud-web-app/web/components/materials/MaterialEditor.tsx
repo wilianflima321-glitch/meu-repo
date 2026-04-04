@@ -824,7 +824,7 @@ function PropertyInput({ property }: { property: MaterialProperty }) {
       return (
         <div className="flex items-center gap-2">
           <span className="text-xs text-[var(--aethel-text-secondary)]">{property.name}</span>
-          <button className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)]">
+          <button type="button" className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)]">
             Select...
           </button>
         </div>
@@ -951,10 +951,10 @@ function MaterialPreview({ material }: { material: PBRMaterial }) {
       <h3 className="text-[var(--aethel-text-primary)] font-medium mb-2">Preview</h3>
       <canvas ref={canvasRef} className="rounded" />
       <div className="mt-2 space-y-1">
-        <button className="w-full px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded">
+        <button type="button" className="w-full px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded">
           Export GLSL
         </button>
-        <button className="w-full px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded">
+        <button type="button" className="w-full px-2 py-1 text-xs text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded">
           Save Material
         </button>
       </div>

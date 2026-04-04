@@ -295,7 +295,7 @@ export default function AdminPanel() {
                 onChange={(e) => setUserSearch(e.target.value)}
                 className="aethel-input w-64"
               />
-              <button className="aethel-button aethel-button-primary">Novo usuario</button>
+              <button type="button" className="aethel-button aethel-button-primary">Novo usuario</button>
             </div>
           </div>
 
@@ -422,7 +422,7 @@ export default function AdminPanel() {
         <div className="space-y-6">
           <div className="aethel-flex aethel-justify-between aethel-items-center">
             <h3 className="text-xl font-semibold">Gerenciamento de creditos</h3>
-            <button className="aethel-button aethel-button-primary">Operacao de creditos em lote</button>
+            <button type="button" className="aethel-button aethel-button-primary">Operacao de creditos em lote</button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 aethel-gap-6">
@@ -452,7 +452,7 @@ export default function AdminPanel() {
                     placeholder="Motivo para alocacao de creditos"
                   />
                 </div>
-                <button className="aethel-button aethel-button-primary w-full">Adicionar Creditos</button>
+                <button type="button" className="aethel-button aethel-button-primary w-full">Adicionar Creditos</button>
               </div>
             </div>
 
@@ -531,7 +531,7 @@ export default function AdminPanel() {
         <div className="space-y-6">
           <div className="aethel-flex aethel-justify-between aethel-items-center">
             <h3 className="text-xl font-semibold">Gestao financeira</h3>
-            <button className="aethel-button aethel-button-primary">Gerar relatorio</button>
+            <button type="button" className="aethel-button aethel-button-primary">Gerar relatorio</button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 aethel-gap-6">
@@ -632,7 +632,7 @@ export default function AdminPanel() {
         <div className="space-y-6">
           <div className="aethel-flex aethel-justify-between aethel-items-center">
             <h3 className="text-xl font-semibold">Gestao do sistema</h3>
-            <button className="aethel-button aethel-button-primary">Configuracoes do sistema</button>
+            <button type="button" className="aethel-button aethel-button-primary">Configuracoes do sistema</button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 aethel-gap-6">

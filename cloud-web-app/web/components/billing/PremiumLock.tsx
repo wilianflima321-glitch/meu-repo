@@ -272,7 +272,7 @@ export function PremiumLock({
           <Lock className="w-5 h-5" />
           <span>Recurso {PLAN_NAMES[minPlan]}+</span>
         </div>
-        <button className="premium-lock-cta">
+        <button type="button" className="premium-lock-cta">
           Ver como desbloquear
         </button>
       </div>

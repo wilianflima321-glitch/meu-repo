@@ -113,7 +113,7 @@ function buildCssPreview(css: string): string {
     <div class="card">
       <h2>Previa CSS do Aethel</h2>
       <p>Arquivo CSS aplicado a um template de teste.</p>
-      <button class="btn">Botao de teste</button>
+      <button type="button" class="btn">Botao de teste</button>
     </div>
   </div>
 </body>

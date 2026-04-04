@@ -91,9 +91,9 @@ export default function DirectorMode() {
 
               {/* Action Overlay (Hover) */}
               <div className="absolute inset-0 bg-[var(--aethel-surface-primary)]/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                <button className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Play size={20} /></button>
-                <button className="p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-full text-[var(--aethel-text-primary)] transition-colors"><Wand2 size={20} /></button>
-                <button className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Eye size={20} /></button>
+                <button type="button" className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Play size={20} /></button>
+                <button type="button" className="p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-full text-[var(--aethel-text-primary)] transition-colors"><Wand2 size={20} /></button>
+                <button type="button" className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Eye size={20} /></button>
               </div>
             </div>
           ))}
@@ -103,20 +103,20 @@ export default function DirectorMode() {
       {/* Controls */}
       <div className="p-4 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-2xl">
         <div className="flex items-center justify-center gap-6 mb-4">
-          <button className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipBack size={20} /></button>
-          <button className="p-4 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-primary)] transition-colors"><Play size={24} /></button>
-          <button className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipForward size={20} /></button>
+          <button type="button" className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipBack size={20} /></button>
+          <button type="button" className="p-4 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-primary)] transition-colors"><Play size={24} /></button>
+          <button type="button" className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipForward size={20} /></button>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <button className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
+          <button type="button" className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
             <Layers size={16} className="text-[var(--aethel-info-light)]" />
             <span className="text-[9px] font-bold text-[var(--aethel-text-quaternary)] uppercase">Camadas</span>
           </button>
-          <button className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
+          <button type="button" className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
             <Shield size={16} className="text-[var(--aethel-success)]" />
             <span className="text-[9px] font-bold text-[var(--aethel-text-quaternary)] uppercase">Qualidade</span>
           </button>
-          <button className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
+          <button type="button" className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">
             <Box size={16} className="text-[var(--aethel-info)]" />
             <span className="text-[9px] font-bold text-[var(--aethel-text-quaternary)] uppercase">Assets</span>
           </button>

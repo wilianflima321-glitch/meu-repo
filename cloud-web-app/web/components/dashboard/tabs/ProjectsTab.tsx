@@ -132,7 +132,7 @@ function ProjectCard({
             </button>
             <Dropdown
               trigger={
-                <button className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
+                <button type="button" className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               }

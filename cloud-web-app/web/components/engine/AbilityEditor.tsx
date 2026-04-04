@@ -596,7 +596,7 @@ export function AbilityEditor({
           </div>
 
           {selectedAbility && (
-            <button className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition">
+            <button type="button" className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition">
               Test Ability
             </button>
           )}

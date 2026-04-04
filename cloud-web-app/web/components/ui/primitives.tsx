@@ -144,6 +144,7 @@ export function AethelButton({
   rightIcon,
   children,
   disabled,
+  type,
   style: userStyle,
   ...props
 }: AethelButtonProps) {
@@ -199,7 +200,7 @@ export function AethelButton({
   };
 
   return (
-    <button style={style} disabled={disabled || loading} {...props}>
+    <button type={type ?? 'button'} style={style} disabled={disabled || loading} {...props}>
       {loading && (
         <span
           style={{

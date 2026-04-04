@@ -702,6 +702,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
 
         {/* Settings */}
         <button
+          type="button"
           style={{
             padding: '6px',
             background: 'transparent',

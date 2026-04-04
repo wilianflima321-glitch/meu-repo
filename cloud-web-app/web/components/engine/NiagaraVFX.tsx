@@ -891,6 +891,7 @@ export default function NiagaraVFX() {
           Show Stats
         </label>
         <button
+          type="button"
           style={{
             padding: '6px 12px',
             background: 'var(--aethel-surface-quaternary)',
@@ -903,6 +904,7 @@ export default function NiagaraVFX() {
           Save
         </button>
         <button
+          type="button"
           style={{
             padding: '6px 12px',
             background: 'var(--aethel-surface-quaternary)',

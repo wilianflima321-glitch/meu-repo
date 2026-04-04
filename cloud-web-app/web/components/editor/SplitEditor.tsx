@@ -404,6 +404,7 @@ const TabBar: React.FC<TabBarProps> = ({
           </button>
         )}
         <button
+          type="button"
           className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
           title="More Actions"
           aria-label="More actions"

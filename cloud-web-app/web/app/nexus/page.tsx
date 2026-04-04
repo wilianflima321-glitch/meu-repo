@@ -55,7 +55,7 @@ export default function NexusPage() {
           Direção
         </button>
       </div>
-      <button className="rounded-lg bg-[var(--aethel-primary-dark)] px-4 py-1.5 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-900/20 transition-all hover:bg-[var(--aethel-primary)]">
+      <button type="button" className="rounded-lg bg-[var(--aethel-primary-dark)] px-4 py-1.5 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-900/20 transition-all hover:bg-[var(--aethel-primary)]">
         Deploy
       </button>
     </div>
@@ -85,13 +85,13 @@ export default function NexusPage() {
           <div className="border-b border-[var(--aethel-border-primary)] p-4">
             <h2 className="mb-4 text-xs font-bold uppercase tracking-widest text-[var(--aethel-text-tertiary)]">Contexto do projeto</h2>
             <div className="space-y-1">
-              <button className="flex w-full items-center gap-3 rounded-lg border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/5 px-3 py-2 text-xs text-[var(--aethel-primary-light)]">
+              <button type="button" className="flex w-full items-center gap-3 rounded-lg border border-[var(--aethel-primary)]/20 bg-[var(--aethel-primary)]/5 px-3 py-2 text-xs text-[var(--aethel-primary-light)]">
                 <Layout size={14} /> <span>Aethel Engine V2</span>
               </button>
-              <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)]">
+              <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)]">
                 <Activity size={14} /> <span>Reality Matrix</span>
               </button>
-              <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)]">
+              <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)]">
                 <Shield size={14} /> <span>Quality Gates</span>
               </button>
             </div>

@@ -267,7 +267,7 @@ export default function GitPanel() {
                   >
                       <span className="text-[var(--aethel-error-light)] text-xs font-semibold">WARN</span>
                     <span className="flex-1 text-[var(--aethel-error-light)]">{file.path}</span>
-                    <button className="text-sm text-[var(--aethel-error-light)] hover:text-[var(--aethel-error-light)]">
+                    <button type="button" className="text-sm text-[var(--aethel-error-light)] hover:text-[var(--aethel-error-light)]">
                       Resolve
                     </button>
                   </div>

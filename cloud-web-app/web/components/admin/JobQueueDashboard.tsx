@@ -122,7 +122,7 @@ const JobRow: React.FC<{
         className="flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]"
         onClick={onToggle}
       >
-        <button className="text-[var(--aethel-text-tertiary)]">
+        <button type="button" className="text-[var(--aethel-text-tertiary)]">
           {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
 

@@ -169,7 +169,7 @@ export function UsageDashboard() {
             Renova em {daysUntilRenewal} dias
           </p>
         </div>
-        <button className="px-4 py-2 text-sm bg-[var(--aethel-info)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors">
+        <button type="button" className="px-4 py-2 text-sm bg-[var(--aethel-info)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors">
           Fazer upgrade
         </button>
       </div>

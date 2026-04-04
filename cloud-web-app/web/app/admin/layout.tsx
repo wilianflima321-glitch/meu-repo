@@ -188,11 +188,11 @@ function Header({
       )}
 
       <div className="flex items-center gap-2">
-        <button className="relative rounded-lg p-1.5 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-secondary)]" aria-label="Notificacoes">
+        <button type="button" className="relative rounded-lg p-1.5 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-secondary)]" aria-label="Notificacoes">
           <Bell className="h-4 w-4" />
           <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[var(--aethel-error)]" />
         </button>
-        <button className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]">
+        <button type="button" className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]">
           <span>Admin</span>
           <ChevronDown className="h-3.5 w-3.5" />
         </button>

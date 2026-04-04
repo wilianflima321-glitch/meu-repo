@@ -1158,6 +1158,7 @@ export function TerrainSculptingEditor({
           gap: '8px',
         }}>
           <button
+            type="button"
             style={{
               flex: 1,
               background: 'var(--aethel-surface-tertiary)',
@@ -1172,6 +1173,7 @@ export function TerrainSculptingEditor({
             📥 Import
           </button>
           <button
+            type="button"
             style={{
               flex: 1,
               background: 'var(--aethel-surface-tertiary)',

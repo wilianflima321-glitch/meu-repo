@@ -16,7 +16,7 @@
 
 ## Dívida confirmada (último scan disponível)
 
-- Botões sem type="button": 57 ocorrências.
+- Botões sem type="button": 0 ocorrências.
 - Cores hardcoded (bg/text/border/from/to): 134 ocorrências.
 - Hotspots de microcopy em inglês: 1463 ocorrências.
 
