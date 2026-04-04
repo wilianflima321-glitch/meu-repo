@@ -398,7 +398,7 @@ Press Ctrl+C to cancel running command
                 className={`
                   w-full px-3 py-2 text-left text-sm font-mono
                   ${index === selectedSuggestion
-                    ? 'bg-sky-600 text-[var(--aethel-text-primary)]'
+                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
                     : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
                   }
                 `}

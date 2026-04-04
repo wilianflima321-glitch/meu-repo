@@ -48,7 +48,7 @@ export default function ConsentDialog({
     switch (request.risk) {
       case 'low': return 'text-[var(--aethel-success-light)]';
       case 'medium': return 'text-[var(--aethel-warning-light)]';
-      case 'high': return 'text-orange-400';
+      case 'high': return 'text-[var(--aethel-warning-light)]';
       case 'critical': return 'text-[var(--aethel-error-light)]';
       default: return 'text-[var(--aethel-text-tertiary)]';
     }

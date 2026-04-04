@@ -131,7 +131,7 @@ function createSampleAbilities(): GameplayAbilitySpec[] {
 
 function TagBadge({ tag, onRemove }: { tag: string; onRemove?: () => void }) {
   const getTagColor = (t: string) => {
-    if (t.includes('Fire')) return 'bg-orange-600';
+    if (t.includes('Fire')) return 'bg-[var(--aethel-warning)]';
     if (t.includes('Ice')) return 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]';
     if (t.includes('Lightning')) return 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]';
     if (t.includes('Damage')) return 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]';
@@ -189,7 +189,7 @@ function AbilityCard({
       onClick={onClick}
       className={`p-3 rounded-lg cursor-pointer transition-all ${
         isSelected
-          ? 'bg-[var(--aethel-primary)] ring-2 ring-blue-400'
+          ? 'bg-[var(--aethel-primary)] ring-2 ring-[var(--aethel-info-light)]'
           : 'bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)]'
       }`}
     >

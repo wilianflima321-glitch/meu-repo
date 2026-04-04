@@ -834,7 +834,7 @@ function SettingToggle({ setting, value, onChange }: SettingInputProps) {
     <button type="button"
       onClick={() => onChange(!value)}
       className={`relative w-11 h-6 rounded-full transition-colors ${
-        value ? 'bg-sky-600' : 'bg-[var(--aethel-surface-quaternary)]'
+        value ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)]'
       }`}
     >
       <span
@@ -897,7 +897,7 @@ function SettingSlider({ setting, value, onChange }: SettingInputProps) {
         min={setting.min}
         max={setting.max}
         step={setting.step || 1}
-        className="w-32 accent-sky-500"
+        className="w-32 accent-[var(--aethel-info)]"
       />
       <span className="text-sm text-[var(--aethel-text-tertiary)] w-12">{value}</span>
     </div>

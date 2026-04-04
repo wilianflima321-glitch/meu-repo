@@ -117,9 +117,9 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
           <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden">
             <div className="p-4">
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-sky-500/20 rounded-full flex items-center justify-center">
+                <div className="flex-shrink-0 w-10 h-10 bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] rounded-full flex items-center justify-center">
                   <svg
-                    className="w-5 h-5 text-sky-400"
+                    className="w-5 h-5 text-[var(--aethel-info-light)]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -158,7 +158,7 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
               </button>
               <button type="button"
                 onClick={handleUpdate}
-                className="flex-1 px-4 py-3 text-sm font-medium text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors border-l border-[var(--aethel-border-primary)]"
+                className="flex-1 px-4 py-3 text-sm font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] transition-colors border-l border-[var(--aethel-border-primary)]"
               >
                 Atualizar agora
               </button>
@@ -222,7 +222,7 @@ export function InstallPrompt() {
           </div>
           <button type="button"
             onClick={handleInstall}
-            className="px-3 py-1.5 bg-sky-500 text-[var(--aethel-text-primary)] text-sm rounded font-medium hover:bg-sky-400 transition-colors"
+            className="px-3 py-1.5 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] text-sm rounded font-medium hover:brightness-110 transition-colors"
           >
             Instalar
           </button>

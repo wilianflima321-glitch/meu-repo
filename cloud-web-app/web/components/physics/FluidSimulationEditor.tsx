@@ -820,7 +820,7 @@ export default function FluidSimulationEditor({
           <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showVelocityColors: !p.showVelocityColors }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showVelocityColors ? 'bg-orange-600 text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+              editorState.showVelocityColors ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
             }`}
           >
             <Zap className="w-3 h-3" /> Velocity
@@ -968,7 +968,7 @@ export default function FluidSimulationEditor({
               step={1}
               unit="°C"
               onChange={(v) => updateParam('temperature', v)}
-              icon={<Thermometer className="w-3 h-3 text-orange-400" />}
+              icon={<Thermometer className="w-3 h-3 text-[var(--aethel-warning-light)]" />}
             />
           </CollapsibleSection>
 

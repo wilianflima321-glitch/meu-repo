@@ -413,7 +413,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           onClick={toggle}
-          className="fixed bottom-4 right-4 z-50 p-3 rounded-full bg-[var(--aethel-primary-dark)] text-white shadow-lg hover:bg-[var(--aethel-primary)] transition-colors"
+          className="fixed bottom-4 right-4 z-50 p-3 rounded-full bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] shadow-lg hover:bg-[var(--aethel-primary)] transition-colors"
           title="Open DevTools (Ctrl+Shift+D)"
         >
           <Bug className="w-5 h-5" />
@@ -448,7 +448,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-colors ${
                           activeTab === tab.id
-                            ? 'bg-[var(--aethel-primary-dark)] text-white'
+                            ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
                             : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
                         }`}
                       >
@@ -486,7 +486,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     <button type="button"
                       onClick={toggleRecording}
                       className={`p-1.5 rounded-md transition-colors ${
-                        isRecording ? 'text-red-400 bg-red-500/20' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                        isRecording ? 'text-[var(--aethel-error-light)] bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
                       }`}
                       title={isRecording ? 'Stop Recording' : 'Start Recording'}
                     >
@@ -525,7 +525,7 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                 {/* Close */}
                 <button type="button"
                   onClick={toggle}
-                  className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-red-400 rounded-md transition-colors"
+                  className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error-light)] rounded-md transition-colors"
                   title="Close DevTools"
                 >
                   <X className="w-4 h-4" />
@@ -729,9 +729,9 @@ function NetworkTab({ requests, searchQuery }: { requests: NetworkRequest[]; sea
   
   const getStatusColor = (status?: number) => {
     if (!status) return 'text-[var(--aethel-text-tertiary)]';
-    if (status >= 200 && status < 300) return 'text-green-400';
-    if (status >= 300 && status < 400) return 'text-yellow-400';
-    return 'text-red-400';
+    if (status >= 200 && status < 300) return 'text-[var(--aethel-success-light)]';
+    if (status >= 300 && status < 400) return 'text-[var(--aethel-warning-light)]';
+    return 'text-[var(--aethel-error-light)]';
   };
   
   if (filtered.length === 0) {
@@ -792,17 +792,17 @@ function ConsoleTab({ entries, searchQuery }: { entries: ConsoleEntry[]; searchQ
   
   const levelColors: Record<string, string> = {
     log: 'text-[var(--aethel-text-secondary)]',
-    info: 'text-blue-400',
-    warn: 'text-yellow-400',
-    error: 'text-red-400',
+    info: 'text-[var(--aethel-info-light)]',
+    warn: 'text-[var(--aethel-warning-light)]',
+    error: 'text-[var(--aethel-error-light)]',
     debug: 'text-[var(--aethel-accent-light)]'
   };
   
   const levelBgs: Record<string, string> = {
     log: 'bg-transparent',
-    info: 'bg-blue-500/10',
-    warn: 'bg-yellow-500/10',
-    error: 'bg-red-500/10',
+    info: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]',
+    warn: 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]',
+    error: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]',
     debug: 'bg-[color-mix(in_srgb,var(--aethel-accent)_10%,transparent)]'
   };
   

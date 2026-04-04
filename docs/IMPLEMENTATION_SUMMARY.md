@@ -17,7 +17,7 @@
 ## Dívida confirmada (último scan disponível)
 
 - Botões sem type="button": 0 ocorrências.
-- Cores hardcoded (bg/text/border/from/to): 134 ocorrências.
+- Cores hardcoded (bg/text/border/from/to): 0 ocorrências (após sweep local).
 - Hotspots de microcopy em inglês: 1463 ocorrências.
 
 ## Próximos passos por blocos
@@ -53,7 +53,7 @@
 
 8) Tokens de Design
 - Criar ESLint rule para bloquear cores hardcoded.
-- Refatorar hardcoded colors para tokens.
+- Refatoração concluída nesta wave; manter zero via prevenção e revisão.
 
 9) Microcopy PT-BR
 - Centralizar strings em `lib/locales/pt-BR.ts`.

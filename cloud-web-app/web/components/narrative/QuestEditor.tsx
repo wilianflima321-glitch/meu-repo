@@ -233,7 +233,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
         </div>
         <div className="h-1.5 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all"
+            className="h-full bg-gradient-to-r from-[var(--aethel-info)] to-[var(--aethel-success)] transition-all"
             style={{ width: `${totalObjectives > 0 ? (completedObjectives / totalObjectives) * 100 : 0}%` }}
           />
         </div>

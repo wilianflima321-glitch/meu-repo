@@ -312,7 +312,7 @@ export default function MultiAgentOrchestrator() {
       </div>
 
       <form onSubmit={handleStream} className="relative group">
-        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 opacity-20 blur transition duration-500 group-focus-within:opacity-50" />
+        <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] opacity-20 blur transition duration-500 group-focus-within:opacity-50" />
         <div className="relative flex items-center rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-2 pl-4">
           <input
             type="text"

@@ -371,8 +371,8 @@ const BlendShapeSlider: React.FC<BlendShapeSliderProps> = React.memo(({ name, va
         className="flex-1 h-1 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3
                    [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-sky-500 [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:hover:bg-sky-400"
+                   [&::-webkit-slider-thumb]:bg-[var(--aethel-info)] [&::-webkit-slider-thumb]:cursor-pointer
+                   [&::-webkit-slider-thumb]:hover:bg-[var(--aethel-info-light)]"
       />
       <span className="text-xs text-[var(--aethel-text-tertiary)] w-10 text-right font-mono">
         {value.toFixed(2)}
@@ -397,7 +397,7 @@ const EmotionPresetButton: React.FC<EmotionPresetButtonProps> = React.memo(({ pr
       onClick={onClick}
       className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200
                   ${isActive
-                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-sky-400'
+                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-[var(--aethel-info-light)]'
                     : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
     >
       <span className="text-2xl mb-1">{preset.icon}</span>
@@ -553,7 +553,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
         <div className="flex items-center gap-2">
           <button type="button"
             onClick={togglePlayback}
-            className="px-3 py-1 bg-[var(--aethel-info)] hover:bg-sky-500 rounded text-xs font-medium transition-colors"
+            className="px-3 py-1 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] rounded text-xs font-medium transition-colors"
           >
             {isPlaying ? ' Pause' : ' Play'}
           </button>
@@ -608,8 +608,8 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
               }
             }}
           >
-            <div className="w-4 h-8 bg-sky-500 rounded-sm flex items-center justify-center
-                            group-hover:bg-sky-400 transition-colors">
+            <div className="w-4 h-8 bg-[var(--aethel-info)] rounded-sm flex items-center justify-center
+                            group-hover:bg-[var(--aethel-info-light)] transition-colors">
               <span className="text-xs font-bold text-[var(--aethel-text-primary)]">
                 {VISEMES.find(v => v.id === kf.viseme)?.label.charAt(0) || '?'}
               </span>
@@ -619,7 +619,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
 
         {/* Playhead */}
         <div
-          className="absolute top-0 h-full w-0.5 bg-orange-500"
+          className="absolute top-0 h-full w-0.5 bg-[var(--aethel-warning)]"
           style={{ left: `${(currentTime / duration) * 100}%` }}
         />
       </div>
@@ -702,7 +702,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
                     e.stopPropagation()
                     onSelectAU(au.relatedBlendShapes)
                   }}
-                  className="mt-2 text-xs text-sky-400 hover:text-sky-300"
+                  className="mt-2 text-xs text-[var(--aethel-info-light)] hover:text-[var(--aethel-info)]"
                 >
                   Apply to sliders
                 </button>
@@ -1029,7 +1029,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-bold text-sky-400">
+          <h2 className="text-lg font-bold text-[var(--aethel-info-light)]">
              Facial Animation Editor
           </h2>
           <span className="text-xs text-[var(--aethel-text-tertiary)] bg-[var(--aethel-surface-quaternary)] px-2 py-1 rounded">
@@ -1055,7 +1055,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           </button>
           <button type="button"
             onClick={handleExport}
-            className="px-3 py-1.5 text-sm bg-[var(--aethel-info)] hover:bg-sky-500 rounded transition-colors"
+            className="px-3 py-1.5 text-sm bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] rounded transition-colors"
           >
              Export JSON
           </button>

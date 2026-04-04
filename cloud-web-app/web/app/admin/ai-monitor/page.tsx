@@ -562,7 +562,7 @@ export default function AgentMonitorPage() {
               emergencyState.level === 'shutdown'
                 ? 'bg-[var(--aethel-error)]/20 border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)]'
                 : emergencyState.level === 'critical'
-                  ? 'bg-orange-500/20 border-orange-500/50'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]'
                   : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]'
             }
           `}

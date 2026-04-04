@@ -45,7 +45,7 @@ export default function AdminEmergencyPage() {
   const levelTone = useMemo(() => {
     if (!state?.level || state.level === 'normal') return 'text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] border-[var(--aethel-border-secondary)]'
     if (state.level === 'warning') return 'text-[var(--aethel-warning)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
-    if (state.level === 'critical') return 'text-orange-300 bg-orange-500/10 border-orange-500/30'
+    if (state.level === 'critical') return 'text-[var(--aethel-warning-light)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
     return 'text-[var(--aethel-error-light)] bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'
   }, [state?.level])
 

@@ -340,7 +340,7 @@ export function StorageQuotaManager({
       <div className="border-b border-[var(--aethel-border-primary)] p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="text-sky-300">
+            <div className="text-[var(--aethel-info-light)]">
               <Icons.Storage />
             </div>
             <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Armazenamento</h3>
@@ -436,7 +436,7 @@ export function StorageQuotaManager({
                     key={entry.name}
                     className={`flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors ${
                       selectedForCleanup.has(entry.name)
-                        ? 'border border-sky-500/50 bg-sky-500/10'
+                        ? 'border border-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]'
                         : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
                     }`}
                     onClick={() => {
@@ -458,7 +458,7 @@ export function StorageQuotaManager({
                     </div>
                     <span className="text-xs text-[var(--aethel-text-tertiary)]">{formatBytes(entry.size)}</span>
                     {selectedForCleanup.has(entry.name) && (
-                      <div className="text-sky-300">
+                    <div className="text-[var(--aethel-info-light)]">
                         <Icons.Check />
                       </div>
                     )}

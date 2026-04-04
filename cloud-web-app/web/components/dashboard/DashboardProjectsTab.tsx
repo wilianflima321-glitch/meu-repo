@@ -128,7 +128,7 @@ export function DashboardProjectsTab({
                       onClick={() => onProjectTypeChange(option.value)}
                       className={`rounded-2xl border p-3 text-left transition ${
                         selected
-                          ? 'border-sky-400/30 bg-[linear-gradient(135deg,rgba(79,70,229,0.24),rgba(14,165,233,0.14))]'
+                          ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
                           : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] hover:border-[var(--aethel-border-secondary)]'
                       }`}
                     >
@@ -222,7 +222,7 @@ export function DashboardProjectsTab({
                       onClick={() => onProjectTypeChange(option.value)}
                       className={`rounded-2xl border p-3 text-left transition ${
                         selected
-                          ? 'border-sky-400/30 bg-[linear-gradient(135deg,rgba(79,70,229,0.24),rgba(14,165,233,0.14))]'
+                          ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
                           : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] hover:border-[var(--aethel-border-secondary)]'
                       }`}
                     >

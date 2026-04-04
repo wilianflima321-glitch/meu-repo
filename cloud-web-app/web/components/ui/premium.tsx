@@ -77,7 +77,7 @@ export function GlassCard({
     default: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur}`,
     elevated: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur} shadow-2xl shadow-black/30`,
     glow: `${intensityStyles[intensity].bg} ${intensityStyles[intensity].blur} shadow-[0_0_40px_rgba(99,102,241,0.15)]`,
-    gradient: 'bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-transparent backdrop-blur-xl',
+    gradient: 'bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-text-primary)_8%,transparent)] via-[color-mix(in_srgb,var(--aethel-text-primary)_4%,transparent)] to-transparent backdrop-blur-xl',
     glass: 'bg-[var(--aethel-surface-primary)]/30 backdrop-blur-2xl backdrop-saturate-150',
   }
 
@@ -213,7 +213,7 @@ export function GradientButton({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--aethel-border-primary)] border-t-white" />
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--aethel-border-primary)] border-t-[var(--aethel-text-primary)]" />
         </motion.span>
       )}
       <span className={`flex items-center gap-2 ${loading ? 'opacity-0' : ''}`}>

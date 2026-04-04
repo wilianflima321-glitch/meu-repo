@@ -520,7 +520,7 @@ export default function SettingsEditor() {
                       <div className="mb-1 flex items-center gap-2">
                         <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{setting.title}</h3>
                         {isModified && (
-                          <span className="rounded-full bg-sky-500/20 px-2 py-0.5 text-[11px] text-sky-200">
+                          <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] px-2 py-0.5 text-[11px] text-[var(--aethel-info-light)]">
                             Alterado
                           </span>
                         )}

@@ -216,10 +216,10 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
   const isCritical = percentage > 95;
 
   const colorOptions = {
-    indigo: { bg: 'bg-sky-500', text: 'text-[var(--aethel-info)]', ring: 'ring-sky-500/30' },
-    blue: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', text: 'text-[var(--aethel-info-light)]', ring: 'ring-blue-500/30' },
-    green: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]', text: 'text-[var(--aethel-success-light)]', ring: 'ring-green-500/30' },
-    purple: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', text: 'text-[var(--aethel-info-light)]', ring: 'ring-sky-500/30' },
+    indigo: { bg: 'bg-[var(--aethel-info)]', text: 'text-[var(--aethel-info)]', ring: 'ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' },
+    blue: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', text: 'text-[var(--aethel-info-light)]', ring: 'ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' },
+    green: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]', text: 'text-[var(--aethel-success-light)]', ring: 'ring-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]' },
+    purple: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', text: 'text-[var(--aethel-info-light)]', ring: 'ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' },
     amber: { bg: 'bg-[var(--aethel-warning)]', text: 'text-[var(--aethel-warning-light)]', ring: 'ring-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' },
     cyan: { bg: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', text: 'text-[var(--aethel-info-light)]', ring: 'ring-cyan-500/30' },
   };
@@ -305,7 +305,7 @@ function UsageChart({ history }: { history: UsageData['history'] }) {
         return (
           <div
             key={i}
-            className="flex-1 bg-sky-500/30 hover:bg-sky-500/50 rounded-t transition-all cursor-pointer group relative"
+            className="flex-1 bg-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)] rounded-t transition-all cursor-pointer group relative"
             style={{ height: `${Math.max(height, 4)}%` }}
           >
             {/* Tooltip */}

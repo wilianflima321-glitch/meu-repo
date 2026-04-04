@@ -505,7 +505,7 @@ function DestructionLevels({ levels, currentLevel, health, maxHealth }: Destruct
             </div>
             <div className="flex-1 h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-red-600 to-[var(--aethel-warning-dark)] transition-all"
+                className="h-full bg-gradient-to-r from-[var(--aethel-error)] to-[var(--aethel-warning-dark)] transition-all"
                 style={{ width: `${percent * 100}%` }}
               />
             </div>
@@ -734,7 +734,7 @@ export default function DestructionEditor({
               <span>Health: {currentHealth.toFixed(0)} / {config.maxHealth}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Layers className="w-3 h-3 text-orange-400" />
+              <Layers className="w-3 h-3 text-[var(--aethel-warning-light)]" />
               <span>Level: {currentLevel + 1} / {config.fractureLevels}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -753,7 +753,7 @@ export default function DestructionEditor({
                 {event.type === 'destroy' ? (
                   <Bomb className="w-2.5 h-2.5 text-[var(--aethel-error)]" />
                 ) : (
-                  <Zap className="w-2.5 h-2.5 text-orange-400" />
+                  <Zap className="w-2.5 h-2.5 text-[var(--aethel-warning-light)]" />
                 )}
                 {event.type}: {event.damage.toFixed(0)} damage
               </div>
@@ -832,7 +832,7 @@ export default function DestructionEditor({
               max={5}
               step={1}
               onChange={(v) => setConfig((p) => ({ ...p, fractureLevels: v }))}
-              icon={<Layers className="w-3 h-3 text-orange-400" />}
+              icon={<Layers className="w-3 h-3 text-[var(--aethel-warning-light)]" />}
             />
 
             <div className="mt-3">

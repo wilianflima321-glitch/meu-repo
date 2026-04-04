@@ -129,12 +129,12 @@ const STATUS_COLORS: Record<JobStatus, { bg: string; text: string; dot: string }
   completed: { bg: 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)]', text: 'text-[var(--aethel-success)]', dot: 'bg-[var(--aethel-success-light)]' },
   failed: { bg: 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]', text: 'text-[var(--aethel-error)]', dot: 'bg-[var(--aethel-error-light)]' },
   cancelled: { bg: 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_30%,transparent)]', text: 'text-[var(--aethel-text-secondary)]', dot: 'bg-[var(--aethel-text-tertiary)]' },
-  timeout: { bg: 'bg-orange-500/20', text: 'text-orange-300', dot: 'bg-orange-400' },
+  timeout: { bg: 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]', text: 'text-[var(--aethel-warning-light)]', dot: 'bg-[var(--aethel-warning)]' },
 }
 
 const PRIORITY_COLORS: Record<JobPriority, string> = {
   critical: 'text-[var(--aethel-error)]',
-  high: 'text-orange-300',
+  high: 'text-[var(--aethel-warning-light)]',
   normal: 'text-[var(--aethel-info)]',
   low: 'text-[var(--aethel-text-secondary)]',
 }

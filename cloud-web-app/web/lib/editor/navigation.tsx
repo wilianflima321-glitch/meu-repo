@@ -551,7 +551,7 @@ export function ReferencesPanel({
                 ) : (
                   <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
                 )}
-                <FileCode className="w-4 h-4 text-sky-400" />
+                <FileCode className="w-4 h-4 text-[var(--aethel-info-light)]" />
                 <span className="text-sm text-[var(--aethel-text-primary)] font-medium">
                   {getFileName(uri)}
                 </span>
@@ -654,7 +654,7 @@ export function GoToLineDialog({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-50"
+        className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)]"
         onClick={onClose}
       />
 

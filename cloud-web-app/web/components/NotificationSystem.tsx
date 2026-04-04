@@ -280,7 +280,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
           {notification.action && (
             <button type="button"
               onClick={notification.action.onClick}
-              className="mt-2 text-sm font-medium text-sky-400 hover:text-sky-300 transition-colors"
+              className="mt-2 text-sm font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info)] transition-colors"
             >
               {notification.action.label}
             </button>

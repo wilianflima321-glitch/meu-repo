@@ -171,7 +171,7 @@ const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({
     online: 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_5%,transparent)]',
     offline: 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_5%,transparent)]',
     warning: 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[var(--aethel-warning)]/5',
-    checking: 'border-sky-500/30 bg-[var(--aethel-info)]/5',
+    checking: 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_5%,transparent)]',
   }
 
   return (

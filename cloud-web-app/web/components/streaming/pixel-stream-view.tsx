@@ -226,7 +226,7 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                     </>
                 ) : (
                     <>
-                        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]">
+                        <div className="w-20 h-20 mx-auto bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-primary))] rounded-full flex items-center justify-center shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]">
                             <Play className="w-10 h-10 text-[var(--aethel-text-primary)] ml-1" />
                         </div>
                         <div className="text-[var(--aethel-text-primary)] font-medium text-lg">Cloud Rendering</div>
@@ -235,7 +235,7 @@ const ConnectionOverlay = memo(function ConnectionOverlay({
                         </div>
                         <button type="button"
                             onClick={onConnect}
-                            className="mt-4 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-700 hover:to-blue-700"
+                            className="mt-4 bg-[linear-gradient(90deg,var(--aethel-primary),var(--aethel-primary))] hover:brightness-110"
                             size="lg"
                         >
                             <Zap className="w-4 h-4 mr-2" />
@@ -292,7 +292,7 @@ const ControlsBar = memo(function ControlsBar({
     };
 
     return (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 hover:opacity-100 transition-opacity z-20">
+        <div className="absolute bottom-0 left-0 right-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent),transparent)] p-4 opacity-0 hover:opacity-100 transition-opacity z-20">
             <div className="flex items-center justify-between">
                 {/* Left controls */}
                 <div className="flex items-center gap-2">

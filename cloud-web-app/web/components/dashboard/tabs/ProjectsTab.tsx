@@ -235,7 +235,7 @@ export function ProjectsTab({
           <select
             value={filterType || ''}
             onChange={(e) => setFilterType(e.target.value || null)}
-            className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-sky-500"
+            className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-[var(--aethel-info)]"
           >
             <option value="">Todos os tipos</option>
             <option value="code">Codigo</option>
@@ -246,7 +246,7 @@ export function ProjectsTab({
           <select
             value={filterStatus || ''}
             onChange={(e) => setFilterStatus(e.target.value || null)}
-            className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-sky-500"
+            className="px-4 py-2.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-[var(--aethel-text-primary)] text-sm focus:outline-none focus:border-[var(--aethel-info)]"
           >
             <option value="">Todos os status</option>
             <option value="active">Ativo</option>

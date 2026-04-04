@@ -1044,7 +1044,7 @@ export default function ClothSimulationEditor({
           </CollapsibleSection>
 
           {/* Colliders */}
-          <CollapsibleSection title="Colliders" icon={<Box className="w-4 h-4 text-orange-400" />}>
+          <CollapsibleSection title="Colliders" icon={<Box className="w-4 h-4 text-[var(--aethel-warning-light)]" />}>
             <div className="flex gap-1 mb-3">
               <button type="button"
                 onClick={() => addCollider('sphere')}

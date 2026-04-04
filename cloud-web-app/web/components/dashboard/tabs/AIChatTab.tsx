@@ -260,7 +260,7 @@ export function AIChatTab({
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
-            className="w-full px-4 py-3 pr-24 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-xl text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] resize-none focus:outline-none focus:border-sky-500 transition-colors"
+            className="w-full px-4 py-3 pr-24 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-xl text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] resize-none focus:outline-none focus:border-[var(--aethel-info)] transition-colors"
             rows={1}
             disabled={isGenerating}
           />

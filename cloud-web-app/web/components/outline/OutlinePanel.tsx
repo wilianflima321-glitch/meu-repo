@@ -115,7 +115,7 @@ const getSymbolIcon = (kind: SymbolKind) => {
       return <Variable {...iconProps} className="text-[var(--aethel-info-light)]" />;
     case 'enum':
     case 'enumMember':
-      return <LayoutList {...iconProps} className="text-orange-400" />;
+      return <LayoutList {...iconProps} className="text-[var(--aethel-warning-light)]" />;
     case 'interface':
       return <Type {...iconProps} className="text-[var(--aethel-success-light)]" />;
     case 'variable':
@@ -123,7 +123,7 @@ const getSymbolIcon = (kind: SymbolKind) => {
     case 'constant':
       return <Hash {...iconProps} className="text-[var(--aethel-info-light)]" />;
     case 'struct':
-      return <Box {...iconProps} className="text-teal-400" />;
+      return <Box {...iconProps} className="text-[var(--aethel-success-light)]" />;
     case 'event':
       return <Zap {...iconProps} className="text-[var(--aethel-warning-light)]" />;
     case 'typeParameter':

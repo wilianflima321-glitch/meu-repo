@@ -140,7 +140,7 @@ function getStatusColor(status: RenderJobStatus): string {
         case 'queued':
             return 'text-[var(--aethel-text-secondary)]';
         case 'paused':
-            return 'text-orange-500';
+            return 'text-[var(--aethel-warning)]';
         case 'failed':
         case 'cancelled':
             return 'text-[var(--aethel-error)]';
@@ -162,7 +162,7 @@ function getStatusBg(status: RenderJobStatus): string {
         case 'queued':
             return 'bg-[var(--aethel-surface-secondary)]';
         case 'paused':
-            return 'bg-orange-500';
+            return 'bg-[var(--aethel-warning)]';
         case 'failed':
         case 'cancelled':
             return 'bg-[var(--aethel-error)]';

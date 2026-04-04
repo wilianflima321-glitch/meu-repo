@@ -14,7 +14,7 @@ type StudioGlobalNavProps = {
 
 function linkClass(active: boolean): string {
   return active
-    ? 'rounded-xl border border-sky-400/30 bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] px-3 py-2 text-sm font-medium text-[var(--aethel-text-primary)]'
+    ? 'rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_35%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))] px-3 py-2 text-sm font-medium text-[var(--aethel-text-primary)]'
     : 'rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] hover:text-[var(--aethel-text-primary)]'
 }
 

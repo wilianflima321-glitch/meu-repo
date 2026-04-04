@@ -103,7 +103,7 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
       {/* Toolbar Overlay */}
       <div className="absolute top-4 left-4 z-10 flex gap-2">
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur p-2 rounded border border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-primary)]">
-          Mode: <span className="font-bold text-sky-400 uppercase">{mode}</span>
+          Mode: <span className="font-bold text-[var(--aethel-info-light)] uppercase">{mode}</span>
         </div>
         <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur p-2 rounded border border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-success)] flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] animate-pulse"/>
@@ -111,7 +111,7 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
         </div>
         <button type="button"
           onClick={() => setBoxes(prev => [...prev, [(Math.random() - 0.5) * 5, 10, (Math.random() - 0.5) * 5]])}
-          className="bg-[var(--aethel-info)] hover:bg-sky-700 text-[var(--aethel-text-primary)] px-3 py-1 rounded text-xs font-bold transition"
+          className="bg-[var(--aethel-info)] hover:brightness-110 text-[var(--aethel-text-primary)] px-3 py-1 rounded text-xs font-bold transition"
         >
           Spawn Cube
         </button>

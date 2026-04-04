@@ -438,7 +438,7 @@ function Timeline({
             key={frame.id}
             className={`relative flex-shrink-0 w-16 h-16 rounded border-2 cursor-pointer ${
               idx === currentFrameIndex
-                ? 'border-sky-500'
+                ? 'border-[var(--aethel-info)]'
                 : 'border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
             }`}
             onClick={() => onSelectFrame(idx)}

@@ -266,7 +266,7 @@ export default function AethelResearch() {
                 </div>
                 <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]/30 p-4">
                   <div className="mb-2 flex items-center gap-2">
-                    <BarChart3 size={14} className="text-orange-400" />
+                    <BarChart3 size={14} className="text-[var(--aethel-warning-light)]" />
                     <span className="text-[10px] font-bold uppercase text-[var(--aethel-text-quaternary)]">Latencia</span>
                   </div>
                   <div className="text-lg font-bold text-[var(--aethel-text-primary)]">450ms</div>

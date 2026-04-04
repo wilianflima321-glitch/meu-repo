@@ -80,7 +80,7 @@ export function SettingsSidebar({
               onClick={() => onSelectCategory(category.id)}
               className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
                 selectedCategory === category.id && !selectedSubcategory
-                  ? 'bg-sky-600/20 text-sky-400'
+                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
@@ -96,7 +96,7 @@ export function SettingsSidebar({
                     onClick={() => onSelectSubcategory(subcategory.id)}
                     className={`w-full flex items-center gap-2 px-4 py-1.5 text-left text-sm transition-colors ${
                       selectedSubcategory === subcategory.id
-                        ? 'text-sky-400'
+                        ? 'text-[var(--aethel-info-light)]'
                         : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]'
                     }`}
                   >

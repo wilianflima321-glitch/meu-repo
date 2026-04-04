@@ -322,7 +322,7 @@ export default function HelpPage() {
         </section>
 
         <section className="mx-auto max-w-5xl px-6 pb-20">
-          <div className="rounded-3xl border border-[var(--aethel-primary)]/20 bg-gradient-to-br from-blue-500/15 via-cyan-500/10 to-transparent p-10 text-center">
+          <div className="rounded-3xl border border-[var(--aethel-primary)]/20 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_15%,transparent),color-mix(in_srgb,var(--aethel-info)_10%,transparent),transparent)] p-10 text-center">
             <h3 className="text-2xl font-semibold text-[var(--aethel-text-primary)]">Ainda precisa de ajuda?</h3>
             <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--aethel-text-secondary)]">
               Nosso time responde por email ou comunidade. Em demandas enterprise, fale direto com vendas.

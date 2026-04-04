@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_20%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))]">
                   <Mail className="h-8 w-8 text-[var(--aethel-primary-light)]" />
                 </div>
                 <h1 className="text-2xl font-bold">Esqueceu a senha?</h1>

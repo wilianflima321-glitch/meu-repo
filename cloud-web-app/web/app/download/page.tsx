@@ -150,7 +150,7 @@ export default function DownloadPage() {
             <div className="flex flex-col gap-6 md:flex-row md:items-center">
               <div className="flex-1">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-sky-500/20">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_20%,transparent),color-mix(in_srgb,var(--aethel-info)_20%,transparent))]">
                     <CurrentIcon />
                   </div>
                   <div>

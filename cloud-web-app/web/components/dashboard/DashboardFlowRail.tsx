@@ -81,7 +81,7 @@ export function DashboardFlowRail({
           <button
             type="button"
             onClick={onOpenIde}
-            className="inline-flex items-center justify-center rounded-2xl border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-sm font-medium text-sky-100 transition hover:bg-sky-400/15"
+            className="inline-flex items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-info-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)]"
           >
             Abrir IDE com handoff
           </button>
@@ -92,7 +92,7 @@ export function DashboardFlowRail({
             const state = getStepState(activeTab, step)
             const className =
               state === 'active'
-                ? 'border-sky-400/35 bg-[linear-gradient(135deg,rgba(79,70,229,0.28),rgba(14,165,233,0.16))] text-[var(--aethel-text-primary)]'
+                ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_28%,transparent),color-mix(in_srgb,var(--aethel-info)_16%,transparent))] text-[var(--aethel-text-primary)]'
                 : state === 'complete'
                 ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
                 : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-secondary)]'

@@ -150,7 +150,7 @@ function FileIcon({ type }: { type: FileChange['type'] }) {
     case 'modified':
       return <FileEdit className="w-3.5 h-3.5 text-[var(--aethel-warning-light)]" />;
     case 'renamed':
-      return <FileCode className="w-3.5 h-3.5 text-sky-400" />;
+      return <FileCode className="w-3.5 h-3.5 text-[var(--aethel-info-light)]" />;
     default:
       return <FileCode className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />;
   }
@@ -183,7 +183,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
           ? 'bg-[var(--aethel-surface-tertiary)] border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_25%,transparent)]'
           : 'bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
         }
-        ${isPreviewing ? 'ring-2 ring-sky-500/50' : ''}
+        ${isPreviewing ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)]' : ''}
       `}
       onClick={onClick}
     >

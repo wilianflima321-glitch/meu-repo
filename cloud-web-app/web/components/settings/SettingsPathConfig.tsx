@@ -150,7 +150,7 @@ const PathInput: React.FC<{
 
         <div className="flex items-center gap-1">
           {isValidating ? (
-            <RefreshCw className="h-5 w-5 text-sky-300 animate-spin" />
+            <RefreshCw className="h-5 w-5 text-[var(--aethel-info-light)] animate-spin" />
           ) : config.isValid ? (
             <Check className="h-5 w-5 text-[var(--aethel-success-light)]" />
           ) : value ? (
@@ -308,7 +308,7 @@ export const SettingsPathConfig: React.FC<{
       <div className="aethel-card w-full max-w-2xl overflow-hidden shadow-2xl">
         <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] p-4">
           <div className="flex items-center gap-3">
-            <Settings className="h-5 w-5 text-sky-300" />
+            <Settings className="h-5 w-5 text-[var(--aethel-info-light)]" />
             <div>
               <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Configuracao de caminhos</h2>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Configure onde encontrar programas externos</p>
@@ -321,7 +321,7 @@ export const SettingsPathConfig: React.FC<{
         </div>
 
         <div className="max-h-[60vh] space-y-4 overflow-y-auto p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-sky-500/30 bg-sky-500/10 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] p-3">
             <div>
               <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Deteccao automatica</p>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Deixe o Aethel encontrar os programas por voce</p>

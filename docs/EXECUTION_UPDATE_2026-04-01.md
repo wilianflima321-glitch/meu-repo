@@ -65,7 +65,7 @@ Atualização: 2026-04-04
 ## Varredura local de dívida (app/components/lib)
 
 - Botões sem type="button": 0 ocorrências (scan com glob via `cloud-web-app/web/node_modules`).
-- Utilitários de cor hardcoded (bg/text/border/from/to): 134 ocorrências.
+- Utilitários de cor hardcoded (bg/text/border/from/to): 0 ocorrências (após sweep local).
 - Hotspots de microcopy em inglês: 1463 ocorrências.
 - Uso de tokens `var(--aethel-*)`: 15323 ocorrências (última contagem registrada).
 
@@ -75,9 +75,7 @@ Amostra de arquivos com botões sem type (não exaustivo):
 - Nenhuma ocorrência após o sweep atual.
 
 Amostra de arquivos com cores hardcoded (não exaustivo):
-- `cloud-web-app/web/components/video/VideoTimeline.tsx`
-- `cloud-web-app/web/components/vcs/TimeMachineSlider.tsx`
-- `cloud-web-app/web/components/ui/DesignSystem.tsx`
+- Nenhuma ocorrência após o sweep atual.
 
 ## Benchmark Aethel Engine vs Líderes de Mercado 2026 (fornecido pelo usuário; pendente de validação)
 
@@ -92,7 +90,7 @@ Branch: audit/ux-shell-ptbr-2026-04-01
 Status atual do Aethel Engine
 - Superfícies inventariadas: 434 arquivos (app/), 325 (components/), 386 (lib/)
 - Sistema de tokens: `var(--aethel-*)` definido em `styles/globals.css` e `styles/design-tokens.css`
-- Gaps P0: 120+ botões sem `type="button"`, 160+ linhas com cores hardcoded
+- Gaps P0: 0 botões sem `type="button"`, 0 linhas com cores hardcoded (ajustado pós-sweep local)
 - Microcopy PT-BR: drift de inglês em 200+ ocorrências (Preview, Refresh, Loading, etc.)
 - Blockers operacionais: `node_modules` ausente, `STRIPE_WEBHOOK_SECRET` missing, Docker daemon
 
@@ -272,12 +270,12 @@ Observability roadmap
 | Hardcoded Color Detection | Automated | Lint warnings | Grep scan only | P0 |
 | Cross-platform Export | JSON, CSS, iOS, Android | Multi-platform | CSS only | P2 |
 
-Plano de governança de tokens
-- [P0] Criar ESLint rule customizada para bloquear cores hardcoded.
-- [P0] Refatorar hardcoded colors para tokens correspondentes.
-- [P1] Documentar token usage (Storybook ou exemplos).
-- [P1] Adicionar CI check para falhar build se cores hardcoded são detectadas.
-- [P2] Migrar para DTCG.
+ Plano de governança de tokens
+ - [P0] Criar ESLint rule customizada para bloquear cores hardcoded.
+ - [P0] Refatoração concluída nesta wave; manter zero via prevenção e revisão.
+ - [P1] Documentar token usage (Storybook ou exemplos).
+ - [P1] Adicionar CI check para falhar build se cores hardcoded são detectadas.
+ - [P2] Migrar para DTCG.
 
 9) Microcopy e Localização PT-BR
 
@@ -293,13 +291,13 @@ Plano de normalização
 P0 - Blockers críticos
 - HMR para preview runtime
 - Agent mode multi-step
-- Botões sem type
+- Botões sem type (resolvido nesta wave)
 - Focus visible inconsistente
 - Contraste não validado
 - LSP real
 - STRIPE_WEBHOOK_SECRET
 - Extension publishing API
-- Hardcoded colors
+- Hardcoded colors (resolvido nesta wave)
 - Termos em inglês
 
 P1 - Alta prioridade
@@ -373,12 +371,12 @@ P2 - Backlog
 - Ativar security audit logs.
 - Adicionar session replay (FullStory ou LogRocket).
 
-8) Tokens de Design
-- Criar ESLint rule customizada para bloquear cores hardcoded.
-- Refatorar hardcoded colors para tokens.
-- Documentar token usage.
-- Adicionar CI check para cores hardcoded.
-- Migrar para DTCG.
+ 8) Tokens de Design
+ - Criar ESLint rule customizada para bloquear cores hardcoded.
+ - Refatoração concluída nesta wave; manter zero via prevenção e revisão.
+ - Documentar token usage.
+ - Adicionar CI check para cores hardcoded.
+ - Migrar para DTCG.
 
 9) Microcopy PT-BR
 - Centralizar strings em `lib/locales/pt-BR.ts`.

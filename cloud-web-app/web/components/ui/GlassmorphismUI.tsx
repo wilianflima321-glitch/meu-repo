@@ -166,7 +166,7 @@ export function GlassButton({
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          className="w-4 h-4 border-2 border-[var(--aethel-border-primary)] border-t-white rounded-full"
+          className="w-4 h-4 border-2 border-[var(--aethel-border-primary)] border-t-[var(--aethel-text-primary)] rounded-full"
         />
       )}
       {children}
@@ -203,7 +203,7 @@ export function GlassInput({
         className={`
           w-full px-4 py-2.5 rounded-lg
           bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)]
-          text-[var(--aethel-text-primary)] placeholder-white/40
+          text-[var(--aethel-text-primary)] placeholder-[color-mix(in_srgb,var(--aethel-text-primary)_40%,transparent)]
           backdrop-blur-xl
           transition-all duration-200
           focus:outline-none focus:border-[var(--aethel-border-primary)] focus:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]
@@ -457,7 +457,7 @@ export function ShimmerSkeleton({
       className={`
         ${width} ${height}
         rounded-lg
-        bg-gradient-to-r from-white/5 via-white/10 to-white/5
+        bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-text-primary)_6%,transparent)] via-[color-mix(in_srgb,var(--aethel-text-primary)_12%,transparent)] to-[color-mix(in_srgb,var(--aethel-text-primary)_6%,transparent)]
         bg-[length:200%_100%]
         ${className}
       `}
@@ -479,7 +479,7 @@ export function AnimatedProgressBar({
 }) {
   const colorClasses = {
     blue: 'from-[var(--aethel-info-light)] to-[var(--aethel-primary)]',
-    green: 'from-green-400 to-green-600',
+    green: 'from-[var(--aethel-success-light)] to-[var(--aethel-success)]',
     red: 'from-[color-mix(in_srgb,var(--aethel-error)_60%,transparent)] to-[var(--aethel-error)]',
     purple: 'from-[var(--aethel-accent-light)] to-[var(--aethel-accent-dark)]',
   }
@@ -517,7 +517,7 @@ export function FloatingActionButton({
 }) {
   const colorClasses = {
     blue: 'from-[var(--aethel-info)] to-[var(--aethel-primary)] hover:shadow-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]',
-    green: 'from-green-500 to-green-600 hover:shadow-green-500/50',
+    green: 'from-[var(--aethel-success)] to-[var(--aethel-success-dark)] hover:shadow-[color-mix(in_srgb,var(--aethel-success)_45%,transparent)]',
     red: 'from-[color-mix(in_srgb,var(--aethel-error)_70%,transparent)] to-[var(--aethel-error)] hover:shadow-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)]',
     purple: 'from-[var(--aethel-accent)] to-[var(--aethel-accent-dark)] hover:shadow-[0_0_24px_color-mix(in_srgb,var(--aethel-accent)_50%,transparent)]',
   }
