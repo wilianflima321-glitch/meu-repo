@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { capabilityResponse } from '@/lib/server/capability-response'
 import { buildAiProviderSetupMetadata } from '@/lib/capability-constants'
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
 import {
   AI_DEMO_MODEL,
   AI_DEMO_PROVIDER,
@@ -100,6 +101,13 @@ export async function POST(req: NextRequest) {
     const prompt = instruction || (promptBuilder ? promptBuilder(code, language) : code)
 
     if (aiService.getAvailableProviders().length === 0) {
+      const blocked = blockIfSimulationDisabled({
+        capability: 'AI_ACTION',
+        reason: 'AI_PROVIDER_NOT_CONFIGURED',
+        message: 'AI provider not configured. Configure a real provider to run this capability.',
+        missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
+      })
+      if (blocked) return blocked
       if (isAiDemoModeEnabled()) {
         const demoUsage = await consumeAiDemoUsage({
           userId: user.userId,

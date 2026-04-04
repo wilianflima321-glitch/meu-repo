@@ -30,6 +30,7 @@ import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 import { buildMentionContextBlock } from '@/lib/server/mention-context'
 import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models';
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
@@ -278,6 +279,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const availableProviders = aiService.getAvailableProviders();
 
     if (availableProviders.length === 0) {
+      const blocked = blockIfSimulationDisabled({
+        capability: 'AI_CHAT_ADVANCED',
+        reason: 'AI_PROVIDER_NOT_CONFIGURED',
+        message: 'AI provider not configured. Configure a real provider to run advanced chat.',
+        missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
+      })
+      if (blocked) return blocked
       if (isAiDemoModeEnabled()) {
         const demoUsage = await consumeAiDemoUsage({
           userId,

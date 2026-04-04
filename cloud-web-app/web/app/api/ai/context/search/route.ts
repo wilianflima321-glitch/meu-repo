@@ -6,6 +6,7 @@ import {
   getSemanticCodeSearchReadiness,
   searchSemanticCodebase,
 } from '@/lib/server/semantic-code-search'
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,10 +21,19 @@ export async function GET(request: NextRequest) {
       projectId,
     })
 
+    if (readiness.status !== 'ready') {
+      const blocked = blockIfSimulationDisabled({
+        capability: 'AI_CODEBASE_CONTEXT_SEARCH',
+        reason: 'CONTEXT_SEARCH_NOT_READY',
+        message: 'Semantic code search index not ready. Build the index to enable real execution.',
+      })
+      if (blocked) return blocked
+    }
+
     return NextResponse.json({
       readiness,
       capability: 'AI_CODEBASE_CONTEXT_SEARCH',
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: readiness.status === 'ready' ? 'IMPLEMENTED' : 'PARTIAL',
       authority: 'canonical',
     })
   } catch (error) {
@@ -51,6 +61,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const readiness = await getSemanticCodeSearchReadiness({
+      userId: user.userId,
+      projectId,
+    })
+
+    if (readiness.status !== 'ready') {
+      const blocked = blockIfSimulationDisabled({
+        capability: 'AI_CODEBASE_CONTEXT_SEARCH',
+        reason: 'CONTEXT_SEARCH_NOT_READY',
+        message: 'Semantic code search index not ready. Build the index to enable real execution.',
+      })
+      if (blocked) return blocked
+    }
+
     const response = await searchSemanticCodebase({
       query,
       userId: user.userId,
@@ -61,8 +85,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       ...response,
+      readiness,
       capability: 'AI_CODEBASE_CONTEXT_SEARCH',
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: readiness.status === 'ready' ? 'IMPLEMENTED' : 'PARTIAL',
       authority: 'canonical',
     })
   } catch (error) {

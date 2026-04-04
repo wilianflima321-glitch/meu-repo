@@ -14,6 +14,7 @@ import {
 } from '@/lib/server/ai-demo-mode'
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
 
 /**
  * POST /api/ai/complete
@@ -119,6 +120,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (aiService.getAvailableProviders().length === 0) {
+      const blocked = blockIfSimulationDisabled({
+        capability: 'AI_COMPLETE',
+        reason: 'AI_PROVIDER_NOT_CONFIGURED',
+        message: 'AI provider not configured. Configure a real provider to run completion.',
+        missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
+      })
+      if (blocked) return blocked
       if (isAiDemoModeEnabled()) {
         const demoUsage = await consumeAiDemoUsage({
           userId: user.userId,

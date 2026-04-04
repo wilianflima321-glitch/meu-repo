@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       message: 'Invalid JSON body.',
       status: 400,
       capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: 'IMPLEMENTED',
     })
   }
 
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       message: 'feedback must be accepted, rejected or needs_work.',
       status: 400,
       capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: 'IMPLEMENTED',
       metadata: {
         acceptedValues: ['accepted', 'rejected', 'needs_work'],
       },
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       message: 'runId is required for learn feedback.',
       status: 400,
       capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: 'IMPLEMENTED',
     })
   }
 
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       message: `notes exceeded ${MAX_NOTES_CHARS} characters.`,
       status: 413,
       capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: 'IMPLEMENTED',
       metadata: {
         maxChars: MAX_NOTES_CHARS,
         receivedChars: notes.length,
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       message: 'runId was not found in scoped change-run ledger evidence.',
       status: 404,
       capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: 'IMPLEMENTED',
       metadata: {
         runId,
         lookbackDays: FEEDBACK_LOOKBACK_DAYS,
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
       message: 'Learn feedback already exists for this runId.',
       status: 409,
       capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: 'IMPLEMENTED',
       metadata: {
         runId,
         previousSubmittedAt: extractSubmittedAt(previousFeedback.metadata),
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     message: 'Learn feedback saved.',
     status: 200,
     capability: CAPABILITY,
-    capabilityStatus: 'PARTIAL',
+    capabilityStatus: 'IMPLEMENTED',
     metadata: {
       runId,
       feedback,

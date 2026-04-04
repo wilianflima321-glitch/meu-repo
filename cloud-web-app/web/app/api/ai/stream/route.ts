@@ -20,6 +20,7 @@ import {
 } from '@/lib/server/ai-demo-mode';
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 
 function getBackendBaseUrl(): string | null {
 	const raw = process.env.NEXT_PUBLIC_API_URL;
@@ -139,6 +140,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		}
 
 		if (aiService.getAvailableProviders().length === 0) {
+			const blocked = blockIfSimulationDisabled({
+				capability: 'AI_STREAM',
+				reason: 'AI_PROVIDER_NOT_CONFIGURED',
+				message: 'AI provider not configured. Configure a real provider to run streaming chat.',
+				missingEnv: ['OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY'],
+			})
+			if (blocked) return blocked
 			if (isAiDemoModeEnabled()) {
 				const demoUsage = await consumeAiDemoUsage({
 					userId: auth.userId,

@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       message: 'Change run ledger loaded.',
       status: 200,
       capability: CAPABILITY,
-      capabilityStatus: 'PARTIAL',
+      capabilityStatus: 'IMPLEMENTED',
       metadata: {
         sinceIso,
         limit,

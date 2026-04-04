@@ -18,6 +18,8 @@
 
 - Thinking stream simulado agora bloqueado por `AETHEL_DISABLE_SIMULATION` (retorna 501 quando simulation é proibida).
 
+- Rotas de IA agora bloqueiam fallback demo/partial quando `AETHEL_DISABLE_SIMULATION` está ativo.
+
 - Nenhuma claim de backend novo, runtime externo ou conclusão operacional sem evidência local.
 
 
@@ -98,6 +100,7 @@
 - `cloud-web-app/web/lib/server/qa-gate.ts`
 - `cloud-web-app/web/lib/server/patch-engine.ts`
 - `cloud-web-app/web/lib/server/execution-context.ts`
+- `cloud-web-app/web/lib/server/simulation-guard.ts`
 - `cloud-web-app/web/app/api/studio/tasks/plan/route.ts`
 - `cloud-web-app/web/app/api/studio/tasks/[id]/route.ts`
 - `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`

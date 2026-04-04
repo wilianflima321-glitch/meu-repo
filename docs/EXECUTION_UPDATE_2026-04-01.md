@@ -128,6 +128,7 @@ Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
   - `cloud-web-app/web/lib/server/qa-gate.ts`
   - `cloud-web-app/web/lib/server/patch-engine.ts`
   - `cloud-web-app/web/lib/server/execution-context.ts`
+  - `cloud-web-app/web/lib/server/simulation-guard.ts`
   - `cloud-web-app/web/app/api/studio/tasks/plan/route.ts`
   - `cloud-web-app/web/app/api/studio/tasks/[id]/route.ts`
   - `cloud-web-app/web/app/api/studio/tasks/[id]/run/route.ts`
@@ -135,6 +136,20 @@ Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
   - `cloud-web-app/web/app/api/studio/tasks/[id]/apply/route.ts`
 - Thinking stream:
   - `cloud-web-app/web/app/api/ai/thinking/[sessionId]/route.ts` (simulação bloqueada quando `AETHEL_DISABLE_SIMULATION` está ativo)
+- Guardas de simulação AI:
+  - `cloud-web-app/web/app/api/ai/action/route.ts`
+  - `cloud-web-app/web/app/api/ai/chat/route.ts`
+  - `cloud-web-app/web/app/api/ai/chat-advanced/route.ts`
+  - `cloud-web-app/web/app/api/ai/complete/route.ts`
+  - `cloud-web-app/web/app/api/ai/inline-completion/route.ts`
+  - `cloud-web-app/web/app/api/ai/inline-edit/route.ts`
+  - `cloud-web-app/web/app/api/ai/stream/route.ts`
+  - `cloud-web-app/web/app/api/ai/context/search/route.ts`
+  - `cloud-web-app/web/app/api/ai/agents/route.ts`
+  - `cloud-web-app/web/app/api/ai/agents/executions/route.ts`
+  - `cloud-web-app/web/app/api/ai/agents/metrics/route.ts`
+  - `cloud-web-app/web/app/api/ai/director/[projectId]/route.ts`
+  - `cloud-web-app/web/app/api/ai/director/[projectId]/action/route.ts`
 
 
 ## Varredura local de dívida (app/components/lib)
@@ -321,6 +336,9 @@ Nota: `rg` bloqueado neste ambiente; scan parcial via Python (top 15). Usar como
 
 - **Thinking simulada**: `cloud-web-app/web/app/api/ai/thinking/[sessionId]/route.ts` contém `runtimeMode: 'simulated_preview'` e `simulateThinkingProgress(...)` (agora bloqueado por `AETHEL_DISABLE_SIMULATION`, retornando 501).
 - **Sandbox apply com mensagens de simulação**: `cloud-web-app/web/app/api/ai/change/apply/route.ts` ainda contém texto de "sandbox simulation" (mesmo com bloqueio ativo).
+- **Bloqueio por env**: `cloud-web-app/web/lib/server/simulation-guard.ts` agora impede fallback demo/partial quando `AETHEL_DISABLE_SIMULATION` está ativo.
+  - `AETHEL_DISABLE_SIMULATION` (default: ativo) bloqueia simulação/demos.
+  - `AETHEL_ALLOW_PARTIAL=true` permite manter respostas PARTIAL para UX preview.
 - **Modo não implementado**: `cloud-web-app/web/app/api/ai/3d/generate/route.ts` retorna 501 (`Mode not implemented`).
 - **CapabilityStatus PARTIAL em rotas AI** (exposição de execução parcial):
   - `cloud-web-app/web/app/api/ai/agents/route.ts`

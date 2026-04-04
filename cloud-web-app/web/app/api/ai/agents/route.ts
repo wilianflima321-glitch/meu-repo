@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
     requireAuth(request)
+    const blocked = blockIfSimulationDisabled({
+      capability: 'AI_AGENTS_OVERVIEW',
+      reason: 'CAPABILITY_NOT_IMPLEMENTED',
+      message: 'AI agents overview requires real runtime implementation.',
+    })
+    if (blocked) return blocked
     return NextResponse.json({
       agents: [],
       capability: 'AI_AGENTS_OVERVIEW',

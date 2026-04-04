@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,13 @@ export async function POST(
     const user = requireAuth(req);
     const { projectId } = await params;
     const body: ActionPayload = await req.json();
+
+    const blocked = blockIfSimulationDisabled({
+      capability: 'AI_DIRECTOR_ACTION',
+      reason: 'CAPABILITY_NOT_IMPLEMENTED',
+      message: 'AI director actions require real runtime implementation.',
+    })
+    if (blocked) return blocked
 
     // Verificar projeto
     const project = await prisma.project.findFirst({

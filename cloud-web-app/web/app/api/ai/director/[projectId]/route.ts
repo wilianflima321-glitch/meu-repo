@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +74,13 @@ export async function GET(
   try {
     const user = requireAuth(req);
     const { projectId } = await params;
+
+    const blocked = blockIfSimulationDisabled({
+      capability: 'AI_DIRECTOR',
+      reason: 'CAPABILITY_NOT_IMPLEMENTED',
+      message: 'AI director is currently heuristic preview only. Provide real runtime to enable.',
+    })
+    if (blocked) return blocked
 
     // Verificar se projeto existe e pertence ao usuário
     const project = await prisma.project.findFirst({
