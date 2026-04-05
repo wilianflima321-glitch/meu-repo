@@ -126,8 +126,6 @@ function IDEContent() {
   const missionParam = searchParams.get("mission");
   const previewUrlParam = searchParams.get("previewUrl");
   const sourceParam = searchParams.get("source");
-  const shellParam = searchParams.get('shell');
-  const useModernShell = shellParam === 'modern';
 
   const projectId = useMemo(() => {
     if (projectIdParam && projectIdParam.trim()) {
@@ -894,8 +892,7 @@ function IDEContent() {
       files={workspaceFilesLoaded ? workspaceFiles : []}
     >
       <TabProvider>
-        {useModernShell ? (
-          <ModernIDEShell
+        <ModernIDEShell
             projectName={`Projeto ${projectId}`}
             activeFileName={activeFile?.path}
             panelState={modernPanelState}
@@ -1197,8 +1194,7 @@ function IDEContent() {
                 </div>
               )
             }}
-          </ModernIDEShell>
-        ) : null}
+        </ModernIDEShell>
       </TabProvider>
     </CommandPaletteProvider>
   );

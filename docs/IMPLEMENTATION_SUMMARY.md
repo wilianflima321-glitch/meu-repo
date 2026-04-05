@@ -18,18 +18,19 @@
    - `app/admin/ai-monitor/page.tsx`, `hot-reload-server.ts`, `profiler-integrated.ts`.
 4. Microcopy PT-BR no `ModernIDEShell` (labels de preview/dock).
 5. Limpeza de encoding PT-BR em strings do IDE (remoção de sequências `Ã`).
+6. `ModernIDEShell` definido como shell padrão do `FullscreenIDE`.
 
 ## Dívida confirmada (último scan disponível)
 
 - Botões sem `type="button"`: 0 (via `tools/check-button-types.mjs`).
 - Cores hardcoded (Tailwind): 0 (via `tools/check-hardcoded-colors.mjs`).
-- Hotspots de microcopy em inglês: **16869** ocorrências (heurístico por regex).
+- Hotspots de microcopy em inglês: **16868** ocorrências (heurístico por regex).
 
 ## Integração (verificada)
 
-- `FullscreenIDE.tsx` já integra **DevicePreview / ConsoleIntegration / ProfessionalViewport3D / GitIntegration / IntelliSense / ErrorHighlighting**.
+- `FullscreenIDE.tsx` integra **DevicePreview / ConsoleIntegration / ProfessionalViewport3D / GitIntegration / IntelliSense / ErrorHighlighting**.
 - `AIChatPanelPro.tsx` integra **MemoryPanel / ApprovalCard / CodeDiffPreview**.
-- `ModernIDEShell.tsx` segue como casca genérica sem esses módulos (gap de consistência entre shells).
+- `ModernIDEShell.tsx` agora é o shell padrão no IDE.
 
 ## Próximos passos por blocos (baseline fornecido + ajustes da wave)
 
@@ -41,7 +42,6 @@
 - Tokens: governança anti-hardcode (lint/CI) + refatoração de hardcoded restantes fora do escopo do script.
 - Billing: validar STRIPE_WEBHOOK_SECRET com webhook real.
 - Marketplace: extensão API + permissões granulares.
-- Consistência de shell: unificar `ModernIDEShell` vs `FullscreenIDE` (definir padrão único).
 
 ### P1 — Alta prioridade
 - Split editors, drag-and-drop de panels/files.
@@ -60,4 +60,4 @@
 ## Observações finais
 
 - O benchmark 2026 permanece como baseline de planejamento e está marcado como não validado.
-- O foco da próxima wave deve priorizar **paridade real de execução** (preview, agent loop, LSP) e **padronização de shell** para evitar features “criadas porém dispersas”.
+- O foco da próxima wave deve priorizar **paridade real de execução** (preview, agent loop, LSP) e **padronização contínua de microcopy** para reduzir os hotspots.

@@ -15,7 +15,8 @@ Atualização: 2026-04-05
    - HTML inline em overlays/diagnósticos: `hot-reload-server.ts` e `profiler-integrated.ts` com `type="button"`.
 4. Normalização de microcopy PT-BR no `ModernIDEShell` (labels de preview, dock e comandos).
 5. Limpeza de encoding PT-BR em strings dos módulos IDE (remoção de sequências `Ã` em arquivos de chat/preview/diagnóstico).
-6. QA local executado com scripts do repositório (ver “Validações”).
+6. `ModernIDEShell` definido como shell padrão no `FullscreenIDE` (sem dependência de query param).
+7. QA local executado com scripts do repositório (ver “Validações”).
 
 ## Validações executadas (com evidência)
 
@@ -34,8 +35,8 @@ Atualização: 2026-04-05
 **Integrado no `AIChatPanelPro.tsx`**
 - `MemoryPanel`, `ApprovalCard`, `CodeDiffPreview`
 
-**Não integrado no `ModernIDEShell.tsx`**
-- Nenhum dos componentes acima é utilizado diretamente no `ModernIDEShell`. O shell moderno permanece como casca genérica.
+**`ModernIDEShell` como padrão**
+- O shell moderno agora é o fluxo padrão do `FullscreenIDE`.
 
 ## Superfícies atualizadas (arquivo → ajuste)
 
@@ -47,6 +48,7 @@ Atualização: 2026-04-05
 - `cloud-web-app/web/components/ide/AIViewportAssistant.tsx` (tipografia + PT-BR)
 - `cloud-web-app/web/components/ide/ProfessionalViewport3D.tsx` (tipografia)
 - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` (microcopy PT-BR)
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` (shell padrão)
 - `cloud-web-app/web/app/admin/ai-monitor/page.tsx` (type="button")
 - `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` (type="button" no overlay)
 - `cloud-web-app/web/lib/profiler-integrated.ts` (type="button" no overlay)
@@ -56,7 +58,7 @@ Atualização: 2026-04-05
 
 - Botões sem `type="button"`: 0 (confirmado por `tools/check-button-types.mjs`).
 - Tailwind hardcoded colors: 0 (confirmado por `tools/check-hardcoded-colors.mjs`).
-- Hotspots de microcopy em inglês: 16869 ocorrências (heurístico baseado em regex; não é contagem semântica).
+- Hotspots de microcopy em inglês: 16868 ocorrências (heurístico baseado em regex; não é contagem semântica).
 
 Observação: o script de cores não captura `canvas` ou `style` inline; as cores em canvas foram corrigidas manualmente nos componentes 3D.
 
