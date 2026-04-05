@@ -2,6 +2,8 @@
 
 import type { PreviewRuntimeHealthStatus, PreviewRuntimeReadinessResponse } from '@/lib/preview/runtime-manager'
 
+import { ptBR } from '@/lib/locales/pt-BR'
+
 type Props = {
   previewRuntimeUrl: string | null
   runtimeHealthStatus: PreviewRuntimeHealthStatus
@@ -63,6 +65,9 @@ export default function PreviewRuntimeToolbar({
   runtimeDiscoveryMessage,
   runtimeDiscoveryTone = 'info',
 }: Props) {
+  const t = ptBR.ide.preview;
+  const tc = ptBR.common;
+
   const reachableCandidates = runtimeReadiness?.metadata?.localDiscovery?.reachableCandidates ?? 0
   const totalCandidates = runtimeReadiness?.metadata?.localDiscovery?.totalCandidates ?? 0
   const configuredEndpoints = runtimeReadiness?.metadata?.configuredEndpoints ?? []
@@ -88,20 +93,21 @@ export default function PreviewRuntimeToolbar({
           : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
   const runtimeStateLabel =
     runtimeHealthStatus === 'checking'
-      ? 'Verificando'
+      ? tc.status.checking
       : runtimeHealthStatus === 'reachable'
-        ? `Acessível${typeof runtimeHealthLatencyMs === 'number' ? ` · ${runtimeHealthLatencyMs}ms` : ''}`
+        ? `${tc.status.reachable}${typeof runtimeHealthLatencyMs === 'number' ? ` · ${runtimeHealthLatencyMs}ms` : ''}`
         : runtimeHealthStatus === 'idle'
-          ? 'Sem verificação'
-          : 'Indisponível'
+          ? tc.status.idle
+          : tc.status.unavailable
   const readinessLabel =
     runtimeReadiness?.status === 'ready'
-      ? 'Pronto'
+      ? tc.status.ready
       : runtimeReadiness?.status === 'partial'
-        ? 'Parcial'
+        ? tc.status.partial
         : runtimeReadiness?.blockers?.length
-          ? 'Bloqueado'
-          : 'Em avaliação'
+          ? tc.status.blocked
+          : tc.status.checking
+
   const readinessToneClass =
     runtimeReadiness?.status === 'ready'
       ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
@@ -126,6 +132,7 @@ export default function PreviewRuntimeToolbar({
       : runtimePrimaryAction === 'discover'
         ? 'Detectando...'
         : runtimePrimaryActionLabel
+
   const firstBlocker = runtimeReadiness?.blockers?.[0] ?? null
 
   return (
@@ -133,9 +140,9 @@ export default function PreviewRuntimeToolbar({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-[280px] flex-1 flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Runtime de preview</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">{t.runtime}</span>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${previewRuntimeUrl ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]' : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'}`}>
-              {previewRuntimeUrl ? 'Servidor externo' : 'Fallback inline'}
+              {previewRuntimeUrl ? t.externalServer : t.inlineFallback}
             </span>
             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${readinessToneClass}`}>
               Prontidão: {readinessLabel}
@@ -151,16 +158,16 @@ export default function PreviewRuntimeToolbar({
           </div>
           <div className="grid gap-2 lg:grid-cols-3">
             <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-secondary)]">
-              <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Estado atual</div>
+              <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">{t.health}</div>
               <div className="mt-1 font-medium text-[var(--aethel-text-primary)]">{runtimeHealthHint}</div>
             </div>
             <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-secondary)]">
-              <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Estratégia</div>
+              <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">{t.strategy}</div>
               <div className="mt-1 font-medium text-[var(--aethel-text-primary)]">{runtimeStrategyLabel}</div>
               <div className="mt-1 text-[var(--aethel-text-tertiary)]">{runtimeStrategyHint}</div>
             </div>
             <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-secondary)]">
-              <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">Próxima ação</div>
+              <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">{t.nextAction}</div>
               <div className="mt-1 font-medium text-[var(--aethel-text-primary)]">{runtimePrimaryActionLabel}</div>
               <div className="mt-1 text-[var(--aethel-text-tertiary)]">{nextStepText}</div>
               {firstBlocker && (
@@ -195,7 +202,7 @@ export default function PreviewRuntimeToolbar({
             <button
               type="button"
               onClick={onOpenRuntime}
-              aria-label="Abrir o preview em nova aba"
+              aria-label={t.openNewTab}
               className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
               Abrir preview
@@ -211,7 +218,7 @@ export default function PreviewRuntimeToolbar({
             value={previewRuntimeInput}
             onChange={(event) => onRuntimeInputChange(event.target.value)}
             placeholder="https://localhost:5173"
-            aria-label="URL manual do runtime de preview"
+            aria-label={t.manualUrl}
             className="min-w-[280px] flex-1 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           />
           <button
@@ -220,25 +227,25 @@ export default function PreviewRuntimeToolbar({
             aria-label="Aplicar a URL manual do runtime"
             className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
           >
-            Aplicar
+            {tc.actions.apply}
           </button>
           <button
             type="button"
             onClick={onDiscoverRuntime}
             disabled={isDiscoveringRuntime}
-            aria-label="Detectar automaticamente um runtime de preview"
+            aria-label={t.autoDetect}
             className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isDiscoveringRuntime ? 'Detectando...' : 'Auto-detectar'}
+            {isDiscoveringRuntime ? 'Detectando...' : t.autoDetect}
           </button>
           <button
             type="button"
             onClick={onProvisionRuntime}
             disabled={isProvisioningRuntime || !routeProvisionSupported}
-            aria-label="Provisionar um runtime de preview gerenciado"
+            aria-label={t.provisionManaged}
             className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-success-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? 'Provisionar runtime' : 'Provisionamento indisponível'}
+            {isProvisioningRuntime ? 'Provisionando...' : routeProvisionSupported ? t.provisionManaged : 'Provisionamento indisponível'}
           </button>
           {canSyncRuntime && (
             <button
@@ -248,7 +255,7 @@ export default function PreviewRuntimeToolbar({
               aria-label="Sincronizar os arquivos atuais com o runtime de preview"
               className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-2.5 py-2 text-[11px] font-medium text-[var(--aethel-primary-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isSyncingRuntime ? 'Sincronizando...' : 'Sincronizar runtime'}
+              {isSyncingRuntime ? 'Sincronizando...' : tc.actions.sync}
             </button>
           )}
           {previewRuntimeUrl && (
@@ -258,7 +265,7 @@ export default function PreviewRuntimeToolbar({
               aria-label="Revalidar o runtime de preview"
               className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2.5 py-2 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
             >
-              Revalidar
+              {tc.actions.revalidate}
             </button>
           )}
           {previewRuntimeUrl && (
@@ -290,9 +297,10 @@ export default function PreviewRuntimeToolbar({
 
       <details className="mt-3 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]">
         <summary className="cursor-pointer list-none px-3 py-2 text-[11px] font-medium text-[var(--aethel-text-secondary)]">
-          Ver detalhes técnicos do runtime
+          {t.technicalDetails}
         </summary>
         <div className="border-t border-[var(--aethel-border-primary)] px-3 py-3">
+
           <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--aethel-text-tertiary)]">
             {managedProvider && (
               <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2 py-1">

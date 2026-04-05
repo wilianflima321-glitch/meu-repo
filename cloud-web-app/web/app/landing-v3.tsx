@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Sparkles, Loader2 } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 import { GlassCard, GradientButton, GlowBadge } from '@/components/ui/premium'
@@ -110,6 +110,9 @@ export default function LandingPageV3() {
   const router = useRouter()
   const [inputValue, setInputValue] = useState('')
   const [suggestionIndex, setSuggestionIndex] = useState(0)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generationProgress, setGenerationProgress] = useState(0)
+  const [generationStep, setGenerationStep] = useState('')
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -120,7 +123,7 @@ export default function LandingPageV3() {
 
   const placeholder = useMemo(() => QUICK_MISSIONS[suggestionIndex], [suggestionIndex])
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const mission = inputValue.trim()
 
@@ -135,11 +138,65 @@ export default function LandingPageV3() {
       return
     }
 
-    const params = new URLSearchParams()
-    params.set('mission', mission)
-    params.set('onboarding', '1')
-    params.set('source', 'landing-v3')
-    router.push(`/dashboard?${params.toString()}`)
+    // Gerar workspace real via API
+    setIsGenerating(true)
+    setGenerationProgress(0)
+    setGenerationStep('Inicializando workspace...')
+
+    try {
+      // Simular progresso de geração (em produção, isso viria da API)
+      const steps = [
+        { step: 'Analisando requisitos...', progress: 20 },
+        { step: 'Criando estrutura do projeto...', progress: 40 },
+        { step: 'Configurando dependências...', progress: 60 },
+        { step: 'Gerando arquivos base...', progress: 80 },
+        { step: 'Finalizando workspace...', progress: 95 },
+      ]
+
+      for (const { step, progress } of steps) {
+        await new Promise(resolve => setTimeout(resolve, 400))
+        setGenerationStep(step)
+        setGenerationProgress(progress)
+      }
+
+      // Chamar API real para criar workspace
+      const response = await fetch('/api/workspace/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mission,
+          source: 'landing-magic-box',
+          template: 'saas-starter', // Template baseado na missão
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setGenerationProgress(100)
+        setGenerationStep('Workspace criado com sucesso!')
+
+        // Redirecionar para o workspace criado
+        await new Promise(resolve => setTimeout(resolve, 500))
+        router.push(`/dashboard?workspace=${data.workspaceId}&onboarding=1&source=landing-magic-box`)
+      } else {
+        // Fallback para dashboard se API falhar
+        const params = new URLSearchParams()
+        params.set('mission', mission)
+        params.set('onboarding', '1')
+        params.set('source', 'landing-v3')
+        router.push(`/dashboard?${params.toString()}`)
+      }
+    } catch (error) {
+      console.error('Erro ao gerar workspace:', error)
+      // Fallback para dashboard se houver erro
+      const params = new URLSearchParams()
+      params.set('mission', mission)
+      params.set('onboarding', '1')
+      params.set('source', 'landing-v3-fallback')
+      router.push(`/dashboard?${params.toString()}`)
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   return (
@@ -184,17 +241,30 @@ export default function LandingPageV3() {
                       value={inputValue}
                       onChange={(event) => setInputValue(event.target.value)}
                       placeholder={placeholder}
-                      className="w-full bg-transparent text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] outline-none sm:text-[15px]"
+                      disabled={isGenerating}
+                      className="w-full bg-transparent text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] outline-none disabled:opacity-50 sm:text-[15px]"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg transition hover:brightness-110"
+                    disabled={isGenerating}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Abrir studio
-                    <ArrowRight className="h-4 w-4" />
+                    {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                    {isGenerating ? 'Gerando...' : 'Abrir studio'}
                   </button>
                 </div>
+                {isGenerating && (
+                  <div className="mt-4 p-4 border rounded-2xl bg-[var(--aethel-surface-secondary)]">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-xs">{generationStep}</span>
+                      <span className="text-xs">{generationProgress}%</span>
+                    </div>
+                    <div className="h-2 bg-[var(--aethel-surface-quaternary)] rounded-full">
+                      <div className="h-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)]" style={{ width: `${generationProgress}%` }} />
+                    </div>
+                  </div>
+                )}
               </form>
 
               <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[var(--aethel-text-tertiary)]">

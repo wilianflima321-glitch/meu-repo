@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
+import { ptBR } from '@/lib/locales/pt-BR'
 import {
   Send,
   Bot,
@@ -38,6 +39,12 @@ import {
   Upload,
   File,
   ImageIcon,
+  Video,
+  MoreHorizontal,
+  Users,
+  Clock,
+  DollarSign,
+  Activity,
 } from 'lucide-react'
 import {
   DEFAULT_MODELS,
@@ -62,6 +69,9 @@ import {
   ThinkingDisplay,
   ToolCallDisplay,
 } from './AIChatPanelChrome'
+import { MemoryPanel } from './MemoryPanel'
+import { ApprovalCard } from './ApprovalCard'
+import { CodeDiffPreview } from './CodeDiffPreview'
 import { MentionChip, SuggestionList, useMentions } from '@/lib/copilot/mention-parser'
 
 const QUICK_PROMPTS = [
@@ -82,7 +92,11 @@ const QUICK_MENTIONS = [
   { label: '@diagnostics', value: '@diagnostics ' },
 ]
 
-const formatCost = (value?: number) => {
+const t = ptBR.ide.ai.console
+const tc = ptBR.common
+const ta = ptBR.ide.ai
+
+const formatCost = (value: number) => {
   if (value === undefined || Number.isNaN(value)) return null
   if (value >= 10) return `$${value.toFixed(0)}`
   if (value >= 1) return `$${value.toFixed(2)}`
@@ -120,7 +134,7 @@ function useVoiceRecording() {
           setTranscript(finalTranscript || interimTranscript)
         }
         recognitionRef.current.onerror = () => {
-          setVoiceError('Falha ao transcrever. Verifique permissao do microfone.')
+          setVoiceError('Falha ao transcrever. Verifique permissão do microfone.')
         }
         recognitionRef.current.start()
       }
@@ -141,7 +155,7 @@ function useVoiceRecording() {
       setIsRecording(true)
     } catch (error) {
       console.error('Error starting recording:', error)
-      setVoiceError('Nao foi possivel iniciar a captura de voz. Verifique as permissoes do navegador.')
+      setVoiceError('Não foi possível iniciar a captura de voz. Verifique as permissões do navegador.')
     }
   }, [])
   const stopRecording = useCallback(() => {
@@ -176,7 +190,7 @@ const DEMO_MESSAGES: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Ola! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explicacao de codigo** - entender trechos complexos\n- **Deteccao de bugs** - encontrar problemas no seu codigo\n- **Otimizacao** - melhorar performance\n- **Geracao de codigo** - escrever codigo novo\n\nComo posso ajudar voce hoje?',
+    content: 'Ol?! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explica??o de c?digo** - entender trechos complexos\n- **Detec??o de bugs** - encontrar problemas no seu c?digo\n- **Otimiza??o** - melhorar performance\n- **Gera??o de c?digo** - escrever c?digo novo\n\nComo posso ajudar voc? hoje',
     timestamp: new Date(Date.now() - 60000),
     model: DEFAULT_OPENROUTER_MODEL_ID,
   },
@@ -197,10 +211,10 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
     setTimeout(() => setCopied(false), 2000)
   }
   const renderContent = (content: string) => {
-    const parts = content.split(/(```[\s\S]*?```)/g)
+    const parts = content.split(/(```[\s\S]*```)/g)
     return parts.map((part, i) => {
       if (part.startsWith('```')) {
-        const match = part.match(/```(\w+)?\n?([\s\S]*?)```/)
+        const match = part.match(/```(\w+)\n([\s\S]*)```/)
         if (match) {
           const [, language = 'text', code] = match
           return (
@@ -221,7 +235,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                 <button type="button"
                   disabled
                   className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
-                  title="Requer integracao com o editor"
+                  title="Requer integração com o editor"
                   aria-disabled="true"
                 >
                   Aplicar no editor
@@ -229,7 +243,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                 <button type="button"
                   disabled
                   className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
-                  title="Requer integracao com o editor"
+                  title="Requer integração com o editor"
                   aria-disabled="true"
                 >
                   Abrir diff
@@ -237,7 +251,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                 <button type="button"
                   disabled
                   className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
-                  title="Requer integracao com o editor"
+                  title="Requer integração com o editor"
                   aria-disabled="true"
                 >
                   Criar arquivo
@@ -245,13 +259,13 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                 <button type="button"
                   disabled
                   className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
-                  title="Requer integracao com o editor"
+                  title="Requer integração com o editor"
                   aria-disabled="true"
                 >
-                  Inserir selecao
+                  Inserir seleção
                 </button>
                 <span className="ml-auto text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
-                  Integracao do editor pendente
+                  Integração do editor pendente
                 </span>
               </div>
             </div>
@@ -262,11 +276,11 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
         <span key={i} className="whitespace-pre-wrap">
           {part.split('\n').map((line, j) => (
             <span key={j}>
-              {line.startsWith('- ') ? (
+              {line.startsWith('- ')  (
                 <span className="relative block pl-4 before:absolute before:left-0 before:text-[var(--aethel-text-quaternary)] before:content-['-']">
                   {line.slice(2)}
                 </span>
-              ) : line.startsWith('**') && line.endsWith('**') ? (
+              ) : line.startsWith('**') && line.endsWith('**')  (
                 <strong>{line.slice(2, -2)}</strong>
               ) : (
                 line
@@ -279,16 +293,16 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
     })
   }
   return (
-    <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
+    <div className={`flex gap-3 ${isUser  'flex-row-reverse' : ''}`}>
       {/* Avatar */}
       <div className={`
         w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-        ${isUser ? 'bg-[var(--aethel-primary)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}
+        ${isUser  'bg-[var(--aethel-primary)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}
       `}>
-        {isUser ? <User className="w-4 h-4 text-[var(--aethel-text-primary)]" /> : <Bot className="w-4 h-4 text-[var(--aethel-text-primary)]" />}
+        {isUser  <User className="w-4 h-4 text-[var(--aethel-text-primary)]" /> : <Bot className="w-4 h-4 text-[var(--aethel-text-primary)]" />}
       </div>
       {/* Content */}
-      <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : ''}`}>
+      <div className={`flex-1 min-w-0 ${isUser  'text-right' : ''}`}>
         {/* Voice indicator */}
         {message.isVoice && (
           <div className="flex items-center gap-1 mb-1 text-xs text-[var(--aethel-info-light)]">
@@ -301,7 +315,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
           <div className="flex flex-wrap gap-2 mb-2">
             {message.attachments.map(att => (
               <div key={att.id} className="flex items-center gap-2 rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_48%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-secondary)]">
-                {att.type === 'image' ? <ImageIcon className="w-3 h-3" /> : <File className="w-3 h-3" />}
+                {att.type === 'image'  <ImageIcon className="w-3 h-3" /> : <File className="w-3 h-3" />}
                 {att.name}
               </div>
             ))}
@@ -326,14 +340,14 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
         <div className={`
           inline-block max-w-full text-left px-4 py-2.5 rounded-2xl
           ${isUser
-            ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] rounded-tr-sm'
+             'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] rounded-tr-sm'
             : 'rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] text-[var(--aethel-text-secondary)]'
           }
         `}>
           <div className="text-sm">{renderContent(message.content)}</div>
         </div>
         {/* Meta & Actions */}
-        <div className={`mt-1 flex items-center gap-2 text-xs text-[var(--aethel-text-quaternary)] ${isUser ? 'justify-end' : ''}`}>
+        <div className={`mt-1 flex items-center gap-2 text-xs text-[var(--aethel-text-quaternary)] ${isUser  'justify-end' : ''}`}>
           {message.model && (
             <span className="flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
@@ -355,21 +369,21 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                 title="Copiar resposta"
                 aria-label="Copiar resposta"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-[var(--aethel-success)]" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied  <Check className="w-3.5 h-3.5 text-[var(--aethel-success)]" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <button type="button"
                 onClick={onRegenerate}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-                title="Regerar resposta"
-                aria-label="Regerar resposta"
+                title="Regenerar resposta"
+                aria-label="Regenerar resposta"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
               <button type="button"
                 onClick={() => onRate('up')}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-                title="Marcar resposta como util"
-                aria-label="Marcar resposta como util"
+                title="Marcar resposta como útil"
+                aria-label="Marcar resposta como útil"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
               </button>
@@ -388,6 +402,280 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
     </div>
   )
 }
+
+// ============================================================================
+// RUN CARD (Visualização de operações de IA)
+// ============================================================================
+
+interface RunCardProps {
+  status: 'idle' | 'running' | 'completed' | 'failed'
+  duration: number
+  cost: number
+  model: string
+  onInterrupt: () => void
+}
+
+function RunCard({ status, duration, cost, model, onInterrupt }: RunCardProps) {
+  const statusConfig = {
+    idle: { label: 'Aguardando', color: 'text-[var(--aethel-text-quaternary)]', bgColor: 'bg-[var(--aethel-surface-tertiary)]' },
+    running: { label: 'Executando', color: 'text-[var(--aethel-info-light)]', bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' },
+    completed: { label: 'Concluído', color: 'text-[var(--aethel-success-light)]', bgColor: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' },
+    failed: { label: 'Falhou', color: 'text-[var(--aethel-error-light)]', bgColor: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]' },
+  }
+
+  const config = statusConfig[status]
+
+  if (status === 'idle') return null
+
+  return (
+    <div className={`mx-4 mb-3 rounded-lg border border-[var(--aethel-border-secondary)] ${config.bgColor} p-3`}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${status === 'running'  'bg-[var(--aethel-info)] animate-pulse' : status === 'completed'  'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'}`} />
+          <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
+          {model && <span className="text-xs text-[var(--aethel-text-tertiary)]">{model}</span>}
+        </div>
+        {status === 'running' && onInterrupt && (
+          <button
+            type="button"
+            onClick={onInterrupt}
+            className="flex items-center gap-1 px-2 py-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] text-[10px] font-medium text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_22%,transparent)]"
+            aria-label="Interromper operação"
+          >
+            <StopCircle className="w-3 h-3" />
+            Interromper
+          </button>
+        )}
+      </div>
+      {(duration !== undefined || cost !== undefined) && (
+        <div className="mt-2 flex items-center gap-4 text-[11px] text-[var(--aethel-text-tertiary)]">
+          {duration !== undefined && (
+            <span className="flex items-center gap-1">
+              <Zap className="w-3 h-3" />
+              {duration.toFixed(2)}s
+            </span>
+          )}
+          {cost !== undefined && (
+            <span className="flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
+              ${cost.toFixed(4)}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================================
+// AGENT BOARD (Visualização de progresso de agentes multi-agent)
+// ============================================================================
+
+interface AgentInfo {
+  id: string
+  role: string
+  name: string
+  currentTask: string
+  dependency: string
+  progress: number
+  output: string
+  confidence: number
+  cost: number
+  status: 'idle' | 'working' | 'completed' | 'blocked'
+}
+
+interface AgentBoardProps {
+  agents: AgentInfo[]
+  onAgentClick: (agentId: string) => void
+}
+
+function AgentBoard({ agents, onAgentClick }: AgentBoardProps) {
+  if (agents.length === 0) return null
+
+  const statusConfig = {
+    idle: { color: 'text-[var(--aethel-text-quaternary)]', bgColor: 'bg-[var(--aethel-surface-tertiary)]', icon: Users },
+    working: { color: 'text-[var(--aethel-info-light)]', bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]', icon: Activity },
+    completed: { color: 'text-[var(--aethel-success-light)]', bgColor: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]', icon: Check },
+    blocked: { color: 'text-[var(--aethel-error-light)]', bgColor: 'bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)]', icon: AlertTriangle },
+  }
+
+  return (
+    <div className="mx-4 mb-3 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] p-3">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-[var(--aethel-info-light)]" />
+          <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Agent Board</span>
+          <span className="text-xs text-[var(--aethel-text-tertiary)]">{agents.length} agentes</span>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {agents.map((agent) => {
+          const config = statusConfig[agent.status]
+          const StatusIcon = config.icon
+          return (
+            <div
+              key={agent.id}
+              onClick={() => onAgentClick.(agent.id)}
+              className={`p-2 rounded-lg border border-[var(--aethel-border-secondary)] ${config.bgColor} transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] cursor-pointer`}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <StatusIcon className={`w-3.5 h-3.5 ${config.color}`} />
+                  <div>
+                    <div className="text-xs font-medium text-[var(--aethel-text-primary)]">{agent.name}</div>
+                    <div className="text-[10px] text-[var(--aethel-text-tertiary)]">{agent.role}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1 text-[10px] text-[var(--aethel-text-tertiary)]">
+                    <DollarSign className="w-3 h-3" />
+                    ${agent.cost.toFixed(4)}
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] text-[var(--aethel-text-tertiary)]">
+                    <Activity className="w-3 h-3" />
+                    {agent.confidence.toFixed(0)}%
+                  </div>
+                </div>
+              </div>
+              <div className="text-[11px] text-[var(--aethel-text-secondary)] mb-2">{agent.currentTask}</div>
+              {agent.dependency && (
+                <div className="text-[10px] text-[var(--aethel-text-quaternary)] mb-2">
+                  Depende de: {agent.dependency}
+                </div>
+              )}
+              <div className="relative h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
+                <div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] transition-all duration-300"
+                  style={{ width: `${agent.progress}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-[10px] text-[var(--aethel-text-quaternary)]">{agent.progress}%</span>
+                {agent.output && (
+                  <span className="text-[10px] text-[var(--aethel-info-light)] truncate max-w-[120px]">{agent.output}</span>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// LIVE CONVERSATION PANEL (Gemini Live-style)
+// ============================================================================
+
+interface LiveConversationPanelProps {
+  isWorking: boolean
+  onInterrupt: () => void
+  onSendMessage: (message: string) => void
+}
+
+function LiveConversationPanel({ isWorking, onInterrupt, onSendMessage }: LiveConversationPanelProps) {
+  const [liveInput, setLiveInput] = useState('')
+  const [isLiveSpeaking, setIsLiveSpeaking] = useState(false)
+
+  const handleLiveSend = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (liveInput.trim()) {
+      onSendMessage(liveInput.trim())
+      setLiveInput('')
+    }
+  }
+
+  return (
+    <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]">
+      {/* Live Status Bar */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-secondary)]">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${isWorking  'bg-[var(--aethel-success)] animate-pulse' : 'bg-[var(--aethel-text-quaternary)]'}`} />
+          <span className="text-xs font-medium text-[var(--aethel-text-secondary)]">
+            {isWorking  'IA trabalhando' : 'Aguardando'}
+          </span>
+        </div>
+        {isWorking && (
+          <button
+            type="button"
+            onClick={onInterrupt}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] text-[11px] font-medium text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_22%,transparent)]"
+            aria-label="Interromper trabalho da IA"
+          >
+            <StopCircle className="w-3 h-3" />
+            Interromper
+          </button>
+        )}
+      </div>
+
+      {/* Live Input */}
+      <div className="p-3">
+        <form onSubmit={handleLiveSend} className="flex items-end gap-2">
+          <div className="flex-1 relative">
+            <textarea
+              value={liveInput}
+              onChange={(e) => setLiveInput(e.target.value)}
+              placeholder="Converse enquanto a IA trabalha..."
+              className="w-full min-h-[60px] max-h-[120px] px-3 py-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] resize-none focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)] focus:ring-1 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]"
+              rows={2}
+              aria-label="Mensagem de conversação ao vivo"
+            />
+          </div>
+          <div className="flex items-center gap-1 pb-0.5">
+            <button
+              type="button"
+              className={`rounded p-2 transition-colors ${isLiveSpeaking  'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'}`}
+              title={isLiveSpeaking  'Parar fala' : 'Falar resposta'}
+              aria-label={isLiveSpeaking  'Parar fala' : 'Falar resposta'}
+            >
+              {isLiveSpeaking  <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+            <button
+              type="button"
+              className="rounded p-2 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] transition-colors"
+              title="Anexar arquivo"
+              aria-label="Anexar arquivo"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+            <button
+              type="submit"
+              disabled={!liveInput.trim()}
+              className="rounded-lg bg-[var(--aethel-primary)] px-3 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Enviar mensagem ao vivo"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="px-3 pb-3">
+        <div className="flex items-center gap-2 overflow-x-auto">
+          {[
+            { label: 'Continuar', icon: Sparkles },
+            { label: 'Corrigir', icon: Bug },
+            { label: 'Explorar', icon: Lightbulb },
+            { label: 'Refinar', icon: Wand2 },
+          ].map((action) => (
+            <button
+              key={action.label}
+              type="button"
+              onClick={() => setLiveInput((prev) => `${prev} ${action.label.toLowerCase()}: `)}
+              className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+              aria-label={`Ação rápida: ${action.label}`}
+            >
+              <action.icon className="w-3 h-3" />
+              {action.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AIChatPanelPro({
   messages = DEMO_MESSAGES,
   onSendMessage,
@@ -416,10 +704,16 @@ export default function AIChatPanelPro({
   codebaseContextPreview,
 }: AIChatPanelProps) {
   const [showModelSelector, setShowModelSelector] = useState(false)
+  const [opsTab, setOpsTab] = useState<'memory' | 'approval' | 'diff'>('memory')
   const [showAdvancedControls, setShowAdvancedControls] = useState(false)
+  const [consoleMode, setConsoleMode] = useState<'ask' | 'plan' | 'execute' | 'review' | 'live'>('ask')
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [showHistorySidebar, setShowHistorySidebar] = useState(showHistory)
   const [agentCount, setAgentCount] = useState(1)
+  const [isAIWorking, setIsAIWorking] = useState(false)
+  const [runStartTime, setRunStartTime] = useState<number | null>(null)
+  const [runCost, setRunCost] = useState<number | null>(null)
+  const [agents, setAgents] = useState<AgentInfo[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -433,7 +727,7 @@ export default function AIChatPanelPro({
   })
   const [mentionContextPreview, setMentionContextPreview] = useState<{
     loading: boolean
-    error?: string | null
+    error: string | null
     blocks: MentionContextPreviewBlock[]
   }>({
     loading: false,
@@ -444,7 +738,7 @@ export default function AIChatPanelPro({
   const inputRef = mentionState.inputRef
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingContent])
   useEffect(() => {
     if (inputRef.current) {
@@ -454,10 +748,63 @@ export default function AIChatPanelPro({
   }, [input, inputRef])
   useEffect(() => {
     if (transcript) {
-      const nextValue = input.trim() ? `${input} ${transcript}` : transcript
+      const nextValue = input.trim()  `${input} ${transcript}` : transcript
       mentionState.replaceText(nextValue)
     }
   }, [input, mentionState, transcript])
+
+  // Control AI working state for live conversation
+  useEffect(() => {
+    setIsAIWorking(isLoading || streamingContent.length > 0)
+    
+    // Track run start time
+    if (isLoading && !runStartTime) {
+      setRunStartTime(Date.now())
+    } else if (!isLoading && !streamingContent && runStartTime) {
+      setRunStartTime(null)
+    }
+  }, [isLoading, streamingContent, runStartTime])
+
+  // Calculate run duration and estimated cost
+  const runDuration = runStartTime  (Date.now() - runStartTime) / 1000 : undefined
+  const selectedModel = models.find(m => m.id === currentModel) || models[0]
+  const estimatedCost = runDuration && selectedModel.outputCost
+     (runDuration * selectedModel.outputCost * 100) / 1000000 // Rough estimate
+    : undefined
+
+  // Simulate agents when multi-agent mode is active
+  useEffect(() => {
+    if (agentCount > 1 && isAIWorking) {
+      const agentRoles = [
+        { id: '1', role: 'Architect', name: 'Arquiteto', currentTask: 'Analisando requisitos', dependency: undefined, progress: 75, output: 'Estrutura definida', confidence: 85, cost: 0.0023, status: 'working' as const },
+        { id: '2', role: 'Engineer', name: 'Engenheiro', currentTask: 'Implementando componentes', dependency: 'Arquiteto', progress: 45, output: 'Componentes base criados', confidence: 78, cost: 0.0045, status: 'working' as const },
+        { id: '3', role: 'QA', name: 'QA', currentTask: 'Aguardando implementação', dependency: 'Engenheiro', progress: 0, output: undefined, confidence: 0, cost: 0.0000, status: 'idle' as const },
+      ]
+      setAgents(agentRoles.slice(0, agentCount))
+    } else {
+      setAgents([])
+    }
+  }, [agentCount, isAIWorking])
+
+  const handleAgentClick = useCallback((agentId: string) => {
+    console.log('Agent clicked:', agentId)
+    // Would open agent details panel
+  }, [])
+
+  const handleLiveInterrupt = useCallback(() => {
+    // Trigger interrupt callback if available
+    if (onRegenerateResponse) {
+      // This would need to be implemented in the parent component
+      console.log('Live interrupt triggered')
+    }
+    setIsAIWorking(false)
+  }, [onRegenerateResponse])
+
+  const handleLiveSendMessage = useCallback((message: string) => {
+    if (onSendMessage) {
+      onSendMessage(message)
+    }
+  }, [onSendMessage])
 
   useEffect(() => {
     const normalizedInput = input.trim()
@@ -466,7 +813,7 @@ export default function AIChatPanelPro({
     if (!shouldFetch) {
       setLocalCodebaseContextPreview((prev) => (
         prev.loading || prev.results.length > 0 || prev.error
-          ? { loading: false, results: [] }
+           { loading: false, results: [] }
           : prev
       ))
       return
@@ -496,25 +843,25 @@ export default function AIChatPanelPro({
 
         const payload = await response.json()
         if (!response.ok) {
-          throw new Error(typeof payload?.error === 'string' ? payload.error : 'CONTEXT_SEARCH_FAILED')
+          throw new Error(typeof payload.error === 'string'  payload.error : 'CONTEXT_SEARCH_FAILED')
         }
 
         setLocalCodebaseContextPreview({
           loading: false,
           error: null,
-          results: Array.isArray(payload?.results) ? payload.results : [],
-          scope: payload?.readiness?.scope,
-          source: payload?.readiness?.source,
-          incrementalReindex: Boolean(payload?.readiness?.incrementalReindex),
-          blockers: Array.isArray(payload?.readiness?.blockers) ? payload.readiness.blockers : [],
-          stats: payload?.stats ?? undefined,
+          results: Array.isArray(payload.results)  payload.results : [],
+          scope: payload.readiness.scope,
+          source: payload.readiness.source,
+          incrementalReindex: Boolean(payload.readiness.incrementalReindex),
+          blockers: Array.isArray(payload.readiness.blockers)  payload.readiness.blockers : [],
+          stats: payload.stats  undefined,
         })
       } catch (error) {
         if (controller.signal.aborted) return
         setLocalCodebaseContextPreview({
           loading: false,
           results: [],
-          error: error instanceof Error ? error.message : 'CONTEXT_SEARCH_FAILED',
+          error: error instanceof Error  error.message : 'CONTEXT_SEARCH_FAILED',
         })
       }
     }, 350)
@@ -533,7 +880,7 @@ export default function AIChatPanelPro({
     if (contextualMentions.length === 0) {
       setMentionContextPreview((prev) =>
         prev.loading || prev.blocks.length > 0 || prev.error
-          ? { loading: false, blocks: [] }
+           { loading: false, blocks: [] }
           : prev
       )
       return
@@ -555,14 +902,14 @@ export default function AIChatPanelPro({
 
         const payload = await response.json()
         if (!response.ok) {
-          throw new Error(typeof payload?.error === 'string' ? payload.error : 'MENTION_CONTEXT_FAILED')
+          throw new Error(typeof payload.error === 'string'  payload.error : 'MENTION_CONTEXT_FAILED')
         }
 
         setMentionContextPreview({
           loading: false,
           error: null,
-          blocks: Array.isArray(payload?.blocks)
-            ? payload.blocks.filter((block: MentionContextPreviewBlock) => block.kind !== 'codebase')
+          blocks: Array.isArray(payload.blocks)
+             payload.blocks.filter((block: MentionContextPreviewBlock) => block.kind !== 'codebase')
             : [],
         })
       } catch (error) {
@@ -570,7 +917,7 @@ export default function AIChatPanelPro({
         setMentionContextPreview({
           loading: false,
           blocks: [],
-          error: error instanceof Error ? error.message : 'MENTION_CONTEXT_FAILED',
+          error: error instanceof Error  error.message : 'MENTION_CONTEXT_FAILED',
         })
       }
     }, 250)
@@ -585,10 +932,10 @@ export default function AIChatPanelPro({
     if (typeof window === 'undefined') return
 
     const onFileMutation = (event: Event) => {
-      const detail = (event as CustomEvent<{ projectId?: string; operation?: string }>).detail
+      const detail = (event as CustomEvent<{ projectId: string; operation: string }>).detail
       const matchesProject =
         !projectId ||
-        !detail?.projectId ||
+        !detail.projectId ||
         detail.projectId === projectId
 
       if (!matchesProject) return
@@ -618,16 +965,16 @@ export default function AIChatPanelPro({
       setIsSpeaking(false)
     }
   }, [])
-  const handleSend = useCallback((e?: FormEvent) => {
-    e?.preventDefault()
+  const handleSend = useCallback((e: FormEvent) => {
+    e.preventDefault()
     const normalizedInput = input.trim()
     if (!normalizedInput || isLoading) return
     const hasAgentTag = /@agents:[123]/i.test(normalizedInput)
     const messageWithAgents = agentCount > 1 && !hasAgentTag
-      ? `@agents:${agentCount} ${normalizedInput}`
+       `@agents:${agentCount} ${normalizedInput}`
       : normalizedInput
-    onSendMessage?.(messageWithAgents, {
-      attachments: allowAttachments && attachments.length > 0 ? attachments : undefined,
+    onSendMessage.(messageWithAgents, {
+      attachments: allowAttachments && attachments.length > 0  attachments : undefined,
     })
     mentionState.replaceText('')
     setAttachments([])
@@ -642,13 +989,13 @@ export default function AIChatPanelPro({
     }
   }
   const handleFileAttach = () => {
-    fileInputRef.current?.click()
+    fileInputRef.current.click()
   }
   const handleImageAttach = () => {
-    imageInputRef.current?.click()
+    imageInputRef.current.click()
   }
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'image') => {
-    const file = e.target.files?.[0]
+    const file = e.target.files.[0]
     if (file) {
       const attachment: Attachment = {
         id: crypto.randomUUID(),
@@ -659,7 +1006,7 @@ export default function AIChatPanelPro({
       if (type === 'image') {
         const reader = new FileReader()
         reader.onload = (ev) => {
-          attachment.preview = ev.target?.result as string
+          attachment.preview = ev.target.result as string
           setAttachments(prev => [...prev, attachment])
         }
         reader.readAsDataURL(file)
@@ -673,18 +1020,18 @@ export default function AIChatPanelPro({
     setAttachments(prev => prev.filter(a => a.id !== id))
   }
   const handleQuickPrompt = (prompt: string) => {
-    const nextValue = input ? `${input}\n\n${prompt}` : prompt
+    const nextValue = input  `${input}\n\n${prompt}` : prompt
     mentionState.replaceText(nextValue)
-    inputRef.current?.focus()
+    inputRef.current.focus()
   }
   const insertQuickMention = (mentionValue: string) => {
-    const cursorPosition = inputRef.current?.selectionStart ?? input.length
+    const cursorPosition = inputRef.current.selectionStart  input.length
     const nextValue = `${input.slice(0, cursorPosition)}${mentionValue}${input.slice(cursorPosition)}`
     mentionState.replaceText(nextValue)
     requestAnimationFrame(() => {
-      inputRef.current?.focus()
+      inputRef.current.focus()
       const nextCursor = cursorPosition + mentionValue.length
-      inputRef.current?.setSelectionRange(nextCursor, nextCursor)
+      inputRef.current.setSelectionRange(nextCursor, nextCursor)
     })
   }
   const handleCopy = async (content: string) => {
@@ -693,7 +1040,7 @@ export default function AIChatPanelPro({
   const handleRefreshCodebaseContext = useCallback(() => {
     setCodebaseRefreshNonce((prev) => prev + 1)
   }, [])
-  const handleOpenCodeContextResult = useCallback((filePath: string, startLine?: number, endLine?: number) => {
+  const handleOpenCodeContextResult = useCallback((filePath: string, startLine: number, endLine: number) => {
     if (typeof window === 'undefined') return
     window.dispatchEvent(new CustomEvent('aethel.ide.openFileFromContext', {
       detail: {
@@ -722,11 +1069,10 @@ export default function AIChatPanelPro({
       startRecording()
     }
   }
-  const selectedModel = models.find(m => m.id === currentModel) || models[0]
-  const inputCostLabel = formatCost(selectedModel?.inputCost)
-  const outputCostLabel = formatCost(selectedModel?.outputCost)
-  const modelTierLabel = selectedModel?.tier?.toUpperCase() ?? 'BUDGET'
-  const visibleCodebaseContextPreview = codebaseContextPreview ?? localCodebaseContextPreview
+  const inputCostLabel = formatCost(selectedModel.inputCost)
+  const outputCostLabel = formatCost(selectedModel.outputCost)
+  const modelTierLabel = selectedModel.tier.toUpperCase()  'BUDGET'
+  const visibleCodebaseContextPreview = codebaseContextPreview  localCodebaseContextPreview
   return (
     <div className={`h-full flex ${className}`}>
       {/* History Sidebar */}
@@ -748,15 +1094,47 @@ export default function AIChatPanelPro({
           <LiveModeIndicator status={liveStatus} onEnd={onToggleLiveMode} />
         )}
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--aethel-border-secondary)] px-3 py-2">
+        <div className="flex flex-col border-b border-[var(--aethel-border-secondary)]">
+          {/* Console Mode Tabs */}
+          <div className="flex items-center gap-1 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] border-b border-[var(--aethel-border-secondary)]">
+            {[
+              { id: 'ask' as const, label: 'Perguntar', icon: MessageSquare, description: 'Perguntas rápidas' },
+              { id: 'plan' as const, label: 'Planejar', icon: Layers, description: 'Planejar tarefas' },
+              { id: 'execute' as const, label: 'Executar', icon: Play, description: 'Executar plano' },
+              { id: 'review' as const, label: 'Revisar', icon: Check, description: 'Revisar mudanças' },
+              { id: 'live' as const, label: 'Ao vivo', icon: Radio, description: 'Conversação ao vivo' },
+            ].map((mode) => (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => setConsoleMode(mode.id)}
+                className={`
+                  flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
+                  ${consoleMode === mode.id
+                     'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] shadow-sm'
+                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'
+                  }
+                `}
+                title={mode.description}
+                aria-label={`Modo ${mode.label}: ${mode.description}`}
+                aria-pressed={consoleMode === mode.id}
+              >
+                <mode.icon className="w-3.5 h-3.5" />
+                <span>{mode.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Header Actions */}
+          <div className="flex items-center justify-between px-3 py-2">
           {/* Left: History + Model */}
           <div className="flex items-center gap-2">
             {threads.length > 0 && (
               <button type="button"
                 onClick={() => setShowHistorySidebar(!showHistorySidebar)}
-                className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showHistorySidebar ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}
-                title="Historico do chat"
-                aria-label="Alternar historico do chat"
+                className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showHistorySidebar  'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}
+                title="Histórico do chat"
+                aria-label="Alternar histórico do chat"
               >
                 <History className="w-4 h-4" />
               </button>
@@ -783,15 +1161,15 @@ export default function AIChatPanelPro({
                           <button type="button"
                             key={model.id}
                             onClick={() => {
-                              onModelChange?.(model.id)
+                              onModelChange.(model.id)
                               setShowModelSelector(false)
                             }}
                             className={`
                               w-full flex items-start gap-3 px-3 py-2 text-left
-                              ${model.id === currentModel ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)]'}
+                              ${model.id === currentModel  'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)]'}
                             `}
                           >
-                            <Sparkles className={`mt-0.5 h-4 w-4 ${model.id === currentModel ? 'text-[var(--aethel-info)]' : 'text-[var(--aethel-text-quaternary)]'}`} />
+                            <Sparkles className={`mt-0.5 h-4 w-4 ${model.id === currentModel  'text-[var(--aethel-info)]' : 'text-[var(--aethel-text-quaternary)]'}`} />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{model.name}</span>
@@ -802,7 +1180,7 @@ export default function AIChatPanelPro({
                                   </span>
                                 )}
                                 {model.supportsVision && (
-                                  <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)] rounded">Visao</span>
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)] rounded">Visão</span>
                                 )}
                                 {model.supportsVoice && (
                                   <span className="px-1.5 py-0.5 text-[10px] bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success)] rounded">Voz</span>
@@ -824,7 +1202,7 @@ export default function AIChatPanelPro({
                     </>
                   )}
                 </div>
-                {showAdvancedControls ? (
+                {showAdvancedControls  (
                   <div className="mt-0.5 flex items-center gap-2 text-[11px] text-[var(--aethel-text-tertiary)]">
                     <span className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-1.5 py-0.5 uppercase tracking-wide text-[var(--aethel-text-secondary)]">
                       {modelTierLabel}
@@ -837,7 +1215,7 @@ export default function AIChatPanelPro({
                     )}
                   </div>
                 ) : (
-                  <div className="mt-0.5 text-[11px] text-[var(--aethel-text-quaternary)]">Modo basico</div>
+                  <div className="mt-0.5 text-[11px] text-[var(--aethel-text-quaternary)]">Modo básico</div>
                 )}
               </div>
               {showAdvancedControls && (
@@ -849,7 +1227,7 @@ export default function AIChatPanelPro({
                       onClick={() => setAgentCount(count)}
                       className={`px-2 py-0.5 text-[11px] rounded border ${
                         agentCount === count
-                          ? 'border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
+                           'border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
                           : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
                       }`}
                     >
@@ -868,24 +1246,24 @@ export default function AIChatPanelPro({
                 {selectedModel.supportsVoice && onToggleLiveMode && (
                   <button type="button"
                     onClick={onToggleLiveMode}
-                    className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isLiveMode ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
-                    title={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo (voz em tempo real)'}
-                    aria-label={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo'}
+                    className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isLiveMode  'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+                    title={isLiveMode  'Sair do modo ao vivo' : 'Entrar no modo ao vivo (voz em tempo real)'}
+                    aria-label={isLiveMode  'Sair do modo ao vivo' : 'Entrar no modo ao vivo'}
                   >
                     <Radio className="w-4 h-4" />
                   </button>
                 )}
                 {/* TTS Toggle */}
                 <button type="button"
-                  onClick={isSpeaking ? stopSpeaking : () => {
+                  onClick={isSpeaking  stopSpeaking : () => {
                     const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
                     if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
                   }}
-                  className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isSpeaking ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
-                  title={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
-                  aria-label={isSpeaking ? 'Parar leitura' : 'Ler ultima resposta'}
+                  className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isSpeaking  'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+                  title={isSpeaking  'Parar leitura' : 'Ler última resposta'}
+                  aria-label={isSpeaking  'Parar leitura' : 'Ler última resposta'}
                 >
-                  {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  {isSpeaking  <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </button>
               </>
             )}
@@ -899,14 +1277,15 @@ export default function AIChatPanelPro({
             </button>
             <button type="button"
               onClick={() => setShowAdvancedControls((prev) => !prev)}
-              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showAdvancedControls ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
-              title={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
+              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showAdvancedControls  'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+              title={showAdvancedControls  'Ocultar avançado' : 'Mostrar avançado'}
               aria-pressed={showAdvancedControls}
-              aria-label={showAdvancedControls ? 'Ocultar avancado' : 'Mostrar avancado'}
+              aria-label={showAdvancedControls  'Ocultar avançado' : 'Mostrar avançado'}
             >
               <Settings className="w-4 h-4" />
             </button>
           </div>
+        </div>
         </div>
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -925,13 +1304,13 @@ export default function AIChatPanelPro({
                   Este modelo suporta modo ao vivo para voz em tempo real
                 </p>
               )}
-              {showAdvancedControls ? (
+              {showAdvancedControls  (
                 <div className="flex flex-wrap gap-2 justify-center">
                   {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
                     <button type="button"
                       key={label}
                       onClick={() => handleQuickPrompt(prompt)}
-                      aria-label={`Aplicar prompt rapido: ${label}`}
+                      aria-label={`Aplicar prompt rápido: ${label}`}
                       className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                     >
                       <Icon className="w-4 h-4" />
@@ -944,7 +1323,7 @@ export default function AIChatPanelPro({
                   onClick={() => setShowAdvancedControls(true)}
                   className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
-                  Mostrar atalhos avancados
+                  Mostrar atalhos avançados
                 </button>
               )}
             </div>
@@ -954,8 +1333,8 @@ export default function AIChatPanelPro({
             key={message.id}
             message={message}
             onCopy={handleCopy}
-            onRegenerate={() => onRegenerateResponse?.(message.id)}
-            onRate={(rating) => onRateResponse?.(message.id, rating)}
+            onRegenerate={() => onRegenerateResponse.(message.id)}
+            onRate={(rating) => onRateResponse.(message.id, rating)}
           />
         ))}
         {/* Streaming response */}
@@ -987,6 +1366,35 @@ export default function AIChatPanelPro({
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Live Conversation Panel - Gemini Live-style */}
+      {consoleMode === 'live' && (
+        <LiveConversationPanel
+          isWorking={isAIWorking}
+          onInterrupt={handleLiveInterrupt}
+          onSendMessage={handleLiveSendMessage}
+        />
+      )}
+
+      {/* Run Card - Visualização de operações de IA */}
+      {consoleMode !== 'ask' && (
+        <RunCard
+          status={isAIWorking  'running' : 'idle'}
+          duration={runDuration}
+          cost={estimatedCost}
+          model={selectedModel.name}
+          onInterrupt={handleLiveInterrupt}
+        />
+      )}
+
+      {/* Agent Board - Visualização de progresso de agentes */}
+      {agentCount > 1 && (
+        <AgentBoard
+          agents={agents}
+          onAgentClick={handleAgentClick}
+        />
+      )}
+
       {/* Quick prompts bar */}
       {showAdvancedControls && (
         <div className="border-t border-[var(--aethel-border-secondary)] px-3 py-2">
@@ -995,7 +1403,7 @@ export default function AIChatPanelPro({
               <button type="button"
                 key={label}
                 onClick={() => handleQuickPrompt(prompt)}
-                aria-label={`Aplicar prompt rapido: ${label}`}
+                aria-label={`Aplicar prompt rápido: ${label}`}
                 className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] px-2.5 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -1034,7 +1442,7 @@ export default function AIChatPanelPro({
             <button type="button"
               onClick={stopRecording}
               className="rounded px-2 py-1 text-xs text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-              aria-label="Parar gravacao de voz"
+              aria-label="Parar gravação de voz"
             >
               Parar
             </button>
@@ -1077,11 +1485,11 @@ export default function AIChatPanelPro({
             )}
             <button type="button"
               onClick={handleVoiceToggle}
-              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isRecording ? 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
-              title={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
-              aria-label={isRecording ? 'Parar gravacao' : 'Entrada de voz'}
+              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isRecording  'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
+              title={isRecording  'Parar gravação' : 'Entrada de voz'}
+              aria-label={isRecording  'Parar gravação' : 'Entrada de voz'}
             >
-              {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              {isRecording  <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
           </div>
           {/* Input */}
@@ -1098,9 +1506,9 @@ export default function AIChatPanelPro({
             <textarea
               ref={inputRef}
               value={input}
-              onChange={(e) => mentionState.setText(e.target.value, e.target.selectionStart ?? e.target.value.length)}
+              onChange={(e) => mentionState.setText(e.target.value, e.target.selectionStart  e.target.value.length)}
               onKeyDown={handleComposerKeyDown}
-              placeholder={isRecording ? 'Ouvindo...' : 'Pergunte para a IA sobre o seu codigo...'}
+              placeholder={isRecording  'Ouvindo...' : 'Pergunte para a IA sobre o seu código...'}
               disabled={isLoading}
               aria-controls="mention-suggestions-list"
               aria-label="Mensagem do chat"
@@ -1113,14 +1521,14 @@ export default function AIChatPanelPro({
               className={`
                 absolute right-2 bottom-2 rounded-lg p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
                 ${input.trim() && !isLoading
-                  ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+                   'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
                   : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
                 }
               `}
-              aria-label={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
-              title={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
+              aria-label={isLoading  'Parar resposta' : 'Enviar mensagem'}
+              title={isLoading  'Parar resposta' : 'Enviar mensagem'}
             >
-              {isLoading ? (
+              {isLoading  (
                 <StopCircle className="w-4 h-4" />
               ) : (
                 <Send className="w-4 h-4" />
@@ -1175,6 +1583,50 @@ export default function AIChatPanelPro({
         )}
       </form>
       </div>
+      {showAdvancedControls && (
+        <aside className="w-80 border-l border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] flex flex-col">
+          <div className="flex items-center gap-1 border-b border-[var(--aethel-border-secondary)] px-2 py-2">
+            {[
+              { id: 'memory' as const, label: 'Memória', icon: Brain },
+              { id: 'approval' as const, label: 'Aprovação', icon: Check },
+              { id: 'diff' as const, label: 'Diff', icon: Code },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setOpsTab(tab.id)}
+                className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                  opsTab === tab.id
+                    ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                }`}
+              >
+                <span className="inline-flex items-center justify-center gap-1">
+                  <tab.icon className="h-3 w-3" />
+                  {tab.label}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {opsTab === 'memory' && (
+              <MemoryPanel memories={[]} onAdd={() => undefined} onDelete={() => undefined} onUpdate={() => undefined} />
+            )}
+            {opsTab === 'approval' && (
+              <ApprovalCard changes={[]} onApprove={() => undefined} onReject={() => undefined} />
+            )}
+            {opsTab === 'diff' && (
+              <CodeDiffPreview
+                diffs={[]}
+                onAccept={() => undefined}
+                onReject={() => undefined}
+                onAcceptLine={() => undefined}
+                onRejectLine={() => undefined}
+              />
+            )}
+          </div>
+        </aside>
+      )}
     </div>
   )
 }

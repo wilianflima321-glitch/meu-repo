@@ -16,7 +16,15 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  GripVertical
+  GripVertical,
+  GitBranch,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Terminal,
+  Search,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 
 // ============================================================================
@@ -336,6 +344,20 @@ export function ModernIDEShell({
           onTogglePanel={togglePanel}
         />
       )}
+
+      {/* Desktop Bottom Dock */}
+      {!isCompact && (
+        <>
+          <BottomDock
+            panelState={panelState}
+            onTogglePanel={togglePanel}
+          />
+          <StatusBar
+            projectName={projectName}
+            activeFileName={activeFileName}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -513,6 +535,138 @@ function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
       {icon}
       {label}
     </button>
+  );
+}
+
+// ============================================================================
+// BOTTOM DOCK (VS Code/Figma-style)
+// ============================================================================
+
+interface BottomDockProps {
+  panelState: PanelState;
+  onTogglePanel: (panel: keyof PanelState) => void;
+}
+
+function BottomDock({ panelState, onTogglePanel }: BottomDockProps) {
+  const dockStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacing['1'],
+    padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
+    background: gradients.glassStrong,
+    borderTop: `1px solid ${tokens.colors.border.light}`,
+    height: '40px',
+  };
+
+  const dockItems = [
+    { id: 'sidebar', icon: <FolderTree size={16} />, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
+    { id: 'search', icon: <Search size={16} />, label: 'Search', shortcut: 'Ctrl+Shift+F' },
+    { id: 'git', icon: <GitBranch size={16} />, label: 'Source Control', shortcut: 'Ctrl+Shift+G' },
+    { id: 'debug', icon: <Sparkles size={16} />, label: 'AI Console', shortcut: 'Ctrl+Shift+A' },
+    { id: 'extensions', icon: <Layers size={16} />, label: 'Extensions', shortcut: 'Ctrl+Shift+X' },
+  ] as const;
+
+  return (
+    <div style={dockStyle}>
+      {dockItems.map((item) => {
+        const isActive = item.id === 'sidebar' ? panelState.sidebar.open : false;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => item.id === 'sidebar' && onTogglePanel('sidebar')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: tokens.spacing['2'],
+              padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
+              background: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+              border: 'none',
+              borderRadius: tokens.radius.sm,
+              color: isActive ? tokens.colors.text.primary : tokens.colors.text.muted,
+              fontSize: tokens.typography.fontSize.xs,
+              cursor: 'pointer',
+              transition: `all ${tokens.animation.duration.fast}`,
+            }}
+            title={`${item.label} (${item.shortcut})`}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ============================================================================
+// STATUS BAR (VS Code/Unreal-style)
+// ============================================================================
+
+interface StatusBarProps {
+  projectName: string;
+  activeFileName?: string;
+}
+
+function StatusBar({ projectName, activeFileName }: StatusBarProps) {
+  const statusBarStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: `${tokens.spacing['1']} ${tokens.spacing['3']}`,
+    background: tokens.colors.bg.surface,
+    borderTop: `1px solid ${tokens.colors.border.light}`,
+    height: '24px',
+    fontSize: tokens.typography.fontSize.xs,
+    color: tokens.colors.text.secondary,
+  };
+
+  return (
+    <div style={statusBarStyle}>
+      {/* Left Side */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'] }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+          <GitBranch size={12} />
+          <span>main</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+          <AlertCircle size={12} style={{ color: tokens.colors.warning }} />
+          <span>0</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+          <AlertCircle size={12} style={{ color: tokens.colors.error }} />
+          <span>0</span>
+        </div>
+      </div>
+
+      {/* Center - Active File */}
+      {activeFileName && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+          <Code2 size={12} />
+          <span>{activeFileName}</span>
+        </div>
+      )}
+
+      {/* Right Side */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'] }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+          <CheckCircle size={12} style={{ color: tokens.colors.success }} />
+          <span>Prettier</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+          <Terminal size={12} />
+          <span>UTF-8</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+          <Clock size={12} />
+          <span>Ln 1, Col 1</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+          <Sparkles size={12} />
+          <span>AI Ready</span>
+        </div>
+      </div>
+    </div>
   );
 }
 

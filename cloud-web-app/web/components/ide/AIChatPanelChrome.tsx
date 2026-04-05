@@ -1,7 +1,7 @@
 'use client'
 
 import type { Attachment, ChatThread, ToolCall } from './AIChatPanelPro.types'
-import { X, History, Zap, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react'
+import { X, History, Zap, CheckCircle2, AlertTriangle, Loader2, Circle } from 'lucide-react'
 
 type AttachmentPreviewProps = {
   attachment: Attachment
@@ -156,9 +156,18 @@ type ThinkingDisplayProps = {
   thinking: string
   isExpanded: boolean
   onToggle: () => void
+  steps?: Array<{
+    id: string
+    title: string
+    status: 'pending' | 'in_progress' | 'completed' | 'failed'
+    duration?: number
+  }>
 }
 
-export function ThinkingDisplay({ thinking, isExpanded, onToggle }: ThinkingDisplayProps) {
+export function ThinkingDisplay({ thinking, isExpanded, onToggle, steps }: ThinkingDisplayProps) {
+  // Parse thinking into steps if not provided
+  const parsedSteps = steps || parseThinkingSteps(thinking)
+
   return (
     <button
       type="button"
@@ -166,19 +175,80 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle }: ThinkingDisp
       aria-expanded={isExpanded}
       className="mb-2 w-full rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-3 py-2 text-left text-xs text-[var(--aethel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
     >
-      <div className="flex items-center gap-2">
-        <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-text-tertiary)]" />
-        <span>Raciocinio {isExpanded ? 'expandido' : 'resumido'}</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-info-light)]" />
+          <span className="font-medium text-[var(--aethel-text-primary)]">Processo de Pensamento</span>
+        </div>
+        <div className="flex items-center gap-1 text-[10px] text-[var(--aethel-text-tertiary)]">
+          {parsedSteps.filter(s => s.status === 'completed').length}/{parsedSteps.length} passos
+        </div>
       </div>
-      <div className="mt-2 grid grid-cols-2 gap-1 text-[10px] text-[var(--aethel-text-quaternary)]">
-        <span>• Entendendo contexto</span>
-        <span>• Lendo arquivos</span>
-        <span>• Executando ferramentas</span>
-        <span>• Montando resposta</span>
+      
+      {/* Steps Timeline */}
+      <div className="mt-2 space-y-1">
+        {parsedSteps.slice(0, isExpanded ? undefined : 3).map((step, index) => {
+          const StepIcon = step.status === 'completed' ? CheckCircle2 
+                        : step.status === 'in_progress' ? Loader2
+                        : step.status === 'failed' ? AlertTriangle
+                        : Circle
+          
+          return (
+            <div key={step.id} className="flex items-start gap-2">
+              <div className="mt-0.5">
+                {step.status === 'in_progress' ? (
+                  <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-info-light)]" />
+                ) : (
+                  <StepIcon className={`h-3 w-3 ${
+                    step.status === 'completed' ? 'text-[var(--aethel-success-light)]' 
+                    : step.status === 'failed' ? 'text-[var(--aethel-error-light)]'
+                    : 'text-[var(--aethel-text-quaternary)]'
+                  }`} />
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <span className={`text-[10px] ${
+                    step.status === 'completed' ? 'text-[var(--aethel-text-primary)]'
+                    : step.status === 'in_progress' ? 'text-[var(--aethel-info-light)] font-medium'
+                    : 'text-[var(--aethel-text-tertiary)]'
+                  }`}>
+                    {step.title}
+                  </span>
+                  {step.duration && (
+                    <span className="text-[9px] text-[var(--aethel-text-quaternary)]">{step.duration}ms</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
-      {isExpanded && <div className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">{thinking}</div>}
+
+      {isExpanded && (
+        <div className="mt-3 pt-2 border-t border-[var(--aethel-border-secondary)]">
+          <div className="text-[11px] text-[var(--aethel-text-tertiary)] whitespace-pre-wrap font-mono">
+            {thinking}
+          </div>
+        </div>
+      )}
     </button>
   )
+}
+
+function parseThinkingSteps(thinking: string): Array<{
+  id: string
+  title: string
+  status: 'pending' | 'in_progress' | 'completed' | 'failed'
+  duration?: number
+}> {
+  // Parse thinking text into steps
+  const lines = thinking.split('\n').filter(line => line.trim())
+  return lines.map((line, index) => ({
+    id: `step-${index}`,
+    title: line.replace(/^[-•]\s*/, '').trim(),
+    status: index === lines.length - 1 ? 'in_progress' : 'completed',
+  }))
 }
 
 type ToolCallDisplayProps = {

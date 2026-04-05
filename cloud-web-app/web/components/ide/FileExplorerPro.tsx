@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import Codicon, { type CodiconName } from './Codicon'
+import { Search, X, Filter } from 'lucide-react'
 
 // ============= Types =============
 

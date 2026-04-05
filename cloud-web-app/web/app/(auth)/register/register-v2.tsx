@@ -258,33 +258,25 @@ export default function RegisterPageV2() {
             <div className="space-y-2">
               <button
                 type="button"
-                disabled
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] opacity-70"
-                aria-label="Continuar com GitHub (indisponivel ate configurar OAuth)"
+                onClick={() => window.location.href = '/api/auth/oauth/authorize?provider=github'}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                aria-label="Continuar com GitHub"
               >
                 <Codicon name="github-inverted" />
                 Continuar com GitHub
-                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-                  em breve
-                </span>
               </button>
               <button
                 type="button"
-                disabled
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] opacity-70"
-                aria-label="Continuar com Google (indisponivel ate configurar OAuth)"
+                onClick={() => window.location.href = '/api/auth/oauth/authorize?provider=google'}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                aria-label="Continuar com Google"
               >
                 <Codicon name="google" />
                 Continuar com Google
-                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-                  em breve
-                </span>
               </button>
             </div>
 
-            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">
-              {SOCIAL_AUTH_MESSAGE}
-            </p>
+            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">Ou cadastre-se com email e senha.</p>
 
             <p className="mt-6 text-center text-sm text-[var(--aethel-text-secondary)]">
               Ja tem conta?{' '}

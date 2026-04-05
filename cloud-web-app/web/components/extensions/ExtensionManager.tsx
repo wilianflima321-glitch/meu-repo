@@ -1,5 +1,7 @@
 'use client'
 
+import { ptBR } from '@/lib/locales/pt-BR'
+
 /**
  * Gerenciador de extensões - Marketplace e gestão
  * Inspirado no painel de extensões do VS Code
@@ -166,6 +168,9 @@ export default function ExtensionManager({
   onDesativar: propOnDisable,
   onOpenSettings,
 }: ExtensionManagerProps) {
+  const t = ptBR.extensions.manager;
+  const tc = ptBR.common;
+
   // Use the hook to fetch real extensions from API
   const {
     extensions: apiExtensions,
@@ -258,10 +263,10 @@ export default function ExtensionManager({
   // Handle uninstall
   const handleUninstall = useCallback(async (ext: Extension) => {
     const shouldDesinstalar = await openConfirmDialog({
-      title: 'Desinstalar extensão',
-      message: `Desinstalar "${ext.displayName}"?`,
-      confirmText: 'Desinstalar',
-      cancelText: 'Cancelar',
+      title: t.uninstallConfirm,
+      message: t.uninstallMessage(ext.displayName),
+      confirmText: tc.actions.delete,
+      cancelText: tc.actions.cancel,
     })
     if (!shouldDesinstalar) return
     setIsLoading(ext.id)
@@ -330,7 +335,7 @@ export default function ExtensionManager({
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Buscar extensões..."
+              placeholder={t.searchPlaceholder}
               className="w-full pl-10 pr-4 py-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] focus:outline-none focus:border-[var(--aethel-primary)]"
             />
           </div>
@@ -345,7 +350,7 @@ export default function ExtensionManager({
             }`}
           >
             <Package className="w-4 h-4" />
-            <span className="flex-1 text-sm">Instaladas</span>
+            <span className="flex-1 text-sm">{t.installed}</span>
             <span className="text-xs text-[var(--aethel-text-tertiary)]">{counts.installed}</span>
           </button>
           <button type="button"
@@ -355,7 +360,7 @@ export default function ExtensionManager({
             }`}
           >
             <Globe className="w-4 h-4" />
-            <span className="flex-1 text-sm">Marketplace</span>
+            <span className="flex-1 text-sm">{t.marketplace}</span>
             <span className="text-xs text-[var(--aethel-text-tertiary)]">{counts.available}</span>
           </button>
           <button type="button"
@@ -365,7 +370,7 @@ export default function ExtensionManager({
             }`}
           >
             <Star className="w-4 h-4" />
-            <span className="flex-1 text-sm">Recomendadas</span>
+            <span className="flex-1 text-sm">{t.recommended}</span>
           </button>
         </div>
 
@@ -401,9 +406,9 @@ export default function ExtensionManager({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
           <h2 className="text-lg font-semibold">
-            {activeView === 'installed' && 'Extensões instaladas'}
-            {activeView === 'marketplace' && 'Marketplace de extensões'}
-            {activeView === 'recommended' && 'Extensões recomendadas'}
+            {activeView === 'installed' && `Extensões ${t.installed.toLowerCase()}`}
+            {activeView === 'marketplace' && `${t.marketplace} de extensões`}
+            {activeView === 'recommended' && `Extensões ${t.recommended.toLowerCase()}`}
           </h2>
 
           <div className="flex items-center gap-2">
@@ -415,7 +420,7 @@ export default function ExtensionManager({
                 }`}
               >
                 {showDisabled ? <ToggleLeft className="w-4 h-4" /> : <ToggleRight className="w-4 h-4" />}
-                {showDisabled ? 'Mostrar desativadas' : 'Ocultar desativadas'}
+                {showDisabled ? t.showDisabled : t.hideDisabled}
               </button>
             )}
             <button type="button"

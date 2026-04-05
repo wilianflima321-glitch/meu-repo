@@ -211,31 +211,25 @@ export default function LoginPageV2() {
             <div className="space-y-2">
               <button
                 type="button"
-                disabled
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] opacity-70"
-                aria-label="Continuar com GitHub (indisponivel ate configurar OAuth)"
+                onClick={() => window.location.href = '/api/auth/oauth/authorize?provider=github'}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                aria-label="Continuar com GitHub"
               >
-                <Codicon name="github-inverted" />
+                <Codicon name="github" />
                 Continuar com GitHub
-                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-                  em breve
-                </span>
               </button>
               <button
                 type="button"
-                disabled
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] opacity-70"
-                aria-label="Continuar com Google (indisponivel ate configurar OAuth)"
+                onClick={() => window.location.href = '/api/auth/oauth/authorize?provider=google'}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                aria-label="Continuar com Google"
               >
                 <Codicon name="google" />
                 Continuar com Google
-                <span className="ml-auto rounded-full border border-[var(--aethel-border-primary)] px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-                  em breve
-                </span>
               </button>
             </div>
 
-            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">OAuth entra assim que Google e GitHub forem ligados. Por enquanto, o acesso oficial continua por email e senha.</p>
+            <p className="mt-3 text-xs leading-6 text-[var(--aethel-text-tertiary)]">Ou continue com email e senha.</p>
 
             <div className="mt-6 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">

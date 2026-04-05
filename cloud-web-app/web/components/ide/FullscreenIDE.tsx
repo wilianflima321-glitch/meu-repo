@@ -16,6 +16,12 @@ import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
 import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
 import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
 import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
+import { DevicePreview } from "@/components/ide/DevicePreview";
+import { ConsoleIntegration } from "@/components/ide/ConsoleIntegration";
+import { ProfessionalViewport3D } from "@/components/ide/ProfessionalViewport3D";
+import { GitIntegration } from "@/components/ide/GitIntegration";
+import { IntelliSense } from "@/components/ide/IntelliSense";
+import { ErrorHighlighting } from "@/components/ide/ErrorHighlighting";
 import { analytics } from "@/lib/analytics";
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
@@ -151,6 +157,10 @@ function IDEContent() {
     preview: { open: true, size: 35 },
     chat: { open: false, size: 25 },
   }));
+  const [previewMode, setPreviewMode] = useState<'runtime' | 'device' | 'console' | 'viewport3d'>('runtime')
+  const [sidebarTab, setSidebarTab] = useState<'explorer' | 'git'>('explorer')
+  const [showIntelliSense, setShowIntelliSense] = useState(false)
+  const [showDiagnostics, setShowDiagnostics] = useState(false)
   const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
   const [initialFileResolved, setInitialFileResolved] = useState(false);
   const [isCompactViewport, setIsCompactViewport] = useState(false)
@@ -917,7 +927,41 @@ function IDEContent() {
             }}
           >
             {{
-              sidebar: <FileExplorerPro onFileSelect={handleFileSelect} />,
+              sidebar: (
+                <div className="h-full flex flex-col">
+                  <div className="flex items-center gap-1 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-2 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setSidebarTab('explorer')}
+                      className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                        sidebarTab === 'explorer'
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                      }`}
+                    >
+                      Arquivos
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSidebarTab('git')}
+                      className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                        sidebarTab === 'git'
+                          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+                          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                      }`}
+                    >
+                      Git
+                    </button>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    {sidebarTab === 'explorer' ? (
+                      <FileExplorerPro onFileSelect={handleFileSelect} />
+                    ) : (
+                      <GitIntegration />
+                    )}
+                  </div>
+                </div>
+              ),
               chat: <AIChatPanelContainer />,
               editor: (
                 <div className="h-full flex flex-col">
@@ -927,6 +971,35 @@ function IDEContent() {
                     </div>
                   )}
                   <TabBar />
+                  <div className="flex items-center justify-between border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2 py-1.5 text-[11px]">
+                    <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
+                      <span>Ferramentas do editor</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowIntelliSense((prev) => !prev)}
+                        className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                          showIntelliSense
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                        }`}
+                      >
+                        IntelliSense
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowDiagnostics((prev) => !prev)}
+                        className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                          showDiagnostics
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
+                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                        }`}
+                      >
+                        Diagnósticos
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex-1 overflow-hidden">
                     {isReadingFile && (
                       <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Carregando arquivo...</div>
@@ -938,30 +1011,48 @@ function IDEContent() {
                     )}
                     {!isReadingFile && !fileError && activeFile && (
                       <div className="h-full min-h-0">
-                        <MonacoEditorPro
-                          path={activeFile.path}
-                          value={activeFile.content}
-                          language={activeFile.language}
-                          fullAccessActive={Boolean(fullAccessActiveGrant)}
-                          onMount={(editor) => {
-                            editorRef.current = editor
-                          }}
-                          onAiApplyResult={handleInlineApplyResult}
-                          onRequestFullAccess={handleToggleFullAccess}
-                          onChange={(value) => {
-                            setActiveFile((prev) =>
-                              prev
-                                ? {
-                                    ...prev,
-                                    content: value ?? "",
-                                  }
-                                : prev
-                            )
-                          }}
-                          onSave={(value) => {
-                            void writeFile(activeFile.path, value)
-                          }}
-                        />
+                        <div className="h-full min-h-0 flex">
+                          <div className="flex-1 min-w-0">
+                            <MonacoEditorPro
+                              path={activeFile.path}
+                              value={activeFile.content}
+                              language={activeFile.language}
+                              fullAccessActive={Boolean(fullAccessActiveGrant)}
+                              onMount={(editor) => {
+                                editorRef.current = editor
+                              }}
+                              onAiApplyResult={handleInlineApplyResult}
+                              onRequestFullAccess={handleToggleFullAccess}
+                              onChange={(value) => {
+                                setActiveFile((prev) =>
+                                  prev
+                                    ? {
+                                        ...prev,
+                                        content: value ?? "",
+                                      }
+                                    : prev
+                                )
+                              }}
+                              onSave={(value) => {
+                                void writeFile(activeFile.path, value)
+                              }}
+                            />
+                          </div>
+                          {(showIntelliSense || showDiagnostics) && (
+                            <div className="w-80 border-l border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] flex flex-col">
+                              {showIntelliSense && (
+                                <div className="flex-1 min-h-0 border-b border-[var(--aethel-border-secondary)]">
+                                  <IntelliSense />
+                                </div>
+                              )}
+                              {showDiagnostics && (
+                                <div className="flex-1 min-h-0">
+                                  <ErrorHighlighting />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                     {!isReadingFile && !fileError && !activeFile && (
@@ -972,305 +1063,136 @@ function IDEContent() {
               ),
               preview: (
                 <div className="h-full min-h-0 bg-[var(--aethel-surface-primary)] flex flex-col">
-                  <PreviewRuntimeToolbar
-                    previewRuntimeUrl={previewRuntimeUrl}
-                    runtimeHealthStatus={runtimeHealth.status}
-                    runtimeHealthLatencyMs={runtimeHealth.latencyMs}
-                    runtimeHealthCheckedAt={runtimeHealthCheckedAt}
-                    runtimeHealthHint={runtimeHealthHint}
-                    runtimeReadiness={runtimeReadiness}
-                    runtimePrimaryAction={
-                      runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
-                        ? runtimePrimaryAction
-                        : 'inline'
-                    }
-                    runtimePrimaryActionLabel={runtimePrimaryActionLabel}
-                    runtimeStrategyLabel={runtimeStrategyLabel}
-                    runtimeStrategyHint={runtimeStrategyHint}
-                    showRuntimeSettings={showRuntimeSettings}
-                    previewRuntimeInput={previewRuntimeInput}
-                    onToggleSettings={() => setShowRuntimeSettings((prev) => !prev)}
-                    onRuntimeInputChange={setPreviewRuntimeInput}
-                    onApplyRuntime={applyRuntimeUrl}
-                    onUseFallback={handleUseInlineFallback}
-                    isDiscoveringRuntime={isDiscoveringRuntime}
-                    isProvisioningRuntime={isProvisioningRuntime}
-                    isSyncingRuntime={isSyncingRuntime}
-                    canSyncRuntime={Boolean(previewSandboxId)}
-                    runtimeDiscoveryMessage={runtimeDiscoveryMessage}
-                    runtimeDiscoveryTone={runtimeDiscoveryTone}
-                    onRunRecommendedAction={handleRunRecommendedPreviewAction}
-                    onDiscoverRuntime={() => {
-                      void discoverRuntime('manual').then(() => {
-                        void refreshRuntimeReadiness()
-                      })
-                    }}
-                    onProvisionRuntime={() => {
-                      void provisionRuntime('manual').then(() => {
-                        void refreshRuntimeReadiness()
-                      })
-                    }}
-                    onSyncRuntime={() => {
-                      void syncRuntime().then(() => {
-                        void refreshRuntimeReadiness()
-                      })
-                    }}
-                    onRevalidate={() => {
-                      if (!previewRuntimeUrl) return
-                      void checkRuntimeHealth(previewRuntimeUrl)
-                      analytics?.track?.('engine', 'render_time', {
-                        metadata: {
-                          surface: 'ide-preview-runtime-health',
-                          action: 'manual-revalidate',
-                          runtimeUrl: previewRuntimeUrl,
-                        },
-                      })
-                    }}
-                    onOpenRuntime={() => {
-                      if (!previewRuntimeUrl) return
-                      window.open(previewRuntimeUrl, '_blank', 'noopener,noreferrer')
-                    }}
-                  />
-                  {activeFile ? (
-                    <div className="flex-1 min-h-0">
-                      <CanonicalPreviewSurface
-                        key={`${activeFile.path}:${previewRefreshTick}`}
-                        variant="runtime"
-                        title="Prévia ao vivo"
-                        filePath={activeFile.path}
-                        content={activeFile.content}
-                        projectId={projectId}
-                        runtimeUrl={previewRuntimeUrl ?? undefined}
-                        forceInlineFallback={forceInlinePreviewFallback}
-                        runtimeUnavailableReason={runtimeHealth.reason}
-                        isStale={isSavingFile}
-                        onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para visualizar a prévia.</div>
+                  {(previewMode === 'runtime' || previewMode === 'device') && (
+                    <PreviewRuntimeToolbar
+                      previewRuntimeUrl={previewRuntimeUrl}
+                      runtimeHealthStatus={runtimeHealth.status}
+                      runtimeHealthLatencyMs={runtimeHealth.latencyMs}
+                      runtimeHealthCheckedAt={runtimeHealthCheckedAt}
+                      runtimeHealthHint={runtimeHealthHint}
+                      runtimeReadiness={runtimeReadiness}
+                      runtimePrimaryAction={
+                        runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
+                          ? runtimePrimaryAction
+                          : 'inline'
+                      }
+                      runtimePrimaryActionLabel={runtimePrimaryActionLabel}
+                      runtimeStrategyLabel={runtimeStrategyLabel}
+                      runtimeStrategyHint={runtimeStrategyHint}
+                      showRuntimeSettings={showRuntimeSettings}
+                      previewRuntimeInput={previewRuntimeInput}
+                      onToggleSettings={() => setShowRuntimeSettings((prev) => !prev)}
+                      onRuntimeInputChange={setPreviewRuntimeInput}
+                      onApplyRuntime={applyRuntimeUrl}
+                      onUseFallback={handleUseInlineFallback}
+                      isDiscoveringRuntime={isDiscoveringRuntime}
+                      isProvisioningRuntime={isProvisioningRuntime}
+                      isSyncingRuntime={isSyncingRuntime}
+                      canSyncRuntime={Boolean(previewSandboxId)}
+                      runtimeDiscoveryMessage={runtimeDiscoveryMessage}
+                      runtimeDiscoveryTone={runtimeDiscoveryTone}
+                      onRunRecommendedAction={handleRunRecommendedPreviewAction}
+                      onDiscoverRuntime={() => {
+                        void discoverRuntime('manual').then(() => {
+                          void refreshRuntimeReadiness()
+                        })
+                      }}
+                      onProvisionRuntime={() => {
+                        void provisionRuntime('manual').then(() => {
+                          void refreshRuntimeReadiness()
+                        })
+                      }}
+                      onSyncRuntime={() => {
+                        void syncRuntime().then(() => {
+                          void refreshRuntimeReadiness()
+                        })
+                      }}
+                      onRevalidate={() => {
+                        if (!previewRuntimeUrl) return
+                        void checkRuntimeHealth(previewRuntimeUrl)
+                        analytics?.track?.('engine', 'render_time', {
+                          metadata: {
+                            surface: 'ide-preview-runtime-health',
+                            action: 'manual-revalidate',
+                            runtimeUrl: previewRuntimeUrl,
+                          },
+                        })
+                      }}
+                      onOpenRuntime={() => {
+                        if (!previewRuntimeUrl) return
+                        window.open(previewRuntimeUrl, '_blank', 'noopener,noreferrer')
+                      }}
+                    />
                   )}
-                </div>
-              ),
-            }}
-          </ModernIDEShell>
-        ) : (
-          <IDELayout
-            showStudioNav
-            studioTitle="Workbench"
-            studioSubtitle="Editor, prévia e runtime no mesmo fluxo."
-            onCommandPalette={() => openCommandPalette('commands')}
-            workbenchBanner={
-              <WorkbenchMissionBar
-                mission={missionParam}
-                source={sourceParam || entryParam}
-                projectId={projectId}
-                previewEnabled={previewEnabled}
-                runtimeStrategyLabel={runtimeStrategyLabel}
-                runtimeStateLabel={runtimeStateLabel}
-                onOpenAiPanel={handleAIPanel}
-                onTogglePreview={() => setPreviewEnabled((prev) => !prev)}
-                onOpenCommandPalette={() => openCommandPalette('commands')}
-                onBackToDashboard={handleBackToDashboard}
-              />
-            }
-            studioRightSlot={
-              <Link
-                href={projectId && projectId !== 'default' ? `/dashboard?projectId=${encodeURIComponent(projectId)}` : "/dashboard"}
-                className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-primary)]"
-              >
-                Voltar ao dashboard
-              </Link>
-            }
-            fileExplorer={<FileExplorerPro onFileSelect={handleFileSelect} />}
-            aiChatPanel={<AIChatPanelContainer />}
-            onTogglePreview={() => setPreviewEnabled((prev) => !prev)}
-          >
-            <div className="h-full flex flex-col">
-              {isCompactViewport && (
-                <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
-                  Viewport compacto detectado. Para melhor experiência use desktop com {'>='} 1024px.
-                </div>
-              )}
-              <TabBar />
-              {previewEnabled && (
-                <PreviewRuntimeToolbar
-                  previewRuntimeUrl={previewRuntimeUrl}
-                  runtimeHealthStatus={runtimeHealth.status}
-                  runtimeHealthLatencyMs={runtimeHealth.latencyMs}
-                  runtimeHealthCheckedAt={runtimeHealthCheckedAt}
-                  runtimeHealthHint={runtimeHealthHint}
-                  runtimeReadiness={runtimeReadiness}
-                  runtimePrimaryAction={
-                    runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
-                      ? runtimePrimaryAction
-                      : 'inline'
-                  }
-                  runtimePrimaryActionLabel={runtimePrimaryActionLabel}
-                  runtimeStrategyLabel={runtimeStrategyLabel}
-                  runtimeStrategyHint={runtimeStrategyHint}
-                  showRuntimeSettings={showRuntimeSettings}
-                  previewRuntimeInput={previewRuntimeInput}
-                  onToggleSettings={() => setShowRuntimeSettings((prev) => !prev)}
-                  onRuntimeInputChange={setPreviewRuntimeInput}
-                  onApplyRuntime={applyRuntimeUrl}
-                  onUseFallback={handleUseInlineFallback}
-                  isDiscoveringRuntime={isDiscoveringRuntime}
-                  isProvisioningRuntime={isProvisioningRuntime}
-                  isSyncingRuntime={isSyncingRuntime}
-                  canSyncRuntime={Boolean(previewSandboxId)}
-                  runtimeDiscoveryMessage={runtimeDiscoveryMessage}
-                  runtimeDiscoveryTone={runtimeDiscoveryTone}
-                  onRunRecommendedAction={handleRunRecommendedPreviewAction}
-                  onDiscoverRuntime={() => {
-                    void discoverRuntime('manual').then(() => {
-                      void refreshRuntimeReadiness()
-                    })
-                  }}
-                  onProvisionRuntime={() => {
-                    void provisionRuntime('manual').then(() => {
-                      void refreshRuntimeReadiness()
-                    })
-                  }}
-                  onSyncRuntime={() => {
-                    void syncRuntime().then(() => {
-                      void refreshRuntimeReadiness()
-                    })
-                  }}
-                  onRevalidate={() => {
-                    if (!previewRuntimeUrl) return
-                    void checkRuntimeHealth(previewRuntimeUrl)
-                    analytics?.track?.('engine', 'render_time', {
-                      metadata: {
-                        surface: 'ide-preview-runtime-health',
-                        action: 'manual-revalidate',
-                        runtimeUrl: previewRuntimeUrl,
-                      },
-                    })
-                  }}
-                  onOpenRuntime={() => {
-                    if (!previewRuntimeUrl) return
-                    window.open(previewRuntimeUrl, '_blank', 'noopener,noreferrer')
-                  }}
-                />
-              )}
-              <div className="flex-1 overflow-hidden">
-                {isReadingFile && (
-                  <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
-                    Carregando arquivo...
-                  </div>
-                )}
-
-                {!isReadingFile && fileError && (
-                  <div className="h-full flex items-center justify-center px-6">
-                    <div className="max-w-xl rounded border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">
-                      {fileError}
-                    </div>
-                  </div>
-                )}
-
-                {!isReadingFile && !fileError && activeFile && (
-                  <div className={`h-full min-h-0 ${previewEnabled ? "grid grid-cols-1 xl:grid-cols-2" : ""}`}>
-                    <div className={`h-full min-h-0 ${previewEnabled ? "border-r border-[var(--aethel-border-primary)]" : ""}`}>
-                      <MonacoEditorPro
-                        path={activeFile.path}
-                        value={activeFile.content}
-                        language={activeFile.language}
-                        fullAccessActive={Boolean(fullAccessActiveGrant)}
-                        onMount={(editor) => {
-                          editorRef.current = editor
-                        }}
-                        onAiApplyResult={handleInlineApplyResult}
-                        onRequestFullAccess={handleToggleFullAccess}
-                        onChange={(value) => {
-                          setActiveFile((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  content: value ?? "",
-                                }
-                              : prev
-                          );
-                        }}
-                        onSave={(value) => {
-                          void writeFile(activeFile.path, value);
-                        }}
-                      />
-                    </div>
-                    {previewEnabled && (
-                      <div className="h-full min-h-0 bg-[var(--aethel-surface-primary)]">
-                        <CanonicalPreviewSurface
-                          key={`${activeFile.path}:${previewRefreshTick}`}
-                          variant="runtime"
-                          title="Prévia ao vivo"
-                          filePath={activeFile.path}
-                          content={activeFile.content}
-                          projectId={projectId}
-                          runtimeUrl={previewRuntimeUrl ?? undefined}
-                          forceInlineFallback={forceInlinePreviewFallback}
-                          runtimeUnavailableReason={runtimeHealth.reason}
-                          isStale={isSavingFile}
-                          onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {!isReadingFile && !fileError && !activeFile && (
-                  <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">
-                    Selecione um arquivo para começar a editar.
-                  </div>
-                )}
-              </div>
-              {activeFile && (
-                <div className="h-7 border-t border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
-                  <span>
-                    {isSavingFile
-                      ? "Salvando..."
-                      : lastSavedAt
-                        ? `Salvo às ${lastSavedAt.toLocaleTimeString()}`
-                        : "Pronto"}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {lastAiApply?.rollbackToken && (
+                  <div className="flex items-center gap-1 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] px-2 py-2 text-[11px]">
+                    {[
+                      { id: 'runtime' as const, label: 'Prévia' },
+                      { id: 'device' as const, label: 'Dispositivos' },
+                      { id: 'console' as const, label: 'Console' },
+                      { id: 'viewport3d' as const, label: 'Viewport 3D' },
+                    ].map((mode) => (
                       <button
+                        key={mode.id}
                         type="button"
-                        onClick={handleRollbackLastAiApply}
-                        disabled={rollbackBusy}
-                        className="rounded border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] disabled:opacity-60"
-                        title="Desfazer a última aplicação inline da IA"
-                      >
-                        {rollbackBusy ? 'Desfazendo...' : 'Desfazer IA'}
-                      </button>
-                    )}
-                    {fullAccessActiveGrant && (
-                      <span className="rounded border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-info-light)]">
-                        Acesso total ativo{fullAccessExpiryLabel ? ` (${fullAccessExpiryLabel})` : ''}
-                      </span>
-                    )}
-                    {hasToken && (
-                      <button
-                        type="button"
-                        onClick={handleToggleFullAccess}
-                        disabled={fullAccessBusy}
-                        className={`rounded border px-2 py-0.5 text-[10px] disabled:opacity-60 ${
-                          fullAccessActiveGrant
-                            ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
-                            : 'border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+                        onClick={() => setPreviewMode(mode.id)}
+                        className={`rounded-md px-2.5 py-1 font-medium transition-colors ${
+                          previewMode === mode.id
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
                         }`}
-                        title={
-                          fullAccessActiveGrant
-                            ? 'Revogar acesso total temporário auditado'
-                            : 'Ativar acesso total temporário auditado'
-                        }
                       >
-                        {fullAccessBusy
-                          ? '...'
-                          : fullAccessActiveGrant
-                            ? 'Revogar acesso total'
-                            : 'Acesso total'}
+                        {mode.label}
                       </button>
+                    ))}
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    {previewMode === 'console' && <ConsoleIntegration />}
+                    {previewMode === 'viewport3d' && <ProfessionalViewport3D />}
+                    {previewMode === 'runtime' && (
+                      activeFile ? (
+                        <div className="h-full min-h-0">
+                          <CanonicalPreviewSurface
+                            key={`${activeFile.path}:${previewRefreshTick}`}
+                            variant="runtime"
+                            title="Prévia ao vivo"
+                            filePath={activeFile.path}
+                            content={activeFile.content}
+                            projectId={projectId}
+                            runtimeUrl={previewRuntimeUrl ?? undefined}
+                            forceInlineFallback={forceInlinePreviewFallback}
+                            runtimeUnavailableReason={runtimeHealth.reason}
+                            isStale={isSavingFile}
+                            onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)]">
+                          Selecione um arquivo para visualizar a prévia.
+                        </div>
+                      )
+                    )}
+                    {previewMode === 'device' && (
+                      activeFile ? (
+                        <DevicePreview>
+                          <CanonicalPreviewSurface
+                            key={`${activeFile.path}:${previewRefreshTick}:device`}
+                            variant="runtime"
+                            title="Prévia ao vivo"
+                            filePath={activeFile.path}
+                            content={activeFile.content}
+                            projectId={projectId}
+                            runtimeUrl={previewRuntimeUrl ?? undefined}
+                            forceInlineFallback={forceInlinePreviewFallback}
+                            runtimeUnavailableReason={runtimeHealth.reason}
+                            isStale={isSavingFile}
+                            onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
+                          />
+                        </DevicePreview>
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)]">
+                          Selecione um arquivo para visualizar a prévia.
+                        </div>
+                      )
                     )}
                   </div>
                 </div>

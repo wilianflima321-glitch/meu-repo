@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { X, Check, ChevronRight, Award, Sparkles, Target, Users, Rocket } from 'lucide-react';
+import { X, Check, ChevronRight, Award, Sparkles, Target, Users, Rocket, Layout } from 'lucide-react';
 
 // ============================================================================
 // TIPOS
@@ -187,14 +187,36 @@ export function useOnboarding() {
 }
 
 // ============================================================================
-// WELCOME MODAL
+// WELCOME MODAL (Mission-First)
 // ============================================================================
 
-export function WelcomeModal() {
+export function WelcomeModal({ mission }: { mission?: string }) {
   const { showWelcome, setShowWelcome, completeStep, skipOnboarding } = useOnboarding();
   const [step, setStep] = useState(0);
 
-  const welcomeSteps = [
+  // Mission-first onboarding steps
+  const welcomeSteps = mission ? [
+    {
+      title: `Vamos criar: ${mission}`,
+      description: 'Seu workspace foi configurado automaticamente. Agora vamos configurar os detalhes específicos do seu projeto.',
+      icon: <Sparkles className="w-12 h-12 text-[var(--aethel-primary-light)]" />,
+    },
+    {
+      title: 'Configure sua IA',
+      description: 'Escolha seu provider de IA para começar a desenvolver com inteligência artificial integrada.',
+      icon: <Target className="w-12 h-12 text-[var(--aethel-info-light)]" />,
+    },
+    {
+      title: 'Explore o IDE',
+      description: 'Conheça o Editor, Preview e AI Console. Tudo conectado para desenvolvimento ágil.',
+      icon: <Layout className="w-12 h-12 text-[var(--aethel-success-light)]" />,
+    },
+    {
+      title: 'Comece a desenvolver',
+      description: 'Seu projeto está pronto. Use o AI Console para gerar código e veja o preview em tempo real.',
+      icon: <Rocket className="w-12 h-12 text-[var(--aethel-warning-light)]" />,
+    },
+  ] : [
     {
       title: 'Bem-vindo ao Aethel Engine',
       description: 'Estúdio focado em Apps e Research com governança rigorosa. Games e Films seguem em roadmap.',

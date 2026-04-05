@@ -17,6 +17,12 @@
     --aethel-panel-strong: rgba(10, 14, 24, 0.94);
     --aethel-panel-soft: rgba(18, 24, 39, 0.62);
 
+    /* WCAG 2.2 AA Focus & Target Size */
+    --aethel-focus-ring: 2px solid var(--aethel-primary);
+    --aethel-focus-offset: 2px;
+    --aethel-target-size-min: 44px;
+    --aethel-target-size-dense: 32px;
+
     /* Surfaces */
     --aethel-surface-primary: #0a0a0f;
     --aethel-surface-secondary: #101622;
@@ -98,9 +104,26 @@
   }
 
   :where(button, [role='button'], a, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid var(--aethel-border-focus);
-    outline-offset: 2px;
+    outline: var(--aethel-focus-ring);
+    outline-offset: var(--aethel-focus-offset);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--aethel-info) 18%, transparent);
+  }
+
+  /* Target Size Enforcement (WCAG 2.2 AA) */
+  .aethel-target-min {
+    min-width: var(--aethel-target-size-min);
+    min-height: var(--aethel-target-size-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .aethel-target-dense {
+    min-width: var(--aethel-target-size-dense);
+    min-height: var(--aethel-target-size-dense);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Custom Scrollbar */

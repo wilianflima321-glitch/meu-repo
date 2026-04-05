@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Codicon from './Codicon'
 import { analytics } from '@/lib/analytics'
+import { Monitor, Smartphone, Tablet, RotateCw, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
 
 interface PreviewPanelProps {
   title?: string

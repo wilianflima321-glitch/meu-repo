@@ -12,6 +12,9 @@ import {
   Mic,
   Image as ImageIcon,
   Bug,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
 } from 'lucide-react'
 
 interface Agent {
@@ -21,6 +24,17 @@ interface Agent {
   icon: any
   color: string
   chipClass: string
+}
+
+interface AgentTask {
+  id: string
+  agentId: string
+  description: string
+  status: 'pending' | 'in_progress' | 'completed' | 'failed'
+  startTime?: number
+  endTime?: number
+  handoffTo?: string
+  output?: string
 }
 
 const AGENTS: Agent[] = [
@@ -67,6 +81,7 @@ export default function NexusChatMultimodal() {
   const [inputValue, setInputValue] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [messages, setMessages] = useState<any[]>([])
+  const [agentTasks, setAgentTasks] = useState<AgentTask[]>([])
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,22 +98,73 @@ export default function NexusChatMultimodal() {
     setInputValue('')
     setIsThinking(true)
 
-    // Simulacao de resposta da IA
-    setTimeout(() => {
-      setIsThinking(false)
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          agent: activeAgent,
-          content: `Como seu ${activeAgent.role}, analisei sua solicitacao. Estou orquestrando as alteracoes no Nexus Canvas agora.`,
-          thinking:
-            'Analisando dependencias de arquitetura... Validando contra o AETHEL_DESIGN_MANIFESTO... Preparando execucao de codigo.',
-          timestamp: new Date(),
-        },
-      ])
-    }, 2000)
+    // Simular orquestração multi-agent
+    const tasks: AgentTask[] = [
+      {
+        id: 'task-1',
+        agentId: 'architect',
+        description: 'Analisando requisitos e definindo arquitetura',
+        status: 'in_progress',
+        startTime: Date.now(),
+        handoffTo: 'designer',
+      },
+      {
+        id: 'task-2',
+        agentId: 'designer',
+        description: 'Criando componentes UI/UX',
+        status: 'pending',
+        handoffTo: 'engineer',
+      },
+      {
+        id: 'task-3',
+        agentId: 'engineer',
+        description: 'Implementando lógica e componentes',
+        status: 'pending',
+        handoffTo: 'qa',
+      },
+      {
+        id: 'task-4',
+        agentId: 'qa',
+        description: 'Validando qualidade e testes',
+        status: 'pending',
+      },
+    ]
+    setAgentTasks(tasks)
+
+    // Simular progresso das tarefas
+    let currentIndex = 0
+    const processNextTask = () => {
+      if (currentIndex >= tasks.length) {
+        setIsThinking(false)
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            agent: activeAgent,
+            content: `Orquestração multi-agent concluída! ${tasks.length} agentes trabalharam em paralelo para entregar sua solicitação.`,
+            timestamp: new Date(),
+          },
+        ])
+        setAgentTasks([])
+        return
+      }
+
+      const task = tasks[currentIndex]
+      const updatedTasks = [...tasks]
+      updatedTasks[currentIndex] = { ...task, status: 'completed', endTime: Date.now() }
+      
+      if (currentIndex < tasks.length - 1) {
+        updatedTasks[currentIndex + 1] = { ...tasks[currentIndex + 1], status: 'in_progress', startTime: Date.now() }
+      }
+      
+      setAgentTasks(updatedTasks)
+      currentIndex++
+      
+      setTimeout(processNextTask, 1500)
+    }
+
+    setTimeout(processNextTask, 1000)
   }
 
   return (
@@ -175,6 +241,67 @@ export default function NexusChatMultimodal() {
             </div>
           </div>
         ))}
+
+        {/* Agent Orchestration Visual */}
+        {agentTasks.length > 0 && (
+          <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layers size={14} className="text-[var(--aethel-info-light)]" />
+                <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Orquestração Multi-Agent</span>
+              </div>
+              <span className="text-[10px] text-[var(--aethel-text-tertiary)]">
+                {agentTasks.filter(t => t.status === 'completed').length}/{agentTasks.length}
+              </span>
+            </div>
+            
+            <div className="space-y-2">
+              {agentTasks.map((task, index) => {
+                const agent = AGENTS.find(a => a.id === task.agentId)
+                if (!agent) return null
+                
+                const nextAgent = task.handoffTo ? AGENTS.find(a => a.id === task.handoffTo) : null
+                const isLast = index === agentTasks.length - 1
+                
+                return (
+                  <div key={task.id} className="flex items-start gap-2">
+                    <div className="mt-1.5 flex flex-col items-center">
+                      {task.status === 'completed' ? (
+                        <CheckCircle2 size={14} className="text-[var(--aethel-success-light)]" />
+                      ) : task.status === 'in_progress' ? (
+                        <Loader2 size={14} className="animate-spin text-[var(--aethel-info-light)]" />
+                      ) : (
+                        <Clock size={14} className="text-[var(--aethel-text-quaternary)]" />
+                      )}
+                      {!isLast && (
+                        <ArrowRight size={12} className="mt-1 text-[var(--aethel-text-tertiary)]" />
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <agent.icon size={12} className={agent.color} />
+                        <span className="text-[10px] font-medium text-[var(--aethel-text-primary)]">{agent.name}</span>
+                        {nextAgent && (
+                          <>
+                            <ArrowRight size={10} className="text-[var(--aethel-text-tertiary)]" />
+                            <nextAgent.icon size={10} className={nextAgent.color} />
+                          </>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-[var(--aethel-text-secondary)]">{task.description}</p>
+                      {task.startTime && task.endTime && (
+                        <span className="text-[9px] text-[var(--aethel-text-quaternary)]">
+                          {task.endTime - task.startTime}ms
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {isThinking && (
           <div

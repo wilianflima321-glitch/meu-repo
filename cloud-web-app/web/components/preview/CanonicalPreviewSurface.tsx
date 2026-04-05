@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { createHMRBridge, type HMRBridge } from '@/lib/preview/hmr-bridge';
+import { MagicWandChat } from './MagicWandChat';
+import { useMagicWand } from './useMagicWand';
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -508,6 +510,10 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
   } = props;
 
   const { runtime, provision, switchToInline } = usePreviewRuntime(projectId, autoProvision);
+  const { magicWandState, openMagicWand, closeMagicWand, handleSendMessage } = useMagicWand((message, context) => {
+    // Handle Magic Wand message - could be passed up to parent or sent to AI
+    console.log('Magic Wand message:', message, context);
+  });
 
   // Determine effective URL
   const effectiveUrl = externalRuntimeUrl || runtime.runtimeUrl;
@@ -616,6 +622,27 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
           <div className="absolute top-1 right-1 px-2 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)] text-[10px] rounded-full">
             Desatualizado
           </div>
+        )}
+        {/* Magic Wand Button */}
+        <button
+          type="button"
+          onClick={(e) => openMagicWand(e)}
+          className="absolute bottom-4 right-4 rounded-full bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] p-3 shadow-lg transition hover:brightness-110 hover:scale-105"
+          title="Magic Wand - Clique em um elemento para editar com IA"
+          aria-label="Magic Wand"
+        >
+          <svg className="w-5 h-5 text-[var(--aethel-text-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </button>
+        {/* Magic Wand Chat */}
+        {magicWandState.isOpen && (
+          <MagicWandChat
+            position={magicWandState.position}
+            elementInfo={magicWandState.elementInfo}
+            onClose={closeMagicWand}
+            onSendMessage={handleSendMessage}
+          />
         )}
       </div>
     </div>

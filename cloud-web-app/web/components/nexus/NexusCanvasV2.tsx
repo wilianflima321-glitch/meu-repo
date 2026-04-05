@@ -38,6 +38,8 @@ interface NexusCanvasProps {
   onSceneChange?: (scene: SceneObject[]) => void;
   enablePhysics?: boolean;
   renderMode?: 'draft' | 'cinematic';
+  isAIPainting?: boolean;
+  paintingProgress?: number;
 }
 
 // Canonical scene/canvas preview primitive for dashboard-facing 3D surfaces.
@@ -48,6 +50,8 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
   onSceneChange,
   enablePhysics = true,
   renderMode = 'draft',
+  isAIPainting = false,
+  paintingProgress = 0,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -276,6 +280,82 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
           <div>Renderizador: WebGL</div>
           <div>Mode: {renderMode}</div>
         </div>
+
+        {/* AI Painting Overlay */}
+        {isAIPainting && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(59, 130, 246, 0.9))',
+              color: '#ffffff',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              zIndex: 101,
+              fontFamily: 'system-ui',
+              fontSize: '12px',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '50%',
+                  background: '#ffffff',
+                  animation: 'pulse 1.5s ease-in-out infinite',
+                }}
+              />
+              <span style={{ fontWeight: 600 }}>IA Criando</span>
+            </div>
+            <div style={{ marginTop: '8px', fontSize: '11px', opacity: 0.9 }}>
+              {paintingProgress.toFixed(0)}% concluído
+            </div>
+            <div
+              style={{
+                marginTop: '8px',
+                height: '4px',
+                background: 'rgba(255, 255, 255, 0.3)',
+                borderRadius: '2px',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  height: '100%',
+                  width: `${paintingProgress}%`,
+                  background: '#ffffff',
+                  transition: 'width 0.3s ease',
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* AI Painting Particles Effect */}
+        {isAIPainting && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              zIndex: 50,
+            }}
+          >
+            <style>
+              {`
+                @keyframes pulse {
+                  0%, 100% { opacity: 1; transform: scale(1); }
+                  50% { opacity: 0.7; transform: scale(1.1); }
+                }
+              `}
+            </style>
+          </div>
+        )}
       </div>
     </div>
   );
