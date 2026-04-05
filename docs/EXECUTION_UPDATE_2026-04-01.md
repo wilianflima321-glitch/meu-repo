@@ -16,7 +16,9 @@ Atualização: 2026-04-05
 4. Normalização de microcopy PT-BR no `ModernIDEShell` (labels de preview, dock e comandos).
 5. Limpeza de encoding PT-BR em strings dos módulos IDE (remoção de sequências `Ã` em arquivos de chat/preview/diagnóstico).
 6. `ModernIDEShell` definido como shell padrão no `FullscreenIDE` (sem dependência de query param).
-7. QA local executado com scripts do repositório (ver “Validações”).
+7. Console de execução real no AI Console:
+   - novo `TaskOpsPanel` no `AIChatPanelPro` com criação de plano via `/api/studio/tasks/plan` e leitura via `/api/studio/tasks/[id]`.
+8. QA local executado com scripts do repositório (ver “Validações”).
 
 ## Validações executadas (com evidência)
 
@@ -33,7 +35,7 @@ Atualização: 2026-04-05
 - `GitIntegration`, `IntelliSense`, `ErrorHighlighting`
 
 **Integrado no `AIChatPanelPro.tsx`**
-- `MemoryPanel`, `ApprovalCard`, `CodeDiffPreview`
+- `MemoryPanel`, `ApprovalCard`, `CodeDiffPreview`, `TaskOpsPanel` (plano de execução real via API de tarefas)
 
 **`ModernIDEShell` como padrão**
 - O shell moderno agora é o fluxo padrão do `FullscreenIDE`.
@@ -49,6 +51,8 @@ Atualização: 2026-04-05
 - `cloud-web-app/web/components/ide/ProfessionalViewport3D.tsx` (tipografia)
 - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` (microcopy PT-BR)
 - `cloud-web-app/web/components/ide/FullscreenIDE.tsx` (shell padrão)
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` (tab de execução real + integração do `TaskOpsPanel`)
+- `cloud-web-app/web/components/ide/TaskOpsPanel.tsx` (novo painel de execução real)
 - `cloud-web-app/web/app/admin/ai-monitor/page.tsx` (type="button")
 - `cloud-web-app/web/lib/hot-reload/hot-reload-server.ts` (type="button" no overlay)
 - `cloud-web-app/web/lib/profiler-integrated.ts` (type="button" no overlay)

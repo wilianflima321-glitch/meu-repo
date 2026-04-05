@@ -19,6 +19,7 @@
 4. Microcopy PT-BR no `ModernIDEShell` (labels de preview/dock).
 5. Limpeza de encoding PT-BR em strings do IDE (remoção de sequências `Ã`).
 6. `ModernIDEShell` definido como shell padrão do `FullscreenIDE`.
+7. Tab de execução real no AI Console com criação de planos via `/api/studio/tasks/plan` e leitura via `/api/studio/tasks/[id]`.
 
 ## Dívida confirmada (último scan disponível)
 
@@ -29,7 +30,7 @@
 ## Integração (verificada)
 
 - `FullscreenIDE.tsx` integra **DevicePreview / ConsoleIntegration / ProfessionalViewport3D / GitIntegration / IntelliSense / ErrorHighlighting**.
-- `AIChatPanelPro.tsx` integra **MemoryPanel / ApprovalCard / CodeDiffPreview**.
+- `AIChatPanelPro.tsx` integra **MemoryPanel / ApprovalCard / CodeDiffPreview / TaskOpsPanel**.
 - `ModernIDEShell.tsx` agora é o shell padrão no IDE.
 
 ## Próximos passos por blocos (baseline fornecido + ajustes da wave)

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useEffect, useCallback, type FormEvent } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo, type FormEvent } from 'react'
 import { ptBR } from '@/lib/locales/pt-BR'
 import {
   Send,
@@ -45,6 +45,7 @@ import {
   Clock,
   DollarSign,
   Activity,
+  ClipboardList,
 } from 'lucide-react'
 import {
   DEFAULT_MODELS,
@@ -72,6 +73,7 @@ import {
 import { MemoryPanel } from './MemoryPanel'
 import { ApprovalCard } from './ApprovalCard'
 import { CodeDiffPreview } from './CodeDiffPreview'
+import { TaskOpsPanel } from './TaskOpsPanel'
 import { MentionChip, SuggestionList, useMentions } from '@/lib/copilot/mention-parser'
 
 const QUICK_PROMPTS = [
@@ -704,10 +706,15 @@ export default function AIChatPanelPro({
   codebaseContextPreview,
 }: AIChatPanelProps) {
   const [showModelSelector, setShowModelSelector] = useState(false)
-  const [opsTab, setOpsTab] = useState<'memory' | 'approval' | 'diff'>('memory')
+  const [opsTab, setOpsTab] = useState<'memory' | 'approval' | 'diff' | 'execution'>('memory')
   const [showAdvancedControls, setShowAdvancedControls] = useState(false)
   const [consoleMode, setConsoleMode] = useState<'ask' | 'plan' | 'execute' | 'review' | 'live'>('ask')
   const [attachments, setAttachments] = useState<Attachment[]>([])
+  const lastUserGoal = useMemo(() => {
+    const list = messages ?? []
+    const last = [...list].reverse().find((item) => item.role === 'user')
+    return last?.content?.trim() || ''
+  }, [messages])
   const [showHistorySidebar, setShowHistorySidebar] = useState(showHistory)
   const [agentCount, setAgentCount] = useState(1)
   const [isAIWorking, setIsAIWorking] = useState(false)
@@ -1597,6 +1604,7 @@ export default function AIChatPanelPro({
               { id: 'memory' as const, label: 'Memória', icon: Brain },
               { id: 'approval' as const, label: 'Aprovação', icon: Check },
               { id: 'diff' as const, label: 'Diff', icon: Code },
+              { id: 'execution' as const, label: 'Execução', icon: ClipboardList },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -1630,6 +1638,9 @@ export default function AIChatPanelPro({
                 onAcceptLine={() => undefined}
                 onRejectLine={() => undefined}
               />
+            )}
+            {opsTab === 'execution' && (
+              <TaskOpsPanel projectId={projectId} defaultGoal={lastUserGoal} />
             )}
           </div>
         </aside>
