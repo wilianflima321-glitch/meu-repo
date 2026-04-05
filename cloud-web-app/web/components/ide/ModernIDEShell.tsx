@@ -288,7 +288,7 @@ export function ModernIDEShell({
                   }}
                 >
                   <Play size={14} />
-                  Preview
+                  Prévia
                 </span>
                 <button type="button"
                   onClick={() => togglePanel('preview')}
@@ -457,7 +457,7 @@ function IDEHeader({
           />
           <PanelToggle
             icon={<Play size={16} />}
-            label="Preview"
+            label="Prévia"
             active={panelState.preview.open}
             onClick={() => onTogglePanel('preview')}
           />
@@ -559,11 +559,11 @@ function BottomDock({ panelState, onTogglePanel }: BottomDockProps) {
   };
 
   const dockItems = [
-    { id: 'sidebar', icon: <FolderTree size={16} />, label: 'Explorer', shortcut: 'Ctrl+Shift+E' },
-    { id: 'search', icon: <Search size={16} />, label: 'Search', shortcut: 'Ctrl+Shift+F' },
-    { id: 'git', icon: <GitBranch size={16} />, label: 'Source Control', shortcut: 'Ctrl+Shift+G' },
-    { id: 'debug', icon: <Sparkles size={16} />, label: 'AI Console', shortcut: 'Ctrl+Shift+A' },
-    { id: 'extensions', icon: <Layers size={16} />, label: 'Extensions', shortcut: 'Ctrl+Shift+X' },
+    { id: 'sidebar', icon: <FolderTree size={16} />, label: 'Arquivos', shortcut: 'Ctrl+Shift+E' },
+    { id: 'search', icon: <Search size={16} />, label: 'Buscar', shortcut: 'Ctrl+Shift+F' },
+    { id: 'git', icon: <GitBranch size={16} />, label: 'Controle de código', shortcut: 'Ctrl+Shift+G' },
+    { id: 'debug', icon: <Sparkles size={16} />, label: 'Console IA', shortcut: 'Ctrl+Shift+A' },
+    { id: 'extensions', icon: <Layers size={16} />, label: 'Extensões', shortcut: 'Ctrl+Shift+X' },
   ] as const;
 
   return (
@@ -694,7 +694,7 @@ function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
     { id: 'sidebar', icon: <FolderTree size={20} />, label: 'Arquivos' },
     { id: 'editor', icon: <Code2 size={20} />, label: 'Editor' },
     { id: 'chat', icon: <MessageSquare size={20} />, label: 'Copiloto' },
-    { id: 'preview', icon: <Play size={20} />, label: 'Preview' },
+    { id: 'preview', icon: <Play size={20} />, label: 'Prévia' },
   ] as const;
 
   return (

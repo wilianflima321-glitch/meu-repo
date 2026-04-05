@@ -16,12 +16,14 @@
    - `PreviewViewport3D.tsx`, `PropertiesPanel3D.tsx`, `Outliner3D.tsx`, `Timeline3D.tsx`, `AssetBrowser3D.tsx`, `AIViewportAssistant.tsx`, `ProfessionalViewport3D.tsx`.
 3. Acessibilidade pontual em botões inline e overlays:
    - `app/admin/ai-monitor/page.tsx`, `hot-reload-server.ts`, `profiler-integrated.ts`.
+4. Microcopy PT-BR no `ModernIDEShell` (labels de preview/dock).
+5. Limpeza de encoding PT-BR em strings do IDE (remoção de sequências `Ã`).
 
 ## Dívida confirmada (último scan disponível)
 
 - Botões sem `type="button"`: 0 (via `tools/check-button-types.mjs`).
 - Cores hardcoded (Tailwind): 0 (via `tools/check-hardcoded-colors.mjs`).
-- Hotspots de microcopy em inglês: **16873** ocorrências (heurístico por regex).
+- Hotspots de microcopy em inglês: **16869** ocorrências (heurístico por regex).
 
 ## Integração (verificada)
 
