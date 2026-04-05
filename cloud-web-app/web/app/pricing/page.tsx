@@ -15,7 +15,7 @@ function formatStorage(bytes: number) {
 }
 
 function formatLimit(value: number) {
-  return value < 0 - 'Ilimitado' : String(value)
+  return value < 0 ? 'Ilimitado' : String(value)
 }
 
 const FAQ_ITEMS = [
@@ -69,8 +69,8 @@ export default function PricingPage() {
       const annualBRLFallback = Math.round((plan.priceBRL || 0) * 12 * 0.8)
       return {
         ...plan,
-        displayPrice: isAnnual - (plan.priceAnnual -- annualFallback) : plan.price,
-        displayPriceBRL: isAnnual - (plan.priceAnnualBRL -- annualBRLFallback) : plan.priceBRL,
+        displayPrice: isAnnual ? (plan.priceAnnual ?? annualFallback) : plan.price,
+        displayPriceBRL: isAnnual ? (plan.priceAnnualBRL ?? annualBRLFallback) : plan.priceBRL,
       }
     })
   }, [isAnnual])
@@ -121,7 +121,7 @@ export default function PricingPage() {
                   type="button"
                   onClick={() => setBillingCycle('month')}
                   className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                    billingCycle === 'month' - 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+                    billingCycle === 'month' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   Mensal
@@ -130,7 +130,7 @@ export default function PricingPage() {
                   type="button"
                   onClick={() => setBillingCycle('year')}
                   className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                    billingCycle === 'year' - 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+                    billingCycle === 'year' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                   }`}
                 >
                   Anual
@@ -188,11 +188,11 @@ export default function PricingPage() {
                 key={plan.id}
                 className={`relative flex h-full flex-col rounded-[24px] border p-5 transition-all ${
                   plan.popular
-                    - 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] to-transparent shadow-xl'
+                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] to-transparent shadow-xl'
                     : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'
                 }`}
               >
-                {plan.popular - (
+                {plan.popular ? (
                   <div className="absolute -top-3.5 left-6 rounded-full bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-4 py-1 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg">
                     Melhor equilibrio
                   </div>
@@ -207,11 +207,11 @@ export default function PricingPage() {
                 <div className="mb-5 border-b border-[var(--aethel-border-subtle)] pb-5">
                   <div className="flex items-end gap-2">
                     <span className="text-3xl font-bold text-[var(--aethel-text-primary)]">R${plan.displayPriceBRL}</span>
-                    <span className="pb-1 text-xs text-[var(--aethel-text-tertiary)]">/{isAnnual - 'ano' : 'mes'}</span>
+                    <span className="pb-1 text-xs text-[var(--aethel-text-tertiary)]">/{isAnnual ? 'ano' : 'mes'}</span>
                   </div>
-                  <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">US${plan.displayPrice}/{isAnnual - 'ano' : 'mes'}</p>
+                  <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">US${plan.displayPrice}/{isAnnual ? 'ano' : 'mes'}</p>
                   <p className="mt-2 text-[11px] text-[var(--aethel-text-tertiary)]">
-                    Cobranca {isAnnual - 'anual' : 'mensal'}  impostos nao inclusos
+                    Cobranca {isAnnual ? 'anual' : 'mensal'}  impostos nao inclusos
                   </p>
                 </div>
 
@@ -241,9 +241,9 @@ export default function PricingPage() {
                 </ul>
 
                 <Link
-                  href={`/dashboard-tab=billing&plan=${plan.id}&interval=${isAnnual - 'year' : 'month'}`}
+                  href={`/dashboard-tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`}
                   className={`aethel-button w-full rounded-xl px-4 py-3 text-sm font-semibold ${
-                    plan.popular - 'aethel-button-primary shadow-lg' : 'aethel-button-secondary'
+                    plan.popular ? 'aethel-button-primary shadow-lg' : 'aethel-button-secondary'
                   }`}
                 >
                   Selecionar {plan.name}
@@ -253,7 +253,7 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {enterprisePlan - (
+        {enterprisePlan ? (
           <section className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
             <article className="overflow-hidden rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[linear-gradient(135deg,var(--aethel-panel),var(--aethel-panel-soft))] shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
               <div className="grid gap-8 p-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:p-8">
@@ -275,7 +275,7 @@ export default function PricingPage() {
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Preco base</p>
                     <p className="mt-2 text-3xl font-bold text-[var(--aethel-text-primary)]">R${enterprisePlan.displayPriceBRL}</p>
-                    <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">US${enterprisePlan.displayPrice}/{isAnnual - 'ano' : 'mes'}</p>
+                    <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">US${enterprisePlan.displayPrice}/{isAnnual ? 'ano' : 'mes'}</p>
                   </div>
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Capacidade</p>
@@ -366,17 +366,17 @@ export default function PricingPage() {
               >
                 <button
                   type="button"
-                  onClick={() => setOpenFaq(openFaq === i - null : i)}
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="flex w-full items-center justify-between p-5 text-left"
                   aria-expanded={openFaq === i}
                 >
                   <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{item.q}</span>
-                  <span className={`ml-4 flex-shrink-0 text-[var(--aethel-text-tertiary)] transition-transform duration-200 ${openFaq === i - 'rotate-180' : ''}`}>
+                  <span className={`ml-4 flex-shrink-0 text-[var(--aethel-text-tertiary)] transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`}>
                     <Codicon name='chevron-down' />
                   </span>
                 </button>
                 <div
-                  className={`overflow-hidden transition-all duration-300 ${openFaq === i - 'max-h-48 pb-5' : 'max-h-0'}`}
+                  className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-48 pb-5' : 'max-h-0'}`}
                 >
                   <p className="px-5 text-sm leading-relaxed text-[var(--aethel-text-secondary)]">{item.a}</p>
                 </div>

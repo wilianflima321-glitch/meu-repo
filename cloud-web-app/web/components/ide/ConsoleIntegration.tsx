@@ -8,16 +8,16 @@ interface ConsoleLog {
   type: 'log' | 'warn' | 'error' | 'info' | 'debug'
   message: string
   timestamp: number
-  source: string
-  stack: string
+  source?: string
+  stack?: string
 }
 
 interface ConsoleIntegrationProps {
-  onClear: () => void
-  filter: ConsoleLog['type'][]
+  onClear?: () => void
+  filter?: ConsoleLog['type'][]
 }
 
-export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps) {
+export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: ConsoleIntegrationProps) {
   const [logs, setLogs] = useState<ConsoleLog[]>([])
   const [activeFilter, setActiveFilter] = useState<ConsoleLog['type'] | 'all'>('all')
   const [isExpanded, setIsExpanded] = useState(false)
@@ -33,7 +33,7 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
 
     const addLog = (type: ConsoleLog['type'], args: any[]) => {
       const message = args.map(arg => 
-        typeof arg === 'object'  JSON.stringify(arg, null, 2) : String(arg)
+        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
       ).join(' ')
       
       const log: ConsoleLog = {
@@ -41,7 +41,8 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
         type,
         message,
         timestamp: Date.now(),
-        stack: type === 'error' && args[0].stack  args[0].stack : undefined,
+        source: 'browser',
+        stack: type === 'error' && args[0].stack ? args[0].stack : undefined,
       }
       
       setLogs(prev => [...prev.slice(-99), log]) // Keep last 100 logs
@@ -77,13 +78,13 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
     }
   }, [])
 
-  const filteredLogs = activeFilter === 'all' 
-     logs 
+  const filteredLogs = activeFilter === 'all'
+    ? logs
     : logs.filter(log => log.type === activeFilter)
 
   const clearLogs = () => {
     setLogs([])
-    onClear.()
+    onClear()
   }
 
   const getLogIcon = (type: ConsoleLog['type']) => {
@@ -156,9 +157,9 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title={isExpanded  'Recolher' : 'Expandir'}
+            title={isExpanded ? 'Recolher' : 'Expandir'}
           >
-            <X className={`w-3.5 h-3.5 transition-transform ${isExpanded  'rotate-45' : ''}`} />
+           <X className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-45' : ''}`} />
           </button>
         </div>
       </div>
@@ -172,7 +173,7 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
               type="button"
               onClick={() => setActiveFilter('all')}
               className={`px-2 py-1 text-[10px] rounded transition-colors ${
-                activeFilter === 'all'
+                activeFilter === 'all' ?
                    'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -183,7 +184,7 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
               type="button"
               onClick={() => setActiveFilter('error')}
               className={`px-2 py-1 text-[10px] rounded transition-colors ${
-                activeFilter === 'error'
+                activeFilter === 'error' ?
                    'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -194,7 +195,7 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
               type="button"
               onClick={() => setActiveFilter('warn')}
               className={`px-2 py-1 text-[10px] rounded transition-colors ${
-                activeFilter === 'warn'
+                activeFilter === 'warn' ?
                    'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -205,7 +206,7 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
               type="button"
               onClick={() => setActiveFilter('log')}
               className={`px-2 py-1 text-[10px] rounded transition-colors ${
-                activeFilter === 'log'
+                activeFilter === 'log' ?
                    'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -222,7 +223,7 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
           ref={containerRef}
           className="flex-1 overflow-auto max-h-48 p-3 space-y-1 font-mono text-xs"
         >
-          {filteredLogs.length === 0  (
+          {filteredLogs.length === 0 ? (
             <div className="flex items-center justify-center h-full text-[var(--aethel-text-tertiary)]">
               Nenhum log ainda
             </div>
@@ -243,7 +244,7 @@ export function ConsoleIntegration({ onClear, filter }: ConsoleIntegrationProps)
                   <div className="whitespace-pre-wrap break-all">{log.message}</div>
                   {log.stack && (
                     <details className="mt-1">
-                      <summary className="cursor-pointer text-[10px] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]">
+                     <summary className="cursor-pointer text-[10px] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]">
                         Stack trace
                       </summary>
                       <pre className="mt-1 text-[10px] text-[var(--aethel-text-quaternary)] whitespace-pre-wrap">

@@ -14,18 +14,18 @@ interface ApprovalCardProps {
   changes: Change[]
   onApprove: (changes: Change[]) => void
   onReject: (changes: Change[]) => void
-  onApprovePartial: (change: Change) => void
-  onRejectPartial: (change: Change) => void
-  estimatedCost: number
-  estimatedDuration: number
+  onApprovePartial?: (change: Change) => void
+  onRejectPartial?: (change: Change) => void
+  estimatedCost?: number
+  estimatedDuration?: number
 }
 
 export function ApprovalCard({
   changes,
   onApprove,
   onReject,
-  onApprovePartial,
-  onRejectPartial,
+  onApprovePartial = () => undefined,
+  onRejectPartial = () => undefined,
   estimatedCost = 0,
   estimatedDuration = 0,
 }: ApprovalCardProps) {
@@ -93,7 +93,7 @@ export function ApprovalCard({
           onClick={() => setExpanded(!expanded)}
           className="p-1 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
         >
-          {expanded  <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
       </div>
 
@@ -106,13 +106,13 @@ export function ApprovalCard({
                 {estimatedCost > 0 && (
                   <div className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
                     <AlertTriangle className="w-3.5 h-3.5 text-[var(--aethel-warning-light)]" />
-                    <span>Custo estimado: ${estimatedCost.toFixed(4)}</span>
+                   <span>Custo estimado: ${estimatedCost.toFixed(4)}</span>
                   </div>
                 )}
                 {estimatedDuration > 0 && (
                   <div className="flex items-center gap-1 text-[var(--aethel-text-secondary)]">
                     <Clock className="w-3.5 h-3.5 text-[var(--aethel-info-light)]" />
-                    <span>Duração estimada: {estimatedDuration}s</span>
+                   <span>Duração estimada: {estimatedDuration}s</span>
                   </div>
                 )}
               </div>
@@ -132,7 +132,7 @@ export function ApprovalCard({
                 <div
                   key={change.filePath}
                   className={`rounded-lg border p-3 transition-colors ${
-                    isSelected
+                    isSelected ?
                        'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
                       : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
                   }`}
@@ -151,7 +151,7 @@ export function ApprovalCard({
                           <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{change.lineChanges} linha(s)</span>
                         </div>
                         <div className="text-[10px] text-[var(--aethel-text-tertiary)]">
-                          {change.newContent.length > change.oldContent.length  '+' : ''}
+                          {change.newContent.length > change.oldContent.length ? '+' : ''}
                           {change.newContent.length - change.oldContent.length} caracteres
                         </div>
                       </div>
@@ -159,7 +159,7 @@ export function ApprovalCard({
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
-                        onClick={() => setViewingChange(viewingChange === change.filePath  null : change.filePath)}
+                      onClick={() => setViewingChange(viewingChange === change.filePath ? null : change.filePath)}
                         className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
                         title="Ver diff"
                       >

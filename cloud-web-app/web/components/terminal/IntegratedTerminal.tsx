@@ -438,7 +438,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
               </button>
             </button>
           ))}
-          <button type="button"
+          <Button type="button"
             variant="ghost"
             size="icon"
             onClick={() => createTerminal()}
@@ -450,7 +450,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
 
         {/* Actions */}
         <div className="flex items-center gap-1">
-          <button type="button"
+          <Button type="button"
             variant="ghost"
             size="icon"
             onClick={() => setShowSearch(!showSearch)}
@@ -458,7 +458,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           >
             <Search className="h-3 w-3" />
           </Button>
-          <button type="button"
+          <Button type="button"
             variant="ghost"
             size="icon"
             onClick={copySelection}
@@ -466,7 +466,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           >
             <Copy className="h-3 w-3" />
           </Button>
-          <button type="button"
+          <Button type="button"
             variant="ghost"
             size="icon"
             onClick={() => {
@@ -477,7 +477,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           >
             <Trash2 className="h-3 w-3" />
           </Button>
-          <button type="button"
+          <Button type="button"
             variant="ghost"
             size="icon"
             onClick={() => setIsMaximized(!isMaximized)}
@@ -502,7 +502,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
             placeholder="Search..."
             className="h-6 text-xs bg-[var(--aethel-surface-primary)] border-[var(--aethel-border-primary)]"
           />
-          <button type="button"
+          <Button type="button"
             variant="ghost"
             size="sm"
             onClick={() => {
@@ -513,7 +513,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
           >
             Next
           </Button>
-          <button type="button"
+          <Button type="button"
             variant="ghost"
             size="sm"
             onClick={() => {

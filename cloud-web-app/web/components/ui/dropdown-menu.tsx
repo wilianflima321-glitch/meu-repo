@@ -62,6 +62,7 @@ export function DropdownMenuTrigger({
   ...props
 }: { children: ReactNode; asChild?: boolean } & ButtonHTMLAttributes<HTMLButtonElement>) {
   const { open, setOpen, triggerRef } = useDropdownMenuContext();
+  const triggerButtonRef = triggerRef as React.RefObject<HTMLButtonElement>;
 
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children as React.ReactElement, {
@@ -77,8 +78,7 @@ export function DropdownMenuTrigger({
 
   return (
     <button
-      type="button"
-      ref={triggerRef as React.RefObject<HTMLButtonElement>}
+      ref={triggerButtonRef}
       type="button"
       {...props}
       onClick={(event) => {

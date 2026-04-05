@@ -27,6 +27,7 @@ import {
   Filter,
   RefreshCw
 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 // ============================================================================
 // TYPES
@@ -271,7 +272,7 @@ const SymbolItem: React.FC<SymbolItemProps> = ({
       aria-selected={isActive}
     >
       {/* Expand/Collapse Toggle */}
-      <button type="button"
+      <Button type="button"
         className={`
           p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors
           ${!hasChildren ? 'invisible' : ''}
@@ -287,7 +288,7 @@ const SymbolItem: React.FC<SymbolItemProps> = ({
         ) : (
           <ChevronRight size={14} className="text-[var(--aethel-text-secondary)]" />
         )}
-      </button>
+      </Button>
 
       {/* Symbol Icon */}
       {getSymbolIcon(symbol.kind)}

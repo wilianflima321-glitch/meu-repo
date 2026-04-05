@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     const persistSnapshot = async (params: {
       sessionId: string
       status?: Record<string, unknown>
-      steps?: Array<Record<string, unknown>>
+      steps?: unknown[]
     }) => {
       const existing = await loadAgentSnapshot({ userId: auth.userId, sessionId: params.sessionId })
       const snapshot: AgentSnapshot = {
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
         task: typeof task === 'string' ? task : existing?.task,
         config: typeof config === 'object' && config ? config : existing?.config,
         status: params.status ?? existing?.status,
-        steps: params.steps ?? existing?.steps,
+        steps: (params.steps ?? existing?.steps) as Record<string, unknown>[] | undefined,
       }
       await saveAgentSnapshot(snapshot)
     }

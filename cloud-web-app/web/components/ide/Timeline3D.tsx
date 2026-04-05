@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Play, Pause, SkipBack, SkipForward, Scissors, Plus, Layers, Clock, Keyframe } from 'lucide-react'
+import { Play, Pause, SkipBack, SkipForward, Scissors, Plus, Layers, Clock, KeyRound } from 'lucide-react'
 
 interface TimelineProps {
-  duration: number
-  currentTime: number
-  onTimeChange: (time: number) => void
-  onPlay: () => void
-  onPause: () => void
+  duration?: number
+  currentTime?: number
+  onTimeChange?: (time: number) => void
+  onPlay?: () => void
+  onPause?: () => void
 }
 
 interface KeyframeData {
@@ -18,7 +18,13 @@ interface KeyframeData {
   value: any
 }
 
-export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay, onPause }: TimelineProps) {
+export function Timeline3D({
+  duration = 10,
+  currentTime = 0,
+  onTimeChange = () => undefined,
+  onPlay = () => undefined,
+  onPause = () => undefined,
+}: TimelineProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [keyframes, setKeyframes] = useState<KeyframeData[]>([
     { id: '1', time: 0, track: 'position', value: { x: 0, y: 0, z: 0 } },
@@ -33,7 +39,7 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
     let interval: NodeJS.Timeout
     if (isPlaying) {
       interval = setInterval(() => {
-        onTimeChange.(Math.min(currentTime + 0.1, duration))
+        onTimeChange(Math.min(currentTime + 0.1, duration))
         if (currentTime >= duration) {
           setIsPlaying(false)
         }
@@ -47,7 +53,7 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
     const rect = timelineRef.current.getBoundingClientRect()
     const x = e.clientX - rect.left
     const percentage = x / rect.width
-    onTimeChange.(percentage * duration)
+    onTimeChange(percentage * duration)
   }
 
   const tracks = ['position', 'rotation', 'scale', 'visibility', 'material']
@@ -61,18 +67,18 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
             type="button"
             onClick={() => setIsPlaying(!isPlaying)}
             className={`p-1.5 rounded-lg transition-colors ${
-              isPlaying
+              isPlaying ?
                  'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
             }`}
-            title={isPlaying  'Pausar' : 'Reproduzir'}
+            title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
-            {isPlaying  <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
           </button>
 
           <button
             type="button"
-            onClick={() => onTimeChange.(0)}
+            onClick={() => onTimeChange(0)}
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
             title="Início"
           >
@@ -81,7 +87,7 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
 
           <button
             type="button"
-            onClick={() => onTimeChange.(duration)}
+            onClick={() => onTimeChange(duration)}
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
             title="Fim"
           >
@@ -95,7 +101,7 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
             title="Adicionar Keyframe"
           >
-            <Keyframe className="w-3.5 h-3.5" />
+            <KeyRound className="w-3.5 h-3.5" />
           </button>
 
           <button
@@ -115,7 +121,7 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
           </button>
         </div>
 
-        <div className="flex items-center gap-4 text-[10px]">
+        <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
             <Clock className="w-3 h-3" />
             <span className="font-mono">{currentTime.toFixed(2)}s / {duration.toFixed(2)}s</span>
@@ -134,8 +140,8 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
           {tracks.map((track) => (
             <div
               key={track}
-              className={`h-8 flex items-center px-3 text-[10px] cursor-pointer transition-colors ${
-                selectedTrack === track
+              className={`h-8 flex items-center px-3 text-xs cursor-pointer transition-colors ${
+                selectedTrack === track ?
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]'
                   : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
               }`}
@@ -152,7 +158,7 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
           <div className="h-6 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] flex">
             {Array.from({ length: 20 }).map((_, i) => (
               <div key={i} className="flex-1 border-l border-[var(--aethel-border-secondary)]">
-                <span className="text-[8px] text-[var(--aethel-text-quaternary)] ml-1">{(i * 0.5).toFixed(1)}s</span>
+                <span className="text-xs text-[var(--aethel-text-quaternary)] ml-1">{(i * 0.5).toFixed(1)}s</span>
               </div>
             ))}
           </div>
@@ -193,3 +199,5 @@ export function Timeline({ duration = 10, currentTime = 0, onTimeChange, onPlay,
     </div>
   )
 }
+
+export { Timeline3D as Timeline }

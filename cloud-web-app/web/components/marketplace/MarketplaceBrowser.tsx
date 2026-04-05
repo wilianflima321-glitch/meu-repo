@@ -290,7 +290,7 @@ function AssetCard({
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button type="button"
+                    <Button type="button"
                         size="icon"
                         variant="ghost"
                         onClick={(e) => {
@@ -302,7 +302,7 @@ function AssetCard({
                         <Heart className={cn("w-4 h-4", isFavorited && "fill-red-500 text-[var(--aethel-error-light)]")} />
                     </Button>
                     {!asset.isFree && (
-                        <button type="button"
+                        <Button type="button"
                             size="icon"
                             variant="ghost"
                             onClick={(e) => {
@@ -367,7 +367,7 @@ function AssetCard({
                             exit={{ opacity: 0 }}
                             className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] flex items-center justify-center gap-2"
                         >
-                            <button type="button"
+                            <Button type="button"
                                 size="sm"
                                 variant="secondary"
                                 onClick={(e) => {
@@ -383,7 +383,7 @@ function AssetCard({
                                 {isFavorited ? 'Salvo' : 'Salvar'}
                             </Button>
                             {!asset.isFree && (
-                                <button type="button"
+                                <Button type="button"
                                     size="sm"
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -578,7 +578,7 @@ function FilterSidebar({
             </div>
 
             {/* Clear Filters */}
-            <button type="button"
+            <Button type="button"
                 variant="outline"
                 className="w-full"
                 onClick={() => onChange({
@@ -721,7 +721,7 @@ export default function MarketplaceBrowser() {
 
                     {/* View controls */}
                     <div className="flex items-center gap-2">
-                        <button type="button"
+                        <Button type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => setShowFilters(!showFilters)}
@@ -755,7 +755,7 @@ export default function MarketplaceBrowser() {
                         </div>
 
                         <div className="flex border rounded-md">
-                            <button type="button"
+                            <Button type="button"
                                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                                 size="icon"
                                 className="rounded-r-none"
@@ -763,7 +763,7 @@ export default function MarketplaceBrowser() {
                             >
                                 <Grid className="w-4 h-4" />
                             </Button>
-                            <button type="button"
+                            <Button type="button"
                                 variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                                 size="icon"
                                 className="rounded-l-none"
@@ -844,7 +844,7 @@ export default function MarketplaceBrowser() {
                                     </p>
                                     <button type="button" onClick={() => refetch()}>
                                         Tentar Novamente
-                                    </Button>
+                                    </button>
                                 </div>
                             )}
 
@@ -856,7 +856,7 @@ export default function MarketplaceBrowser() {
                                     <p className="text-muted-foreground mb-4">
                                         Tente ajustar seus filtros ou termos de busca
                                     </p>
-                                    <button type="button"
+                                    <Button type="button"
                                         variant="outline"
                                         onClick={() => handleFilterChange({
                                             query: '',
@@ -898,7 +898,7 @@ export default function MarketplaceBrowser() {
                                     {/* Pagination */}
                                     {data.hasMore && (
                                         <div className="flex justify-center mt-8">
-                                            <button type="button"
+                                            <Button type="button"
                                                 variant="outline"
                                                 onClick={() => setPage(p => p + 1)}
                                                 disabled={isLoading}

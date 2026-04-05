@@ -182,7 +182,7 @@ export function InlineEditModal({
                 ⌘K
               </kbd>
             </div>
-            <button type="button"
+            <Button type="button"
               variant="ghost"
               size="icon"
               onClick={onClose}
@@ -206,7 +206,7 @@ export function InlineEditModal({
           {/* Quick Actions */}
           <div className="flex gap-2 px-4 py-3 border-b border-[var(--aethel-border-primary)]">
             {QUICK_ACTIONS.map((action) => (
-              <button type="button"
+              <Button type="button"
                 key={action.id}
                 variant="outline"
                 size="sm"
@@ -236,7 +236,7 @@ export function InlineEditModal({
                   }
                 }}
               />
-              <button type="button"
+              <Button type="button"
                 size="sm"
                 onClick={handleSubmit}
                 disabled={isProcessing || (!instruction.trim() && !selectedCode)}
@@ -294,7 +294,7 @@ export function InlineEditModal({
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <button type="button"
+                  <Button type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowDiff(!showDiff)}
@@ -323,7 +323,7 @@ export function InlineEditModal({
 
               {/* Actions */}
               <div className="flex items-center justify-between px-4 py-3 bg-[var(--aethel-surface-tertiary)]">
-                <button type="button"
+                <Button type="button"
                   variant="ghost"
                   onClick={() => setSuggestion(null)}
                   className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
@@ -332,7 +332,7 @@ export function InlineEditModal({
                   Regenerar
                 </Button>
                 <div className="flex gap-2">
-                  <button type="button"
+                  <Button type="button"
                     variant="outline"
                     onClick={onClose}
                     className="border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)]"
@@ -346,7 +346,7 @@ export function InlineEditModal({
                     <Check className="h-4 w-4 mr-2" />
                     Aplicar
                     <kbd className="ml-2 px-1 py-0.5 text-xs bg-[var(--aethel-success-dark)] rounded">⌘↵</kbd>
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>

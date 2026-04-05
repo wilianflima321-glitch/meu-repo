@@ -24,14 +24,14 @@ export function ProfessionalViewport3D() {
     <div className="flex h-full w-full bg-[var(--aethel-surface-primary)]">
       {/* Left Panel */}
       {showLeftPanel && (
-        <div className={`w-64 border-r border-[var(--aethel-border-primary)] flex-shrink-0 transition-all ${layoutMode === 'maximized'  'hidden' : ''}`}>
+        <div className={`w-64 border-r border-[var(--aethel-border-primary)] flex-shrink-0 transition-all ${layoutMode === 'maximized' ? 'hidden' : ''}`}>
           {/* Panel Tabs */}
           <div className="flex items-center gap-1 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-2">
             <button
               type="button"
               onClick={() => setLeftPanel('outliner')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[10px] rounded transition-colors ${
-                leftPanel === 'outliner'
+              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors ${
+                leftPanel === 'outliner' ?
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -42,8 +42,8 @@ export function ProfessionalViewport3D() {
             <button
               type="button"
               onClick={() => setLeftPanel('assets')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[10px] rounded transition-colors ${
-                leftPanel === 'assets'
+              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors ${
+                leftPanel === 'assets' ?
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -72,7 +72,7 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setShowLeftPanel(!showLeftPanel)}
               className={`p-1.5 rounded transition-colors ${
-                showLeftPanel
+                showLeftPanel ?
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -84,7 +84,7 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setShowRightPanel(!showRightPanel)}
               className={`p-1.5 rounded transition-colors ${
-                showRightPanel
+                showRightPanel ?
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -96,7 +96,7 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setShowTimeline(!showTimeline)}
               className={`p-1.5 rounded transition-colors ${
-                showTimeline
+                showTimeline ?
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -108,7 +108,7 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setShowAI(!showAI)}
               className={`p-1.5 rounded transition-colors ${
-                showAI
+                showAI ?
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
@@ -121,7 +121,7 @@ export function ProfessionalViewport3D() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setLayoutMode(layoutMode === 'maximized'  'default' : 'maximized')}
+              onClick={() => setLayoutMode(layoutMode === 'maximized' ? 'default' : 'maximized')}
               className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
               title="Maximizar viewport"
             >
@@ -155,7 +155,7 @@ export function ProfessionalViewport3D() {
 
       {/* Right Panel */}
       {showRightPanel && (
-        <div className={`w-72 border-l border-[var(--aethel-border-primary)] flex-shrink-0 transition-all ${layoutMode === 'maximized'  'hidden' : ''}`}>
+        <div className={`w-72 border-l border-[var(--aethel-border-primary)] flex-shrink-0 transition-all ${layoutMode === 'maximized' ? 'hidden' : ''}`}>
           <PropertiesPanel3D />
         </div>
       )}

@@ -32,13 +32,13 @@ export async function loadExecutionContext(params: {
     })
     const virtualPath = toVirtualWorkspacePath(absolutePath, root)
     const current = await fsRuntime.readFile(absolutePath)
-    const dependencyImpact = await analyzeDependencyImpact({
+    const dependencyImpact = (await analyzeDependencyImpact({
       workspaceRoot: root,
       absolutePath,
     }).catch(() => ({
       localImports: [],
       externalImports: [],
-    }))
+    }))) as { localImports?: string[]; externalImports?: string[] }
 
     files.push({
       virtualPath,

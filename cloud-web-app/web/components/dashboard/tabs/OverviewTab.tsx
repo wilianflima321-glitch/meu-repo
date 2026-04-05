@@ -190,7 +190,7 @@ export function OverviewTab({
             title="Projetos Recentes"
             description="Continue de onde parou"
             action={
-              <button type="button" variant="ghost" size="sm" onClick={onCreateProject}>
+              <Button type="button" variant="ghost" size="sm" onClick={onCreateProject}>
                 Ver todos
               </Button>
             }
@@ -275,14 +275,14 @@ export function OverviewTab({
             </p>
           </div>
           <div className="flex gap-3">
-            <button type="button" variant="secondary" onClick={onOpenChat}>
+            <Button type="button" variant="secondary" onClick={onOpenChat}>
               <MessageSquare className="w-4 h-4 mr-2" />
               Chat AI
             </Button>
             <button type="button" onClick={onCreateProject}>
               <FolderKanban className="w-4 h-4 mr-2" />
               Novo Projeto
-            </Button>
+            </button>
           </div>
         </div>
       </Card>

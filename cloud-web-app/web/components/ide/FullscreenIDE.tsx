@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import type * as monacoEditor from 'monaco-editor'
-import IDELayout from "@/components/ide/IDELayout";
 import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
 import CanonicalPreviewSurface from "@/components/preview/CanonicalPreviewSurface";
@@ -1196,10 +1195,10 @@ function IDEContent() {
                     )}
                   </div>
                 </div>
-              )}
-            </div>
-          </IDELayout>
-        )}
+              )
+            }}
+          </ModernIDEShell>
+        ) : null}
       </TabProvider>
     </CommandPaletteProvider>
   );

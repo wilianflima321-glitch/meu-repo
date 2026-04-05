@@ -362,7 +362,7 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-[var(--aethel-text-secondary)]">Gradiente Raiz -> Ponta</label>
+        <label className="text-sm font-medium text-[var(--aethel-text-secondary)]">Gradiente Raiz → Ponta</label>
         <button type="button"
           onClick={addStop}
           className="px-2 py-1 text-xs bg-[var(--aethel-info)] hover:brightness-110 rounded text-[var(--aethel-text-primary)] transition-colors"

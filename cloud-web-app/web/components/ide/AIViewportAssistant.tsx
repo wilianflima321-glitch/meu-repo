@@ -13,11 +13,11 @@ interface AIStep {
 }
 
 interface AIViewportAssistantProps {
-  onAction: (action: string) => void
-  onGenerate: (prompt: string) => void
+  onAction?: (action: string) => void
+  onGenerate?: (prompt: string) => void
 }
 
-export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistantProps) {
+export function AIViewportAssistant({ onAction = () => undefined, onGenerate = () => undefined }: AIViewportAssistantProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentStep, setCurrentStep] = useState<AIStep | null>(null)
@@ -35,6 +35,7 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
         type: 'thinking',
         message: 'Analisando solicitação...',
         details: userPrompt,
+        duration: 1500,
         timestamp: Date.now(),
       },
       {
@@ -42,6 +43,7 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
         type: 'search',
         message: 'Pesquisando referências...',
         details: 'Buscando em base de conhecimento...',
+        duration: 1500,
         timestamp: Date.now(),
       },
       {
@@ -49,6 +51,7 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
         type: 'code',
         message: 'Gerando código 3D...',
         details: 'Criando geometria e materiais...',
+        duration: 1500,
         timestamp: Date.now(),
       },
       {
@@ -56,6 +59,7 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
         type: 'preview',
         message: 'Renderizando preview...',
         details: 'Aplicando iluminação e texturas...',
+        duration: 1500,
         timestamp: Date.now(),
       },
       {
@@ -63,6 +67,7 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
         type: 'complete',
         message: 'Concluído!',
         details: 'Objeto 3D gerado com sucesso.',
+        duration: 1500,
         timestamp: Date.now(),
       },
     ]
@@ -88,12 +93,12 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-lg ${isProcessing  'bg-[var(--aethel-primary)] animate-pulse' : 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'}`}>
-            <Sparkles className={`w-4 h-4 ${isProcessing  'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-primary-light)]'}`} />
+          <div className={`p-1.5 rounded-lg ${isProcessing ? 'bg-[var(--aethel-primary)] animate-pulse' : 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'}`}>
+            <Sparkles className={`w-4 h-4 ${isProcessing ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-primary-light)]'}`} />
           </div>
-          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">AI Assistant</span>
+          <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">Assistente IA</span>
           {isProcessing && (
-            <span className="text-[10px] text-[var(--aethel-info-light)]">Processando...</span>
+            <span className="text-xs text-[var(--aethel-info-light)]">Processando...</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -101,20 +106,20 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
             type="button"
             onClick={() => setIsPlaying(!isPlaying)}
             className={`p-1.5 rounded-lg transition-colors ${
-              isPlaying
+              isPlaying ?
                  'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
             }`}
-            title={isPlaying  'Pausar' : 'Reproduzir'}
+            title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
-            {isPlaying  <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
           </button>
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
             className="p-1.5 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
           >
-            {isExpanded  <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -123,7 +128,7 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
         <>
           {/* Process Visualization */}
           <div className="flex-1 overflow-auto p-4 space-y-3">
-            {steps.length === 0 && !isProcessing  (
+            {steps.length === 0 && !isProcessing ? (
               <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)] text-sm">
                 <div className="text-center">
                   <Brain className="w-12 h-12 mx-auto mb-3 text-[var(--aethel-text-quaternary)]" />
@@ -134,22 +139,22 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
             ) : (
               <div className="space-y-2">
                 {steps.map((step, index) => {
-                  const isCurrent = currentStep.id === step.id
+                  const isCurrent = currentStep?.id === step.id
                   return (
                     <div
                       key={step.id}
                       className={`rounded-lg border p-3 transition-all ${
-                        isCurrent
+                        isCurrent ?
                            'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
                           : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`p-1.5 rounded-lg ${
-                          step.type === 'thinking'  'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' :
-                          step.type === 'search'  'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]' :
-                          step.type === 'code'  'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]' :
-                          step.type === 'preview'  'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)]' :
+                          step.type === 'thinking' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' :
+                          step.type === 'search' ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]' :
+                          step.type === 'code' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]' :
+                          step.type === 'preview' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)]' :
                           'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
                         }`}>
                           {step.type === 'thinking' && <Brain className="w-3.5 h-3.5 text-[var(--aethel-info-light)]" />}
@@ -162,11 +167,11 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-xs font-medium text-[var(--aethel-text-primary)]">{step.message}</span>
                             {isCurrent && (
-                              <span className="text-[10px] text-[var(--aethel-primary-light)] animate-pulse">Em progresso</span>
+                              <span className="text-xs text-[var(--aethel-primary-light)] animate-pulse">Em progresso</span>
                             )}
                           </div>
                           {step.details && (
-                            <p className="text-[10px] text-[var(--aethel-text-secondary)]">{step.details}</p>
+                            <p className="text-xs text-[var(--aethel-text-secondary)]">{step.details}</p>
                           )}
                         </div>
                         {isCurrent && (
@@ -207,21 +212,21 @@ export function AIViewportAssistant({ onAction, onGenerate }: AIViewportAssistan
               <button
                 type="button"
                 onClick={() => setPrompt('Crie um cubo vermelho girando')}
-                className="flex-1 px-2 py-1.5 text-[10px] rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)] transition-colors"
+                className="flex-1 px-2 py-1.5 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)] transition-colors"
               >
                 Cubo girando
               </button>
               <button
                 type="button"
                 onClick={() => setPrompt('Crie uma esfera com material metálico')}
-                className="flex-1 px-2 py-1.5 text-[10px] rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)] transition-colors"
+                className="flex-1 px-2 py-1.5 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)] transition-colors"
               >
                 Esfera metálica
               </button>
               <button
                 type="button"
                 onClick={() => setPrompt('Crie uma luz direcional com sombras')}
-                className="flex-1 px-2 py-1.5 text-[10px] rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)] transition-colors"
+                className="flex-1 px-2 py-1.5 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)] transition-colors"
               >
                 Luz com sombras
               </button>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, type MouseEvent as ReactMouseEvent } from 'react'
 
 interface ElementInfo {
   tag: string
@@ -20,11 +20,11 @@ export function useMagicWand(onSendMessage: (message: string, context: { element
     position: { x: 0, y: 0 },
   })
 
-  const openMagicWand = useCallback((event: MouseEvent, elementInfo?: ElementInfo) => {
+  const openMagicWand = useCallback((event: MouseEvent | ReactMouseEvent<HTMLElement>, elementInfo?: ElementInfo) => {
     event.preventDefault()
     event.stopPropagation()
-    
-    const target = event.target as HTMLElement
+    const nativeEvent = 'nativeEvent' in event ? event.nativeEvent : event
+    const target = nativeEvent.target as HTMLElement
     const rect = target.getBoundingClientRect()
     
     setMagicWandState({

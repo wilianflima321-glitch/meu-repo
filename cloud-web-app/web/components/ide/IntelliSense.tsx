@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Lightbulb, Code, Function, Variable, Type, ChevronRight, Star, Clock, FileText } from 'lucide-react'
+import { Lightbulb, Code, Variable, Type, ChevronRight, Star, Clock, FileText } from 'lucide-react'
 
 interface Suggestion {
   id: string
@@ -14,11 +14,11 @@ interface Suggestion {
 }
 
 interface IntelliSenseProps {
-  suggestions: Suggestion[]
-  onSuggestionSelect: (suggestion: Suggestion) => void
-  triggerCharacter: string
-  position: { x: number; y: number }
-  visible: boolean
+  suggestions?: Suggestion[]
+  onSuggestionSelect?: (suggestion: Suggestion) => void
+  triggerCharacter?: string
+  position?: { x: number; y: number }
+  visible?: boolean
 }
 
 export function IntelliSense({ suggestions = [], onSuggestionSelect, visible = true }: IntelliSenseProps) {
@@ -32,7 +32,7 @@ export function IntelliSense({ suggestions = [], onSuggestionSelect, visible = t
   const getSuggestionIcon = (type: Suggestion['type']) => {
     switch (type) {
       case 'function':
-        return <Function className="w-3.5 h-3.5 text-[var(--aethel-primary-light)]" />
+        return <Code className="w-3.5 h-3.5 text-[var(--aethel-primary-light)]" />
       case 'variable':
         return <Variable className="w-3.5 h-3.5 text-[var(--aethel-info-light)]" />
       case 'type':
@@ -85,18 +85,18 @@ export function IntelliSense({ suggestions = [], onSuggestionSelect, visible = t
 
       {/* Suggestions */}
       <div className="max-h-64 overflow-auto py-1">
-        {filteredSuggestions.length === 0  (
+        {filteredSuggestions.length === 0 ? (
           <div className="px-4 py-8 text-center text-[var(--aethel-text-tertiary)] text-sm">
-            {suggestions.length === 0  'Integração Monaco pendente' : 'Nenhuma sugestão encontrada'}
+            {suggestions.length === 0 ? 'Integração Monaco pendente' : 'Nenhuma sugestão encontrada'}
           </div>
         ) : (
           filteredSuggestions.map((suggestion, index) => (
             <button
               key={suggestion.id}
               type="button"
-              onClick={() => onSuggestionSelect.(suggestion)}
+              onClick={() => onSuggestionSelect?.(suggestion)}
               className={`w-full flex items-start gap-3 px-3 py-2 text-left transition-colors ${
-                index === selectedIndex
+                index === selectedIndex ?
                    'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)]'
                   : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
               }`}

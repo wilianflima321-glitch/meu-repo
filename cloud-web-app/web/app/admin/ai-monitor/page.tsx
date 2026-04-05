@@ -448,7 +448,6 @@ export default function AgentMonitorPage() {
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
                   isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
                 }`}
-                type="button"
               >
                 {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
                 {isPaused ? 'Retomar' : 'Pausar stream'}
@@ -456,7 +455,6 @@ export default function AgentMonitorPage() {
               <button type="button"
                 onClick={() => void refreshCalls()}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]"
-                type="button"
               >
                 <RefreshCw className="w-4 h-4" />
                 Atualizar
@@ -465,7 +463,6 @@ export default function AgentMonitorPage() {
                 onClick={() => void runCoreLoopDrill()}
                 disabled={isRunningDrill}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] text-[var(--aethel-info-light)] disabled:opacity-60"
-                type="button"
               >
                 <Zap className="w-4 h-4" />
                 {isRunningDrill ? 'Rodando drill...' : 'Run Drill'}
@@ -474,7 +471,6 @@ export default function AgentMonitorPage() {
                 onClick={() => void runProductionProbe()}
                 disabled={isRunningProductionProbe}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] text-[var(--aethel-success)] disabled:opacity-60"
-                type="button"
               >
                 <Zap className="w-4 h-4" />
                 {isRunningProductionProbe ? 'Rodando probe...' : 'Run Production Probe'}

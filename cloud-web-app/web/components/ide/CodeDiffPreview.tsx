@@ -114,7 +114,7 @@ export function CodeDiffPreview({
               onClick={() => setSelectedFile(diff.path)}
               className={`flex items-center gap-2 px-4 py-2 text-xs border-b-2 transition-colors whitespace-nowrap ${
                 selectedFile === diff.path
-                   'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] text-[var(--aethel-text-primary)]'
+                  ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] text-[var(--aethel-text-primary)]'
                   : 'border-transparent text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
               }`}
             >

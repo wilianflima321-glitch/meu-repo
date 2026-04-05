@@ -5,7 +5,7 @@ import { X, Sparkles, Eye, Layers, Code, Palette, Box, Settings, Wand2 } from 'l
 
 interface MagicWandChatProps {
   position: { x: number; y: number }
-  elementInfo: {
+  elementInfo?: {
     tag: string
     id?: string
     className?: string
@@ -25,6 +25,10 @@ interface MagicWandChatProps {
 }
 
 export function MagicWandChat({ position, elementInfo, onClose, onSendMessage }: MagicWandChatProps) {
+  const safeElementInfo =
+    elementInfo ?? {
+      tag: 'element',
+    }
   const [inputValue, setInputValue] = useState('')
   const [activeTab, setActiveTab] = useState<'chat' | 'inspector'>('chat')
 
@@ -37,7 +41,7 @@ export function MagicWandChat({ position, elementInfo, onClose, onSendMessage }:
 
   const handleSend = () => {
     if (!inputValue.trim()) return
-    onSendMessage(inputValue, { element: elementInfo })
+    onSendMessage(inputValue, { element: safeElementInfo })
     setInputValue('')
   }
 
@@ -72,16 +76,16 @@ export function MagicWandChat({ position, elementInfo, onClose, onSendMessage }:
             <div className="mb-3 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
               <div className="flex items-center gap-2 text-[10px] text-[var(--aethel-text-tertiary)]">
                 <Code className="w-3 h-3" />
-                <span className="font-mono">{elementInfo.tag}</span>
-                {elementInfo.id && <span className="font-mono">#{elementInfo.id}</span>}
-                {elementInfo.className && <span className="font-mono">.{elementInfo.className}</span>}
+                <span className="font-mono">{safeElementInfo.tag}</span>
+                {safeElementInfo.id && <span className="font-mono">#{safeElementInfo.id}</span>}
+                {safeElementInfo.className && <span className="font-mono">.{safeElementInfo.className}</span>}
               </div>
-              {elementInfo.textContent && <div className="mt-1 text-[10px] text-[var(--aethel-text-secondary)] truncate">{elementInfo.textContent}</div>}
+              {safeElementInfo.textContent && <div className="mt-1 text-[10px] text-[var(--aethel-text-secondary)] truncate">{safeElementInfo.textContent}</div>}
             </div>
 
             <div className="mb-3 grid grid-cols-2 gap-2">
               {quickActions.map((action) => (
-                <button key={action.label} type="button" onClick={() => setInputValue(`${action.prompt} ${elementInfo.tag}`)} className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-2 py-1.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)]">
+                <button key={action.label} type="button" onClick={() => setInputValue(`${action.prompt} ${safeElementInfo.tag}`)} className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-2 py-1.5 text-[10px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] hover:text-[var(--aethel-text-primary)]">
                   <action.icon className="w-3 h-3" />
                   {action.label}
                 </button>
@@ -98,42 +102,42 @@ export function MagicWandChat({ position, elementInfo, onClose, onSendMessage }:
             <div>
               <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider"><Code className="w-3 h-3" />Element</div>
               <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
-                <div className="font-mono text-[10px] text-[var(--aethel-text-primary)]">{elementInfo.tag}</div>
-                {elementInfo.id && <div className="mt-1 font-mono text-[10px] text-[var(--aethel-text-secondary)]">id: {elementInfo.id}</div>}
-                {elementInfo.className && <div className="mt-1 font-mono text-[10px] text-[var(--aethel-text-secondary)]">class: {elementInfo.className}</div>}
+                <div className="font-mono text-[10px] text-[var(--aethel-text-primary)]">{safeElementInfo.tag}</div>
+                {safeElementInfo.id && <div className="mt-1 font-mono text-[10px] text-[var(--aethel-text-secondary)]">id: {safeElementInfo.id}</div>}
+                {safeElementInfo.className && <div className="mt-1 font-mono text-[10px] text-[var(--aethel-text-secondary)]">class: {safeElementInfo.className}</div>}
               </div>
             </div>
 
-            {elementInfo.computedStyles && (
+            {safeElementInfo.computedStyles && (
               <div>
                 <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider"><Palette className="w-3 h-3" />Styles</div>
                 <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2 max-h-32 overflow-auto">
-                  {Object.entries(elementInfo.computedStyles).slice(0, 10).map(([key, value]) => (
+                  {Object.entries(safeElementInfo.computedStyles).slice(0, 10).map(([key, value]) => (
                     <div key={key} className="flex items-center justify-between py-1"><span className="font-mono text-[10px] text-[var(--aethel-text-secondary)]">{key}</span><span className="font-mono text-[10px] text-[var(--aethel-text-tertiary)]">{value}</span></div>
                   ))}
                 </div>
               </div>
             )}
 
-            {elementInfo.boxModel && (
+            {safeElementInfo.boxModel && (
               <div>
                 <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider"><Box className="w-3 h-3" />Box Model</div>
                 <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
                   <div className="grid grid-cols-2 gap-2 text-[10px]">
-                    <div><span className="text-[var(--aethel-text-tertiary)]">Width:</span><span className="ml-1 font-mono text-[var(--aethel-text-secondary)]">{elementInfo.boxModel.width}px</span></div>
-                    <div><span className="text-[var(--aethel-text-tertiary)]">Height:</span><span className="ml-1 font-mono text-[var(--aethel-text-secondary)]">{elementInfo.boxModel.height}px</span></div>
-                    <div><span className="text-[var(--aethel-text-tertiary)]">Margin:</span><span className="ml-1 font-mono text-[var(--aethel-text-secondary)]">{elementInfo.boxModel.margin}</span></div>
-                    <div><span className="text-[var(--aethel-text-tertiary)]">Padding:</span><span className="ml-1 font-mono text-[var(--aethel-text-secondary)]">{elementInfo.boxModel.padding}</span></div>
+                    <div><span className="text-[var(--aethel-text-tertiary)]">Width:</span><span className="ml-1 font-mono text-[var(--aethel-text-secondary)]">{safeElementInfo.boxModel.width}px</span></div>
+                    <div><span className="text-[var(--aethel-text-tertiary)]">Height:</span><span className="ml-1 font-mono text-[var(--aethel-text-secondary)]">{safeElementInfo.boxModel.height}px</span></div>
+                    <div><span className="text-[var(--aethel-text-tertiary)]">Margin:</span><span className="ml-1 font-mono text-[var(--aethel-text-secondary)]">{safeElementInfo.boxModel.margin}</span></div>
+                    <div><span className="text-[var(--aethel-text-tertiary)]">Padding:</span><span className="ml-1 font-mono text-[var(--aethel-text-secondary)]">{safeElementInfo.boxModel.padding}</span></div>
                   </div>
                 </div>
               </div>
             )}
 
-            {elementInfo.attributes && Object.keys(elementInfo.attributes).length > 0 && (
+            {safeElementInfo.attributes && Object.keys(safeElementInfo.attributes).length > 0 && (
               <div>
                 <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider"><Settings className="w-3 h-3" />Attributes</div>
                 <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-2">
-                  {Object.entries(elementInfo.attributes).map(([key, value]) => (
+                  {Object.entries(safeElementInfo.attributes).map(([key, value]) => (
                     <div key={key} className="flex items-center justify-between py-1"><span className="font-mono text-[10px] text-[var(--aethel-text-secondary)]">{key}</span><span className="font-mono text-[10px] text-[var(--aethel-text-tertiary)] truncate max-w-24">{value}</span></div>
                   ))}
                 </div>

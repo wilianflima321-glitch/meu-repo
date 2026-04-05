@@ -17,10 +17,10 @@ interface Error {
 }
 
 interface ErrorHighlightingProps {
-  errors: Error[]
-  onErrorSelect: (error: Error) => void
-  onErrorDismiss: (errorId: string) => void
-  onFixError: (errorId: string) => void
+  errors?: Error[]
+  onErrorSelect?: (error: Error) => void
+  onErrorDismiss?: (errorId: string) => void
+  onFixError?: (errorId: string) => void
 }
 
 export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, onFixError }: ErrorHighlightingProps) {
@@ -75,7 +75,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
           onClick={() => setExpanded(!expanded)}
           className="p-1 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
         >
-          {expanded  <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
       </div>
 
@@ -87,7 +87,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               type="button"
               onClick={() => setFilter('all')}
               className={`px-3 py-1 text-[10px] rounded-full transition-colors ${
-                filter === 'all'
+                filter === 'all' ?
                    'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
               }`}
@@ -98,7 +98,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               type="button"
               onClick={() => setFilter('error')}
               className={`px-3 py-1 text-[10px] rounded-full transition-colors ${
-                filter === 'error'
+                filter === 'error' ?
                    'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
               }`}
@@ -109,7 +109,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               type="button"
               onClick={() => setFilter('warning')}
               className={`px-3 py-1 text-[10px] rounded-full transition-colors ${
-                filter === 'warning'
+                filter === 'warning' ?
                    'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
               }`}
@@ -120,7 +120,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               type="button"
               onClick={() => setFilter('info')}
               className={`px-3 py-1 text-[10px] rounded-full transition-colors ${
-                filter === 'info'
+                filter === 'info' ?
                    'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
                   : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
               }`}
@@ -131,13 +131,13 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
 
           {/* Errors List */}
           <div className="flex-1 overflow-auto p-4 space-y-2">
-            {filteredErrors.length === 0  (
+            {filteredErrors.length === 0 ? (
               <div className="flex items-center justify-center py-8 text-[var(--aethel-text-tertiary)] text-sm">
                 <div className="text-center">
                   <CheckCircle className="w-12 h-12 mx-auto mb-3 text-[var(--aethel-success-light)]" />
-                  <p>{errors.length === 0  'Integração Monaco pendente' : 'Nenhum problema encontrado'}</p>
+                 <p>{errors.length === 0 ? 'Integração Monaco pendente' : 'Nenhum problema encontrado'}</p>
                   <p className="text-xs mt-1">
-                    {errors.length === 0  'Aguardando diagnósticos do editor.' : 'Seu código está limpo'}
+                    {errors.length === 0 ? 'Aguardando diagnósticos do editor.' : 'Seu código está limpo'}
                   </p>
                 </div>
               </div>
@@ -146,7 +146,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
                 <div
                   key={error.id}
                   className={`rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3 ${getSeverityColor(error.severity)} ${
-                    selectedError === error.id  'ring-2 ring-[var(--aethel-primary)]' : ''
+                    selectedError === error.id ? 'ring-2 ring-[var(--aethel-primary)]' : ''
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -159,7 +159,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
                         {error.fixable && (
                           <button
                             type="button"
-                            onClick={() => onFixError.(error.id)}
+                            onClick={() => onFixError?.(error.id)}
                             className="px-2 py-0.5 text-[10px] rounded bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] hover:brightness-110 transition-colors"
                           >
                             Fix
@@ -192,7 +192,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
-                        onClick={() => setSelectedError(selectedError === error.id  null : error.id)}
+                onClick={() => setSelectedError(selectedError === error.id ? null : error.id)}
                         className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
                         title="Ver detalhes"
                       >
@@ -200,7 +200,7 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
                       </button>
                       <button
                         type="button"
-                        onClick={() => onErrorDismiss.(error.id)}
+                    onClick={() => onErrorDismiss?.(error.id)}
                         className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] transition-colors"
                         title="Dispensar"
                       >

@@ -30,7 +30,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
 
   const handleAdd = () => {
     if (!newKey.trim() || !newValue.trim()) return
-    onAdd.({
+    onAdd({
       scope: activeScope,
       key: newKey.trim(),
       value: newValue.trim(),
@@ -42,7 +42,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
 
   const handleUpdate = (id: string) => {
     if (!editingValue.trim()) return
-    onUpdate.(id, editingValue.trim())
+    onUpdate(id, editingValue.trim())
     setEditingId(null)
     setEditingValue('')
   }
@@ -99,7 +99,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
             type="button"
             onClick={() => setActiveScope(scope)}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-xs font-medium transition-colors ${
-              activeScope === scope
+              activeScope === scope ?
                  `text-[var(--aethel-primary-light)] border-b-2 border-[var(--aethel-primary)]`
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
             }`}
@@ -153,7 +153,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
 
       {/* Memory List */}
       <div className="flex-1 overflow-auto p-3">
-        {filteredMemories.length === 0  (
+        {filteredMemories.length === 0 ? (
           <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)] text-xs">
             Nenhuma memória neste escopo
           </div>
@@ -187,7 +187,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
                     )}
                     <button
                       type="button"
-                      onClick={() => onDelete.(memory.id)}
+                      onClick={() => onDelete(memory.id)}
                       className="p-1 rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] transition-colors"
                       title="Excluir"
                     >
@@ -195,7 +195,7 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
                     </button>
                   </div>
                 </div>
-                {editingId === memory.id  (
+                {editingId === memory.id ? (
                   <>
                     <textarea
                       value={editingValue}

@@ -437,7 +437,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
             <div className={cn("flex items-center gap-2", className)}>
                 <audio ref={audioRef} src={src} preload="metadata" />
 
-                <button type="button"
+                <Button type="button"
                     size="icon"
                     variant="ghost"
                     className="h-8 w-8"
@@ -493,7 +493,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                     )}
 
                     <div className="flex items-center gap-2 mt-1">
-                        <button type="button"
+                        <Button type="button"
                             size="icon"
                             variant="ghost"
                             className="h-6 w-6"
@@ -577,7 +577,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
             <div className="flex items-center justify-center gap-2">
                 {/* Loop button */}
                 <Tooltip content={isLooped ? 'Disable loop (L)' : 'Enable loop (L)'}>
-                    <button type="button"
+                    <Button type="button"
                         size="icon"
                         variant={isLooped ? "secondary" : "ghost"}
                         onClick={() => setIsLooped(!isLooped)}
@@ -591,7 +591,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
 
                 {/* Skip back */}
                 <Tooltip content="Back 10s (←)">
-                    <button type="button"
+                    <Button type="button"
                         size="icon"
                         variant="ghost"
                         onClick={skipBack}
@@ -602,7 +602,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                 </Tooltip>
 
                 {/* Play/Pause */}
-                <button type="button"
+                <Button type="button"
                     size="icon"
                     className="h-12 w-12"
                     onClick={toggle}
@@ -619,7 +619,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
 
                 {/* Skip forward */}
                 <Tooltip content="Forward 10s (→)">
-                    <button type="button"
+                    <Button type="button"
                         size="icon"
                         variant="ghost"
                         onClick={skipForward}
@@ -636,7 +636,7 @@ const AudioPreview = forwardRef<AudioPreviewRef, AudioPreviewProps>(({
                     onMouseLeave={() => setShowVolumeSlider(false)}
                 >
                     <Tooltip content="Mute (M)">
-                        <button type="button"
+                        <Button type="button"
                             size="icon"
                             variant="ghost"
                             onClick={() => setIsMuted(!isMuted)}

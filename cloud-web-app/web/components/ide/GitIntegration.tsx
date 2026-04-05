@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { GitBranch, GitCommit, GitPullRequest, Refresh, Plus, X, Check, AlertTriangle, Clock } from 'lucide-react'
+import { GitBranch, GitCommit, GitPullRequest, RefreshCw, Plus, X, Check, AlertTriangle, Clock } from 'lucide-react'
 
 interface GitStatus {
   branch: string
@@ -100,7 +100,7 @@ export function GitIntegration({
             title="Enviar (push)"
             aria-label="Enviar (push)"
           >
-            <Refresh className="w-3.5 h-3.5" />
+            <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -145,7 +145,7 @@ export function GitIntegration({
             : status?.status === 'modified'
               ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]'
               : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
-      }`)}>
+      }`}>
         <div className="flex items-center gap-2">
           {status?.status === 'clean' && <Check className="w-3.5 h-3.5 text-[var(--aethel-success-light)]" />}
           {status?.status === 'conflict' && <AlertTriangle className="w-3.5 h-3.5 text-[var(--aethel-error-light)]" />}
@@ -236,7 +236,7 @@ export function GitIntegration({
               Sem histórico disponível (integração pendente).
             </div>
           ) : (
-            commits.map(commit => (
+            commits.map((commit) => (
               <div key={commit.id} className="flex items-start gap-2 px-2 py-2 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors">
                 <GitCommit className="w-3.5 h-3.5 text-[var(--aethel-primary-light)] mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -303,7 +303,7 @@ export function GitIntegration({
           className="flex items-center gap-2 rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 disabled:opacity-50"
         >
           <GitCommit className="w-3.5 h-3.5" />
-          Criar commit
+          Criar commit ?
         </button>
         <span className="text-[10px] text-[var(--aethel-text-tertiary)]">{status ? `Branch ${status.branch}` : 'Sem repositório ativo'}</span>
       </div>

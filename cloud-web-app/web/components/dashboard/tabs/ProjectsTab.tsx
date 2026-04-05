@@ -269,7 +269,7 @@ export function ProjectsTab({
               <p className="text-[var(--aethel-text-secondary)] mb-4">
                 Tente ajustar seus filtros de busca
               </p>
-              <button type="button"
+              <Button type="button"
                 variant="secondary"
                 onClick={() => {
                   setSearchQuery('')

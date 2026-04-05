@@ -857,7 +857,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         mode: 'managed',
         strategy: 'managed',
-        provider: managedProviderId || null,
+        provider: null,
       },
     })
   }

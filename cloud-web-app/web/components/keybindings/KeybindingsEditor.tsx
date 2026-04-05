@@ -382,8 +382,8 @@ export default function KeybindingsEditor({
 
   // Save and register with manager
   const handleSave = useCallback(() => {
-    const personalizado(s) = keybindings.filter((kb) => kb.source === 'user')
-    localStorage.setItem('keybindings', JSON.stringify(personalizado(s)))
+    const personalizados = keybindings.filter((kb) => kb.source === 'user')
+    localStorage.setItem('keybindings', JSON.stringify(personalizados))
 
     // Re-register all keybindings with the manager
     const manager = getKeybindingManager()

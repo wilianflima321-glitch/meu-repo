@@ -7,7 +7,7 @@ type Device = 'desktop' | 'tablet' | 'mobile'
 
 interface DevicePreviewProps {
   children: React.ReactNode
-  defaultDevice: Device
+  defaultDevice?: Device
 }
 
 const DEVICE_CONFIGS: Record<Device, { width: number; height: number; label: string }> = {
@@ -23,8 +23,8 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   const config = DEVICE_CONFIGS[device]
-  const effectiveWidth = isRotated  config.height : config.width
-  const effectiveHeight = isRotated  config.width : config.height
+  const effectiveWidth = isRotated ? config.height : config.width
+  const effectiveHeight = isRotated ? config.width : config.height
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 10, 200))
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 10, 50))
@@ -39,7 +39,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setDevice('desktop')}
             className={`p-2 rounded-lg transition-colors ${
-              device === 'desktop'
+              device === 'desktop' ?
                  'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
             }`}
@@ -51,7 +51,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setDevice('tablet')}
             className={`p-2 rounded-lg transition-colors ${
-              device === 'tablet'
+              device === 'tablet' ?
                  'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
             }`}
@@ -63,7 +63,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setDevice('mobile')}
             className={`p-2 rounded-lg transition-colors ${
-              device === 'mobile'
+              device === 'mobile' ?
                  'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
             }`}
@@ -79,7 +79,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setIsRotated(!isRotated)}
             className={`p-2 rounded-lg transition-colors ${
-              isRotated
+              isRotated ?
                  'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
             }`}
@@ -118,7 +118,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
             className={`p-2 rounded-lg transition-colors ${
-              isFullscreen
+              isFullscreen ?
                  'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
             }`}
@@ -136,7 +136,7 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
           style={{
             width: `${effectiveWidth * (zoom / 100)}px`,
             height: `${effectiveHeight * (zoom / 100)}px`,
-            transform: isFullscreen  'scale(1)' : 'scale(1)',
+            transform: isFullscreen ? 'scale(1)' : 'scale(1)',
           }}
         >
           {/* Device Frame Styling */}

@@ -196,7 +196,7 @@ function AssetCard({
 
                         {/* Actions */}
                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button type="button"
+                            <Button type="button"
                                 size="sm"
                                 onClick={handleDownload}
                                 disabled={isDownloading}
@@ -290,7 +290,7 @@ function AssetCard({
                             <button type="button" onClick={handleDownload} disabled={isDownloading}>
                                 <Download className="w-4 h-4 mr-2" />
                                 {isDownloading ? 'Baixando...' : 'Baixar'}
-                            </Button>
+                            </button>
                         </div>
                     </div>
 
@@ -556,7 +556,7 @@ export default function UserLibrary() {
 
                         {/* View toggle */}
                         <div className="flex border rounded-md">
-                            <button type="button"
+                            <Button type="button"
                                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                                 size="icon"
                                 className="rounded-r-none"
@@ -564,7 +564,7 @@ export default function UserLibrary() {
                             >
                                 <Grid className="w-4 h-4" />
                             </Button>
-                            <button type="button"
+                            <Button type="button"
                                 variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                                 size="icon"
                                 className="rounded-l-none"
@@ -729,12 +729,12 @@ export default function UserLibrary() {
                                             onChange={(e) => setNewCollectionName(e.target.value)}
                                         />
                                         <DialogFooter>
-                                            <button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                                            <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                                                 Cancelar
                                             </Button>
                                             <button type="button" onClick={handleCreateCollection}>
                                                 Criar
-                                            </Button>
+                                            </button>
                                         </DialogFooter>
                                     </DialogContent>
                                 </Dialog>
@@ -751,7 +751,7 @@ export default function UserLibrary() {
                                         <button type="button" onClick={() => setIsCreateDialogOpen(true)}>
                                             <Plus className="w-4 h-4 mr-2" />
                                             Criar colecao
-                                        </Button>
+                                        </button>
                                     }
                                 />
                             ) : (

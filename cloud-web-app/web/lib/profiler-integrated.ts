@@ -928,7 +928,7 @@ export class ProfilerOverlay {
       ${stats.hotPaths.length > 0 ? this.renderHotPaths(stats.hotPaths) : ''}
 
       <div style="margin-top: 10px; border-top: 1px solid #444; padding-top: 10px; text-align: center;">
-        <button onclick="window.aethelProfiler.exportData()" style="
+        <button type="button" onclick="window.aethelProfiler.exportData()" style="
           background: #2196F3;
           border: none;
           color: white;

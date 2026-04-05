@@ -974,7 +974,7 @@ export class HotReloadServer extends EventEmitter {
         html += '\\n\\nStack:\\n' + this.escapeHtml(error.stack);
       }
       html += '</pre>';
-      html += '<button onclick="document.getElementById(\\'hmr-error-overlay\\').remove()" style="position:absolute;top:20px;right:20px;background:#333;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Close</button>';
+      html += '<button type="button" onclick="document.getElementById(\\'hmr-error-overlay\\').remove()" style="position:absolute;top:20px;right:20px;background:#333;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;">Close</button>';
       html += '</div>';
       overlay.innerHTML = html;
       document.body.appendChild(overlay);

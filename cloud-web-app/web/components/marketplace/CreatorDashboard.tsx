@@ -207,7 +207,7 @@ function ErrorState({
         <div className="flex flex-col items-center justify-center py-8 gap-4">
             <AlertCircle className="w-10 h-10 text-destructive" />
             <p className="text-sm text-muted-foreground text-center">{message}</p>
-            <button type="button" variant="outline" size="sm" onClick={onRetry}>
+            <Button type="button" variant="outline" size="sm" onClick={onRetry}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Tentar novamente
             </Button>
@@ -741,7 +741,7 @@ function RecentSales() {
                             onRetry={() => refetch()}
                         />
                     )
-                ) : !sales || vendas.length === 0 ? (
+                ) : !vendas || vendas.length === 0 ? (
                     <EmptyState
                         icon={Inbox}
                         title="Sem vendas ainda"
@@ -749,7 +749,7 @@ function RecentSales() {
                     />
                 ) : (
                     <div className="space-y-4">
-                        {sales.map((sale) => (
+                        {vendas.map((sale) => (
                             <div key={sale.id} className="flex items-center gap-4">
                                 <Avatar>
                                     <AvatarFallback>{sale.buyerName.charAt(0)}</AvatarFallback>
@@ -851,7 +851,7 @@ export default function CreatorDashboard() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button type="button" variant="outline" onClick={handleRefetchAll} disabled={isRefreshing}>
+                        <Button type="button" variant="outline" onClick={handleRefetchAll} disabled={isRefreshing}>
                             <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                             Atualizar
                         </Button>

@@ -36,9 +36,9 @@ interface UserProfile {
   id: string
   email: string
   name: string
-  avatar-: string
+  avatar?: string
   createdAt: string
-  lastLogin-: string
+  lastLogin?: string
   plan: string
   timezone: string
   language: string
@@ -62,7 +62,7 @@ function ProfileSection({
   children
 }: {
   title: string
-  description-: string
+  description?: string
   children: React.ReactNode
 }) {
   return (
@@ -85,16 +85,16 @@ function SettingRow({
 }: {
   icon: React.ElementType
   label: string
-  value-: string | React.ReactNode
-  action-: React.ReactNode
-  danger-: boolean
+  value?: string | React.ReactNode
+  action?: React.ReactNode
+  danger?: boolean
 }) {
   return (
-    <div className={`flex items-center justify-between py-3 border-b border-[var(--aethel-border-secondary)]/50 last:border-0 ${danger - 'text-[var(--aethel-error)]' : ''}`}>
+    <div className={`flex items-center justify-between py-3 border-b border-[var(--aethel-border-secondary)]/50 last:border-0 ${danger ? 'text-[var(--aethel-error)]' : ''}`}>
       <div className="flex items-center gap-3">
         <Icon className="w-5 h-5 text-[var(--aethel-text-secondary)]" />
         <div>
-          <div className={`text-sm font-medium ${danger - 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-primary)]'}`}>{label}</div>
+          <div className={`text-sm font-medium ${danger ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-primary)]'}`}>{label}</div>
           {value && <div className="text-xs text-[var(--aethel-text-tertiary)]">{value}</div>}
         </div>
       </div>
@@ -145,11 +145,11 @@ export default function ProfilePage() {
     try {
       setLoading(true)
       const response = await AethelAPIClient.getProfile()
-      const data = (response as any)-.profile -- response
+      const data = (response as any)?.profile ?? response
       setProfile({
         id: data.id,
         email: data.email,
-        name: data.name || data.email-.split('@')[0] || 'Usuario',
+        name: data.name || data.email?.split('@')[0] || 'Usuario',
         avatar: data.avatar || undefined,
         createdAt: data.createdAt || new Date().toISOString(),
         lastLogin: data.lastLogin || undefined,
@@ -160,9 +160,9 @@ export default function ProfilePage() {
         emailVerified: Boolean(data.emailVerified),
         twoFactorEnabled: Boolean(data.twoFactorEnabled || data.mfaEnabled),
         notifications: {
-          email: data.notifications-.email -- true,
-          push: data.notifications-.push -- false,
-          marketing: data.notifications-.marketing -- false,
+          email: data.notifications?.email ?? true,
+          push: data.notifications?.push ?? false,
+          marketing: data.notifications?.marketing ?? false,
         }
       })
       setProfileError(null)
@@ -181,14 +181,14 @@ export default function ProfilePage() {
     setSaving(true)
     try {
       const response = await AethelAPIClient.updateProfile(updates)
-      const data = (response as any)-.profile -- response
+      const data = (response as any)?.profile ?? response
       setProfile({
         ...profile,
         ...updates,
         ...data,
         notifications: {
           ...profile.notifications,
-          ...(data-.notifications || {}),
+          ...(data?.notifications || {}),
         },
       })
     } catch (error) {
@@ -206,15 +206,15 @@ export default function ProfilePage() {
       const res = await fetch('/api/auth/2fa/setup', { method: 'POST' })
       const data = await res.json().catch(() => null)
       if (!res.ok) {
-        throw new Error(data-.error || 'Falha ao iniciar 2FA')
+        throw new Error(data?.error || 'Falha ao iniciar 2FA')
       }
       setTwoFactorSetup({
         qrCode: data.qrCode,
-        backupCodes: Array.isArray(data.backupCodes) - data.backupCodes : [],
+        backupCodes: Array.isArray(data.backupCodes) ? data.backupCodes : [],
       })
       setTwoFactorModal('setup')
     } catch (error) {
-      setTwoFactorError(error instanceof Error - error.message : 'Erro ao configurar 2FA')
+      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao configurar 2FA')
     } finally {
       setTwoFactorLoading(false)
     }
@@ -231,13 +231,13 @@ export default function ProfilePage() {
       })
       const data = await res.json().catch(() => null)
       if (!res.ok) {
-        throw new Error(data-.error || 'Falha ao validar 2FA')
+        throw new Error(data?.error || 'Falha ao validar 2FA')
       }
       setTwoFactorModal(null)
       setTwoFactorSetup(null)
       await loadProfile()
     } catch (error) {
-      setTwoFactorError(error instanceof Error - error.message : 'Erro ao validar 2FA')
+      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao validar 2FA')
     } finally {
       setTwoFactorLoading(false)
     }
@@ -254,14 +254,14 @@ export default function ProfilePage() {
       })
       const data = await res.json().catch(() => null)
       if (!res.ok) {
-        throw new Error(data-.error || 'Falha ao desativar 2FA')
+        throw new Error(data?.error || 'Falha ao desativar 2FA')
       }
       setTwoFactorModal(null)
       setTwoFactorCode('')
       setTwoFactorPassword('')
       await loadProfile()
     } catch (error) {
-      setTwoFactorError(error instanceof Error - error.message : 'Erro ao desativar 2FA')
+      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao desativar 2FA')
     } finally {
       setTwoFactorLoading(false)
     }
@@ -312,7 +312,7 @@ export default function ProfilePage() {
             {/* Avatar */}
             <div className="relative group">
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)] flex items-center justify-center text-3xl font-bold">
-                {profile.avatar - (
+                {profile.avatar ? (
                   <Image
                     src={profile.avatar}
                     alt={profile.name}
@@ -333,7 +333,7 @@ export default function ProfilePage() {
             {/* Info */}
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                {editingName - (
+                {editingName ? (
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
@@ -364,7 +364,7 @@ export default function ProfilePage() {
               <p className="text-[var(--aethel-text-secondary)]">{profile.email}</p>
               <div className="flex items-center gap-4 mt-2">
                 <span className="px-2 py-1 text-xs rounded-full bg-[var(--aethel-primary)]/20 text-[var(--aethel-primary-light)] border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]">
-                  {planLabels[profile.plan] -- profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
+                  {planLabels[profile.plan] ?? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                 </span>
                 {profile.emailVerified && (
                   <span className="flex items-center gap-1 text-xs text-[var(--aethel-success)]">
@@ -399,7 +399,7 @@ export default function ProfilePage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-4 border-b-2 transition-colors ${
                   activeTab === tab.id
-                    - 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+                    ? 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                     : 'border-transparent text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
                 }`}
               >
@@ -456,7 +456,7 @@ export default function ProfilePage() {
               <SettingRow
                 icon={CreditCard}
                 label="Plano atual"
-                value={planLabels[profile.plan] -- profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
+                value={planLabels[profile.plan] ?? profile.plan.charAt(0).toUpperCase() + profile.plan.slice(1)}
                 action={
                   <button type="button"
                     onClick={() => router.push('/billing')}
@@ -487,7 +487,7 @@ export default function ProfilePage() {
               <SettingRow
                 icon={Smartphone}
                 label="Autenticacao de dois fatores"
-                value={profile.twoFactorEnabled - 'Ativada' : 'Desativada'}
+                value={profile.twoFactorEnabled ? 'Ativada' : 'Desativada'}
                 action={
                   <button type="button"
                     onClick={() => {
@@ -503,11 +503,11 @@ export default function ProfilePage() {
                     disabled={twoFactorLoading}
                     className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                       profile.twoFactorEnabled
-                        - 'bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)]'
+                        ? 'bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)]'
                         : 'bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)]'
                     }`}
                   >
-                    {twoFactorLoading - 'Processando...' : profile.twoFactorEnabled - 'Desativar' : 'Ativar'}
+                    {twoFactorLoading ? 'Processando...' : profile.twoFactorEnabled ? 'Desativar' : 'Ativar'}
                   </button>
                 }
               />
@@ -539,7 +539,7 @@ export default function ProfilePage() {
               <SettingRow
                 icon={Palette}
                 label="Tema"
-                value={profile.theme === 'dark' - 'Escuro' : profile.theme === 'light' - 'Claro' : 'Sistema'}
+                value={profile.theme === 'dark' ? 'Escuro' : profile.theme === 'light' ? 'Claro' : 'Sistema'}
                 action={
                   <select
                     value={profile.theme}
@@ -558,7 +558,7 @@ export default function ProfilePage() {
               <SettingRow
                 icon={Globe}
                 label="Idioma"
-                value={profile.language === 'pt-BR' - 'Portugues (Brasil)' : 'Ingles'}
+                value={profile.language === 'pt-BR' ? 'Portugues (Brasil)' : 'Ingles'}
                 action={
                   <select
                     value={profile.language}
@@ -587,11 +587,11 @@ export default function ProfilePage() {
                       notifications: { ...profile.notifications, email: !profile.notifications.email }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.email - 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+                      profile.notifications.email ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-[var(--aethel-text-primary)] transform transition-transform ${
-                      profile.notifications.email - 'translate-x-6' : 'translate-x-1'
+                      profile.notifications.email ? 'translate-x-6' : 'translate-x-1'
                     }`} />
                   </button>
                 }
@@ -605,11 +605,11 @@ export default function ProfilePage() {
                       notifications: { ...profile.notifications, push: !profile.notifications.push }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.push - 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+                      profile.notifications.push ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-[var(--aethel-text-primary)] transform transition-transform ${
-                      profile.notifications.push - 'translate-x-6' : 'translate-x-1'
+                      profile.notifications.push ? 'translate-x-6' : 'translate-x-1'
                     }`} />
                   </button>
                 }
@@ -623,11 +623,11 @@ export default function ProfilePage() {
                       notifications: { ...profile.notifications, marketing: !profile.notifications.marketing }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.marketing - 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+                      profile.notifications.marketing ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-[var(--aethel-text-primary)] transform transition-transform ${
-                      profile.notifications.marketing - 'translate-x-6' : 'translate-x-1'
+                      profile.notifications.marketing ? 'translate-x-6' : 'translate-x-1'
                     }`} />
                   </button>
                 }
@@ -647,7 +647,7 @@ export default function ProfilePage() {
                 <Shield className="w-5 h-5 text-[var(--aethel-primary-light)]" />
               </div>
               <h3 className="text-xl font-bold text-[var(--aethel-text-primary)]">
-                {twoFactorModal === 'setup' - 'Ativar 2FA' : 'Desativar 2FA'}
+                {twoFactorModal === 'setup' ? 'Ativar 2FA' : 'Desativar 2FA'}
               </h3>
             </div>
 
@@ -659,7 +659,7 @@ export default function ProfilePage() {
 
             {twoFactorModal === 'setup' && (
               <div className="space-y-4">
-                {twoFactorSetup-.qrCode && (
+                {twoFactorSetup?.qrCode && (
                   <div className="flex flex-col items-center gap-3">
                     <Image
                       src={twoFactorSetup.qrCode}
@@ -682,7 +682,7 @@ export default function ProfilePage() {
                     placeholder="000000"
                   />
                 </div>
-                {twoFactorSetup-.backupCodes-.length - (
+                {twoFactorSetup?.backupCodes?.length ? (
                   <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)]/60 p-3">
                     <p className="text-xs text-[var(--aethel-text-secondary)] mb-2">Codigos de backup (salve em local seguro):</p>
                     <div className="grid grid-cols-2 gap-2 text-xs text-[var(--aethel-text-primary)]">
@@ -731,11 +731,11 @@ export default function ProfilePage() {
                 Cancelar
               </button>
               <button type="button"
-                onClick={twoFactorModal === 'setup' - confirmTwoFactorSetup : confirmTwoFactorDisable}
+                onClick={twoFactorModal === 'setup' ? confirmTwoFactorSetup : confirmTwoFactorDisable}
                 disabled={twoFactorLoading}
                 className="flex-1 px-4 py-2 bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] rounded-lg transition-colors"
               >
-                {twoFactorLoading - 'Processando...' : twoFactorModal === 'setup' - 'Confirmar' : 'Desativar'}
+                {twoFactorLoading ? 'Processando...' : twoFactorModal === 'setup' ? 'Confirmar' : 'Desativar'}
               </button>
             </div>
           </div>

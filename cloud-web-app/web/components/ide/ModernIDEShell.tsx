@@ -630,11 +630,11 @@ function StatusBar({ projectName, activeFileName }: StatusBarProps) {
           <span>main</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <AlertCircle size={12} style={{ color: tokens.colors.warning }} />
+          <AlertCircle size={12} style={{ color: tokens.colors.status.warning }} />
           <span>0</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <AlertCircle size={12} style={{ color: tokens.colors.error }} />
+          <AlertCircle size={12} style={{ color: tokens.colors.status.error }} />
           <span>0</span>
         </div>
       </div>
@@ -650,7 +650,7 @@ function StatusBar({ projectName, activeFileName }: StatusBarProps) {
       {/* Right Side */}
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'] }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <CheckCircle size={12} style={{ color: tokens.colors.success }} />
+          <CheckCircle size={12} style={{ color: tokens.colors.status.success }} />
           <span>Prettier</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>

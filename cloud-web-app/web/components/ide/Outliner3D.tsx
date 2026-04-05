@@ -1,27 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Box, Sphere, Lightbulb, Camera, Layers, Eye, EyeOff, Lock, Unlock } from 'lucide-react'
+import { ChevronDown, ChevronRight, Box, Circle, Lightbulb, Camera, Layers, Eye, EyeOff, Lock, Unlock } from 'lucide-react'
 
 interface SceneNode {
   id: string
   name: string
   type: 'mesh' | 'light' | 'camera' | 'empty' | 'group'
-  children: SceneNode[]
-  visible: boolean
-  locked: boolean
-  selected: boolean
+  children?: SceneNode[]
+  visible?: boolean
+  locked?: boolean
+  selected?: boolean
 }
 
 interface OutlinerProps {
-  nodes: SceneNode[]
-  onNodeSelect: (nodeId: string) => void
-  onNodeToggle: (nodeId: string) => void
-  onNodeVisibility: (nodeId: string) => void
-  onNodeLock: (nodeId: string) => void
+  nodes?: SceneNode[]
+  onNodeSelect?: (nodeId: string) => void
+  onNodeToggle?: (nodeId: string) => void
+  onNodeVisibility?: (nodeId: string) => void
+  onNodeLock?: (nodeId: string) => void
 }
 
-export function Outliner({ nodes = defaultNodes, onNodeSelect, onNodeToggle, onNodeVisibility, onNodeLock }: OutlinerProps) {
+export function Outliner3D({
+  nodes = defaultNodes,
+  onNodeSelect = () => undefined,
+  onNodeToggle = () => undefined,
+  onNodeVisibility = () => undefined,
+  onNodeLock = () => undefined,
+}: OutlinerProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['root', 'group1']))
 
   const toggleExpand = (nodeId: string) => {
@@ -47,27 +53,30 @@ export function Outliner({ nodes = defaultNodes, onNodeSelect, onNodeToggle, onN
       case 'group':
         return <Layers className="w-3 h-3" />
       default:
-        return <Sphere className="w-3 h-3" />
+        return <Circle className="w-3 h-3" />
     }
   }
 
   const renderNode = (node: SceneNode, depth: number = 0) => {
     const isExpanded = expanded.has(node.id)
     const hasChildren = node.children && node.children.length > 0
+    const isVisible = node.visible ?? true
+    const isLocked = node.locked ?? false
+    const isSelected = node.selected ?? false
 
     return (
       <div key={node.id}>
         <div
-          className={`flex items-center gap-1.5 px-2 py-1 text-[10px] cursor-pointer transition-colors ${
-            node.selected
+          className={`flex items-center gap-1.5 px-2 py-1 text-xs cursor-pointer transition-colors ${
+            isSelected ?
                'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
               : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
           }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
-          onClick={() => onNodeSelect.(node.id)}
+          onClick={() => onNodeSelect(node.id)}
         >
           {/* Expand/Collapse */}
-          {hasChildren  (
+          {hasChildren ? (
             <button
               type="button"
               onClick={(e) => {
@@ -76,19 +85,19 @@ export function Outliner({ nodes = defaultNodes, onNodeSelect, onNodeToggle, onN
               }}
               className="p-0.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
             >
-              {isExpanded  <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
             </button>
           ) : (
             <span className="w-5" />
           )}
 
           {/* Node Icon */}
-          <span className={node.visible  'text-[var(--aethel-text-secondary)]' : 'text-[var(--aethel-text-quaternary)]'}>
+          <span className={isVisible ? 'text-[var(--aethel-text-secondary)]' : 'text-[var(--aethel-text-quaternary)]'}>
             {getNodeIcon(node.type)}
           </span>
 
           {/* Node Name */}
-          <span className={`flex-1 truncate ${node.visible  '' : 'opacity-50'}`}>
+          <span className={`flex-1 truncate ${isVisible ? '' : 'opacity-50'}`}>
             {node.name}
           </span>
 
@@ -98,21 +107,21 @@ export function Outliner({ nodes = defaultNodes, onNodeSelect, onNodeToggle, onN
               type="button"
               onClick={(e) => {
                 e.stopPropagation()
-                onNodeVisibility.(node.id)
+                onNodeVisibility(node.id)
               }}
               className="p-0.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
             >
-              {node.visible  <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+              {isVisible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
             </button>
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation()
-                onNodeLock.(node.id)
+                onNodeLock(node.id)
               }}
               className="p-0.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]"
             >
-              {node.locked  <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+              {isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
             </button>
           </div>
         </div>
@@ -148,13 +157,15 @@ export function Outliner({ nodes = defaultNodes, onNodeSelect, onNodeToggle, onN
 
       {/* Footer */}
       <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2">
-        <div className="text-[10px] text-[var(--aethel-text-tertiary)]">
+        <div className="text-xs text-[var(--aethel-text-tertiary)]">
           {nodes.length} objetos na cena
         </div>
       </div>
     </div>
   )
 }
+
+export { Outliner3D as Outliner }
 
 const defaultNodes: SceneNode[] = [
   {

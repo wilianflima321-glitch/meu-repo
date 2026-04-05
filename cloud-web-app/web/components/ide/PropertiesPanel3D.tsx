@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowDown, ArrowUp, Move, Rotate3D, Maximize, Layers, Palette, Box as BoxIcon } from 'lucide-react'
+import { tokens } from '@/lib/design-tokens'
 
 interface PropertySection {
   title: string
@@ -13,21 +14,24 @@ interface Property {
   name: string
   type: 'vector3' | 'float' | 'color' | 'boolean' | 'string' | 'enum'
   value: any
-  min: number
-  max: number
-  options: string[]
+  min?: number
+  max?: number
+  options?: string[]
 }
 
 interface PropertiesPanelProps {
-  sections: PropertySection[]
-  onPropertyChange: (section: string, property: string, value: any) => void
+  sections?: PropertySection[]
+  onPropertyChange?: (section: string, property: string, value: any) => void
 }
 
-export function PropertiesPanel({ sections = defaultSections, onPropertyChange }: PropertiesPanelProps) {
+export function PropertiesPanel3D({
+  sections = defaultSections,
+  onPropertyChange = () => undefined,
+}: PropertiesPanelProps) {
   const [activeSection, setActiveSection] = useState(0)
 
   const handleValueChange = (sectionIndex: number, propertyIndex: number, newValue: any) => {
-    onPropertyChange.(sections[sectionIndex].title, sections[sectionIndex].properties[propertyIndex].name, newValue)
+    onPropertyChange(sections[sectionIndex].title, sections[sectionIndex].properties[propertyIndex].name, newValue)
   }
 
   const renderProperty = (sectionIndex: number, prop: Property, propIndex: number) => {
@@ -37,7 +41,7 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
           <div className="grid grid-cols-4 gap-1">
             {['X', 'Y', 'Z'].map((axis, i) => (
               <div key={axis} className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] text-[var(--aethel-text-quaternary)]">{axis}</span>
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[var(--aethel-text-quaternary)]">{axis}</span>
                 <input
                   type="number"
                   value={prop.value[i]}
@@ -46,7 +50,7 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
                     newValue[i] = parseFloat(e.target.value)
                     handleValueChange(sectionIndex, propIndex, newValue)
                   }}
-                  className="w-full pl-5 pr-1 py-1 text-[10px] rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+                  className="w-full pl-5 pr-1 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
                   step={0.1}
                 />
               </div>
@@ -68,7 +72,7 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
               type="number"
               value={prop.value}
               onChange={(e) => handleValueChange(sectionIndex, propIndex, parseFloat(e.target.value))}
-              className="w-16 px-2 py-1 text-[10px] rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+              className="w-16 px-2 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
               step={0.1}
             />
           </div>
@@ -86,7 +90,7 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
               type="text"
               value={prop.value}
               onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
-              className="flex-1 px-2 py-1 text-[10px] rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+              className="flex-1 px-2 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
             />
           </div>
         )
@@ -96,12 +100,12 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
             type="button"
             onClick={() => handleValueChange(sectionIndex, propIndex, !prop.value)}
             className={`w-10 h-5 rounded-full transition-colors ${
-              prop.value  'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-tertiary)]'
+              prop.value ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-tertiary)]'
             }`}
           >
             <div
               className={`w-4 h-4 rounded-full bg-[var(--aethel-text-primary)] transition-transform ${
-                prop.value  'translate-x-5' : 'translate-x-0.5'
+                prop.value ? 'translate-x-5' : 'translate-x-0.5'
               }`}
             />
           </button>
@@ -111,9 +115,9 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
           <select
             value={prop.value}
             onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
-            className="w-full px-2 py-1 text-[10px] rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+            className="w-full px-2 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
           >
-            {prop.options.map(option => (
+            {(prop.options ?? []).map(option => (
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
@@ -124,7 +128,7 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
             type="text"
             value={prop.value}
             onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
-            className="w-full px-2 py-1 text-[10px] rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+            className="w-full px-2 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
           />
         )
       default:
@@ -152,14 +156,14 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
           <div key={section.title} className="border-b border-[var(--aethel-border-secondary)]">
             <button
               type="button"
-              onClick={() => setActiveSection(activeSection === sectionIndex  -1 : sectionIndex)}
-              className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-medium text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
+              onClick={() => setActiveSection(activeSection === sectionIndex ? -1 : sectionIndex)}
+              className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
             >
               <div className="flex items-center gap-2">
                 <section.icon className="w-3.5 h-3.5 text-[var(--aethel-primary-light)]" />
                 {section.title}
               </div>
-              {activeSection === sectionIndex  (
+              {activeSection === sectionIndex ? (
                 <ArrowDown className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
               ) : (
                 <ArrowUp className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
@@ -171,7 +175,7 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
                 {section.properties.map((prop, propIndex) => (
                   <div key={prop.name}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] text-[var(--aethel-text-secondary)]">{prop.name}</span>
+                      <span className="text-xs text-[var(--aethel-text-secondary)]">{prop.name}</span>
                     </div>
                     {renderProperty(sectionIndex, prop, propIndex)}
                   </div>
@@ -184,7 +188,7 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
 
       {/* Footer */}
       <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2">
-        <div className="flex items-center justify-between text-[10px] text-[var(--aethel-text-tertiary)]">
+        <div className="flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
           <span>{sections.reduce((acc, s) => acc + s.properties.length, 0)} propriedades</span>
           <span>Cube</span>
         </div>
@@ -192,6 +196,8 @@ export function PropertiesPanel({ sections = defaultSections, onPropertyChange }
     </div>
   )
 }
+
+export { PropertiesPanel3D as PropertiesPanel }
 
 const defaultSections: PropertySection[] = [
   {
@@ -207,7 +213,7 @@ const defaultSections: PropertySection[] = [
     title: 'Material',
     icon: Palette,
     properties: [
-      { name: 'Color', type: 'color', value: '#6366f1' },
+      { name: 'Color', type: 'color', value: tokens.colors.accent.indigo },
       { name: 'Metallic', type: 'float', value: 0.5, min: 0, max: 1 },
       { name: 'Roughness', type: 'float', value: 0.5, min: 0, max: 1 },
       { name: 'Emissive', type: 'boolean', value: false },

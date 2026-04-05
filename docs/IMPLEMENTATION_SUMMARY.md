@@ -3,63 +3,59 @@
 ## Estado executivo
 
 - Execução local concluída com evidência em arquivos do repositório.
-- Sem claim de build, lint ou testes nesta rodada.
-- QA gate de botões sem type e cores hardcoded adicionado ao CI.
-- Guardas de simulação aplicados para bloquear respostas parciais em rotas de AI quando `AETHEL_DISABLE_SIMULATION` está ativo.
+- Typecheck executado com sucesso (`npm --prefix cloud-web-app/web run typecheck`).
+- QA scripts executados com sucesso:
+  - `tools/check-button-types.mjs`
+  - `tools/check-hardcoded-colors.mjs`
+- Sem claim de build, lint ou testes automatizados nesta rodada.
 
-## O que foi entregue
+## O que foi entregue nesta wave
 
-- Refino PT-BR e tokens Aethel em superfícies críticas do shell.
-- Adição de `type="button"` em `<button>` com `onClick` sem type (codemod em app/components/lib).
-- Execução real com persistência: task-store, patch-engine, qa-gate e endpoints de tasks.
-- Documentação atualizada com benchmark fornecido pelo usuário (pendente de validação).
+1. Estabilidade de compilação em superfícies novas (AI Console + Viewport 3D + marketplace + shell).
+2. Tokenização de cores do canvas e padronização tipográfica em componentes 3D/AI:
+   - `PreviewViewport3D.tsx`, `PropertiesPanel3D.tsx`, `Outliner3D.tsx`, `Timeline3D.tsx`, `AssetBrowser3D.tsx`, `AIViewportAssistant.tsx`, `ProfessionalViewport3D.tsx`.
+3. Acessibilidade pontual em botões inline e overlays:
+   - `app/admin/ai-monitor/page.tsx`, `hot-reload-server.ts`, `profiler-integrated.ts`.
 
 ## Dívida confirmada (último scan disponível)
 
-- Botões sem type="button": 0 ocorrências.
-- Cores hardcoded (bg/text/border/from/to): 0 ocorrências (após sweep local).
-- Hotspots de microcopy em inglês: 1463 ocorrências.
+- Botões sem `type="button"`: 0 (via `tools/check-button-types.mjs`).
+- Cores hardcoded (Tailwind): 0 (via `tools/check-hardcoded-colors.mjs`).
+- Hotspots de microcopy em inglês: **16873** ocorrências (heurístico por regex).
 
-## Próximos passos por blocos
+## Integração (verificada)
 
-1) Preview/Runtime
-- Implementar HMR para preview em tempo real.
-- Automatizar preview deployment por branch/PR.
+- `FullscreenIDE.tsx` já integra **DevicePreview / ConsoleIntegration / ProfessionalViewport3D / GitIntegration / IntelliSense / ErrorHighlighting**.
+- `AIChatPanelPro.tsx` integra **MemoryPanel / ApprovalCard / CodeDiffPreview**.
+- `ModernIDEShell.tsx` segue como casca genérica sem esses módulos (gap de consistência entre shells).
 
-2) Chat/IA Agent
-- Implementar Agent Mode multi-step com persistência.
-- Criar Apply Code com preview de diff.
+## Próximos passos por blocos (baseline fornecido + ajustes da wave)
 
-3) IDE Shell/UX
-- Integrar LSP real (Go to Definition, Find References, Rename Symbol).
-- Implementar split editors horizontal/vertical.
+### P0 — Bloqueadores críticos
+- Preview/Runtime: HMR, preview por branch/PR, telemetria de runtime.
+- Chat/IA: Agent Mode multi-step + Apply Code com diff + background agents.
+- IDE Shell: LSP real (Go to Definition/Find References/Rename).
+- Acessibilidade: focus visible consistente, contraste validado, target size mínimo.
+- Tokens: governança anti-hardcode (lint/CI) + refatoração de hardcoded restantes fora do escopo do script.
+- Billing: validar STRIPE_WEBHOOK_SECRET com webhook real.
+- Marketplace: extensão API + permissões granulares.
+- Consistência de shell: unificar `ModernIDEShell` vs `FullscreenIDE` (definir padrão único).
 
-4) Acessibilidade WCAG 2.2 AA
-- Corrigir botões sem type explícito.
-- Validar contraste (4.5:1 texto, 3:1 UI).
-- Focus visible consistente.
+### P1 — Alta prioridade
+- Split editors, drag-and-drop de panels/files.
+- Keyboard navigation completa em menus, modals e context menus.
+- Invoice auto-generation e proration.
+- Reviews/ratings reais e auto-update de extensões.
+- Error tracking (Sentry/Rollbar) + real-time logs.
 
-5) Marketplace/Extensions
-- Documentar Extension API + SDK.
-- Criar sistema de permissões granulares.
-
-6) Billing/Pricing
-- Validar STRIPE_WEBHOOK_SECRET via Stripe CLI/Dashboard (assinatura real).
-- Implementar invoice auto-generation.
-
-7) Admin/Monitoring
-- Integrar error tracking (Sentry/Rollbar).
-- Implementar real-time logs.
-
-8) Tokens de Design
-- Criar ESLint rule para bloquear cores hardcoded.
-- Refatoração concluída nesta wave; manter zero via prevenção e revisão.
-
-9) Microcopy PT-BR
-- Centralizar strings em `lib/locales/pt-BR.ts`.
-- Implementar i18n.
+### P2 — Melhoria contínua
+- Minimap + breadcrumbs.
+- Redundant entry prevention (WCAG 3.3.7).
+- i18n formal + glossário PT-BR.
+- DTCG tokens e export cross-platform.
+- Session replay e audit logs completos.
 
 ## Observações finais
 
-- Benchmark 2026 foi integrado como baseline de planejamento e está marcado como pendente de validação no relatório de execução.
-- No-simulation policy continua ativa por padrão; simulações devem falhar com 501 quando `AETHEL_DISABLE_SIMULATION` estiver ativo.
+- O benchmark 2026 permanece como baseline de planejamento e está marcado como não validado.
+- O foco da próxima wave deve priorizar **paridade real de execução** (preview, agent loop, LSP) e **padronização de shell** para evitar features “criadas porém dispersas”.

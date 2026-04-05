@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { Clapperboard, Film, Play, Pause, SkipBack, SkipForward, Settings, Layers, Eye, Shield, CheckCircle, AlertCircle, Sparkles, Wand2, Box } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
 interface Shot {
   id: string
@@ -91,9 +92,9 @@ export default function DirectorMode() {
 
               {/* Action Overlay (Hover) */}
               <div className="absolute inset-0 bg-[var(--aethel-surface-primary)]/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                <button type="button" className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Play size={20} /></button>
-                <button type="button" className="p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-full text-[var(--aethel-text-primary)] transition-colors"><Wand2 size={20} /></button>
-                <button type="button" className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Eye size={20} /></button>
+                <Button type="button" className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Play size={20} /></Button>
+                <Button type="button" className="p-3 bg-[var(--aethel-primary)] hover:brightness-110 rounded-full text-[var(--aethel-text-primary)] transition-colors"><Wand2 size={20} /></Button>
+                <Button type="button" className="p-3 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-secondary)] transition-colors"><Eye size={20} /></Button>
               </div>
             </div>
           ))}
@@ -103,9 +104,9 @@ export default function DirectorMode() {
       {/* Controls */}
       <div className="p-4 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-2xl">
         <div className="flex items-center justify-center gap-6 mb-4">
-          <button type="button" className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipBack size={20} /></button>
-          <button type="button" className="p-4 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-primary)] transition-colors"><Play size={24} /></button>
-          <button type="button" className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipForward size={20} /></button>
+          <Button type="button" className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipBack size={20} /></Button>
+          <Button type="button" className="p-4 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-full text-[var(--aethel-text-primary)] transition-colors"><Play size={24} /></Button>
+          <Button type="button" className="p-2 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"><SkipForward size={20} /></Button>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <button type="button" className="flex flex-col items-center gap-1 p-3 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl hover:border-[var(--aethel-border-primary)] transition-all">

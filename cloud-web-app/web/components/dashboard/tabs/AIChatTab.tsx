@@ -225,7 +225,7 @@ export function AIChatTab({
             align="right"
             width="lg"
           />
-          <button type="button" variant="secondary" size="sm" onClick={onNewThread}>
+          <Button type="button" variant="secondary" size="sm" onClick={onNewThread}>
             <Plus className="w-4 h-4 mr-2" />
             Nova
           </Button>
