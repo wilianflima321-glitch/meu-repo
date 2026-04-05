@@ -148,7 +148,7 @@ export const TerminalPanel: React.FC = () => {
             >
               <span className="terminal-icon">$</span>
               <span className="terminal-name">{terminal.name}</span>
-              <button
+              <button type="button"
                 className="close-button"
                 onClick={(e) => handleTerminalClose(e, terminal.id)}
                 aria-label="Close terminal"
@@ -162,11 +162,11 @@ export const TerminalPanel: React.FC = () => {
           <button
             className="action-button"
             onClick={handleNewTerminalClick}
-            title="New Terminal"
+            title="New Terminal" type="button"
           >
             +
           </button>
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleSplitTerminalClick}
             title="Split Terminal"
@@ -174,7 +174,7 @@ export const TerminalPanel: React.FC = () => {
           >
             ⊞
           </button>
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleKillTerminalClick}
             title="Kill Terminal"
@@ -212,7 +212,7 @@ export const TerminalPanel: React.FC = () => {
         {terminals.length === 0 && (
           <div className="no-terminals">
             <p>No terminals open</p>
-            <button onClick={handleNewTerminalClick}>Create New Terminal</button>
+            <button type="button" onClick={handleNewTerminalClick}>Create New Terminal</button>
           </div>
         )}
       </div>
@@ -222,6 +222,7 @@ export const TerminalPanel: React.FC = () => {
           display: flex;
           flex-direction: column;
           height: 100%;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
           background: var(--vscode-terminal-background);
           color: var(--vscode-terminal-foreground);
         }
@@ -248,8 +249,8 @@ export const TerminalPanel: React.FC = () => {
         .terminal-tab {
           display: flex;
           align-items: center;
-          gap: 6px;
-          padding: 0 12px;
+          gap: 8px;
+          padding: 6px 12px;
           min-width: 120px;
           background: var(--vscode-tab-inactiveBackground);
           color: var(--vscode-tab-inactiveForeground);
@@ -257,10 +258,16 @@ export const TerminalPanel: React.FC = () => {
           cursor: pointer;
           user-select: none;
           height: 100%;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .terminal-tab:hover {
           background: var(--vscode-tab-hoverBackground);
+        }
+
+        .terminal-tab:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .terminal-tab.active {
@@ -292,6 +299,7 @@ export const TerminalPanel: React.FC = () => {
           height: 20px;
           cursor: pointer;
           border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .terminal-tab:hover .close-button {
@@ -304,7 +312,7 @@ export const TerminalPanel: React.FC = () => {
 
         .terminal-actions {
           display: flex;
-          gap: 4px;
+          gap: 8px;
           padding: 0 8px;
         }
 
@@ -312,14 +320,20 @@ export const TerminalPanel: React.FC = () => {
           background: none;
           border: none;
           color: var(--vscode-foreground);
-          font-size: 16px;
-          padding: 4px 8px;
+          font-size: 14px;
+          padding: 6px 10px;
           cursor: pointer;
           border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .action-button:hover:not(:disabled) {
           background: var(--vscode-toolbar-hoverBackground);
+        }
+
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .action-button:disabled {
@@ -337,6 +351,7 @@ export const TerminalPanel: React.FC = () => {
           display: none;
           flex-direction: column;
           height: 100%;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .terminal-instance.active {
@@ -388,12 +403,18 @@ export const TerminalPanel: React.FC = () => {
           font-size: var(--vscode-editor-font-size, 14px);
         }
 
+        .terminal-input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 2px;
+        }
+
         .no-terminals {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           height: 100%;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
           gap: 16px;
         }
 
@@ -407,9 +428,10 @@ export const TerminalPanel: React.FC = () => {
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
           border: none;
-          border-radius: 2px;
+          border-radius: 3px;
           cursor: pointer;
           font-size: 13px;
+          transition: background 0.15s ease-out;
         }
 
         .no-terminals button:hover {

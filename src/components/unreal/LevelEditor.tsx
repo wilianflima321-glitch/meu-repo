@@ -165,16 +165,18 @@ export const LevelEditor: React.FC = () => {
     });
   };
 
-  const getActorIcon = (type: string): string => {
+    const getActorIcon = (type: string): string => {
     const icons: Record<string, string> = {
-      'StaticMesh': '🗿',
-      'Light': '💡',
-      'Camera': '📷',
-      'PlayerStart': '🎮',
-      'Trigger': '⚡',
-      'Sound': '🔊',
-      'Particle': '✨'
+      'StaticMesh': 'SM',
+      'Light': 'LGT',
+      'Camera': 'CAM',
+      'PlayerStart': 'PLY',
+      'Trigger': 'TRG',
+      'Sound': 'SND',
+      'Particle': 'FX'
     };
+    return icons[type] || 'ACT';
+  };
     return icons[type] || '📦';
   };
 
@@ -186,38 +188,42 @@ export const LevelEditor: React.FC = () => {
         </div>
 
         <div className="toolbar-section">
-          <button 
+          <button type="button" 
             className={activeTool === 'select' ? 'active' : ''}
             onClick={() => setActiveTool('select')}
             title="Select (Q)"
+            aria-pressed={activeTool === 'select'}
           >
             Select
           </button>
-          <button 
+          <button type="button" 
             className={activeTool === 'move' ? 'active' : ''}
             onClick={() => setActiveTool('move')}
             title="Move (W)"
+            aria-pressed={activeTool === 'move'}
           >
             Move
           </button>
-          <button 
+          <button type="button" 
             className={activeTool === 'rotate' ? 'active' : ''}
             onClick={() => setActiveTool('rotate')}
             title="Rotate (E)"
+            aria-pressed={activeTool === 'rotate'}
           >
             Rotate
           </button>
-          <button 
+          <button type="button" 
             className={activeTool === 'scale' ? 'active' : ''}
             onClick={() => setActiveTool('scale')}
             title="Scale (R)"
+            aria-pressed={activeTool === 'scale'}
           >
             Scale
           </button>
         </div>
 
         <div className="toolbar-section">
-          <select value={viewMode} onChange={(e) => setViewMode(e.target.value as ViewMode)}>
+          <select aria-label="View mode" value={viewMode} onChange={(e) => setViewMode(e.target.value as ViewMode)}>
             <option value="perspective">Perspective</option>
             <option value="top">Top</option>
             <option value="front">Front</option>
@@ -251,8 +257,8 @@ export const LevelEditor: React.FC = () => {
         </div>
 
         <div className="toolbar-section">
-          <button onClick={handleBuild}>Build</button>
-          <button onClick={handlePlay} className="play-button">Play</button>
+          <button type="button" onClick={handleBuild}>Build</button>
+          <button type="button" onClick={handlePlay} className="play-button">Play</button>
         </div>
       </div>
 
@@ -265,27 +271,35 @@ export const LevelEditor: React.FC = () => {
           <div className="panel-header">
             <h3>Actors</h3>
             <div className="panel-actions">
-              <button onClick={() => handleAddActor('StaticMesh')} title="Add Static Mesh">+</button>
+              <button type="button" onClick={() => handleAddActor('StaticMesh')} title="Add Static Mesh">+</button>
             </div>
           </div>
 
           <div className="add-actor-menu">
-            <button onClick={() => handleAddActor('StaticMesh')}>Static Mesh</button>
-            <button onClick={() => handleAddActor('Light')}>Light</button>
-            <button onClick={() => handleAddActor('Camera')}>Camera</button>
-            <button onClick={() => handleAddActor('PlayerStart')}>Player Start</button>
-            <button onClick={() => handleAddActor('Trigger')}>Trigger</button>
-            <button onClick={() => handleAddActor('Sound')}>Sound</button>
-            <button onClick={() => handleAddActor('Particle')}>Particle</button>
+            <button type="button" onClick={() => handleAddActor('StaticMesh')}>Static Mesh</button>
+            <button type="button" onClick={() => handleAddActor('Light')}>Light</button>
+            <button type="button" onClick={() => handleAddActor('Camera')}>Camera</button>
+            <button type="button" onClick={() => handleAddActor('PlayerStart')}>Player Start</button>
+            <button type="button" onClick={() => handleAddActor('Trigger')}>Trigger</button>
+            <button type="button" onClick={() => handleAddActor('Sound')}>Sound</button>
+            <button type="button" onClick={() => handleAddActor('Particle')}>Particle</button>
           </div>
 
           <div className="actors-list">
             {actors.map(actor => (
-              <div
-                key={actor.id}
-                className={`actor-item ${selectedActor?.id === actor.id ? 'selected' : ''}`}
-                onClick={() => setSelectedActor(actor)}
-              >
+            <div
+              key={actor.id}
+              className={`actor-item ${selectedActor?.id === actor.id ? 'selected' : ''}`}
+              onClick={() => setSelectedActor(actor)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedActor(actor);
+                }
+              }}
+            >
                 <span className="actor-icon">{getActorIcon(actor.type)}</span>
                 <span className="actor-name">{actor.name}</span>
                 <span className="actor-type">{actor.type}</span>
@@ -354,8 +368,8 @@ export const LevelEditor: React.FC = () => {
             <div className="panel-header">
               <h3>Details</h3>
               <div className="panel-actions">
-                <button onClick={handleDuplicateActor} title="Duplicate">Duplicate</button>
-                <button onClick={handleDeleteActor} title="Delete">Delete</button>
+                <button type="button" onClick={handleDuplicateActor} title="Duplicate">Duplicate</button>
+                <button type="button" onClick={handleDeleteActor} title="Delete">Delete</button>
               </div>
             </div>
 
@@ -508,7 +522,8 @@ export const LevelEditor: React.FC = () => {
           border: none;
           cursor: pointer;
           font-size: 12px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .editor-toolbar button:hover {
@@ -517,6 +532,12 @@ export const LevelEditor: React.FC = () => {
 
         .editor-toolbar button.active {
           background: #0e639c;
+        }
+
+        .editor-toolbar button:focus-visible,
+        .editor-toolbar select:focus-visible {
+          outline: 2px solid #0e639c;
+          outline-offset: 1px;
         }
 
         .play-button {
@@ -601,11 +622,17 @@ export const LevelEditor: React.FC = () => {
           cursor: pointer;
           font-size: 12px;
           text-align: left;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .add-actor-menu button:hover {
           background: #4a4a4a;
+        }
+
+        .add-actor-menu button:focus-visible {
+          outline: 2px solid #0e639c;
+          outline-offset: 1px;
         }
 
         .actors-list {
@@ -618,10 +645,11 @@ export const LevelEditor: React.FC = () => {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 8px;
+          padding: 8px 12px;
           cursor: pointer;
-          border-radius: 2px;
+          border-radius: 3px;
           margin-bottom: 2px;
+          transition: background 0.15s ease-out;
         }
 
         .actor-item:hover {
@@ -632,8 +660,16 @@ export const LevelEditor: React.FC = () => {
           background: #0e639c;
         }
 
+        .actor-item:focus-visible {
+          outline: 2px solid #0e639c;
+          outline-offset: -2px;
+        }
+
         .actor-icon {
-          font-size: 16px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
         }
 
         .actor-name {

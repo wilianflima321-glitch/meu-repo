@@ -123,9 +123,9 @@ export const DebugCallStackPanel: React.FC = () => {
       if (frames) {
         allFrames.push(`Thread ${thread.id}: ${thread.name}`);
         frames.forEach(frame => {
-          const location = frame.source 
+          const location = frame.source
             ? `${frame.source.name}:${frame.line}:${frame.column}`
-            : 'unknown';
+            : 'desconhecido';
           allFrames.push(`  at ${frame.name} (${location})`);
         });
         allFrames.push('');
@@ -134,33 +134,35 @@ export const DebugCallStackPanel: React.FC = () => {
     
     navigator.clipboard.writeText(allFrames.join('\n'));
     EventBus.getInstance().emit('notification:show', {
-      message: 'Stack trace copied to clipboard',
+      message: 'Pilha copiada para a area de transferencia',
       type: 'info'
     });
   };
 
   const getFrameIcon = (frame: StackFrame) => {
-    if (frame.presentationHint === 'label') return '🏷️';
-    if (frame.presentationHint === 'subtle') return '⚪';
-    return '📍';
+    if (frame.presentationHint === 'label') return 'LBL';
+    if (frame.presentationHint === 'subtle') return 'SUB';
+    return 'FRM';
   };
 
   const getThreadIcon = (thread: Thread) => {
-    if (thread.id === selectedThreadId) return '▶️';
-    return '⏸️';
+    if (thread.id === selectedThreadId) return 'ATIVO';
+    return 'PAUSA';
   };
 
   return (
     <div className="debug-callstack-panel">
       <div className="panel-header">
-        <h3>Call Stack</h3>
+        <h3>Pilha de chamadas</h3>
         <button
+          type="button"
           className="action-button"
           onClick={handleCopyStackTrace}
-          title="Copy stack trace"
+          title="Copiar pilha"
+          aria-label="Copiar pilha de chamadas"
           disabled={threads.length === 0}
         >
-          📋
+          Copiar
         </button>
       </div>
 
@@ -174,10 +176,23 @@ export const DebugCallStackPanel: React.FC = () => {
             <div key={thread.id} className="thread-item">
               <div
                 className={`thread-header ${isSelected ? 'selected' : ''}`}
+                role="button"
+                tabIndex={0}
                 onClick={() => handleThreadClick(thread.id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleThreadClick(thread.id);
+                  }
+                }}
               >
-                <button className="expand-button">
-                  {isExpanded ? '▼' : '▶'}
+                <button
+                  type="button"
+                  className="expand-button"
+                  aria-label={isExpanded ? 'Recolher thread' : 'Expandir thread'}
+                  aria-expanded={isExpanded}
+                >
+                  {isExpanded ? '-' : '+'}
                 </button>
                 <span className="thread-icon">{getThreadIcon(thread)}</span>
                 <span className="thread-name">{thread.name}</span>
@@ -190,13 +205,21 @@ export const DebugCallStackPanel: React.FC = () => {
                     const isFrameSelected = frame.id === selectedFrameId;
                     const location = frame.source
                       ? `${frame.source.name}:${frame.line}`
-                      : 'unknown';
+                      : 'desconhecido';
 
                     return (
                       <div
                         key={frame.id}
                         className={`frame-item ${isFrameSelected ? 'selected' : ''}`}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => handleFrameClick(frame)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            handleFrameClick(frame);
+                          }
+                        }}
                       >
                         <span className="frame-icon">{getFrameIcon(frame)}</span>
                         <div className="frame-info">
@@ -208,7 +231,7 @@ export const DebugCallStackPanel: React.FC = () => {
                     );
                   })}
                   {frames.length === 0 && (
-                    <div className="no-frames">No stack frames</div>
+                    <div className="no-frames">Nenhum frame encontrado</div>
                   )}
                 </div>
               )}
@@ -218,8 +241,8 @@ export const DebugCallStackPanel: React.FC = () => {
 
         {threads.length === 0 && (
           <div className="no-threads">
-            <p>No call stack available</p>
-            <p className="hint">Pause execution to view call stack</p>
+            <p>Nenhuma pilha disponivel</p>
+            <p className="hint">Pause a execucao para ver a pilha</p>
           </div>
         )}
       </div>
@@ -237,7 +260,7 @@ export const DebugCallStackPanel: React.FC = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 12px;
+          padding: 16px;
           border-bottom: 1px solid var(--vscode-panel-border);
         }
 
@@ -248,17 +271,23 @@ export const DebugCallStackPanel: React.FC = () => {
         }
 
         .action-button {
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           cursor: pointer;
           font-size: 14px;
           border-radius: 2px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .action-button:hover:not(:disabled) {
           background: var(--vscode-toolbar-hoverBackground);
+        }
+
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 2px;
         }
 
         .action-button:disabled {
@@ -279,9 +308,10 @@ export const DebugCallStackPanel: React.FC = () => {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 8px 12px;
+          padding: 8px 16px;
           cursor: pointer;
           font-size: 13px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .thread-header:hover {
@@ -293,6 +323,11 @@ export const DebugCallStackPanel: React.FC = () => {
           color: var(--vscode-list-activeSelectionForeground);
         }
 
+        .thread-header:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
+        }
+
         .expand-button {
           background: none;
           border: none;
@@ -301,6 +336,12 @@ export const DebugCallStackPanel: React.FC = () => {
           padding: 0;
           width: 16px;
           font-size: 10px;
+          transition: transform 0.15s ease-out, color 0.15s ease-out;
+        }
+
+        .expand-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 2px;
         }
 
         .thread-icon {
@@ -320,16 +361,17 @@ export const DebugCallStackPanel: React.FC = () => {
         .frames-list {
           background: var(--vscode-sideBar-background);
           border-left: 2px solid var(--vscode-panel-border);
-          margin-left: 20px;
+          margin-left: 16px;
         }
 
         .frame-item {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 6px 12px;
+          padding: 8px 16px;
           cursor: pointer;
           font-size: 13px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .frame-item:hover {
@@ -339,6 +381,11 @@ export const DebugCallStackPanel: React.FC = () => {
         .frame-item.selected {
           background: var(--vscode-list-activeSelectionBackground);
           color: var(--vscode-list-activeSelectionForeground);
+        }
+
+        .frame-item:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .frame-icon {
@@ -374,7 +421,7 @@ export const DebugCallStackPanel: React.FC = () => {
         }
 
         .no-frames {
-          padding: 12px;
+          padding: 16px;
           text-align: center;
           color: var(--vscode-descriptionForeground);
           font-size: 12px;

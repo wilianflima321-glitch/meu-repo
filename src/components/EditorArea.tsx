@@ -51,10 +51,10 @@ export const EditorArea: React.FC = () => {
               <h1>Professional IDE</h1>
               <p>Open a file to start editing</p>
               <div className="welcome-actions">
-                <button onClick={() => setQuickOpenVisible(true)}>
+                <button type="button" onClick={() => setQuickOpenVisible(true)}>
                   Open File (Ctrl+P)
                 </button>
-                <button onClick={() => EventBus.getInstance().emit('file:new', {})}>
+                <button type="button" onClick={() => EventBus.getInstance().emit('file:new', {})}>
                   New File (Ctrl+N)
                 </button>
               </div>
@@ -122,12 +122,17 @@ export const EditorArea: React.FC = () => {
           border: none;
           cursor: pointer;
           font-size: 14px;
-          border-radius: 2px;
-          transition: background 0.1s;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .welcome-actions button:hover {
           background: var(--vscode-button-hoverBackground);
+        }
+
+        .welcome-actions button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 2px;
         }
       `}</style>
     </div>

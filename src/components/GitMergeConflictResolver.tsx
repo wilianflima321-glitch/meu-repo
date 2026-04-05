@@ -166,7 +166,7 @@ export const GitMergeConflictResolver: React.FC = () => {
           </span>
         </div>
         <div className="header-actions">
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleResolveAll}
             disabled={stats.resolved !== stats.total}
@@ -186,6 +186,14 @@ export const GitMergeConflictResolver: React.FC = () => {
                 key={conflict.filePath}
                 className={`conflict-item ${selectedConflict?.filePath === conflict.filePath ? 'selected' : ''} ${isResolved ? 'resolved' : ''}`}
                 onClick={() => setSelectedConflict(conflict)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedConflict(conflict);
+                  }
+                }}
               >
                 <div className="conflict-status">
                   {isResolved ? '✓' : '⚠'}
@@ -211,9 +219,10 @@ export const GitMergeConflictResolver: React.FC = () => {
           <div className="conflict-details">
             <div className="details-header">
               <span className="file-path">{selectedConflict.filePath}</span>
-              <button
+              <button type="button"
                 className="action-button"
                 onClick={() => handleOpenInEditor(selectedConflict.filePath)}
+                aria-label="Open in editor"
               >
                 Open in Editor
               </button>
@@ -228,21 +237,24 @@ export const GitMergeConflictResolver: React.FC = () => {
                     <div className="region-header">
                       <span className="region-title">Conflict {regionIndex + 1}</span>
                       <div className="region-actions">
-                        <button
+                        <button type="button"
                           className={`resolution-button ${currentResolution === 'current' ? 'active' : ''}`}
                           onClick={() => handleAcceptCurrent(regionIndex)}
+                          aria-pressed={currentResolution === 'current'}
                         >
                           Accept Current
                         </button>
-                        <button
+                        <button type="button"
                           className={`resolution-button ${currentResolution === 'incoming' ? 'active' : ''}`}
                           onClick={() => handleAcceptIncoming(regionIndex)}
+                          aria-pressed={currentResolution === 'incoming'}
                         >
                           Accept Incoming
                         </button>
-                        <button
+                        <button type="button"
                           className={`resolution-button ${currentResolution === 'both' ? 'active' : ''}`}
                           onClick={() => handleAcceptBoth(regionIndex)}
+                          aria-pressed={currentResolution === 'both'}
                         >
                           Accept Both
                         </button>
@@ -274,6 +286,7 @@ export const GitMergeConflictResolver: React.FC = () => {
                             value={manualContent.get(regionIndex) || ''}
                             onChange={(e) => handleManualEdit(regionIndex, e.target.value)}
                             placeholder="Enter manual resolution..."
+                            aria-label="Manual resolution"
                           />
                         </div>
                       )}
@@ -284,7 +297,7 @@ export const GitMergeConflictResolver: React.FC = () => {
             </div>
 
             <div className="details-footer">
-              <button
+              <button type="button"
                 className="action-button primary"
                 onClick={handleResolveConflict}
                 disabled={!selectedConflict.regions.every((_, i) => resolution.has(i))}
@@ -353,6 +366,7 @@ export const GitMergeConflictResolver: React.FC = () => {
           padding: 12px;
           cursor: pointer;
           border-bottom: 1px solid var(--vscode-panel-border);
+          transition: background 0.15s ease-out;
         }
 
         .conflict-item:hover {
@@ -362,6 +376,11 @@ export const GitMergeConflictResolver: React.FC = () => {
         .conflict-item.selected {
           background: var(--vscode-list-activeSelectionBackground);
           color: var(--vscode-list-activeSelectionForeground);
+        }
+
+        .conflict-item:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .conflict-item.resolved .conflict-status {
@@ -459,13 +478,14 @@ export const GitMergeConflictResolver: React.FC = () => {
         }
 
         .resolution-button {
-          padding: 4px 12px;
+          padding: 6px 12px;
           background: var(--vscode-button-secondaryBackground);
           color: var(--vscode-button-secondaryForeground);
           border: none;
           cursor: pointer;
           font-size: 11px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .resolution-button:hover {
@@ -475,6 +495,11 @@ export const GitMergeConflictResolver: React.FC = () => {
         .resolution-button.active {
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
+        }
+
+        .resolution-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .region-content {
@@ -530,10 +555,16 @@ export const GitMergeConflictResolver: React.FC = () => {
           font-size: var(--vscode-editor-font-size, 13px);
           line-height: 1.6;
           resize: vertical;
+          transition: border-color 0.15s ease-out;
         }
 
         .manual-editor:focus {
           border-color: var(--vscode-focusBorder);
+        }
+
+        .manual-editor:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .content-divider {
@@ -550,13 +581,14 @@ export const GitMergeConflictResolver: React.FC = () => {
         }
 
         .action-button {
-          padding: 6px 16px;
+          padding: 8px 16px;
           background: var(--vscode-button-secondaryBackground);
           color: var(--vscode-button-secondaryForeground);
           border: none;
           cursor: pointer;
           font-size: 12px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .action-button:hover:not(:disabled) {
@@ -575,6 +607,11 @@ export const GitMergeConflictResolver: React.FC = () => {
         .action-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
       `}</style>
     </div>

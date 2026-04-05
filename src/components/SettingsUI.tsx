@@ -178,6 +178,7 @@ export const SettingsUI: React.FC = () => {
           type="text"
           className="search-input"
           placeholder="Search settings..."
+          aria-label="Search settings"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -185,14 +186,14 @@ export const SettingsUI: React.FC = () => {
 
       <div className="settings-content">
         <div className="settings-sidebar">
-          {categories.map(category => (
-            <div
-              key={category}
+          {categories.map((category) => (
+            <button
+              key={category} type="button"
               className={`category-item ${selectedCategory === category ? 'active' : ''}`}
               onClick={() => setSelectedCategory(category)}
             >
               {category.charAt(0).toUpperCase() + category.slice(1)}
-            </div>
+            </button>
           ))}
         </div>
 
@@ -225,7 +226,7 @@ export const SettingsUI: React.FC = () => {
         }
 
         .settings-header {
-          padding: 20px;
+          padding: 24px;
           border-bottom: 1px solid var(--vscode-panel-border);
         }
 
@@ -243,10 +244,16 @@ export const SettingsUI: React.FC = () => {
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 14px;
+          transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out;
         }
 
         .search-input:focus {
           border-color: var(--vscode-focusBorder);
+        }
+
+        .search-input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .settings-content {
@@ -263,12 +270,23 @@ export const SettingsUI: React.FC = () => {
 
         .category-item {
           padding: 8px 16px;
+          background: none;
+          border: none;
+          color: var(--vscode-sideBar-foreground);
           cursor: pointer;
           font-size: 13px;
+          text-align: left;
+          width: 100%;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .category-item:hover {
           background: var(--vscode-list-hoverBackground);
+        }
+
+        .category-item:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .category-item.active {
@@ -279,7 +297,7 @@ export const SettingsUI: React.FC = () => {
         .settings-main {
           flex: 1;
           overflow-y: auto;
-          padding: 20px;
+          padding: 24px;
         }
 
         .setting-item {
@@ -288,6 +306,7 @@ export const SettingsUI: React.FC = () => {
           align-items: flex-start;
           padding: 16px;
           border-bottom: 1px solid var(--vscode-panel-border);
+          transition: background 0.15s ease-out;
         }
 
         .setting-item.modified {
@@ -325,12 +344,14 @@ export const SettingsUI: React.FC = () => {
         .setting-control input[type="number"],
         .setting-control select {
           width: 100%;
-          padding: 4px 8px;
+          min-height: 32px;
+          padding: 6px 10px;
           background: var(--vscode-input-background);
           color: var(--vscode-input-foreground);
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 13px;
+          transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out;
         }
 
         .setting-control input[type="checkbox"] {
@@ -342,6 +363,12 @@ export const SettingsUI: React.FC = () => {
         .setting-control input:focus,
         .setting-control select:focus {
           border-color: var(--vscode-focusBorder);
+        }
+
+        .setting-control input:focus-visible,
+        .setting-control select:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .no-results {

@@ -199,47 +199,51 @@ export const SourceControlPanel: React.FC = () => {
       <div className="panel-header">
         <h3>Source Control</h3>
         <div className="header-actions">
-          <button
+          <button type="button"
             className="action-button"
             onClick={handlePull}
             disabled={isLoading}
             title="Pull"
+            aria-label="Pull"
           >
-            ⬇
+            Pull
           </button>
-          <button
+          <button type="button"
             className="action-button"
             onClick={handlePush}
             disabled={isLoading || stagedChanges.length === 0}
             title="Push"
+            aria-label="Push"
           >
-            ⬆
+            Push
           </button>
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleSync}
             disabled={isLoading}
             title="Sync"
+            aria-label="Sync"
           >
-            🔄
+            Sync
           </button>
-          <button
+          <button type="button"
             className="action-button"
             onClick={loadStatus}
             disabled={isLoading}
             title="Refresh"
+            aria-label="Refresh"
           >
-            ↻
+            Refresh
           </button>
         </div>
       </div>
 
       {status && (
         <div className="branch-info">
-          <span className="branch-icon">🌿</span>
+          <span className="branch-icon">Branch</span>
           <span className="branch-name">{status.branch}</span>
-          {status.ahead > 0 && <span className="sync-info">↑{status.ahead}</span>}
-          {status.behind > 0 && <span className="sync-info">↓{status.behind}</span>}
+          {status.ahead > 0 && <span className="sync-info">Ahead {status.ahead}</span>}
+          {status.behind > 0 && <span className="sync-info">Behind {status.behind}</span>}
         </div>
       )}
 
@@ -256,7 +260,7 @@ export const SourceControlPanel: React.FC = () => {
           }}
           disabled={isLoading}
         />
-        <button
+        <button type="button"
           className="commit-button"
           onClick={handleCommit}
           disabled={isLoading || !commitMessage.trim() || stagedChanges.length === 0}
@@ -270,12 +274,13 @@ export const SourceControlPanel: React.FC = () => {
           <div className="changes-group">
             <div className="group-header">
               <span className="group-title">Staged Changes ({stagedChanges.length})</span>
-              <button
+              <button type="button"
                 className="group-action"
                 onClick={handleUnstageAll}
                 title="Unstage all"
+                aria-label="Unstage all"
               >
-                −
+                Unstage
               </button>
             </div>
             <div className="changes-list">
@@ -288,12 +293,13 @@ export const SourceControlPanel: React.FC = () => {
                     {change.path}
                   </span>
                   <div className="change-actions">
-                    <button
+                    <button type="button"
                       className="change-action"
                       onClick={() => handleUnstage(change.path)}
                       title="Unstage"
+                      aria-label="Unstage"
                     >
-                      −
+                      Unstage
                     </button>
                   </div>
                 </div>
@@ -306,13 +312,12 @@ export const SourceControlPanel: React.FC = () => {
           <div className="changes-group">
             <div className="group-header">
               <span className="group-title">Changes ({unstagedChanges.length})</span>
-              <button
+              <button type="button"
                 className="group-action"
                 onClick={handleStageAll}
                 title="Stage all"
-              >
-                +
-              </button>
+                aria-label="Stage all"
+              >Stage</button>
             </div>
             <div className="changes-list">
               {unstagedChanges.map(change => (
@@ -324,19 +329,19 @@ export const SourceControlPanel: React.FC = () => {
                     {change.path}
                   </span>
                   <div className="change-actions">
-                    <button
+                    <button type="button"
                       className="change-action"
                       onClick={() => handleStage(change.path)}
                       title="Stage"
-                    >
-                      +
-                    </button>
-                    <button
+                      aria-label="Stage"
+                    >Stage</button>
+                    <button type="button"
                       className="change-action"
                       onClick={() => handleDiscard(change.path)}
                       title="Discard"
+                      aria-label="Discard"
                     >
-                      ↶
+                      Discard
                     </button>
                   </div>
                 </div>
@@ -377,21 +382,27 @@ export const SourceControlPanel: React.FC = () => {
 
         .header-actions {
           display: flex;
-          gap: 4px;
+          gap: 8px;
         }
 
         .action-button {
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           font-size: 14px;
           cursor: pointer;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .action-button:hover:not(:disabled) {
           background: var(--vscode-toolbar-hoverBackground);
+        }
+
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .action-button:disabled {
@@ -430,7 +441,7 @@ export const SourceControlPanel: React.FC = () => {
         .commit-message {
           width: 100%;
           min-height: 60px;
-          padding: 8px;
+          padding: 8px 10px;
           background: var(--vscode-input-background);
           color: var(--vscode-input-foreground);
           border: 1px solid var(--vscode-input-border);
@@ -439,21 +450,28 @@ export const SourceControlPanel: React.FC = () => {
           font-family: inherit;
           resize: vertical;
           margin-bottom: 8px;
+          transition: border-color 0.15s ease-out;
         }
 
         .commit-message:focus {
           border-color: var(--vscode-focusBorder);
         }
 
+        .commit-message:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
+        }
+
         .commit-button {
           width: 100%;
-          padding: 6px 12px;
+          padding: 8px 12px;
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
           border: none;
           cursor: pointer;
           font-size: 13px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .commit-button:hover:not(:disabled) {
@@ -489,13 +507,14 @@ export const SourceControlPanel: React.FC = () => {
         }
 
         .group-action {
-          padding: 2px 6px;
+          padding: 4px 8px;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           cursor: pointer;
-          font-size: 16px;
-          border-radius: 2px;
+          font-size: 12px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .group-action:hover {
@@ -519,7 +538,8 @@ export const SourceControlPanel: React.FC = () => {
         }
 
         .change-item:hover .change-actions {
-          display: flex;
+          opacity: 1;
+          visibility: visible;
         }
 
         .change-type {
@@ -568,18 +588,27 @@ export const SourceControlPanel: React.FC = () => {
         }
 
         .change-actions {
-          display: none;
-          gap: 4px;
+          display: flex;
+          gap: 6px;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.15s ease-out;
+        }
+
+        .change-item:focus-within .change-actions {
+          opacity: 1;
+          visibility: visible;
         }
 
         .change-action {
-          padding: 2px 6px;
+          padding: 4px 8px;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           cursor: pointer;
-          font-size: 14px;
-          border-radius: 2px;
+          font-size: 12px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .change-action:hover {

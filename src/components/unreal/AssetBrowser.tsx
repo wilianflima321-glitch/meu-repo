@@ -98,19 +98,21 @@ export const AssetBrowser: React.FC = () => {
     return asset.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const getAssetIcon = (type: AssetType): string => {
+    const getAssetIcon = (type: AssetType): string => {
     const icons: Record<AssetType, string> = {
-      'StaticMesh': '🗿',
-      'SkeletalMesh': '🦴',
-      'Material': '🎨',
-      'Texture': '🖼️',
-      'Blueprint': '📘',
-      'Animation': '🎬',
-      'Sound': '🔊',
-      'Particle': '✨',
-      'Level': '🗺️',
-      'Folder': '📁'
+      'StaticMesh': 'SM',
+      'SkeletalMesh': 'SK',
+      'Material': 'MAT',
+      'Texture': 'TEX',
+      'Blueprint': 'BP',
+      'Animation': 'ANIM',
+      'Sound': 'SND',
+      'Particle': 'FX',
+      'Level': 'LVL',
+      'Folder': 'DIR'
     };
+    return icons[type] || 'FILE';
+  };
     return icons[type] || '📄';
   };
 
@@ -118,8 +120,13 @@ export const AssetBrowser: React.FC = () => {
     <div className="asset-browser">
       <div className="browser-toolbar">
         <div className="navigation">
-          <button onClick={handleNavigateUp} disabled={currentPath === '/Game'}>
-            ←
+          <button
+            type="button"
+            onClick={handleNavigateUp}
+            disabled={currentPath === '/Game'}
+            aria-label="Navigate up"
+          >
+            Up
           </button>
           <span className="current-path">{currentPath}</span>
         </div>
@@ -128,13 +135,14 @@ export const AssetBrowser: React.FC = () => {
           <input
             type="text"
             placeholder="Search assets..."
+            aria-label="Search assets"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
         <div className="toolbar-actions">
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value as AssetType | 'all')}>
+          <select aria-label="Filter asset type" value={filterType} onChange={(e) => setFilterType(e.target.value as AssetType | 'all')}>
             <option value="all">All Types</option>
             <option value="StaticMesh">Static Mesh</option>
             <option value="SkeletalMesh">Skeletal Mesh</option>
@@ -148,23 +156,25 @@ export const AssetBrowser: React.FC = () => {
           </select>
 
           <div className="view-mode-toggle">
-            <button
+            <button type="button"
               className={viewMode === 'grid' ? 'active' : ''}
+              aria-pressed={viewMode === 'grid'}
               onClick={() => setViewMode('grid')}
             >
               Grid
             </button>
-            <button
+            <button type="button"
               className={viewMode === 'list' ? 'active' : ''}
+              aria-pressed={viewMode === 'list'}
               onClick={() => setViewMode('list')}
             >
               List
             </button>
           </div>
 
-          <button onClick={handleImport}>Import</button>
-          <button onClick={handleExport} disabled={!selectedAsset}>Export</button>
-          <button onClick={handleDelete} disabled={!selectedAsset}>Delete</button>
+          <button type="button" onClick={handleImport} aria-label="Import asset">Import</button>
+          <button type="button" onClick={handleExport} disabled={!selectedAsset} aria-label="Export asset">Export</button>
+          <button type="button" onClick={handleDelete} disabled={!selectedAsset} aria-label="Delete asset">Delete</button>
         </div>
       </div>
 
@@ -182,6 +192,14 @@ export const AssetBrowser: React.FC = () => {
               className={`asset-item ${selectedAsset?.path === asset.path ? 'selected' : ''}`}
               onClick={() => handleAssetClick(asset)}
               onDoubleClick={() => handleAssetDoubleClick(asset)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleAssetDoubleClick(asset);
+                }
+              }}
             >
               <div className="asset-thumbnail">
                 {asset.thumbnail ? (
@@ -251,17 +269,24 @@ export const AssetBrowser: React.FC = () => {
         }
 
         .navigation button {
-          padding: 4px 12px;
+          padding: 6px 12px;
           background: var(--vscode-button-secondaryBackground);
           color: var(--vscode-button-secondaryForeground);
           border: none;
           cursor: pointer;
           font-size: 14px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .navigation button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+
+        .navigation button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .current-path {
@@ -281,6 +306,12 @@ export const AssetBrowser: React.FC = () => {
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 13px;
+          transition: border-color 0.15s ease-out;
+        }
+
+        .search-bar input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .toolbar-actions {
@@ -297,6 +328,14 @@ export const AssetBrowser: React.FC = () => {
           border: none;
           cursor: pointer;
           font-size: 12px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
+        }
+
+        .toolbar-actions select:focus-visible,
+        .toolbar-actions button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .toolbar-actions button:disabled {
@@ -307,7 +346,7 @@ export const AssetBrowser: React.FC = () => {
         .view-mode-toggle {
           display: flex;
           border: 1px solid var(--vscode-button-border);
-          border-radius: 2px;
+          border-radius: 3px;
           overflow: hidden;
         }
 
@@ -348,7 +387,7 @@ export const AssetBrowser: React.FC = () => {
           border: 2px solid transparent;
           border-radius: 4px;
           padding: 8px;
-          transition: all 0.1s;
+          transition: background 0.15s ease-out, border-color 0.15s ease-out;
         }
 
         .asset-item:hover {
@@ -358,6 +397,11 @@ export const AssetBrowser: React.FC = () => {
         .asset-item.selected {
           border-color: var(--vscode-focusBorder);
           background: var(--vscode-list-activeSelectionBackground);
+        }
+
+        .asset-item:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 2px;
         }
 
         .grid .asset-item {
@@ -396,11 +440,14 @@ export const AssetBrowser: React.FC = () => {
         }
 
         .asset-icon {
-          font-size: 48px;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
         }
 
         .list .asset-icon {
-          font-size: 24px;
+          font-size: 12px;
         }
 
         .asset-info {

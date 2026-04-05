@@ -178,7 +178,7 @@ export const GitBranchManager: React.FC = () => {
     <div className="git-branch-manager">
       <div className="manager-header">
         <h3>Branches</h3>
-        <button
+        <button type="button"
           className="create-button"
           onClick={() => setIsCreating(true)}
         >
@@ -192,6 +192,7 @@ export const GitBranchManager: React.FC = () => {
             type="text"
             className="branch-input"
             placeholder="Branch name..."
+            aria-label="Branch name"
             value={newBranchName}
             onChange={(e) => setNewBranchName(e.target.value)}
             onKeyDown={(e) => {
@@ -201,10 +202,10 @@ export const GitBranchManager: React.FC = () => {
             autoFocus
           />
           <div className="form-actions">
-            <button className="action-button primary" onClick={handleCreateBranch}>
+            <button type="button" className="action-button primary" onClick={handleCreateBranch}>
               Create
             </button>
-            <button className="action-button" onClick={() => setIsCreating(false)}>
+            <button type="button" className="action-button" onClick={() => setIsCreating(false)}>
               Cancel
             </button>
           </div>
@@ -216,6 +217,7 @@ export const GitBranchManager: React.FC = () => {
           type="text"
           className="search-input"
           placeholder="Search branches..."
+          aria-label="Search branches"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -236,7 +238,15 @@ export const GitBranchManager: React.FC = () => {
             <div
               key={branch.name}
               className={`branch-item ${branch.name === currentBranch ? 'current' : ''}`}
+              role="button"
+              tabIndex={0}
               onClick={() => setSelectedBranch(branch)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSelectedBranch(branch);
+                }
+              }}
             >
               <div className="branch-main">
                 {branch.name === currentBranch && (
@@ -251,7 +261,7 @@ export const GitBranchManager: React.FC = () => {
               </div>
               <div className="branch-actions">
                 {branch.name !== currentBranch && (
-                  <button
+                  <button type="button"
                     className="action-button"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -263,7 +273,7 @@ export const GitBranchManager: React.FC = () => {
                   </button>
                 )}
                 {branch.name !== currentBranch && (
-                  <button
+                  <button type="button"
                     className="action-button"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -275,7 +285,7 @@ export const GitBranchManager: React.FC = () => {
                   </button>
                 )}
                 {!branch.upstream && (
-                  <button
+                  <button type="button"
                     className="action-button"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -286,7 +296,7 @@ export const GitBranchManager: React.FC = () => {
                     Publish
                   </button>
                 )}
-                <button
+                <button type="button"
                   className="action-button"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -297,7 +307,7 @@ export const GitBranchManager: React.FC = () => {
                   Compare
                 </button>
                 {branch.name !== currentBranch && (
-                  <button
+                  <button type="button"
                     className="action-button danger"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -320,13 +330,21 @@ export const GitBranchManager: React.FC = () => {
               <div
                 key={branch.name}
                 className="branch-item remote"
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedBranch(branch)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedBranch(branch);
+                  }
+                }}
               >
                 <div className="branch-main">
                   <span className="branch-name">{branch.name}</span>
                 </div>
                 <div className="branch-actions">
-                  <button
+                  <button type="button"
                     className="action-button"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -336,7 +354,7 @@ export const GitBranchManager: React.FC = () => {
                   >
                     Checkout
                   </button>
-                  <button
+                  <button type="button"
                     className="action-button danger"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -381,13 +399,14 @@ export const GitBranchManager: React.FC = () => {
         }
 
         .create-button {
-          padding: 4px 12px;
+          padding: 6px 12px;
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
           border: none;
           cursor: pointer;
           font-size: 12px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .create-button:hover {
@@ -409,10 +428,16 @@ export const GitBranchManager: React.FC = () => {
           outline: none;
           font-size: 13px;
           margin-bottom: 8px;
+          transition: border-color 0.15s ease-out;
         }
 
         .branch-input:focus {
           border-color: var(--vscode-focusBorder);
+        }
+
+        .branch-input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .form-actions {
@@ -430,16 +455,22 @@ export const GitBranchManager: React.FC = () => {
 
         .search-input {
           flex: 1;
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: var(--vscode-input-background);
           color: var(--vscode-input-foreground);
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 12px;
+          transition: border-color 0.15s ease-out;
         }
 
         .search-input:focus {
           border-color: var(--vscode-focusBorder);
+        }
+
+        .search-input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .checkbox-label {
@@ -473,6 +504,7 @@ export const GitBranchManager: React.FC = () => {
           padding: 8px 12px;
           cursor: pointer;
           border-bottom: 1px solid var(--vscode-panel-border);
+          transition: background 0.15s ease-out;
         }
 
         .branch-item:hover {
@@ -484,8 +516,15 @@ export const GitBranchManager: React.FC = () => {
           color: var(--vscode-list-activeSelectionForeground);
         }
 
-        .branch-item:hover .branch-actions {
-          display: flex;
+        .branch-item:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
+        }
+
+        .branch-item:hover .branch-actions,
+        .branch-item:focus-within .branch-actions {
+          opacity: 1;
+          visibility: visible;
         }
 
         .branch-main {
@@ -512,23 +551,32 @@ export const GitBranchManager: React.FC = () => {
         }
 
         .branch-actions {
-          display: none;
+          display: flex;
           gap: 6px;
           flex-wrap: wrap;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.15s ease-out;
         }
 
         .action-button {
-          padding: 3px 8px;
+          padding: 4px 10px;
           background: var(--vscode-button-secondaryBackground);
           color: var(--vscode-button-secondaryForeground);
           border: none;
           cursor: pointer;
           font-size: 11px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .action-button:hover {
           background: var(--vscode-button-secondaryHoverBackground);
+        }
+
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .action-button.primary {

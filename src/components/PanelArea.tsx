@@ -9,7 +9,7 @@ type PanelView = 'terminal' | 'output' | 'problems' | 'debug';
 
 export const PanelArea: React.FC = () => {
   const [activePanel, setActivePanel] = useState<PanelView>('terminal');
-  const [panelHeight, setPanelHeight] = useState(300);
+  const [panelHeight, setPanelHeight] = useState(200);
   const [isResizing, setIsResizing] = useState(false);
 
   useEffect(() => {
@@ -86,25 +86,25 @@ export const PanelArea: React.FC = () => {
       
       <div className="panel-header">
         <div className="panel-tabs">
-          <button
+          <button type="button"
             className={`panel-tab ${activePanel === 'terminal' ? 'active' : ''}`}
             onClick={() => setActivePanel('terminal')}
           >
             Terminal
           </button>
-          <button
+          <button type="button"
             className={`panel-tab ${activePanel === 'output' ? 'active' : ''}`}
             onClick={() => setActivePanel('output')}
           >
             Output
           </button>
-          <button
+          <button type="button"
             className={`panel-tab ${activePanel === 'problems' ? 'active' : ''}`}
             onClick={() => setActivePanel('problems')}
           >
             Problems
           </button>
-          <button
+          <button type="button"
             className={`panel-tab ${activePanel === 'debug' ? 'active' : ''}`}
             onClick={() => setActivePanel('debug')}
           >
@@ -112,10 +112,11 @@ export const PanelArea: React.FC = () => {
           </button>
         </div>
         <div className="panel-actions">
-          <button
+          <button type="button"
             className="panel-action"
             onClick={() => EventBus.getInstance().emit('view:togglePanel', {})}
             title="Close Panel"
+            aria-label="Close Panel"
           >
             ×
           </button>
@@ -140,9 +141,10 @@ export const PanelArea: React.FC = () => {
           top: 0;
           left: 0;
           right: 0;
-          height: 4px;
+          height: 3px;
           cursor: ns-resize;
           z-index: 10;
+          transition: background 0.15s ease-out;
         }
 
         .panel-resize-handle:hover {
@@ -164,14 +166,14 @@ export const PanelArea: React.FC = () => {
         }
 
         .panel-tab {
-          padding: 0 16px;
+          padding: 8px 16px;
           background: none;
           border: none;
           color: var(--vscode-tab-inactiveForeground);
           cursor: pointer;
           font-size: 13px;
-          border-bottom: 2px solid transparent;
-          transition: color 0.1s, border-color 0.1s;
+          border-bottom: 1px solid transparent;
+          transition: color 0.15s ease-out, border-color 0.15s ease-out;
         }
 
         .panel-tab:hover {
@@ -199,11 +201,18 @@ export const PanelArea: React.FC = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .panel-action:hover {
           background: var(--vscode-toolbar-hoverBackground);
+        }
+
+        .panel-action:focus-visible,
+        .panel-tab:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .panel-content {

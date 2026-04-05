@@ -182,10 +182,10 @@ export const EditorTabs: React.FC = () => {
             {tab.isPinned && <span className="pin-icon">📌</span>}
             <span className="tab-name">{tab.name}</span>
             {tab.isDirty && <span className="dirty-indicator">●</span>}
-            <button
+            <button type="button"
               className="close-button"
               onClick={(e) => handleTabClose(e, tab.id)}
-              aria-label="Close"
+              type="button" aria-label="Close tab" title="Close"
             >
               ×
             </button>
@@ -251,8 +251,8 @@ export const EditorTabs: React.FC = () => {
         .tab {
           display: flex;
           align-items: center;
-          gap: 6px;
-          padding: 0 12px;
+          gap: 8px;
+          padding: 8px 12px;
           min-width: 120px;
           max-width: 200px;
           background: var(--vscode-tab-inactiveBackground);
@@ -260,17 +260,23 @@ export const EditorTabs: React.FC = () => {
           border-right: 1px solid var(--vscode-tab-border);
           cursor: pointer;
           user-select: none;
-          transition: background 0.1s;
+          transition: background 0.15s ease-out;
         }
 
         .tab:hover {
           background: var(--vscode-tab-hoverBackground);
         }
 
+        .tab:focus-visible,
+        .close-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
+        }
+
         .tab.active {
           background: var(--vscode-tab-activeBackground);
           color: var(--vscode-tab-activeForeground);
-          border-bottom: 2px solid var(--vscode-tab-activeBorder);
+          border-bottom: 1px solid var(--vscode-tab-activeBorder);
         }
 
         .tab.pinned {
@@ -294,9 +300,11 @@ export const EditorTabs: React.FC = () => {
         }
 
         .dirty-indicator {
-          color: var(--vscode-tab-activeForeground);
-          font-size: 16px;
-          line-height: 1;
+          width: 8px;
+          height: 8px;
+          border-radius: 999px;
+          background: var(--vscode-tab-activeForeground);
+          display: inline-block;
         }
 
         .close-button {
@@ -304,17 +312,20 @@ export const EditorTabs: React.FC = () => {
           background: none;
           border: none;
           color: inherit;
-          font-size: 18px;
+          font-size: 14px;
           line-height: 1;
           padding: 0;
           width: 20px;
           height: 20px;
           cursor: pointer;
           border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .tab:hover .close-button {
-          display: block;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .close-button:hover {

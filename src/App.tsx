@@ -327,6 +327,9 @@ export const App: React.FC = () => {
           --vscode-dropdown-background: #3c3c3c;
           --vscode-dropdown-foreground: #cccccc;
           --vscode-dropdown-border: #3c3c3c;
+          --vscode-scrollbarSlider-background: #424242;
+          --vscode-scrollbarSlider-hoverBackground: #4f4f4f;
+          --vscode-scrollbarSlider-activeBackground: #5a5a5a;
         }
 
         /* Theme Variables - Light */
@@ -414,6 +417,9 @@ export const App: React.FC = () => {
           --vscode-dropdown-background: #ffffff;
           --vscode-dropdown-foreground: #000000;
           --vscode-dropdown-border: #cecece;
+          --vscode-scrollbarSlider-background: #c4c4c4;
+          --vscode-scrollbarSlider-hoverBackground: #b0b0b0;
+          --vscode-scrollbarSlider-activeBackground: #a0a0a0;
         }
 
         /* Global Styles */
@@ -435,10 +441,15 @@ export const App: React.FC = () => {
         ::-webkit-scrollbar-thumb {
           background: var(--vscode-scrollbarSlider-background, #424242);
           border-radius: 5px;
+          transition: background 0.15s ease-out;
         }
 
         ::-webkit-scrollbar-thumb:hover {
           background: var(--vscode-scrollbarSlider-hoverBackground, #4f4f4f);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+          background: var(--vscode-scrollbarSlider-activeBackground, #5a5a5a);
         }
       `}</style>
     </div>

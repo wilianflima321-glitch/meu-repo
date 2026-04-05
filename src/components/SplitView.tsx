@@ -78,6 +78,38 @@ export const SplitView: React.FC<SplitViewProps> = ({
     setDragIndex(index);
   };
 
+  const handleKeyDown = (index: number) => (e: React.KeyboardEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const totalSize = direction === 'horizontal' ? rect.width : rect.height;
+    if (!totalSize) return;
+
+    const minPercent = (minSize / totalSize) * 100;
+    const stepPercent = Math.max(1, (16 / totalSize) * 100);
+    let delta = 0;
+
+    if (direction === 'horizontal') {
+      if (e.key === 'ArrowLeft') delta = -stepPercent;
+      if (e.key === 'ArrowRight') delta = stepPercent;
+    } else {
+      if (e.key === 'ArrowUp') delta = -stepPercent;
+      if (e.key === 'ArrowDown') delta = stepPercent;
+    }
+
+    if (!delta) return;
+    e.preventDefault();
+
+    setSizes((prev) => {
+      const next = [...prev];
+      const left = next[index] + delta;
+      const right = next[index + 1] - delta;
+      if (left < minPercent || right < minPercent) return prev;
+      next[index] = left;
+      next[index + 1] = right;
+      return next;
+    });
+  };
+
   return (
     <div
       ref={containerRef}
@@ -97,6 +129,11 @@ export const SplitView: React.FC<SplitViewProps> = ({
             <div
               className={`split-divider ${direction}`}
               onMouseDown={handleMouseDown(index)}
+              role="separator"
+              tabIndex={0}
+              aria-orientation={direction === 'horizontal' ? 'vertical' : 'horizontal'}
+              aria-label="Resize panel"
+              onKeyDown={handleKeyDown(index)}
             />
           )}
         </React.Fragment>
@@ -129,6 +166,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
           cursor: col-resize;
           position: relative;
           z-index: 10;
+          transition: background 0.15s ease-out;
         }
 
         .split-divider.horizontal {
@@ -141,12 +179,31 @@ export const SplitView: React.FC<SplitViewProps> = ({
           cursor: row-resize;
         }
 
+        .split-divider::after {
+          content: '';
+          position: absolute;
+          inset: -4px;
+        }
+
+        .split-divider.vertical::after {
+          inset: -4px 0;
+        }
+
+        .split-divider.horizontal::after {
+          inset: 0 -4px;
+        }
+
         .split-divider:hover {
           background: var(--vscode-focusBorder);
         }
 
         .split-divider:active {
           background: var(--vscode-focusBorder);
+        }
+
+        .split-divider:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
       `}</style>
     </div>

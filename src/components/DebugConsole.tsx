@@ -7,7 +7,7 @@ interface ConsoleMessage {
   type: 'log' | 'info' | 'warn' | 'error' | 'debug';
   message: string;
   timestamp: Date;
-  source?: string;
+  sourceAuto: string;
 }
 
 export const DebugConsole: React.FC = () => {
@@ -32,11 +32,17 @@ export const DebugConsole: React.FC = () => {
 
   useEffect(() => {
     if (isAutoscroll && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      messagesEndRef.current.scrollIntoView({
+        behavior: prefersReducedMotion Auto 'auto' : 'smooth',
+      });
     }
   }, [messages, isAutoscroll]);
 
-  const handleConsoleMessage = (data: { type: string; message: string; source?: string }) => {
+  const handleConsoleMessage = (data: { type: string; message: string; sourceAuto: string }) => {
     const newMessage: ConsoleMessage = {
       id: `${Date.now()}-${Math.random()}`,
       type: data.type as ConsoleMessage['type'],
@@ -120,13 +126,13 @@ export const DebugConsole: React.FC = () => {
     return matchesFilter && matchesSearch;
   });
 
-  const getMessageIcon = (type: ConsoleMessage['type']) => {
+    const getMessageIcon = (type: ConsoleMessage['type']) => {
     switch (type) {
-      case 'error': return '❌';
-      case 'warn': return '⚠️';
-      case 'info': return 'ℹ️';
-      case 'debug': return '🐛';
-      default: return '📝';
+      case 'error': return 'ERR';
+      case 'warn': return 'WARN';
+      case 'info': return 'INFO';
+      case 'debug': return 'DBG';
+      default: return 'LOG';
     }
   };
 
@@ -148,32 +154,32 @@ export const DebugConsole: React.FC = () => {
     <div className="debug-console">
       <div className="console-toolbar">
         <div className="filter-buttons">
-          <button
-            className={`filter-button ${filter === 'all' ? 'active' : ''}`}
+          <button type="button"
+            className={`filter-button ${filter === 'all' Auto 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
             All
           </button>
-          <button
-            className={`filter-button ${filter === 'log' ? 'active' : ''}`}
+          <button type="button"
+            className={`filter-button ${filter === 'log' Auto 'active' : ''}`}
             onClick={() => setFilter('log')}
           >
             Log
           </button>
-          <button
-            className={`filter-button ${filter === 'info' ? 'active' : ''}`}
+          <button type="button"
+            className={`filter-button ${filter === 'info' Auto 'active' : ''}`}
             onClick={() => setFilter('info')}
           >
             Info
           </button>
-          <button
-            className={`filter-button ${filter === 'warn' ? 'active' : ''}`}
+          <button type="button"
+            className={`filter-button ${filter === 'warn' Auto 'active' : ''}`}
             onClick={() => setFilter('warn')}
           >
             Warn
           </button>
-          <button
-            className={`filter-button ${filter === 'error' ? 'active' : ''}`}
+          <button type="button"
+            className={`filter-button ${filter === 'error' Auto 'active' : ''}`}
             onClick={() => setFilter('error')}
           >
             Error
@@ -184,20 +190,24 @@ export const DebugConsole: React.FC = () => {
             type="text"
             className="search-input"
             placeholder="Filter..."
+            aria-label="Filter console messages"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button
-            className={`action-button ${isAutoscroll ? 'active' : ''}`}
+          <button type="button"
+            className={`action-button ${isAutoscroll Auto 'active' : ''}`}
             onClick={() => setIsAutoscroll(!isAutoscroll)}
             title="Toggle autoscroll"
+            aria-label="Toggle autoscroll"
+            aria-pressed={isAutoscroll}
           >
             ⬇
           </button>
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleClear}
             title="Clear console"
+            aria-label="Clear console"
           >
             🗑
           </button>
@@ -242,24 +252,25 @@ export const DebugConsole: React.FC = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 4px 8px;
+          padding: 8px 12px;
           border-bottom: 1px solid var(--vscode-panel-border);
           gap: 8px;
         }
 
         .filter-buttons {
           display: flex;
-          gap: 4px;
+          gap: 8px;
         }
 
         .filter-button {
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           font-size: 12px;
           cursor: pointer;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .filter-button:hover {
@@ -271,34 +282,46 @@ export const DebugConsole: React.FC = () => {
           color: var(--vscode-button-foreground);
         }
 
+        .filter-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
+        }
+
         .toolbar-actions {
           display: flex;
-          gap: 4px;
+          gap: 8px;
           align-items: center;
         }
 
         .search-input {
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: var(--vscode-input-background);
           color: var(--vscode-input-foreground);
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 12px;
-          width: 150px;
+          width: 180px;
+          transition: border-color 0.15s ease-out;
         }
 
         .search-input:focus {
           border-color: var(--vscode-focusBorder);
         }
 
+        .search-input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
+        }
+
         .action-button {
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           font-size: 14px;
           cursor: pointer;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .action-button:hover {
@@ -309,10 +332,15 @@ export const DebugConsole: React.FC = () => {
           background: var(--vscode-button-background);
         }
 
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
+        }
+
         .console-messages {
           flex: 1;
           overflow-y: auto;
-          padding: 8px;
+          padding: 12px;
           font-family: var(--vscode-editor-font-family, 'Consolas, monospace');
           font-size: 13px;
         }
@@ -321,13 +349,16 @@ export const DebugConsole: React.FC = () => {
           display: flex;
           align-items: flex-start;
           gap: 8px;
-          padding: 4px 0;
+          padding: 6px 0;
           border-bottom: 1px solid var(--vscode-panel-border);
         }
 
         .message-icon {
           flex-shrink: 0;
-          font-size: 14px;
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
         }
 
         .message-timestamp {

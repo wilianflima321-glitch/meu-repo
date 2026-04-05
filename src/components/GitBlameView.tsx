@@ -133,7 +133,17 @@ export const GitBlameView: React.FC<GitBlameViewProps> = ({ filePath, content })
                 style={{ background: ageColor }}
                 onMouseEnter={() => setHoveredLine(index)}
                 onMouseLeave={() => setHoveredLine(null)}
+                onFocus={() => setHoveredLine(index)}
+                onBlur={() => setHoveredLine(null)}
                 onClick={() => handleLineClick(blameLine)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleLineClick(blameLine);
+                  }
+                }}
               >
                 <div className="blame-info">
                   {showDetails ? (
@@ -180,12 +190,13 @@ export const GitBlameView: React.FC<GitBlameViewProps> = ({ filePath, content })
                   <div className="hover-tooltip">
                     <div className="tooltip-header">
                       <strong>{blameLine.commit.author}</strong>
-                      <button
+                      <button type="button"
                         className="copy-button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCopyCommitHash(blameLine.commit.hash);
                         }}
+                        aria-label="Copy commit hash"
                       >
                         Copy Hash
                       </button>
@@ -228,7 +239,7 @@ export const GitBlameView: React.FC<GitBlameViewProps> = ({ filePath, content })
 
         .toolbar-actions {
           display: flex;
-          gap: 16px;
+          gap: 12px;
         }
 
         .checkbox-label {
@@ -257,10 +268,11 @@ export const GitBlameView: React.FC<GitBlameViewProps> = ({ filePath, content })
         .blame-line {
           display: flex;
           align-items: center;
-          min-height: 22px;
+          min-height: 28px;
           cursor: pointer;
           position: relative;
           border-bottom: 1px solid var(--vscode-panel-border);
+          transition: background 0.15s ease-out;
         }
 
         .blame-line:hover {
@@ -271,11 +283,16 @@ export const GitBlameView: React.FC<GitBlameViewProps> = ({ filePath, content })
           background: var(--vscode-editor-selectionBackground) !important;
         }
 
+        .blame-line:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
+        }
+
         .blame-info {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 4px 8px;
+          padding: 8px 12px;
           min-width: 280px;
           border-right: 1px solid var(--vscode-editorGroupHeader-tabsBorder);
           background: var(--vscode-sideBar-background);
@@ -359,6 +376,7 @@ export const GitBlameView: React.FC<GitBlameViewProps> = ({ filePath, content })
           padding: 12px;
           min-width: 300px;
           max-width: 500px;
+          border-radius: 4px;
         }
 
         .tooltip-header {
@@ -369,17 +387,23 @@ export const GitBlameView: React.FC<GitBlameViewProps> = ({ filePath, content })
         }
 
         .copy-button {
-          padding: 2px 8px;
+          padding: 4px 8px;
           background: var(--vscode-button-secondaryBackground);
           color: var(--vscode-button-secondaryForeground);
           border: none;
           cursor: pointer;
           font-size: 11px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .copy-button:hover {
           background: var(--vscode-button-secondaryHoverBackground);
+        }
+
+        .copy-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .tooltip-message {

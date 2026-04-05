@@ -29,6 +29,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView }) => {
 
   return (
     <div className="sidebar">
+      <div className="sidebar-header">
+        <span className="sidebar-title">
+          {activeView.charAt(0).toUpperCase() + activeView.slice(1)}
+        </span>
+      </div>
       {renderView()}
 
       <style jsx>{`
@@ -40,6 +45,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView }) => {
           display: flex;
           flex-direction: column;
           overflow: hidden;
+        }
+
+        .sidebar-header {
+          padding: 8px 12px;
+          background: var(--vscode-sideBarSectionHeader-background);
+          border-bottom: 1px solid var(--vscode-panel-border);
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .sidebar-title {
+          color: var(--vscode-sideBar-foreground);
+          opacity: 0.9;
         }
       `}</style>
     </div>

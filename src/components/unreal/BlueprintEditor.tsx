@@ -225,25 +225,25 @@ export const BlueprintEditor: React.FC = () => {
         </div>
         
         <div className="toolbar-section">
-          <button onClick={() => handleAddNode('Event')}>Event</button>
-          <button onClick={() => handleAddNode('Function')}>Function</button>
-          <button onClick={() => handleAddNode('Branch')}>Branch</button>
-          <button onClick={() => handleAddNode('Print')}>Print</button>
-          <button onClick={() => handleAddNode('Add')}>Add</button>
-          <button onClick={() => handleAddNode('GetVariable')}>Get Var</button>
-          <button onClick={() => handleAddNode('SetVariable')}>Set Var</button>
+          <button type="button" onClick={() => handleAddNode('Event')}>Event</button>
+          <button type="button" onClick={() => handleAddNode('Function')}>Function</button>
+          <button type="button" onClick={() => handleAddNode('Branch')}>Branch</button>
+          <button type="button" onClick={() => handleAddNode('Print')}>Print</button>
+          <button type="button" onClick={() => handleAddNode('Add')}>Add</button>
+          <button type="button" onClick={() => handleAddNode('GetVariable')}>Get Var</button>
+          <button type="button" onClick={() => handleAddNode('SetVariable')}>Set Var</button>
         </div>
 
         <div className="toolbar-section">
-          <button onClick={handleZoomIn}>Zoom +</button>
-          <button onClick={handleZoomOut}>Zoom -</button>
-          <button onClick={handleResetView}>Reset</button>
+          <button type="button" onClick={handleZoomIn}>Zoom +</button>
+          <button type="button" onClick={handleZoomOut}>Zoom -</button>
+          <button type="button" onClick={handleResetView}>Reset</button>
           <span className="zoom-level">{Math.round(zoom * 100)}%</span>
         </div>
 
         <div className="toolbar-section">
-          <button onClick={handleCompile} className="compile-button">Compile</button>
-          <button onClick={handleDeleteNode} disabled={!selectedNode}>Delete</button>
+          <button type="button" onClick={handleCompile} className="compile-button">Compile</button>
+          <button type="button" onClick={handleDeleteNode} disabled={!selectedNode}>Delete</button>
         </div>
       </div>
 
@@ -417,7 +417,8 @@ export const BlueprintEditor: React.FC = () => {
           border: none;
           cursor: pointer;
           font-size: 12px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .editor-toolbar button:hover:not(:disabled) {
@@ -427,6 +428,11 @@ export const BlueprintEditor: React.FC = () => {
         .editor-toolbar button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+
+        .editor-toolbar button:focus-visible {
+          outline: 2px solid #0e639c;
+          outline-offset: 1px;
         }
 
         .compile-button {
@@ -522,7 +528,7 @@ export const BlueprintEditor: React.FC = () => {
           background: #ffffff;
           border: 2px solid #4a4a4a;
           cursor: pointer;
-          transition: all 0.1s;
+          transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
         }
 
         .pin:hover {

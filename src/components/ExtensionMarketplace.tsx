@@ -138,27 +138,31 @@ export const ExtensionMarketplace: React.FC = () => {
           type="text"
           className="search-input"
           placeholder="Search extensions..."
+          aria-label="Search extensions"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
       <div className="filter-bar">
-        <button
+        <button type="button"
           className={`filter-button ${filter === 'all' ? 'active' : ''}`}
           onClick={() => setFilter('all')}
+          aria-pressed={filter === 'all'}
         >
           All
         </button>
-        <button
+        <button type="button"
           className={`filter-button ${filter === 'installed' ? 'active' : ''}`}
           onClick={() => setFilter('installed')}
+          aria-pressed={filter === 'installed'}
         >
           Installed
         </button>
-        <button
+        <button type="button"
           className={`filter-button ${filter === 'recommended' ? 'active' : ''}`}
           onClick={() => setFilter('recommended')}
+          aria-pressed={filter === 'recommended'}
         >
           Recommended
         </button>
@@ -202,14 +206,14 @@ export const ExtensionMarketplace: React.FC = () => {
               <div className="extension-actions">
                 {installed ? (
                   <>
-                    <button
+                    <button type="button"
                       className="action-button toggle-button"
                       onClick={() => handleToggle(extension.id)}
                       disabled={isLoading}
                     >
                       {installedExt?.enabled ? 'Disable' : 'Enable'}
                     </button>
-                    <button
+                    <button type="button"
                       className="action-button uninstall-button"
                       onClick={() => handleUninstall(extension.id)}
                       disabled={isLoading}
@@ -218,7 +222,7 @@ export const ExtensionMarketplace: React.FC = () => {
                     </button>
                   </>
                 ) : (
-                  <button
+                  <button type="button"
                     className="action-button install-button"
                     onClick={() => handleInstall(extension.id)}
                     disabled={isLoading}
@@ -265,10 +269,16 @@ export const ExtensionMarketplace: React.FC = () => {
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 14px;
+          transition: border-color 0.15s ease-out;
         }
 
         .search-input:focus {
           border-color: var(--vscode-focusBorder);
+        }
+
+        .search-input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .filter-bar {
@@ -285,7 +295,8 @@ export const ExtensionMarketplace: React.FC = () => {
           color: var(--vscode-foreground);
           cursor: pointer;
           font-size: 13px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .filter-button:hover {
@@ -296,6 +307,11 @@ export const ExtensionMarketplace: React.FC = () => {
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
           border-color: var(--vscode-button-background);
+        }
+
+        .filter-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .extensions-list {
@@ -312,6 +328,7 @@ export const ExtensionMarketplace: React.FC = () => {
           border-radius: 4px;
           margin-bottom: 12px;
           background: var(--vscode-sideBar-background);
+          transition: background 0.15s ease-out, border-color 0.15s ease-out;
         }
 
         .extension-icon {
@@ -401,8 +418,9 @@ export const ExtensionMarketplace: React.FC = () => {
           border: none;
           cursor: pointer;
           font-size: 13px;
-          border-radius: 2px;
+          border-radius: 3px;
           min-width: 100px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .action-button:disabled {
@@ -417,6 +435,11 @@ export const ExtensionMarketplace: React.FC = () => {
 
         .install-button:hover:not(:disabled) {
           background: var(--vscode-button-hoverBackground);
+        }
+
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .toggle-button {

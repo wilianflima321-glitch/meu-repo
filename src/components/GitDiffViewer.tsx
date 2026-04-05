@@ -98,7 +98,7 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
               <span className="hunk-range">{hunk.header}</span>
               <div className="hunk-actions">
                 {!staged && (
-                  <button
+                  <button type="button"
                     className="hunk-action"
                     onClick={() => handleStageHunk(hunkIndex)}
                     title="Stage hunk"
@@ -107,7 +107,7 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
                   </button>
                 )}
                 {staged && (
-                  <button
+                  <button type="button"
                     className="hunk-action"
                     onClick={() => handleUnstageHunk(hunkIndex)}
                     title="Unstage hunk"
@@ -116,7 +116,7 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
                   </button>
                 )}
                 {!staged && (
-                  <button
+                  <button type="button"
                     className="hunk-action danger"
                     onClick={() => handleDiscardHunk(hunkIndex)}
                     title="Discard hunk"
@@ -183,7 +183,7 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
                 <span className="hunk-range">{hunk.newStart},{hunk.newLines}</span>
                 <div className="hunk-actions">
                   {!staged && (
-                    <button
+                    <button type="button"
                       className="hunk-action"
                       onClick={() => handleStageHunk(hunkIndex)}
                     >
@@ -191,7 +191,7 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
                     </button>
                   )}
                   {staged && (
-                    <button
+                    <button type="button"
                       className="hunk-action"
                       onClick={() => handleUnstageHunk(hunkIndex)}
                     >
@@ -199,7 +199,7 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
                     </button>
                   )}
                   {!staged && (
-                    <button
+                    <button type="button"
                       className="hunk-action danger"
                       onClick={() => handleDiscardHunk(hunkIndex)}
                     >
@@ -232,15 +232,17 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
         <div className="file-path">{filePath}</div>
         <div className="toolbar-actions">
           <div className="view-mode-toggle">
-            <button
+            <button type="button"
               className={`mode-button ${viewMode === 'split' ? 'active' : ''}`}
               onClick={() => setViewMode('split')}
+              aria-pressed={viewMode === 'split'}
             >
               Split
             </button>
-            <button
+            <button type="button"
               className={`mode-button ${viewMode === 'inline' ? 'active' : ''}`}
               onClick={() => setViewMode('inline')}
+              aria-pressed={viewMode === 'inline'}
             >
               Inline
             </button>
@@ -293,18 +295,19 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
         .view-mode-toggle {
           display: flex;
           border: 1px solid var(--vscode-button-border);
-          border-radius: 2px;
+          border-radius: 3px;
           overflow: hidden;
         }
 
         .mode-button {
-          padding: 4px 12px;
+          padding: 6px 12px;
           background: var(--vscode-button-secondaryBackground);
           color: var(--vscode-button-secondaryForeground);
           border: none;
           cursor: pointer;
           font-size: 12px;
           border-right: 1px solid var(--vscode-button-border);
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .mode-button:last-child {
@@ -318,6 +321,11 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
         .mode-button.active {
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
+        }
+
+        .mode-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .checkbox-label {
@@ -371,7 +379,7 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: var(--vscode-diffEditor-unchangedRegionBackground);
           border-top: 1px solid var(--vscode-diffEditor-border);
           border-bottom: 1px solid var(--vscode-diffEditor-border);
@@ -389,13 +397,14 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
         }
 
         .hunk-action {
-          padding: 2px 8px;
+          padding: 4px 8px;
           background: var(--vscode-button-secondaryBackground);
           color: var(--vscode-button-secondaryForeground);
           border: none;
           cursor: pointer;
           font-size: 11px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .hunk-action:hover {
@@ -406,6 +415,11 @@ export const GitDiffViewer: React.FC<GitDiffViewerProps> = ({
           background: transparent;
           color: var(--vscode-errorForeground);
           border: 1px solid var(--vscode-errorForeground);
+        }
+
+        .hunk-action:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .hunk-action.danger:hover {

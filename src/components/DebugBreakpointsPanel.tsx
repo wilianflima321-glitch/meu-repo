@@ -105,11 +105,11 @@ export const DebugBreakpointsPanel: React.FC = () => {
     setLogMessageInput('');
   };
 
-  const getBreakpointIcon = (breakpoint: Breakpoint) => {
-    if (!breakpoint.enabled) return '⚪';
-    if (breakpoint.logMessage) return '💬';
-    if (breakpoint.condition || breakpoint.hitCondition) return '❓';
-    return '🔴';
+    const getBreakpointIcon = (breakpoint: Breakpoint) => {
+    if (!breakpoint.enabled) return 'OFF';
+    if (breakpoint.logMessage) return 'LOG';
+    if (breakpoint.condition || breakpoint.hitCondition) return 'COND';
+    return 'BP';
   };
 
   const getBreakpointLabel = (breakpoint: Breakpoint) => {
@@ -144,26 +144,29 @@ export const DebugBreakpointsPanel: React.FC = () => {
       <div className="panel-header">
         <h3>Breakpoints ({filteredBreakpoints.length})</h3>
         <div className="header-actions">
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleEnableAll}
             title="Enable all"
+            aria-label="Enable all"
             disabled={breakpoints.length === 0}
           >
             ✓
           </button>
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleDisableAll}
             title="Disable all"
+            aria-label="Disable all"
             disabled={breakpoints.length === 0}
           >
             ⊘
           </button>
-          <button
+          <button type="button"
             className="action-button"
             onClick={handleRemoveAll}
             title="Remove all"
+            aria-label="Remove all"
             disabled={breakpoints.length === 0}
           >
             🗑
@@ -208,8 +211,9 @@ export const DebugBreakpointsPanel: React.FC = () => {
                   {editingBreakpoint === breakpoint.id ? (
                     <div className="breakpoint-edit">
                       <div className="edit-field">
-                        <label>Condition:</label>
+                        <label htmlFor="breakpoint-condition">Condition:</label>
                         <input
+                          id="breakpoint-condition"
                           type="text"
                           value={conditionInput}
                           onChange={(e) => setConditionInput(e.target.value)}
@@ -217,8 +221,9 @@ export const DebugBreakpointsPanel: React.FC = () => {
                         />
                       </div>
                       <div className="edit-field">
-                        <label>Hit Count:</label>
+                        <label htmlFor="breakpoint-hitcount">Hit Count:</label>
                         <input
+                          id="breakpoint-hitcount"
                           type="text"
                           value={hitCountInput}
                           onChange={(e) => setHitCountInput(e.target.value)}
@@ -226,8 +231,9 @@ export const DebugBreakpointsPanel: React.FC = () => {
                         />
                       </div>
                       <div className="edit-field">
-                        <label>Log Message:</label>
+                        <label htmlFor="breakpoint-logmessage">Log Message:</label>
                         <input
+                          id="breakpoint-logmessage"
                           type="text"
                           value={logMessageInput}
                           onChange={(e) => setLogMessageInput(e.target.value)}
@@ -235,15 +241,23 @@ export const DebugBreakpointsPanel: React.FC = () => {
                         />
                       </div>
                       <div className="edit-actions">
-                        <button onClick={handleSaveBreakpoint}>Save</button>
-                        <button onClick={handleCancelEdit}>Cancel</button>
+                        <button type="button" onClick={handleSaveBreakpoint}>Save</button>
+                        <button type="button" onClick={handleCancelEdit}>Cancel</button>
                       </div>
                     </div>
                   ) : (
                     <>
                       <div
                         className="breakpoint-main"
+                        role="button"
+                        tabIndex={0}
                         onClick={() => handleGoToBreakpoint(breakpoint)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleGoToBreakpoint(breakpoint);
+                          }
+                        }}
                       >
                         <input
                           type="checkbox"
@@ -274,17 +288,19 @@ export const DebugBreakpointsPanel: React.FC = () => {
                         </div>
                       </div>
                       <div className="breakpoint-actions">
-                        <button
+                        <button type="button"
                           className="action-button"
                           onClick={() => handleEditBreakpoint(breakpoint)}
                           title="Edit breakpoint"
+                          aria-label="Edit breakpoint"
                         >
                           ✎
                         </button>
-                        <button
+                        <button type="button"
                           className="action-button"
                           onClick={() => handleRemoveBreakpoint(breakpoint.id)}
                           title="Remove breakpoint"
+                          aria-label="Remove breakpoint"
                         >
                           ✗
                         </button>
@@ -330,21 +346,27 @@ export const DebugBreakpointsPanel: React.FC = () => {
 
         .header-actions {
           display: flex;
-          gap: 4px;
+          gap: 8px;
         }
 
         .action-button {
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           cursor: pointer;
           font-size: 14px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .action-button:hover:not(:disabled) {
           background: var(--vscode-toolbar-hoverBackground);
+        }
+
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .action-button:disabled {
@@ -373,12 +395,18 @@ export const DebugBreakpointsPanel: React.FC = () => {
         }
 
         .group-select {
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: var(--vscode-dropdown-background);
           color: var(--vscode-dropdown-foreground);
           border: 1px solid var(--vscode-dropdown-border);
           outline: none;
           font-size: 12px;
+          transition: border-color 0.15s ease-out;
+        }
+
+        .group-select:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .breakpoints-list {
@@ -400,17 +428,20 @@ export const DebugBreakpointsPanel: React.FC = () => {
         .breakpoint-item {
           display: flex;
           align-items: center;
-          padding: 6px 12px;
+          padding: 8px 12px;
           cursor: pointer;
           font-size: 13px;
+          transition: background 0.15s ease-out;
         }
 
         .breakpoint-item:hover {
           background: var(--vscode-list-hoverBackground);
         }
 
-        .breakpoint-item:hover .breakpoint-actions {
-          display: flex;
+        .breakpoint-item:hover .breakpoint-actions,
+        .breakpoint-item:focus-within .breakpoint-actions {
+          opacity: 1;
+          visibility: visible;
         }
 
         .breakpoint-main {
@@ -418,6 +449,12 @@ export const DebugBreakpointsPanel: React.FC = () => {
           align-items: center;
           gap: 8px;
           flex: 1;
+        }
+
+        .breakpoint-main:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 2px;
+          border-radius: 4px;
         }
 
         .breakpoint-main input[type="checkbox"] {
@@ -453,8 +490,11 @@ export const DebugBreakpointsPanel: React.FC = () => {
         }
 
         .breakpoint-actions {
-          display: none;
-          gap: 4px;
+          display: flex;
+          gap: 6px;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.15s ease-out;
         }
 
         .breakpoint-edit {
@@ -462,7 +502,7 @@ export const DebugBreakpointsPanel: React.FC = () => {
           padding: 8px;
           background: var(--vscode-input-background);
           border: 1px solid var(--vscode-input-border);
-          border-radius: 2px;
+          border-radius: 3px;
         }
 
         .edit-field {
@@ -478,12 +518,18 @@ export const DebugBreakpointsPanel: React.FC = () => {
 
         .edit-field input {
           width: 100%;
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: var(--vscode-input-background);
           color: var(--vscode-input-foreground);
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 12px;
+          transition: border-color 0.15s ease-out;
+        }
+
+        .edit-field input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .edit-actions {
@@ -493,17 +539,23 @@ export const DebugBreakpointsPanel: React.FC = () => {
         }
 
         .edit-actions button {
-          padding: 4px 12px;
+          padding: 6px 12px;
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
           border: none;
           cursor: pointer;
           font-size: 12px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .edit-actions button:hover {
           background: var(--vscode-button-hoverBackground);
+        }
+
+        .edit-actions button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .no-breakpoints {

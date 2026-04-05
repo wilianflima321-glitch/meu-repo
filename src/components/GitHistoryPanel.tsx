@@ -158,6 +158,7 @@ export const GitHistoryPanel: React.FC = () => {
           type="text"
           className="search-input"
           placeholder="Search commits..."
+          aria-label="Search commits"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -165,6 +166,7 @@ export const GitHistoryPanel: React.FC = () => {
           type="text"
           className="branch-filter"
           placeholder="Filter by branch..."
+          aria-label="Filter by branch"
           value={filterBranch}
           onChange={(e) => setFilterBranch(e.target.value)}
         />
@@ -177,6 +179,14 @@ export const GitHistoryPanel: React.FC = () => {
               key={commit.hash}
               className={`commit-item ${selectedCommit?.hash === commit.hash ? 'selected' : ''}`}
               onClick={() => handleCommitClick(commit)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleCommitClick(commit);
+                }
+              }}
             >
               <div className="commit-header">
                 <div className="commit-graph">
@@ -198,7 +208,7 @@ export const GitHistoryPanel: React.FC = () => {
           ))}
 
           {hasMore && !isLoading && (
-            <button className="load-more" onClick={handleLoadMore}>
+            <button type="button" className="load-more" onClick={handleLoadMore}>
               Load More
             </button>
           )}
@@ -217,21 +227,21 @@ export const GitHistoryPanel: React.FC = () => {
             <div className="details-header">
               <h3>Commit Details</h3>
               <div className="header-actions">
-                <button
+                <button type="button"
                   className="action-button"
                   onClick={() => handleCopyHash(selectedCommit.hash)}
                   title="Copy hash"
                 >
                   Copy Hash
                 </button>
-                <button
+                <button type="button"
                   className="action-button"
                   onClick={() => handleCheckoutCommit(selectedCommit.hash)}
                   title="Checkout"
                 >
                   Checkout
                 </button>
-                <button
+                <button type="button"
                   className="action-button danger"
                   onClick={() => handleRevertCommit(selectedCommit.hash)}
                   title="Revert"
@@ -285,6 +295,14 @@ export const GitHistoryPanel: React.FC = () => {
                       key={file.path}
                       className="file-item"
                       onClick={() => handleViewDiff(file)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleViewDiff(file);
+                        }
+                      }}
                     >
                       <span className={getChangeClass(file.type)}>
                         {getChangeIcon(file.type)}
@@ -329,11 +347,18 @@ export const GitHistoryPanel: React.FC = () => {
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 13px;
+          transition: border-color 0.15s ease-out;
         }
 
         .search-input:focus,
         .branch-filter:focus {
           border-color: var(--vscode-focusBorder);
+        }
+
+        .search-input:focus-visible,
+        .branch-filter:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .history-content {
@@ -352,6 +377,7 @@ export const GitHistoryPanel: React.FC = () => {
           padding: 12px;
           border-bottom: 1px solid var(--vscode-panel-border);
           cursor: pointer;
+          transition: background 0.15s ease-out;
         }
 
         .commit-item:hover {
@@ -361,6 +387,11 @@ export const GitHistoryPanel: React.FC = () => {
         .commit-item.selected {
           background: var(--vscode-list-activeSelectionBackground);
           color: var(--vscode-list-activeSelectionForeground);
+        }
+
+        .commit-item:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .commit-header {
@@ -431,6 +462,8 @@ export const GitHistoryPanel: React.FC = () => {
           border: none;
           cursor: pointer;
           font-size: 13px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .load-more:hover {
@@ -472,13 +505,14 @@ export const GitHistoryPanel: React.FC = () => {
         }
 
         .action-button {
-          padding: 4px 12px;
+          padding: 6px 12px;
           background: var(--vscode-button-secondaryBackground);
           color: var(--vscode-button-secondaryForeground);
           border: none;
           cursor: pointer;
           font-size: 12px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out, color 0.15s ease-out;
         }
 
         .action-button:hover {
@@ -494,6 +528,11 @@ export const GitHistoryPanel: React.FC = () => {
         .action-button.danger:hover {
           background: var(--vscode-errorForeground);
           color: var(--vscode-errorBackground);
+        }
+
+        .action-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .details-content {
@@ -544,14 +583,20 @@ export const GitHistoryPanel: React.FC = () => {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 6px 8px;
+          padding: 8px 10px;
           cursor: pointer;
           font-size: 12px;
-          border-radius: 2px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
         }
 
         .file-item:hover {
           background: var(--vscode-list-hoverBackground);
+        }
+
+        .file-item:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: -2px;
         }
 
         .change-type {

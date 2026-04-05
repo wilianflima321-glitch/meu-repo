@@ -145,9 +145,11 @@ export const DebugVariablesPanel: React.FC = () => {
       <div key={fullPath} className="variable-item" style={{ paddingLeft: `${depth * 16}px` }}>
         <div className="variable-row">
           {hasChildren && (
-            <button
+            <button type="button"
               className="expand-button"
               onClick={() => toggleExpand(fullPath, variable)}
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+              aria-expanded={isExpanded}
             >
               {isExpanded ? '▼' : '▶'}
             </button>
@@ -168,8 +170,8 @@ export const DebugVariablesPanel: React.FC = () => {
                 }}
                 autoFocus
               />
-              <button onClick={handleSaveVariable}>✓</button>
-              <button onClick={handleCancelEdit}>✗</button>
+              <button type="button" onClick={handleSaveVariable}>✓</button>
+              <button type="button" onClick={handleCancelEdit}>✗</button>
             </div>
           ) : (
             <>
@@ -177,10 +179,11 @@ export const DebugVariablesPanel: React.FC = () => {
                 {variable.value}
               </span>
               <span className="variable-type">{variable.type}</span>
-              <button
+              <button type="button"
                 className="edit-button"
                 onClick={() => handleEditVariable(fullPath, variable.value)}
                 title="Edit value"
+                aria-label="Edit value"
               >
                 ✎
               </button>
@@ -207,10 +210,11 @@ export const DebugVariablesPanel: React.FC = () => {
           {watchExpressions.map((expr, index) => (
             <div key={index} className="watch-item">
               <span className="watch-expression">{expr}</span>
-              <button
+              <button type="button"
                 className="remove-button"
                 onClick={() => handleRemoveWatch(index)}
                 title="Remove watch"
+                aria-label="Remove watch"
               >
                 ✗
               </button>
@@ -220,13 +224,14 @@ export const DebugVariablesPanel: React.FC = () => {
             <input
               type="text"
               placeholder="Add watch expression..."
+              aria-label="Add watch expression"
               value={newWatchExpression}
               onChange={(e) => setNewWatchExpression(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAddWatch();
               }}
             />
-            <button onClick={handleAddWatch}>+</button>
+            <button type="button" onClick={handleAddWatch} aria-label="Add watch">Add</button>
           </div>
         </div>
       </div>
@@ -277,14 +282,15 @@ export const DebugVariablesPanel: React.FC = () => {
         }
 
         .watch-list {
-          padding: 4px 0;
+          padding: 8px 0;
         }
 
         .watch-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 4px 12px;
+          padding: 8px 12px;
+          transition: background 0.15s ease-out;
         }
 
         .watch-item:hover {
@@ -298,46 +304,76 @@ export const DebugVariablesPanel: React.FC = () => {
         }
 
         .remove-button {
-          display: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           cursor: pointer;
-          padding: 2px 6px;
+          padding: 4px 8px;
           font-size: 12px;
+          border-radius: 3px;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.15s ease-out, background 0.15s ease-out;
         }
 
-        .watch-item:hover .remove-button {
-          display: block;
+        .watch-item:hover .remove-button,
+        .watch-item:focus-within .remove-button {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .remove-button:hover {
+          background: var(--vscode-toolbar-hoverBackground);
+        }
+
+        .remove-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .watch-input {
           display: flex;
-          gap: 4px;
-          padding: 4px 12px;
+          gap: 8px;
+          padding: 8px 12px;
         }
 
         .watch-input input {
           flex: 1;
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: var(--vscode-input-background);
           color: var(--vscode-input-foreground);
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 12px;
+          transition: border-color 0.15s ease-out;
+        }
+
+        .watch-input input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .watch-input button {
-          padding: 4px 8px;
+          padding: 6px 10px;
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
           border: none;
           cursor: pointer;
           font-size: 12px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
+        }
+
+        .watch-input button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .variables-list {
-          padding: 4px 0;
+          padding: 8px 0;
         }
 
         .variable-item {
@@ -348,17 +384,20 @@ export const DebugVariablesPanel: React.FC = () => {
         .variable-row {
           display: flex;
           align-items: center;
-          gap: 6px;
-          padding: 2px 12px;
-          min-height: 22px;
+          gap: 8px;
+          padding: 6px 12px;
+          min-height: 28px;
+          transition: background 0.15s ease-out;
         }
 
         .variable-row:hover {
           background: var(--vscode-list-hoverBackground);
         }
 
-        .variable-row:hover .edit-button {
-          display: block;
+        .variable-row:hover .edit-button,
+        .variable-row:focus-within .edit-button {
+          opacity: 1;
+          visibility: visible;
         }
 
         .expand-button {
@@ -367,8 +406,23 @@ export const DebugVariablesPanel: React.FC = () => {
           color: var(--vscode-foreground);
           cursor: pointer;
           padding: 0;
-          width: 16px;
-          font-size: 10px;
+          width: 20px;
+          height: 20px;
+          font-size: 12px;
+          border-radius: 3px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.15s ease-out;
+        }
+
+        .expand-button:hover {
+          background: var(--vscode-toolbar-hoverBackground);
+        }
+
+        .expand-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .expand-spacer {
@@ -409,39 +463,67 @@ export const DebugVariablesPanel: React.FC = () => {
         }
 
         .edit-button {
-          display: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           background: none;
           border: none;
           color: var(--vscode-foreground);
           cursor: pointer;
-          padding: 2px 6px;
+          padding: 4px 8px;
           font-size: 12px;
+          border-radius: 3px;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.15s ease-out, background 0.15s ease-out;
+        }
+
+        .edit-button:hover {
+          background: var(--vscode-toolbar-hoverBackground);
+        }
+
+        .edit-button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .variable-edit {
           display: flex;
-          gap: 4px;
+          gap: 8px;
           flex: 1;
         }
 
         .variable-edit input {
           flex: 1;
-          padding: 2px 6px;
+          padding: 6px 10px;
           background: var(--vscode-input-background);
           color: var(--vscode-input-foreground);
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 12px;
           font-family: inherit;
+          transition: border-color 0.15s ease-out;
+        }
+
+        .variable-edit input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .variable-edit button {
-          padding: 2px 6px;
+          padding: 6px 10px;
           background: var(--vscode-button-background);
           color: var(--vscode-button-foreground);
           border: none;
           cursor: pointer;
           font-size: 12px;
+          border-radius: 3px;
+          transition: background 0.15s ease-out;
+        }
+
+        .variable-edit button:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .variable-children {

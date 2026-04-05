@@ -231,21 +231,44 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.4);
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(4px);
           display: flex;
           justify-content: center;
-          padding-top: 100px;
+          padding-top: 15vh;
           z-index: 10000;
+          animation: fadeIn 0.15s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
 
         .command-palette {
           width: 600px;
-          max-height: 500px;
+          max-height: 400px;
           background: var(--vscode-quickInput-background);
           border: 1px solid var(--vscode-quickInput-border);
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
           display: flex;
           flex-direction: column;
+          animation: slideIn 0.15s ease-out;
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateY(-10px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
 
         .search-box {
@@ -255,16 +278,22 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
 
         .search-box input {
           width: 100%;
-          padding: 8px 12px;
+          padding: 6px 12px;
           background: var(--vscode-input-background);
           color: var(--vscode-input-foreground);
           border: 1px solid var(--vscode-input-border);
           outline: none;
           font-size: 14px;
+          transition: border-color 0.15s ease-out;
         }
 
         .search-box input:focus {
           border-color: var(--vscode-focusBorder);
+        }
+
+        .search-box input:focus-visible {
+          outline: 2px solid var(--vscode-focusBorder);
+          outline-offset: 1px;
         }
 
         .commands-list {
@@ -277,9 +306,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 8px 12px;
+          padding: 6px 12px;
           cursor: pointer;
           color: var(--vscode-quickInput-foreground);
+          transition: background 0.15s ease-out;
         }
 
         .command-item:hover,
