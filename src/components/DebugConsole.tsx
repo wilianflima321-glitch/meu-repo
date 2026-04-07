@@ -7,7 +7,7 @@ interface ConsoleMessage {
   type: 'log' | 'info' | 'warn' | 'error' | 'debug';
   message: string;
   timestamp: Date;
-  sourceAuto: string;
+  source?: string;
 }
 
 export const DebugConsole: React.FC = () => {
@@ -37,12 +37,12 @@ export const DebugConsole: React.FC = () => {
         window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       messagesEndRef.current.scrollIntoView({
-        behavior: prefersReducedMotion Auto 'auto' : 'smooth',
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
       });
     }
   }, [messages, isAutoscroll]);
 
-  const handleConsoleMessage = (data: { type: string; message: string; sourceAuto: string }) => {
+  const handleConsoleMessage = (data: { type: string; message: string; source?: string }) => {
     const newMessage: ConsoleMessage = {
       id: `${Date.now()}-${Math.random()}`,
       type: data.type as ConsoleMessage['type'],
@@ -155,31 +155,31 @@ export const DebugConsole: React.FC = () => {
       <div className="console-toolbar">
         <div className="filter-buttons">
           <button type="button"
-            className={`filter-button ${filter === 'all' Auto 'active' : ''}`}
+            className={`filter-button ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
             All
           </button>
           <button type="button"
-            className={`filter-button ${filter === 'log' Auto 'active' : ''}`}
+            className={`filter-button ${filter === 'log' ? 'active' : ''}`}
             onClick={() => setFilter('log')}
           >
             Log
           </button>
           <button type="button"
-            className={`filter-button ${filter === 'info' Auto 'active' : ''}`}
+            className={`filter-button ${filter === 'info' ? 'active' : ''}`}
             onClick={() => setFilter('info')}
           >
             Info
           </button>
           <button type="button"
-            className={`filter-button ${filter === 'warn' Auto 'active' : ''}`}
+            className={`filter-button ${filter === 'warn' ? 'active' : ''}`}
             onClick={() => setFilter('warn')}
           >
             Warn
           </button>
           <button type="button"
-            className={`filter-button ${filter === 'error' Auto 'active' : ''}`}
+            className={`filter-button ${filter === 'error' ? 'active' : ''}`}
             onClick={() => setFilter('error')}
           >
             Error
@@ -195,7 +195,7 @@ export const DebugConsole: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button type="button"
-            className={`action-button ${isAutoscroll Auto 'active' : ''}`}
+            className={`action-button ${isAutoscroll ? 'active' : ''}`}
             onClick={() => setIsAutoscroll(!isAutoscroll)}
             title="Toggle autoscroll"
             aria-label="Toggle autoscroll"
