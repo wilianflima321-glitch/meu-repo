@@ -1,5 +1,9 @@
 'use client';
 
+/**
+ * @deprecated Sem referências na app Next actual. Use o toast/banner do dashboard ou integre `NotificationSystem` quando for o caso.
+ */
+
 import { useCallback, useEffect, useState } from 'react';
 
 export type NotificationSeverity = 'info' | 'success' | 'warning' | 'error';

@@ -1,5 +1,7 @@
 # EXECUTION_ALIGNMENT_2026-03-27
 
+> **Nota (colisão `41_*`):** Ficheiro `41_EXECUTION_ALIGNMENT_2026-03-27.md` — registo de **alinhamento técnico aplicado**; distinto de `41_AUDITORIA_MAXIMA_*` e `41_DOCS_NAMING_*`. Ver `DEPRECATED_INDEX.md`.
+
 ## Objetivo
 Registrar o pacote de alinhamento tecnico aplicado para reduzir gaps entre spec, runtime e experiencia real no Studio.
 

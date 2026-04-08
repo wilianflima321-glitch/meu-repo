@@ -15,6 +15,8 @@ import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
 import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
 import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
 import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
+import { EditorApplyBridgeProvider } from "@/components/ide/EditorApplyBridgeContext";
+import { IdeWorkbenchCommandExtras } from "@/components/ide/IdeWorkbenchCommandExtras";
 import { DevicePreview } from "@/components/ide/DevicePreview";
 import { ConsoleIntegration } from "@/components/ide/ConsoleIntegration";
 import { ProfessionalViewport3D } from "@/components/ide/ProfessionalViewport3D";
@@ -661,6 +663,20 @@ function IDEContent() {
     }
     if (entry === "live-preview" || entry === "preview") {
       setPreviewEnabled(true);
+      return;
+    }
+    if (entry === "playground") {
+      setPreviewEnabled(true);
+      window.dispatchEvent(new Event("aethel.layout.openAI"));
+      return;
+    }
+    if (entry === "testing") {
+      setPreviewEnabled(true);
+      window.dispatchEvent(
+        new CustomEvent("aethel.layout.openBottomTab", {
+          detail: { tab: "debug" },
+        })
+      );
     }
   }, [entryParam]);
 
@@ -891,7 +907,16 @@ function IDEContent() {
       onAIChat={handleAIPanel}
       files={workspaceFilesLoaded ? workspaceFiles : []}
     >
+      <IdeWorkbenchCommandExtras />
       <TabProvider>
+        <EditorApplyBridgeProvider
+          editorRef={editorRef}
+          activeFilePath={activeFile?.path ?? null}
+          activeFileContent={activeFile?.content ?? ""}
+          normalizePath={normalizePath}
+          writeFile={writeFile}
+          readFile={readFile}
+        >
         <ModernIDEShell
             projectName={`Projeto ${projectId}`}
             activeFileName={activeFile?.path}
@@ -1195,6 +1220,7 @@ function IDEContent() {
               )
             }}
         </ModernIDEShell>
+        </EditorApplyBridgeProvider>
       </TabProvider>
     </CommandPaletteProvider>
   );

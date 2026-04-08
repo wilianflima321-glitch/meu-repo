@@ -1,7 +1,12 @@
 ﻿'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ClipboardList, RefreshCw, Play, AlertTriangle } from 'lucide-react'
+import { ClipboardList, RefreshCw, Play, AlertTriangle, Info, X } from 'lucide-react'
+import {
+  buildLocalAgentPlanPreview,
+  type AgentSession,
+  type AgentStepStatus,
+} from '@/lib/ai/ai-agent-mode'
 
 interface TaskStep {
   id: string
@@ -66,6 +71,14 @@ function formatTimestamp(value?: string) {
   }
 }
 
+const AGENT_STATUS_CLASS: Record<AgentStepStatus, string> = {
+  pending: 'text-[var(--aethel-text-tertiary)]',
+  running: 'text-[var(--aethel-info-light)]',
+  ok: 'text-[var(--aethel-success-light)]',
+  error: 'text-[var(--aethel-error-light)]',
+  skipped: 'text-[var(--aethel-text-quaternary)]',
+}
+
 export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps) {
   const storageKey = useMemo(() => getTaskStorageKey(projectId), [projectId])
   const [goal, setGoal] = useState(defaultGoal)
@@ -74,6 +87,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
   const [error, setError] = useState<string | null>(null)
   const [isPlanning, setIsPlanning] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [localAgentPreview, setLocalAgentPreview] = useState<AgentSession | null>(null)
 
   useEffect(() => {
     if (!defaultGoal) return
@@ -120,6 +134,7 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
     }
     setIsPlanning(true)
     setError(null)
+    setLocalAgentPreview(null)
     try {
       const response = await fetch('/api/studio/tasks/plan', {
         method: 'POST',
@@ -129,11 +144,17 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
       const payload = await response.json().catch(() => null)
       if (!response.ok) {
         setError(payload?.message || payload?.error || 'Falha ao criar o plano.')
+        setLocalAgentPreview(
+          buildLocalAgentPlanPreview({ projectId: projectId || 'default' }, goal.trim())
+        )
         return
       }
       const nextTask: TaskRecord | null = payload?.metadata?.task ?? null
       if (!nextTask?.id) {
         setError('Plano criado sem ID de tarefa. Verifique o backend.')
+        setLocalAgentPreview(
+          buildLocalAgentPlanPreview({ projectId: projectId || 'default' }, goal.trim())
+        )
         return
       }
       setTaskId(nextTask.id)
@@ -143,6 +164,9 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha ao criar o plano.')
+      setLocalAgentPreview(
+        buildLocalAgentPlanPreview({ projectId: projectId || 'default' }, goal.trim())
+      )
     } finally {
       setIsPlanning(false)
     }
@@ -196,11 +220,59 @@ export function TaskOpsPanel({ projectId, defaultGoal = '' }: TaskOpsPanelProps)
             {error}
           </div>
         )}
+        {localAgentPreview && (
+          <div className="mt-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-2">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--aethel-info-light)]" />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-[var(--aethel-text-primary)]">
+                    Rascunho do modo agente (contrato)
+                  </p>
+                  <p className="mt-1 text-[10px] leading-relaxed text-[var(--aethel-text-tertiary)]">
+                    API de tarefas indisponível ou incompleta. Isto é a sequência prevista quando o backend estiver ligado — não indica execução real.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLocalAgentPreview(null)}
+                className="shrink-0 rounded p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_60%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                aria-label="Fechar rascunho"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <ul className="mt-2 space-y-1.5 border-t border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] pt-2">
+              {localAgentPreview.steps.map((step) => (
+                <li
+                  key={step.id}
+                  className="flex items-start justify-between gap-2 rounded-md border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_65%,transparent)] px-2 py-1.5"
+                >
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-mono uppercase text-[var(--aethel-text-quaternary)]">
+                      {step.kind}
+                    </span>
+                    <p className="text-[11px] text-[var(--aethel-text-secondary)]">{step.label}</p>
+                    {step.detail ? (
+                      <p className="mt-0.5 text-[10px] text-[var(--aethel-text-quaternary)]">{step.detail}</p>
+                    ) : null}
+                  </div>
+                  <span className={`shrink-0 text-[10px] uppercase tracking-wide ${AGENT_STATUS_CLASS[step.status]}`}>
+                    {step.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       {!task && (
-        <div className="flex flex-1 items-center justify-center p-4 text-xs text-[var(--aethel-text-tertiary)]">
-          Crie um plano para acompanhar a execução.
+        <div className="flex flex-1 items-center justify-center p-4 text-center text-xs text-[var(--aethel-text-tertiary)]">
+          {localAgentPreview
+            ? 'Quando a API de tarefas estiver disponível, o progresso detalhado aparece nesta área.'
+            : 'Crie um plano para acompanhar a execução.'}
         </div>
       )}
 

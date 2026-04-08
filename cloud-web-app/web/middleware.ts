@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { resolveWorkbenchConvergenceRedirect } from '@/lib/routes/workbench-convergence';
 import { jwtVerify } from 'jose';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis/cloudflare';
@@ -214,6 +215,16 @@ const PUBLIC_EXACT_PATHS = new Set([
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  const convergence = resolveWorkbenchConvergenceRedirect(pathname);
+  if (convergence && req.method === 'GET') {
+    const url = req.nextUrl.clone();
+    const internal = new URL(convergence.target, req.nextUrl.origin);
+    url.pathname = internal.pathname;
+    url.search = internal.search;
+    return withSecurityHeaders(NextResponse.redirect(url), req);
+  }
+
   const isApi = pathname.startsWith('/api');
   const enforceDevRateLimit = process.env.AETHEL_ENFORCE_DEV_RATE_LIMIT === 'true';
   const shouldApplyRateLimit = process.env.NODE_ENV === 'production' || enforceDevRateLimit;

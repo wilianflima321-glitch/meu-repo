@@ -1,4 +1,5 @@
 'use client'
+import dynamic from 'next/dynamic'
 import { useState, useRef, useEffect, useCallback, useMemo, type FormEvent } from 'react'
 import { ptBR } from '@/lib/locales/pt-BR'
 import {
@@ -72,8 +73,19 @@ import {
 } from './AIChatPanelChrome'
 import { MemoryPanel } from './MemoryPanel'
 import { ApprovalCard } from './ApprovalCard'
-import { CodeDiffPreview } from './CodeDiffPreview'
+const MonacoChatDiffPanel = dynamic(
+  () => import('./MonacoChatDiffPanel').then((m) => m.MonacoChatDiffPanel),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 items-center justify-center text-[11px] text-[var(--aethel-text-tertiary)]">
+        A carregar comparador Monaco...
+      </div>
+    ),
+  }
+)
 import { TaskOpsPanel } from './TaskOpsPanel'
+import { useEditorApplyBridge } from './EditorApplyBridgeContext'
 import { MentionChip, SuggestionList, useMentions } from '@/lib/copilot/mention-parser'
 
 const QUICK_PROMPTS = [
@@ -192,7 +204,7 @@ const DEMO_MESSAGES: Message[] = [
   {
     id: '1',
     role: 'assistant',
-    content: 'Ol?! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explica??o de c?digo** - entender trechos complexos\n- **Detec??o de bugs** - encontrar problemas no seu c?digo\n- **Otimiza??o** - melhorar performance\n- **Gera??o de c?digo** - escrever c?digo novo\n\nComo posso ajudar voc? hoje',
+    content: 'Ola! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explicacao de codigo** - entender trechos complexos\n- **Deteccao de bugs** - encontrar problemas no seu codigo\n- **Otimizacao** - melhorar performance\n- **Geracao de codigo** - escrever codigo novo\n\nComo posso ajudar voce hoje?',
     timestamp: new Date(Date.now() - 60000),
     model: DEFAULT_OPENROUTER_MODEL_ID,
   },
@@ -204,6 +216,7 @@ interface MessageBubbleProps {
   onRate: (rating: 'up' | 'down') => void
 }
 function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleProps) {
+  const editorBridge = useEditorApplyBridge()
   const [copied, setCopied] = useState(false)
   const [showThinking, setShowThinking] = useState(false)
   const isUser = message.role === 'user'
@@ -234,40 +247,95 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                 <code className="text-[var(--aethel-text-secondary)]">{code}</code>
               </pre>
               <div className="flex flex-wrap items-center gap-2 border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-text-tertiary)]">
-                <button type="button"
-                  disabled
-                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
-                  title="Requer integração com o editor"
-                  aria-disabled="true"
+                <button
+                  type="button"
+                  disabled={!editorBridge?.activeFilePath}
+                  className={`rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] transition-colors ${
+                    editorBridge?.activeFilePath
+                      ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
+                      : 'cursor-not-allowed opacity-50'
+                  }`}
+                  title={
+                    editorBridge
+                      ? editorBridge.activeFilePath
+                        ? 'Substitui a seleção ou insere no cursor'
+                        : 'Abra um arquivo no editor'
+                      : 'Disponível no workbench (/ide)'
+                  }
+                  onClick={() => {
+                    if (!editorBridge?.activeFilePath) return
+                    const r = editorBridge.applySnippetToEditor(code)
+                    if (!r.ok) window.alert(r.message)
+                  }}
                 >
                   Aplicar no editor
                 </button>
-                <button type="button"
-                  disabled
-                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
-                  title="Requer integração com o editor"
-                  aria-disabled="true"
+                <button
+                  type="button"
+                  disabled={!editorBridge?.activeFilePath}
+                  className={`rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] transition-colors ${
+                    editorBridge?.activeFilePath
+                      ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
+                      : 'cursor-not-allowed opacity-50'
+                  }`}
+                  title={
+                    editorBridge
+                      ? editorBridge.activeFilePath
+                        ? 'Abre o painel lateral com prévia (antes/depois)'
+                        : 'Abra um arquivo no editor'
+                      : 'Disponível no workbench (/ide)'
+                  }
+                  onClick={() => {
+                    if (!editorBridge?.activeFilePath) return
+                    const r = editorBridge.stageDiffForActiveFile(code)
+                    if (!r.ok) window.alert(r.message)
+                  }}
                 >
                   Abrir diff
                 </button>
-                <button type="button"
-                  disabled
-                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
-                  title="Requer integração com o editor"
-                  aria-disabled="true"
+                <button
+                  type="button"
+                  disabled={!editorBridge}
+                  className={`rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] transition-colors ${
+                    editorBridge
+                      ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
+                      : 'cursor-not-allowed opacity-50'
+                  }`}
+                  title={editorBridge ? 'Cria arquivo via API e abre no editor' : 'Disponível no workbench (/ide)'}
+                  onClick={() => {
+                    if (!editorBridge) return
+                    void editorBridge.createFileFromSnippet(code).then((r) => {
+                      if (!r.ok) window.alert(r.message)
+                    })
+                  }}
                 >
                   Criar arquivo
                 </button>
-                <button type="button"
-                  disabled
-                  className="rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] opacity-60 cursor-not-allowed"
-                  title="Requer integração com o editor"
-                  aria-disabled="true"
+                <button
+                  type="button"
+                  disabled={!editorBridge?.activeFilePath}
+                  className={`rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] transition-colors ${
+                    editorBridge?.activeFilePath
+                      ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
+                      : 'cursor-not-allowed opacity-50'
+                  }`}
+                  title={
+                    editorBridge
+                      ? editorBridge.activeFilePath
+                        ? 'Insere no cursor sem substituir seleção'
+                        : 'Abra um arquivo no editor'
+                      : 'Disponível no workbench (/ide)'
+                  }
+                  onClick={() => {
+                    if (!editorBridge?.activeFilePath) return
+                    const r = editorBridge.insertSnippetAtCursor(code)
+                    if (!r.ok) window.alert(r.message)
+                  }}
                 >
                   Inserir seleção
                 </button>
                 <span className="ml-auto text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
-                  Integração do editor pendente
+                  {editorBridge ? 'Ponte editor ativa' : 'Workbench: /ide'}
                 </span>
               </div>
             </div>
@@ -728,6 +796,7 @@ export default function AIChatPanelPro({
   const [isSpeaking, setIsSpeaking] = useState(false)
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null)
   const mentionState = useMentions('')
+  const editorBridge = useEditorApplyBridge()
   const [localCodebaseContextPreview, setLocalCodebaseContextPreview] = useState<CodebaseContextPreview>({
     loading: false,
     results: [],
@@ -748,6 +817,31 @@ export default function AIChatPanelPro({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingContent])
+
+  useEffect(() => {
+    if (editorBridge?.pendingDiff) {
+      setShowAdvancedControls(true)
+      setOpsTab('diff')
+    }
+  }, [editorBridge?.pendingDiff])
+
+  useEffect(() => {
+    const onOpenDiff = () => {
+      setShowAdvancedControls(true)
+      setOpsTab('diff')
+    }
+    const onOpenExecution = () => {
+      setShowAdvancedControls(true)
+      setOpsTab('execution')
+    }
+    window.addEventListener('aethel.ide.openChatDiff', onOpenDiff)
+    window.addEventListener('aethel.ide.openChatExecution', onOpenExecution)
+    return () => {
+      window.removeEventListener('aethel.ide.openChatDiff', onOpenDiff)
+      window.removeEventListener('aethel.ide.openChatExecution', onOpenExecution)
+    }
+  }, [])
+
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.style.height = 'auto'
@@ -1630,15 +1724,31 @@ export default function AIChatPanelPro({
             {opsTab === 'approval' && (
               <ApprovalCard changes={[]} onApprove={() => undefined} onReject={() => undefined} />
             )}
-            {opsTab === 'diff' && (
-              <CodeDiffPreview
-                diffs={[]}
-                onAccept={() => undefined}
-                onReject={() => undefined}
-                onAcceptLine={() => undefined}
-                onRejectLine={() => undefined}
-              />
-            )}
+            {opsTab === 'diff' &&
+              (editorBridge?.pendingDiff ? (
+                <MonacoChatDiffPanel
+                  filePath={editorBridge.pendingDiff.path}
+                  original={editorBridge.pendingDiff.oldContent}
+                  modified={editorBridge.pendingDiff.newContent}
+                  onAcceptAll={(finalModified) => {
+                    if (!editorBridge) return
+                    const r = editorBridge.replaceEntireFile(finalModified)
+                    if (!r.ok) {
+                      window.alert(r.message)
+                      return
+                    }
+                    editorBridge.clearPendingDiff()
+                  }}
+                  onReject={() => editorBridge?.clearPendingDiff()}
+                />
+              ) : (
+                <div className="flex h-full min-h-[160px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
+                  <p>Nenhum diff pendente.</p>
+                  <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
+                    Use &quot;Abrir diff&quot; num bloco de código da assistente.
+                  </p>
+                </div>
+              ))}
             {opsTab === 'execution' && (
               <TaskOpsPanel projectId={projectId} defaultGoal={lastUserGoal} />
             )}

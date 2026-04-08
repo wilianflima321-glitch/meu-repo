@@ -62,7 +62,7 @@ export interface GameEvent {
  * 1. Compilar código TypeScript para WASM
  * 2. Executar lógica de jogo de forma determinística
  * 3. Gerenciar estado do jogo
- * 4. Sincronizar com a visualização (NexusCanvas)
+ * 4. Sincronizar com a visualização (NexusCanvasV2 / preview canónico)
  */
 export class WasmRuntime {
   private module: WasmModule | null = null;

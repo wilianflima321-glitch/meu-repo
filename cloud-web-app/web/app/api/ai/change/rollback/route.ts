@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
           message: 'No rollback tokens found for the provided runId.',
           status: 404,
           capability: CAPABILITY,
-          capabilityStatus: 'IMPLEMENTED',
+          capabilityStatus: 'PARTIAL',
           metadata: { runId: requestedRunId },
         })
       }
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
           message: `Rollback token not found: ${token}.`,
           status: 404,
           capability: CAPABILITY,
-          capabilityStatus: 'IMPLEMENTED',
+          capabilityStatus: 'PARTIAL',
           metadata: { rollbackToken: token },
         })
       }
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
           message: 'Rollback token does not belong to this user.',
           status: 403,
           capability: CAPABILITY,
-          capabilityStatus: 'IMPLEMENTED',
+        capabilityStatus: 'PARTIAL',
           metadata: { rollbackToken: token },
         })
       }
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
           message: 'Rollback token was already used.',
           status: 409,
           capability: CAPABILITY,
-          capabilityStatus: 'IMPLEMENTED',
+          capabilityStatus: 'PARTIAL',
           metadata: { rollbackToken: token, usedAt: snapshot.usedAt },
         })
       }
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
           message: 'Rollback token expired.',
           status: 410,
           capability: CAPABILITY,
-          capabilityStatus: 'IMPLEMENTED',
+          capabilityStatus: 'PARTIAL',
           metadata: { rollbackToken: token, expiresAt: snapshot.expiresAt },
         })
       }
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
           message: 'Rollback blocked: current hash does not match expectedCurrentHash.',
           status: 409,
           capability: CAPABILITY,
-          capabilityStatus: 'IMPLEMENTED',
+          capabilityStatus: 'PARTIAL',
           metadata: { rollbackToken: token, currentHash, expectedCurrentHash },
         })
       }
@@ -268,7 +268,7 @@ export async function POST(request: NextRequest) {
           message: 'Rollback failed during file write. Prior restores were reverted when possible.',
           status: 500,
           capability: CAPABILITY,
-          capabilityStatus: 'IMPLEMENTED',
+          capabilityStatus: 'PARTIAL',
           metadata: {
             rollbackToken: target.token,
             recovered,
@@ -308,7 +308,7 @@ export async function POST(request: NextRequest) {
       message: restored.length === 1 ? 'Rollback applied successfully.' : `Applied ${restored.length} rollbacks successfully.`,
       status: 200,
       capability: CAPABILITY,
-      capabilityStatus: 'IMPLEMENTED',
+          capabilityStatus: 'PARTIAL',
       milestone: 'P0',
       metadata: {
         runId,

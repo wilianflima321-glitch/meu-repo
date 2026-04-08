@@ -12,6 +12,7 @@ import { DashboardFlowRail } from './DashboardFlowRail'
 import { DashboardMainContent } from './DashboardMainContent'
 import OnboardingWizard from '../onboarding/OnboardingWizard'
 import { DashboardToast } from './DashboardToast'
+import { DashboardRoutingNotice } from './DashboardRoutingNotice'
 import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
 
 type OnboardingCompleteHandler = ComponentProps<typeof OnboardingWizard>['onComplete']
@@ -113,6 +114,8 @@ export function DashboardShell({
           onUpgrade={onUpgradeTrial}
         />
       )}
+
+      <DashboardRoutingNotice />
 
       <StudioGlobalNav
         title="Studio Home"

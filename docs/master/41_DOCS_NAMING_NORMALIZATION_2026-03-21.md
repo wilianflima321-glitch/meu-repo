@@ -1,5 +1,7 @@
 ﻿# 41_DOCS_NAMING_NORMALIZATION_2026-03-21 (CANONICAL)
 
+> **Nota (colisão `41_*`):** Este ficheiro é a **política de nomes**; não confundir com `41_AUDITORIA_MAXIMA_*` nem `41_EXECUTION_ALIGNMENT_*`. Ver `DEPRECATED_INDEX.md`.
+
 **Data:** 2026-03-22  
 **Versao:** 1.1  
 **Status:** ACTIVE (transition incomplete; aliases exist, but legacy drift still requires enforcement)

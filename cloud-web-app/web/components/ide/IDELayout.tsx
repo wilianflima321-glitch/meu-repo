@@ -1,5 +1,10 @@
 'use client'
 
+/**
+ * @deprecated O workbench canónico usa `ModernIDEShell` dentro de `FullscreenIDE`.
+ * Mantido só por compatibilidade de exports; evitar novas integrações.
+ */
+
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import Codicon, { type CodiconName } from './Codicon'
 import StudioGlobalNav from '@/components/studio/StudioGlobalNav'

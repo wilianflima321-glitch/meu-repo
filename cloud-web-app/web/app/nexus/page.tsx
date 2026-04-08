@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import NexusCanvas from '@/components/NexusCanvas'
+import NexusCanvasV2 from '@/components/nexus/NexusCanvasV2'
 import NexusChatMultimodal from '@/components/nexus/NexusChatMultimodal'
 import AethelResearch from '@/components/nexus/AethelResearch'
 import DirectorMode from '@/components/nexus/DirectorMode'
@@ -52,7 +52,7 @@ export default function NexusPage() {
             rightPanelMode === 'director' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
           }`}
         >
-          Direção
+          Direcao
         </button>
       </div>
       <button type="button" className="rounded-lg bg-[var(--aethel-primary-dark)] px-4 py-1.5 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg shadow-blue-900/20 transition-all hover:bg-[var(--aethel-primary)]">
@@ -64,7 +64,7 @@ export default function NexusPage() {
   return (
     <StudioLayout
       title="Nexus"
-      subtitle="Orquestração multimodal e renderização em tempo real."
+      subtitle="Orquestracao multimodal e renderizacao em tempo real."
       actions={actions}
       padded={false}
       maxWidth="full"
@@ -119,11 +119,10 @@ export default function NexusPage() {
 
         {/* Main Canvas Area */}
         <div className="flex flex-1 flex-col bg-[var(--aethel-surface-primary)] p-4">
-          <NexusCanvas
-            mode={canvasMode}
-            onSelectElement={(id, pos) => console.log('Selected:', id, pos)}
+          <NexusCanvasV2
+            renderMode={canvasMode === '3d' && !isAIPainting ? 'draft' : 'cinematic'}
             isAIPainting={isAIPainting}
-            content={null}
+            paintingProgress={isAIPainting ? 75 : 0}
           />
         </div>
 

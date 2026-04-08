@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     message: 'Core-loop readiness loaded.',
     status: 200,
     capability: CAPABILITY,
-    capabilityStatus: 'IMPLEMENTED',
+    capabilityStatus: 'PARTIAL',
     metadata: {
       hours,
       sinceIso,
