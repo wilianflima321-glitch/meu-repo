@@ -23,7 +23,7 @@ export const ASPIRATIONAL_LABS_FALLBACK = '/dashboard?notice=labs-hidden'
 export const IDE_CONVERGENCE_REDIRECTS: Record<string, string> = {
   '/ai-command': '/ide?entry=ai-command',
   '/chat': '/ide?entry=chat',
-  '/editor-hub': '/ide?entry=editor-hub',
+  '/editor-hub': '/ide',
   '/explorer': '/ide?entry=explorer',
   '/git': '/ide?entry=git',
   '/search': '/ide?entry=search',

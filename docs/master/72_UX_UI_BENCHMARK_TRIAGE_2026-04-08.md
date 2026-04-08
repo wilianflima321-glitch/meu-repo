@@ -53,6 +53,7 @@ Benchmark de mercado ensina uma licao simples: os melhores produtos parecem coes
 
 - `ModernIDEShell` ja organiza a experiencia principal.
 - Resize real nas costuras principais entrou no shell, com persistencia local de layout.
+- Rotas duplicadas como `editor-hub` deixaram de parecer um segundo produto e passaram a convergir mais claramente para o workbench canonico.
 - O maior gap de "feel premium" saiu de "handles fake" para "falta de split editor, distribuicao mais adaptativa e maior densidade de comandos".
 
 ### Nexus
