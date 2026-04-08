@@ -41,6 +41,7 @@ export interface MonacoEditorProps {
   onRequestFullAccess?: () => void;
   onCursorChange?: (position: { line: number; column: number }) => void;
   onSelectionChange?: (selection: { text: string; range: monacoEditor.IRange }) => void;
+  onDiagnosticsChange?: (diagnostics: Diagnostic[]) => void;
   onMount?: (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: Monaco) => void;
 
   // Options
@@ -169,6 +170,7 @@ export function MonacoEditorPro({
   onRequestFullAccess,
   onCursorChange,
   onSelectionChange,
+  onDiagnosticsChange,
   onMount: onMountProp,
   readOnly = false,
   minimap = true,
@@ -203,6 +205,28 @@ export function MonacoEditorPro({
     message: string;
   } | null>(null);
   const [inlineEditNeedsFullAccess, setInlineEditNeedsFullAccess] = useState(false);
+
+  const mapMarkersToDiagnostics = useCallback((markers: monacoEditor.editor.IMarker[]) => {
+    return markers.map((marker) => ({
+      line: marker.startLineNumber,
+      column: marker.startColumn,
+      endLine: marker.endLineNumber,
+      endColumn: marker.endColumn,
+      message: marker.message,
+      severity:
+        marker.severity === 8
+          ? 'error'
+          : marker.severity === 4
+            ? 'warning'
+            : marker.severity === 2
+              ? 'info'
+              : 'hint',
+      source: marker.source,
+      code: typeof marker.code === 'string' || typeof marker.code === 'number'
+        ? marker.code
+        : undefined,
+    })) satisfies Diagnostic[];
+  }, []);
 
   // Handle editor mount
   const handleMount: OnMount = useCallback((editor, monaco) => {
@@ -359,6 +383,33 @@ export function MonacoEditorPro({
       inlineCompletionDisposableRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!editorRef.current || !monacoRef.current || !onDiagnosticsChange) return;
+
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    const model = editor.getModel();
+    if (!model) return;
+
+    const publishMarkers = () => {
+      const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+      onDiagnosticsChange(mapMarkersToDiagnostics(markers));
+    };
+
+    publishMarkers();
+
+    const markerListener = monaco.editor.onDidChangeMarkers((resources) => {
+      if (resources.some((resource) => resource.toString() === model.uri.toString())) {
+        publishMarkers();
+      }
+    });
+
+    return () => {
+      markerListener.dispose();
+      onDiagnosticsChange([]);
+    };
+  }, [language, onDiagnosticsChange, path, mapMarkersToDiagnostics]);
 
   useEffect(() => {
     const handleRevealLocation = (event: Event) => {
