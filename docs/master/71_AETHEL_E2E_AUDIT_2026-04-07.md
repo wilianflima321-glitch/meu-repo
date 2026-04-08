@@ -31,6 +31,7 @@ Plataforma web em monorepo Next.js com Studio (`/dashboard`) e Workbench (`/ide`
 - `lib/ai/ai-agent-mode.ts` define o contrato minimo do modo agente e `TaskOpsPanel.tsx` mostra rascunho local quando a API real nao responde, sem fingir execucao.
 - `lib/routes/workbench-convergence.ts` e `middleware.ts` ja escondem labs em producao por padrao e convergem rotas duplicadas para o `/ide`.
 - `/editor-hub` foi reduzido para redirecionamento direto ao `/ide`, removendo uma duplicacao de entrada sem valor proprio.
+- `components/ide/index.ts` deixou de reexportar `IDELayout`, reduzindo o risco de reintroduzir o shell legado por imports indiretos.
 - `DashboardRoutingNotice.tsx` comunica o motivo do redirecionamento em vez de fazer redirect mudo.
 - `ModernIDEShell.tsx` agora tem resize real nas costuras principais (sidebar, preview e copiloto), usa os tamanhos do estado e deixou de exibir handle "fake".
 - `FullscreenIDE.tsx` persiste o layout do shell em `localStorage` e liga o bottom dock a acoes reais (buscar arquivos, abrir Git, console, diagnosticos e modos da previa).

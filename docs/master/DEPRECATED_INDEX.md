@@ -16,8 +16,10 @@ Referencia rapida para evitar releitura de specs obsoletos e para nao reintroduz
 | Item | Estado |
 | --- | --- |
 | `components/ide/IDELayout.tsx` | Deprecated; o workbench canonico e `ModernIDEShell` dentro de `FullscreenIDE` |
+| `components/ide/index.ts` export de `IDELayout` | Removido para evitar reintroduzir o shell legado por imports indiretos |
 | `components/NexusCanvas.tsx` | Deprecated como wrapper; use `components/nexus/NexusCanvasV2.tsx` |
 | `components/NotificationCenter.tsx` | Deprecated; o fluxo ativo de notificacao esta no dashboard e em `NotificationSystem` quando integrado |
+| `components/NotificationSystem.tsx` | Deprecated como superficie React; a referencia ativa e `lib/ui/notification-system.tsx` |
 | `components/editor/` e `components/editors/` | Pastas distintas por dominio: Monaco e fluxo de codigo vs editores de jogo e VFX; ver `components/editors/index.ts` |
 
 ## Rotas e ambiente

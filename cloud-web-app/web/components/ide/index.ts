@@ -13,8 +13,7 @@ export {
 } from './InlineAIChat'
 
 // Legacy / compatibility exports
-// `IDELayout` remains exported only to avoid quebrar imports antigos.
-export { default as IDELayout } from './IDELayout'
+// `IDELayout` permanece no repo apenas como legado documental; evitar novos imports.
 export { default as FileExplorerPro } from './FileExplorerPro'
 export { default as GitPanelPro } from './GitPanelPro'
 export { default as AIChatPanelPro } from './AIChatPanelPro'
@@ -26,5 +25,3 @@ export { default as DiffViewer } from './DiffViewer'
 export { default as InlineCompletion } from './InlineCompletion'
 
 // Types
-// Mantido apenas para imports antigos; o shell canônico não depende mais deste tipo.
-export type { default as IDELayoutProps } from './IDELayout'

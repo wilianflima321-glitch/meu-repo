@@ -1,5 +1,10 @@
 'use client'
 
+/**
+ * @deprecated A superficie canônica de notificações está em `lib/ui/notification-system.tsx`.
+ * Este componente permanece apenas para compatibilidade local; evitar novas integrações.
+ */
+
 import { useState, useEffect, createContext, useContext, useCallback, type ReactNode } from 'react'
 import { X, AlertCircle, CheckCircle, Info, AlertTriangle, Loader2 } from 'lucide-react'
 
