@@ -1179,11 +1179,11 @@ function IDEContent() {
             {{
               sidebar: (
                 <div className="h-full flex flex-col">
-                  <div className="flex items-center gap-1 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-2 py-2">
+                  <div className="flex items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-3 py-3">
                     <button
                       type="button"
                       onClick={() => setSidebarTab('explorer')}
-                      className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                      className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
                         sidebarTab === 'explorer'
                           ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
                           : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -1194,7 +1194,7 @@ function IDEContent() {
                     <button
                       type="button"
                       onClick={() => setSidebarTab('git')}
-                      className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                      className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
                         sidebarTab === 'git'
                           ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
                           : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -1216,20 +1216,20 @@ function IDEContent() {
               editor: (
                 <div className="h-full flex flex-col">
                   {isCompactViewport && (
-                    <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
+                    <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-4 py-3.5 text-xs leading-6 text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
                       Viewport compacto detectado. Para melhor experiência use desktop com {'>='} 1024px.
                     </div>
                   )}
                   <TabBar />
-                  <div className="flex items-center justify-between border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2 py-1.5 text-[11px]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2.5 text-[11px]">
                     <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
-                      <span>Ferramentas do editor</span>
+                      <span className="font-medium uppercase tracking-[0.12em]">Ferramentas do editor</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setShowIntelliSense((prev) => !prev)}
-                        className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
                           showIntelliSense
                             ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
                             : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -1240,7 +1240,7 @@ function IDEContent() {
                       <button
                         type="button"
                         onClick={() => setShowDiagnostics((prev) => !prev)}
-                        className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
                           showDiagnostics
                             ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
                             : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -1252,7 +1252,11 @@ function IDEContent() {
                   </div>
                   <div className="flex-1 overflow-hidden">
                     {isReadingFile && (
-                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Carregando arquivo...</div>
+                      <div className="h-full flex items-center justify-center px-6">
+                        <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-5 py-4 text-sm text-[var(--aethel-text-tertiary)]">
+                          Carregando arquivo...
+                        </div>
+                      </div>
                     )}
                     {!isReadingFile && fileError && (
                       <div className="h-full flex items-center justify-center px-6">
@@ -1332,7 +1336,7 @@ function IDEContent() {
                       </div>
                     )}
                     {!isReadingFile && !fileError && !activeFile && (
-                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para começar a editar.</div>
+                      <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">Selecione um arquivo para iniciar a edi??o.</div>
                     )}
                   </div>
                 </div>
@@ -1400,7 +1404,7 @@ function IDEContent() {
                       }}
                     />
                   )}
-                  <div className="flex items-center gap-1 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] px-2 py-2 text-[11px]">
+                  <div className="flex flex-wrap items-center gap-2 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] px-3 py-2.5 text-[11px]">
                     {[
                       { id: 'runtime' as const, label: 'Prévia' },
                       { id: 'device' as const, label: 'Dispositivos' },
@@ -1411,7 +1415,7 @@ function IDEContent() {
                         key={mode.id}
                         type="button"
                         onClick={() => setPreviewMode(mode.id)}
-                        className={`rounded-md px-2.5 py-1 font-medium transition-colors ${
+                        className={`rounded-lg px-3 py-1.5 font-medium transition-colors min-h-[36px] ${
                           previewMode === mode.id
                             ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                             : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -1442,7 +1446,7 @@ function IDEContent() {
                           />
                         </div>
                       ) : (
-                        <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)]">
+                        <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
                           Selecione um arquivo para visualizar a prévia.
                         </div>
                       )
@@ -1465,7 +1469,7 @@ function IDEContent() {
                           />
                         </DevicePreview>
                       ) : (
-                        <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)]">
+                        <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
                           Selecione um arquivo para visualizar a prévia.
                         </div>
                       )
@@ -1494,8 +1498,8 @@ function WorkbenchEntryNotice({
       : 'border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]'
 
   return (
-    <div className="flex items-start justify-between gap-4 px-4 py-3">
-      <div className={`flex-1 rounded-xl border px-3 py-2 ${toneClasses}`}>
+    <div className="flex items-start justify-between gap-4 px-5 py-4">
+      <div className={`flex-1 rounded-xl border px-4 py-3 ${toneClasses}`}>
         <div className="text-[11px] font-semibold uppercase tracking-[0.14em]">
           {notice.title}
         </div>
@@ -1506,7 +1510,7 @@ function WorkbenchEntryNotice({
       <button
         type="button"
         onClick={onDismiss}
-        className="rounded-lg border border-[var(--aethel-border-primary)] px-2 py-1 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]"
+        className="min-h-[36px] rounded-lg border border-[var(--aethel-border-primary)] px-3 py-2 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]"
         aria-label="Fechar aviso do workbench"
       >
         Fechar
@@ -1517,7 +1521,13 @@ function WorkbenchEntryNotice({
 
 export default function FullscreenIDE() {
   return (
-    <Suspense fallback={<div>Carregando contexto do workspace...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center px-6 text-sm text-[var(--aethel-text-tertiary)]">
+          Carregando contexto do workspace...
+        </div>
+      }
+    >
       <IDEContent />
     </Suspense>
   );

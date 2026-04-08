@@ -55,6 +55,23 @@ interface PanelState {
 
 export type { PanelState };
 
+const chromeBarPadding = `${tokens.spacing['2']} ${tokens.spacing['4']}`;
+const chromeBarHeight = '48px';
+const iconButtonStyle: React.CSSProperties = {
+  minWidth: '36px',
+  minHeight: '36px',
+  padding: tokens.spacing['2'],
+  background: 'transparent',
+  border: 'none',
+  borderRadius: tokens.radius.md,
+  color: tokens.colors.text.muted,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
+};
+
 export function ModernIDEShell({
   banner,
   children,
@@ -312,7 +329,8 @@ export function ModernIDEShell({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: `${tokens.spacing['2']} ${tokens.spacing['4']}`,
+                      padding: chromeBarPadding,
+                      minHeight: chromeBarHeight,
                       borderBottom: `1px solid ${tokens.colors.border.light}`,
                       background: 'rgba(255, 255, 255, 0.02)',
                     }}
@@ -335,13 +353,7 @@ export function ModernIDEShell({
                     <button
                       type="button"
                       onClick={() => togglePanel('chat')}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: tokens.colors.text.muted,
-                        cursor: 'pointer',
-                        padding: tokens.spacing['1'],
-                      }}
+                      style={iconButtonStyle}
                       aria-label="Fechar copiloto"
                     >
                       ×
@@ -380,7 +392,8 @@ export function ModernIDEShell({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: `${tokens.spacing['2']} ${tokens.spacing['4']}`,
+                  padding: chromeBarPadding,
+                  minHeight: chromeBarHeight,
                   borderBottom: `1px solid ${tokens.colors.border.light}`,
                   background: gradients.glassSubtle,
                 }}
@@ -403,12 +416,7 @@ export function ModernIDEShell({
                 <button
                   type="button"
                   onClick={() => togglePanel('preview')}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: tokens.colors.text.muted,
-                    cursor: 'pointer',
-                  }}
+                  style={iconButtonStyle}
                   aria-label="Fechar prévia"
                 >
                   <ChevronRight size={16} />
@@ -430,7 +438,7 @@ export function ModernIDEShell({
               right: 0,
               top: '50%',
               transform: 'translateY(-50%)',
-              padding: `${tokens.spacing['2']} ${tokens.spacing['1']}`,
+              padding: `${tokens.spacing['2']} ${tokens.spacing['1.5']}`,
               background: gradients.glassMedium,
               border: `1px solid ${tokens.colors.border.light}`,
               borderRight: 'none',
@@ -536,24 +544,22 @@ function IDEHeader({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: `${tokens.spacing['2']} ${tokens.spacing['4']}`,
+    padding: `${tokens.spacing['3']} ${tokens.spacing['5']}`,
     background: gradients.glassStrong,
     borderBottom: `1px solid ${tokens.colors.border.light}`,
-    height: '48px',
+    minHeight: '60px',
+    gap: tokens.spacing['4'],
   };
 
   return (
     <header style={headerStyle}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'] }}>
+      <div style={{ display: 'flex', minWidth: 0, flex: '1 1 auto', alignItems: 'center', gap: tokens.spacing['4'] }}>
         <button
           type="button"
           onClick={onToggleSidebar}
           style={{
-            background: 'transparent',
-            border: 'none',
+            ...iconButtonStyle,
             color: tokens.colors.text.secondary,
-            cursor: 'pointer',
-            padding: tokens.spacing['2'],
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -563,12 +569,15 @@ function IDEHeader({
           <Layout size={20} />
         </button>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing['0.5'] }}>
+        <div style={{ display: 'flex', minWidth: 0, flexDirection: 'column', gap: tokens.spacing['0.5'] }}>
           <span
             style={{
               fontSize: tokens.typography.fontSize.sm,
               fontWeight: tokens.typography.fontWeight.semibold,
               color: tokens.colors.text.primary,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
           >
             {projectName}
@@ -581,17 +590,20 @@ function IDEHeader({
                 display: 'flex',
                 alignItems: 'center',
                 gap: tokens.spacing['1'],
+                minWidth: 0,
               }}
             >
               <Code2 size={12} />
-              {activeFileName}
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {activeFileName}
+              </span>
             </span>
           )}
         </div>
       </div>
 
       {!isCompact && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'] }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexWrap: 'wrap', justifyContent: 'center' }}>
           <PanelToggle
             icon={<FolderTree size={16} />}
             label="Arquivos"
@@ -613,13 +625,14 @@ function IDEHeader({
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'] }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexShrink: 0 }}>
         <button
           type="button"
           onClick={onRunPrimaryAction}
           disabled={!onRunPrimaryAction}
           style={{
-            padding: `${tokens.spacing['1.5']} ${tokens.spacing['3']}`,
+            minHeight: '40px',
+            padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
             background: gradients.brand,
             border: 'none',
             borderRadius: tokens.radius.md,
@@ -642,11 +655,8 @@ function IDEHeader({
           onClick={onOpenSettings}
           disabled={!onOpenSettings}
           style={{
-            padding: tokens.spacing['2'],
-            background: 'transparent',
-            border: 'none',
+            ...iconButtonStyle,
             color: tokens.colors.text.secondary,
-            cursor: 'pointer',
             opacity: onOpenSettings ? 1 : 0.65,
           }}
           aria-label="Abrir configurações"
@@ -674,15 +684,17 @@ function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
         display: 'flex',
         alignItems: 'center',
         gap: tokens.spacing['2'],
-        padding: `${tokens.spacing['1.5']} ${tokens.spacing['3']}`,
+        minHeight: '36px',
+        padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
         background: active ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-        border: 'none',
+        border: `1px solid ${active ? tokens.colors.border.medium : 'transparent'}`,
         borderRadius: tokens.radius.md,
         color: active ? tokens.colors.text.primary : tokens.colors.text.secondary,
         fontSize: tokens.typography.fontSize.xs,
         fontWeight: tokens.typography.fontWeight.medium,
+        whiteSpace: 'nowrap',
         cursor: 'pointer',
-        transition: `all ${tokens.animation.duration.fast}`,
+        transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
       }}
     >
       {icon}
@@ -715,11 +727,12 @@ function BottomDock({
   const dockStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: tokens.spacing['1'],
-    padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
+    gap: tokens.spacing['2'],
+    padding: `${tokens.spacing['2']} ${tokens.spacing['4']}`,
     background: gradients.glassStrong,
     borderTop: `1px solid ${tokens.colors.border.light}`,
-    height: '40px',
+    minHeight: '52px',
+    overflowX: 'auto',
   };
 
   const dockItems = [
@@ -776,14 +789,17 @@ function BottomDock({
               display: 'flex',
               alignItems: 'center',
               gap: tokens.spacing['2'],
-              padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
+              minHeight: '36px',
+              padding: `${tokens.spacing['1.5']} ${tokens.spacing['2.5']}`,
               background: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-              border: 'none',
+              border: `1px solid ${isActive ? tokens.colors.border.medium : 'transparent'}`,
               borderRadius: tokens.radius.sm,
               color: isActive ? tokens.colors.text.primary : tokens.colors.text.muted,
               fontSize: tokens.typography.fontSize.xs,
               cursor: 'pointer',
-              transition: `all ${tokens.animation.duration.fast}`,
+              flexShrink: 0,
+              transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
+              whiteSpace: 'nowrap',
             }}
             title={`${item.label} (${item.shortcut})`}
           >
@@ -806,17 +822,18 @@ function StatusBar({ projectName, activeFileName }: StatusBarProps) {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: `${tokens.spacing['1']} ${tokens.spacing['3']}`,
+    padding: `${tokens.spacing['1.5']} ${tokens.spacing['4']}`,
     background: tokens.colors.bg.surface,
     borderTop: `1px solid ${tokens.colors.border.light}`,
-    height: '24px',
+    minHeight: '28px',
     fontSize: tokens.typography.fontSize.xs,
     color: tokens.colors.text.secondary,
+    gap: tokens.spacing['4'],
   };
 
   return (
     <div style={statusBarStyle}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'] }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'], minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
           <GitBranch size={12} />
           <span>main</span>
@@ -832,13 +849,13 @@ function StatusBar({ projectName, activeFileName }: StatusBarProps) {
       </div>
 
       {activeFileName && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
+        <div style={{ display: 'flex', minWidth: 0, alignItems: 'center', gap: tokens.spacing['1'] }}>
           <Code2 size={12} />
-          <span>{activeFileName}</span>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeFileName}</span>
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'] }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'], flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
           <CheckCircle size={12} style={{ color: tokens.colors.status.success }} />
           <span>Prettier</span>
@@ -870,10 +887,11 @@ function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-around',
-    padding: `${tokens.spacing['2']} 0`,
+    padding: `${tokens.spacing['2']} ${tokens.spacing['2']}`,
     background: gradients.glassStrong,
     borderTop: `1px solid ${tokens.colors.border.light}`,
-    height: '56px',
+    minHeight: '60px',
+    gap: tokens.spacing['1'],
   };
 
   const items = [
@@ -897,7 +915,9 @@ function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
               flexDirection: 'column',
               alignItems: 'center',
               gap: tokens.spacing['1'],
-              padding: `${tokens.spacing['1']} ${tokens.spacing['3']}`,
+              minWidth: '64px',
+              minHeight: '44px',
+              padding: `${tokens.spacing['1.5']} ${tokens.spacing['3']}`,
               background: 'transparent',
               border: 'none',
               color: isActive ? tokens.colors.accent.cyan : tokens.colors.text.muted,
