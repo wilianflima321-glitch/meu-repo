@@ -2,6 +2,8 @@
 
 Referencia rapida para evitar releitura de specs obsoletos e para nao reintroduzir shells antigos.
 
+Auditoria reconciliada mais recente: `docs/master/73_AUDIT_RECONCILIATION_2026-04-08.md`.
+
 ## Documentacao
 
 | Legado ou colisao | Substituido por ou notas |
@@ -9,7 +11,7 @@ Referencia rapida para evitar releitura de specs obsoletos e para nao reintroduz
 | `docs/master/39_STUDIO_UNIFIED*` | Direcao absorvida pelos blueprints de produto e por `65_STUDIO_PRODUCT_BLUEPRINT` |
 | `docs/master/48_WORKBENCH_SPEC*` | `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md` |
 | `docs/master/28_UX_SUPERIORITY*` | `65`, `66` e `AETHEL_INTERFACE_BLUEPRINTS/*` |
-| Colisao `docs/master/41_*.md` | Nao sao duplicados: `41_AUDITORIA_MAXIMA_2026-03-20` cobre auditoria, `41_DOCS_NAMING_NORMALIZATION_2026-03-21` cobre politica de nomes e `41_EXECUTION_ALIGNMENT_2026-03-27` cobre alinhamento tecnico aplicado |
+| Serie historica `docs/master/41*.md` | Colisao resolvida: `41_AUDITORIA_MAXIMA_2026-03-20`, `41a_DOCS_NAMING_NORMALIZATION_2026-03-21` e `41b_EXECUTION_ALIGNMENT_2026-03-27` |
 
 ## Codigo UI e layout
 

@@ -1,4 +1,8 @@
-'use client';
+/**
+ * @deprecated Use the canonical editor breadcrumbs from `@/components/editor/Breadcrumbs`
+ * or route-level breadcrumbs via App Router layouts.
+ */
+'use client';;
 
 import { useRouter } from 'next/navigation';
 

@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   Bell,
   Search,
@@ -20,8 +20,8 @@ import {
   Monitor,
   Globe,
 } from 'lucide-react'
-import { Avatar, PlanBadge, Dropdown, type DropdownItem, Badge } from './ui'
-import { isAuthenticated } from '@/lib/auth'
+import { Avatar, PlanBadge, Dropdown, type DropdownItem } from './ui'
+import { authHeaders, isAuthenticated, logout } from '@/lib/auth'
 
 interface UserData {
   name: string
@@ -30,28 +30,120 @@ interface UserData {
   plan: 'free' | 'pro' | 'enterprise'
 }
 
+interface HeaderNotificationItem {
+  id: string
+  title: string
+  message?: string | null
+  read: boolean
+  createdAt: string
+}
+
 export default function AethelHeader() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isAuth, setIsAuth] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [notifications, setNotifications] = useState(3)
-
-  // Simulated user data - in production, fetch from API
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [notifications, setNotifications] = useState(0)
+  const [notificationItems, setNotificationItems] = useState<HeaderNotificationItem[]>([])
+  const [notificationsLoading, setNotificationsLoading] = useState(false)
   const [user, setUser] = useState<UserData | null>(null)
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/profile', {
+        headers: authHeaders(),
+        cache: 'no-store',
+      })
+
+      if (!response.ok) {
+        setUser(null)
+        return
+      }
+
+      const data = await response.json()
+      const profile = data?.profile
+      if (!profile) {
+        setUser(null)
+        return
+      }
+
+      setUser({
+        name: profile.name || profile.email?.split('@')[0] || 'Conta',
+        email: profile.email || '',
+        avatar: profile.avatar || undefined,
+        plan: profile.plan === 'enterprise' ? 'enterprise' : profile.plan === 'pro' ? 'pro' : 'free',
+      })
+    } catch {
+      setUser(null)
+    }
+  }, [])
+
+  const fetchNotificationCount = useCallback(async () => {
+    try {
+      setNotificationsLoading(true)
+      const response = await fetch('/api/notifications?unread=true&limit=1', {
+        headers: authHeaders(),
+        cache: 'no-store',
+      })
+      if (!response.ok) {
+        setNotifications(0)
+        return
+      }
+      const data = await response.json()
+      setNotifications(typeof data?.unreadCount === 'number' ? data.unreadCount : 0)
+      setNotificationItems(Array.isArray(data?.notifications) ? data.notifications : [])
+    } catch {
+      setNotifications(0)
+      setNotificationItems([])
+    } finally {
+      setNotificationsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     const auth = isAuthenticated()
     setIsAuth(auth)
+
     if (auth) {
-      // Fetch user data in production
-      setUser({
-        name: 'Desenvolvedor',
-        email: 'dev@aethel.io',
-        plan: 'pro',
-      })
+      void fetchUser()
+      void fetchNotificationCount()
+    } else {
+      setUser(null)
+      setNotifications(0)
+      setNotificationsOpen(false)
+      setNotificationItems([])
     }
-  }, [])
+  }, [fetchNotificationCount, fetchUser])
+
+  const handleOpenSearch = () => {
+    router.push('/ide?entry=search')
+  }
+
+  const handleToggleNotifications = async () => {
+    const nextOpen = !notificationsOpen
+    setNotificationsOpen(nextOpen)
+    if (!nextOpen) return
+    await fetchNotificationCount()
+  }
+
+  const handleMarkAllRead = async () => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders(),
+        },
+        body: JSON.stringify({ markAllRead: true }),
+      })
+      if (!response.ok) return
+      setNotifications(0)
+      setNotificationItems((prev) => prev.map((item) => ({ ...item, read: true })))
+    } catch {
+      // Preserve current state if the request fails.
+    }
+  }
 
   const productItems: DropdownItem[] = [
     {
@@ -113,8 +205,7 @@ export default function AethelHeader() {
       label: 'Sair',
       icon: <LogOut className="w-4 h-4" />,
       onClick: () => {
-        localStorage.removeItem('token')
-        window.location.href = '/login'
+        logout(true)
       },
       danger: true,
     },
@@ -128,6 +219,12 @@ export default function AethelHeader() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+      <a
+        href="#conteudo-principal"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-[var(--aethel-surface-primary)] focus:px-3 focus:py-2 focus:text-sm focus:text-[var(--aethel-text-primary)]"
+      >
+        Pular para o conteudo principal
+      </a>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Left Section: Logo + Nav */}
@@ -186,11 +283,11 @@ export default function AethelHeader() {
             <button
               type="button"
               aria-label="Abrir busca global"
-              onClick={() => setSearchOpen(true)}
+              onClick={handleOpenSearch}
               className="hidden sm:flex items-center gap-2 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]"
             >
               <Search className="w-4 h-4" />
-              <span>Buscar...</span>
+              <span>Buscar no workbench</span>
               <kbd className="hidden lg:inline-flex items-center gap-1 rounded-md border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] px-1.5 py-0.5 text-xs text-[var(--aethel-text-quaternary)]">
                 Ctrl+K
               </kbd>
@@ -199,18 +296,72 @@ export default function AethelHeader() {
             {isAuth ? (
               <>
                 {/* Notifications */}
-                <button
-                  type="button"
-                  aria-label={`Abrir notificacoes${notifications > 0 ? `, ${notifications} pendentes` : ''}`}
-                  className="relative rounded-xl p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]"
-                >
-                  <Bell className="w-5 h-5" />
-                  {notifications > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 text-[10px] font-bold text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-full flex items-center justify-center">
-                      {notifications > 9 ? '9+' : notifications}
-                    </span>
+                <div className="relative">
+                  <button
+                    type="button"
+                    aria-label={`Abrir notificacoes${notifications > 0 ? `, ${notifications} pendentes` : ''}`}
+                    onClick={() => {
+                      void handleToggleNotifications()
+                    }}
+                    className="relative rounded-xl p-2 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {notifications > 0 && (
+                      <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aethel-error)] px-1 text-[10px] font-bold text-white">
+                        {notifications > 9 ? '9+' : notifications}
+                      </span>
+                    )}
+                  </button>
+                  {notificationsOpen && (
+                    <div className="absolute right-0 top-12 z-50 w-80 overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.98),rgba(10,14,24,0.98))] shadow-[0_24px_70px_rgba(2,6,23,0.55)]">
+                      <div className="flex items-center justify-between border-b border-[var(--aethel-border-secondary)] px-4 py-3">
+                        <div>
+                          <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Notificações</p>
+                          <p className="text-xs text-[var(--aethel-text-quaternary)]">
+                            {notifications > 0 ? `${notifications} pendentes` : 'Tudo em dia'}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void handleMarkAllRead()
+                          }}
+                          className="rounded-lg px-2 py-1 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                        >
+                          Marcar tudo como lido
+                        </button>
+                      </div>
+                      <div className="max-h-80 overflow-y-auto">
+                        {notificationsLoading ? (
+                          <div className="px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">
+                            Carregando notificações...
+                          </div>
+                        ) : notificationItems.length > 0 ? (
+                          notificationItems.map((item) => (
+                            <div
+                              key={item.id}
+                              className="border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_65%,transparent)] px-4 py-3 last:border-b-0"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{item.title}</p>
+                                  {item.message && (
+                                    <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{item.message}</p>
+                                  )}
+                                </div>
+                                {!item.read && <Badge variant="error" size="sm">Nova</Badge>}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">
+                            Nenhuma notificação recente.
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
-                </button>
+                </div>
 
                 {/* Plan Badge */}
                 {user && (
@@ -223,12 +374,7 @@ export default function AethelHeader() {
                 <Dropdown
                   trigger={
                     <div className="flex items-center gap-2 rounded-xl border border-transparent p-1 transition-colors hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] cursor-pointer">
-                      <Avatar
-                        src={user?.avatar}
-                        name={user?.name || 'User'}
-                        size="sm"
-                        status="online"
-                      />
+                      <Avatar src={user?.avatar} name={user?.name || 'Conta'} size="sm" status="online" />
                       <ChevronDown className="hidden h-4 w-4 text-[var(--aethel-text-tertiary)] sm:block" />
                     </div>
                   }
@@ -305,31 +451,6 @@ export default function AethelHeader() {
         )}
       </div>
 
-      {/* Search Modal */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-sm" onClick={() => setSearchOpen(false)}>
-          <div className="fixed top-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4">
-            <div
-              className="overflow-hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.96),rgba(10,14,24,0.94))] shadow-[0_32px_90px_rgba(2,6,23,0.55)]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center gap-3 border-b border-[var(--aethel-border-secondary)] px-4 py-3">
-                <Search className="h-5 w-5 text-[var(--aethel-text-tertiary)]" />
-                <input
-                  type="text"
-                  placeholder="Buscar projetos, comandos, arquivos..."
-                  className="flex-1 bg-transparent text-lg text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] outline-none"
-                  autoFocus
-                />
-                <kbd className="rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_78%,transparent)] px-2 py-1 text-xs text-[var(--aethel-text-quaternary)]">ESC</kbd>
-              </div>
-              <div className="p-4 text-center text-sm text-[var(--aethel-text-quaternary)]">
-                Digite para buscar...
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   )
 }

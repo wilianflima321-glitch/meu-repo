@@ -1,21 +1,10 @@
-import dynamic from 'next/dynamic'
-
-const AethelDashboard = dynamic(() => import('../../components/AethelDashboardGateway'), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-screen aethel-flex aethel-items-center aethel-justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <div className="aethel-state aethel-state-loading text-sm" role="status" aria-live="polite">
-        Carregando Studio Home...
-      </div>
-    </div>
-  ),
-})
+import DashboardPageClient from '../../components/dashboard/DashboardPageClient'
 
 export const metadata = {
-  title: 'Aethel IDE Dashboard',
-  description: 'Interface completa da IDE Aethel com chat, projetos, billing e conectividade.',
+  title: 'Aethel Studio - Dashboard',
+  description: 'Studio Home da plataforma Aethel Engine.',
 }
 
 export default function DashboardPage() {
-  return <AethelDashboard />
+  return <DashboardPageClient />
 }

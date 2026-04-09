@@ -1,4 +1,8 @@
-'use client';
+/**
+ * @deprecated Use the canonical Button from `@/components/ui/Button`.
+ * This root-level file remains only for backward compatibility while legacy imports are removed.
+ */
+'use client';;
 
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
