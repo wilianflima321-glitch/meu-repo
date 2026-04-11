@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { FolderPlus } from 'lucide-react'
 import { CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 /**
@@ -75,6 +76,26 @@ export function PremiumEmptyState({
         )}
       </div>
     </div>
+  )
+}
+
+type PremiumEmptyProjectsProps = {
+  onCreate: () => void
+  className?: string
+}
+
+export function PremiumEmptyProjects({ onCreate, className }: PremiumEmptyProjectsProps) {
+  return (
+    <PremiumEmptyState
+      className={className}
+      icon={<FolderPlus className="h-7 w-7 text-[var(--aethel-info)]" aria-hidden="true" />}
+      title="Nenhum projeto criado ainda"
+      description="Crie o primeiro workspace para seguir do Studio para a IDE com contexto, preview e execucao no mesmo fluxo."
+      action={{
+        label: 'Criar primeiro projeto',
+        onClick: onCreate,
+      }}
+    />
   )
 }
 

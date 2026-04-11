@@ -554,12 +554,15 @@ export function useDashboardActions({
     trackEvent('onboarding', 'wizard_dismiss', { reason })
   }, [setShowOnboardingWizard, trackEvent])
 
-  const handleOnboardingComplete = useCallback((template: { id: string }) => {
+  const handleOnboardingComplete = useCallback((data: { template: string; name: string; description: string }) => {
     handleDismissOnboardingWizard('complete')
-    if (template?.id) {
-      handleTemplateSelect(template.id)
+    if (data?.name?.trim()) {
+      setNewProjectName(data.name.trim())
     }
-  }, [handleDismissOnboardingWizard, handleTemplateSelect])
+    if (data?.template) {
+      handleTemplateSelect(data.template)
+    }
+  }, [handleDismissOnboardingWizard, handleTemplateSelect, setNewProjectName])
 
   const handleOnboardingSkip = useCallback(() => {
     handleDismissOnboardingWizard('skip')
