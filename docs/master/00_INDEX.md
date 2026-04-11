@@ -22,6 +22,7 @@ Status: CANONICAL ENTRYPOINT
 17. `docs/master/73_AUDIT_RECONCILIATION_2026-04-08.md`
 18. `docs/master/74_GENSPARK_PATCH_REVIEW_2026-04-10.md`
 19. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
+20. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
 20. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
 21. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
 22. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
@@ -83,6 +84,7 @@ Rules:
 | `73_AUDIT_RECONCILIATION_2026-04-08.md` | Reconciliacao da auditoria externa com o repo real | ACTIVE |
 | `74_GENSPARK_PATCH_REVIEW_2026-04-10.md` | Revisao do patch externo do Genspark com aceite/rejeicao por criterio tecnico | ACTIVE |
 | `75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md` | Guia pratico de convergencia visual sem regressao estrutural | ACTIVE |
+| `76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md` | Auditoria end-to-end definitiva com benchmark competitivo, criticas por interface e plano de acao | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

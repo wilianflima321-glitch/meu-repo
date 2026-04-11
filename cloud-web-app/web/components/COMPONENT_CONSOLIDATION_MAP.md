@@ -1,0 +1,45 @@
+# Component Consolidation Map
+Date: 2026-04-11
+Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
+
+## Canonical Components (USE THESE)
+| Component | Path | Purpose |
+|---|---|---|
+| Button | `@/components/ui/Button` | All buttons |
+| Input | `@/components/ui/Input` | All text inputs |
+| Modal | `@/components/ui/Modal` | All modals/dialogs |
+| Card | `@/components/ui/Card` | All card containers |
+| Badge | `@/components/ui/Badge` | All badges |
+| Tooltip | `@/components/ui/Tooltip` | All tooltips |
+| Toast | `@/components/ui/Toast` | All notifications |
+| Select | `@/components/ui/Select` | All dropdowns |
+| Tabs | `@/components/ui/Tabs` | All tab navigation |
+| primitives | `@/components/ui/primitives` | Low-level glass panels, etc |
+| premium | `@/components/ui/premium` | Premium UI patterns |
+
+## Deprecated Components (MIGRATE AWAY)
+| Component | Path | Migrate To |
+|---|---|---|
+| Button (legacy) | `@/components/Button.tsx` | `@/components/ui/Button` |
+| Breadcrumbs (legacy) | `@/components/Breadcrumbs.tsx` | Create canonical in ui/ |
+| NotificationCenter | `@/components/NotificationCenter.tsx` | `@/components/ui/Toast` |
+| NotificationSystem | `@/components/NotificationSystem.tsx` | `@/components/ui/Toast` |
+| LivePreview (root) | `@/components/LivePreview.tsx` | `@/components/preview/CanonicalPreviewSurface` |
+| OutputPanel (root) | `@/components/OutputPanel.tsx` | Integrate into IDE shell |
+| QuickOpen (root) | `@/components/QuickOpen.tsx` | Merge into CommandPalette |
+| IDELayout (legacy) | `@/components/ide/IDELayout.tsx` | `ModernIDEShell` |
+| PreviewPanel (ide) | `@/components/ide/PreviewPanel.tsx` | `CanonicalPreviewSurface` |
+
+## Admin Components - Needs Migration to Canonical
+| Component | Current Issue | Action |
+|---|---|---|
+| AdminDashboardPro | Uses legacy aethel-* classes | Migrate to canonical tokens |
+| AdminMetricCard | Inconsistent with Studio cards | Use canonical Card + spacing |
+| AdminPageHeader | Different layout than Studio | Align with StudioGlobalNav |
+| AdminSummaryGrid | Custom grid system | Use canonical gap/padding |
+
+## Rules
+1. New components MUST use canonical primitives
+2. New surfaces MUST NOT introduce new aethel-* classes
+3. Legacy components can keep aethel-* temporarily if marked deprecated
+4. Test every migration before removing legacy imports

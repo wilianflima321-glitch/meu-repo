@@ -1,32 +1,59 @@
 # Aethel Engine
 
-Plataforma web para criação assistida por IA, com foco em Studio (`/dashboard`) e Workbench avançado (`/ide`).
+Plataforma web para criaÃ§Ã£o assistida por IA, com foco em Studio (`/dashboard`) e Workbench avanÃ§ado (`/ide`).
 
 ## Estado Atual
 - Monorepo ativo com frontend principal em `cloud-web-app/web`
-- Contratos explícitos de capability/deprecation nas rotas e superfícies críticas
-- Documentação canônica centralizada em `docs/master/`
-- Política anti-fake-success aplicada como requisito de produto
-- L4 continua bloqueado por evidência operacional e runtime local incompleto
+- Contratos explÃ­citos de capability/deprecation nas rotas e superfÃ­cies crÃ­ticas
+- DocumentaÃ§Ã£o canÃ´nica centralizada em `docs/master/`
+- PolÃ­tica anti-fake-success aplicada como requisito de produto
+- L4 continua bloqueado por evidÃªncia operacional e runtime local incompleto
+- Auditoria definitiva com benchmark competitivo disponÃ­vel em `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
 
 ## Fonte de Verdade
 Leia nesta ordem:
 1. `docs/master/00_INDEX.md`
 2. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-3. `docs/master/71_AETHEL_E2E_AUDIT_2026-04-07.md`
-4. `docs/master/72_UX_UI_BENCHMARK_TRIAGE_2026-04-08.md`
-5. `docs/master/73_AUDIT_RECONCILIATION_2026-04-08.md`
-6. `docs/master/DEPRECATED_INDEX.md`
+3. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+4. `docs/master/71_AETHEL_E2E_AUDIT_2026-04-07.md`
+5. `docs/master/72_UX_UI_BENCHMARK_TRIAGE_2026-04-08.md`
+6. `docs/master/73_AUDIT_RECONCILIATION_2026-04-08.md`
+7. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
+8. `docs/master/DEPRECATED_INDEX.md`
+
+## Benchmark Competitivo (2026-04-11)
+| DimensÃ£o | Aethel | Cursor | Replit | Linear | v0/Vercel |
+|---|---|---|---|---|---|
+| Design System | 5/10 | 8/10 | 9/10 | 10/10 | 10/10 |
+| Editor/IDE UX | 6/10 | 10/10 | 7/10 | N/A | 6/10 |
+| AI Integration | 5/10 | 9/10 | 9/10 | N/A | 8/10 |
+| Onboarding | 4/10 | 8/10 | 10/10 | 9/10 | 9/10 |
+| **MÃ©dia** | **4.7** | **7.9** | **8.7** | **9.1** | **8.5** |
+
+Detalhes completos: `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
 
 ## Estrutura Principal
 - `cloud-web-app/web/`: app Next.js, APIs, design system e scripts de QA
-- `AETHEL_INTERFACE_BLUEPRINTS/`: blueprints canônicos de produto e interface
-- `docs/master/`: contratos canônicos de execução, auditoria e alinhamento
-- `docs/archive/`: histórico documental não canônico
-- `tools/`: scripts de QA, preflight e operação local
+- `AETHEL_INTERFACE_BLUEPRINTS/`: blueprints canÃ´nicos de produto e interface
+- `docs/master/`: contratos canÃ´nicos de execuÃ§Ã£o, auditoria e alinhamento
+- `docs/archive/`: histÃ³rico documental nÃ£o canÃ´nico
+- `tools/`: scripts de QA, preflight e operaÃ§Ã£o local
 
-## Setup Local Mínimo
-1. Instale dependências:
+## Design System CanÃ´nico
+Cascata oficial (definida em `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`):
+```
+CSS Variables (globals.css) â†’ Tailwind utilities â†’ primitives e componentes canÃ´nicos
+```
+
+Componentes canÃ´nicos:
+- `@/components/ui/Button`
+- `@/components/ui/Input`
+- `@/components/ui/Modal`
+- `@/components/ui/primitives`
+- `@/components/ui/premium`
+
+## Setup Local MÃ­nimo
+1. Instale dependÃªncias:
 
 ```bash
 npm install
@@ -51,16 +78,6 @@ Isso agora sincroniza:
 - `JWT_SECRET`
 - `CSRF_SECRET`
 - um provider real como `OPENROUTER_API_KEY` ou use `AETHEL_AI_DEMO_MODE=true`
-- opcionalmente o caminho canônico de preview gerenciado:
-  - `AETHEL_PREVIEW_PROVIDER`
-  - `AETHEL_PREVIEW_PROVISION_ENDPOINT`
-  - `AETHEL_PREVIEW_PROVISION_TOKEN`
-  - exemplo route-managed: `AETHEL_PREVIEW_PROVIDER=e2b`
-  - exemplo browser-side-only: `AETHEL_PREVIEW_PROVIDER=webcontainers`
-  - `webcontainers` ainda não suporta provisionamento via rota; hoje ele é alvo de wiring browser-side
-- opcionalmente use os bootstraps canônicos de setup:
-  - `npm run setup:preview-runtime`
-  - `npm run setup:billing-runtime`
 
 4. Suba a stack local:
 
@@ -71,7 +88,7 @@ npm run db:push
 cd ../..
 ```
 
-Ou use o caminho canônico único:
+Ou use o caminho canÃ´nico Ãºnico:
 
 ```bash
 npm run setup:local-db
@@ -89,18 +106,7 @@ npm run qa:production-runtime-readiness
 npm run dev
 ```
 
-O preflight CLI agora também exige que a app responda em `AETHEL_BASE_URL` (padrão `http://localhost:3000`) antes de liberar o probe de produção.
-
-## Bloqueadores Reais de L4
-O runtime de prova operacional continua bloqueado se qualquer item abaixo falhar:
-- `cloud-web-app/web/.env.local` ausente
-- `DATABASE_URL` ausente ou sem reachability básica
-- app local indisponível em `AETHEL_BASE_URL`
-- `JWT_SECRET` ausente
-- `CSRF_SECRET` ausente
-- Docker daemon inativo para fluxos mais pesados
-
-## Validação
+## ValidaÃ§Ã£o
 No app web:
 
 ```bash
@@ -108,11 +114,6 @@ cd cloud-web-app/web
 npm run lint
 npm run typecheck
 npm run build
-npm run qa:interface-gate
-npm run qa:canonical-components
-npm run qa:route-contracts
-npm run qa:no-fake-success
-npm run qa:mojibake
 npm run qa:enterprise-gate
 ```
 
@@ -126,8 +127,17 @@ npm run qa:preview-runtime-readiness
 npm run qa:operator-readiness
 ```
 
-## Regras de Execução
+## Prioridades Atuais (P0)
+1. Unificar design system: CSS vars como fonte Ãºnica
+2. Esconder rotas aspiracionais atrÃ¡s de feature flag
+3. Ponte chat â†’ editor com apply inline
+4. Decompor AIChatPanelPro em mÃ³dulos
+5. Admin: migrar para mesma linguagem visual
+
+Ver plano completo: `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md#6-plano-de-acao-priorizado`
+
+## Regras de ExecuÃ§Ã£o
 - Sem fake success
 - Sem inflar claims de maturidade
 - `PARTIAL`, `BLOCKED` e `ACTIVE` devem refletir runtime real
-- Claim de L4/L5 só com evidência operacional no repositório
+- Claim de L4/L5 sÃ³ com evidÃªncia operacional no repositÃ³rio
