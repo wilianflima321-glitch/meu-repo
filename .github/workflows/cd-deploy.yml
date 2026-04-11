@@ -188,7 +188,7 @@ jobs:
 
       - name: Notify Slack on success
         if: success()
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v3
         with:
           payload: |
             {
@@ -290,7 +290,7 @@ jobs:
 
       - name: Notify Slack on production deploy
         if: success()
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v3
         with:
           payload: |
             {
@@ -335,7 +335,7 @@ jobs:
           kubectl rollout status deployment/aethel-web -n aethel-production
 
       - name: Notify rollback
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v3
         with:
           payload: |
             {
