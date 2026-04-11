@@ -19,6 +19,7 @@ import {
   HardDrive,
   Layers,
 } from 'lucide-react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 // ============================================================================
 // TYPES
@@ -73,6 +74,14 @@ const TYPE_CONFIG: Record<JobType, { color: string; label: string }> = {
   other: { color: 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_15%,transparent)] text-[var(--aethel-text-secondary)]', label: 'Outro' },
 }
 
+const PANEL_CLASS =
+  'rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] shadow-[0_18px_48px_rgba(2,6,23,0.2)]'
+const GHOST_ICON_BUTTON_CLASS = `inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] p-1.5 text-[var(--aethel-text-secondary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] disabled:cursor-not-allowed disabled:opacity-50`
+const PRIMARY_BUTTON_CLASS = `inline-flex items-center gap-2 rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50`
+const INPUT_CLASS = `rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`
+const STATUS_NOTICE_CLASS =
+  'mx-4 mt-4 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]'
+
 const StatusBadge: React.FC<{ status: JobStatus }> = ({ status }) => {
   const { color, icon: Icon, label } = STATUS_CONFIG[status]
 
@@ -122,7 +131,7 @@ const JobRow: React.FC<{
         className="flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]"
         onClick={onToggle}
       >
-        <button type="button" className="text-[var(--aethel-text-tertiary)]">
+        <button type="button" aria-label={isExpanded ? 'Recolher detalhes do job' : 'Expandir detalhes do job'} className={`${GHOST_ICON_BUTTON_CLASS} border-transparent bg-transparent p-0 text-[var(--aethel-text-tertiary)] shadow-none`}>
           {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
 
@@ -143,48 +152,48 @@ const JobRow: React.FC<{
 
         <div className="flex items-center gap-1">
           {job.status === 'failed' && (
-            <button type="button"
+            <button type="button" aria-label="Reenfileirar job"
               onClick={(event) => {
                 event.stopPropagation()
                 onRetry()
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-info-light)]"
+              className={GHOST_ICON_BUTTON_CLASS}
               title="Reenfileirar"
             >
               <RefreshCw className="h-4 w-4" />
             </button>
           )}
           {job.status === 'running' && (
-            <button type="button"
+            <button type="button" aria-label="Pausar job"
               onClick={(event) => {
                 event.stopPropagation()
                 onPause()
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-warning-light)]"
+              className={GHOST_ICON_BUTTON_CLASS}
               title="Pausar"
             >
               <Pause className="h-4 w-4" />
             </button>
           )}
           {job.status === 'paused' && (
-            <button type="button"
+            <button type="button" aria-label="Retomar job"
               onClick={(event) => {
                 event.stopPropagation()
                 onPause()
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-success-light)]"
+              className={GHOST_ICON_BUTTON_CLASS}
               title="Retomar"
             >
               <Play className="h-4 w-4" />
             </button>
           )}
           {(job.status === 'pending' || job.status === 'running') && (
-            <button type="button"
+            <button type="button" aria-label="Cancelar job"
               onClick={(event) => {
                 event.stopPropagation()
                 onCancelar()
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-error-light)]"
+              className={GHOST_ICON_BUTTON_CLASS}
               title="Cancelar"
             >
               <Trash2 className="h-4 w-4" />
@@ -233,7 +242,7 @@ const StatsCard: React.FC<{
   icon: React.ReactNode
   color: string
 }> = ({ label, value, icon, color }) => (
-  <div className={`aethel-card aethel-p-4 ${color}`}>
+  <div className={`${PANEL_CLASS} p-4 ${color}`}>
     <div className="flex items-center gap-3">
       <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-2 text-[var(--aethel-text-tertiary)]">{icon}</div>
       <div>
@@ -353,27 +362,29 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
 
   if (isLoading) {
     return (
-      <div className={`aethel-card ${className}`}>
-        <div className="aethel-state aethel-state-loading h-64">Carregando fila de jobs...</div>
+      <div className={`${PANEL_CLASS} ${className}`}>
+        <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-[var(--aethel-border-primary)] text-sm text-[var(--aethel-text-secondary)]">
+          Carregando fila de jobs...
+        </div>
       </div>
     )
   }
 
   return (
-    <div className={`aethel-card ${className}`}>
+    <div className={`${PANEL_CLASS} ${className}`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <div className="flex items-center gap-3">
           <Layers className="h-5 w-5 text-[var(--aethel-info-light)]" />
           <div>
-            <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Fila de jobs</h2>
+            <h2 className={`${CANONICAL_TYPOGRAPHY.h3} text-[var(--aethel-text-primary)]`}>Fila de jobs</h2>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">{jobs.length} jobs no total</p>
           </div>
         </div>
 
-        <button type="button"
+        <button type="button" aria-label="Atualizar fila de jobs"
           onClick={fetchJobs}
           disabled={isRefreshing}
-          className="aethel-button aethel-button-primary flex items-center gap-2 text-xs"
+          className={PRIMARY_BUTTON_CLASS}
         >
           <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           Atualizar
@@ -381,7 +392,7 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
       </div>
 
       {error && (
-        <div className="aethel-state aethel-state-error mx-4 mt-4">
+        <div className={STATUS_NOTICE_CLASS}>
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
             <span className="text-sm">{error}</span>
@@ -426,7 +437,8 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
             placeholder="Buscar jobs..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="aethel-input w-full pl-9 text-xs"
+            className={`${INPUT_CLASS} w-full pl-9`}
+            aria-label="Buscar jobs por nome"
           />
         </div>
 
@@ -435,7 +447,8 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
           <select
             value={filterStatus}
             onChange={(event) => setFilterStatus(event.target.value as JobStatus | 'all')}
-            className="aethel-input text-xs"
+            className={INPUT_CLASS}
+            aria-label="Filtrar jobs por status"
           >
             <option value="all">Todos status</option>
             <option value="pending">Pendente</option>
@@ -447,7 +460,8 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
           <select
             value={filterType}
             onChange={(event) => setFilterType(event.target.value as JobType | 'all')}
-            className="aethel-input text-xs"
+            className={INPUT_CLASS}
+            aria-label="Filtrar jobs por tipo"
           >
             <option value="all">Todos tipos</option>
             <option value="render">Render</option>
@@ -462,9 +476,12 @@ export const JobQueueDashboard: React.FC<{ className?: string }> = ({ className 
 
       <div className="max-h-[500px] space-y-3 overflow-y-auto px-4 pb-4">
         {filteredJobs.length === 0 ? (
-          <div className="aethel-state aethel-state-empty">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-6 py-12 text-center">
             <HardDrive className="mb-2 h-10 w-10 text-[var(--aethel-text-tertiary)]" />
-            <p>Nenhum job encontrado.</p>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Nenhum job encontrado.</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
+              Ajuste os filtros ou aguarde novas execucoes entrarem na fila.
+            </p>
           </div>
         ) : (
           filteredJobs.map((job) => (

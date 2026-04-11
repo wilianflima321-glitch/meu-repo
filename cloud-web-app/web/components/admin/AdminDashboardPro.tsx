@@ -6,6 +6,7 @@ import {
   CreditCard, Activity, RefreshCw,
   CheckCircle, XCircle
 } from 'lucide-react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 interface AdminMetric {
   label: string
@@ -94,7 +95,7 @@ export default function AdminDashboardPro() {
           type="button"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg transition-colors disabled:opacity-50"
+          className={`rounded-lg bg-[var(--aethel-surface-tertiary)] p-2 hover:bg-[var(--aethel-surface-quaternary)] disabled:opacity-50 ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
           aria-label="Atualizar painel"
         >
           <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
@@ -108,7 +109,8 @@ export default function AdminDashboardPro() {
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+            aria-label={`Abrir aba ${tab === 'overview' ? 'visao geral' : tab === 'billing' ? 'faturamento' : tab === 'security' ? 'seguranca' : 'operacoes'}`}
+            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider whitespace-nowrap ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
               activeTab === tab
                 ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
                 : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
@@ -254,34 +256,34 @@ export default function AdminDashboardPro() {
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button type="button"
+                <button type="button" aria-label="Executar backup de database"
                   onClick={() => runOpsAction('backup')}
                   disabled={runningAction !== null}
-                  className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`group rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] p-4 text-left hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
                 >
                   <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Backup de database</p>
                   <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Ultimo backup: 2 horas</p>
                 </button>
-                <button type="button"
+                <button type="button" aria-label="Limpar cache do sistema"
                   onClick={() => runOpsAction('cache_flush')}
                   disabled={runningAction !== null}
-                  className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`group rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] p-4 text-left hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
                 >
                   <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Limpar cache</p>
                   <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Limpar dados em cache</p>
                 </button>
-                <button type="button"
+                <button type="button" aria-label="Exportar logs do sistema"
                   onClick={() => runOpsAction('logs_export')}
                   disabled={runningAction !== null}
-                  className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`group rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] p-4 text-left hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
                 >
                   <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Exportar logs</p>
                   <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Baixar logs do sistema</p>
                 </button>
-                <button type="button"
+                <button type="button" aria-label="Sincronizar feature flags"
                   onClick={() => runOpsAction('feature_flags')}
                   disabled={runningAction !== null}
-                  className="p-4 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] rounded-lg hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] transition-all text-left group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`group rounded-lg border border-[color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] p-4 text-left hover:border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
                 >
                   <p className="text-sm font-bold text-[var(--aethel-text-primary)] group-hover:text-[var(--aethel-primary)] transition-colors">Feature Flags</p>
                     <p className="text-xs text-[var(--aethel-text-quaternary)] mt-1">Gerencie os toggles de features</p>
