@@ -11,6 +11,7 @@ import PreviewRuntimeToolbar from "@/components/ide/PreviewRuntimeToolbar";
 import TabBar, { TabProvider } from "@/components/editor/TabBar";
 import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
 import type { Diagnostic as MonacoDiagnostic } from "@/components/editor/MonacoEditorPro";
+import SplitEditor, { type EditorGroup, type EditorTab, type SplitDirection } from "@/components/editor/SplitEditor";
 import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
 import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
 import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
@@ -35,6 +36,8 @@ type ActiveFileState = {
   content: string;
   language: string;
 };
+
+type EditorPane = 'primary' | 'secondary';
 
 type WorkspaceTreeNode = {
   path?: string;
@@ -145,6 +148,11 @@ function IDEContent() {
   }, [projectIdParam]);
 
   const [activeFile, setActiveFile] = useState<ActiveFileState | null>(null);
+  const [secondaryFile, setSecondaryFile] = useState<ActiveFileState | null>(null);
+  const [splitEditorOpen, setSplitEditorOpen] = useState(false);
+  const [splitDirection, setSplitDirection] = useState<SplitDirection>('horizontal');
+  const [splitActivePane, setSplitActivePane] = useState<EditorPane>('primary');
+  const [nextOpenTarget, setNextOpenTarget] = useState<EditorPane>('primary');
   const [isReadingFile, setIsReadingFile] = useState(false);
   const [isSavingFile, setIsSavingFile] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -185,6 +193,7 @@ function IDEContent() {
   const [showIntelliSense, setShowIntelliSense] = useState(false)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
   const [editorDiagnostics, setEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
+  const [secondaryEditorDiagnostics, setSecondaryEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
   const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
   const [initialFileResolved, setInitialFileResolved] = useState(false);
   const [isCompactViewport, setIsCompactViewport] = useState(false)
@@ -193,8 +202,13 @@ function IDEContent() {
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
+  const primaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
+  const secondaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const runtimeSyncTimerRef = useRef<number | null>(null)
   const lastRuntimeSyncAtRef = useRef<number>(0)
+
+  const bridgeActiveFile = splitActivePane === 'secondary' && secondaryFile ? secondaryFile : activeFile
+  const activeDiagnostics = splitActivePane === 'secondary' ? secondaryEditorDiagnostics : editorDiagnostics
 
   const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([])
   const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false)
@@ -589,7 +603,7 @@ function IDEContent() {
   }, [])
 
   const readFile = useCallback(
-    async (path: string) => {
+    async (path: string, targetPane: EditorPane = 'primary') => {
       const normalizedPath = normalizePath(path);
       setIsReadingFile(true);
       setFileError(null);
@@ -616,11 +630,21 @@ function IDEContent() {
         const payload = await response.json();
         const content = typeof payload?.content === "string" ? payload.content : "";
 
-        setActiveFile({
+        const nextFile = {
           path: normalizedPath,
           content,
           language: resolveLanguage(normalizedPath),
-        });
+        };
+
+        if (targetPane === 'secondary') {
+          setSecondaryFile(nextFile);
+          setSplitEditorOpen(true);
+          setSplitActivePane('secondary');
+          setNextOpenTarget('primary');
+        } else {
+          setActiveFile(nextFile);
+          setSplitActivePane('primary');
+        }
         setLastSavedAt(null);
       } catch (error) {
         setFileError(error instanceof Error ? error.message : "Não foi possível ler o arquivo.");
@@ -759,6 +783,11 @@ function IDEContent() {
       setEditorDiagnostics([])
     }
   }, [activeFile?.path])
+
+  useEffect(() => {
+    if (!splitEditorOpen || secondaryFile || !activeFile) return
+    setSecondaryFile({ ...activeFile })
+  }, [activeFile, secondaryFile, splitEditorOpen])
 
   useEffect(() => {
     if (!entryParam) return;
@@ -941,14 +970,14 @@ function IDEContent() {
   const handleFileSelect = useCallback(
     (file: { path: string; type: "file" | "folder" }) => {
       if (file.type !== "file") return;
-      void readFile(file.path);
+      void readFile(file.path, nextOpenTarget);
     },
-    [readFile]
+    [nextOpenTarget, readFile]
   );
 
   const handlePaletteOpenFile = useCallback((path: string) => {
-    void readFile(path);
-  }, [readFile]);
+    void readFile(path, nextOpenTarget);
+  }, [nextOpenTarget, readFile]);
 
   const handleRunRecommendedPreviewAction = useCallback(() => {
     if (runtimePrimaryAction === 'provision') {
@@ -971,6 +1000,59 @@ function IDEContent() {
     refreshRuntimeReadiness,
     runtimePrimaryAction,
   ])
+
+  const handleToggleSplitEditor = useCallback(() => {
+    setSplitEditorOpen((prev) => {
+      const next = !prev
+      if (!next) {
+        setSecondaryFile(null)
+        setNextOpenTarget('primary')
+        setSplitActivePane('primary')
+      } else if (activeFile) {
+        setSecondaryFile((current) => current ?? { ...activeFile })
+      }
+      return next
+    })
+  }, [activeFile])
+
+  const splitEditorGroups = useMemo<EditorGroup[]>(() => {
+    const groups: EditorGroup[] = []
+    if (activeFile) {
+      const primaryTab: EditorTab = {
+        id: `primary:${activeFile.path}`,
+        title: activeFile.path.split('/').pop() || activeFile.path,
+        path: activeFile.path,
+        language: activeFile.language,
+        dirty: false,
+        pinned: true,
+        preview: false,
+      }
+      groups.push({
+        id: 'primary',
+        tabs: [primaryTab],
+        activeTabId: primaryTab.id,
+      })
+    }
+
+    if (splitEditorOpen && secondaryFile) {
+      const secondaryTab: EditorTab = {
+        id: `secondary:${secondaryFile.path}`,
+        title: secondaryFile.path.split('/').pop() || secondaryFile.path,
+        path: secondaryFile.path,
+        language: secondaryFile.language,
+        dirty: false,
+        pinned: false,
+        preview: false,
+      }
+      groups.push({
+        id: 'secondary',
+        tabs: [secondaryTab],
+        activeTabId: secondaryTab.id,
+      })
+    }
+
+    return groups
+  }, [activeFile, secondaryFile, splitEditorOpen])
 
   const fullAccessActiveGrant = useMemo(() => {
     const grants = fullAccessData?.metadata?.grants || []
@@ -1115,8 +1197,8 @@ function IDEContent() {
       <TabProvider>
         <EditorApplyBridgeProvider
           editorRef={editorRef}
-          activeFilePath={activeFile?.path ?? null}
-          activeFileContent={activeFile?.content ?? ""}
+          activeFilePath={bridgeActiveFile?.path ?? null}
+          activeFileContent={bridgeActiveFile?.content ?? ""}
           normalizePath={normalizePath}
           writeFile={writeFile}
           readFile={readFile}
@@ -1228,6 +1310,39 @@ function IDEContent() {
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
+                        onClick={handleToggleSplitEditor}
+                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+                          splitEditorOpen
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                        }`}
+                      >
+                        {splitEditorOpen ? 'Fechar split' : 'Dividir editor'}
+                      </button>
+                      {splitEditorOpen && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setNextOpenTarget((prev) => (prev === 'secondary' ? 'primary' : 'secondary'))}
+                            className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+                              nextOpenTarget === 'secondary'
+                                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]'
+                                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                            }`}
+                          >
+                            {nextOpenTarget === 'secondary' ? 'Próximo arquivo: lateral' : 'Próximo arquivo: principal'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSplitDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))}
+                            className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+                          >
+                            {splitDirection === 'horizontal' ? 'Empilhar verticalmente' : 'Dividir lado a lado'}
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
                         onClick={() => setShowIntelliSense((prev) => !prev)}
                         className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
                           showIntelliSense
@@ -1267,31 +1382,132 @@ function IDEContent() {
                       <div className="h-full min-h-0">
                         <div className="h-full min-h-0 flex">
                           <div className="flex-1 min-w-0">
-                            <MonacoEditorPro
-                              path={activeFile.path}
-                              value={activeFile.content}
-                              language={activeFile.language}
-                              fullAccessActive={Boolean(fullAccessActiveGrant)}
-                              onMount={(editor) => {
-                                editorRef.current = editor
-                              }}
-                              onAiApplyResult={handleInlineApplyResult}
-                              onRequestFullAccess={handleToggleFullAccess}
-                              onDiagnosticsChange={setEditorDiagnostics}
-                              onChange={(value) => {
-                                setActiveFile((prev) =>
-                                  prev
-                                    ? {
-                                        ...prev,
-                                        content: value ?? "",
-                                      }
-                                    : prev
-                                )
-                              }}
-                              onSave={(value) => {
-                                void writeFile(activeFile.path, value)
-                              }}
-                            />
+                            {splitEditorOpen ? (
+                              <SplitEditor
+                                groups={splitEditorGroups}
+                                activeGroupId={splitActivePane}
+                                splitDirection={splitDirection}
+                                onGroupFocus={(groupId) => {
+                                  const pane = groupId === 'secondary' ? 'secondary' : 'primary'
+                                  setSplitActivePane(pane)
+                                  editorRef.current = pane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
+                                }}
+                                onSplit={() => {}}
+                                onTabClick={(_, groupId) => {
+                                  const pane = groupId === 'secondary' ? 'secondary' : 'primary'
+                                  setSplitActivePane(pane)
+                                  editorRef.current = pane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
+                                  if (pane === 'secondary') {
+                                    secondaryEditorRef.current?.focus()
+                                  } else {
+                                    primaryEditorRef.current?.focus()
+                                  }
+                                }}
+                                onTabClose={(_, groupId) => {
+                                  if (groupId === 'secondary') {
+                                    setSplitEditorOpen(false)
+                                    setSecondaryFile(null)
+                                    setNextOpenTarget('primary')
+                                    setSplitActivePane('primary')
+                                    editorRef.current = primaryEditorRef.current
+                                    return
+                                  }
+                                  setActiveFile(null)
+                                }}
+                                onTabPin={() => {}}
+                                onTabMove={() => {}}
+                                onGroupClose={(groupId) => {
+                                  if (groupId === 'secondary') {
+                                    setSplitEditorOpen(false)
+                                    setSecondaryFile(null)
+                                    setNextOpenTarget('primary')
+                                    setSplitActivePane('primary')
+                                    editorRef.current = primaryEditorRef.current
+                                  }
+                                }}
+                                renderEditor={(groupId, tab) => {
+                                  if (!tab) {
+                                    return (
+                                      <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
+                                        Nenhum arquivo aberto neste grupo.
+                                      </div>
+                                    )
+                                  }
+
+                                  const isSecondary = groupId === 'secondary'
+                                  const fileState = isSecondary ? secondaryFile : activeFile
+                                  if (!fileState) return null
+
+                                  return (
+                                    <div
+                                      className="h-full"
+                                      onMouseDown={() => {
+                                        setSplitActivePane(isSecondary ? 'secondary' : 'primary')
+                                        editorRef.current = isSecondary ? secondaryEditorRef.current : primaryEditorRef.current
+                                      }}
+                                    >
+                                      <MonacoEditorPro
+                                        path={fileState.path}
+                                        value={fileState.content}
+                                        language={fileState.language}
+                                        fullAccessActive={Boolean(fullAccessActiveGrant)}
+                                        onMount={(editor) => {
+                                          if (isSecondary) {
+                                            secondaryEditorRef.current = editor
+                                          } else {
+                                            primaryEditorRef.current = editor
+                                          }
+                                          if ((isSecondary && splitActivePane === 'secondary') || (!isSecondary && splitActivePane === 'primary')) {
+                                            editorRef.current = editor
+                                          }
+                                        }}
+                                        onAiApplyResult={handleInlineApplyResult}
+                                        onRequestFullAccess={handleToggleFullAccess}
+                                        onDiagnosticsChange={isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics}
+                                        onChange={(value) => {
+                                          const nextValue = value ?? ""
+                                          if (isSecondary) {
+                                            setSecondaryFile((prev) => (prev ? { ...prev, content: nextValue } : prev))
+                                          } else {
+                                            setActiveFile((prev) => (prev ? { ...prev, content: nextValue } : prev))
+                                          }
+                                        }}
+                                        onSave={(value) => {
+                                          void writeFile(fileState.path, value)
+                                        }}
+                                      />
+                                    </div>
+                                  )
+                                }}
+                              />
+                            ) : (
+                              <MonacoEditorPro
+                                path={activeFile.path}
+                                value={activeFile.content}
+                                language={activeFile.language}
+                                fullAccessActive={Boolean(fullAccessActiveGrant)}
+                                onMount={(editor) => {
+                                  primaryEditorRef.current = editor
+                                  editorRef.current = editor
+                                }}
+                                onAiApplyResult={handleInlineApplyResult}
+                                onRequestFullAccess={handleToggleFullAccess}
+                                onDiagnosticsChange={setEditorDiagnostics}
+                                onChange={(value) => {
+                                  setActiveFile((prev) =>
+                                    prev
+                                      ? {
+                                          ...prev,
+                                          content: value ?? "",
+                                        }
+                                      : prev
+                                  )
+                                }}
+                                onSave={(value) => {
+                                  void writeFile(activeFile.path, value)
+                                }}
+                              />
+                            )}
                           </div>
                           {(showIntelliSense || showDiagnostics) && (
                             <div className="w-80 border-l border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] flex flex-col">
@@ -1303,8 +1519,8 @@ function IDEContent() {
                               {showDiagnostics && (
                                 <div className="flex-1 min-h-0">
                                   <ErrorHighlighting
-                                    errors={editorDiagnostics.map((diagnostic, index) => ({
-                                      id: `${activeFile.path}:${diagnostic.line}:${diagnostic.column}:${index}`,
+                                    errors={activeDiagnostics.map((diagnostic, index) => ({
+                                      id: `${bridgeActiveFile?.path ?? activeFile.path}:${diagnostic.line}:${diagnostic.column}:${index}`,
                                       type:
                                         diagnostic.severity === 'error'
                                           ? 'error'
@@ -1321,7 +1537,7 @@ function IDEContent() {
                                       code: diagnostic.code ? String(diagnostic.code) : '',
                                       line: diagnostic.line,
                                       column: diagnostic.column,
-                                      file: activeFile.path,
+                                      file: bridgeActiveFile?.path ?? activeFile.path,
                                       documentation: diagnostic.source
                                         ? `Origem: ${diagnostic.source}`
                                         : '',
