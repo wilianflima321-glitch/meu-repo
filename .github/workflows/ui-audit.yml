@@ -19,7 +19,7 @@ jobs:
       A11Y_MAX_VIOLATIONS_PER_PAGE: "20"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
         uses: actions/setup-node@v4
