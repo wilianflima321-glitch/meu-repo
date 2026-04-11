@@ -6,7 +6,7 @@
 # ========================================
 # Stage 1: Dependencies
 # ========================================
-FROM node:20-alpine AS deps
+FROM node:25-alpine AS deps
 
 # Add libc6-compat for Alpine compatibility
 RUN apk add --no-cache libc6-compat
@@ -27,7 +27,7 @@ RUN \
 # ========================================
 # Stage 2: Builder
 # ========================================
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 WORKDIR /app
 
@@ -48,7 +48,7 @@ RUN npm run build
 # ========================================
 # Stage 3: Runtime Server (WebSocket, PTY, LSP, DAP)
 # ========================================
-FROM node:20-alpine AS runtime
+FROM node:25-alpine AS runtime
 
 # Install runtime dependencies for PTY and native modules
 RUN apk add --no-cache \
@@ -85,7 +85,7 @@ CMD ["npx", "ts-node", "--transpile-only", "lib/server/bootstrap.ts"]
 # ========================================
 # Stage 3b: Worker (Build Queue)
 # ========================================
-FROM node:20-alpine AS worker
+FROM node:25-alpine AS worker
 
 WORKDIR /app
 
@@ -113,7 +113,7 @@ CMD ["npm", "run", "worker:build-queue"]
 # ========================================
 # Stage 4: Web Application (Production)
 # ========================================
-FROM node:20-alpine AS web
+FROM node:25-alpine AS web
 
 WORKDIR /app
 
@@ -151,7 +151,7 @@ CMD ["npm", "run", "start"]
 # ========================================
 # Stage 5: All-in-One (Default - includes everything)
 # ========================================
-FROM node:20-alpine AS allinone
+FROM node:25-alpine AS allinone
 
 # Install all dependencies for full functionality
 RUN apk add --no-cache \
