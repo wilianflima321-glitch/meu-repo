@@ -40,10 +40,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 # Generate Prisma client
-RUN npx prisma generate || true
+RUN npx prisma generate
 
 # Build the application
-RUN npm run build || true
+RUN npm run build
 
 # ========================================
 # Stage 3: Runtime Server (WebSocket, PTY, LSP, DAP)

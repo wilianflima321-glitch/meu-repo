@@ -1,4 +1,8 @@
-﻿'use client';
+/**
+ * @deprecated Prefer the canonical Git panel in `@/components/git/GitPanel`.
+ * This root-level version remains for compatibility while imports are migrated.
+ */
+'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

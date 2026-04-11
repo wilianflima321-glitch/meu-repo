@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Usage Dashboard - Visualização de Consumo de Recursos
  *
  * Mostra ao usuário seu consumo atual de:

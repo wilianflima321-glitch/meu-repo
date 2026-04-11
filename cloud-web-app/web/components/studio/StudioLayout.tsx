@@ -1,4 +1,4 @@
-﻿/**
+/**
  * StudioLayout - Shared layout for all studio surfaces
  * Eliminates duplicate Shell/Header patterns across /billing, /settings, /profile, etc.
  * Provides consistent navigation, spacing, and responsive behavior.

@@ -1,4 +1,4 @@
-﻿import { glob } from 'glob';
+import { glob } from 'glob';
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 

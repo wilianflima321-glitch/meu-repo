@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Stripe Customer Portal API
  */
 

@@ -1,4 +1,4 @@
-﻿import type { Project, UseCase, WorkflowTemplate } from './aethel-dashboard-model'
+import type { Project, UseCase, WorkflowTemplate } from './aethel-dashboard-model'
 
 export const DEFAULT_WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
   {

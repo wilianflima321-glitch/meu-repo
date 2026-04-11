@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import type { ComponentProps } from 'react'
 import { Code, CreditCard, LayoutDashboard, MessageSquare, Settings } from 'lucide-react'

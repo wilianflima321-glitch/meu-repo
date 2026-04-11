@@ -21,7 +21,12 @@ export const ASPIRATIONAL_LABS_FALLBACK = '/dashboard?notice=labs-hidden'
  * Rotas que devem abrir no IDE. O valor aponta para o `entry` entendido por `FullscreenIDE`.
  */
 export const IDE_CONVERGENCE_REDIRECTS: Record<string, string> = {
+  '/ai-command': '/ide?entry=ai-command',
+  '/chat': '/ide?entry=chat',
+  '/editor-hub': '/ide',
   '/explorer': '/ide?entry=explorer',
+  '/git': '/ide?entry=git',
+  '/search': '/ide?entry=search',
   '/terminal': '/ide?entry=terminal',
   '/live-preview': '/ide?entry=preview',
   '/debugger': '/ide?entry=debug',

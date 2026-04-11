@@ -1,6 +1,6 @@
-﻿# 41_DOCS_NAMING_NORMALIZATION_2026-03-21 (CANONICAL)
+# 41_DOCS_NAMING_NORMALIZATION_2026-03-21 (CANONICAL)
 
-> **Nota (colisão `41_*`):** Este ficheiro é a **política de nomes**; não confundir com `41_AUDITORIA_MAXIMA_*` nem `41_EXECUTION_ALIGNMENT_*`. Ver `DEPRECATED_INDEX.md`.
+> **Nota de indexação:** este ficheiro usa o prefixo `41a_` para manter a ordem histórica sem colisão com `41_AUDITORIA_MAXIMA_*` e `41b_EXECUTION_ALIGNMENT_*`. Ver `DEPRECATED_INDEX.md`.
 
 **Data:** 2026-03-22  
 **Versao:** 1.1  
@@ -13,10 +13,10 @@ Padronizar nomes de documentos legados em `docs/master/` sem quebrar referencias
 The naming transition is only partially complete.
 The directory still contains legacy compatibility files and a numeric collision:
 - `41_AUDITORIA_MAXIMA_2026-03-20.md`
-- `41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
+- `41a_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
 
 For canonical interpretation:
-- `41_DOCS_NAMING_NORMALIZATION_2026-03-21.md` is the active normalization authority.
+- `41a_DOCS_NAMING_NORMALIZATION_2026-03-21.md` is the active normalization authority.
 - `41_AUDITORIA_MAXIMA_2026-03-20.md` is a historical draft and must not be treated as primary authority.
 
 ## Estrategia

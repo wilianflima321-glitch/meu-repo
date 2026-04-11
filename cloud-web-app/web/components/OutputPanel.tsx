@@ -1,4 +1,8 @@
-﻿'use client';
+/**
+ * @deprecated Prefer the canonical output surface in `@/components/output/OutputPanel`.
+ * This root-level panel remains only as a compatibility shim.
+ */
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 

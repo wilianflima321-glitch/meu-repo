@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SOUND CUE NODE EDITOR - Aethel Engine
  *
  * Editor visual de Sound Cues no estilo Unreal Engine.

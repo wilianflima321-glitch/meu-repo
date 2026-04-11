@@ -1,28 +1,32 @@
 # Aethel Engine
 
-Plataforma web para criacao assistida por IA, com foco em Studio (`/dashboard`) e workbench avancado (`/ide`).
+Plataforma web para criação assistida por IA, com foco em Studio (`/dashboard`) e Workbench avançado (`/ide`).
 
 ## Estado Atual
 - Monorepo ativo com frontend principal em `cloud-web-app/web`
-- Contratos explicitos de capability/deprecation em rotas criticas
-- Documentacao canonica centralizada em `docs/master/`
-- Qualidade tecnica forte, mas L4 continua bloqueado por evidencia operacional e runtime local incompleto
+- Contratos explícitos de capability/deprecation nas rotas e superfícies críticas
+- Documentação canônica centralizada em `docs/master/`
+- Política anti-fake-success aplicada como requisito de produto
+- L4 continua bloqueado por evidência operacional e runtime local incompleto
 
 ## Fonte de Verdade
 Leia nesta ordem:
 1. `docs/master/00_INDEX.md`
-2. `docs/master/35_L4_L5_COMPLETION_MAP_2026-03-05.md`
-3. `docs/master/36_QUALITY_90_EXECUTION_MAP_2026-03-08.md`
-4. `docs/master/DUPLICATIONS_AND_CONFLICTS.md`
+2. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+3. `docs/master/71_AETHEL_E2E_AUDIT_2026-04-07.md`
+4. `docs/master/72_UX_UI_BENCHMARK_TRIAGE_2026-04-08.md`
+5. `docs/master/73_AUDIT_RECONCILIATION_2026-04-08.md`
+6. `docs/master/DEPRECATED_INDEX.md`
 
 ## Estrutura Principal
-- `cloud-web-app/web/`: app Next.js, APIs e scripts de QA
-- `docs/master/`: contratos canonicos de execucao
-- `docs/archive/`: historico documental nao-canonico
-- `tools/`: scripts de QA, preflight e operacao local
+- `cloud-web-app/web/`: app Next.js, APIs, design system e scripts de QA
+- `AETHEL_INTERFACE_BLUEPRINTS/`: blueprints canônicos de produto e interface
+- `docs/master/`: contratos canônicos de execução, auditoria e alinhamento
+- `docs/archive/`: histórico documental não canônico
+- `tools/`: scripts de QA, preflight e operação local
 
-## Setup Local Minimo
-1. Instale dependencias:
+## Setup Local Mínimo
+1. Instale dependências:
 
 ```bash
 npm install
@@ -47,14 +51,14 @@ Isso agora sincroniza:
 - `JWT_SECRET`
 - `CSRF_SECRET`
 - um provider real como `OPENROUTER_API_KEY` ou use `AETHEL_AI_DEMO_MODE=true`
-- opcionalmente o caminho canonico de preview gerenciado:
+- opcionalmente o caminho canônico de preview gerenciado:
   - `AETHEL_PREVIEW_PROVIDER`
   - `AETHEL_PREVIEW_PROVISION_ENDPOINT`
   - `AETHEL_PREVIEW_PROVISION_TOKEN`
   - exemplo route-managed: `AETHEL_PREVIEW_PROVIDER=e2b`
   - exemplo browser-side-only: `AETHEL_PREVIEW_PROVIDER=webcontainers`
-  - `webcontainers` ainda nao suporta provisionamento via rota; hoje ele e alvo de wiring browser-side
-- opcionalmente use os bootstraps canonicos de setup:
+  - `webcontainers` ainda não suporta provisionamento via rota; hoje ele é alvo de wiring browser-side
+- opcionalmente use os bootstraps canônicos de setup:
   - `npm run setup:preview-runtime`
   - `npm run setup:billing-runtime`
 
@@ -67,7 +71,7 @@ npm run db:push
 cd ../..
 ```
 
-Ou use o caminho canonico unico:
+Ou use o caminho canônico único:
 
 ```bash
 npm run setup:local-db
@@ -85,18 +89,18 @@ npm run qa:production-runtime-readiness
 npm run dev
 ```
 
-O preflight CLI agora tambem exige que a app responda em `AETHEL_BASE_URL` (padrao `http://localhost:3000`) antes de liberar o probe de producao.
+O preflight CLI agora também exige que a app responda em `AETHEL_BASE_URL` (padrão `http://localhost:3000`) antes de liberar o probe de produção.
 
 ## Bloqueadores Reais de L4
 O runtime de prova operacional continua bloqueado se qualquer item abaixo falhar:
 - `cloud-web-app/web/.env.local` ausente
-- `DATABASE_URL` ausente ou sem reachability basica
-- app local indisponivel em `AETHEL_BASE_URL`
+- `DATABASE_URL` ausente ou sem reachability básica
+- app local indisponível em `AETHEL_BASE_URL`
 - `JWT_SECRET` ausente
 - `CSRF_SECRET` ausente
 - Docker daemon inativo para fluxos mais pesados
 
-## Validacao
+## Validação
 No app web:
 
 ```bash
@@ -122,8 +126,8 @@ npm run qa:preview-runtime-readiness
 npm run qa:operator-readiness
 ```
 
-## Regras de Execucao
+## Regras de Execução
 - Sem fake success
 - Sem inflar claims de maturidade
 - `PARTIAL`, `BLOCKED` e `ACTIVE` devem refletir runtime real
-- Claim de L4/L5 so com evidencia operacional no repositorio
+- Claim de L4/L5 só com evidência operacional no repositório

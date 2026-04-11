@@ -9,8 +9,8 @@ const bannedSuffixes = [
   { suffix: '/CommandPalette', replacement: '@/components/ide/CommandPalette' },
   { suffix: '/CommandPalettePro', replacement: '@/components/ide/CommandPalette' },
   { suffix: '/CommandPaletteUnified', replacement: '@/components/ide/CommandPalette' },
-  { suffix: '/statusbar/StatusBar', replacement: 'IDELayout status bar slot' },
-  { suffix: '/statusbar/StatusBarPro', replacement: 'IDELayout status bar slot' },
+  { suffix: '/statusbar/StatusBar', replacement: 'ModernIDEShell / FullscreenIDE status surface' },
+  { suffix: '/statusbar/StatusBarPro', replacement: 'ModernIDEShell / FullscreenIDE status surface' },
 ];
 
 const skipSegments = new Set(['node_modules', '.next', 'dist', 'build']);

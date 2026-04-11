@@ -1,4 +1,4 @@
-﻿# 42_RELATORIO_COMPLETO_PENDENCIAS_2026-03-20.md
+# 42_RELATORIO_COMPLETO_PENDENCIAS_2026-03-20.md
 
 **Documento:** Relatório Completo de Pendências e Críticas (baseado em evidências do repositório)  
 **Data:** 2026-03-20  

@@ -1,5 +1,6 @@
 // IDE Components - Unified Export
 // Aethel Engine IDE Components
+// Canonical workbench: `FullscreenIDE` + `ModernIDEShell`.
 
 // Modern IDE Components (2026 UX Improvements)
 export {
@@ -11,8 +12,8 @@ export {
   InlineAIChat,
 } from './InlineAIChat'
 
-// Legacy Components (for backwards compatibility)
-export { default as IDELayout } from './IDELayout'
+// Legacy / compatibility exports
+// `IDELayout` permanece no repo apenas como legado documental; evitar novos imports.
 export { default as FileExplorerPro } from './FileExplorerPro'
 export { default as GitPanelPro } from './GitPanelPro'
 export { default as AIChatPanelPro } from './AIChatPanelPro'
@@ -24,4 +25,3 @@ export { default as DiffViewer } from './DiffViewer'
 export { default as InlineCompletion } from './InlineCompletion'
 
 // Types
-export type { default as IDELayoutProps } from './IDELayout'

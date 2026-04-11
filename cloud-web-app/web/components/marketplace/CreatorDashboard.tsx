@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AETHEL ENGINE - Painel do criador
  *
  * Full creator dashboard for asset sellers with:

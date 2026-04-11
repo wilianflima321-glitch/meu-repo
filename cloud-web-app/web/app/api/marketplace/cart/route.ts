@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Marketplace Cart API
  *
  * Persists cart in UserPreferences.preferences.marketplaceCart.

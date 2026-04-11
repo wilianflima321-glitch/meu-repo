@@ -23,7 +23,7 @@ Any Markdown outside those chains is historical unless explicitly referenced by 
 - `docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
 - `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
 - `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
-- `docs/master/41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
+- `docs/master/41a_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
 - `docs/master/43_ADMIN_SYSTEM_SPEC_2026-03-22.md`
 - `docs/master/44_BACKEND_SYSTEM_SPEC_2026-03-22.md`
 - `docs/master/45_AI_SYSTEM_SPEC_2026-03-22.md`

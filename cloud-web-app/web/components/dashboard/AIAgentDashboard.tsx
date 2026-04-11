@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 /**
  * AETHEL ENGINE - AI Agent Dashboard

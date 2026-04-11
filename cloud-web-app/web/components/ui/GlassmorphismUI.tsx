@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Glassmorphism UI Components - Nível Studio L5
  *
  * Componentes com efeitos de vidro, glows dinâmicos e transições de elite

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AIThinkingPanel - Painel Visual de "Cadeia de Pensamento" da IA
  *
  * Mostra em tempo real os passos de raciocínio da IA.

@@ -1,4 +1,4 @@
-﻿# ðŸŒ‰ Aethel Visual Bridge: EspecificaÃ§Ã£o TÃ©cnica (WebGPU AAA)
+# ðŸŒ‰ Aethel Visual Bridge: EspecificaÃ§Ã£o TÃ©cnica (WebGPU AAA)
 
 **Data:** 27 de Fevereiro de 2026  
 **VisÃ£o:** Superar a Unreal Engine no browser atravÃ©s de uma arquitetura de renderizaÃ§Ã£o de prÃ³xima geraÃ§Ã£o baseada em WebGPU, focada em fidelidade visual extrema e eficiÃªncia de IA.

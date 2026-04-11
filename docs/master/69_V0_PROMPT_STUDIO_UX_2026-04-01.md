@@ -1,4 +1,4 @@
-﻿# 69_V0_PROMPT_STUDIO_UX_2026-04-01
+# 69_V0_PROMPT_STUDIO_UX_2026-04-01
 
 Use o prompt abaixo no v0 para gerar UI/UX de alta fidelidade com foco em experiencia profissional e consistencia Aethel.
 

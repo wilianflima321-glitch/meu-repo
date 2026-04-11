@@ -1,4 +1,4 @@
-﻿# 16_MASTER_FIGMA_PROMPT
+# 16_MASTER_FIGMA_PROMPT
 Date: 2026-03-25
 Status: EXECUTION ARTIFACT
 Surface Type: Figma / Design Generation Master Prompt

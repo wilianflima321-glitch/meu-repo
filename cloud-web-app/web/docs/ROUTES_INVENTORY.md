@@ -1,12 +1,18 @@
 # ROUTES_INVENTORY.md
-Generated: 2026-02-16T04:18:58.582Z
+Updated: 2026-04-08
 
 ## Summary
-- Total routes: 88
-- Admin routes: 44
+- Total route files under `app/`: 103
+- Admin routes: 48
 - Auth routes: 5
-- Core workbench routes: 1
-- Workbench redirect routes: 17
+- Canonical workbench route: `/ide`
+- Workbench convergence routes: 15
+
+## Convergence Notes
+- `/ide` is the canonical workbench shell.
+- Redirect surfaces such as `/chat`, `/explorer`, `/terminal`, `/debugger`, `/git`, `/search`, `/playground` and `/testing` converge into the workbench instead of shipping parallel shells.
+- `/editor-hub` now redirects directly to `/ide` because it no longer represents a distinct surface.
+- Aspirational lab routes (`/animation-blueprint`, `/blueprint-editor`, `/landscape-editor`, `/level-editor`, `/niagara-editor`, `/vr-preview`) are treated as labs and may be hidden in production by middleware.
 
 ## API Gate Status
 - Remaining NOT_IMPLEMENTED API markers: 6

@@ -1,4 +1,4 @@
-﻿# 00_INDEX
+# 00_INDEX
 Date: 2026-03-20
 Status: CANONICAL ENTRYPOINT
 
@@ -10,7 +10,7 @@ Status: CANONICAL ENTRYPOINT
 5. `docs/master/31_EXECUTIVE_REALITY_GAP_ALIGNMENT_2026-02-28.md`
 6. `docs/master/32_GLOBAL_GAP_REGISTER_2026-03-01.md`
 7. `docs/master/39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md`
-8. `docs/master/41_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
+8. `docs/master/41a_DOCS_NAMING_NORMALIZATION_2026-03-21.md`
 9. `docs/master/43_ADMIN_SYSTEM_SPEC_2026-03-22.md`
 10. `docs/master/44_BACKEND_SYSTEM_SPEC_2026-03-22.md`
 11. `docs/master/45_AI_SYSTEM_SPEC_2026-03-22.md`
@@ -19,10 +19,13 @@ Status: CANONICAL ENTRYPOINT
 14. `docs/master/65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md`
 15. `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
 16. `docs/master/68_L5_UX_HARDENING_DELTA_2026-04-01.md`
-17. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-18. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-19. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-20. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+17. `docs/master/73_AUDIT_RECONCILIATION_2026-04-08.md`
+18. `docs/master/74_GENSPARK_PATCH_REVIEW_2026-04-10.md`
+19. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
+20. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+21. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+22. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+23. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -42,7 +45,7 @@ Rules:
 | Doc | Role | Status |
 |---|---|---|
 | `00_FONTE_CANONICA.md` | Canonical policy | ACTIVE |
-| `00_REALITY_MATRIX_2026-02-04.md` | Validation snapshot (historical) | HISTORICAL |
+| `01_REALITY_MATRIX_2026-02-04.md` | Validation snapshot (historical) | HISTORICAL |
 | `10_AAA_REALITY_EXECUTION_CONTRACT_2026-02-11.md` | Master execution contract | ACTIVE |
 | `11_WEB_USER_OWNER_TRIAGE_2026-02-11.md` | Archived into `10` | HISTORICAL |
 | `12_INTERFACE_SYSTEMS_REFACTOR_CONTRACT_2026-02-11.md` | Archived into `10` | HISTORICAL |
@@ -73,10 +76,13 @@ Rules:
 | `38_L5_EXECUTION_BOARD_2026-03-10.md` | Master tracking board for L4/L5 execution | ACTIVE |
 | `39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md` | Unified Studio information architecture and navigation contract | ACTIVE |
 | `40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md` | Consolidated L5 execution plan and dependency graph | ACTIVE |
-| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificação) | HISTORICAL DRAFT (NUMBER COLLISION; DO NOT USE AS PRIMARY AUTHORITY) |
+| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificação) | HISTORICAL DRAFT |
 | `65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for navigation, layers, screens and handoffs | ACTIVE |
 | `66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for multi-agent UX, status, cost, confidence, approvals, memory and context | ACTIVE |
 | `68_L5_UX_HARDENING_DELTA_2026-04-01.md` | L5 UX hardening sweep summary | ACTIVE |
+| `73_AUDIT_RECONCILIATION_2026-04-08.md` | Reconciliacao da auditoria externa com o repo real | ACTIVE |
+| `74_GENSPARK_PATCH_REVIEW_2026-04-10.md` | Revisao do patch externo do Genspark com aceite/rejeicao por criterio tecnico | ACTIVE |
+| `75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md` | Guia pratico de convergencia visual sem regressao estrutural | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -90,7 +96,8 @@ Rules:
 | `49_EXECUTION_PLAN_2026-03-22.md` | Execution reference | PARTIALLY SUPERSEDED BY `10` |
 | `43_ADMIN_SYSTEM_SPEC_2026-03-22.md` | Admin scope | ACTIVE |
 | `44_BACKEND_SYSTEM_SPEC_2026-03-22.md` | Backend scope | ACTIVE |
-| `41_DOCS_NAMING_NORMALIZATION_2026-03-21.md` | Legacy naming normalization plan | ACTIVE |
+| `41a_DOCS_NAMING_NORMALIZATION_2026-03-21.md` | Legacy naming normalization plan | ACTIVE |
+| `41b_EXECUTION_ALIGNMENT_2026-03-27.md` | Execution alignment contract | ACTIVE |
 
 ## Current Factual Snapshot (2026-03-08)
 - Interface critical sweep (`cloud-web-app/web/docs/INTERFACE_CRITICAL_SWEEP.md`):

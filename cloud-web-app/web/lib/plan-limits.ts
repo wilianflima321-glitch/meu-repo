@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Plan Limits Service - Enforcement de Limites por Plano
  * 
  * Define e verifica limites de uso para cada tier de assinatura.

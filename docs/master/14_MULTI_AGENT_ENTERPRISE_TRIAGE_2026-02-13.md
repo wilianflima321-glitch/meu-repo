@@ -1,4 +1,4 @@
-﻿# 14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13
+# 14_MULTI_AGENT_ENTERPRISE_TRIAGE_2026-02-13
 Status: AUDITORIA EXECUTAVEL  
 Data: 2026-02-14  
 Direcao: Equilibrado + corte legado faseado + sem mudanca de escopo

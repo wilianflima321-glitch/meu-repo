@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, FileText, ShieldAlert } from 'lucide-react';

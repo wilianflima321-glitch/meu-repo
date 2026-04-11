@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AISuggestionBubble - Bolhas de Sugestão Proativa da IA
  *
  * Sugestões contextuais não-intrusivas da IA.

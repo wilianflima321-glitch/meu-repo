@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AETHEL ENGINE - Pixel Streaming React Component
  *
  * Full-featured React component for cloud GPU streaming.

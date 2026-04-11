@@ -15,7 +15,7 @@ Plataforma web em monorepo Next.js com Studio (`/dashboard`) e Workbench (`/ide`
 | Rotas aspiracionais em `app/` | Usuario encontra shells vazios ou pouco confiaveis | Colocar atras de gate, redirecionar com aviso ou remover |
 | Chat de IA sem aplicacao real no editor | Paridade baixa frente a Cursor e Windsurf | Prioridade P0 para ponte chat -> Monaco |
 | `components/` e `lib/` muito fragmentados | Stubs, duplicacao de ideia e manutencao dificil | Podar, mover para `_deprecated/` e reorganizar por dominios |
-| Supersedencia documental confusa | Leitura errada do canonico | Manter `DEPRECATED_INDEX.md` e resolver colisao `41_*` |
+| Supersedencia documental confusa | Leitura errada do canonico | Manter `DEPRECATED_INDEX.md` e preservar a serie historica `41/41a/41b` sem novas colisoes |
 
 ### 2.2 Duplicacoes conhecidas
 
@@ -26,11 +26,17 @@ Plataforma web em monorepo Next.js com Studio (`/dashboard`) e Workbench (`/ide`
 ### 2.3 Estado verificado no repositorio
 
 - `FullscreenIDE` usa apenas `ModernIDEShell`; `IDELayout.tsx` permanece so como legado identificado.
+- `next.config.js` deixou de ignorar erros de TypeScript no build; o gate correto volta a ser `tsc --noEmit`.
 - `lib/ai/ai-apply-bridge.ts` e `EditorApplyBridgeContext.tsx` fecham o MVP de chat -> editor, com persistencia via `writeFile`.
 - `MonacoChatDiffPanel.tsx` fornece diff Monaco lado a lado, com revisao antes de aplicar.
 - `lib/ai/ai-agent-mode.ts` define o contrato minimo do modo agente e `TaskOpsPanel.tsx` mostra rascunho local quando a API real nao responde, sem fingir execucao.
 - `lib/routes/workbench-convergence.ts` e `middleware.ts` ja escondem labs em producao por padrao e convergem rotas duplicadas para o `/ide`.
+- `/editor-hub` foi reduzido para redirecionamento direto ao `/ide`, removendo uma duplicacao de entrada sem valor proprio.
+- `components/ide/index.ts` deixou de reexportar `IDELayout`, reduzindo o risco de reintroduzir o shell legado por imports indiretos.
 - `DashboardRoutingNotice.tsx` comunica o motivo do redirecionamento em vez de fazer redirect mudo.
+- `AethelHeaderPro.tsx` deixa de depender de usuario hardcoded, contador fake e busca simulada; usa `auth/profile`, `notifications` e envia a busca para o workbench.
+- `ModernIDEShell.tsx` agora tem resize real nas costuras principais (sidebar, preview e copiloto), usa os tamanhos do estado e deixou de exibir handle "fake".
+- `FullscreenIDE.tsx` persiste o layout do shell em `localStorage` e liga o bottom dock a acoes reais (buscar arquivos, abrir Git, console, diagnosticos e modos da previa).
 - Arquivos `.bak` em `cloud-web-app/web` foram removidos nesta rodada.
 
 ## 3. Benchmark resumido
@@ -75,7 +81,7 @@ Persistencia de memoria, `.aethelrules`, billing real, WCAG AA, PT-BR completo, 
 
 - `DEPRECATED_INDEX.md` agora lista supersedencias e superficies retiradas.
 - `72_UX_UI_BENCHMARK_TRIAGE_2026-04-08.md` faz a triagem visual e de experiencia.
-- A colisao `41_*` permanece explicada, mas ainda merece normalizacao futura.
+- A serie historica `41`, `41a` e `41b` foi normalizada e segue explicada em `DEPRECATED_INDEX.md`.
 
 ## 6. Veredito
 

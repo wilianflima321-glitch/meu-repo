@@ -1,6 +1,6 @@
-﻿# 41_AUDITORIA_MAXIMA_2026-03-20
+# 41_AUDITORIA_MAXIMA_2026-03-20
 
-> **Nota (colisão `41_*`):** Existem três ficheiros distintos com prefixo `41_` em `docs/master/`. Este é a **auditoria máxima** (2026-03-20). Os outros: normalização de nomes (2026-03-21) e alinhamento de execução (2026-03-27). Ver `DEPRECATED_INDEX.md`.
+> **Nota de indexação:** este ficheiro mantém o prefixo `41_` por ordem histórica. Os documentos relacionados foram normalizados para `41a_` e `41b_`. Ver `DEPRECATED_INDEX.md`.
 
 Date: 2026-03-20
 Status: DRAFT (NEEDS_VERIFICATION)

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AI_PROVIDER_ENV_LABELS } from '@/lib/ai-provider-config'

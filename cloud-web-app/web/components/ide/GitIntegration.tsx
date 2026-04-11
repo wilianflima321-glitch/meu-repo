@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { GitBranch, GitCommit, GitPullRequest, RefreshCw, Plus, X, Check, AlertTriangle, Clock } from 'lucide-react'

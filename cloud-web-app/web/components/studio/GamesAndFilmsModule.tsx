@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Games & Films Module - Alpha Honest
  *
  * Módulo de criação e gerenciamento de Games e Films

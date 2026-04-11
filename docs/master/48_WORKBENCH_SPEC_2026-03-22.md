@@ -1,4 +1,4 @@
-﻿# WORKBENCH_SPEC.md
+# WORKBENCH_SPEC.md
 ## EspecificaÃ§Ã£o TÃ©cnica do Workbench IDE
 **Data:** Janeiro 2026  
 **VersÃ£o:** 1.0  

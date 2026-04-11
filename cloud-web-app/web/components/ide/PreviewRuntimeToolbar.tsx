@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import type { PreviewRuntimeHealthStatus, PreviewRuntimeReadinessResponse } from '@/lib/preview/runtime-manager'
 

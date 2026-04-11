@@ -52,7 +52,9 @@ Benchmark de mercado ensina uma licao simples: os melhores produtos parecem coes
 ### IDE e workbench
 
 - `ModernIDEShell` ja organiza a experiencia principal.
-- O maior gap de "feel premium" hoje e resize de paineis e distribuicao mais adaptativa.
+- Resize real nas costuras principais entrou no shell, com persistencia local de layout.
+- Rotas duplicadas como `editor-hub` deixaram de parecer um segundo produto e passaram a convergir mais claramente para o workbench canonico.
+- O maior gap de "feel premium" saiu de "handles fake" para "falta de split editor, distribuicao mais adaptativa e maior densidade de comandos".
 
 ### Nexus
 
@@ -79,8 +81,8 @@ Benchmark de mercado ensina uma licao simples: os melhores produtos parecem coes
 
 ### P1
 
-1. Adicionar resize real aos paineis do workbench.
-2. Revisar onboarding para reduzir friccao ate o primeiro projeto.
+1. Revisar onboarding para reduzir friccao ate o primeiro projeto.
+2. Levar o shell para um nivel mais perto de VS Code: split editor, distribuicao adaptativa e mais comandos conectados.
 
 ### P2
 

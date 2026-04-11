@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Agent Orchestrator for Aethel Engine
  * Streams parallel agent messages with explicit cancellation semantics.
  */

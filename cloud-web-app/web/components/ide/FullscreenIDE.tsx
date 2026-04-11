@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from 'next/link';
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import type * as monacoEditor from 'monaco-editor'
@@ -9,9 +8,10 @@ import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
 import CanonicalPreviewSurface from "@/components/preview/CanonicalPreviewSurface";
 import PreviewRuntimeToolbar from "@/components/ide/PreviewRuntimeToolbar";
-import WorkbenchMissionBar from "@/components/ide/WorkbenchMissionBar";
 import TabBar, { TabProvider } from "@/components/editor/TabBar";
 import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
+import type { Diagnostic as MonacoDiagnostic } from "@/components/editor/MonacoEditorPro";
+import SplitEditor, { type EditorGroup, type EditorTab, type SplitDirection } from "@/components/editor/SplitEditor";
 import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
 import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
 import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
@@ -23,18 +23,23 @@ import { ProfessionalViewport3D } from "@/components/ide/ProfessionalViewport3D"
 import { GitIntegration } from "@/components/ide/GitIntegration";
 import { IntelliSense } from "@/components/ide/IntelliSense";
 import { ErrorHighlighting } from "@/components/ide/ErrorHighlighting";
+import OutlinePanel, { type DocumentSymbol } from "@/components/outline/OutlinePanel";
+import { buildOutlineSymbols } from "@/components/outline/outline-parser";
 import { analytics } from "@/lib/analytics";
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
 const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
+const PANEL_STATE_STORAGE_KEY = "aethel.workbench.panelState";
 
 type ActiveFileState = {
   path: string;
   content: string;
   language: string;
 };
+
+type EditorPane = 'primary' | 'secondary';
 
 type WorkspaceTreeNode = {
   path?: string;
@@ -64,6 +69,12 @@ type InlineApplyResult = {
   rollbackToken?: string
   message?: string
   filePath?: string
+}
+
+type EntryNotice = {
+  tone: 'info' | 'warning'
+  title: string
+  description: string
 }
 
 function getAuthHeaders(): Record<string, string> {
@@ -139,6 +150,11 @@ function IDEContent() {
   }, [projectIdParam]);
 
   const [activeFile, setActiveFile] = useState<ActiveFileState | null>(null);
+  const [secondaryFile, setSecondaryFile] = useState<ActiveFileState | null>(null);
+  const [splitEditorOpen, setSplitEditorOpen] = useState(false);
+  const [splitDirection, setSplitDirection] = useState<SplitDirection>('horizontal');
+  const [splitActivePane, setSplitActivePane] = useState<EditorPane>('primary');
+  const [nextOpenTarget, setNextOpenTarget] = useState<EditorPane>('primary');
   const [isReadingFile, setIsReadingFile] = useState(false);
   const [isSavingFile, setIsSavingFile] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -150,16 +166,37 @@ function IDEContent() {
     if (stored === "0") return false;
     return window.innerWidth >= 1440;
   });
-  const [modernPanelState, setModernPanelState] = useState<ModernPanelState>(() => ({
-    sidebar: { open: true, size: 20 },
-    editor: { open: true, size: 45 },
-    preview: { open: true, size: 35 },
-    chat: { open: false, size: 25 },
-  }));
+  const [modernPanelState, setModernPanelState] = useState<ModernPanelState>(() => {
+    const fallback: ModernPanelState = {
+      sidebar: { open: true, size: 20 },
+      editor: { open: true, size: 45 },
+      preview: { open: true, size: 35 },
+      chat: { open: false, size: 25 },
+    }
+    if (typeof window === "undefined") return fallback;
+
+    try {
+      const stored = window.localStorage.getItem(PANEL_STATE_STORAGE_KEY);
+      if (!stored) return fallback;
+      const parsed = JSON.parse(stored) as Partial<ModernPanelState>;
+      return {
+        sidebar: { ...fallback.sidebar, ...parsed.sidebar },
+        editor: { ...fallback.editor, ...parsed.editor },
+        preview: { ...fallback.preview, ...parsed.preview },
+        chat: { ...fallback.chat, ...parsed.chat },
+      };
+    } catch {
+      return fallback;
+    }
+  });
   const [previewMode, setPreviewMode] = useState<'runtime' | 'device' | 'console' | 'viewport3d'>('runtime')
   const [sidebarTab, setSidebarTab] = useState<'explorer' | 'git'>('explorer')
+  const [entryNotice, setEntryNotice] = useState<EntryNotice | null>(null)
   const [showIntelliSense, setShowIntelliSense] = useState(false)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
+  const [showOutline, setShowOutline] = useState(false)
+  const [editorDiagnostics, setEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
+  const [secondaryEditorDiagnostics, setSecondaryEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
   const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
   const [initialFileResolved, setInitialFileResolved] = useState(false);
   const [isCompactViewport, setIsCompactViewport] = useState(false)
@@ -168,8 +205,17 @@ function IDEContent() {
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
+  const primaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
+  const secondaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const runtimeSyncTimerRef = useRef<number | null>(null)
   const lastRuntimeSyncAtRef = useRef<number>(0)
+
+  const bridgeActiveFile = splitActivePane === 'secondary' && secondaryFile ? secondaryFile : activeFile
+  const activeDiagnostics = splitActivePane === 'secondary' ? secondaryEditorDiagnostics : editorDiagnostics
+  const outlineSymbols = useMemo<DocumentSymbol[]>(() => {
+    if (!bridgeActiveFile) return []
+    return buildOutlineSymbols(bridgeActiveFile.content, bridgeActiveFile.language)
+  }, [bridgeActiveFile])
 
   const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([])
   const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false)
@@ -282,6 +328,52 @@ function IDEContent() {
     emitLayoutEvent('aethel.layout.openAI')
   }, [emitLayoutEvent])
 
+  const handleSelectSidebarTab = useCallback((tab: 'explorer' | 'git') => {
+    setSidebarTab(tab)
+    setModernPanelState((prev) => ({
+      ...prev,
+      sidebar: {
+        ...prev.sidebar,
+        open: true,
+      },
+    }))
+  }, [])
+
+  const handleSelectPreviewMode = useCallback((mode: 'runtime' | 'device' | 'console' | 'viewport3d') => {
+    setPreviewEnabled(true)
+    setPreviewMode(mode)
+    setModernPanelState((prev) => ({
+      ...prev,
+      preview: {
+        ...prev.preview,
+        open: true,
+      },
+    }))
+  }, [])
+
+  const clearEntryNotice = useCallback(() => {
+    setEntryNotice(null)
+  }, [])
+
+  const showEntryNotice = useCallback((notice: EntryNotice) => {
+    setEntryNotice(notice)
+  }, [])
+
+  const handleToggleDiagnosticsPanel = useCallback(() => {
+    setShowDiagnostics((prev) => !prev)
+  }, [])
+
+  const handleJumpToOutlineSymbol = useCallback((symbol: DocumentSymbol) => {
+    const editor = splitActivePane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
+    if (!editor) return
+    editor.revealLineInCenter(symbol.selectionRange.startLine)
+    editor.setPosition({
+      lineNumber: symbol.selectionRange.startLine,
+      column: symbol.selectionRange.startColumn,
+    })
+    editor.focus()
+  }, [splitActivePane])
+
   useEffect(() => {
     return () => {
       if (runtimeSyncTimerRef.current) {
@@ -317,6 +409,66 @@ function IDEContent() {
       localStorage.setItem(LAST_PROJECT_ID_STORAGE_KEY, projectId);
     }
   }, [projectId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const onToggleSidebar = () => {
+      setModernPanelState((prev) => ({
+        ...prev,
+        sidebar: {
+          ...prev.sidebar,
+          open: !prev.sidebar.open,
+        },
+      }))
+    }
+
+    const onOpenAI = () => {
+      setModernPanelState((prev) => ({
+        ...prev,
+        chat: {
+          ...prev.chat,
+          open: true,
+        },
+      }))
+    }
+
+    const onToggleTerminal = () => {
+      handleSelectPreviewMode('console')
+    }
+
+    const onOpenSidebarTab = (event: Event) => {
+      const detail = (event as CustomEvent<{ tab?: 'explorer' | 'git' }>).detail
+      if (detail?.tab === 'explorer' || detail?.tab === 'git') {
+        handleSelectSidebarTab(detail.tab)
+      }
+    }
+
+    const onOpenBottomTab = (event: Event) => {
+      const detail = (event as CustomEvent<{ tab?: string }>).detail
+      if (detail?.tab === 'terminal') {
+        handleSelectPreviewMode('console')
+        return
+      }
+      if (detail?.tab === 'debug') {
+        setShowDiagnostics(true)
+      }
+    }
+
+    window.addEventListener('aethel.layout.toggleSidebar', onToggleSidebar)
+    window.addEventListener('aethel.layout.openAI', onOpenAI)
+    window.addEventListener('aethel.layout.toggleTerminal', onToggleTerminal)
+    window.addEventListener('aethel.layout.openSidebarTab', onOpenSidebarTab as EventListener)
+    window.addEventListener('aethel.layout.openBottomTab', onOpenBottomTab as EventListener)
+
+    return () => {
+      window.removeEventListener('aethel.layout.toggleSidebar', onToggleSidebar)
+      window.removeEventListener('aethel.layout.openAI', onOpenAI)
+      window.removeEventListener('aethel.layout.toggleTerminal', onToggleTerminal)
+      window.removeEventListener('aethel.layout.openSidebarTab', onOpenSidebarTab as EventListener)
+      window.removeEventListener('aethel.layout.openBottomTab', onOpenBottomTab as EventListener)
+    }
+  }, [handleSelectPreviewMode, handleSelectSidebarTab])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -444,6 +596,11 @@ function IDEContent() {
   }, [previewEnabled]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(PANEL_STATE_STORAGE_KEY, JSON.stringify(modernPanelState));
+  }, [modernPanelState]);
+
+  useEffect(() => {
     setModernPanelState((prev) => ({
       ...prev,
       preview: {
@@ -464,7 +621,7 @@ function IDEContent() {
   }, [])
 
   const readFile = useCallback(
-    async (path: string) => {
+    async (path: string, targetPane: EditorPane = 'primary') => {
       const normalizedPath = normalizePath(path);
       setIsReadingFile(true);
       setFileError(null);
@@ -491,11 +648,21 @@ function IDEContent() {
         const payload = await response.json();
         const content = typeof payload?.content === "string" ? payload.content : "";
 
-        setActiveFile({
+        const nextFile = {
           path: normalizedPath,
           content,
           language: resolveLanguage(normalizedPath),
-        });
+        };
+
+        if (targetPane === 'secondary') {
+          setSecondaryFile(nextFile);
+          setSplitEditorOpen(true);
+          setSplitActivePane('secondary');
+          setNextOpenTarget('primary');
+        } else {
+          setActiveFile(nextFile);
+          setSplitActivePane('primary');
+        }
         setLastSavedAt(null);
       } catch (error) {
         setFileError(error instanceof Error ? error.message : "Não foi possível ler o arquivo.");
@@ -630,11 +797,36 @@ function IDEContent() {
   }, [activeFile, fileParam, initialFileResolved, isReadingFile, projectId, readFile]);
 
   useEffect(() => {
+    if (!activeFile?.path) {
+      setEditorDiagnostics([])
+    }
+  }, [activeFile?.path])
+
+  useEffect(() => {
+    if (!splitEditorOpen || secondaryFile || !activeFile) return
+    setSecondaryFile({ ...activeFile })
+  }, [activeFile, secondaryFile, splitEditorOpen])
+
+  useEffect(() => {
     if (!entryParam) return;
     const entry = entryParam.toLowerCase();
+    const labNotice = {
+      tone: 'warning' as const,
+      title: 'Surface em modo Labs',
+      description: 'Esta rota foi convergida para o workbench principal. A experiência canônica ainda está no shell de código, prévia e revisão.',
+    }
 
-    if (entry === "ai" || entry === "chat") {
+    clearEntryNotice()
+
+    if (entry === "ai" || entry === "chat" || entry === 'ai-command') {
       window.dispatchEvent(new Event("aethel.layout.openAI"));
+      if (entry === 'ai-command') {
+        showEntryNotice({
+          tone: 'info',
+          title: 'Comando de IA convergido',
+          description: 'A ação abriu o painel principal de IA dentro do workbench, onde diff, execução e contexto ficam centralizados.',
+        })
+      }
       return;
     }
     if (entry === "explorer") {
@@ -643,6 +835,19 @@ function IDEContent() {
           detail: { tab: "explorer" },
         })
       );
+      return;
+    }
+    if (entry === 'git') {
+      window.dispatchEvent(
+        new CustomEvent("aethel.layout.openSidebarTab", {
+          detail: { tab: "git" },
+        })
+      );
+      showEntryNotice({
+        tone: 'info',
+        title: 'Git aberto no workbench',
+        description: 'A rota dedicada foi convergida para a barra lateral do IDE para manter revisão, arquivos e diff no mesmo fluxo.',
+      })
       return;
     }
     if (entry === "debugger" || entry === "debug") {
@@ -663,11 +868,39 @@ function IDEContent() {
     }
     if (entry === "live-preview" || entry === "preview") {
       setPreviewEnabled(true);
+      showEntryNotice({
+        tone: 'info',
+        title: 'Prévia aberta no shell principal',
+        description: 'A prévia canônica agora vive dentro do workbench para manter runtime, console e editor no mesmo contexto.',
+      })
       return;
+    }
+    if (entry === 'editor-hub') {
+      setPreviewEnabled(true)
+      showEntryNotice({
+        tone: 'info',
+        title: 'Editor Hub convergido',
+        description: 'Você já está no hub principal do editor. A navegação dedicada foi removida para evitar duplicidade de shell.',
+      })
+      return
+    }
+    if (entry === 'search') {
+      openCommandPalette('files')
+      showEntryNotice({
+        tone: 'info',
+        title: 'Busca convergida',
+        description: 'A busca dedicada foi substituída pela command palette e pelo quick open do workbench.',
+      })
+      return
     }
     if (entry === "playground") {
       setPreviewEnabled(true);
       window.dispatchEvent(new Event("aethel.layout.openAI"));
+      showEntryNotice({
+        tone: 'info',
+        title: 'Playground convergido',
+        description: 'O playground agora usa o shell principal com prévia ativa e copiloto aberto, evitando uma superfície paralela.',
+      })
       return;
     }
     if (entry === "testing") {
@@ -677,8 +910,26 @@ function IDEContent() {
           detail: { tab: "debug" },
         })
       );
+      showEntryNotice({
+        tone: 'info',
+        title: 'Testing convergido',
+        description: 'A rota abriu a prévia e os diagnósticos do editor para manter testes e inspeção no mesmo fluxo.',
+      })
+      return
     }
-  }, [entryParam]);
+    if (
+      entry === 'animation-blueprint' ||
+      entry === 'blueprint-editor' ||
+      entry === 'landscape-editor' ||
+      entry === 'level-editor' ||
+      entry === 'niagara-editor' ||
+      entry === 'vr-preview'
+    ) {
+      handleSelectPreviewMode('viewport3d')
+      window.dispatchEvent(new Event("aethel.layout.openAI"));
+      showEntryNotice(labNotice)
+    }
+  }, [clearEntryNotice, entryParam, handleSelectPreviewMode, openCommandPalette, showEntryNotice]);
 
   useEffect(() => {
     const onOpenFileFromContext = (event: Event) => {
@@ -737,14 +988,14 @@ function IDEContent() {
   const handleFileSelect = useCallback(
     (file: { path: string; type: "file" | "folder" }) => {
       if (file.type !== "file") return;
-      void readFile(file.path);
+      void readFile(file.path, nextOpenTarget);
     },
-    [readFile]
+    [nextOpenTarget, readFile]
   );
 
   const handlePaletteOpenFile = useCallback((path: string) => {
-    void readFile(path);
-  }, [readFile]);
+    void readFile(path, nextOpenTarget);
+  }, [nextOpenTarget, readFile]);
 
   const handleRunRecommendedPreviewAction = useCallback(() => {
     if (runtimePrimaryAction === 'provision') {
@@ -767,6 +1018,59 @@ function IDEContent() {
     refreshRuntimeReadiness,
     runtimePrimaryAction,
   ])
+
+  const handleToggleSplitEditor = useCallback(() => {
+    setSplitEditorOpen((prev) => {
+      const next = !prev
+      if (!next) {
+        setSecondaryFile(null)
+        setNextOpenTarget('primary')
+        setSplitActivePane('primary')
+      } else if (activeFile) {
+        setSecondaryFile((current) => current ?? { ...activeFile })
+      }
+      return next
+    })
+  }, [activeFile])
+
+  const splitEditorGroups = useMemo<EditorGroup[]>(() => {
+    const groups: EditorGroup[] = []
+    if (activeFile) {
+      const primaryTab: EditorTab = {
+        id: `primary:${activeFile.path}`,
+        title: activeFile.path.split('/').pop() || activeFile.path,
+        path: activeFile.path,
+        language: activeFile.language,
+        dirty: false,
+        pinned: true,
+        preview: false,
+      }
+      groups.push({
+        id: 'primary',
+        tabs: [primaryTab],
+        activeTabId: primaryTab.id,
+      })
+    }
+
+    if (splitEditorOpen && secondaryFile) {
+      const secondaryTab: EditorTab = {
+        id: `secondary:${secondaryFile.path}`,
+        title: secondaryFile.path.split('/').pop() || secondaryFile.path,
+        path: secondaryFile.path,
+        language: secondaryFile.language,
+        dirty: false,
+        pinned: false,
+        preview: false,
+      }
+      groups.push({
+        id: 'secondary',
+        tabs: [secondaryTab],
+        activeTabId: secondaryTab.id,
+      })
+    }
+
+    return groups
+  }, [activeFile, secondaryFile, splitEditorOpen])
 
   const fullAccessActiveGrant = useMemo(() => {
     const grants = fullAccessData?.metadata?.grants || []
@@ -911,8 +1215,8 @@ function IDEContent() {
       <TabProvider>
         <EditorApplyBridgeProvider
           editorRef={editorRef}
-          activeFilePath={activeFile?.path ?? null}
-          activeFileContent={activeFile?.content ?? ""}
+          activeFilePath={bridgeActiveFile?.path ?? null}
+          activeFileContent={bridgeActiveFile?.content ?? ""}
           normalizePath={normalizePath}
           writeFile={writeFile}
           readFile={readFile}
@@ -920,7 +1224,24 @@ function IDEContent() {
         <ModernIDEShell
             projectName={`Projeto ${projectId}`}
             activeFileName={activeFile?.path}
+            banner={
+              entryNotice ? (
+                <WorkbenchEntryNotice
+                  notice={entryNotice}
+                  onDismiss={clearEntryNotice}
+                />
+              ) : null
+            }
             panelState={modernPanelState}
+            onResizePanel={(panel, size) => {
+              setModernPanelState((prev) => ({
+                ...prev,
+                [panel]: {
+                  ...prev[panel],
+                  size,
+                },
+              }))
+            }}
             onToggleSidebar={() => {
               setModernPanelState((prev) => ({
                 ...prev,
@@ -946,15 +1267,23 @@ function IDEContent() {
                 },
               }))
             }}
+            onRunPrimaryAction={handleRunRecommendedPreviewAction}
+            onOpenSettings={handleOpenSettings}
+            onOpenCommandPalette={openCommandPalette}
+            onSelectSidebarTab={handleSelectSidebarTab}
+            onSelectPreviewMode={handleSelectPreviewMode}
+            onToggleDiagnostics={handleToggleDiagnosticsPanel}
+            activeSidebarTab={sidebarTab}
+            activePreviewMode={previewMode}
           >
             {{
               sidebar: (
                 <div className="h-full flex flex-col">
-                  <div className="flex items-center gap-1 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-2 py-2">
+                  <div className="flex items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-3 py-3">
                     <button
                       type="button"
                       onClick={() => setSidebarTab('explorer')}
-                      className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                      className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
                         sidebarTab === 'explorer'
                           ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
                           : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -965,7 +1294,7 @@ function IDEContent() {
                     <button
                       type="button"
                       onClick={() => setSidebarTab('git')}
-                      className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                      className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
                         sidebarTab === 'git'
                           ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
                           : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -987,20 +1316,67 @@ function IDEContent() {
               editor: (
                 <div className="h-full flex flex-col">
                   {isCompactViewport && (
-                    <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
+                    <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-4 py-3.5 text-xs leading-6 text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
                       Viewport compacto detectado. Para melhor experiência use desktop com {'>='} 1024px.
                     </div>
                   )}
                   <TabBar />
-                  <div className="flex items-center justify-between border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2 py-1.5 text-[11px]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2.5 text-[11px]">
                     <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
-                      <span>Ferramentas do editor</span>
+                      <span className="font-medium uppercase tracking-[0.12em]">Ferramentas do editor</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleEditorFind}
+                        className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+                      >
+                        Buscar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleEditorReplace}
+                        className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+                      >
+                        Substituir
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleToggleSplitEditor}
+                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+                          splitEditorOpen
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                        }`}
+                      >
+                        {splitEditorOpen ? 'Fechar split' : 'Dividir editor'}
+                      </button>
+                      {splitEditorOpen && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setNextOpenTarget((prev) => (prev === 'secondary' ? 'primary' : 'secondary'))}
+                            className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+                              nextOpenTarget === 'secondary'
+                                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]'
+                                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                            }`}
+                          >
+                            {nextOpenTarget === 'secondary' ? 'Próximo arquivo: lateral' : 'Próximo arquivo: principal'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSplitDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))}
+                            className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+                          >
+                            {splitDirection === 'horizontal' ? 'Empilhar verticalmente' : 'Dividir lado a lado'}
+                          </button>
+                        </>
+                      )}
                       <button
                         type="button"
                         onClick={() => setShowIntelliSense((prev) => !prev)}
-                        className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
                           showIntelliSense
                             ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
                             : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -1010,8 +1386,19 @@ function IDEContent() {
                       </button>
                       <button
                         type="button"
+                        onClick={() => setShowOutline((prev) => !prev)}
+                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+                          showOutline
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                        }`}
+                      >
+                        Outline
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setShowDiagnostics((prev) => !prev)}
-                        className={`rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors ${
+                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
                           showDiagnostics
                             ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
                             : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -1023,7 +1410,11 @@ function IDEContent() {
                   </div>
                   <div className="flex-1 overflow-hidden">
                     {isReadingFile && (
-                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Carregando arquivo...</div>
+                      <div className="h-full flex items-center justify-center px-6">
+                        <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-5 py-4 text-sm text-[var(--aethel-text-tertiary)]">
+                          Carregando arquivo...
+                        </div>
+                      </div>
                     )}
                     {!isReadingFile && fileError && (
                       <div className="h-full flex items-center justify-center px-6">
@@ -1034,41 +1425,177 @@ function IDEContent() {
                       <div className="h-full min-h-0">
                         <div className="h-full min-h-0 flex">
                           <div className="flex-1 min-w-0">
-                            <MonacoEditorPro
-                              path={activeFile.path}
-                              value={activeFile.content}
-                              language={activeFile.language}
-                              fullAccessActive={Boolean(fullAccessActiveGrant)}
-                              onMount={(editor) => {
-                                editorRef.current = editor
-                              }}
-                              onAiApplyResult={handleInlineApplyResult}
-                              onRequestFullAccess={handleToggleFullAccess}
-                              onChange={(value) => {
-                                setActiveFile((prev) =>
-                                  prev
-                                    ? {
-                                        ...prev,
-                                        content: value ?? "",
-                                      }
-                                    : prev
-                                )
-                              }}
-                              onSave={(value) => {
-                                void writeFile(activeFile.path, value)
-                              }}
-                            />
+                            {splitEditorOpen ? (
+                              <SplitEditor
+                                groups={splitEditorGroups}
+                                activeGroupId={splitActivePane}
+                                splitDirection={splitDirection}
+                                onGroupFocus={(groupId) => {
+                                  const pane = groupId === 'secondary' ? 'secondary' : 'primary'
+                                  setSplitActivePane(pane)
+                                  editorRef.current = pane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
+                                }}
+                                onSplit={() => {}}
+                                onTabClick={(_, groupId) => {
+                                  const pane = groupId === 'secondary' ? 'secondary' : 'primary'
+                                  setSplitActivePane(pane)
+                                  editorRef.current = pane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
+                                  if (pane === 'secondary') {
+                                    secondaryEditorRef.current?.focus()
+                                  } else {
+                                    primaryEditorRef.current?.focus()
+                                  }
+                                }}
+                                onTabClose={(_, groupId) => {
+                                  if (groupId === 'secondary') {
+                                    setSplitEditorOpen(false)
+                                    setSecondaryFile(null)
+                                    setNextOpenTarget('primary')
+                                    setSplitActivePane('primary')
+                                    editorRef.current = primaryEditorRef.current
+                                    return
+                                  }
+                                  setActiveFile(null)
+                                }}
+                                onTabPin={() => {}}
+                                onTabMove={() => {}}
+                                onGroupClose={(groupId) => {
+                                  if (groupId === 'secondary') {
+                                    setSplitEditorOpen(false)
+                                    setSecondaryFile(null)
+                                    setNextOpenTarget('primary')
+                                    setSplitActivePane('primary')
+                                    editorRef.current = primaryEditorRef.current
+                                  }
+                                }}
+                                renderEditor={(groupId, tab) => {
+                                  if (!tab) {
+                                    return (
+                                      <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
+                                        Nenhum arquivo aberto neste grupo.
+                                      </div>
+                                    )
+                                  }
+
+                                  const isSecondary = groupId === 'secondary'
+                                  const fileState = isSecondary ? secondaryFile : activeFile
+                                  if (!fileState) return null
+
+                                  return (
+                                    <div
+                                      className="h-full"
+                                      onMouseDown={() => {
+                                        setSplitActivePane(isSecondary ? 'secondary' : 'primary')
+                                        editorRef.current = isSecondary ? secondaryEditorRef.current : primaryEditorRef.current
+                                      }}
+                                    >
+                                      <MonacoEditorPro
+                                        path={fileState.path}
+                                        value={fileState.content}
+                                        language={fileState.language}
+                                        fullAccessActive={Boolean(fullAccessActiveGrant)}
+                                        onMount={(editor) => {
+                                          if (isSecondary) {
+                                            secondaryEditorRef.current = editor
+                                          } else {
+                                            primaryEditorRef.current = editor
+                                          }
+                                          if ((isSecondary && splitActivePane === 'secondary') || (!isSecondary && splitActivePane === 'primary')) {
+                                            editorRef.current = editor
+                                          }
+                                        }}
+                                        onAiApplyResult={handleInlineApplyResult}
+                                        onRequestFullAccess={handleToggleFullAccess}
+                                        onDiagnosticsChange={isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics}
+                                        onChange={(value) => {
+                                          const nextValue = value ?? ""
+                                          if (isSecondary) {
+                                            setSecondaryFile((prev) => (prev ? { ...prev, content: nextValue } : prev))
+                                          } else {
+                                            setActiveFile((prev) => (prev ? { ...prev, content: nextValue } : prev))
+                                          }
+                                        }}
+                                        onSave={(value) => {
+                                          void writeFile(fileState.path, value)
+                                        }}
+                                      />
+                                    </div>
+                                  )
+                                }}
+                              />
+                            ) : (
+                              <MonacoEditorPro
+                                path={activeFile.path}
+                                value={activeFile.content}
+                                language={activeFile.language}
+                                fullAccessActive={Boolean(fullAccessActiveGrant)}
+                                onMount={(editor) => {
+                                  primaryEditorRef.current = editor
+                                  editorRef.current = editor
+                                }}
+                                onAiApplyResult={handleInlineApplyResult}
+                                onRequestFullAccess={handleToggleFullAccess}
+                                onDiagnosticsChange={setEditorDiagnostics}
+                                onChange={(value) => {
+                                  setActiveFile((prev) =>
+                                    prev
+                                      ? {
+                                          ...prev,
+                                          content: value ?? "",
+                                        }
+                                      : prev
+                                  )
+                                }}
+                                onSave={(value) => {
+                                  void writeFile(activeFile.path, value)
+                                }}
+                              />
+                            )}
                           </div>
-                          {(showIntelliSense || showDiagnostics) && (
+                          {(showIntelliSense || showOutline || showDiagnostics) && (
                             <div className="w-80 border-l border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] flex flex-col">
                               {showIntelliSense && (
                                 <div className="flex-1 min-h-0 border-b border-[var(--aethel-border-secondary)]">
                                   <IntelliSense />
                                 </div>
                               )}
+                              {showOutline && (
+                                <div className="flex-1 min-h-0 border-b border-[var(--aethel-border-secondary)]">
+                                  <OutlinePanel
+                                    symbols={outlineSymbols}
+                                    activeFilePath={bridgeActiveFile?.path ?? activeFile.path}
+                                    onSymbolClick={handleJumpToOutlineSymbol}
+                                  />
+                                </div>
+                              )}
                               {showDiagnostics && (
                                 <div className="flex-1 min-h-0">
-                                  <ErrorHighlighting />
+                                  <ErrorHighlighting
+                                    errors={activeDiagnostics.map((diagnostic, index) => ({
+                                      id: `${bridgeActiveFile?.path ?? activeFile.path}:${diagnostic.line}:${diagnostic.column}:${index}`,
+                                      type:
+                                        diagnostic.severity === 'error'
+                                          ? 'error'
+                                          : diagnostic.severity === 'warning'
+                                            ? 'warning'
+                                            : 'info',
+                                      severity:
+                                        diagnostic.severity === 'error'
+                                          ? 'major'
+                                          : diagnostic.severity === 'warning'
+                                            ? 'minor'
+                                            : 'suggestion',
+                                      message: diagnostic.message,
+                                      code: diagnostic.code ? String(diagnostic.code) : '',
+                                      line: diagnostic.line,
+                                      column: diagnostic.column,
+                                      file: bridgeActiveFile?.path ?? activeFile.path,
+                                      documentation: diagnostic.source
+                                        ? `Origem: ${diagnostic.source}`
+                                        : '',
+                                      fixable: false,
+                                    }))}
+                                  />
                                 </div>
                               )}
                             </div>
@@ -1077,7 +1604,7 @@ function IDEContent() {
                       </div>
                     )}
                     {!isReadingFile && !fileError && !activeFile && (
-                      <div className="h-full flex items-center justify-center text-[var(--aethel-text-tertiary)]">Selecione um arquivo para começar a editar.</div>
+                      <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">Selecione um arquivo para iniciar a edi??o.</div>
                     )}
                   </div>
                 </div>
@@ -1145,7 +1672,7 @@ function IDEContent() {
                       }}
                     />
                   )}
-                  <div className="flex items-center gap-1 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] px-2 py-2 text-[11px]">
+                  <div className="flex flex-wrap items-center gap-2 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] px-3 py-2.5 text-[11px]">
                     {[
                       { id: 'runtime' as const, label: 'Prévia' },
                       { id: 'device' as const, label: 'Dispositivos' },
@@ -1156,7 +1683,7 @@ function IDEContent() {
                         key={mode.id}
                         type="button"
                         onClick={() => setPreviewMode(mode.id)}
-                        className={`rounded-md px-2.5 py-1 font-medium transition-colors ${
+                        className={`rounded-lg px-3 py-1.5 font-medium transition-colors min-h-[36px] ${
                           previewMode === mode.id
                             ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
                             : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -1187,7 +1714,7 @@ function IDEContent() {
                           />
                         </div>
                       ) : (
-                        <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)]">
+                        <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
                           Selecione um arquivo para visualizar a prévia.
                         </div>
                       )
@@ -1210,7 +1737,7 @@ function IDEContent() {
                           />
                         </DevicePreview>
                       ) : (
-                        <div className="flex h-full items-center justify-center text-[var(--aethel-text-tertiary)]">
+                        <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
                           Selecione um arquivo para visualizar a prévia.
                         </div>
                       )
@@ -1226,9 +1753,49 @@ function IDEContent() {
   );
 }
 
+function WorkbenchEntryNotice({
+  notice,
+  onDismiss,
+}: {
+  notice: EntryNotice
+  onDismiss: () => void
+}) {
+  const toneClasses =
+    notice.tone === 'warning'
+      ? 'border-[color-mix(in_srgb,var(--aethel-warning)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+      : 'border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]'
+
+  return (
+    <div className="flex items-start justify-between gap-4 px-5 py-4">
+      <div className={`flex-1 rounded-xl border px-4 py-3 ${toneClasses}`}>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em]">
+          {notice.title}
+        </div>
+        <p className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+          {notice.description}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="min-h-[36px] rounded-lg border border-[var(--aethel-border-primary)] px-3 py-2 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]"
+        aria-label="Fechar aviso do workbench"
+      >
+        Fechar
+      </button>
+    </div>
+  )
+}
+
 export default function FullscreenIDE() {
   return (
-    <Suspense fallback={<div>Carregando contexto do workspace...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center px-6 text-sm text-[var(--aethel-text-tertiary)]">
+          Carregando contexto do workspace...
+        </div>
+      }
+    >
       <IDEContent />
     </Suspense>
   );

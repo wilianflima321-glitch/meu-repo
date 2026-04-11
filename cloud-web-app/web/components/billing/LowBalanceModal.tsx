@@ -1,4 +1,4 @@
-﻿/**
+/**
  * LowBalanceModal - Modal Não-Intrusivo de Saldo Baixo
  *
  * Aparece quando o saldo do usuário está crítico.
