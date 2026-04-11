@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 /**
  * Onboarding Components - Aethel Engine

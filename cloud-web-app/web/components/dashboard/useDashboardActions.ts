@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import type { FormEvent } from 'react'
 import { useCallback } from 'react'

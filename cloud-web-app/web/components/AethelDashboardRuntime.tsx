@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { DashboardShell } from './dashboard/DashboardShell'
 import { DashboardLoadingScreen } from './dashboard/DashboardLoadingScreen'

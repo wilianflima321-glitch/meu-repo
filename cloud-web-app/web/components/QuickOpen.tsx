@@ -1,4 +1,8 @@
-﻿'use client';
+/**
+ * @deprecated Prefer the canonical quick-open flow in `@/components/explorer/QuickOpen`.
+ * This file remains for backward compatibility while legacy imports are removed.
+ */
+'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';

@@ -11,6 +11,10 @@ A auditoria externa acertou em varios P0/P1 importantes, mas parte dela ja estav
 - `components/AethelHeaderPro.tsx` deixou de exibir dados fake de usuario e notificacoes fake como padrao.
 - A colisao documental `41_*` e o uso ambiguo de `00_REALITY_MATRIX_*` foram renormalizados.
 
+Complementos posteriores:
+- `docs/master/74_GENSPARK_PATCH_REVIEW_2026-04-10.md`
+- `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
+
 ## Ponto a ponto da auditoria
 
 ### 1. `typescript.ignoreBuildErrors`

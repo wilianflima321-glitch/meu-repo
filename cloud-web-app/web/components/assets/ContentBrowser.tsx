@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Content Browser Component - Navegador de Assets
  *
  * Interface profissional para gerenciar e visualizar assets do projeto.

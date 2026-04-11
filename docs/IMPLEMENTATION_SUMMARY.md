@@ -1,4 +1,4 @@
-﻿# Implementation Summary — 2026-04-01
+# Implementation Summary — 2026-04-01
 
 ## Estado executivo
 

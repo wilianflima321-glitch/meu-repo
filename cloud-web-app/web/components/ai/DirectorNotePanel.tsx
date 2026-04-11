@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DirectorNotePanel - Painel de Crítica Artística da IA
  *
  * A IA age como um "diretor de cinema/jogos" experiente,

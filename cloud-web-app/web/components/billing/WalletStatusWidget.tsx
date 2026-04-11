@@ -1,4 +1,4 @@
-﻿/**
+/**
  * WalletStatusWidget - Widget Compacto de Saldo na StatusBar
  *
  * Exibe saldo de créditos de forma compacta na StatusBar.

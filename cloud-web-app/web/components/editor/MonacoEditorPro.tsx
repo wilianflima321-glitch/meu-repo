@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import Editor, { OnMount, loader, Monaco } from '@monaco-editor/react';

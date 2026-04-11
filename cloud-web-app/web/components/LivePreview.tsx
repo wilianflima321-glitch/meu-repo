@@ -1,3 +1,7 @@
+/**
+ * @deprecated Product-facing preview should go through
+ * `@/components/preview/CanonicalPreviewSurface`.
+ */
 'use client'
 
 import { useState, useRef, useEffect } from 'react'

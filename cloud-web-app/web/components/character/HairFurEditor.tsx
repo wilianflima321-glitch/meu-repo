@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';

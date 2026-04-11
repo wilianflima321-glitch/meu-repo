@@ -20,7 +20,7 @@ import {
   Monitor,
   Globe,
 } from 'lucide-react'
-import { Avatar, PlanBadge, Dropdown, type DropdownItem } from './ui'
+import { Avatar, Badge, PlanBadge, Dropdown, type DropdownItem } from './ui'
 import { authHeaders, isAuthenticated, logout } from '@/lib/auth'
 
 interface UserData {

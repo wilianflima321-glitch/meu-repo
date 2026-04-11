@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Admin System Stats API
  */
 

@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react'
+import { useMemo } from 'react'
 import type { BillingPlan, ConnectivityResponse, WalletSummary } from '@/lib/api'
 import type { SessionEntry, SessionFilter } from './aethel-dashboard-model'
 import { filterSessionHistory } from './aethel-dashboard-session-utils'

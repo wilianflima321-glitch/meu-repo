@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Workspace Switcher Component
  * Switch between Workspaces and manage Workspace folders
  */

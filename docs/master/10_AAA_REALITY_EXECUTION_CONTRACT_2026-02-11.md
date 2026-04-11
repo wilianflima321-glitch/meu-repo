@@ -8,7 +8,7 @@ This contract is the continuation of the canonical audit folder and is written t
 
 Primary canonical sources:
 - `docs/master/00_FONTE_CANONICA.md`
-- `docs/master/00_REALITY_MATRIX_2026-02-04.md`
+- `docs/master/01_REALITY_MATRIX_2026-02-04.md`
 - `docs/master/FULL_AUDIT.md`
 - `docs/master/DUPLICATIONS_AND_CONFLICTS.md`
 - `docs/master/LIMITATIONS.md`

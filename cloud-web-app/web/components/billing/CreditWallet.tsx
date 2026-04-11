@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CreditWallet - UI Completa de Carteira de creditos
  *
  * Painel que mostra saldo, histórico e opções de recarga.

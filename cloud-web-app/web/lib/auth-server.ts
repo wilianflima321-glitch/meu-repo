@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Authentication (Server)
  * Verify JWT tokens and protect API routes.
  */

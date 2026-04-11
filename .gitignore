@@ -59,3 +59,25 @@ build-output*.txt
 .gh_token
 .aethel/
 .playwright-cli/
+
+# Security - never commit secrets
+*.pem
+*.key
+*.cert
+.env.production
+.env.staging
+
+# Backup files
+*.bak
+*.orig
+*.backup
+
+# OS files
+Thumbs.db
+ehthumbs.db
+
+# Python artifacts (tools)
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/

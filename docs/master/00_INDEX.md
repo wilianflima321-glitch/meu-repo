@@ -20,10 +20,12 @@ Status: CANONICAL ENTRYPOINT
 15. `docs/master/66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md`
 16. `docs/master/68_L5_UX_HARDENING_DELTA_2026-04-01.md`
 17. `docs/master/73_AUDIT_RECONCILIATION_2026-04-08.md`
-18. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-19. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-20. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-21. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+18. `docs/master/74_GENSPARK_PATCH_REVIEW_2026-04-10.md`
+19. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
+20. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+21. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+22. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+23. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -79,6 +81,8 @@ Rules:
 | `66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for multi-agent UX, status, cost, confidence, approvals, memory and context | ACTIVE |
 | `68_L5_UX_HARDENING_DELTA_2026-04-01.md` | L5 UX hardening sweep summary | ACTIVE |
 | `73_AUDIT_RECONCILIATION_2026-04-08.md` | Reconciliacao da auditoria externa com o repo real | ACTIVE |
+| `74_GENSPARK_PATCH_REVIEW_2026-04-10.md` | Revisao do patch externo do Genspark com aceite/rejeicao por criterio tecnico | ACTIVE |
+| `75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md` | Guia pratico de convergencia visual sem regressao estrutural | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

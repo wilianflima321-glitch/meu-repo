@@ -1,4 +1,4 @@
-﻿# EXECUTION UPDATE — 2026-04-01
+# EXECUTION UPDATE — 2026-04-01
 
 Status: EXECUTADO LOCALMENTE (evidência limitada ao repositório)
 Atualização: 2026-04-05

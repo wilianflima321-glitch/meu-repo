@@ -212,6 +212,19 @@
 }
 
 /* ============================================================================
+ * ACCESSIBILITY: High Contrast Support
+ * Tightens borders and secondary copy for users with stronger contrast needs.
+ * ============================================================================ */
+@media (prefers-contrast: high) {
+  :root {
+    --aethel-border-primary: rgba(255, 255, 255, 0.4);
+    --aethel-border-secondary: rgba(255, 255, 255, 0.3);
+    --aethel-text-secondary: #e2e8f0;
+    --aethel-text-tertiary: #cbd5e1;
+  }
+}
+
+/* ============================================================================
  * ANIMATION KEYFRAMES
  * Standard enter/exit patterns per design tokens
  * ============================================================================ */

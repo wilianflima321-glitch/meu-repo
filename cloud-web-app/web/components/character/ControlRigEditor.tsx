@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CONTROL RIG EDITOR - Aethel Engine
  *
  * Editor profissional de Control Rig para animação procedural e IK/FK.
