@@ -23,6 +23,8 @@ import { ProfessionalViewport3D } from "@/components/ide/ProfessionalViewport3D"
 import { GitIntegration } from "@/components/ide/GitIntegration";
 import { IntelliSense } from "@/components/ide/IntelliSense";
 import { ErrorHighlighting } from "@/components/ide/ErrorHighlighting";
+import OutlinePanel, { type DocumentSymbol } from "@/components/outline/OutlinePanel";
+import { buildOutlineSymbols } from "@/components/outline/outline-parser";
 import { analytics } from "@/lib/analytics";
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
@@ -192,6 +194,7 @@ function IDEContent() {
   const [entryNotice, setEntryNotice] = useState<EntryNotice | null>(null)
   const [showIntelliSense, setShowIntelliSense] = useState(false)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
+  const [showOutline, setShowOutline] = useState(false)
   const [editorDiagnostics, setEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
   const [secondaryEditorDiagnostics, setSecondaryEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
   const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
@@ -209,6 +212,10 @@ function IDEContent() {
 
   const bridgeActiveFile = splitActivePane === 'secondary' && secondaryFile ? secondaryFile : activeFile
   const activeDiagnostics = splitActivePane === 'secondary' ? secondaryEditorDiagnostics : editorDiagnostics
+  const outlineSymbols = useMemo<DocumentSymbol[]>(() => {
+    if (!bridgeActiveFile) return []
+    return buildOutlineSymbols(bridgeActiveFile.content, bridgeActiveFile.language)
+  }, [bridgeActiveFile])
 
   const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([])
   const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false)
@@ -355,6 +362,17 @@ function IDEContent() {
   const handleToggleDiagnosticsPanel = useCallback(() => {
     setShowDiagnostics((prev) => !prev)
   }, [])
+
+  const handleJumpToOutlineSymbol = useCallback((symbol: DocumentSymbol) => {
+    const editor = splitActivePane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
+    if (!editor) return
+    editor.revealLineInCenter(symbol.selectionRange.startLine)
+    editor.setPosition({
+      lineNumber: symbol.selectionRange.startLine,
+      column: symbol.selectionRange.startColumn,
+    })
+    editor.focus()
+  }, [splitActivePane])
 
   useEffect(() => {
     return () => {
@@ -1310,6 +1328,20 @@ function IDEContent() {
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
+                        onClick={handleEditorFind}
+                        className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+                      >
+                        Buscar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleEditorReplace}
+                        className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+                      >
+                        Substituir
+                      </button>
+                      <button
+                        type="button"
                         onClick={handleToggleSplitEditor}
                         className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
                           splitEditorOpen
@@ -1351,6 +1383,17 @@ function IDEContent() {
                         }`}
                       >
                         IntelliSense
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowOutline((prev) => !prev)}
+                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+                          showOutline
+                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                        }`}
+                      >
+                        Outline
                       </button>
                       <button
                         type="button"
@@ -1509,11 +1552,20 @@ function IDEContent() {
                               />
                             )}
                           </div>
-                          {(showIntelliSense || showDiagnostics) && (
+                          {(showIntelliSense || showOutline || showDiagnostics) && (
                             <div className="w-80 border-l border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] flex flex-col">
                               {showIntelliSense && (
                                 <div className="flex-1 min-h-0 border-b border-[var(--aethel-border-secondary)]">
                                   <IntelliSense />
+                                </div>
+                              )}
+                              {showOutline && (
+                                <div className="flex-1 min-h-0 border-b border-[var(--aethel-border-secondary)]">
+                                  <OutlinePanel
+                                    symbols={outlineSymbols}
+                                    activeFilePath={bridgeActiveFile?.path ?? activeFile.path}
+                                    onSymbolClick={handleJumpToOutlineSymbol}
+                                  />
                                 </div>
                               )}
                               {showDiagnostics && (
