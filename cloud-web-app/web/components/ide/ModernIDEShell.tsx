@@ -278,6 +278,10 @@ export function ModernIDEShell({
             ariaLabel="Redimensionar barra lateral"
             orientation="vertical"
             onMouseDown={(event) => startHorizontalResize('sidebar', event)}
+            onAdjust={(delta) => setPanelSize('sidebar', panelState.sidebar.size + delta)}
+            valueNow={panelState.sidebar.size}
+            valueMin={16}
+            valueMax={32}
           />
         )}
 
@@ -310,6 +314,10 @@ export function ModernIDEShell({
                   ariaLabel="Redimensionar copiloto"
                   orientation="horizontal"
                   onMouseDown={startVerticalResize}
+                  onAdjust={(delta) => setPanelSize('chat', panelState.chat.size + delta)}
+                  valueNow={panelState.chat.size}
+                  valueMin={18}
+                  valueMax={45}
                 />
                 <div
                   style={{
@@ -372,6 +380,10 @@ export function ModernIDEShell({
               ariaLabel="Redimensionar prévia"
               orientation="vertical"
               onMouseDown={(event) => startHorizontalResize('preview', event)}
+              onAdjust={(delta) => setPanelSize('preview', panelState.preview.size + delta)}
+              valueNow={panelState.preview.size}
+              valueMin={25}
+              valueMax={55}
             />
           )}
 
@@ -483,37 +495,105 @@ interface ResizeHandleProps {
   ariaLabel: string;
   orientation: 'vertical' | 'horizontal';
   onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
+  onAdjust: (delta: number) => void;
+  valueNow: number;
+  valueMin: number;
+  valueMax: number;
 }
 
-function ResizeHandle({ ariaLabel, orientation, onMouseDown }: ResizeHandleProps) {
+function ResizeHandle({
+  ariaLabel,
+  orientation,
+  onMouseDown,
+  onAdjust,
+  valueNow,
+  valueMin,
+  valueMax,
+}: ResizeHandleProps) {
+  const isVertical = orientation === 'vertical';
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const step = event.shiftKey ? 5 : 2;
+
+    if (isVertical) {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        onAdjust(-step);
+        return;
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        onAdjust(step);
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      onAdjust(-step);
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      onAdjust(step);
+    }
+  };
+
   return (
     <div
       role="separator"
       aria-label={ariaLabel}
       aria-orientation={orientation}
-      tabIndex={-1}
+      aria-valuenow={Math.round(valueNow)}
+      aria-valuemin={valueMin}
+      aria-valuemax={valueMax}
+      tabIndex={0}
       style={{
-        width: orientation === 'vertical' ? '8px' : '100%',
-        height: orientation === 'horizontal' ? '8px' : '100%',
-        cursor: orientation === 'vertical' ? 'col-resize' : 'row-resize',
+        width: isVertical ? '10px' : '100%',
+        height: isVertical ? '100%' : '10px',
+        cursor: isVertical ? 'col-resize' : 'row-resize',
         background: 'transparent',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
+        position: 'relative',
+        outline: 'none',
+        transition: `background ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
       }}
       onMouseDown={onMouseDown}
+      onKeyDown={handleKeyDown}
+      onFocus={(e) => {
+        e.currentTarget.style.background = tokens.colors.border.medium;
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.background = 'transparent';
+      }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = tokens.colors.border.medium;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'transparent';
       }}
+      title={`${ariaLabel} — use setas${isVertical ? ' esquerda/direita' : ' cima/baixo'} para ajustar`}
     >
+      <div
+        style={{
+          width: isVertical ? '2px' : '28px',
+          height: isVertical ? '28px' : '2px',
+          borderRadius: tokens.radius.full,
+          background: tokens.colors.border.medium,
+          opacity: 0.9,
+        }}
+      />
       <GripVertical
         size={12}
         color={tokens.colors.text.muted}
-        style={{ transform: orientation === 'horizontal' ? 'rotate(90deg)' : undefined }}
+        style={{
+          position: 'absolute',
+          transform: isVertical ? undefined : 'rotate(90deg)',
+        }}
       />
     </div>
   );
