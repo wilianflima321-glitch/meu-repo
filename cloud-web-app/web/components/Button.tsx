@@ -1,4 +1,9 @@
 /**
+ * @deprecated Use canonical equivalent from @/components/ui/ instead.
+ * Migration guide: cloud-web-app/web/components/COMPONENT_CONSOLIDATION_MAP.md
+ * Source: docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md
+ */
+/**
  * @deprecated Use the canonical Button from `@/components/ui/Button`.
  * This root-level file remains only for backward compatibility while legacy imports are removed.
  */

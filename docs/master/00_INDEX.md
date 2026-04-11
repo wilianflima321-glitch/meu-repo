@@ -85,6 +85,7 @@ Rules:
 | `74_GENSPARK_PATCH_REVIEW_2026-04-10.md` | Revisao do patch externo do Genspark com aceite/rejeicao por criterio tecnico | ACTIVE |
 | `75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md` | Guia pratico de convergencia visual sem regressao estrutural | ACTIVE |
 | `76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md` | Auditoria end-to-end definitiva com benchmark competitivo, criticas por interface e plano de acao | ACTIVE |
+| `77_FINAL_10_10_GAP_AUDIT_2026-04-11.md` | Auditoria final detalhando tudo que falta para 10/10 em cada dimensao | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

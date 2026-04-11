@@ -48,12 +48,10 @@
     "test:quick-ai": "npx ts-node -P src/common/tests/tsconfig.cjs.json src/common/tests/quick-ai-test.ts",
     "test:llm": "npx ts-node src/common/llm/tests/llm-integration.test.ts",
     "test:browser": "npx ts-node src/common/web-automation/tests/browser.test.ts",
-    "test:trading": "npx ts-node src/common/trading/tests/exchange.test.ts"
-    ,
+    "test:trading": "npx ts-node src/common/trading/tests/exchange.test.ts",
     "test:web": "npm --prefix cloud-web-app/web test",
     "test:web:fast": "npm --prefix cloud-web-app/web run test:fast",
-    "test:web:changed": "npm --prefix cloud-web-app/web run test:changed"
-    ,
+    "test:web:changed": "npm --prefix cloud-web-app/web run test:changed",
     "desktop:dev": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
     "desktop:build": "node -e \"console.warn('desktop-app not present in this repo snapshot; skipping')\"",
     "portal:dev": "npm --prefix cloud-web-app/web run dev",
@@ -71,7 +69,8 @@
     "qa:mojibake": "npm --prefix cloud-web-app/web run qa:mojibake",
     "qa:button-types": "node tools/check-button-types.mjs",
     "qa:hardcoded-colors": "node tools/check-hardcoded-colors.mjs",
-    "qa:enterprise-gate": "npm --prefix cloud-web-app/web run qa:enterprise-gate"
+    "qa:enterprise-gate": "npm --prefix cloud-web-app/web run qa:enterprise-gate",
+    "qa:design-system-consistency": "node tools/check-design-system-consistency.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
@@ -101,19 +100,15 @@
   },
   "dependencies": {
     "@theia/filesystem": "^1.66.2",
-    
     "openai": "^4.52.0",
     "@anthropic-ai/sdk": "^0.24.0",
     "@google/generative-ai": "^0.12.0",
     "groq-sdk": "^0.5.0",
-    
     "playwright": "^1.40.0",
     "playwright-extra": "^4.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
-    
     "ccxt": "^4.2.0",
     "technicalindicators": "^3.1.0",
-    
     "dotenv": "^16.4.5",
     "axios": "^1.6.8",
     "ws": "^8.16.0",
