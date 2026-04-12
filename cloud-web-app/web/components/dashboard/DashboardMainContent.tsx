@@ -1,6 +1,7 @@
 'use client'
 
 import type { ComponentProps } from 'react'
+import { CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import { FirstValueGuide } from './FirstValueGuide'
 import { DashboardOverviewTab } from './DashboardOverviewTab'
@@ -107,12 +108,22 @@ export function DashboardMainContent({
         <div className="space-y-4">
           <BillingTab {...billingProps} />
           {billingError && (
-            <div className="aethel-state aethel-state-error mt-4 text-xs" role="alert" aria-live="polite">
+            <div
+              className="mt-4 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-xs text-[var(--aethel-error)]"
+              role="alert"
+              aria-live="polite"
+            >
+              <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1`}>Billing</p>
               {billingError}
             </div>
           )}
           {subscribingPlan && (
-            <div className="aethel-state aethel-state-loading mt-2 text-xs" role="status" aria-live="polite">
+            <div
+              className="mt-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-3 text-xs text-[var(--aethel-text-secondary)]"
+              role="status"
+              aria-live="polite"
+            >
+              <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1 text-[var(--aethel-text-primary)]`}>Billing</p>
               Processando plano {subscribingPlan}...
             </div>
           )}

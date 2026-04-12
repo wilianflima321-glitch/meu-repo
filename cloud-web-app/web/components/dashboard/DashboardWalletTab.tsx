@@ -6,6 +6,7 @@ import type {
   WalletSummary,
   WalletTransaction,
 } from '@/lib/api'
+import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import type { ReceivableSummary } from './aethel-dashboard-wallet-utils'
 
@@ -82,13 +83,23 @@ export function DashboardWalletTab({
   formatStatusLabel,
 }: DashboardWalletTabProps) {
   const hasWalletError = Boolean(walletError)
+  const panelClass =
+    'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
+  const statCardClass =
+    'rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4'
+  const inputClass = `h-12 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const primaryButtonClass = `inline-flex min-h-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const secondaryButtonClass = `inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] disabled:cursor-not-allowed disabled:opacity-60 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   return (
-    <div className="aethel-p-6 space-y-6">
-      <div className="aethel-flex aethel-items-center aethel-justify-between">
-        <h2 className="text-2xl font-bold">Carteira</h2>
+    <div className={`${CANONICAL_SPACING.page.padding} space-y-6`}>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Wallet</p>
+          <h2 className={CANONICAL_TYPOGRAPHY.h1}>Carteira</h2>
+        </div>
         {authReady && hasToken && (
-          <button type="button" onClick={onRefreshWallet} className="aethel-button aethel-button-secondary text-xs">
+          <button type="button" onClick={onRefreshWallet} className={secondaryButtonClass} aria-label="Atualizar carteira">
             Atualizar
           </button>
         )}
@@ -97,7 +108,7 @@ export function DashboardWalletTab({
       {!authReady && <p className="text-sm text-[var(--aethel-text-secondary)]">Verificando autenticacao...</p>}
 
       {authReady && !hasToken && (
-        <div className="aethel-card aethel-p-6 max-w-2xl">
+        <div className={`${panelClass} max-w-2xl`}>
           <p className="text-sm text-[var(--aethel-text-secondary)]">
             Para visualizar o saldo e realizar operacoes, faca login no portal.
           </p>
@@ -105,8 +116,8 @@ export function DashboardWalletTab({
       )}
 
       {authReady && hasToken && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 aethel-gap-6">
-          <div className="aethel-card aethel-p-6 space-y-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className={`${panelClass} space-y-4`}>
             <div>
               <h3 className="text-lg font-semibold">Saldo Atual</h3>
               {walletLoading && <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando carteira...</p>}
@@ -133,20 +144,20 @@ export function DashboardWalletTab({
                       Atualizado em {new Date(lastWalletUpdate).toLocaleString()}
                     </p>
                   )}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 aethel-gap-3 mt-4">
-                    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] aethel-rounded-lg aethel-p-3">
+                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className={statCardClass}>
                       <p className="text-xs text-[var(--aethel-text-tertiary)]">Gasto hoje</p>
                       <p className="text-lg font-semibold text-[var(--aethel-error)]">
                         {creditsUsedToday.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                       </p>
                     </div>
-                    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] aethel-rounded-lg aethel-p-3">
+                    <div className={statCardClass}>
                       <p className="text-xs text-[var(--aethel-text-tertiary)]">Gasto no mes</p>
                       <p className="text-lg font-semibold text-[var(--aethel-warning)]">
                         {creditsUsedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
                       </p>
                     </div>
-                    <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] aethel-rounded-lg aethel-p-3">
+                    <div className={statCardClass}>
                       <p className="text-xs text-[var(--aethel-text-tertiary)]">Recebido no mes</p>
                       <p className="text-lg font-semibold text-[var(--aethel-success)]">
                         {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
@@ -179,20 +190,22 @@ export function DashboardWalletTab({
 
             <form className="space-y-3" onSubmit={onPurchaseIntentSubmit}>
               <h4 className="text-sm font-semibold">Adicionar Creditos</h4>
-              <div className="aethel-flex aethel-gap-2">
+              <div className="flex gap-2">
                 <input
                   type="number"
                   min={1}
                   value={purchaseForm.amount}
                   onChange={(event) => setPurchaseForm((prev) => ({ ...prev, amount: event.target.value }))}
-                  className="aethel-input"
+                  className={inputClass}
+                  aria-label="Quantidade de creditos"
                   placeholder="Quantidade"
                   required
                 />
                 <select
                   value={purchaseForm.currency}
                   onChange={(event) => setPurchaseForm((prev) => ({ ...prev, currency: event.target.value }))}
-                  className="aethel-input w-32"
+                  className={`${inputClass} w-32`}
+                  aria-label="Moeda da compra"
                 >
                   <option value="credits">Creditos</option>
                 </select>
@@ -201,40 +214,44 @@ export function DashboardWalletTab({
                 type="text"
                 value={purchaseForm.reference}
                 onChange={(event) => setPurchaseForm((prev) => ({ ...prev, reference: event.target.value }))}
-                className="aethel-input"
+                className={inputClass}
+                aria-label="Referencia da compra"
                 placeholder="Referencia (opcional)"
               />
-              <button type="submit" className="aethel-button aethel-button-primary" disabled={walletSubmitting}>
+              <button type="submit" className={primaryButtonClass} disabled={walletSubmitting} aria-label="Confirmar intencao de compra de creditos">
                 {walletSubmitting ? 'Processando...' : 'Confirmar Intencao'}
               </button>
             </form>
           </div>
 
-          <div className="aethel-card aethel-p-6 space-y-4">
+          <div className={`${panelClass} space-y-4`}>
             <form className="space-y-3" onSubmit={onTransferSubmit}>
               <h3 className="text-lg font-semibold">Transferir Creditos</h3>
               <input
                 type="text"
                 value={transferForm.targetUserId}
                 onChange={(event) => setTransferForm((prev) => ({ ...prev, targetUserId: event.target.value }))}
-                className="aethel-input"
+                className={inputClass}
+                aria-label="Destinatario da transferencia"
                 placeholder="ID do usuario ou e-mail do destinatario"
                 required
               />
-              <div className="aethel-flex aethel-gap-2">
+              <div className="flex gap-2">
                 <input
                   type="number"
                   min={1}
                   value={transferForm.amount}
                   onChange={(event) => setTransferForm((prev) => ({ ...prev, amount: event.target.value }))}
-                  className="aethel-input"
+                  className={inputClass}
+                  aria-label="Quantidade para transferir"
                   placeholder="Quantidade"
                   required
                 />
                 <select
                   value={transferForm.currency}
                   onChange={(event) => setTransferForm((prev) => ({ ...prev, currency: event.target.value }))}
-                  className="aethel-input w-32"
+                  className={`${inputClass} w-32`}
+                  aria-label="Moeda da transferencia"
                 >
                   <option value="credits">Creditos</option>
                 </select>
@@ -243,10 +260,11 @@ export function DashboardWalletTab({
                 type="text"
                 value={transferForm.reference}
                 onChange={(event) => setTransferForm((prev) => ({ ...prev, reference: event.target.value }))}
-                className="aethel-input"
+                className={inputClass}
+                aria-label="Referencia da transferencia"
                 placeholder="Referencia (opcional)"
               />
-              <button type="submit" className="aethel-button aethel-button-secondary" disabled={walletSubmitting}>
+              <button type="submit" className={secondaryButtonClass} disabled={walletSubmitting} aria-label="Transferir creditos">
                 {walletSubmitting ? 'Processando...' : 'Transferir'}
               </button>
             </form>
@@ -258,8 +276,8 @@ export function DashboardWalletTab({
                   <p className="text-sm text-[var(--aethel-text-tertiary)]">Nenhuma transacao registrada.</p>
                 )}
                 {walletTransactions.slice().reverse().map((entry) => (
-                  <div key={entry.id} className="border border-[var(--aethel-border-primary)] aethel-rounded-lg aethel-p-3">
-                    <div className="aethel-flex aethel-justify-between aethel-items-center">
+                  <div key={entry.id} className="rounded-2xl border border-[var(--aethel-border-primary)] p-3">
+                    <div className="flex items-center justify-between gap-3">
                       <span className="text-sm font-medium">
                         {entry.reference || entry.entry_type.toUpperCase()}
                       </span>
@@ -267,7 +285,7 @@ export function DashboardWalletTab({
                         {entry.entry_type === 'credit' ? '+' : '-'}{entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
                       </span>
                     </div>
-                    <div className="aethel-flex aethel-justify-between aethel-items-center mt-1">
+                    <div className="mt-1 flex items-center justify-between gap-3">
                       <span className="text-xs text-[var(--aethel-text-secondary)]">
                         Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'} {formatCurrencyLabel(entry.currency)}
                       </span>
@@ -281,27 +299,27 @@ export function DashboardWalletTab({
             </div>
           </div>
 
-          <div className="aethel-card aethel-p-6 lg:col-span-2 space-y-4">
-            <div className="aethel-flex aethel-items-center aethel-justify-between">
+          <div className={`${panelClass} space-y-4 lg:col-span-2`}>
+            <div className="flex items-center justify-between gap-3">
               <h3 className="text-lg font-semibold">Recebiveis</h3>
               <span className="text-xs text-[var(--aethel-text-tertiary)]">
                 {creditEntries.length} lancamentos de entrada
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 aethel-gap-4">
-              <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] aethel-rounded-lg aethel-p-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className={statCardClass}>
                 <p className="text-xs text-[var(--aethel-text-tertiary)]">Recebido no mes</p>
                 <p className="text-lg font-semibold text-[var(--aethel-success)]">
                   {creditsReceivedThisMonth.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                 </p>
               </div>
-              <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] aethel-rounded-lg aethel-p-4">
+              <div className={statCardClass}>
                 <p className="text-xs text-[var(--aethel-text-tertiary)]">Total creditado</p>
                 <p className="text-lg font-semibold text-[var(--aethel-primary-light)]">
                   {receivableSummary.total.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}
                 </p>
               </div>
-              <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] aethel-rounded-lg aethel-p-4">
+              <div className={statCardClass}>
                 <p className="text-xs text-[var(--aethel-text-tertiary)]">Pendente de conciliacao</p>
                 <p className="text-lg font-semibold text-[var(--aethel-warning)]">
                   {receivableSummary.pending.toLocaleString()} {formatCurrencyLabel(walletData?.currency)}

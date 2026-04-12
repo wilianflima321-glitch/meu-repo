@@ -95,7 +95,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   return (
     <div
-      className={`relative min-h-screen aethel-flex flex-column overflow-hidden ${
+      className={`relative flex min-h-screen flex-col overflow-hidden ${
         'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
       }`}
     >
@@ -211,7 +211,7 @@ export function DashboardShell({
         onOpenIde={onOpenIde}
       />
 
-      <div className="relative z-10 aethel-flex flex-1 overflow-hidden">
+      <div className="relative z-10 flex flex-1 overflow-hidden">
         {sidebarOpen && (
           <button
             type="button"
@@ -234,7 +234,7 @@ export function DashboardShell({
         />
         <main id="dashboard-main-content" className="flex-1 overflow-y-auto relative has-mobile-nav">
           {showOnboardingWizard ? (
-            <div className="aethel-p-6">
+            <div className="p-6">
               <OnboardingWizard onComplete={onOnboardingComplete} onSkip={onOnboardingSkip} />
             </div>
           ) : (

@@ -22,6 +22,19 @@ import {
   Copy
 } from 'lucide-react';
 
+const SURFACE_PRIMARY = 'var(--aethel-surface-primary)';
+const SURFACE_SECONDARY = 'var(--aethel-surface-secondary)';
+const SURFACE_TERTIARY = 'var(--aethel-surface-tertiary)';
+const SURFACE_QUATERNARY = 'var(--aethel-surface-quaternary)';
+const TEXT_PRIMARY = 'var(--aethel-text-primary)';
+const TEXT_SECONDARY = 'var(--aethel-text-secondary)';
+const TEXT_TERTIARY = 'var(--aethel-text-tertiary)';
+const TEXT_INVERSE = 'var(--aethel-text-primary)';
+const BORDER_PRIMARY = 'var(--aethel-border-primary)';
+const BORDER_SECONDARY = 'var(--aethel-border-secondary)';
+const BORDER_FOCUS = 'var(--aethel-border-focus)';
+const ACCENT_CYAN = 'var(--aethel-info)';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -172,8 +185,8 @@ export function InlineAIChat({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        background: tokens.colors.bg.surface,
-        color: tokens.colors.text.primary,
+        background: SURFACE_SECONDARY,
+        color: TEXT_PRIMARY,
         fontFamily: tokens.typography.fontFamily.sans,
       }}
     >
@@ -184,7 +197,7 @@ export function InlineAIChat({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: `${tokens.spacing['3']} ${tokens.spacing['4']}`,
-          borderBottom: `1px solid ${tokens.colors.border.light}`,
+          borderBottom: `1px solid ${BORDER_SECONDARY}`,
           background: 'color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)',
           cursor: 'pointer',
         }}
@@ -202,14 +215,14 @@ export function InlineAIChat({
               background: 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))',
             }}
           >
-            <Bot size={16} color={tokens.colors.text.inverse} />
+            <Bot size={16} color={TEXT_INVERSE} />
           </div>
           <div>
             <div
               style={{
                 fontSize: tokens.typography.fontSize.sm,
                 fontWeight: tokens.typography.fontWeight.semibold,
-                color: tokens.colors.text.primary,
+                color: TEXT_PRIMARY,
               }}
             >
               Assistente de IA
@@ -218,7 +231,7 @@ export function InlineAIChat({
               <div
                 style={{
                   fontSize: tokens.typography.fontSize.xs,
-                  color: tokens.colors.text.muted,
+                  color: TEXT_TERTIARY,
                   display: 'flex',
                   alignItems: 'center',
                   gap: tokens.spacing['1'],
@@ -237,12 +250,13 @@ export function InlineAIChat({
               e.stopPropagation();
               setShowContext(!showContext);
             }}
+            aria-label={showContext ? 'Ocultar contexto ativo' : 'Mostrar contexto ativo'}
             style={{
               padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
               background: showContext ? 'color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)' : 'transparent',
-              border: `1px solid ${tokens.colors.border.light}`,
+              border: `1px solid ${BORDER_SECONDARY}`,
               borderRadius: tokens.radius.md,
-              color: tokens.colors.text.muted,
+              color: TEXT_TERTIARY,
               fontSize: tokens.typography.fontSize.xs,
               cursor: 'pointer',
             }}
@@ -254,10 +268,11 @@ export function InlineAIChat({
               e.stopPropagation();
               onClose?.();
             }}
+            aria-label="Fechar chat inline de IA"
             style={{
               background: 'transparent',
               border: 'none',
-              color: tokens.colors.text.muted,
+              color: TEXT_TERTIARY,
               cursor: 'pointer',
               padding: tokens.spacing['1'],
             }}
@@ -274,32 +289,32 @@ export function InlineAIChat({
           style={{
             padding: tokens.spacing['3'],
             background: 'color-mix(in_srgb,var(--aethel-info)_8%,transparent)',
-            borderBottom: `1px solid ${tokens.colors.border.light}`,
+            borderBottom: `1px solid ${BORDER_SECONDARY}`,
             fontSize: tokens.typography.fontSize.xs,
           }}
         >
-          <div style={{ marginBottom: tokens.spacing['2'], color: tokens.colors.accent.cyan, fontWeight: tokens.typography.fontWeight.medium }}>
+          <div style={{ marginBottom: tokens.spacing['2'], color: ACCENT_CYAN, fontWeight: tokens.typography.fontWeight.medium }}>
             Contexto ativo
           </div>
           {activeFile ? (
             <>
-              <div style={{ color: tokens.colors.text.secondary, marginBottom: tokens.spacing['1'] }}>
+              <div style={{ color: TEXT_SECONDARY, marginBottom: tokens.spacing['1'] }}>
                 <strong>Arquivo:</strong> {activeFile.path}
               </div>
-              <div style={{ color: tokens.colors.text.secondary, marginBottom: tokens.spacing['1'] }}>
+              <div style={{ color: TEXT_SECONDARY, marginBottom: tokens.spacing['1'] }}>
                 <strong>Linguagem:</strong> {activeFile.language}
               </div>
-              <div style={{ color: tokens.colors.text.secondary }}>
+              <div style={{ color: TEXT_SECONDARY }}>
                 <strong>Tamanho:</strong> {activeFile.content.length} caracteres
               </div>
             </>
           ) : (
-            <div style={{ color: tokens.colors.text.muted }}>
+            <div style={{ color: TEXT_TERTIARY }}>
               Nenhum arquivo aberto. Abra um arquivo para habilitar a assistencia contextual.
             </div>
           )}
           {projectContext && (
-            <div style={{ marginTop: tokens.spacing['2'], color: tokens.colors.text.secondary }}>
+            <div style={{ marginTop: tokens.spacing['2'], color: TEXT_SECONDARY }}>
               <strong>Projeto:</strong> {projectContext.name} ({projectContext.files.length} arquivos)
             </div>
           )}
@@ -332,7 +347,7 @@ export function InlineAIChat({
                   display: 'flex',
                   alignItems: 'center',
                   gap: tokens.spacing['2'],
-                  color: tokens.colors.text.muted,
+                  color: TEXT_TERTIARY,
                   fontSize: tokens.typography.fontSize.sm,
                 }}
               >
@@ -350,7 +365,7 @@ export function InlineAIChat({
               gap: tokens.spacing['2'],
               padding: `${tokens.spacing['2']} ${tokens.spacing['4']}`,
               overflowX: 'auto',
-              borderTop: `1px solid ${tokens.colors.border.light}`,
+              borderTop: `1px solid ${BORDER_SECONDARY}`,
             }}
           >
             {suggestionChips.map((chip, index) => (
@@ -366,9 +381,9 @@ export function InlineAIChat({
                   gap: tokens.spacing['2'],
                   padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
                   background: 'color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)',
-                  border: `1px solid ${tokens.colors.border.light}`,
+                  border: `1px solid ${BORDER_SECONDARY}`,
                   borderRadius: tokens.radius.full,
-                  color: tokens.colors.text.secondary,
+                  color: TEXT_SECONDARY,
                   fontSize: tokens.typography.fontSize.xs,
                   whiteSpace: 'nowrap',
                   cursor: 'pointer',
@@ -376,11 +391,11 @@ export function InlineAIChat({
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)';
-                  e.currentTarget.style.borderColor = tokens.colors.border.medium;
+                  e.currentTarget.style.borderColor = BORDER_PRIMARY;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)';
-                  e.currentTarget.style.borderColor = tokens.colors.border.light;
+                  e.currentTarget.style.borderColor = BORDER_SECONDARY;
                 }}
               >
                 {chip.icon}
@@ -393,7 +408,7 @@ export function InlineAIChat({
           <div
             style={{
               padding: tokens.spacing['4'],
-              borderTop: `1px solid ${tokens.colors.border.light}`,
+              borderTop: `1px solid ${BORDER_SECONDARY}`,
               background: 'color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)',
             }}
           >
@@ -403,17 +418,17 @@ export function InlineAIChat({
                 alignItems: 'flex-end',
                 gap: tokens.spacing['2'],
                 padding: tokens.spacing['3'],
-                background: tokens.colors.bg.primary,
-                border: `1px solid ${tokens.colors.border.light}`,
+                background: SURFACE_PRIMARY,
+                border: `1px solid ${BORDER_SECONDARY}`,
                 borderRadius: tokens.radius.xl,
                 transition: `border-color ${tokens.animation.duration.fast}`,
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = tokens.colors.accent.cyan;
+                e.currentTarget.style.borderColor = BORDER_FOCUS;
                 e.currentTarget.style.boxShadow = `0 0 0 3px rgba(6, 182, 212, 0.1)`;
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = tokens.colors.border.light;
+                e.currentTarget.style.borderColor = BORDER_SECONDARY;
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
@@ -428,7 +443,7 @@ export function InlineAIChat({
                   background: 'transparent',
                   border: 'none',
                   outline: 'none',
-                  color: tokens.colors.text.primary,
+                  color: TEXT_PRIMARY,
                   fontSize: tokens.typography.fontSize.sm,
                   fontFamily: tokens.typography.fontFamily.sans,
                   resize: 'none',
@@ -441,14 +456,15 @@ export function InlineAIChat({
               <button type="button"
                 onClick={sendMessage}
                 disabled={!input.trim() || isLoading}
+                aria-label="Enviar mensagem no chat inline"
                 style={{
                   padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
                   background: input.trim() && !isLoading
                     ? 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))'
-                    : tokens.colors.bg.elevated,
+                    : SURFACE_TERTIARY,
                   border: 'none',
                   borderRadius: tokens.radius.lg,
-                  color: tokens.colors.text.primary,
+                  color: TEXT_PRIMARY,
                   cursor: input.trim() && !isLoading ? 'pointer' : 'not-allowed',
                   opacity: input.trim() && !isLoading ? 1 : 0.5,
                   display: 'flex',
@@ -464,7 +480,7 @@ export function InlineAIChat({
               style={{
                 marginTop: tokens.spacing['2'],
                 fontSize: tokens.typography.fontSize.xs,
-                color: tokens.colors.text.muted,
+                color: TEXT_TERTIARY,
                 textAlign: 'center',
               }}
             >
@@ -510,14 +526,14 @@ function MessageBubble({ message, onApplyCode }: MessageBubbleProps) {
           justifyContent: 'center',
           flexShrink: 0,
           background: isUser
-            ? tokens.colors.bg.elevated
+            ? SURFACE_TERTIARY
             : 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))',
         }}
       >
         {isUser ? (
-          <User size={14} color={tokens.colors.text.secondary} />
+          <User size={14} color={TEXT_SECONDARY} />
         ) : (
-          <Bot size={14} color={tokens.colors.text.inverse} />
+          <Bot size={14} color={TEXT_INVERSE} />
         )}
       </div>
 
@@ -531,14 +547,14 @@ function MessageBubble({ message, onApplyCode }: MessageBubbleProps) {
             : isSystem
             ? 'transparent'
             : 'color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)',
-          border: isSystem ? 'none' : `1px solid ${isUser ? 'color-mix(in_srgb,var(--aethel-info)_24%,transparent)' : tokens.colors.border.light}`,
+          border: isSystem ? 'none' : `1px solid ${isUser ? 'color-mix(in_srgb,var(--aethel-info)_24%,transparent)' : BORDER_SECONDARY}`,
           borderRadius: tokens.radius.lg,
         }}
       >
         <div
           style={{
             fontSize: tokens.typography.fontSize.sm,
-            color: tokens.colors.text.primary,
+            color: TEXT_PRIMARY,
             lineHeight: tokens.typography.lineHeight.relaxed,
             whiteSpace: 'pre-wrap',
           }}
@@ -582,10 +598,10 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
     <div
       style={{
         marginTop: tokens.spacing['3'],
-        border: `1px solid ${tokens.colors.border.light}`,
+        border: `1px solid ${BORDER_SECONDARY}`,
         borderRadius: tokens.radius.lg,
         overflow: 'hidden',
-        background: tokens.colors.bg.primary,
+        background: SURFACE_PRIMARY,
       }}
     >
       {/* Header */}
@@ -596,13 +612,13 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
           justifyContent: 'space-between',
           padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
           background: 'color-mix(in_srgb,var(--aethel-surface-secondary)_76%,transparent)',
-          borderBottom: `1px solid ${tokens.colors.border.light}`,
+          borderBottom: `1px solid ${BORDER_SECONDARY}`,
         }}
       >
         <span
           style={{
             fontSize: tokens.typography.fontSize.xs,
-            color: tokens.colors.text.muted,
+            color: TEXT_TERTIARY,
             textTransform: 'uppercase',
           }}
         >
@@ -611,12 +627,13 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
         <div style={{ display: 'flex', gap: tokens.spacing['2'] }}>
           <button type="button"
             onClick={copyToClipboard}
+            aria-label="Copiar bloco de código"
             style={{
               padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
               background: 'transparent',
-              border: `1px solid ${tokens.colors.border.light}`,
+              border: `1px solid ${BORDER_SECONDARY}`,
               borderRadius: tokens.radius.md,
-              color: tokens.colors.text.muted,
+              color: TEXT_TERTIARY,
               fontSize: tokens.typography.fontSize.xs,
               cursor: 'pointer',
               display: 'flex',
@@ -630,12 +647,13 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
           {onApply && (
             <button type="button"
               onClick={() => onApply(code)}
+              aria-label="Aplicar bloco de código ao editor"
               style={{
                 padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
                 background: 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))',
                 border: 'none',
                 borderRadius: tokens.radius.md,
-                color: tokens.colors.text.primary,
+                color: TEXT_PRIMARY,
                 fontSize: tokens.typography.fontSize.xs,
                 cursor: 'pointer',
                 display: 'flex',
@@ -659,7 +677,7 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
           fontSize: tokens.typography.fontSize.xs,
           fontFamily: tokens.typography.fontFamily.mono,
           lineHeight: tokens.typography.lineHeight.normal,
-          color: tokens.colors.text.secondary,
+          color: TEXT_SECONDARY,
           maxHeight: '300px',
         }}
       >

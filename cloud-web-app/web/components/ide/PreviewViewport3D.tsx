@@ -1,25 +1,22 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { 
-  Box, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Maximize2, 
+import {
+  Box,
+  Play,
+  Pause,
+  RotateCcw,
+  Maximize2,
   Minimize2,
   Layers,
   Eye,
   Grid3x3,
   Camera,
-  Settings,
   Sparkles,
   Brain,
-  ChevronDown,
-  ChevronUp,
-  X
+  X,
 } from 'lucide-react'
-import { tokens } from '@/lib/design-tokens'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 interface Viewport3DProps {
   content?: string
@@ -39,7 +36,18 @@ const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
-export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () => undefined }: Viewport3DProps) {
+const resolveCssVar = (name: string, fallback: string) => {
+  if (typeof window === 'undefined') return fallback
+  const value = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return value || fallback
+}
+
+const ICON_BUTTON_CLASS = `rounded-lg p-2 text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:text-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const ACTIVE_ICON_BUTTON_CLASS = `rounded-lg border border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] p-2 text-[var(--aethel-primary-light)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const TOOLBAR_PILL_CLASS = `flex items-center gap-2 rounded-lg border border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const FLOATING_CARD_CLASS = 'absolute rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] px-3 py-2 backdrop-blur-sm'
+
+export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', onAIAction = () => undefined }: Viewport3DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [cameraMode, setCameraMode] = useState<CameraMode>('orbit')
@@ -54,7 +62,6 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
   const [fps, setFps] = useState(60)
   const [selectedObject, setSelectedObject] = useState<string | null>(null)
 
-  // Simular renderização 3D
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -62,34 +69,35 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let animationId: number
+    let animationId: number | undefined
     let lastTime = 0
-    const backgroundColor = tokens.colors.bg.primary
-    const gridColor = tokens.colors.border.light
-    const axisX = tokens.colors.status.error
-    const axisY = tokens.colors.status.success
-    const axisZ = tokens.colors.status.warning
-    const wireframeColor = tokens.colors.text.primary
-    const solidColor = tokens.colors.accent.indigo
-    const statsBackground = hexToRgba(tokens.colors.bg.primary, 0.7)
+
+    const backgroundColor = resolveCssVar('--aethel-surface-primary', '#0f172a')
+    const gridColor = resolveCssVar('--aethel-border-primary', '#334155')
+    const axisX = resolveCssVar('--aethel-error', '#ef4444')
+    const axisY = resolveCssVar('--aethel-success', '#22c55e')
+    const axisZ = resolveCssVar('--aethel-warning', '#f59e0b')
+    const wireframeColor = resolveCssVar('--aethel-text-primary', '#f8fafc')
+    const solidColor = resolveCssVar('--aethel-primary', '#4f46e5')
+    const statsTextColor = resolveCssVar('--aethel-text-primary', '#f8fafc')
+    const statsBackground = hexToRgba(backgroundColor.startsWith('#') ? backgroundColor : '#0f172a', 0.72)
 
     const render = (timestamp: number) => {
-      const deltaTime = timestamp - lastTime
+      const deltaTime = timestamp - lastTime || 16.67
       lastTime = timestamp
+      setFps(Math.round(1000 / deltaTime))
 
-      // Limpar canvas
       ctx.fillStyle = backgroundColor
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Desenhar grid 3D (simulado)
+      const centerX = canvas.width / 2
+      const centerY = canvas.height / 2
+
       if (showGrid) {
         ctx.strokeStyle = gridColor
         ctx.lineWidth = 1
         const gridSize = 50
-        const centerX = canvas.width / 2
-        const centerY = canvas.height / 2
 
-        // Grid horizontal
         for (let i = -10; i <= 10; i++) {
           ctx.beginPath()
           ctx.moveTo(centerX + i * gridSize, 0)
@@ -97,7 +105,6 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
           ctx.stroke()
         }
 
-        // Grid vertical
         for (let i = -10; i <= 10; i++) {
           ctx.beginPath()
           ctx.moveTo(0, centerY + i * gridSize)
@@ -105,7 +112,6 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
           ctx.stroke()
         }
 
-        // Eixos
         ctx.strokeStyle = axisX
         ctx.lineWidth = 2
         ctx.beginPath()
@@ -126,37 +132,30 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
         ctx.stroke()
       }
 
-      // Desenhar cubo 3D (simulado)
       const cubeSize = 100
-      const cx = canvas.width / 2
-      const cy = canvas.height / 2
       const rotation = timestamp * 0.001
-
       const vertices = [
         [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-        [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
-      ]
+        [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1],
+      ] as const
 
       const projected = vertices.map(([x, y, z]) => {
-        // Rotação Y
         const cos = Math.cos(rotation)
         const sin = Math.sin(rotation)
         const rx = x * cos - z * sin
         const rz = x * sin + z * cos
-
-        // Projeção perspectiva
         const scale = 300 / (rz + 4)
         return [
-          cx + rx * cubeSize * scale,
-          cy - y * cubeSize * scale
+          centerX + rx * cubeSize * scale,
+          centerY - y * cubeSize * scale,
         ]
       })
 
       const edges = [
         [0, 1], [1, 2], [2, 3], [3, 0],
         [4, 5], [5, 6], [6, 7], [7, 4],
-        [0, 4], [1, 5], [2, 6], [3, 7]
-      ]
+        [0, 4], [1, 5], [2, 6], [3, 7],
+      ] as const
 
       ctx.strokeStyle = viewMode === 'wireframe' ? wireframeColor : solidColor
       ctx.lineWidth = viewMode === 'wireframe' ? 2 : 3
@@ -168,7 +167,6 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
         ctx.stroke()
       })
 
-      // Gizmo de câmera
       if (showGizmo) {
         const gizmoSize = 50
         const gizmoX = 60
@@ -194,15 +192,14 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
         ctx.stroke()
       }
 
-      // Stats
       if (showStats) {
         ctx.fillStyle = statsBackground
         ctx.fillRect(10, 10, 150, 80)
-        ctx.fillStyle = tokens.colors.text.primary
+        ctx.fillStyle = statsTextColor
         ctx.font = '12px monospace'
         ctx.fillText(`FPS: ${Math.round(1000 / deltaTime)}`, 20, 30)
-        ctx.fillText(`Objects: 1`, 20, 50)
-        ctx.fillText(`Triangles: 12`, 20, 70)
+        ctx.fillText('Objects: 1', 20, 50)
+        ctx.fillText('Triangles: 12', 20, 70)
       }
 
       if (isPlaying) {
@@ -212,207 +209,113 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
 
     if (isPlaying) {
       animationId = requestAnimationFrame(render)
+    } else {
+      render(lastTime)
     }
 
     return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
+      if (animationId) cancelAnimationFrame(animationId)
     }
   }, [isPlaying, showGrid, showGizmo, showStats, viewMode])
 
-  const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+  const handleCanvasClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
     setSelectedObject(`object_${Math.round(x)}_${Math.round(y)}`)
   }, [])
 
   const simulateAIThinking = () => {
     setAiOverlay(true)
-    setAiThinking(['Analisando geometria...', 'Calculando iluminação...', 'Gerando texturas...', 'Aplicando materiais...'])
-    
-    setTimeout(() => {
-      setAiThinking(prev => [...prev, 'Renderização completa!'])
+    setAiThinking(['Analisando geometria...', 'Calculando iluminacao...', 'Gerando texturas...', 'Aplicando materiais...'])
+    onAIAction('simulate-render-pass')
+
+    window.setTimeout(() => {
+      setAiThinking((prev) => [...prev, 'Renderizacao completa!'])
     }, 2000)
   }
 
   return (
     <div className="flex h-full flex-col bg-[var(--aethel-surface-primary)]">
-      {/* Toolbar Superior */}
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setIsPlaying(!isPlaying)}
-            className={`p-2 rounded-lg transition-colors ${
-              isPlaying ?
-                 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
+            aria-label={isPlaying ? 'Pausar viewport 3D' : 'Reproduzir viewport 3D'}
+            className={`rounded-lg p-2 ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${
+              isPlaying
+                ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
             }`}
             title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
 
-          <div className="w-px h-6 bg-[var(--aethel-border-primary)]" />
+          <div className="h-6 w-px bg-[var(--aethel-border-primary)]" />
 
-          <button
-            type="button"
-            onClick={() => setCameraMode('orbit')}
-            className={`p-2 rounded-lg transition-colors ${
-              cameraMode === 'orbit' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
-            title="Câmera Orbit"
-          >
-            <Camera className="w-4 h-4" />
+          <button type="button" onClick={() => setCameraMode('orbit')} aria-label="Usar camera orbit" className={cameraMode === 'orbit' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Camera Orbit">
+            <Camera className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => setCameraMode('fly')} aria-label="Usar camera fly" className={cameraMode === 'fly' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Camera Fly">
+            <Box className="h-4 w-4" />
           </button>
 
-          <button
-            type="button"
-            onClick={() => setCameraMode('fly')}
-            className={`p-2 rounded-lg transition-colors ${
-              cameraMode === 'fly' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
-            title="Câmera Fly"
-          >
-            <Box className="w-4 h-4" />
+          <div className="h-6 w-px bg-[var(--aethel-border-primary)]" />
+
+          <button type="button" onClick={() => setViewMode('solid')} aria-label="Usar visualizacao solida" className={viewMode === 'solid' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Solid">
+            <Box className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => setViewMode('wireframe')} aria-label="Usar visualizacao wireframe" className={viewMode === 'wireframe' ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Wireframe">
+            <Grid3x3 className="h-4 w-4" />
           </button>
 
-          <div className="w-px h-6 bg-[var(--aethel-border-primary)]" />
+          <div className="h-6 w-px bg-[var(--aethel-border-primary)]" />
 
-          <button
-            type="button"
-            onClick={() => setViewMode('solid')}
-            className={`p-2 rounded-lg transition-colors ${
-              viewMode === 'solid' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
-            title="Solid"
-          >
-            <Box className="w-4 h-4" />
+          <button type="button" onClick={() => setShowGrid(!showGrid)} aria-label={showGrid ? 'Ocultar grade do viewport' : 'Mostrar grade do viewport'} className={showGrid ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Grid">
+            <Grid3x3 className="h-4 w-4" />
           </button>
-
-          <button
-            type="button"
-            onClick={() => setViewMode('wireframe')}
-            className={`p-2 rounded-lg transition-colors ${
-              viewMode === 'wireframe' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
-            title="Wireframe"
-          >
-            <Grid3x3 className="w-4 h-4" />
+          <button type="button" onClick={() => setShowGizmo(!showGizmo)} aria-label={showGizmo ? 'Ocultar gizmo do viewport' : 'Mostrar gizmo do viewport'} className={showGizmo ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Gizmo">
+            <Layers className="h-4 w-4" />
           </button>
-
-          <div className="w-px h-6 bg-[var(--aethel-border-primary)]" />
-
-          <button
-            type="button"
-            onClick={() => setShowGrid(!showGrid)}
-            className={`p-2 rounded-lg transition-colors ${
-              showGrid ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
-            title="Grid"
-          >
-            <Grid3x3 className="w-4 h-4" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowGizmo(!showGizmo)}
-            className={`p-2 rounded-lg transition-colors ${
-              showGizmo ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
-            title="Gizmo"
-          >
-            <Layers className="w-4 h-4" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowStats(!showStats)}
-            className={`p-2 rounded-lg transition-colors ${
-              showStats ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
-            title="Stats"
-          >
-            <Eye className="w-4 h-4" />
+          <button type="button" onClick={() => setShowStats(!showStats)} aria-label={showStats ? 'Ocultar estatisticas do viewport' : 'Mostrar estatisticas do viewport'} className={showStats ? ACTIVE_ICON_BUTTON_CLASS : ICON_BUTTON_CLASS} title="Stats">
+            <Eye className="h-4 w-4" />
           </button>
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={simulateAIThinking}
-            className="flex items-center gap-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] border border-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-primary-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]"
-          >
-            <Sparkles className="w-4 h-4" />
+          <button type="button" onClick={simulateAIThinking} aria-label="Executar passe generativo de IA no viewport" className={TOOLBAR_PILL_CLASS}>
+            <Sparkles className="h-4 w-4" />
             IA Render
           </button>
-
-          <button
-            type="button"
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title="Tela cheia"
-          >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          <button type="button" onClick={() => setIsFullscreen(!isFullscreen)} aria-label={isFullscreen ? 'Sair do modo tela cheia do viewport' : 'Entrar no modo tela cheia do viewport'} className={ICON_BUTTON_CLASS} title="Tela cheia">
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
-
-          <button
-            type="button"
-            onClick={() => setTimelinePosition(0)}
-            className="p-2 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-            title="Reset"
-          >
-            <RotateCcw className="w-4 h-4" />
+          <button type="button" onClick={() => setTimelinePosition(0)} aria-label="Resetar timeline do viewport" className={ICON_BUTTON_CLASS} title="Reset">
+            <RotateCcw className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Viewport 3D */}
-      <div className="flex-1 relative bg-[var(--aethel-surface-secondary)]">
-        <canvas
-          ref={canvasRef}
-          width={800}
-          height={600}
-          className="w-full h-full cursor-crosshair"
-          onClick={handleCanvasClick}
-        />
+      <div className="relative flex-1 bg-[var(--aethel-surface-secondary)]">
+        <canvas ref={canvasRef} width={800} height={600} className="h-full w-full cursor-crosshair" onClick={handleCanvasClick} />
 
-        {/* AI Overlay */}
         {aiOverlay && (
-          <div className="absolute inset-4 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] backdrop-blur-sm p-4">
-            <div className="flex items-start justify-between mb-3">
+          <div className="absolute inset-4 rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] p-4 backdrop-blur-sm">
+            <div className="mb-3 flex items-start justify-between">
               <div className="flex items-center gap-2">
-                <Brain className="w-5 h-5 text-[var(--aethel-primary-light)] animate-pulse" />
+                <Brain className="h-5 w-5 animate-pulse text-[var(--aethel-primary-light)]" />
                 <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">IA Processando</span>
               </div>
-              <button
-                type="button"
-                onClick={() => setAiOverlay(false)}
-                className="p-1 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
-              >
-                <X className="w-4 h-4" />
+              <button type="button" onClick={() => setAiOverlay(false)} aria-label="Fechar overlay de processamento da IA" className={ICON_BUTTON_CLASS.replace('p-2', 'p-1')}>
+                <X className="h-4 w-4" />
               </button>
             </div>
             <div className="space-y-2">
               {aiThinking.map((step, index) => (
-                <div key={index} className="flex items-center gap-2 text-xs text-[var(--aethel-text-secondary)]">
-                  <div className={`w-2 h-2 rounded-full ${index === aiThinking.length - 1 ? 'bg-[var(--aethel-primary-light)] animate-pulse' : 'bg-[var(--aethel-success-light)]'}`} />
+                <div key={`${step}-${index}`} className="flex items-center gap-2 text-xs text-[var(--aethel-text-secondary)]">
+                  <div className={`h-2 w-2 rounded-full ${index === aiThinking.length - 1 ? 'animate-pulse bg-[var(--aethel-primary-light)]' : 'bg-[var(--aethel-success-light)]'}`} />
                   {step}
                 </div>
               ))}
@@ -420,32 +323,27 @@ export function PreviewViewport3D({ content = '', mode = '3d', onAIAction = () =
           </div>
         )}
 
-        {/* Selected Object Info */}
         {selectedObject && (
-          <div className="absolute bottom-4 left-4 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] backdrop-blur-sm px-3 py-2">
+          <div className={`${FLOATING_CARD_CLASS} bottom-4 left-4`}>
             <div className="text-xs text-[var(--aethel-text-tertiary)]">Selecionado</div>
             <div className="text-xs font-mono text-[var(--aethel-text-primary)]">{selectedObject}</div>
           </div>
         )}
 
-        {/* Camera Info */}
-        <div className="absolute top-4 right-4 rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] backdrop-blur-sm px-3 py-2">
-          <div className="text-xs text-[var(--aethel-text-tertiary)]">Câmera</div>
-          <div className="text-xs text-[var(--aethel-text-primary)] capitalize">{cameraMode}</div>
+        <div className={`${FLOATING_CARD_CLASS} right-4 top-4`}>
+          <div className="text-xs text-[var(--aethel-text-tertiary)]">Camera</div>
+          <div className="text-xs capitalize text-[var(--aethel-text-primary)]">{cameraMode}</div>
+          <div className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{fps} FPS</div>
         </div>
       </div>
 
-      {/* Timeline */}
       <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2">
         <div className="flex items-center gap-4">
           <span className="text-xs text-[var(--aethel-text-tertiary)]">Timeline</span>
-          <div className="flex-1 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] overflow-hidden">
-            <div 
-              className="h-full bg-[var(--aethel-primary)] transition-all"
-              style={{ width: `${timelinePosition}%` }}
-            />
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]">
+            <div className="h-full bg-[var(--aethel-primary)] transition-all" style={{ width: `${timelinePosition}%` }} />
           </div>
-          <span className="text-xs text-[var(--aethel-text-tertiary)] font-mono">{(timelinePosition / 100).toFixed(2)}s</span>
+          <span className="text-xs font-mono text-[var(--aethel-text-tertiary)]">{(timelinePosition / 100).toFixed(2)}s</span>
         </div>
       </div>
     </div>

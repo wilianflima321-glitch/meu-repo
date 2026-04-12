@@ -387,13 +387,13 @@ export default function AethelHeader() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="aethel-button aethel-button-ghost rounded-xl px-4 py-2 text-sm font-medium"
+                  className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
                   Entrar
                 </Link>
                 <Link
                   href="/register"
-                  className="aethel-button aethel-button-primary rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition-all hover:brightness-110"
                 >
                   Comecar Gratis
                 </Link>

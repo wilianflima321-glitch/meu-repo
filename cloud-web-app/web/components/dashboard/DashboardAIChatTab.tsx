@@ -1,4 +1,5 @@
 import type { ChatMessage, CopilotWorkflowSummary } from '@/lib/api'
+import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import { AIThinkingPanel } from '../ai/AIThinkingPanel'
 import AIProviderSetupGuide from '../ai/AIProviderSetupGuide'
@@ -100,6 +101,31 @@ const AGENT_PLAYBOOK = [
   },
 ] as const
 
+const PAGE_CLASS = `${CANONICAL_SPACING.page.padding} space-y-6`
+const MODE_TOGGLE_CLASS = (isActive: boolean) =>
+  [
+    'rounded-full px-4 py-2 text-sm font-medium border',
+    CANONICAL_MOTION,
+    CANONICAL_FOCUS,
+    isActive
+      ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)]'
+      : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]',
+  ].join(' ')
+const PANEL_CLASS =
+  'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
+const INPUT_CLASS = `h-12 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const PRIMARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const SECONDARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const GHOST_BUTTON_CLASS = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+const MESSAGE_CARD_CLASS = (role: ChatMessage['role']) =>
+  `rounded-2xl border border-[var(--aethel-border-subtle)] px-4 py-3 ${
+    role === 'user'
+      ? 'ml-12 bg-[linear-gradient(135deg,rgba(59,130,246,0.22),rgba(14,165,233,0.12))]'
+      : 'mr-12 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
+  }`
+const EMPTY_CANVAS_CLASS =
+  'mx-auto max-w-xl rounded-2xl border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_16%,transparent)] px-4 py-4 text-xs text-[var(--aethel-text-secondary)]'
+
 export function DashboardAIChatTab({
   chatMode,
   onChatModeChange,
@@ -137,44 +163,35 @@ export function DashboardAIChatTab({
         : 'Espaco de exploracao visual e handoff entre conceito e implementacao.'
 
   return (
-    <div className="aethel-p-6">
-      <div className="aethel-flex aethel-items-center aethel-justify-between mb-6">
+    <div className={PAGE_CLASS}>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Studio Copilot</p>
-          <h2 className="text-2xl font-bold">Chat IA</h2>
+          <h2 className={CANONICAL_TYPOGRAPHY.h1}>Chat IA</h2>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Orquestracao multi-agent com contexto do studio.</p>
         </div>
-        <div className="aethel-flex aethel-gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => onChatModeChange('chat')}
-            className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
-              chatMode === 'chat'
-                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
-                : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
-            }`}
+            aria-label="Alternar para modo de chat"
+            className={MODE_TOGGLE_CLASS(chatMode === 'chat')}
           >
             Chat
           </button>
           <button
             type="button"
             onClick={() => onChatModeChange('agent')}
-            className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
-              chatMode === 'agent'
-                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
-                : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
-            }`}
+            aria-label="Alternar para modo agente"
+            className={MODE_TOGGLE_CLASS(chatMode === 'agent')}
           >
             Modo agente
           </button>
           <button
             type="button"
             onClick={() => onChatModeChange('canvas')}
-            className={`aethel-button rounded-full px-4 py-2 text-sm font-medium transition ${
-              chatMode === 'canvas'
-                ? 'bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)] border border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
-                : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
-            }`}
+            aria-label="Alternar para modo canvas"
+            className={MODE_TOGGLE_CLASS(chatMode === 'canvas')}
           >
             Canvas
           </button>
@@ -283,7 +300,7 @@ export function DashboardAIChatTab({
       )}
 
       {chatMode === 'chat' && (
-        <div className="aethel-card aethel-p-6 max-w-4xl mx-auto">
+        <div className={`${PANEL_CLASS} mx-auto max-w-4xl`}>
           <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
             Chat conversacional padrao com os agentes avancados do Aethel.
           </div>
@@ -320,11 +337,7 @@ export function DashboardAIChatTab({
             {chatHistory.map((msg, index) => (
               <div
                 key={index}
-                className={`aethel-p-3 aethel-rounded-lg border border-[var(--aethel-border-subtle)] ${
-                  msg.role === 'user'
-                    ? 'bg-[linear-gradient(135deg,rgba(59,130,246,0.22),rgba(14,165,233,0.12))] ml-12'
-                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] mr-12'
-                }`}
+                className={MESSAGE_CARD_CLASS(msg.role)}
               >
                 <p className="text-sm font-medium mb-1">{msg.role === 'user' ? 'Voce' : 'IA'}</p>
                 <p className="text-sm">{msg.content}</p>
@@ -332,7 +345,7 @@ export function DashboardAIChatTab({
             ))}
             {isStreaming && <AIThinkingPanel isStreaming={isStreaming} position="floating" />}
           </div>
-          <div className="aethel-flex aethel-gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={chatMessage}
@@ -345,12 +358,13 @@ export function DashboardAIChatTab({
                 }
               }}
               placeholder="Digite sua mensagem..."
-              className="aethel-input flex-1"
+              className={`${INPUT_CLASS} flex-1`}
             />
             <button
               type="button"
               onClick={onSendChatMessage}
-              className="aethel-button aethel-button-primary"
+              aria-label="Enviar mensagem para o chat de IA"
+              className={PRIMARY_BUTTON_CLASS}
               disabled={isStreaming || chatMessage.trim().length === 0}
             >
               {isStreaming ? 'Processando...' : 'Enviar'}
@@ -359,7 +373,8 @@ export function DashboardAIChatTab({
               <button
                 type="button"
                 onClick={onStopStreaming}
-                className="aethel-button aethel-button-ghost text-xs"
+                aria-label="Interromper resposta em streaming"
+                className={`${GHOST_BUTTON_CLASS} text-xs`}
               >
                 Interromper
               </button>
@@ -369,18 +384,19 @@ export function DashboardAIChatTab({
       )}
 
       {chatMode === 'agent' && (
-        <div className="aethel-card aethel-p-6 max-w-4xl mx-auto">
+        <div className={`${PANEL_CLASS} mx-auto max-w-4xl`}>
           <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
             Modo de agente autonomo em passos auditaveis, com validacao antes de aplicar mudancas.
           </div>
           <div className="space-y-4 mb-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 aethel-gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {AGENT_PLAYBOOK.map((item) => (
                 <button
                   key={item.title}
                   type="button"
                   onClick={() => onChatMessageChange(entryMission ? `${entryMission}\n\n${item.prompt}` : item.prompt)}
-                  className="aethel-card aethel-p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] aethel-transition"
+                  aria-label={`Preparar prompt do agente ${item.title}`}
+                  className={`${PANEL_CLASS} p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
                 >
                   <h3 className="font-semibold mb-2">{item.title}</h3>
                   <p className="text-sm text-[var(--aethel-text-secondary)]">{item.description}</p>
@@ -388,7 +404,7 @@ export function DashboardAIChatTab({
               ))}
             </div>
           </div>
-          <div className="aethel-flex aethel-gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={chatMessage}
@@ -399,9 +415,10 @@ export function DashboardAIChatTab({
                 }
               }}
               placeholder="Descreva a tarefa para o agente..."
-              className="aethel-input flex-1"
+              aria-label="Mensagem para o modo agente"
+              className={`${INPUT_CLASS} flex-1`}
             />
-            <button type="button" onClick={onSendChatMessage} className="aethel-button aethel-button-primary">
+            <button type="button" onClick={onSendChatMessage} aria-label="Executar tarefa no modo agente" className={PRIMARY_BUTTON_CLASS}>
               Executar
             </button>
           </div>
@@ -409,24 +426,24 @@ export function DashboardAIChatTab({
       )}
 
       {chatMode === 'canvas' && (
-        <div className="aethel-card aethel-p-6 max-w-6xl mx-auto">
+        <div className={`${PANEL_CLASS} mx-auto max-w-6xl`}>
           <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
             Canvas visual para colaboracao com IA.
           </div>
           <div className="min-h-96 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 relative">
-            <div className="absolute top-4 left-4 aethel-flex aethel-gap-2">
-              <button type="button" disabled className="aethel-button aethel-button-ghost text-xs opacity-60">Desenhar</button>
-              <button type="button" disabled className="aethel-button aethel-button-ghost text-xs opacity-60">Formas</button>
-              <button type="button" disabled className="aethel-button aethel-button-ghost text-xs opacity-60">Texto</button>
-              <button type="button" disabled className="aethel-button aethel-button-ghost text-xs opacity-60">Melhorar com IA</button>
+            <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+              <button type="button" disabled aria-label="Ferramenta desenhar indisponivel" className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`}>Desenhar</button>
+              <button type="button" disabled aria-label="Ferramenta formas indisponivel" className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`}>Formas</button>
+              <button type="button" disabled aria-label="Ferramenta texto indisponivel" className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`}>Texto</button>
+              <button type="button" disabled aria-label="Melhorar canvas com IA indisponivel" className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`}>Melhorar com IA</button>
             </div>
             <div className="text-center text-[var(--aethel-text-tertiary)] py-32">
               <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
               <p className="text-lg font-medium mb-2">Canvas interativo</p>
-              <div className="aethel-state aethel-state-empty mx-auto max-w-xl text-xs">
-                <p className="aethel-state-title mb-1">Capability status: PARTIAL</p>
+              <div className={EMPTY_CANVAS_CLASS}>
+                <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1 text-[var(--aethel-text-primary)]`}>Capability status: PARTIAL</p>
                 <p>Ferramentas de desenho no Studio Home ainda estao limitadas. Use o modo avancado em /ide para edicao completa.</p>
               </div>
             </div>

@@ -23,10 +23,14 @@ Status: CANONICAL ENTRYPOINT
 18. `docs/master/74_GENSPARK_PATCH_REVIEW_2026-04-10.md`
 19. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
 20. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-20. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-21. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-22. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-23. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+21. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
+22. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+23. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
+24. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
+25. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+26. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+27. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+28. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -86,6 +90,9 @@ Rules:
 | `75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md` | Guia pratico de convergencia visual sem regressao estrutural | ACTIVE |
 | `76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md` | Auditoria end-to-end definitiva com benchmark competitivo, criticas por interface e plano de acao | ACTIVE |
 | `77_FINAL_10_10_GAP_AUDIT_2026-04-11.md` | Auditoria final detalhando tudo que falta para 10/10 em cada dimensao | ACTIVE |
+| `78_EXECUTION_MASTER_PLAN_2026-04-12.md` | Plano mestre de execucao para converter a auditoria em fechamento operacional por fases | ACTIVE |
+| `79_TUDO_QUE_PRECISA_SABER_2026-04-12.md` | Compilacao de thesis, benchmark, gaps e prioridades da plataforma inteira | ACTIVE |
+| `80_CONVERSA_10_10_2026-04-12.md` | Mapa de conversa e critica continua para fechar a plataforma web + IDE + app | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

@@ -57,6 +57,32 @@ export type { PanelState };
 
 const chromeBarPadding = `${tokens.spacing['2']} ${tokens.spacing['4']}`;
 const chromeBarHeight = '48px';
+const SURFACE_PRIMARY = 'var(--aethel-surface-primary)';
+const SURFACE_SECONDARY = 'var(--aethel-surface-secondary)';
+const TEXT_PRIMARY = 'var(--aethel-text-primary)';
+const TEXT_SECONDARY = 'var(--aethel-text-secondary)';
+const TEXT_TERTIARY = 'var(--aethel-text-tertiary)';
+const BORDER_PRIMARY = 'var(--aethel-border-primary)';
+const BORDER_SECONDARY = 'var(--aethel-border-secondary)';
+const STATUS_SUCCESS = 'var(--aethel-success)';
+const STATUS_WARNING = 'var(--aethel-warning)';
+const STATUS_ERROR = 'var(--aethel-error)';
+const ACCENT_CYAN = 'var(--aethel-info)';
+const HEADER_ACTION_BUTTON: React.CSSProperties = {
+  minHeight: '36px',
+  padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
+  background: 'color-mix(in srgb, var(--aethel-surface-secondary) 52%, transparent)',
+  border: `1px solid ${BORDER_SECONDARY}`,
+  borderRadius: tokens.radius.md,
+  color: TEXT_SECONDARY,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: tokens.spacing['2'],
+  fontSize: tokens.typography.fontSize.xs,
+  fontWeight: tokens.typography.fontWeight.medium,
+  transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
+};
 const iconButtonStyle: React.CSSProperties = {
   minWidth: '36px',
   minHeight: '36px',
@@ -64,7 +90,7 @@ const iconButtonStyle: React.CSSProperties = {
   background: 'transparent',
   border: 'none',
   borderRadius: tokens.radius.md,
-  color: tokens.colors.text.muted,
+  color: TEXT_TERTIARY,
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
@@ -223,8 +249,8 @@ export function ModernIDEShell({
     flexDirection: 'column',
     height: '100vh',
     width: '100vw',
-    background: tokens.colors.bg.primary,
-    color: tokens.colors.text.primary,
+    background: SURFACE_PRIMARY,
+    color: TEXT_PRIMARY,
     fontFamily: tokens.typography.fontFamily.sans,
     overflow: 'hidden',
   };
@@ -240,12 +266,13 @@ export function ModernIDEShell({
         isCompact={isCompact}
         onRunPrimaryAction={onRunPrimaryAction}
         onOpenSettings={onOpenSettings}
+        onOpenCommandPalette={onOpenCommandPalette}
       />
 
       {banner ? (
         <div
           style={{
-            borderBottom: `1px solid ${tokens.colors.border.light}`,
+            borderBottom: `1px solid ${BORDER_SECONDARY}`,
             background: 'color-mix(in srgb, var(--aethel-surface-secondary) 84%, transparent)',
             flexShrink: 0,
           }}
@@ -262,7 +289,7 @@ export function ModernIDEShell({
               minWidth: '200px',
               maxWidth: '400px',
               background: gradients.glassSubtle,
-              borderRight: `1px solid ${tokens.colors.border.light}`,
+              borderRight: `1px solid ${BORDER_SECONDARY}`,
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
@@ -301,7 +328,7 @@ export function ModernIDEShell({
               style={{
                 flex: 1,
                 overflow: 'auto',
-                background: tokens.colors.bg.primary,
+                background: SURFACE_PRIMARY,
                 minHeight: 0,
               }}
             >
@@ -324,7 +351,7 @@ export function ModernIDEShell({
                     height: `${panelState.chat.size}%`,
                     minHeight: '160px',
                     maxHeight: '55%',
-                    borderTop: `1px solid ${tokens.colors.border.light}`,
+                    borderTop: `1px solid ${BORDER_SECONDARY}`,
                     background: gradients.glassMedium,
                     display: 'flex',
                     flexDirection: 'column',
@@ -339,7 +366,7 @@ export function ModernIDEShell({
                       justifyContent: 'space-between',
                       padding: chromeBarPadding,
                       minHeight: chromeBarHeight,
-                      borderBottom: `1px solid ${tokens.colors.border.light}`,
+                      borderBottom: `1px solid ${BORDER_SECONDARY}`,
                       background: 'rgba(255, 255, 255, 0.02)',
                     }}
                   >
@@ -349,7 +376,7 @@ export function ModernIDEShell({
                         fontWeight: tokens.typography.fontWeight.semibold,
                         textTransform: 'uppercase',
                         letterSpacing: '0.1em',
-                        color: tokens.colors.text.secondary,
+                        color: TEXT_SECONDARY,
                         display: 'flex',
                         alignItems: 'center',
                         gap: tokens.spacing['2'],
@@ -395,7 +422,7 @@ export function ModernIDEShell({
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                background: tokens.colors.bg.surface,
+                background: SURFACE_SECONDARY,
                 flexShrink: 0,
               }}
             >
@@ -406,7 +433,7 @@ export function ModernIDEShell({
                   justifyContent: 'space-between',
                   padding: chromeBarPadding,
                   minHeight: chromeBarHeight,
-                  borderBottom: `1px solid ${tokens.colors.border.light}`,
+                  borderBottom: `1px solid ${BORDER_SECONDARY}`,
                   background: gradients.glassSubtle,
                 }}
               >
@@ -416,7 +443,7 @@ export function ModernIDEShell({
                     fontWeight: tokens.typography.fontWeight.semibold,
                     textTransform: 'uppercase',
                     letterSpacing: '0.1em',
-                    color: tokens.colors.text.secondary,
+                    color: TEXT_SECONDARY,
                     display: 'flex',
                     alignItems: 'center',
                     gap: tokens.spacing['2'],
@@ -452,10 +479,10 @@ export function ModernIDEShell({
               transform: 'translateY(-50%)',
               padding: `${tokens.spacing['2']} ${tokens.spacing['1.5']}`,
               background: gradients.glassMedium,
-              border: `1px solid ${tokens.colors.border.light}`,
+              border: `1px solid ${BORDER_SECONDARY}`,
               borderRight: 'none',
               borderRadius: `${tokens.radius.lg} 0 0 ${tokens.radius.lg}`,
-              color: tokens.colors.text.secondary,
+              color: TEXT_SECONDARY,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -565,13 +592,13 @@ function ResizeHandle({
       onMouseDown={onMouseDown}
       onKeyDown={handleKeyDown}
       onFocus={(e) => {
-        e.currentTarget.style.background = tokens.colors.border.medium;
+        e.currentTarget.style.background = BORDER_PRIMARY;
       }}
       onBlur={(e) => {
         e.currentTarget.style.background = 'transparent';
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = tokens.colors.border.medium;
+        e.currentTarget.style.background = BORDER_PRIMARY;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'transparent';
@@ -583,13 +610,13 @@ function ResizeHandle({
           width: isVertical ? '2px' : '28px',
           height: isVertical ? '28px' : '2px',
           borderRadius: tokens.radius.full,
-          background: tokens.colors.border.medium,
+          background: BORDER_PRIMARY,
           opacity: 0.9,
         }}
       />
       <GripVertical
         size={12}
-        color={tokens.colors.text.muted}
+        color={TEXT_TERTIARY}
         style={{
           position: 'absolute',
           transform: isVertical ? undefined : 'rotate(90deg)',
@@ -608,6 +635,7 @@ interface IDEHeaderProps {
   isCompact: boolean;
   onRunPrimaryAction?: () => void;
   onOpenSettings?: () => void;
+  onOpenCommandPalette?: (mode: 'commands' | 'files') => void;
 }
 
 function IDEHeader({
@@ -619,6 +647,7 @@ function IDEHeader({
   isCompact,
   onRunPrimaryAction,
   onOpenSettings,
+  onOpenCommandPalette,
 }: IDEHeaderProps) {
   const headerStyle: React.CSSProperties = {
     display: 'flex',
@@ -626,7 +655,7 @@ function IDEHeader({
     justifyContent: 'space-between',
     padding: `${tokens.spacing['3']} ${tokens.spacing['5']}`,
     background: gradients.glassStrong,
-    borderBottom: `1px solid ${tokens.colors.border.light}`,
+    borderBottom: `1px solid ${BORDER_SECONDARY}`,
     minHeight: '60px',
     gap: tokens.spacing['4'],
   };
@@ -639,7 +668,7 @@ function IDEHeader({
           onClick={onToggleSidebar}
           style={{
             ...iconButtonStyle,
-            color: tokens.colors.text.secondary,
+            color: TEXT_SECONDARY,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -654,7 +683,7 @@ function IDEHeader({
             style={{
               fontSize: tokens.typography.fontSize.sm,
               fontWeight: tokens.typography.fontWeight.semibold,
-              color: tokens.colors.text.primary,
+              color: TEXT_PRIMARY,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
@@ -666,7 +695,7 @@ function IDEHeader({
             <span
               style={{
                 fontSize: tokens.typography.fontSize.xs,
-                color: tokens.colors.text.muted,
+                color: TEXT_TERTIARY,
                 display: 'flex',
                 alignItems: 'center',
                 gap: tokens.spacing['1'],
@@ -702,6 +731,30 @@ function IDEHeader({
             active={panelState.preview.open}
             onClick={() => onTogglePanel('preview')}
           />
+          {onOpenCommandPalette && (
+            <>
+              <button
+                type="button"
+                onClick={() => onOpenCommandPalette('commands')}
+                style={HEADER_ACTION_BUTTON}
+                aria-label="Abrir paleta de comandos"
+                title="Cmd+K"
+              >
+                <Sparkles size={14} />
+                Cmd+K
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenCommandPalette('files')}
+                style={HEADER_ACTION_BUTTON}
+                aria-label="Abrir paleta de arquivos"
+                title="Cmd+P"
+              >
+                <Search size={14} />
+                Cmd+P
+              </button>
+            </>
+          )}
         </div>
       )}
 
@@ -716,7 +769,7 @@ function IDEHeader({
             background: gradients.brand,
             border: 'none',
             borderRadius: tokens.radius.md,
-            color: tokens.colors.text.primary,
+            color: TEXT_PRIMARY,
             fontSize: tokens.typography.fontSize.xs,
             fontWeight: tokens.typography.fontWeight.semibold,
             cursor: 'pointer',
@@ -736,7 +789,7 @@ function IDEHeader({
           disabled={!onOpenSettings}
           style={{
             ...iconButtonStyle,
-            color: tokens.colors.text.secondary,
+            color: TEXT_SECONDARY,
             opacity: onOpenSettings ? 1 : 0.65,
           }}
           aria-label="Abrir configurações"
@@ -767,9 +820,9 @@ function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
         minHeight: '36px',
         padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
         background: active ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-        border: `1px solid ${active ? tokens.colors.border.medium : 'transparent'}`,
+        border: `1px solid ${active ? BORDER_PRIMARY : 'transparent'}`,
         borderRadius: tokens.radius.md,
-        color: active ? tokens.colors.text.primary : tokens.colors.text.secondary,
+        color: active ? TEXT_PRIMARY : TEXT_SECONDARY,
         fontSize: tokens.typography.fontSize.xs,
         fontWeight: tokens.typography.fontWeight.medium,
         whiteSpace: 'nowrap',
@@ -810,7 +863,7 @@ function BottomDock({
     gap: tokens.spacing['2'],
     padding: `${tokens.spacing['2']} ${tokens.spacing['4']}`,
     background: gradients.glassStrong,
-    borderTop: `1px solid ${tokens.colors.border.light}`,
+    borderTop: `1px solid ${BORDER_SECONDARY}`,
     minHeight: '52px',
     overflowX: 'auto',
   };
@@ -872,9 +925,9 @@ function BottomDock({
               minHeight: '36px',
               padding: `${tokens.spacing['1.5']} ${tokens.spacing['2.5']}`,
               background: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-              border: `1px solid ${isActive ? tokens.colors.border.medium : 'transparent'}`,
+              border: `1px solid ${isActive ? BORDER_PRIMARY : 'transparent'}`,
               borderRadius: tokens.radius.sm,
-              color: isActive ? tokens.colors.text.primary : tokens.colors.text.muted,
+              color: isActive ? TEXT_PRIMARY : TEXT_TERTIARY,
               fontSize: tokens.typography.fontSize.xs,
               cursor: 'pointer',
               flexShrink: 0,
@@ -903,11 +956,11 @@ function StatusBar({ projectName, activeFileName }: StatusBarProps) {
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: `${tokens.spacing['1.5']} ${tokens.spacing['4']}`,
-    background: tokens.colors.bg.surface,
-    borderTop: `1px solid ${tokens.colors.border.light}`,
+    background: SURFACE_SECONDARY,
+    borderTop: `1px solid ${BORDER_SECONDARY}`,
     minHeight: '28px',
     fontSize: tokens.typography.fontSize.xs,
-    color: tokens.colors.text.secondary,
+    color: TEXT_SECONDARY,
     gap: tokens.spacing['4'],
   };
 
@@ -919,11 +972,11 @@ function StatusBar({ projectName, activeFileName }: StatusBarProps) {
           <span>main</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <AlertCircle size={12} style={{ color: tokens.colors.status.warning }} />
+          <AlertCircle size={12} style={{ color: STATUS_WARNING }} />
           <span>0</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <AlertCircle size={12} style={{ color: tokens.colors.status.error }} />
+          <AlertCircle size={12} style={{ color: STATUS_ERROR }} />
           <span>0</span>
         </div>
       </div>
@@ -937,7 +990,7 @@ function StatusBar({ projectName, activeFileName }: StatusBarProps) {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'], flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <CheckCircle size={12} style={{ color: tokens.colors.status.success }} />
+          <CheckCircle size={12} style={{ color: STATUS_SUCCESS }} />
           <span>Prettier</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
@@ -969,7 +1022,7 @@ function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
     justifyContent: 'space-around',
     padding: `${tokens.spacing['2']} ${tokens.spacing['2']}`,
     background: gradients.glassStrong,
-    borderTop: `1px solid ${tokens.colors.border.light}`,
+    borderTop: `1px solid ${BORDER_SECONDARY}`,
     minHeight: '60px',
     gap: tokens.spacing['1'],
   };
@@ -1000,7 +1053,7 @@ function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
               padding: `${tokens.spacing['1.5']} ${tokens.spacing['3']}`,
               background: 'transparent',
               border: 'none',
-              color: isActive ? tokens.colors.accent.cyan : tokens.colors.text.muted,
+              color: isActive ? ACCENT_CYAN : TEXT_TERTIARY,
               fontSize: tokens.typography.fontSize.xs,
               cursor: 'pointer',
             }}
@@ -1022,16 +1075,16 @@ export function ModernIDELoading() {
     justifyContent: 'center',
     height: '100vh',
     width: '100vw',
-    background: tokens.colors.bg.primary,
-    color: tokens.colors.text.secondary,
+    background: SURFACE_PRIMARY,
+    color: TEXT_SECONDARY,
     gap: tokens.spacing['4'],
   };
 
   const spinnerStyle: React.CSSProperties = {
     width: '40px',
     height: '40px',
-    border: `3px solid ${tokens.colors.border.light}`,
-    borderTopColor: tokens.colors.accent.cyan,
+    border: `3px solid ${BORDER_SECONDARY}`,
+    borderTopColor: ACCENT_CYAN,
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
   };
@@ -1047,3 +1100,5 @@ export function ModernIDELoading() {
 }
 
 export default ModernIDEShell;
+
+

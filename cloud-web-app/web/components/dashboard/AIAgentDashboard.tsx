@@ -17,6 +17,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 // ============================================================================
 // TYPES
@@ -209,6 +210,11 @@ function formatTokens(tokens: number): string {
   return `${(tokens / 1000000).toFixed(2)}M`
 }
 
+const PANEL_CLASS = 'rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] shadow-[0_18px_48px_rgba(2,6,23,0.18)]'
+const GHOST_BUTTON_CLASS = `inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] text-[var(--aethel-text-secondary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]`
+const PRIMARY_TAB_CLASS = 'bg-[var(--aethel-primary)] text-white shadow-[0_12px_28px_rgba(79,70,229,0.22)]'
+const EMPTY_STATE_CLASS = 'rounded-2xl border border-dashed border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-6 py-12 text-center text-sm text-[var(--aethel-text-secondary)]'
+
 // ============================================================================
 // API INTEGRATION
 // ============================================================================
@@ -315,7 +321,7 @@ export function AIAgentDashboard({
   }, [onKillAgent])
 
   return (
-    <div className={`aethel-card flex flex-col h-full ${className}`}>
+    <div className={`${PANEL_CLASS} flex h-full flex-col ${className}`}>
       {/* Header */}
       <div className="p-4 border-b border-[var(--aethel-border-subtle)]">
         <div className="flex items-center justify-between mb-4">
@@ -323,16 +329,17 @@ export function AIAgentDashboard({
             <div className="text-[var(--aethel-primary-light)]">
               <Icons.Robot />
             </div>
-            <h2 className="text-[var(--aethel-text-primary)] font-semibold">AI Agents</h2>
+            <h2 className={`${CANONICAL_TYPOGRAPHY.h3} text-[var(--aethel-text-primary)]`}>AI Agents</h2>
             <span className="text-xs text-[var(--aethel-text-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2 py-0.5 rounded">
               {metrics.activeAgents} ativos
             </span>
           </div>
 
           <button type="button"
+            aria-label="Atualizar status dos agentes"
             onClick={refresh}
             disabled={isRefreshing}
-            className="aethel-button aethel-button-ghost rounded-lg p-2"
+            className={`${GHOST_BUTTON_CLASS} p-2`}
           >
             <div className={isRefreshing ? 'animate-spin' : ''}>
               <Icons.Refresh />
@@ -344,12 +351,13 @@ export function AIAgentDashboard({
         <div className="flex gap-1 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
           {(['agents', 'history', 'metrics'] as const).map((tab) => (
             <button type="button"
+              aria-label={`Alternar visualizacao de ${tab === 'agents' ? 'agentes' : tab === 'history' ? 'historico' : 'metricas'}`}
               key={tab}
               onClick={() => setView(tab)}
-              className={`flex-1 aethel-button rounded-lg px-3 py-1.5 text-xs font-semibold ${
+              className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
                 view === tab
-                  ? 'aethel-button-primary'
-                  : 'aethel-button-ghost'
+                  ? PRIMARY_TAB_CLASS
+                  : 'border border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]'
               }`}
             >
               {tab === 'agents' ? 'Agentes' : tab === 'history' ? 'Historico' : 'Metricas'}
@@ -364,7 +372,7 @@ export function AIAgentDashboard({
         {view === 'agents' && (
           <div className="space-y-3">
             {agents.length === 0 && !isLoading && (
-              <div className="aethel-state aethel-state-empty">Nenhum agente ativo no momento.</div>
+              <div className={EMPTY_STATE_CLASS}>Nenhum agente ativo no momento.</div>
             )}
             {agents.map((agent) => (
               <div
@@ -396,11 +404,12 @@ export function AIAgentDashboard({
                     </span>
                     {(agent.status === 'running' || agent.status === 'waiting') && (
                       <button type="button"
+                        aria-label={`Parar agente ${agent.name}`}
                         onClick={(e) => {
                           e.stopPropagation()
                           handleKillAgent(agent.id)
                         }}
-                        className="p-1 text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] rounded"
+                        className={`rounded p-1 text-[var(--aethel-error)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]`}
                         title="Parar agente"
                       >
                         <Icons.Stop />
@@ -461,7 +470,7 @@ export function AIAgentDashboard({
         {view === 'history' && (
           <div className="space-y-2">
             {executions.length === 0 && !isLoading && (
-              <div className="aethel-state aethel-state-empty">Nenhuma execucao registrada.</div>
+              <div className={EMPTY_STATE_CLASS}>Nenhuma execucao registrada.</div>
             )}
             {executions.map((exec) => (
               <div
@@ -605,7 +614,7 @@ export function AIAgentDashboard({
                   const entries = Object.entries(modelUsage)
                   if (entries.length === 0) {
                     return (
-                      <div className="aethel-state aethel-state-empty text-xs text-center py-4">
+                      <div className={`${EMPTY_STATE_CLASS} py-4 text-xs`}>
                         Nenhum dado de uso disponivel
                       </div>
                     )

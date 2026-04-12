@@ -9,6 +9,18 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { tokens } from '@/lib/design-tokens';
 import { useToastActions } from '@/components/ui/toast-system';
 
+const SURFACE_PRIMARY = 'var(--aethel-surface-primary)';
+const SURFACE_SECONDARY = 'var(--aethel-surface-secondary)';
+const SURFACE_ELEVATED = 'var(--aethel-surface-elevated)';
+const TEXT_PRIMARY = 'var(--aethel-text-primary)';
+const TEXT_TERTIARY = 'var(--aethel-text-tertiary)';
+const TEXT_INVERSE = 'var(--aethel-text-inverse)';
+const BORDER_PRIMARY = 'var(--aethel-border-primary)';
+const ACCENT_CYAN = 'var(--aethel-info)';
+const ACCENT_INDIGO = 'var(--aethel-primary-light)';
+const ACCENT_EMERALD = 'var(--aethel-success)';
+const STATUS_ERROR = 'var(--aethel-error)';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -196,7 +208,7 @@ export function SwipeablePanel({
     ...(direction === 'right' && { right: 0, top: 0, bottom: 0, width }),
     ...(direction === 'bottom' && { bottom: 0, left: 0, right: 0, height }),
     ...(direction === 'top' && { top: 0, left: 0, right: 0, height }),
-    background: tokens.colors.bg.surface,
+    background: SURFACE_SECONDARY,
     zIndex: tokens.zIndex.drawer,
     transform: getTransform(),
     transition: isDragging ? 'none' : `transform ${tokens.animation.duration.normal} ${tokens.animation.easing.smooth}`,
@@ -222,7 +234,7 @@ export function SwipeablePanel({
     ...(direction === 'top' && { bottom: 0, left: '50%', transform: 'translateX(-50%)' }),
     width: isHorizontal ? '4px' : '40px',
     height: isHorizontal ? '40px' : '4px',
-    background: tokens.colors.border.light,
+    background: BORDER_PRIMARY,
     borderRadius: tokens.radius.full,
     cursor: isHorizontal ? 'col-resize' : 'row-resize',
   };
@@ -314,7 +326,7 @@ export function PullToRefresh({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: `linear-gradient(180deg, ${tokens.colors.accent.cyan}20, transparent)`,
+    background: `linear-gradient(180deg, ${ACCENT_CYAN}20, transparent)`,
     transition: isPulling ? 'none' : `height ${tokens.animation.duration.fast}`,
     overflow: 'hidden',
   };
@@ -322,8 +334,8 @@ export function PullToRefresh({
   const spinnerStyle: React.CSSProperties = {
     width: '24px',
     height: '24px',
-    border: `2px solid ${tokens.colors.border.light}`,
-    borderTopColor: tokens.colors.accent.cyan,
+    border: `2px solid ${BORDER_PRIMARY}`,
+    borderTopColor: ACCENT_CYAN,
     borderRadius: '50%',
     animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
     transform: `rotate(${pullProgress * 360}deg)`,
@@ -414,7 +426,7 @@ export function BottomSheet({
     left: 0,
     right: 0,
     height: getHeight(),
-    background: tokens.colors.bg.surface,
+    background: SURFACE_SECONDARY,
     borderRadius: `${tokens.radius['2xl']} ${tokens.radius['2xl']} 0 0`,
     transform: `translateY(${getTranslate()})`,
     transition: isDragging ? 'none' : `transform ${tokens.animation.duration.normal}`,
@@ -426,7 +438,7 @@ export function BottomSheet({
 
   const headerStyle: React.CSSProperties = {
     padding: tokens.spacing['4'],
-    borderBottom: `1px solid ${tokens.colors.border.light}`,
+    borderBottom: `1px solid ${BORDER_PRIMARY}`,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -435,7 +447,7 @@ export function BottomSheet({
   const handleStyle: React.CSSProperties = {
     width: '40px',
     height: '4px',
-    background: tokens.colors.border.light,
+    background: BORDER_PRIMARY,
     borderRadius: tokens.radius.full,
     margin: `0 auto ${tokens.spacing['4']}`,
     cursor: 'grab',
@@ -473,7 +485,7 @@ export function BottomSheet({
                 background: 'transparent',
                 border: 'none',
                 fontSize: '24px',
-                color: tokens.colors.text.muted,
+                color: TEXT_TERTIARY,
                 cursor: 'pointer',
               }}
             >
@@ -509,8 +521,8 @@ export function MobileNavBar({ items }: MobileNavBarProps) {
     left: 0,
     right: 0,
     height: '64px',
-    background: `linear-gradient(180deg, ${tokens.colors.bg.surface}, ${tokens.colors.bg.primary})`,
-    borderTop: `1px solid ${tokens.colors.border.light}`,
+    background: `linear-gradient(180deg, ${SURFACE_SECONDARY}, ${SURFACE_PRIMARY})`,
+    borderTop: `1px solid ${BORDER_PRIMARY}`,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-around',
@@ -533,7 +545,7 @@ export function MobileNavBar({ items }: MobileNavBarProps) {
             padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
             background: 'transparent',
             border: 'none',
-            color: item.active ? tokens.colors.accent.cyan : tokens.colors.text.muted,
+            color: item.active ? ACCENT_CYAN : TEXT_TERTIARY,
             fontSize: tokens.typography.fontSize.xs,
             cursor: 'pointer',
             position: 'relative',
@@ -551,11 +563,11 @@ export function MobileNavBar({ items }: MobileNavBarProps) {
                 minWidth: '18px',
                 height: '18px',
                 padding: `0 ${tokens.spacing['1']}`,
-                background: tokens.colors.status.error,
+                background: STATUS_ERROR,
                 borderRadius: tokens.radius.full,
                 fontSize: '10px',
                 fontWeight: tokens.typography.fontWeight.bold,
-                color: tokens.colors.text.inverse,
+                color: TEXT_INVERSE,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -590,9 +602,9 @@ export function MobileFAB({
   color = 'primary',
 }: MobileFABProps) {
   const colorMap = {
-    primary: `linear-gradient(135deg, ${tokens.colors.accent.cyan}, ${tokens.colors.accent.indigo})`,
-    secondary: tokens.colors.bg.elevated,
-    accent: `linear-gradient(135deg, ${tokens.colors.accent.emerald}, ${tokens.colors.accent.cyan})`,
+    primary: `linear-gradient(135deg, ${ACCENT_CYAN}, ${ACCENT_INDIGO})`,
+    secondary: SURFACE_ELEVATED,
+    accent: `linear-gradient(135deg, ${ACCENT_EMERALD}, ${ACCENT_CYAN})`,
   };
 
   const positionMap = {
@@ -614,7 +626,7 @@ export function MobileFAB({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: tokens.colors.text.primary,
+    color: TEXT_PRIMARY,
     cursor: 'pointer',
     zIndex: tokens.zIndex.floating,
     transition: `transform ${tokens.animation.duration.fast}`,

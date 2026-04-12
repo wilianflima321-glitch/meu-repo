@@ -21,6 +21,7 @@ import {
   Zap,
   AlertCircle,
 } from 'lucide-react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 // ============================================================================
 // TYPES
@@ -62,7 +63,7 @@ interface SecurityStats {
 // ============================================================================
 
 const SkeletonCard: React.FC = () => (
-  <div className="aethel-card aethel-p-4 animate-pulse">
+  <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] p-4 animate-pulse">
     <div className="flex items-center justify-between">
       <div className="h-9 w-9 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
       <div className="h-4 w-12 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)]" />
@@ -104,7 +105,7 @@ const ErrorState: React.FC<{ message: string; onRetry: () => void }> = ({ messag
     <AlertCircle className="mb-4 h-12 w-12 text-[var(--aethel-error-light)]" />
     <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Erro ao carregar dados</h3>
     <p className="mb-4 max-w-md text-sm text-[var(--aethel-text-tertiary)]">{message}</p>
-    <button type="button" onClick={onRetry} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
+    <button type="button" aria-label="Tentar carregar eventos de seguranca novamente" onClick={onRetry} className={`inline-flex items-center gap-2 rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:brightness-110`}>
       <RefreshCw className="h-4 w-4" />
       Tentar novamente
     </button>
@@ -168,7 +169,7 @@ const StatsCard: React.FC<{
   trend?: number
   color: string
 }> = ({ label, value, icon, trend, color }) => (
-  <div className={`aethel-card aethel-p-4 ${color}`}>
+  <div className={`rounded-2xl border p-4 shadow-[0_18px_48px_rgba(2,6,23,0.16)] ${color}`}>
     <div className="flex items-center justify-between">
       <div className="rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-2 text-[var(--aethel-text-tertiary)]">{icon}</div>
       {trend !== undefined && (
@@ -237,17 +238,17 @@ const EventRow: React.FC<{
         </div>
 
         <div className="flex items-center gap-1">
-          <button type="button"
+          <button type="button" aria-label="Investigar evento de seguranca"
             onClick={onInvestigate}
-            className="aethel-button aethel-button-ghost rounded-md p-2 text-[var(--aethel-info-light)]"
+            className={`inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] p-2 text-[var(--aethel-info-light)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]`}
             title="Investigar"
           >
             <Eye className="h-4 w-4" />
           </button>
           {!event.blocked && (
-            <button type="button"
+            <button type="button" aria-label="Bloquear origem do evento"
               onClick={onBloquear}
-              className="aethel-button aethel-button-ghost rounded-md p-2 text-[var(--aethel-error-light)]"
+              className={`inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] p-2 text-[var(--aethel-error-light)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]`}
               title="Bloquear IP"
             >
               <Ban className="h-4 w-4" />
@@ -349,7 +350,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
 
   if (error && !isRefreshing) {
     return (
-      <div className={`aethel-card ${className}`}>
+      <div className={`rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] shadow-[0_18px_48px_rgba(2,6,23,0.2)] ${className}`}>
         <div className="flex items-center gap-3 border-b border-[var(--aethel-border-primary)] px-4 py-3">
           <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
@@ -364,7 +365,7 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
 
   if (isLoading) {
     return (
-      <div className={`aethel-card ${className}`}>
+      <div className={`rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] shadow-[0_18px_48px_rgba(2,6,23,0.2)] ${className}`}>
         <div className="flex items-center gap-3 border-b border-[var(--aethel-border-primary)] px-4 py-3">
           <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
@@ -387,12 +388,12 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
   }
 
   return (
-    <div className={`aethel-card ${className}`}>
+    <div className={`rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] shadow-[0_18px_48px_rgba(2,6,23,0.2)] ${className}`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-primary)] px-4 py-3">
         <div className="flex items-center gap-3">
           <Shield className="h-5 w-5 text-[var(--aethel-success-light)]" />
           <div>
-            <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Central de seguranca</h2>
+            <h2 className={`${CANONICAL_TYPOGRAPHY.h3} text-[var(--aethel-text-primary)]`}>Central de seguranca</h2>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Monitoramento de ameacas em tempo real</p>
           </div>
         </div>
@@ -406,10 +407,10 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
             {stats.activeAttacks > 0 ? `${stats.activeAttacks} ataques ativos` : 'Sistema seguro'}
           </div>
 
-          <button type="button"
+          <button type="button" aria-label="Atualizar eventos de seguranca"
             onClick={fetchEvents}
             disabled={isRefreshing}
-            className="aethel-button aethel-button-primary flex items-center gap-2 text-xs"
+            className={`inline-flex items-center gap-2 rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50`}
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Atualizar
@@ -466,7 +467,8 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
             placeholder="Buscar eventos..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="aethel-input w-full pl-9 text-xs"
+            className={`w-full rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] pl-9 pr-3 py-2 text-xs text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
+            aria-label="Buscar eventos de seguranca"
           />
         </div>
 
@@ -475,7 +477,8 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
           <select
             value={filterLevel}
             onChange={(event) => setFilterLevel(event.target.value as ThreatLevel | 'all')}
-            className="aethel-input text-xs"
+            className={`rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
+            aria-label="Filtrar eventos por nivel"
           >
             <option value="all">Todos niveis</option>
             <option value="critical">Critico</option>
@@ -488,7 +491,8 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
           <select
             value={filterType}
             onChange={(event) => setFilterType(event.target.value as ThreatType | 'all')}
-            className="aethel-input text-xs"
+            className={`rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
+            aria-label="Filtrar eventos por tipo"
           >
             <option value="all">Todos tipos</option>
             <option value="prompt_injection">Injecao de prompt</option>
@@ -505,9 +509,10 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
         {filteredEvents.length === 0 && events.length === 0 ? (
           <EmptyState />
         ) : filteredEvents.length === 0 ? (
-          <div className="aethel-state aethel-state-empty">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-6 py-12 text-center">
             <Lock className="mb-2 h-10 w-10 text-[var(--aethel-text-tertiary)]" />
-            <p>Nenhum evento encontrado com os filtros selecionados.</p>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Nenhum evento encontrado com os filtros selecionados.</p>
+            <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Ajuste os filtros ou aguarde novos sinais de seguranca.</p>
           </div>
         ) : (
           filteredEvents.map((event) => (

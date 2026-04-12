@@ -1,4 +1,5 @@
 import type { CopilotWorkflowSummary } from '@/lib/api'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 type DashboardCopilotWorkflowBarProps = {
   activeWorkflowId: string | null
@@ -32,9 +33,11 @@ export function DashboardCopilotWorkflowBar({
   onMergeWorkflow,
 }: DashboardCopilotWorkflowBarProps) {
   const controlsDisabled = copilotWorkflowsLoading || connectBusy
+  const inputClass = `h-11 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const buttonClass = `inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] disabled:cursor-not-allowed disabled:opacity-50 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   return (
-    <div className="aethel-flex aethel-items-center aethel-gap-2 mb-4">
+    <div className="mb-4 flex flex-col gap-2 xl:flex-row xl:items-center">
       <span className="text-sm text-[var(--aethel-text-secondary)]">Trabalho</span>
       <select
         value={activeWorkflowId ?? ''}
@@ -48,7 +51,8 @@ export function DashboardCopilotWorkflowBar({
             onSelectWorkflow(value)
           }
         }}
-        className="aethel-input"
+        aria-label="Selecionar trabalho ativo do Copilot"
+        className={`${inputClass} min-w-[12rem]`}
         disabled={controlsDisabled}
       >
         {copilotWorkflows.map((workflow) => (
@@ -59,17 +63,18 @@ export function DashboardCopilotWorkflowBar({
         <option value="__new__">+ Novo trabalho</option>
       </select>
 
-      <button type="button" onClick={onRenameWorkflow} className="aethel-button aethel-button-secondary" disabled={!activeWorkflowId}>
+      <button type="button" onClick={onRenameWorkflow} aria-label="Renomear trabalho atual do Copilot" className={buttonClass} disabled={!activeWorkflowId}>
         Renomear
       </button>
-      <button type="button" onClick={onArchiveWorkflow} className="aethel-button aethel-button-secondary" disabled={!activeWorkflowId}>
+      <button type="button" onClick={onArchiveWorkflow} aria-label="Arquivar trabalho atual do Copilot" className={buttonClass} disabled={!activeWorkflowId}>
         Arquivar
       </button>
 
       <select
         value={connectFromWorkflowId}
         onChange={(event) => onConnectFromWorkflowChange(event.target.value)}
-        className="aethel-input"
+        aria-label="Selecionar trabalho para conectar contexto"
+        className={`${inputClass} min-w-[12rem]`}
         disabled={controlsDisabled}
       >
         <option value="">Conectar...</option>
@@ -85,7 +90,8 @@ export function DashboardCopilotWorkflowBar({
       <button
         type="button"
         onClick={onCopyHistory}
-        className="aethel-button aethel-button-secondary"
+        aria-label="Copiar histórico do trabalho selecionado para o trabalho atual"
+        className={buttonClass}
         disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
         title="Copia historico da thread selecionada para o trabalho atual"
       >
@@ -95,7 +101,8 @@ export function DashboardCopilotWorkflowBar({
       <button
         type="button"
         onClick={onImportContext}
-        className="aethel-button aethel-button-secondary"
+        aria-label="Importar contexto do trabalho selecionado"
+        className={buttonClass}
         disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
         title="Importa contexto do trabalho selecionado"
       >
@@ -105,7 +112,8 @@ export function DashboardCopilotWorkflowBar({
       <button
         type="button"
         onClick={onMergeWorkflow}
-        className="aethel-button aethel-button-secondary"
+        aria-label="Mesclar histórico e contexto do trabalho selecionado"
+        className={buttonClass}
         disabled={!activeWorkflowId || !connectFromWorkflowId || connectBusy}
         title="Mescla historico e contexto do trabalho selecionado"
       >

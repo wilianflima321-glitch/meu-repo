@@ -131,6 +131,14 @@ const SECONDARY_TABS = new Set<ActiveTab>([
   'admin',
 ])
 
+function buildSidebarItemClass(isActive: boolean) {
+  const base =
+    'flex w-full items-center gap-3 rounded-2xl border px-3 py-2 text-left text-sm font-medium transition-all'
+  return isActive
+    ? `${base} border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_22%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))] text-[var(--aethel-text-primary)] shadow-[0_14px_30px_rgba(14,165,233,0.12)]`
+    : `${base} border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] hover:text-[var(--aethel-text-primary)]`
+}
+
 function buildFilterClass(isActive: boolean) {
   const base =
     'flex items-center justify-center clickable rounded-full px-3 py-1.5 text-xs leading-4 border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-secondary)] transition'
@@ -347,10 +355,10 @@ export function AethelDashboardSidebar({
                         key={item.tab}
                         type="button"
                         onClick={() => selectTab(item.tab)}
-                        className={`aethel-sidebar-item w-full ${activeTab === item.tab ? 'active' : ''}`}
+                        className={buildSidebarItemClass(activeTab === item.tab)}
                         aria-current={activeTab === item.tab ? 'page' : undefined}
                       >
-                        <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPrimary} />
                           {item.iconSecondary ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconSecondary} /> : null}
                         </svg>
@@ -365,10 +373,10 @@ export function AethelDashboardSidebar({
                             key={item.tab}
                             type="button"
                             onClick={() => selectTab(item.tab)}
-                            className={`aethel-sidebar-item w-full ${activeTab === item.tab ? 'active' : ''}`}
+                            className={buildSidebarItemClass(activeTab === item.tab)}
                             aria-current={activeTab === item.tab ? 'page' : undefined}
                           >
-                            <svg className="aethel-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPrimary} />
                               {item.iconSecondary ? (
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconSecondary} />

@@ -35,12 +35,17 @@ export function DashboardConnectivityTab({
   formatConnectivityStatus,
 }: DashboardConnectivityTabProps) {
   const hasConnectivityError = Boolean(connectivityError)
+  const panelClass =
+    'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
+  const secondaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const endpointCardClass =
+    'rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_82%,transparent)] px-4 py-3'
 
   return (
-    <div className="aethel-p-6 space-y-6">
-      <div className="aethel-flex aethel-items-center aethel-justify-between">
-        <h2 className="text-2xl font-bold">Monitor de conectividade</h2>
-        <button type="button" onClick={onRefreshConnectivity} className="aethel-button aethel-button-secondary text-xs">
+    <div className={`${CANONICAL_SPACING.page.padding} space-y-6`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className={CANONICAL_TYPOGRAPHY.h1}>Monitor de conectividade</h2>
+        <button type="button" onClick={onRefreshConnectivity} aria-label="Atualizar monitor de conectividade" className={secondaryButtonClass}>
           Atualizar
         </button>
       </div>
@@ -55,7 +60,7 @@ export function DashboardConnectivityTab({
 
       {!connectivityLoading && !hasConnectivityError && connectivityData && (
         <div className="space-y-4">
-          <div className="aethel-card aethel-p-6 aethel-flex aethel-justify-between aethel-items-center">
+          <div className={`${panelClass} flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between`}>
             <div>
               <p className="text-sm text-[var(--aethel-text-secondary)]">Status geral</p>
               <p className="text-3xl font-bold">
@@ -67,10 +72,10 @@ export function DashboardConnectivityTab({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 aethel-gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {connectivityServices.map((service) => (
-              <div key={service.name} className="aethel-card p-5 space-y-3">
-                <div className="aethel-flex aethel-justify-between aethel-items-center">
+              <div key={service.name} className={`${panelClass} space-y-3 p-5`}>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <h3 className="text-lg font-semibold capitalize">{service.name.replace(/_/g, ' ')}</h3>
                   <span className={`text-xs rounded-full px-2 py-1 ${
                     service.status === 'healthy'
@@ -85,8 +90,8 @@ export function DashboardConnectivityTab({
 
                 <div className="space-y-2">
                   {service.endpoints.map((endpoint) => (
-                    <div key={`${service.name}-${endpoint.url}`} className="border border-[var(--aethel-border-primary)] aethel-rounded aethel-p-3">
-                      <div className="aethel-flex aethel-justify-between aethel-items-center">
+                    <div key={`${service.name}-${endpoint.url}`} className={endpointCardClass}>
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <span className={`${endpoint.healthy ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'} text-sm`}>
                           {endpoint.url}
                         </span>
@@ -108,3 +113,4 @@ export function DashboardConnectivityTab({
     </div>
   )
 }
+import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'

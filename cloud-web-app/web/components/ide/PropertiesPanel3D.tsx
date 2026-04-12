@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { ArrowDown, ArrowUp, Move, Rotate3D, Maximize, Layers, Palette, Box as BoxIcon } from 'lucide-react'
-import { tokens } from '@/lib/design-tokens'
 
 interface PropertySection {
   title: string
@@ -29,6 +28,8 @@ export function PropertiesPanel3D({
   onPropertyChange = () => undefined,
 }: PropertiesPanelProps) {
   const [activeSection, setActiveSection] = useState(0)
+  const inputClass =
+    'w-full rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]'
 
   const handleValueChange = (sectionIndex: number, propertyIndex: number, newValue: any) => {
     onPropertyChange(sections[sectionIndex].title, sections[sectionIndex].properties[propertyIndex].name, newValue)
@@ -50,7 +51,8 @@ export function PropertiesPanel3D({
                     newValue[i] = parseFloat(e.target.value)
                     handleValueChange(sectionIndex, propIndex, newValue)
                   }}
-                  className="w-full pl-5 pr-1 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+                  aria-label={`${prop.name} ${axis}`}
+                  className={`${inputClass} py-1 pl-5 pr-1 text-xs`}
                   step={0.1}
                 />
               </div>
@@ -66,13 +68,15 @@ export function PropertiesPanel3D({
               max={prop.max || 100}
               value={prop.value}
               onChange={(e) => handleValueChange(sectionIndex, propIndex, parseFloat(e.target.value))}
+              aria-label={`${prop.name} slider`}
               className="flex-1"
             />
             <input
               type="number"
               value={prop.value}
               onChange={(e) => handleValueChange(sectionIndex, propIndex, parseFloat(e.target.value))}
-              className="w-16 px-2 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+              aria-label={`${prop.name} value`}
+              className={`${inputClass} w-16 px-2 py-1 text-xs`}
               step={0.1}
             />
           </div>
@@ -84,13 +88,15 @@ export function PropertiesPanel3D({
               type="color"
               value={prop.value}
               onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
+              aria-label={`${prop.name} color picker`}
               className="w-8 h-6 rounded cursor-pointer"
             />
             <input
               type="text"
               value={prop.value}
               onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
-              className="flex-1 px-2 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+              aria-label={`${prop.name} color value`}
+              className={`${inputClass} flex-1 px-2 py-1 text-xs`}
             />
           </div>
         )
@@ -99,6 +105,7 @@ export function PropertiesPanel3D({
           <button
             type="button"
             onClick={() => handleValueChange(sectionIndex, propIndex, !prop.value)}
+            aria-label={`${prop.name} ${prop.value ? 'enabled' : 'disabled'}`}
             className={`w-10 h-5 rounded-full transition-colors ${
               prop.value ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-tertiary)]'
             }`}
@@ -115,7 +122,8 @@ export function PropertiesPanel3D({
           <select
             value={prop.value}
             onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
-            className="w-full px-2 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+            aria-label={`${prop.name} selection`}
+            className={`${inputClass} px-2 py-1 text-xs`}
           >
             {(prop.options ?? []).map(option => (
               <option key={option} value={option}>{option}</option>
@@ -128,7 +136,8 @@ export function PropertiesPanel3D({
             type="text"
             value={prop.value}
             onChange={(e) => handleValueChange(sectionIndex, propIndex, e.target.value)}
-            className="w-full px-2 py-1 text-xs rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]"
+            aria-label={`${prop.name} value`}
+            className={`${inputClass} px-2 py-1 text-xs`}
           />
         )
       default:
@@ -145,6 +154,7 @@ export function PropertiesPanel3D({
           type="button"
           className="p-1 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
           title="Reset"
+          aria-label="Resetar propriedades"
         >
           <ArrowDown className="w-3.5 h-3.5" />
         </button>
@@ -157,6 +167,7 @@ export function PropertiesPanel3D({
             <button
               type="button"
               onClick={() => setActiveSection(activeSection === sectionIndex ? -1 : sectionIndex)}
+              aria-label={`${activeSection === sectionIndex ? 'Recolher' : 'Expandir'} secao ${section.title}`}
               className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] transition-colors"
             >
               <div className="flex items-center gap-2">
@@ -213,7 +224,7 @@ const defaultSections: PropertySection[] = [
     title: 'Material',
     icon: Palette,
     properties: [
-      { name: 'Color', type: 'color', value: tokens.colors.accent.indigo },
+      { name: 'Color', type: 'color', value: '#6366f1' },
       { name: 'Metallic', type: 'float', value: 0.5, min: 0, max: 1 },
       { name: 'Roughness', type: 'float', value: 0.5, min: 0, max: 1 },
       { name: 'Emissive', type: 'boolean', value: false },

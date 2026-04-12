@@ -1,6 +1,7 @@
 import { APIError } from '@/lib/api'
 import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
 import CanonicalPreviewSurface from '@/components/preview/CanonicalPreviewSurface'
+import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import type { Project } from './aethel-dashboard-model'
 
@@ -73,6 +74,12 @@ export function DashboardOverviewTab({
   onSendSuggestion,
   isGenerating,
 }: DashboardOverviewTabProps) {
+  const panelClass =
+    'overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.42))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]'
+  const ghostButtonClass = `inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--aethel-border-subtle)] bg-transparent px-3 py-1 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const emptyStateClass =
+    'rounded-2xl border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_16%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)]'
+
   const quickActions = [
     {
       label: 'Abrir AI Chat',
@@ -216,8 +223,8 @@ export function DashboardOverviewTab({
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr]">
-        <div className="overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.42))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">
-          <div className="aethel-flex aethel-items-center aethel-justify-between">
+        <div className={panelClass}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Carteira</p>
               <h3 className="text-lg font-semibold">Saldo da carteira</h3>
@@ -226,7 +233,8 @@ export function DashboardOverviewTab({
               <button
                 type="button"
                 onClick={onRefreshWallet}
-                className="aethel-button aethel-button-ghost rounded-full px-3 py-1 text-xs"
+                aria-label="Atualizar saldo da carteira"
+                className={`${ghostButtonClass} text-xs`}
               >
                 Atualizar
               </button>
@@ -270,7 +278,7 @@ export function DashboardOverviewTab({
                         key={entry.id}
                         className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3"
                       >
-                        <div className="aethel-flex aethel-justify-between aethel-items-center">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <span className="text-sm font-medium">
                             {entry.reference || entry.entry_type.toUpperCase()}
                           </span>
@@ -283,7 +291,7 @@ export function DashboardOverviewTab({
                             {entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
                           </span>
                         </div>
-                        <div className="aethel-flex aethel-justify-between aethel-items-center mt-1">
+                        <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <span className="text-xs text-[var(--aethel-text-secondary)]">
                             Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'}{' '}
                             {formatCurrencyLabel(entry.currency)}
@@ -295,7 +303,7 @@ export function DashboardOverviewTab({
                       </li>
                     ))}
                     {walletTransactions.length === 0 && (
-                      <li className="aethel-state aethel-state-empty text-sm">Nenhuma transacao registrada.</li>
+                      <li className={emptyStateClass}>Nenhuma transacao registrada.</li>
                     )}
                   </ul>
                 </details>
@@ -305,7 +313,7 @@ export function DashboardOverviewTab({
         </div>
 
         <div className="overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(8,47,73,0.34),rgba(15,23,42,0.56))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">
-          <div className="aethel-flex aethel-justify-between aethel-items-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Infra</p>
               <h3 className="text-lg font-semibold">Status de conectividade</h3>
@@ -330,7 +338,7 @@ export function DashboardOverviewTab({
               <p className="text-sm text-[var(--aethel-error)]">Falha ao consultar conectividade.</p>
             )}
             {!connectivityLoading && !connectivityError && connectivityServices.length === 0 && (
-              <div className="aethel-state aethel-state-empty text-sm">Nenhum servico configurado.</div>
+              <div className={emptyStateClass}>Nenhum servico configurado.</div>
             )}
             {!connectivityLoading && !connectivityError && connectivityServices.length > 0 && (
               <>
@@ -347,7 +355,7 @@ export function DashboardOverviewTab({
                         key={service.name}
                         className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3"
                       >
-                        <div className="aethel-flex aethel-justify-between aethel-items-center">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                           <span className="text-sm font-medium capitalize">
                             {service.name.replace(/_/g, ' ')}
                           </span>
@@ -367,7 +375,7 @@ export function DashboardOverviewTab({
                           {service.endpoints.slice(0, 3).map((endpoint) => (
                             <li
                               key={`${service.name}-${endpoint.url}`}
-                              className="aethel-flex aethel-justify-between text-xs"
+                              className="flex items-center justify-between gap-3 text-xs"
                             >
                               <span className={endpoint.healthy ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'}>
                                 {endpoint.url}
@@ -394,12 +402,17 @@ export function DashboardOverviewTab({
       </div>
 
       <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.76),rgba(7,10,18,0.94))] p-6 shadow-[0_24px_80px_rgba(2,6,23,0.36)]">
-        <div className="aethel-flex aethel-items-center aethel-justify-between mb-4">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Preview</p>
             <h3 className="text-xl font-semibold">Previa ao vivo</h3>
           </div>
-          <button type="button" onClick={onToggleMiniPreviewExpanded} className="aethel-button aethel-button-ghost text-sm">
+          <button
+            type="button"
+            onClick={onToggleMiniPreviewExpanded}
+            aria-label={miniPreviewExpanded ? 'Recolher preview ao vivo' : 'Expandir preview ao vivo'}
+            className={ghostButtonClass}
+          >
             {miniPreviewExpanded ? 'Recolher' : 'Expandir'}
           </button>
         </div>

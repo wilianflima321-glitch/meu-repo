@@ -1,6 +1,7 @@
 import { DirectorNotePanel } from '../ai/DirectorNotePanel'
 import { TimeMachineSlider } from '../collaboration/TimeMachineSlider'
 import { PremiumEmptyProjects } from '../ui/PremiumEmptyState'
+import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import type { Project } from './aethel-dashboard-model'
 
@@ -33,6 +34,13 @@ export function DashboardProjectsTab({
   onOpenAiChat,
   onOpenIde,
 }: DashboardProjectsTabProps) {
+  const panelClass =
+    'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
+  const inputClass = `h-12 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const primaryButtonClass = `inline-flex min-h-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] hover:brightness-110 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const secondaryButtonClass = `inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const dangerButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+
   const projectTypeOptions = [
     {
       value: 'web',
@@ -52,11 +60,11 @@ export function DashboardProjectsTab({
   ] as const
 
   return (
-    <div className="aethel-p-6">
-      <div className="aethel-flex aethel-items-center aethel-justify-between mb-6">
+    <div className={`${CANONICAL_SPACING.page.padding} space-y-6`}>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Studio Projects</p>
-          <h2 className="text-2xl font-bold">Projetos</h2>
+          <h2 className={CANONICAL_TYPOGRAPHY.h1}>Projetos</h2>
           <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Gerencie apps e research. Games e films seguem em roadmap.</p>
         </div>
         {projects.length > 0 && (
@@ -103,11 +111,11 @@ export function DashboardProjectsTab({
       </div>
 
       {projects.length === 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr,1fr] aethel-gap-6 mb-6">
-          <div className="aethel-card aethel-p-0">
+        <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr,1fr]">
+          <div className={`${panelClass} p-0`}>
             <PremiumEmptyProjects onCreate={onCreateProject} />
           </div>
-          <div className="aethel-card aethel-p-6">
+          <div className={panelClass}>
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Novo projeto</p>
             <h3 className="text-lg font-semibold mb-4">Criar novo projeto</h3>
             <div className="space-y-4">
@@ -116,7 +124,7 @@ export function DashboardProjectsTab({
                 value={newProjectName}
                 onChange={(event) => onProjectNameChange(event.target.value)}
                 placeholder="Nome do projeto"
-                className="aethel-input w-full"
+                className={inputClass}
               />
               <div className="grid gap-3">
                 {projectTypeOptions.map((option) => {
@@ -126,6 +134,7 @@ export function DashboardProjectsTab({
                       key={option.value}
                       type="button"
                       onClick={() => onProjectTypeChange(option.value)}
+                      aria-label={`Selecionar tipo de projeto ${option.label}`}
                       className={`rounded-2xl border p-3 text-left transition ${
                         selected
                           ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
@@ -141,13 +150,14 @@ export function DashboardProjectsTab({
               <select
                 value={newProjectType}
                 onChange={(event) => onProjectTypeChange(event.target.value)}
-                className="aethel-input w-full"
+                aria-label="Selecionar trilha de projeto"
+                className={inputClass}
               >
                 <option value="code">Projeto de codigo</option>
                 <option value="unreal">Unreal Engine</option>
                 <option value="web">Aplicacao web</option>
               </select>
-              <button type="button" onClick={onCreateProject} className="aethel-button aethel-button-primary w-full">
+              <button type="button" onClick={onCreateProject} aria-label="Criar novo projeto" className={`${primaryButtonClass} w-full`}>
                 Criar projeto
               </button>
             </div>
@@ -166,9 +176,9 @@ export function DashboardProjectsTab({
       )}
 
       {projects.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 aethel-gap-6 mb-6">
+        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <div key={project.id} className="aethel-card aethel-p-4">
+            <div key={project.id} className={`${panelClass} p-4`}>
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-[var(--aethel-text-primary)]">{project.name}</h3>
                 <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-2 py-0.5 text-xs text-[var(--aethel-text-secondary)]">
@@ -191,7 +201,8 @@ export function DashboardProjectsTab({
               <button
                 type="button"
                 onClick={() => onDeleteProject(project.id)}
-                className="aethel-button aethel-button-danger text-xs"
+                aria-label={`Remover projeto ${project.name}`}
+                className={dangerButtonClass}
               >
                 Remover
               </button>
@@ -201,7 +212,7 @@ export function DashboardProjectsTab({
       )}
 
       {projects.length > 0 && (
-        <div className="aethel-card aethel-p-6 max-w-md">
+        <div className={`${panelClass} max-w-md`}>
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Novo projeto</p>
           <h3 className="text-lg font-semibold mb-4">Criar novo projeto</h3>
             <div className="space-y-4">
@@ -210,7 +221,7 @@ export function DashboardProjectsTab({
                 value={newProjectName}
                 onChange={(event) => onProjectNameChange(event.target.value)}
                 placeholder="Nome do projeto"
-                className="aethel-input w-full"
+                className={inputClass}
               />
               <div className="grid gap-3">
                 {projectTypeOptions.map((option) => {
@@ -220,6 +231,7 @@ export function DashboardProjectsTab({
                       key={option.value}
                       type="button"
                       onClick={() => onProjectTypeChange(option.value)}
+                      aria-label={`Selecionar tipo de projeto ${option.label}`}
                       className={`rounded-2xl border p-3 text-left transition ${
                         selected
                           ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
@@ -235,13 +247,14 @@ export function DashboardProjectsTab({
               <select
                 value={newProjectType}
                 onChange={(event) => onProjectTypeChange(event.target.value)}
-                className="aethel-input w-full"
+                aria-label="Selecionar trilha de projeto"
+                className={inputClass}
               >
               <option value="code">Projeto de codigo</option>
               <option value="unreal">Unreal Engine</option>
               <option value="web">Aplicacao web</option>
             </select>
-            <button type="button" onClick={onCreateProject} className="aethel-button aethel-button-primary w-full">
+            <button type="button" onClick={onCreateProject} aria-label="Criar novo projeto" className={`${primaryButtonClass} w-full`}>
               Criar projeto
             </button>
           </div>
