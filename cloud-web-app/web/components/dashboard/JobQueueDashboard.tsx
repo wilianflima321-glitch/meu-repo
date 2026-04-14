@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 // ============================================================================
 // TYPES
@@ -153,7 +154,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon, trend, color = 'text-[var(--aethel-text-primary)]' }: StatCardProps) {
   return (
-    <div className="aethel-card aethel-p-4">
+    <div className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4">
       <div className="flex items-center justify-between text-xs text-[var(--aethel-text-tertiary)]">
         <span>{label}</span>
         <span className="text-[var(--aethel-text-tertiary)]">{icon}</span>
@@ -254,8 +255,9 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
                 event.stopPropagation()
                 onRetry(job.id)
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-info-light)]"
+              className={`rounded-xl p-1.5 text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:text-[var(--aethel-info-light)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
               title="Tentar novamente"
+              aria-label={`Tentar novamente job ${job.id}`}
             >
               <Icons.Refresh />
             </button>
@@ -266,8 +268,9 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
                 event.stopPropagation()
                 onCancel(job.id)
               }}
-              className="aethel-button aethel-button-ghost rounded-md p-1.5 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-error)]"
+              className={`rounded-xl p-1.5 text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:text-[var(--aethel-error)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
               title="Cancelar"
+              aria-label={`Cancelar job ${job.id}`}
             >
               <Icons.X />
             </button>
@@ -353,6 +356,11 @@ export function JobQueueDashboard({
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [isQueueRunning, setIsQueueRunning] = useState(true)
+  const shellClass =
+    'flex h-full flex-col rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] shadow-[0_24px_80px_rgba(2,6,23,0.22)]'
+  const primaryButtonClass = `inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const ghostButtonClass = `inline-flex items-center justify-center rounded-2xl p-2 text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const inputClass = `w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   const fetchData = useCallback(async () => {
     try {
@@ -453,14 +461,14 @@ export function JobQueueDashboard({
 
   if (isLoading && jobs.length === 0) {
     return (
-      <div className={`aethel-state aethel-state-loading h-64 ${className}`} role="status">
+      <div className={`flex h-64 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-sm text-[var(--aethel-info-light)] ${className}`} role="status">
         Carregando fila de jobs...
       </div>
     )
   }
 
   return (
-    <div className={`aethel-card flex h-full flex-col ${className}`}>
+    <div className={`${shellClass} ${className}`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3">
         <div className="flex items-center gap-3">
           <Icons.Server />
@@ -477,9 +485,12 @@ export function JobQueueDashboard({
         <div className="flex items-center gap-2">
           <button type="button"
             onClick={handleToggleQueue}
-            className={`aethel-button rounded-lg px-3 py-2 text-xs font-semibold ${
-              isQueueRunning ? 'aethel-button-secondary' : 'aethel-button-primary'
+            className={`${primaryButtonClass} ${
+              isQueueRunning
+                ? 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)]'
+                : 'bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] shadow-[0_14px_32px_rgba(56,189,248,0.24)]'
             }`}
+            aria-label={isQueueRunning ? 'Pausar fila de jobs' : 'Iniciar fila de jobs'}
           >
             <span className="flex items-center gap-2">
               {isQueueRunning ? <Icons.Pause /> : <Icons.Play />}
@@ -488,8 +499,9 @@ export function JobQueueDashboard({
           </button>
           <button type="button"
             onClick={fetchData}
-            className="aethel-button aethel-button-ghost rounded-lg p-2"
+            className={ghostButtonClass}
             title="Atualizar"
+            aria-label="Atualizar fila de jobs"
           >
             <Icons.Refresh />
           </button>
@@ -516,7 +528,8 @@ export function JobQueueDashboard({
           <select
             value={filter}
             onChange={(event) => setFilter(event.target.value as JobStatus | 'all')}
-            className="aethel-input text-xs"
+            className={inputClass}
+            aria-label="Filtrar jobs por status"
           >
             <option value="all">Todos os status</option>
             <option value="pending">Pendente</option>
@@ -533,7 +546,8 @@ export function JobQueueDashboard({
             placeholder="Buscar por ID ou tipo..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="aethel-input w-full text-xs"
+            className={inputClass}
+            aria-label="Buscar jobs por id ou tipo"
           />
         </div>
 
@@ -541,7 +555,7 @@ export function JobQueueDashboard({
       </div>
 
       {error && (
-        <div className="aethel-state aethel-state-error border-b border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)]">
+        <div className="border-b border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">
           {error}
         </div>
       )}
@@ -559,7 +573,7 @@ export function JobQueueDashboard({
         </div>
 
         {filteredJobs.length === 0 ? (
-          <div className="aethel-state aethel-state-empty m-4">Nenhum job encontrado.</div>
+          <div className="m-4 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-6 text-sm text-[var(--aethel-text-tertiary)]">Nenhum job encontrado.</div>
         ) : (
           filteredJobs.map((job) => (
             <JobRow
@@ -578,7 +592,8 @@ export function JobQueueDashboard({
         <button type="button"
           onClick={() => setPage(Math.max(1, page - 1))}
           disabled={page === 1}
-          className="aethel-button aethel-button-ghost text-xs disabled:opacity-50"
+          className={`${ghostButtonClass} text-xs disabled:opacity-50`}
+          aria-label="Pagina anterior da fila"
         >
           &lt; Anterior
         </button>
@@ -586,7 +601,8 @@ export function JobQueueDashboard({
         <button type="button"
           onClick={() => setPage(page + 1)}
           disabled={filteredJobs.length < pageSize}
-          className="aethel-button aethel-button-ghost text-xs disabled:opacity-50"
+          className={`${ghostButtonClass} text-xs disabled:opacity-50`}
+          aria-label="Proxima pagina da fila"
         >
           Proxima &gt;
         </button>

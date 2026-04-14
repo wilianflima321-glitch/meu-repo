@@ -347,6 +347,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
         {/* Header */}
         <button type="button"
           onClick={() => setIsExpanded(!isExpanded)}
+          aria-label={`${isExpanded ? 'Recolher' : 'Expandir'} etapa ${step.title}`}
           className="w-full flex items-center gap-3 p-3"
         >
           {/* Status indicator */}
@@ -419,6 +420,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
                       </pre>
                       <button type="button"
                         onClick={handleCopy}
+                        aria-label={copied ? 'Conteudo copiado' : `Copiar preview de codigo da etapa ${step.title}`}
                         className="absolute top-2 right-2 p-1 bg-[var(--aethel-surface-tertiary)]
                                  hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
                       >
@@ -556,6 +558,7 @@ export function AIThinkingPanel({
           {/* Toggle collapse */}
           <button type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
+            aria-label={isCollapsed ? 'Expandir painel de pensamento da IA' : 'Recolher painel de pensamento da IA'}
             className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
           >
             {isCollapsed ? (
@@ -568,6 +571,7 @@ export function AIThinkingPanel({
           {/* Maximize */}
           <button type="button"
             onClick={() => setIsMaximized(!isMaximized)}
+            aria-label={isMaximized ? 'Restaurar tamanho do painel de pensamento da IA' : 'Maximizar painel de pensamento da IA'}
             className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
           >
             {isMaximized ? (
@@ -581,6 +585,7 @@ export function AIThinkingPanel({
           {onClose && (
             <button type="button"
               onClick={onClose}
+              aria-label="Fechar painel de pensamento da IA"
               className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
             >
               <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
