@@ -229,21 +229,21 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
         </div>
         <div className="flex items-center gap-1">
           {status === 'running' && (
-            <Button type="button" variant="ghost" size="icon" onClick={handlePause} className="h-8 w-8">
+            <Button type="button" variant="ghost" size="icon" onClick={handlePause} className="h-8 w-8" aria-label="Pausar agente">
               <Pause className="h-4 w-4" />
             </Button>
           )}
           {status === 'paused' && (
-            <Button type="button" variant="ghost" size="icon" onClick={handleResume} className="h-8 w-8">
+            <Button type="button" variant="ghost" size="icon" onClick={handleResume} className="h-8 w-8" aria-label="Retomar agente">
               <Play className="h-4 w-4" />
             </Button>
           )}
           {(status === 'running' || status === 'paused') && (
-            <Button type="button" variant="ghost" size="icon" onClick={handleStop} className="h-8 w-8 text-[var(--aethel-error-light)]">
+            <Button type="button" variant="ghost" size="icon" onClick={handleStop} className="h-8 w-8 text-[var(--aethel-error-light)]" aria-label="Parar agente">
               <Square className="h-4 w-4" />
             </Button>
           )}
-          <Button type="button" variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+          <Button type="button" variant="ghost" size="icon" onClick={onClose} className="h-8 w-8" aria-label="Fechar modo agente">
             X
           </Button>
         </div>
@@ -295,11 +295,11 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
               {pendingApproval.action.tool}: {JSON.stringify(pendingApproval.action.input)}
             </div>
             <div className="flex gap-2">
-              <Button type="button" size="sm" onClick={handleApprove} className="bg-[var(--aethel-success-dark)] hover:bg-[var(--aethel-success)]">
+              <Button type="button" size="sm" onClick={handleApprove} className="bg-[var(--aethel-success-dark)] hover:bg-[var(--aethel-success)]" aria-label="Aprovar acao pendente do agente">
                 <CheckCircle className="mr-1 h-3 w-3" />
                 Aprovar
               </Button>
-              <Button type="button" size="sm" variant="outline" onClick={handleReject} className="border-[var(--aethel-error)] text-[var(--aethel-error-light)]">
+              <Button type="button" size="sm" variant="outline" onClick={handleReject} className="border-[var(--aethel-error)] text-[var(--aethel-error-light)]" aria-label="Rejeitar acao pendente do agente">
                 <XCircle className="mr-1 h-3 w-3" />
                 Rejeitar
               </Button>
@@ -323,6 +323,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
               >
                 <button type="button"
                   onClick={() => toggleStepExpand(step.id)}
+                  aria-label={`${isExpanded ? 'Recolher' : 'Expandir'} detalhes do passo ${step.type}`}
                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]"
                 >
                   {isExpanded ? (
@@ -421,6 +422,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             size="icon"
             onClick={handleSubmit}
             disabled={!input.trim() || status === 'running'}
+            aria-label={status === 'running' ? 'Executando tarefa do agente' : 'Enviar tarefa para o agente'}
             className="absolute bottom-2 right-2 h-8 w-8 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary-dark)]"
           >
             {status === 'running' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}

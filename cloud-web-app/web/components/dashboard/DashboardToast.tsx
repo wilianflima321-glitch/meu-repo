@@ -13,7 +13,7 @@ export function DashboardToast({ message, type }: DashboardToastProps) {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 px-4 py-2 aethel-rounded-lg aethel-shadow-lg z-50 animate-in slide-in-from-bottom-4 ${colorClass}`}
+      className={`fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 rounded-2xl px-4 py-2 shadow-lg sm:bottom-6 sm:left-auto sm:right-6 ${colorClass}`}
     >
       {message}
     </div>

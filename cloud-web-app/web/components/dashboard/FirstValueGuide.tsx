@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import type { FirstValueSessionSummary } from './useFirstValueTracking'
 
 type FirstValueGuideProps = {
@@ -47,6 +48,10 @@ export function FirstValueGuide({
   onOpenIdePreview,
   onDismiss,
 }: FirstValueGuideProps) {
+  const primaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] hover:brightness-110 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const secondaryButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const ghostButtonClass = `inline-flex min-h-10 items-center justify-center rounded-2xl px-4 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+
   const totalSteps = 3
   const completedSteps = Number(firstProjectCreated) + Number(firstAiSuccess) + Number(firstIdeOpened)
   const completionRatio = Math.max(0, Math.min(1, completedSteps / totalSteps))
@@ -118,8 +123,8 @@ export function FirstValueGuide({
       : 'Sessao em andamento'
 
   return (
-    <section className="aethel-m-4 aethel-rounded-lg border border-[var(--aethel-primary)]/30 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] aethel-p-4 md:aethel-m-6">
-      <div className="aethel-flex aethel-flex-col aethel-gap-4 md:flex-row md:aethel-items-center md:aethel-justify-between">
+    <section className="m-4 rounded-2xl border border-[var(--aethel-primary)]/30 bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] p-4 md:m-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-[var(--aethel-primary-light)]">Primeiro valor em menos de 2 minutos</h3>
           <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
@@ -235,20 +240,20 @@ export function FirstValueGuide({
           </div>
         </div>
 
-        <div className="aethel-flex aethel-flex-col aethel-gap-2 sm:flex-row sm:flex-wrap">
-          <button type="button" onClick={onCreateProject} className="aethel-button aethel-button-primary text-xs">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <button type="button" onClick={onCreateProject} className={primaryButtonClass} aria-label="Criar o primeiro projeto">
             Criar projeto
           </button>
-          <button type="button" onClick={onConfigureAI} className="aethel-button aethel-button-secondary text-xs">
+          <button type="button" onClick={onConfigureAI} className={secondaryButtonClass} aria-label="Configurar provedor de inteligencia artificial">
             Configurar IA
           </button>
-          <button type="button" onClick={onOpenAIChat} className="aethel-button aethel-button-secondary text-xs">
+          <button type="button" onClick={onOpenAIChat} className={secondaryButtonClass} aria-label="Abrir o chat de inteligencia artificial">
             Abrir Chat IA
           </button>
-          <button type="button" onClick={onOpenIdePreview} className="aethel-button aethel-button-secondary text-xs">
+          <button type="button" onClick={onOpenIdePreview} className={secondaryButtonClass} aria-label={previewActionLabel}>
             {previewActionLabel}
           </button>
-          <button type="button" onClick={onDismiss} className="aethel-button aethel-button-ghost text-xs">
+          <button type="button" onClick={onDismiss} className={ghostButtonClass} aria-label="Dispensar guia de primeiro valor">
             Dispensar
           </button>
         </div>

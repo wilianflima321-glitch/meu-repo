@@ -25,6 +25,7 @@ import {
   Clock,
   Thermometer,
 } from 'lucide-react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 // ============================================================================
 // TYPES
@@ -198,6 +199,12 @@ const ComponentStatus: React.FC<{ name: string; component: ComponentHealth; icon
 
 export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConnected, onRefresh, className = '' }) => {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
+  const panelClass =
+    'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
+  const metricCardClass =
+    'rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] p-4 text-center'
+  const actionButtonClass = `inline-flex items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const ghostIconButtonClass = `inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   useEffect(() => {
     if (health) {
@@ -207,13 +214,13 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
 
   if (!isConnected) {
     return (
-      <div className={`aethel-card ${className}`}>
+      <div className={`${panelClass} ${className}`}>
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <WifiOff size={40} className="mb-4 text-[var(--aethel-error)]" />
           <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">Desconectado</h3>
           <p className="mb-4 text-sm text-[var(--aethel-text-tertiary)]">Nao foi possivel conectar ao servidor</p>
           {onRefresh && (
-            <button type="button" onClick={onRefresh} className="aethel-button aethel-button-primary flex items-center gap-2 text-xs">
+            <button type="button" onClick={onRefresh} className={actionButtonClass} aria-label="Reconectar dashboard de saude">
               <RefreshCw size={16} />
               Reconectar
             </button>
@@ -225,7 +232,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
 
   if (!health) {
     return (
-      <div className={`aethel-card ${className}`}>
+      <div className={`${panelClass} ${className}`}>
         <div className="flex flex-col items-center justify-center py-12">
           <RefreshCw size={28} className="mb-4 animate-spin text-[var(--aethel-info)]" />
           <p className="text-sm text-[var(--aethel-text-tertiary)]">Carregando dados de saude...</p>
@@ -235,7 +242,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
   }
 
   return (
-    <div className={`aethel-card ${className}`}>
+    <div className={`${panelClass} ${className}`}>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className={`rounded-lg border p-2 ${getStatusBg(health.status)}`}>
@@ -258,7 +265,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
             {health.status.toUpperCase()}
           </span>
           {onRefresh && (
-            <button type="button" onClick={onRefresh} className="aethel-button aethel-button-ghost rounded-lg p-2" title="Atualizar">
+            <button type="button" onClick={onRefresh} className={ghostIconButtonClass} title="Atualizar" aria-label="Atualizar metricas de saude">
               <RefreshCw size={18} className="text-[var(--aethel-text-secondary)]" />
             </button>
           )}
@@ -266,19 +273,19 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({ health, isConn
       </div>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="aethel-card aethel-p-4 text-center">
+        <div className={metricCardClass}>
           <div className="text-2xl font-semibold text-[var(--aethel-info)]">{health.activeJobs}</div>
           <div className="text-xs text-[var(--aethel-text-tertiary)]">Jobs ativos</div>
         </div>
-        <div className="aethel-card aethel-p-4 text-center">
+        <div className={metricCardClass}>
           <div className="text-2xl font-semibold text-[var(--aethel-warning)]">{health.queuedJobs}</div>
           <div className="text-xs text-[var(--aethel-text-tertiary)]">Na fila</div>
         </div>
-        <div className="aethel-card aethel-p-4 text-center">
+        <div className={metricCardClass}>
           <div className="text-2xl font-semibold text-[var(--aethel-success)]">{health.completedToday}</div>
           <div className="text-xs text-[var(--aethel-text-tertiary)]">Completos hoje</div>
         </div>
-        <div className="aethel-card aethel-p-4 text-center">
+        <div className={metricCardClass}>
           <div className="text-2xl font-semibold text-[var(--aethel-error)]">{health.errors24h}</div>
           <div className="text-xs text-[var(--aethel-text-tertiary)]">Erros 24h</div>
         </div>
