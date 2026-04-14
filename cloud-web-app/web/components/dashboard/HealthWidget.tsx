@@ -14,6 +14,7 @@ import {
   Wifi,
   Box,
 } from 'lucide-react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 // ============================================================================
 // TYPES
@@ -286,9 +287,13 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
 
   const handleFixOllama = () => window.open('https://ollama.ai/download', '_blank')
   const handleFixBlender = () => window.open('https://www.blender.org/download/', '_blank')
+  const shellClass =
+    'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
+  const ghostButtonClass = `inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const secondaryButtonClass = `inline-flex items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-xs font-medium text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   return (
-    <div className={`aethel-card ${className}`}>
+    <div className={`${shellClass} ${className}`}>
       <div
         className="flex cursor-pointer flex-wrap items-center justify-between gap-3 border-b border-[var(--aethel-border-subtle)] px-4 py-3 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)]"
         onClick={() => setExpanded(!expanded)}
@@ -310,8 +315,9 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
               checkAllServices()
             }}
             disabled={isRefreshing}
-            className="aethel-button aethel-button-ghost rounded-lg p-2"
+            className={ghostButtonClass}
             title="Atualizar"
+            aria-label="Atualizar status do sistema"
           >
             <RefreshCw className={`h-4 w-4 text-[var(--aethel-text-secondary)] ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
@@ -322,8 +328,9 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
                 event.stopPropagation()
                 onSettingsClick()
               }}
-              className="aethel-button aethel-button-ghost rounded-lg p-2"
+              className={ghostButtonClass}
               title="Configuracoes"
+              aria-label="Abrir configuracoes de saude"
             >
               <Settings className="h-4 w-4 text-[var(--aethel-text-secondary)]" />
             </button>
@@ -371,14 +378,16 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
               <div className="flex flex-wrap gap-2">
                 <button type="button"
                   onClick={handleFixOllama}
-                  className="aethel-button aethel-button-secondary flex items-center gap-2 text-xs"
+                  className={secondaryButtonClass}
+                  aria-label="Baixar Ollama"
                 >
                   <Download className="h-4 w-4" />
                   Baixar Ollama
                 </button>
                 <button type="button"
                   onClick={handleFixBlender}
-                  className="aethel-button aethel-button-secondary flex items-center gap-2 text-xs"
+                  className={secondaryButtonClass}
+                  aria-label="Baixar Blender"
                 >
                   <Download className="h-4 w-4" />
                   Baixar Blender

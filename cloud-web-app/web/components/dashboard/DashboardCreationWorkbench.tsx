@@ -7,6 +7,7 @@ import { useProjectGraphStore } from '@/lib/project-graph/store';
 import type { ProjectAsset, ProjectDomain, ProjectGraphState, ProjectJob } from '@/lib/project-graph/types';
 import type { MediaAsset, MediaKind, MediaProject } from '@/components/media/media-studio-core';
 import CanonicalPreviewSurface from '@/components/preview/CanonicalPreviewSurface';
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 
 const MediaStudio = dynamic(() => import('@/components/media/MediaStudio'), { ssr: false });
 
@@ -582,10 +583,20 @@ export default function DashboardCreationWorkbench({
     anchor.click();
   }, []);
 
+  const shellClass =
+    'grid h-full overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] shadow-[0_24px_80px_rgba(2,6,23,0.22)] lg:grid-cols-[260px,1fr,420px]';
+  const panelToggleClass = (active: boolean) =>
+    `rounded-2xl px-3 py-1.5 text-xs font-medium ${active ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)] text-[var(--aethel-text-primary)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--aethel-primary)_28%,transparent)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)]'} ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
+  const modeButtonClass = (active: boolean, activeTone: string) =>
+    `rounded-2xl border px-3 py-1.5 text-xs font-medium ${active ? activeTone : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'} ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
+  const textAreaClass =
+    'min-h-20 w-full rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)]';
+  const actionButtonBase = `w-full rounded-2xl px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] shadow-[0_12px_28px_rgba(2,6,23,0.16)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
+
   return (
-    <div className="aethel-p-4 h-[calc(100vh-8.5rem)] min-h-[720px]">
-      <div className="h-full aethel-card grid grid-cols-[260px,1fr,420px] overflow-hidden border border-[var(--aethel-border-primary)]">
-        <aside className="border-r border-[var(--aethel-border-primary)] p-3 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] overflow-y-auto">
+    <div className="h-[calc(100vh-8.5rem)] min-h-[720px] p-4">
+      <div className={shellClass}>
+        <aside className="overflow-y-auto border-r border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] p-3">
           <h3 className="text-xs uppercase tracking-wider text-[var(--aethel-text-tertiary)] mb-2">Project Graph</h3>
           <div className="space-y-2 text-xs">
             <button type="button" onClick={() => selectEntity(null)} className="w-full text-left px-2 py-1 rounded bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]">
@@ -635,17 +646,17 @@ export default function DashboardCreationWorkbench({
           </div>
         </aside>
 
-        <section className="min-w-0 h-full flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-[var(--aethel-border-primary)] flex items-center justify-between bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]">
+        <section className="flex h-full min-w-0 flex-col overflow-hidden">
+          <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-3 py-2">
             <div className="flex items-center gap-2">
               <span className="mr-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">{surfaceLabel}</span>
-              <button type="button" onClick={() => setCenterPanel('scene')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'scene' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Scene</button>
-              <button type="button" onClick={() => setCenterPanel('timeline')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'timeline' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Timeline</button>
-              <button type="button" onClick={() => setCenterPanel('preview')} className={`px-2 py-1 text-xs rounded ${centerPanel === 'preview' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Preview</button>
+              <button type="button" onClick={() => setCenterPanel('scene')} className={panelToggleClass(centerPanel === 'scene')} aria-label="Abrir painel de cena">Scene</button>
+              <button type="button" onClick={() => setCenterPanel('timeline')} className={panelToggleClass(centerPanel === 'timeline')} aria-label="Abrir painel de timeline">Timeline</button>
+              <button type="button" onClick={() => setCenterPanel('preview')} className={panelToggleClass(centerPanel === 'preview')} aria-label="Abrir painel de preview">Preview</button>
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setRuntimeMode('interactive')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'interactive' ? 'bg-[var(--aethel-primary-dark)] border-[var(--aethel-primary)]' : 'border-[var(--aethel-border-primary)]'}`}>Interactive</button>
-              <button type="button" onClick={() => setRuntimeMode('render')} className={`px-2 py-1 text-xs rounded border ${runtimeMode === 'render' ? 'bg-[var(--aethel-info-dark)] border-[var(--aethel-info)]' : 'border-[var(--aethel-border-primary)]'}`}>Render</button>
+              <button type="button" onClick={() => setRuntimeMode('interactive')} className={modeButtonClass(runtimeMode === 'interactive', 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)] text-[var(--aethel-text-primary)]')} aria-label="Alternar para modo interativo">Interactive</button>
+              <button type="button" onClick={() => setRuntimeMode('render')} className={modeButtonClass(runtimeMode === 'render', 'border-[var(--aethel-info)] bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)] text-[var(--aethel-text-primary)]')} aria-label="Alternar para modo render">Render</button>
             </div>
           </div>
           <div className="flex-1 overflow-hidden bg-[var(--aethel-surface-primary)]">
@@ -676,23 +687,23 @@ export default function DashboardCreationWorkbench({
           </div>
         </section>
 
-        <aside className="border-l border-[var(--aethel-border-primary)] p-3 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] overflow-y-auto">
+        <aside className="overflow-y-auto border-l border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] p-3">
           <div className="flex items-center gap-2 mb-3">
-            <button type="button" onClick={() => setRightPanel('jobs')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'jobs' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>AI Jobs</button>
-            <button type="button" onClick={() => setRightPanel('audio-policy')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'audio-policy' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Audio Policy</button>
-            <button type="button" onClick={() => setRightPanel('inspector')} className={`px-2 py-1 text-xs rounded ${rightPanel === 'inspector' ? 'bg-[var(--aethel-surface-quaternary)]' : 'text-[var(--aethel-text-secondary)]'}`}>Inspector</button>
+            <button type="button" onClick={() => setRightPanel('jobs')} className={panelToggleClass(rightPanel === 'jobs')} aria-label="Abrir painel de jobs de IA">AI Jobs</button>
+            <button type="button" onClick={() => setRightPanel('audio-policy')} className={panelToggleClass(rightPanel === 'audio-policy')} aria-label="Abrir painel de politica de audio">Audio Policy</button>
+            <button type="button" onClick={() => setRightPanel('inspector')} className={panelToggleClass(rightPanel === 'inspector')} aria-label="Abrir painel inspetor">Inspector</button>
           </div>
-          {error && <div className="aethel-state aethel-state-error text-xs mb-2">{error}</div>}
-          {notice && <div className="aethel-state aethel-state-loading text-xs mb-2">{notice}</div>}
+          {error && <div className="mb-2 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] px-3 py-2 text-xs text-[var(--aethel-error)]">{error}</div>}
+          {notice && <div className="mb-2 rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-2 text-xs text-[var(--aethel-info-light)]">{notice}</div>}
 
           {rightPanel === 'jobs' && (
             <div className="space-y-3">
-              <textarea value={musicPrompt} onChange={(e) => setMusicPrompt(e.target.value)} placeholder="Prompt de musica..." className="w-full min-h-16 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 text-xs" />
-              <button type="button" onClick={() => void doAction(generateMusic)} className="w-full px-3 py-1 rounded bg-[var(--aethel-info-dark)] text-xs">Gerar Musica</button>
-              <textarea value={voiceText} onChange={(e) => setVoiceText(e.target.value)} placeholder="Texto de voz..." className="w-full min-h-16 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 text-xs" />
-              <button type="button" onClick={() => void doAction(generateVoice)} className="w-full px-3 py-1 rounded bg-[var(--aethel-success-dark)] text-xs">Gerar Voz</button>
-              <textarea value={modelPrompt} onChange={(e) => setModelPrompt(e.target.value)} placeholder="Prompt 3D..." className="w-full min-h-16 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] p-2 text-xs" />
-              <button type="button" onClick={() => void doAction(generate3D)} className="w-full px-3 py-1 rounded bg-[var(--aethel-accent-dark)] text-xs">Gerar 3D</button>
+              <textarea value={musicPrompt} onChange={(e) => setMusicPrompt(e.target.value)} placeholder="Prompt de musica..." className={textAreaClass} aria-label="Prompt para gerar musica" />
+              <button type="button" onClick={() => void doAction(generateMusic)} className={`${actionButtonBase} bg-[var(--aethel-info-dark)]`} aria-label="Gerar musica">Gerar Musica</button>
+              <textarea value={voiceText} onChange={(e) => setVoiceText(e.target.value)} placeholder="Texto de voz..." className={textAreaClass} aria-label="Texto para gerar voz" />
+              <button type="button" onClick={() => void doAction(generateVoice)} className={`${actionButtonBase} bg-[var(--aethel-success-dark)]`} aria-label="Gerar voz">Gerar Voz</button>
+              <textarea value={modelPrompt} onChange={(e) => setModelPrompt(e.target.value)} placeholder="Prompt 3D..." className={textAreaClass} aria-label="Prompt para gerar modelo 3D" />
+              <button type="button" onClick={() => void doAction(generate3D)} className={`${actionButtonBase} bg-[var(--aethel-accent-dark)]`} aria-label="Gerar modelo 3D">Gerar 3D</button>
               <RenderQueue
                 jobs={queueJobs}
                 onCancel={(jobId) => {
