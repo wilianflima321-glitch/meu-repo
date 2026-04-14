@@ -8,6 +8,11 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { tokens } from '@/lib/design-tokens';
 
+const TEXT_PRIMARY = 'var(--aethel-text-primary)';
+const TEXT_SECONDARY = 'var(--aethel-text-secondary)';
+const TEXT_TERTIARY = 'var(--aethel-text-tertiary)';
+const TEXT_INVERSE = 'var(--aethel-text-inverse)';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -208,7 +213,7 @@ function ToastItem({
     height: '24px',
     borderRadius: '50%',
     backgroundColor: style.iconColor,
-    color: tokens.colors.text.inverse,
+    color: TEXT_INVERSE,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -227,13 +232,13 @@ function ToastItem({
   const titleStyle: React.CSSProperties = {
     fontSize: tokens.typography.fontSize.sm,
     fontWeight: tokens.typography.fontWeight.semibold,
-    color: tokens.colors.text.primary,
+    color: TEXT_PRIMARY,
     marginBottom: toast.title ? tokens.spacing['1'] : 0,
   };
 
   const messageStyle: React.CSSProperties = {
     fontSize: tokens.typography.fontSize.sm,
-    color: tokens.colors.text.secondary,
+    color: TEXT_SECONDARY,
     lineHeight: tokens.typography.lineHeight.relaxed,
   };
 
@@ -242,7 +247,7 @@ function ToastItem({
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
-    color: tokens.colors.text.muted,
+    color: TEXT_TERTIARY,
     fontSize: '18px',
     lineHeight: 1,
     transition: `color ${tokens.animation.duration.fast}`,
@@ -273,7 +278,7 @@ function ToastItem({
                 marginTop: tokens.spacing['2'],
                 padding: `${tokens.spacing['1']} ${tokens.spacing['3']}`,
                 backgroundColor: style.iconColor,
-                color: tokens.colors.text.inverse,
+                color: TEXT_INVERSE,
                 border: 'none',
                 borderRadius: tokens.radius.md,
                 fontSize: tokens.typography.fontSize.xs,
@@ -291,8 +296,8 @@ function ToastItem({
         <button type="button"
           onClick={handleDismiss}
           style={closeButtonStyle}
-          onMouseEnter={(e) => (e.currentTarget.style.color = tokens.colors.text.primary)}
-          onMouseLeave={(e) => (e.currentTarget.style.color = tokens.colors.text.muted)}
+          onMouseEnter={(e) => (e.currentTarget.style.color = TEXT_PRIMARY)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = TEXT_TERTIARY)}
           aria-label="Fechar notificacao"
         >
           x

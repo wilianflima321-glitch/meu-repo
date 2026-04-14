@@ -37,6 +37,13 @@ import {
   Layout,
 } from 'lucide-react'
 
+const SURFACE_PRIMARY = 'var(--aethel-surface-primary)'
+const TEXT_PRIMARY = 'var(--aethel-text-primary)'
+const TEXT_SECONDARY = 'var(--aethel-text-secondary)'
+const TEXT_TERTIARY = 'var(--aethel-text-tertiary)'
+const ACCENT_CYAN = 'var(--aethel-info)'
+const ACCENT_INDIGO = 'var(--aethel-primary-light)'
+
 export default function DesignSystemDemo() {
   const { success, error, warning, info, promise } = useToastActions()
   const [showMobileNav, setShowMobileNav] = React.useState(false)
@@ -58,8 +65,8 @@ export default function DesignSystemDemo() {
     <div
       style={{
         minHeight: '100vh',
-        background: tokens.colors.bg.primary,
-        color: tokens.colors.text.primary,
+        background: SURFACE_PRIMARY,
+        color: TEXT_PRIMARY,
         fontFamily: tokens.typography.fontFamily.sans,
         padding: tokens.spacing['8'],
       }}
@@ -78,7 +85,7 @@ export default function DesignSystemDemo() {
         >
           Aethel Design System v2.1
         </h1>
-        <p style={{ color: tokens.colors.text.secondary, fontSize: tokens.typography.fontSize.lg }}>
+        <p style={{ color: TEXT_SECONDARY, fontSize: tokens.typography.fontSize.lg }}>
           Modern components with glassmorphism, unified tokens, and mobile-first gestures
         </p>
       </GlassPanel>
@@ -92,7 +99,7 @@ export default function DesignSystemDemo() {
             fontSize: tokens.typography.fontSize['2xl'],
             fontWeight: tokens.typography.fontWeight.semibold,
             marginBottom: tokens.spacing['6'],
-            color: tokens.colors.text.primary,
+            color: TEXT_PRIMARY,
           }}
         >
           Glass Panels
@@ -105,28 +112,28 @@ export default function DesignSystemDemo() {
           }}
         >
           <GlassPanel variant="subtle" padding="md">
-            <h3 style={{ marginBottom: tokens.spacing['2'], color: tokens.colors.text.secondary }}>
+            <h3 style={{ marginBottom: tokens.spacing['2'], color: TEXT_SECONDARY }}>
               Subtle
             </h3>
-            <p style={{ fontSize: tokens.typography.fontSize.sm, color: tokens.colors.text.muted }}>
+            <p style={{ fontSize: tokens.typography.fontSize.sm, color: TEXT_TERTIARY }}>
               Light glass effect for secondary content
             </p>
           </GlassPanel>
 
           <GlassPanel variant="medium" padding="md" glow="cyan">
-            <h3 style={{ marginBottom: tokens.spacing['2'], color: tokens.colors.accent.cyan }}>
+            <h3 style={{ marginBottom: tokens.spacing['2'], color: ACCENT_CYAN }}>
               Medium + Glow
             </h3>
-            <p style={{ fontSize: tokens.typography.fontSize.sm, color: tokens.colors.text.muted }}>
+            <p style={{ fontSize: tokens.typography.fontSize.sm, color: TEXT_TERTIARY }}>
               Medium glass with cyan glow effect
             </p>
           </GlassPanel>
 
           <GlassPanel variant="strong" padding="md" glow="indigo">
-            <h3 style={{ marginBottom: tokens.spacing['2'], color: tokens.colors.accent.indigo }}>
+            <h3 style={{ marginBottom: tokens.spacing['2'], color: ACCENT_INDIGO }}>
               Strong + Indigo
             </h3>
-            <p style={{ fontSize: tokens.typography.fontSize.sm, color: tokens.colors.text.muted }}>
+            <p style={{ fontSize: tokens.typography.fontSize.sm, color: TEXT_TERTIARY }}>
               Strong glass with indigo accent
             </p>
           </GlassPanel>
@@ -339,7 +346,7 @@ export default function DesignSystemDemo() {
           width="280px"
         >
           <div style={{ padding: tokens.spacing['6'] }}>
-            <h3 style={{ marginBottom: tokens.spacing['4'], color: tokens.colors.text.primary }}>
+        <h3 style={{ marginBottom: tokens.spacing['4'], color: TEXT_PRIMARY }}>
               Project Files
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing['2'] }}>
@@ -349,7 +356,7 @@ export default function DesignSystemDemo() {
                   style={{
                     padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
                     borderRadius: tokens.radius.md,
-                    color: tokens.colors.text.secondary,
+                color: TEXT_SECONDARY,
                     cursor: 'pointer',
                   }}
                   onMouseEnter={(e) => {
@@ -423,7 +430,7 @@ export default function DesignSystemDemo() {
             gap: tokens.spacing['4'],
           }}
         >
-          <div style={{ color: tokens.colors.text.muted, fontSize: tokens.typography.fontSize.sm }}>
+        <div style={{ color: TEXT_TERTIARY, fontSize: tokens.typography.fontSize.sm }}>
             Aethel Engine © 2026
           </div>
           <div style={{ display: 'flex', gap: tokens.spacing['4'] }}>
