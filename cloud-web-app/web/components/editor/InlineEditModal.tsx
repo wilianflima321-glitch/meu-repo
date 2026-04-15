@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 
 /**
  * InlineEditModal - Componente de edição inline estilo Cursor AI
@@ -73,6 +74,7 @@ export function InlineEditModal({
     'Extraia para função separada',
     'Adicione comentários JSDoc',
   ]);
+  const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
 
   // Focus input on open
   useEffect(() => {
@@ -186,7 +188,8 @@ export function InlineEditModal({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
+              aria-label="Fechar edicao inline"
+              className={`h-8 w-8 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -211,7 +214,8 @@ export function InlineEditModal({
                 variant="outline"
                 size="sm"
                 onClick={() => handleQuickAction(action.prompt)}
-                className="bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)]"
+                aria-label={`Aplicar atalho ${action.label}`}
+                className={`bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                 disabled={isProcessing}
               >
                 <action.icon className="h-3.5 w-3.5 mr-1.5" />
@@ -228,7 +232,8 @@ export function InlineEditModal({
                 value={instruction}
                 onChange={(e) => setInstruction(e.target.value)}
                 placeholder="O que você quer fazer com este código?"
-                className="min-h-[60px] bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] resize-none pr-24"
+                className={`min-h-[60px] resize-none bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] pr-24 text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] ${focusClass}`}
+                aria-label="Descrever alteracao desejada no codigo selecionado"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -240,7 +245,8 @@ export function InlineEditModal({
                 size="sm"
                 onClick={handleSubmit}
                 disabled={isProcessing || (!instruction.trim() && !selectedCode)}
-                className="absolute bottom-2 right-2 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]"
+                aria-label={isProcessing ? 'Gerando sugestao de edicao inline' : 'Gerar sugestao de edicao inline'}
+                className={`absolute bottom-2 right-2 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary-dark)] ${focusClass}`}
               >
                 {isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -262,7 +268,8 @@ export function InlineEditModal({
                     <button type="button"
                       key={i}
                       onClick={() => setInstruction(cmd)}
-                      className="px-2 py-1 text-xs bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] rounded hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] transition-colors"
+                      aria-label={`Usar comando recente ${cmd}`}
+                      className={`rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1 text-xs text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                     >
                       {cmd}
                     </button>
@@ -298,7 +305,8 @@ export function InlineEditModal({
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowDiff(!showDiff)}
-                    className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
+                    aria-label={showDiff ? 'Ocultar diff da sugestao' : 'Mostrar diff da sugestao'}
+                    className={`text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                   >
                     {showDiff ? 'Ocultar Diff' : 'Mostrar Diff'}
                   </Button>
@@ -326,7 +334,8 @@ export function InlineEditModal({
                 <Button type="button"
                   variant="ghost"
                   onClick={() => setSuggestion(null)}
-                  className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
+                  aria-label="Descartar diff atual e regenerar sugestao"
+                  className={`text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Regenerar
@@ -335,13 +344,14 @@ export function InlineEditModal({
                   <Button type="button"
                     variant="outline"
                     onClick={onClose}
-                    className="border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)]"
+                    className={`border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] ${focusClass}`}
                   >
                     Cancelar
                   </Button>
                   <button type="button"
                     onClick={() => void handleApply()}
-                    className="bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)] text-[var(--aethel-text-primary)]"
+                    aria-label="Aplicar edicao inline gerada"
+                    className={`inline-flex items-center rounded-lg bg-[var(--aethel-success)] px-4 py-2 text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-success-dark)] ${focusClass}`}
                   >
                     <Check className="h-4 w-4 mr-2" />
                     Aplicar

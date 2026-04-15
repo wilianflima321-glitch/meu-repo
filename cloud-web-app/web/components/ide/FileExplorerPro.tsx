@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import Codicon, { type CodiconName } from './Codicon'
 import { Search, X, Filter } from 'lucide-react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 // ============= Types =============
 
@@ -356,6 +357,7 @@ export default function FileExplorerPro({
   const resolvedFiles = files ?? internalFiles
   const effectiveLoading = usingExternalFiles ? externalLoading : isLoading
   const effectiveError = usingExternalFiles ? externalError : loadError
+  const iconButtonClass = `p-1 rounded text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   const fetchWorkspaceTree = useCallback(async () => {
     try {
@@ -494,7 +496,7 @@ export default function FileExplorerPro({
             type="button"
             onClick={() => setShowSearch(!showSearch)}
             aria-label="Alternar busca de arquivos"
-            className={`p-1 rounded transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showSearch ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
+            className={`${iconButtonClass} ${showSearch ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Buscar arquivos"
           >
             <Codicon name="search" />
@@ -503,7 +505,7 @@ export default function FileExplorerPro({
             type="button"
             onClick={() => onFileCreate?.('/', 'file')}
             aria-label="Criar novo arquivo"
-            className="p-1 rounded text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+            className={iconButtonClass}
             title="Novo arquivo"
           >
             <Codicon name="new-file" />
@@ -512,7 +514,7 @@ export default function FileExplorerPro({
             type="button"
             onClick={() => onFileCreate?.('/', 'folder')}
             aria-label="Criar nova pasta"
-            className="p-1 rounded text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+            className={iconButtonClass}
             title="Nova pasta"
           >
             <Codicon name="new-folder" />
@@ -521,7 +523,7 @@ export default function FileExplorerPro({
             type="button"
             onClick={handleRefresh}
             aria-label="Atualizar arquivos do workspace"
-            className="p-1 rounded text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+            className={iconButtonClass}
             title="Atualizar"
           >
             <Codicon name="refresh" />
@@ -544,8 +546,9 @@ export default function FileExplorerPro({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar arquivos..."
-              className="w-full pl-8 pr-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded text-xs text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]"
+              className={`w-full rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)] py-1.5 pl-8 pr-3 text-xs text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
               autoFocus
+              aria-label="Buscar arquivos no explorer"
             />
           </div>
         </div>
@@ -555,19 +558,23 @@ export default function FileExplorerPro({
       <div className="flex-1 overflow-y-auto py-1">
         {effectiveError && (
           <div className="px-3 py-2">
-            <div className="aethel-state aethel-state-error text-xs" role="alert" aria-live="polite">
+            <div
+              className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-error-light)]"
+              role="alert"
+              aria-live="polite"
+            >
               {effectiveError}
             </div>
           </div>
         )}
         {effectiveLoading && !effectiveError && (
           <div className="px-3 py-2" aria-live="polite">
-            <div className="aethel-state aethel-state-loading text-xs">
-              <p className="aethel-state-title mb-2">Carregando arvore do workspace...</p>
+            <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] px-3 py-3 text-xs text-[var(--aethel-text-secondary)]">
+              <p className="mb-2 font-medium text-[var(--aethel-text-primary)]">Carregando arvore do workspace...</p>
               <div className="space-y-1.5">
-                <div className="aethel-skeleton-line w-full" />
-                <div className="aethel-skeleton-line w-5/6" />
-                <div className="aethel-skeleton-line w-2/3" />
+                <div className="h-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]" />
+                <div className="h-2 w-5/6 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]" />
+                <div className="h-2 w-2/3 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]" />
               </div>
             </div>
           </div>
@@ -587,8 +594,8 @@ export default function FileExplorerPro({
 
         {filteredFiles.length === 0 && searchQuery && (
           <div className="px-3 py-3">
-            <div className="aethel-state aethel-state-empty text-center text-xs">
-              <p className="aethel-state-title mb-1">Nenhum arquivo encontrado</p>
+            <div className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] px-3 py-3 text-center text-xs text-[var(--aethel-text-secondary)]">
+              <p className="mb-1 font-medium text-[var(--aethel-text-primary)]">Nenhum arquivo encontrado</p>
               <p>{`"${searchQuery}"`}</p>
             </div>
           </div>
@@ -603,13 +610,15 @@ export default function FileExplorerPro({
               <div className="flex items-center justify-center gap-2">
                 <button type="button"
                   onClick={() => onFileCreate?.('/', 'file')}
-                  className="px-2.5 py-1.5 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80"
+                  aria-label="Criar novo arquivo em workspace vazio"
+                  className={`rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                 >
                   Novo arquivo
                 </button>
                 <button type="button"
                   onClick={() => onFileCreate?.('/', 'folder')}
-                  className="px-2.5 py-1.5 rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80"
+                  aria-label="Criar nova pasta em workspace vazio"
+                  className={`rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                 >
                   Nova pasta
                 </button>

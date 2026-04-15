@@ -19,6 +19,7 @@ import {
 } from '@/lib/ai-chat-advanced-client'
 import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
 import { DEFAULT_MODELS } from '@/components/ide/AIChatPanelPro.types'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 type ChatMessage = {
   id: string
@@ -202,6 +203,7 @@ export default function AIChatPanelContainer() {
   const [providerGate, setProviderGate] = useState<ProviderGateState | null>(null)
   const [providerStatus, setProviderStatus] = useState<AiProviderStatusResponse | null>(null)
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
+  const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   const modelOptions = useMemo(() => MODELS, [])
 
@@ -600,7 +602,8 @@ export default function AIChatPanelContainer() {
                 key={intent.id}
                 type="button"
                 onClick={() => void handleSendMessage(intent.buildPrompt(mission))}
-                className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-4 py-3 text-left transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)]"
+                className={`rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-4 py-3 text-left hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] ${focusClass}`}
+                aria-label={`Executar atalho ${intent.label}`}
               >
                 <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{intent.label}</p>
                 <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{intent.description}</p>
@@ -633,7 +636,8 @@ export default function AIChatPanelContainer() {
           <button
             type="button"
             onClick={() => void handleSendMessage(lastFailedMessage)}
-            className="rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-error-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)]"
+            aria-label="Tentar novamente a ultima mensagem com falha"
+            className={`rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] ${focusClass}`}
           >
             Tentar novamente
           </button>
@@ -644,7 +648,8 @@ export default function AIChatPanelContainer() {
           <button
             type="button"
             onClick={handleStopGenerating}
-            className="aethel-button aethel-button-ghost text-[11px] border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]"
+            aria-label="Parar resposta atual da IA"
+            className={`rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] ${focusClass}`}
           >
             Parar resposta
           </button>

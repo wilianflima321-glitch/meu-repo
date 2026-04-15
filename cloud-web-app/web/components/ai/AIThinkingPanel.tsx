@@ -42,6 +42,7 @@ import {
   Zap,
   ArrowRight,
 } from 'lucide-react';
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 
 // ============================================================================
 // TYPES
@@ -310,6 +311,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
   const [copied, setCopied] = useState(false);
   const colors = STEP_COLORS[step.type];
   const Icon = STEP_ICONS[step.type];
+  const iconButtonClass = `rounded transition-colors ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(step.content);
@@ -348,7 +350,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
         <button type="button"
           onClick={() => setIsExpanded(!isExpanded)}
           aria-label={`${isExpanded ? 'Recolher' : 'Expandir'} etapa ${step.title}`}
-          className="w-full flex items-center gap-3 p-3"
+          className={`w-full flex items-center gap-3 p-3 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
         >
           {/* Status indicator */}
           <div className={`
@@ -421,8 +423,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
                       <button type="button"
                         onClick={handleCopy}
                         aria-label={copied ? 'Conteudo copiado' : `Copiar preview de codigo da etapa ${step.title}`}
-                        className="absolute top-2 right-2 p-1 bg-[var(--aethel-surface-tertiary)]
-                                 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
+                        className={`absolute top-2 right-2 bg-[var(--aethel-surface-tertiary)] p-1 hover:bg-[var(--aethel-surface-quaternary)] ${iconButtonClass}`}
                       >
                         {copied ? (
                           <Check className="w-3.5 h-3.5 text-[var(--aethel-success)]" />
@@ -482,6 +483,7 @@ export function AIThinkingPanel({
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [isMaximized, setIsMaximized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const headerButtonClass = `p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
 
   // Auto-scroll to bottom when new steps arrive
   useEffect(() => {
@@ -559,7 +561,7 @@ export function AIThinkingPanel({
           <button type="button"
             onClick={() => setIsCollapsed(!isCollapsed)}
             aria-label={isCollapsed ? 'Expandir painel de pensamento da IA' : 'Recolher painel de pensamento da IA'}
-            className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
+            className={headerButtonClass}
           >
             {isCollapsed ? (
               <ChevronRight className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
@@ -572,7 +574,7 @@ export function AIThinkingPanel({
           <button type="button"
             onClick={() => setIsMaximized(!isMaximized)}
             aria-label={isMaximized ? 'Restaurar tamanho do painel de pensamento da IA' : 'Maximizar painel de pensamento da IA'}
-            className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
+            className={headerButtonClass}
           >
             {isMaximized ? (
               <Minimize2 className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
@@ -586,7 +588,7 @@ export function AIThinkingPanel({
             <button type="button"
               onClick={onClose}
               aria-label="Fechar painel de pensamento da IA"
-              className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded transition-colors"
+              className={headerButtonClass}
             >
               <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
             </button>
