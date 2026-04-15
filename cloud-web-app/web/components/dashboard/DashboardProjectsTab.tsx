@@ -89,8 +89,7 @@ export function DashboardProjectsTab({
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             {onOpenAiChat ? (
-              <button
-                type="button"
+              <button type="button" aria-label="Voltar ao AI Chat"
                 onClick={onOpenAiChat}
                 className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]"
               >
@@ -98,8 +97,7 @@ export function DashboardProjectsTab({
               </button>
             ) : null}
             {onOpenIde ? (
-              <button
-                type="button"
+              <button type="button" aria-label="Seguir para a IDE"
                 onClick={onOpenIde}
                 className="rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
               >
@@ -130,11 +128,8 @@ export function DashboardProjectsTab({
                 {projectTypeOptions.map((option) => {
                   const selected = newProjectType === option.value
                   return (
-                    <button
-                      key={option.value}
-                      type="button"
+                    <button key={option.value} type="button" aria-label={`Selecionar tipo de projeto ${option.label}`}
                       onClick={() => onProjectTypeChange(option.value)}
-                      aria-label={`Selecionar tipo de projeto ${option.label}`}
                       className={`rounded-2xl border p-3 text-left transition ${
                         selected
                           ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
@@ -198,10 +193,8 @@ export function DashboardProjectsTab({
                   {project.status}
                 </span>
               </p>
-              <button
-                type="button"
+              <button type="button" aria-label={`Remover projeto ${project.name}`}
                 onClick={() => onDeleteProject(project.id)}
-                aria-label={`Remover projeto ${project.name}`}
                 className={dangerButtonClass}
               >
                 Remover
@@ -227,11 +220,8 @@ export function DashboardProjectsTab({
                 {projectTypeOptions.map((option) => {
                   const selected = newProjectType === option.value
                   return (
-                    <button
-                      key={option.value}
-                      type="button"
+                    <button key={option.value} type="button" aria-label={`Selecionar tipo de projeto ${option.label}`}
                       onClick={() => onProjectTypeChange(option.value)}
-                      aria-label={`Selecionar tipo de projeto ${option.label}`}
                       className={`rounded-2xl border p-3 text-left transition ${
                         selected
                           ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'

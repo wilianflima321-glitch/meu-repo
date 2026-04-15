@@ -320,7 +320,7 @@ const ProjectCard: React.FC<{
         )}
 
         {/* Favorite */}
-        <button type="button"
+        <button type="button" aria-label={project.isFavorite ? `Remover ${project.name} dos favoritos` : `Adicionar ${project.name} aos favoritos`}
           onClick={(e) => {
             e.stopPropagation();
             onToggleFavorite();
@@ -378,7 +378,7 @@ const ProjectCard: React.FC<{
 
           {/* Menu */}
           <div style={{ position: 'relative' }}>
-            <button type="button"
+            <button type="button" aria-label={`Abrir menu de acoes do projeto ${project.name}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setShowMenu(!showMenu);
@@ -470,7 +470,7 @@ const MenuButton: React.FC<{
   onClick: () => void;
   danger?: boolean;
 }> = ({ icon, label, onClick, danger }) => (
-  <button type="button"
+  <button type="button" aria-label={label}
     onClick={(e) => {
       e.stopPropagation();
       onClick();
@@ -595,9 +595,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
               {(['game', 'web', 'api', 'library', 'other'] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
+                <button key={t} type="button" aria-label={`Selecionar tipo de projeto ${t}`}
                   onClick={() => setType(t)}
                   style={{
                     display: 'flex',
@@ -647,8 +645,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-            <button
-              type="button"
+            <button type="button" aria-label="Cancelar criacao de projeto"
               onClick={onClose}
               style={{
                 padding: '10px 20px',
@@ -662,8 +659,7 @@ const CreateProjectModal: React.FC<CreateModalProps> = ({ isOpen, onClose, onCre
             >
               Cancelar
             </button>
-            <button
-              type="submit"
+            <button type="submit" aria-label="Criar projeto"
               disabled={!name.trim()}
               style={{
                 padding: '10px 20px',
@@ -779,7 +775,7 @@ export const ProjectsDashboard: React.FC = () => {
             </p>
           </div>
 
-          <button type="button"
+          <button type="button" aria-label="Abrir modal de novo projeto"
             onClick={() => setShowCreateModal(true)}
             style={{
               display: 'flex',
@@ -883,7 +879,7 @@ export const ProjectsDashboard: React.FC = () => {
               border: `1px solid ${colors.border}`,
             }}
           >
-            <button type="button"
+            <button type="button" aria-label="Alternar visualizacao para grade"
               onClick={() => setView('grid')}
               style={{
                 padding: '6px 10px',
@@ -896,7 +892,7 @@ export const ProjectsDashboard: React.FC = () => {
             >
               <Grid size={16} />
             </button>
-            <button type="button"
+            <button type="button" aria-label="Alternar visualizacao para lista"
               onClick={() => setView('list')}
               style={{
                 padding: '6px 10px',
@@ -934,7 +930,7 @@ export const ProjectsDashboard: React.FC = () => {
                 : 'Crie um novo projeto e comece a desenvolver sua proxima grande ideia.'}
             </p>
             {!search && (
-              <button type="button"
+              <button type="button" aria-label="Abrir modal para criar primeiro projeto"
                 onClick={() => setShowCreateModal(true)}
                 style={{
                   display: 'inline-flex',
