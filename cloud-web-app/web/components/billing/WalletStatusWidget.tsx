@@ -227,7 +227,7 @@ export function WalletStatusWidget({
   // Error state - show minimal UI
   if (error || !wallet) {
     return (
-      <button type="button"
+      <button type="button" aria-label="Tentar recarregar saldo da carteira"
         onClick={() => mutate()}
         className={`flex items-center gap-1.5 px-2 py-1 text-[var(--aethel-text-tertiary)]
                    hover:text-[var(--aethel-text-tertiary)] transition-colors ${className}`}
@@ -245,7 +245,7 @@ export function WalletStatusWidget({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {/* Main Widget Button */}
-      <button type="button"
+      <button type="button" aria-label={isExpanded ? 'Recolher widget da carteira' : 'Expandir widget da carteira'}
         onClick={() => setIsExpanded(!isExpanded)}
         className={`
           flex items-center gap-2 px-2.5 py-1 rounded-md transition-all
@@ -303,7 +303,7 @@ export function WalletStatusWidget({
           <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Carteira</span>
-              <button type="button"
+              <button type="button" aria-label="Atualizar dados da carteira"
                 onClick={() => mutate()}
                 className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
                 title="Atualizar"
@@ -386,7 +386,7 @@ export function WalletStatusWidget({
 
           {/* Actions */}
           <div className="p-3 flex gap-2">
-            <button type="button"
+            <button type="button" aria-label="Recarregar creditos pela carteira"
               onClick={() => {
                 setIsExpanded(false);
                 onRecharge?.();
@@ -398,7 +398,7 @@ export function WalletStatusWidget({
               <CreditCard className="w-4 h-4" />
               Recarregar
             </button>
-            <button type="button"
+            <button type="button" aria-label="Abrir detalhes da carteira"
               onClick={() => {
                 setIsExpanded(false);
                 onOpenWallet?.();
@@ -418,7 +418,7 @@ export function WalletStatusWidget({
       {showLowBalanceAlert && wallet.lowBalanceWarning && (
         <div className="fixed bottom-20 right-4 w-80 bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]
                       rounded-lg shadow-2xl p-4 animate-in slide-in-from-right-5 z-50">
-          <button type="button"
+          <button type="button" aria-label="Fechar alerta de saldo baixo"
             onClick={() => setShowLowBalanceAlert(false)}
             className="absolute top-2 right-2 p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
           >
@@ -436,7 +436,7 @@ export function WalletStatusWidget({
                 Recarregue para continuar criando.
               </p>
               <div className="flex gap-2 mt-3">
-                <button type="button"
+                <button type="button" aria-label="Abrir recarga imediata de creditos"
                   onClick={() => {
                     setShowLowBalanceAlert(false);
                     onRecharge?.();
@@ -446,7 +446,7 @@ export function WalletStatusWidget({
                 >
                   Recarregar agora
                 </button>
-                <button type="button"
+                <button type="button" aria-label="Fechar alerta e decidir depois"
                   onClick={() => setShowLowBalanceAlert(false)}
                   className="px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)]
                            rounded text-sm text-[var(--aethel-text-secondary)] transition-colors"

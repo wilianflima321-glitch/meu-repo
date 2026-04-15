@@ -262,7 +262,7 @@ export function LowBalanceModal({
             `}
           >
             {/* Close button */}
-            <button type="button"
+            <button type="button" aria-label="Fechar modal de saldo baixo"
               onClick={onClose}
               className="absolute top-4 right-4 p-2 hover:bg-[var(--aethel-surface-quaternary)]
                        rounded-lg transition-colors z-10"
@@ -374,7 +374,7 @@ export function LowBalanceModal({
 
             {/* Actions */}
             <div className="p-6 pt-0 space-y-3">
-              <button type="button"
+              <button type="button" aria-label="Recarregar creditos agora"
                 onClick={handleContinue}
                 disabled={!selectedPackage || isProcessing}
                 className="w-full flex items-center justify-center gap-2 py-3
@@ -406,7 +406,7 @@ export function LowBalanceModal({
                 )}
               </button>
 
-              <button type="button"
+              <button type="button" aria-label="Lembrar mais tarde sobre saldo baixo"
                 onClick={handleRemindLater}
                 className="w-full py-2.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
                          transition-colors"
@@ -428,8 +428,8 @@ export function LowBalanceModal({
                     <p className="text-xs text-[color-mix(in_srgb,var(--aethel-primary)_70%,transparent)] mt-1">
                       Considere o plano Pro para creditos ilimitados por $49/mês
                     </p>
-                    <button type="button" className="flex items-center gap-1 mt-2 text-xs font-medium
-                                     text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
+                    <button type="button" aria-label="Ver planos para upgrade de creditos" className="flex items-center gap-1 mt-2 text-xs font-medium
+                                      text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
                       Ver planos
                       <ChevronRight className="w-3 h-3" />
                     </button>

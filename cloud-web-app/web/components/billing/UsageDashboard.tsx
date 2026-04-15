@@ -169,7 +169,11 @@ export function UsageDashboard() {
             Renova em {daysUntilRenewal} dias
           </p>
         </div>
-        <button type="button" className="px-4 py-2 text-sm bg-[var(--aethel-info)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors">
+        <button
+          type="button"
+          aria-label="Fazer upgrade do plano a partir do dashboard de uso"
+          className="px-4 py-2 text-sm bg-[var(--aethel-info)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_80%,transparent)] text-[var(--aethel-text-primary)] rounded-lg font-medium transition-colors"
+        >
           Fazer upgrade
         </button>
       </div>
@@ -347,7 +351,7 @@ function UsageError() {
       <p className="text-[var(--aethel-text-tertiary)] mb-4">
         Não foi possível carregar seus dados de consumo. Tente novamente.
       </p>
-      <button type="button"
+      <button type="button" aria-label="Recarregar pagina de uso"
         onClick={() => window.location.reload()}
         className="px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors"
       >

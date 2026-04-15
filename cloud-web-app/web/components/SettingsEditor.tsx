@@ -8,6 +8,18 @@
 import { useState, useEffect, useMemo } from 'react'
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
 
+const settingsInputClass =
+  'rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-2 text-xs text-[var(--aethel-text-primary)] outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]'
+
+const settingsPrimaryButtonClass =
+  'inline-flex items-center justify-center rounded-lg bg-[var(--aethel-primary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:bg-[var(--aethel-primary-dark)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]'
+
+const settingsSecondaryButtonClass =
+  'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-quaternary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]'
+
+const settingsDangerButtonClass =
+  'inline-flex items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-error-light)] transition hover:bg-[color-mix(in_srgb,var(--aethel-error)_18%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)]'
+
 interface SettingDefinition {
   key: string
   title: string
@@ -406,7 +418,7 @@ export default function SettingsEditor() {
             type="number"
             value={value}
             onChange={(event) => updateSetting(setting.key, parseInt(event.target.value))}
-            className="aethel-input w-32 text-xs"
+            className={`${settingsInputClass} w-32`}
           />
         )
 
@@ -416,7 +428,7 @@ export default function SettingsEditor() {
             type="text"
             value={value}
             onChange={(event) => updateSetting(setting.key, event.target.value)}
-            className="aethel-input w-full max-w-md text-xs"
+            className={`${settingsInputClass} w-full max-w-md`}
           />
         )
 
@@ -425,7 +437,7 @@ export default function SettingsEditor() {
           <select
             value={value}
             onChange={(event) => updateSetting(setting.key, event.target.value)}
-            className="aethel-input text-xs"
+            className={settingsInputClass}
           >
             {setting.enum?.map((option) => (
               <option key={option} value={option}>
@@ -449,7 +461,7 @@ export default function SettingsEditor() {
             placeholder="Buscar configuracoes..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="aethel-input w-full text-xs"
+            className={`${settingsInputClass} w-full`}
           />
         </div>
 
@@ -457,16 +469,18 @@ export default function SettingsEditor() {
           <div className="flex gap-2">
             <button type="button"
               onClick={() => setScope('user')}
-              className={`aethel-button flex-1 text-xs ${
-                scope === 'user' ? 'aethel-button-primary' : 'aethel-button-secondary'
+              aria-label="Mostrar configuracoes do usuario"
+              className={`flex-1 ${
+                scope === 'user' ? settingsPrimaryButtonClass : settingsSecondaryButtonClass
               }`}
             >
               Usuario
             </button>
             <button type="button"
               onClick={() => setScope('workspace')}
-              className={`aethel-button flex-1 text-xs ${
-                scope === 'workspace' ? 'aethel-button-primary' : 'aethel-button-secondary'
+              aria-label="Mostrar configuracoes do workspace"
+              className={`flex-1 ${
+                scope === 'workspace' ? settingsPrimaryButtonClass : settingsSecondaryButtonClass
               }`}
             >
               Workspace
@@ -493,7 +507,12 @@ export default function SettingsEditor() {
         </div>
 
         <div className="border-t border-[var(--aethel-border-primary)] p-4">
-          <button type="button" onClick={resetAllSettings} className="aethel-button aethel-button-danger w-full text-xs">
+          <button
+            type="button"
+            onClick={resetAllSettings}
+            aria-label="Redefinir todas as configuracoes"
+            className={`${settingsDangerButtonClass} w-full`}
+          >
             Redefinir todas as configuracoes
           </button>
         </div>
@@ -531,7 +550,8 @@ export default function SettingsEditor() {
                     {isModified && (
                       <button type="button"
                         onClick={() => resetSetting(setting.key)}
-                        className="aethel-button aethel-button-ghost text-xs"
+                        aria-label={`Redefinir configuracao ${setting.title}`}
+                        className={settingsSecondaryButtonClass}
                       >
                         Redefinir
                       </button>
@@ -544,7 +564,7 @@ export default function SettingsEditor() {
           </div>
 
           {currentCategory?.settings.length === 0 && (
-            <div className="aethel-state aethel-state-empty py-12">
+            <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_75%,transparent)] py-12 text-center text-sm text-[var(--aethel-text-tertiary)]">
               <p>Nenhuma configuracao encontrada para &quot;{searchQuery}&quot;</p>
             </div>
           )}
