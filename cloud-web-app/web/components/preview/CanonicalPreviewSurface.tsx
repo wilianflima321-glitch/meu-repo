@@ -94,6 +94,16 @@ const NexusCanvasV2 = dynamic(
   { ssr: false }
 );
 
+const FacialAnimationEditor = dynamic(
+  () => import('@/components/character/FacialAnimationEditor'),
+  { ssr: false, loading: () => <PreviewSkeleton /> }
+);
+
+const HairFurEditor = dynamic(
+  () => import('@/components/character/HairFurEditor'),
+  { ssr: false, loading: () => <PreviewSkeleton /> }
+);
+
 // ============================================================================
 // SKELETON & UI PRIMITIVES
 // ============================================================================
@@ -526,6 +536,9 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
   const [transformSpace, setTransformSpace] = useState<ViewportTransformSpace>('world');
   const [snapEnabled, setSnapEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [characterTool, setCharacterTool] = useState<'facial' | 'hair' | null>(null);
+  const [facialBlendShapeCount, setFacialBlendShapeCount] = useState(0);
+  const [hairPresetLabel, setHairPresetLabel] = useState('wavy');
   const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null;
 
   return (
@@ -542,22 +555,64 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
         />
       }
       center={
-        <AethelViewport3D
-          objects={objects}
-          selectedIds={selectedIds}
-          transformMode={transformMode}
-          transformSpace={transformSpace}
-          snapEnabled={snapEnabled}
-          renderMode={renderMode}
-          isPlaying={isPlaying}
-          onTogglePlayTest={() => setIsPlaying((current) => !current)}
-          onObjectsChange={setObjects}
-          onSelectionChange={setSelectedIds}
-          onTransformModeChange={setTransformMode}
-          onTransformSpaceChange={setTransformSpace}
-          onSnapEnabledChange={setSnapEnabled}
-          onAIAction={() => undefined}
-        />
+        <div className="relative h-full">
+          <AethelViewport3D
+            objects={objects}
+            selectedIds={selectedIds}
+            transformMode={transformMode}
+            transformSpace={transformSpace}
+            snapEnabled={snapEnabled}
+            renderMode={renderMode}
+            isPlaying={isPlaying}
+            onTogglePlayTest={() => setIsPlaying((current) => !current)}
+            onObjectsChange={setObjects}
+            onSelectionChange={setSelectedIds}
+            onTransformModeChange={setTransformMode}
+            onTransformSpaceChange={setTransformSpace}
+            onSnapEnabledChange={setSnapEnabled}
+            onAIAction={() => undefined}
+          />
+          {characterTool && (
+            <div className="absolute inset-0 z-30 bg-[rgba(4,8,16,0.82)] backdrop-blur-sm">
+              <div className="flex h-full flex-col overflow-hidden border-l border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]">
+                <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Character Workflow</p>
+                    <h3 className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">
+                      {characterTool === 'facial' ? 'Facial Animation Editor' : 'Hair & Fur Editor'}
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCharacterTool(null)}
+                    aria-label="Fechar ferramenta contextual de personagem"
+                    className="rounded-lg border border-[var(--aethel-border-subtle)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+                  >
+                    Fechar
+                  </button>
+                </div>
+                <div className="min-h-0 flex-1 overflow-auto">
+                  {characterTool === 'facial' ? (
+                    <FacialAnimationEditor
+                      characterId={selectedObject?.id ?? 'viewport-character'}
+                      onBlendShapeUpdate={(blendShapes) => {
+                        const activeCount = Object.values(blendShapes).filter((value) => value > 0.01).length;
+                        setFacialBlendShapeCount(activeCount);
+                      }}
+                    />
+                  ) : (
+                    <HairFurEditor
+                      characterId={selectedObject?.id ?? 'viewport-character'}
+                      onHairUpdate={(hairData) => {
+                        setHairPresetLabel(hairData.preset);
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       }
       right={
         <SceneViewportInspector
@@ -566,6 +621,10 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
           transformSpace={transformSpace}
           snapEnabled={snapEnabled}
           isPlaying={isPlaying}
+          facialBlendShapeCount={facialBlendShapeCount}
+          hairPresetLabel={hairPresetLabel}
+          onOpenFacialEditor={() => setCharacterTool('facial')}
+          onOpenHairEditor={() => setCharacterTool('hair')}
           onTransformModeChange={setTransformMode}
           onTransformSpaceChange={setTransformSpace}
           onSnapEnabledChange={setSnapEnabled}

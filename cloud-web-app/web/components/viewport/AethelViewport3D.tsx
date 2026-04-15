@@ -422,6 +422,10 @@ export function SceneViewportInspector({
   transformSpace,
   snapEnabled,
   isPlaying,
+  facialBlendShapeCount,
+  hairPresetLabel,
+  onOpenFacialEditor,
+  onOpenHairEditor,
   onTransformModeChange,
   onTransformSpaceChange,
   onSnapEnabledChange,
@@ -432,6 +436,10 @@ export function SceneViewportInspector({
   transformSpace: ViewportTransformSpace
   snapEnabled: boolean
   isPlaying: boolean
+  facialBlendShapeCount: number
+  hairPresetLabel: string
+  onOpenFacialEditor: () => void
+  onOpenHairEditor: () => void
   onTransformModeChange: (mode: ViewportTransformMode) => void
   onTransformSpaceChange: (space: ViewportTransformSpace) => void
   onSnapEnabledChange: (enabled: boolean) => void
@@ -506,6 +514,24 @@ export function SceneViewportInspector({
               <p className="text-xs font-medium text-[var(--aethel-text-primary)]">Text to action</p>
               <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">“move este objeto 2 para cima”, “rotate 15”, “scale 2”.</p>
             </div>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Character Tools</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" aria-label="Abrir editor facial contextual" onClick={onOpenFacialEditor} className={panelButton}>
+              <Sparkles className="h-4 w-4" />
+              Facial
+            </button>
+            <button type="button" aria-label="Abrir editor de cabelo contextual" onClick={onOpenHairEditor} className={panelButton}>
+              <Box className="h-4 w-4" />
+              Hair
+            </button>
+          </div>
+          <div className="mt-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-3 text-xs text-[var(--aethel-text-secondary)]">
+            <p>Blend shapes ativos: <span className="font-medium text-[var(--aethel-text-primary)]">{facialBlendShapeCount}</span></p>
+            <p className="mt-1">Preset de hair: <span className="font-medium text-[var(--aethel-text-primary)]">{hairPresetLabel}</span></p>
           </div>
         </div>
 
