@@ -18,6 +18,7 @@ import {
   type ViewportTransformMode,
   type ViewportTransformSpace,
 } from '@/components/viewport/AethelViewport3D';
+import type { VisualScript } from '@/components/visual-scripting/VisualScriptEditor';
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -101,6 +102,21 @@ const FacialAnimationEditor = dynamic(
 
 const HairFurEditor = dynamic(
   () => import('@/components/character/HairFurEditor'),
+  { ssr: false, loading: () => <PreviewSkeleton /> }
+);
+
+const VisualScriptEditor = dynamic(
+  () => import('@/components/visual-scripting/VisualScriptEditor'),
+  { ssr: false, loading: () => <PreviewSkeleton /> }
+);
+
+const VFXGraphEditor = dynamic(
+  () => import('@/components/editors/VFXGraphEditor'),
+  { ssr: false, loading: () => <PreviewSkeleton /> }
+);
+
+const AbilityEditor = dynamic(
+  () => import('@/components/engine/AbilityEditor'),
   { ssr: false, loading: () => <PreviewSkeleton /> }
 );
 
@@ -448,6 +464,49 @@ function usePreviewRuntime(projectId?: string, autoProvision = false) {
 // ============================================================================
 
 type Point3 = { x: number; y: number; z: number };
+type ViewportWorkflowTool = 'facial' | 'hair' | 'visual-script' | 'vfx' | 'ability';
+
+const INITIAL_VIEWPORT_VISUAL_SCRIPT: VisualScript = {
+  id: 'viewport-script',
+  name: 'Viewport Logic',
+  nodes: [],
+  edges: [],
+  variables: [],
+};
+
+function cloneViewportObject(object: ViewportSceneObject): ViewportSceneObject {
+  return {
+    ...object,
+    position: [...object.position] as [number, number, number],
+    rotation: [...object.rotation] as [number, number, number],
+    scale: [...object.scale] as [number, number, number],
+  };
+}
+
+function deriveVisualScriptPreviewPatch(script: VisualScript, anchor: ViewportSceneObject): Partial<ViewportSceneObject> {
+  const moveNodes = script.nodes.filter((node) => node.data.definition.type === 'action_move').length;
+  const rotateNodes = script.nodes.filter((node) => node.data.definition.type === 'action_rotate').length;
+  const forceNodes = script.nodes.filter((node) => node.data.definition.type === 'physics_add_force').length;
+  const spawnNodes = script.nodes.filter((node) => node.data.definition.type === 'action_spawn').length;
+
+  return {
+    position: [
+      anchor.position[0] + forceNodes * 0.18,
+      anchor.position[1] + moveNodes * 0.12,
+      anchor.position[2] - forceNodes * 0.16,
+    ],
+    rotation: [
+      anchor.rotation[0],
+      anchor.rotation[1] + rotateNodes * 0.12,
+      anchor.rotation[2],
+    ],
+    scale: [
+      anchor.scale[0] + spawnNodes * 0.03,
+      anchor.scale[1] + spawnNodes * 0.03,
+      anchor.scale[2] + spawnNodes * 0.03,
+    ],
+  };
+}
 
 type CanonicalLiveProps = {
   variant: 'live';
@@ -536,10 +595,48 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
   const [transformSpace, setTransformSpace] = useState<ViewportTransformSpace>('world');
   const [snapEnabled, setSnapEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [characterTool, setCharacterTool] = useState<'facial' | 'hair' | null>(null);
+  const [workflowTool, setWorkflowTool] = useState<ViewportWorkflowTool | null>(null);
   const [facialBlendShapeCount, setFacialBlendShapeCount] = useState(0);
   const [hairPresetLabel, setHairPresetLabel] = useState('wavy');
+  const [visualScript, setVisualScript] = useState<VisualScript>(INITIAL_VIEWPORT_VISUAL_SCRIPT);
+  const visualScriptAnchorRef = useRef<ViewportSceneObject | null>(cloneViewportObject(viewportSeedObjects[0]));
   const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null;
+
+  const openWorkflowTool = useCallback((tool: ViewportWorkflowTool) => {
+    setWorkflowTool(tool);
+    if (tool === 'visual-script' && selectedObject) {
+      visualScriptAnchorRef.current = cloneViewportObject(selectedObject);
+    }
+  }, [selectedObject]);
+
+  const handleVisualScriptChange = useCallback((script: VisualScript) => {
+    setVisualScript(script);
+
+    const anchor = visualScriptAnchorRef.current;
+    if (!anchor) return;
+
+    const patch = deriveVisualScriptPreviewPatch(script, anchor);
+    setObjects((current) =>
+      current.map((object) =>
+        object.id === anchor.id
+          ? { ...object, ...patch }
+          : object
+      )
+    );
+  }, []);
+
+  const activeWorkflowLabel =
+    workflowTool === 'visual-script'
+      ? 'Visual Script'
+      : workflowTool === 'vfx'
+        ? 'VFX Graph'
+        : workflowTool === 'ability'
+          ? 'Ability'
+          : workflowTool === 'facial'
+            ? 'Facial'
+            : workflowTool === 'hair'
+              ? 'Hair'
+              : 'Nenhum';
 
   return (
     <ViewportWorkbenchShell
@@ -572,27 +669,44 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
             onSnapEnabledChange={setSnapEnabled}
             onAIAction={() => undefined}
           />
-          {characterTool && (
+          {workflowTool && (
             <div className="absolute inset-0 z-30 bg-[rgba(4,8,16,0.82)] backdrop-blur-sm">
               <div className="flex h-full flex-col overflow-hidden border-l border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]">
                 <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Character Workflow</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Viewport Workflow</p>
                     <h3 className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">
-                      {characterTool === 'facial' ? 'Facial Animation Editor' : 'Hair & Fur Editor'}
+                      {workflowTool === 'facial'
+                        ? 'Facial Animation Editor'
+                        : workflowTool === 'hair'
+                          ? 'Hair & Fur Editor'
+                          : workflowTool === 'visual-script'
+                            ? 'Visual Script Editor'
+                            : workflowTool === 'vfx'
+                              ? 'VFX Graph Editor'
+                              : 'Ability Editor'}
                     </h3>
+                    <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">
+                      {workflowTool === 'visual-script'
+                        ? 'Os nos Move, Rotate e Add Force refletem no objeto selecionado em tempo real.'
+                        : workflowTool === 'vfx'
+                          ? 'Use este overlay para iterar VFX sem sair do viewport soberano.'
+                          : workflowTool === 'ability'
+                            ? 'Abilities e preview ficam ancorados ao objeto ativo do viewport.'
+                            : 'Ferramenta contextual de personagem conectada ao mesmo objeto 3D.'}
+                    </p>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setCharacterTool(null)}
-                    aria-label="Fechar ferramenta contextual de personagem"
+                    onClick={() => setWorkflowTool(null)}
+                    aria-label="Fechar ferramenta contextual do viewport"
                     className="rounded-lg border border-[var(--aethel-border-subtle)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
                   >
                     Fechar
                   </button>
                 </div>
                 <div className="min-h-0 flex-1 overflow-auto">
-                  {characterTool === 'facial' ? (
+                  {workflowTool === 'facial' ? (
                     <FacialAnimationEditor
                       characterId={selectedObject?.id ?? 'viewport-character'}
                       onBlendShapeUpdate={(blendShapes) => {
@@ -600,13 +714,19 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
                         setFacialBlendShapeCount(activeCount);
                       }}
                     />
-                  ) : (
+                  ) : workflowTool === 'hair' ? (
                     <HairFurEditor
                       characterId={selectedObject?.id ?? 'viewport-character'}
                       onHairUpdate={(hairData) => {
                         setHairPresetLabel(hairData.preset);
                       }}
                     />
+                  ) : workflowTool === 'visual-script' ? (
+                    <VisualScriptEditor script={visualScript} onChange={handleVisualScriptChange} />
+                  ) : workflowTool === 'vfx' ? (
+                    <VFXGraphEditor />
+                  ) : (
+                    <AbilityEditor entityId={selectedObject?.id ?? 'viewport-entity'} />
                   )}
                 </div>
               </div>
@@ -623,8 +743,14 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
           isPlaying={isPlaying}
           facialBlendShapeCount={facialBlendShapeCount}
           hairPresetLabel={hairPresetLabel}
-          onOpenFacialEditor={() => setCharacterTool('facial')}
-          onOpenHairEditor={() => setCharacterTool('hair')}
+          visualScriptNodeCount={visualScript.nodes.length}
+          visualScriptEdgeCount={visualScript.edges.length}
+          activeWorkflowLabel={activeWorkflowLabel}
+          onOpenFacialEditor={() => openWorkflowTool('facial')}
+          onOpenHairEditor={() => openWorkflowTool('hair')}
+          onOpenVisualScript={() => openWorkflowTool('visual-script')}
+          onOpenVfxGraph={() => openWorkflowTool('vfx')}
+          onOpenAbilityEditor={() => openWorkflowTool('ability')}
           onTransformModeChange={setTransformMode}
           onTransformSpaceChange={setTransformSpace}
           onSnapEnabledChange={setSnapEnabled}

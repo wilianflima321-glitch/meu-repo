@@ -144,7 +144,7 @@ function TagBadge({ tag, onRemove }: { tag: string; onRemove?: () => void }) {
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs text-[var(--aethel-text-primary)] ${getTagColor(tag)}`}>
       {tag.split('.').pop()}
       {onRemove && (
-        <button type="button" onClick={onRemove} className="ml-1 hover:text-[var(--aethel-error-light)]">×</button>
+        <button type="button" aria-label={`Remover tag ${tag}`} onClick={onRemove} className="ml-1 hover:text-[var(--aethel-error-light)]">×</button>
       )}
     </span>
   );
@@ -357,7 +357,7 @@ export function AbilityEditor({
         <div className="p-4 border-b border-[var(--aethel-border-primary)]">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-[var(--aethel-text-primary)]">Abilities</h2>
-            <button type="button"
+            <button type="button" aria-label="Criar nova ability"
               onClick={() => setEditMode(true)}
               className="p-1.5 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg transition"
             >
@@ -388,7 +388,7 @@ export function AbilityEditor({
         {/* Tabs */}
         <div className="flex border-b border-[var(--aethel-border-primary)]">
           {(['abilities', 'attributes', 'effects'] as const).map(tab => (
-            <button type="button"
+            <button type="button" aria-label={`Abrir aba ${tab}`}
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 text-sm font-medium transition ${
@@ -480,13 +480,13 @@ export function AbilityEditor({
                   </div>
 
                   <div className="flex gap-3 pt-4">
-                    <button type="button"
+                    <button type="button" aria-label="Criar ability com os dados do formulario"
                       onClick={handleCreateAbility}
                       className="px-4 py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] transition"
                     >
                       Create Ability
                     </button>
-                    <button type="button"
+                    <button type="button" aria-label="Cancelar criacao de ability"
                       onClick={() => setEditMode(false)}
                       className="px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded-lg text-[var(--aethel-text-primary)] transition"
                     >
@@ -596,12 +596,12 @@ export function AbilityEditor({
           </div>
 
           {selectedAbility && (
-            <button type="button" className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition">
+            <button type="button" aria-label="Testar ability selecionada" className="w-full py-2 bg-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition">
               Test Ability
             </button>
           )}
 
-          <button type="button"
+          <button type="button" aria-label="Salvar alteracoes da ability"
             onClick={handleSave}
             className="w-full py-2 bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition flex items-center justify-center gap-2"
           >

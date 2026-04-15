@@ -1,12 +1,32 @@
-// Enhanced physics utilities for scene verification
-// - computeRange: vacuum range formula
-// - computeRangeWithDrag: numerical integration with linear drag approximation
-// - sampleTrajectory: returns sampled points for a trajectory (supports mass & drag)
-// - aabbIntersects / trajectoryIntersectsAABBs: collision helpers
+// Deprecated compatibility shim for legacy root-level physics helpers.
+// Canonical implementation for the sovereign viewport now lives in:
+// `cloud-web-app/web/lib/three/physics.ts`
+//
+// This file stays in place to avoid breaking older tests and scripts while we
+// finish migrating the remaining root-level tooling.
+//
+// Exports maintained:
+// - computeRange
+// - computeRangeWithDrag
+// - sampleTrajectory
+// - aabbIntersects
+// - trajectoryIntersectsAABBs
+
+let hasWarnedAboutDeprecation = false;
+
+function warnDeprecation() {
+  if (hasWarnedAboutDeprecation || process.env.NODE_ENV === 'test') return;
+  hasWarnedAboutDeprecation = true;
+  console.warn(
+    '[deprecated] Root physics.js is kept only as a compatibility shim. ' +
+      'Use cloud-web-app/web/lib/three/physics.ts for new viewport work.'
+  );
+}
 
 function toRad(deg) { return (deg * Math.PI) / 180; }
 
 function computeRange(v0, angleDeg, g = 9.81) {
+  warnDeprecation();
   const theta = toRad(angleDeg);
   if (typeof v0 !== 'number' || typeof angleDeg !== 'number' || g <= 0) return NaN;
   return (v0 * v0 * Math.sin(2 * theta)) / g;
@@ -15,6 +35,7 @@ function computeRange(v0, angleDeg, g = 9.81) {
 // Numerical integration with a simple quadratic drag model: Fd = 0.5 * Cd * rho * A * v^2
 // For simplicity we accept a combined drag coefficient 'k' where acceleration drag = -k * v^2 / m
 function computeRangeWithDrag(v0, angleDeg, opts = {}) {
+  warnDeprecation();
   const { g = 9.81, mass = 1, dragCoef = 0 } = opts;
   // if no drag, fallback to analytic
   if (!dragCoef || dragCoef === 0) return computeRange(v0, angleDeg, g);
@@ -25,6 +46,7 @@ function computeRangeWithDrag(v0, angleDeg, opts = {}) {
 }
 
 function sampleTrajectory(v0, angleDeg, g = 9.81, steps = 100, opts = {}) {
+  warnDeprecation();
   const theta = toRad(angleDeg);
   const mass = typeof opts.mass === 'number' ? opts.mass : 1;
   const dragCoef = typeof opts.dragCoef === 'number' ? opts.dragCoef : 0; // combined k
@@ -70,6 +92,7 @@ function sampleTrajectory(v0, angleDeg, g = 9.81, steps = 100, opts = {}) {
 }
 
 function aabbIntersects(a, b) {
+  warnDeprecation();
   // a and b: { x, y, z, w, h, d } treated as min corner
   const ax1 = a.x || 0, ay1 = a.y || 0, az1 = a.z || 0;
   const ax2 = (a.x || 0) + (a.w || 0), ay2 = (a.y || 0) + (a.h || 0), az2 = (a.z || 0) + (a.d || 0);
@@ -79,6 +102,7 @@ function aabbIntersects(a, b) {
 }
 
 function trajectoryIntersectsAABBs(trajPoints, aabbs) {
+  warnDeprecation();
   if (!Array.isArray(trajPoints) || !Array.isArray(aabbs)) return false;
   
   // Early exit if no boxes to check
