@@ -7,9 +7,17 @@ import { MagicWandChat } from './MagicWandChat';
 import { useMagicWand } from './useMagicWand';
 import { ViewportWorkbenchShell } from './ViewportWorkbenchShell';
 import { Outliner3D } from '@/components/ide/Outliner3D';
-import { PreviewViewport3D } from '@/components/ide/PreviewViewport3D';
 import { PropertiesPanel3D } from '@/components/ide/PropertiesPanel3D';
 import { Timeline3D } from '@/components/ide/Timeline3D';
+import {
+  AethelViewport3D,
+  SceneViewportInspector,
+  SceneViewportOutliner,
+  viewportSeedObjects,
+  type ViewportSceneObject,
+  type ViewportTransformMode,
+  type ViewportTransformSpace,
+} from '@/components/viewport/AethelViewport3D';
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -512,14 +520,58 @@ export default function CanonicalPreviewSurface(props: CanonicalPreviewSurfacePr
 }
 
 function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic' }) {
+  const [objects, setObjects] = useState<ViewportSceneObject[]>(viewportSeedObjects);
+  const [selectedIds, setSelectedIds] = useState<string[]>([viewportSeedObjects[0]?.id].filter(Boolean) as string[]);
+  const [transformMode, setTransformMode] = useState<ViewportTransformMode>('translate');
+  const [transformSpace, setTransformSpace] = useState<ViewportTransformSpace>('world');
+  const [snapEnabled, setSnapEnabled] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null;
+
   return (
     <ViewportWorkbenchShell
       mode="viewport"
       title="Canonical Preview Surface"
       subtitle="Viewport soberano com outliner, inspector generativo e mini timeline para animacao e filme curto."
-      left={<Outliner3D />}
-      center={<PreviewViewport3D mode="3d" onAIAction={() => undefined} />}
-      right={<PropertiesPanel3D />}
+      left={
+        <SceneViewportOutliner
+          objects={objects}
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
+          onObjectsChange={setObjects}
+        />
+      }
+      center={
+        <AethelViewport3D
+          objects={objects}
+          selectedIds={selectedIds}
+          transformMode={transformMode}
+          transformSpace={transformSpace}
+          snapEnabled={snapEnabled}
+          renderMode={renderMode}
+          isPlaying={isPlaying}
+          onTogglePlayTest={() => setIsPlaying((current) => !current)}
+          onObjectsChange={setObjects}
+          onSelectionChange={setSelectedIds}
+          onTransformModeChange={setTransformMode}
+          onTransformSpaceChange={setTransformSpace}
+          onSnapEnabledChange={setSnapEnabled}
+          onAIAction={() => undefined}
+        />
+      }
+      right={
+        <SceneViewportInspector
+          selectedObject={selectedObject}
+          transformMode={transformMode}
+          transformSpace={transformSpace}
+          snapEnabled={snapEnabled}
+          isPlaying={isPlaying}
+          onTransformModeChange={setTransformMode}
+          onTransformSpaceChange={setTransformSpace}
+          onSnapEnabledChange={setSnapEnabled}
+          onTogglePlayTest={() => setIsPlaying((current) => !current)}
+        />
+      }
       bottom={<Timeline3D duration={12} />}
     />
   );

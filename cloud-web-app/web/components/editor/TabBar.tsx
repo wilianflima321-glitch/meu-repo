@@ -517,7 +517,7 @@ function TabContextMenu({
         }
 
         return (
-          <button type="button"
+          <button type="button" aria-label={`${action.label} ${tab.title}`}
             key={action.id}
             onClick={() => {
               action.action(tab);
@@ -638,7 +638,7 @@ function Tab({
 
       {/* Close button */}
       {!tab.isPinned && (
-        <button type="button"
+        <button type="button" aria-label={`Fechar aba ${tab.title}`}
           onClick={e => {
             e.stopPropagation();
             onClose();
@@ -758,7 +758,7 @@ export function TabBar({ className }: { className?: string }) {
       {/* Overflow menu */}
       {overflowTabs.length > 0 && (
         <div className="relative">
-          <button type="button"
+          <button type="button" aria-label={showOverflowMenu ? 'Fechar menu de abas ocultas' : 'Abrir menu de abas ocultas'}
             onClick={() => setShowOverflowMenu(!showOverflowMenu)}
             className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
           >
@@ -772,7 +772,7 @@ export function TabBar({ className }: { className?: string }) {
               {overflowTabs.map(tab => {
                 const Icon = typeof tab.icon !== 'string' ? tab.icon || getFileIcon(tab.path).icon : FileText;
                 return (
-                  <button type="button"
+                  <button type="button" aria-label={`Ativar aba ${tab.title}`}
                     key={tab.id}
                     onClick={() => {
                       setActiveTab(tab.id);
