@@ -164,6 +164,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
         {/* Expand toggle */}
         <button
           type="button"
+          aria-label={expanded ? `Recolher detalhes de ${process.name}` : `Expandir detalhes de ${process.name}`}
           style={{
             background: 'transparent',
             border: 'none',
@@ -274,7 +275,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
         {/* Actions */}
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {isAttached ? (
-            <button type="button"
+            <button type="button" aria-label={`Desanexar depurador de ${process.name}`}
               onClick={onDetach}
               style={{
                 display: 'flex',
@@ -293,7 +294,7 @@ const ProcessItem: React.FC<ProcessItemProps> = ({
               Detach
             </button>
           ) : (
-            <button type="button"
+            <button type="button" aria-label={`Anexar depurador a ${process.name}`}
               onClick={onAttach}
               disabled={isAttaching || process.status === 'stopped'}
               style={{
@@ -573,7 +574,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
         </div>
 
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button type="button"
+          <button type="button" aria-label="Atualizar lista de processos depuráveis"
             onClick={refreshProcesses}
             disabled={resolvedRefreshing}
             style={{
@@ -798,7 +799,7 @@ export const DebugAttachUI: React.FC<DebugAttachUIProps> = ({
               {resolvedProcesses.find((p) => p.id === resolvedAttachedId)?.name}
             </span>
           </div>
-          <button type="button"
+          <button type="button" aria-label="Desanexar depurador da sessão atual"
             onClick={() => handleDetach(resolvedAttachedId)}
             style={{
               padding: '4px 8px',
@@ -828,7 +829,7 @@ const QuickConnectButton: React.FC<{
   color: string;
   onClick: () => void;
 }> = ({ icon, label, color, onClick }) => (
-  <button type="button"
+  <button type="button" aria-label={label}
     onClick={onClick}
     style={{
       display: 'flex',

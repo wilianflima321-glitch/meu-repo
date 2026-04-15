@@ -19,7 +19,6 @@ import { EditorApplyBridgeProvider } from "@/components/ide/EditorApplyBridgeCon
 import { IdeWorkbenchCommandExtras } from "@/components/ide/IdeWorkbenchCommandExtras";
 import { DevicePreview } from "@/components/ide/DevicePreview";
 import { ConsoleIntegration } from "@/components/ide/ConsoleIntegration";
-import { ProfessionalViewport3D } from "@/components/ide/ProfessionalViewport3D";
 import { GitIntegration } from "@/components/ide/GitIntegration";
 import { IntelliSense } from "@/components/ide/IntelliSense";
 import { ErrorHighlighting } from "@/components/ide/ErrorHighlighting";
@@ -1695,7 +1694,12 @@ function IDEContent() {
                   </div>
                   <div className="flex-1 min-h-0">
                     {previewMode === 'console' && <ConsoleIntegration />}
-                    {previewMode === 'viewport3d' && <ProfessionalViewport3D />}
+                    {previewMode === 'viewport3d' && (
+                      <CanonicalPreviewSurface
+                        variant="scene"
+                        renderMode="draft"
+                      />
+                    )}
                     {previewMode === 'runtime' && (
                       activeFile ? (
                         <div className="h-full min-h-0">

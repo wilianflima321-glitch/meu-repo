@@ -174,7 +174,7 @@ const Tab: React.FC<TabProps> = ({
       )}
 
       {/* Close button */}
-      <button type="button"
+      <button type="button" aria-label={`Close ${tab.title}`}
         className={`
           flex-shrink-0 p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]
           ${isActive || tab.dirty ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
@@ -184,7 +184,6 @@ const Tab: React.FC<TabProps> = ({
           e.stopPropagation();
           onTabClose();
         }}
-        aria-label={`Close ${tab.title}`}
       >
         {tab.dirty ? (
           <Circle size={12} className="fill-current" />
@@ -201,32 +200,32 @@ const Tab: React.FC<TabProps> = ({
                      rounded-md shadow-xl z-50 py-1"
           onClick={(e) => e.stopPropagation()}
         >
-          <button type="button"
+          <button type="button" aria-label={`Close ${tab.title}`}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => { onTabClose(); setShowMenu(false); }}
           >
             Close
           </button>
-          <button type="button"
+          <button type="button" aria-label={`Close other tabs than ${tab.title}`}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close Others
           </button>
-          <button type="button"
+          <button type="button" aria-label="Close all tabs"
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close All
           </button>
-          <button type="button"
+          <button type="button" aria-label={`Close tabs to the right of ${tab.title}`}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Close to the Right
           </button>
           <div className="border-t border-[var(--aethel-border-secondary)] my-1" />
-          <button type="button"
+          <button type="button" aria-label={tab.pinned ? `Unpin ${tab.title}` : `Pin ${tab.title}`}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] flex items-center gap-2"
             onClick={() => { onTabPin(); setShowMenu(false); }}
           >
@@ -234,19 +233,19 @@ const Tab: React.FC<TabProps> = ({
             {tab.pinned ? 'Unpin' : 'Pin'}
           </button>
           <div className="border-t border-[var(--aethel-border-secondary)] my-1" />
-          <button type="button"
+          <button type="button" aria-label={`Copy path of ${tab.title}`}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Copy Path
           </button>
-          <button type="button"
+          <button type="button" aria-label={`Copy relative path of ${tab.title}`}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
             Copy Relative Path
           </button>
-          <button type="button"
+          <button type="button" aria-label={`Reveal ${tab.title} in explorer`}
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)]"
             onClick={() => setShowMenu(false)}
           >
@@ -377,28 +376,25 @@ const TabBar: React.FC<TabBarProps> = ({
 
       {/* Actions */}
       <div className="flex items-center gap-0.5 px-1 border-l border-[var(--aethel-border-secondary)]">
-        <button type="button"
+        <button type="button" aria-label="Split editor right"
           className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
           onClick={() => onSplit('horizontal')}
           title="Split Editor Right"
-          aria-label="Split editor right"
         >
           <SplitSquareHorizontal size={14} className="text-[var(--aethel-text-tertiary)]" />
         </button>
-        <button type="button"
+        <button type="button" aria-label="Split editor down"
           className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
           onClick={() => onSplit('vertical')}
           title="Split Editor Down"
-          aria-label="Split editor down"
         >
           <SplitSquareVertical size={14} className="text-[var(--aethel-text-tertiary)]" />
         </button>
         {canClose && (
-          <button type="button"
+          <button type="button" aria-label="Close editor group"
             className="p-1.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] transition-colors"
             onClick={onGroupClose}
             title="Close Editor Group"
-            aria-label="Close editor group"
           >
             <X size={14} className="text-[var(--aethel-text-tertiary)]" />
           </button>

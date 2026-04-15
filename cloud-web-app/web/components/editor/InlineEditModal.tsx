@@ -270,10 +270,9 @@ export function InlineEditModal({
                 <div className="text-xs text-[var(--aethel-text-quaternary)] mb-2">Comandos recentes:</div>
                 <div className="flex flex-wrap gap-1.5">
                   {recentCommands.map((cmd, i) => (
-                    <button type="button"
+                    <button type="button" aria-label={`Usar comando recente ${cmd}`}
                       key={i}
                       onClick={() => setInstruction(cmd)}
-                      aria-label={`Usar comando recente ${cmd}`}
                       className={`rounded bg-[var(--aethel-surface-tertiary)] px-2 py-1 text-xs text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                     >
                       {cmd}
@@ -354,9 +353,8 @@ export function InlineEditModal({
                   >
                     Cancelar
                   </Button>
-                  <button type="button"
+                  <button type="button" aria-label="Aplicar edicao inline gerada"
                     onClick={() => void handleApply()}
-                    aria-label="Aplicar edicao inline gerada"
                     className={`inline-flex items-center rounded-lg bg-[var(--aethel-success)] px-4 py-2 text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-success-dark)] ${focusClass}`}
                   >
                     <Check className="h-4 w-4 mr-2" />

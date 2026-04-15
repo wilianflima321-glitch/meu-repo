@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { tokens, gradients } from '@/lib/design-tokens';
@@ -119,8 +119,8 @@ export function ModernIDEShell({
 }: ModernIDEShellProps) {
   const [internalPanelState, setInternalPanelState] = useState<PanelState>({
     sidebar: { open: sidebarOpen, size: 20 },
-    editor: { open: true, size: 45 },
-    preview: { open: true, size: 35 },
+    editor: { open: true, size: 40 },
+    preview: { open: true, size: 40 },
     chat: { open: false, size: 25 },
   });
 
@@ -131,6 +131,14 @@ export function ModernIDEShell({
   const mainAreaRef = useRef<HTMLDivElement>(null);
   const contentRowRef = useRef<HTMLDivElement>(null);
   const editorColumnRef = useRef<HTMLDivElement>(null);
+  const previewPanelLabel =
+    activePreviewMode === 'viewport3d'
+      ? 'Viewport'
+      : activePreviewMode === 'console'
+        ? 'Console'
+        : activePreviewMode === 'device'
+          ? 'Device Preview'
+          : 'Preview';
 
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
@@ -391,7 +399,7 @@ export function ModernIDEShell({
                       style={iconButtonStyle}
                       aria-label="Fechar copiloto"
                     >
-                      ×
+                      Ã—
                     </button>
                   </div>
                   <div style={{ flex: 1, overflow: 'auto' }}>
@@ -404,7 +412,7 @@ export function ModernIDEShell({
 
           {panelState.preview.open && !isCompact && (
             <ResizeHandle
-              ariaLabel="Redimensionar prévia"
+              ariaLabel="Redimensionar prÃ©via"
               orientation="vertical"
               onMouseDown={(event) => startHorizontalResize('preview', event)}
               onAdjust={(delta) => setPanelSize('preview', panelState.preview.size + delta)}
@@ -450,13 +458,13 @@ export function ModernIDEShell({
                   }}
                 >
                   <Play size={14} />
-                  Prévia
+                  {previewPanelLabel}
                 </span>
                 <button
                   type="button"
                   onClick={() => togglePanel('preview')}
                   style={iconButtonStyle}
-                  aria-label="Fechar prévia"
+                  aria-label={`Fechar ${previewPanelLabel.toLowerCase()}`}
                 >
                   <ChevronRight size={16} />
                 </button>
@@ -489,10 +497,11 @@ export function ModernIDEShell({
               gap: tokens.spacing['2'],
               zIndex: 10,
             }}
-            aria-label="Abrir prévia"
+            aria-label={`Abrir ${previewPanelLabel.toLowerCase()}`}
           >
             <ChevronLeft size={16} />
             <Play size={14} />
+            {previewPanelLabel}
           </button>
         )}
       </div>
@@ -603,7 +612,7 @@ function ResizeHandle({
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'transparent';
       }}
-      title={`${ariaLabel} — use setas${isVertical ? ' esquerda/direita' : ' cima/baixo'} para ajustar`}
+      title={`${ariaLabel} â€” use setas${isVertical ? ' esquerda/direita' : ' cima/baixo'} para ajustar`}
     >
       <div
         style={{
@@ -727,7 +736,7 @@ function IDEHeader({
           />
           <PanelToggle
             icon={<Play size={16} />}
-            label="Prévia"
+            label="PrÃ©via"
             active={panelState.preview.open}
             onClick={() => onTogglePanel('preview')}
           />
@@ -792,7 +801,7 @@ function IDEHeader({
             color: TEXT_SECONDARY,
             opacity: onOpenSettings ? 1 : 0.65,
           }}
-          aria-label="Abrir configurações"
+          aria-label="Abrir configuraÃ§Ãµes"
         >
           <Settings size={18} />
         </button>
@@ -872,6 +881,7 @@ function BottomDock({
     { id: 'explorer', icon: <FolderTree size={16} />, label: 'Arquivos', shortcut: 'Ctrl+Shift+E' },
     { id: 'search', icon: <Search size={16} />, label: 'Buscar', shortcut: 'Ctrl+Shift+F' },
     { id: 'git', icon: <GitBranch size={16} />, label: 'Git', shortcut: 'Ctrl+Shift+G' },
+    { id: 'viewport', icon: <Play size={16} />, label: 'Viewport', shortcut: 'Ctrl+Shift+V' },
     { id: 'console', icon: <Terminal size={16} />, label: 'Console', shortcut: 'Ctrl+J' },
     { id: 'diagnostics', icon: <AlertCircle size={16} />, label: 'Erros', shortcut: 'Ctrl+Shift+M' },
     { id: 'chat', icon: <Sparkles size={16} />, label: 'IA', shortcut: 'Ctrl+I' },
@@ -883,6 +893,7 @@ function BottomDock({
         const isActive =
           (item.id === 'explorer' && panelState.sidebar.open && activeSidebarTab === 'explorer') ||
           (item.id === 'git' && panelState.sidebar.open && activeSidebarTab === 'git') ||
+          (item.id === 'viewport' && panelState.preview.open && activePreviewMode === 'viewport3d') ||
           (item.id === 'console' && panelState.preview.open && activePreviewMode === 'console') ||
           (item.id === 'chat' && panelState.chat.open);
 
@@ -903,6 +914,11 @@ function BottomDock({
               }
               if (item.id === 'search') {
                 onOpenCommandPalette?.('files');
+                return;
+              }
+              if (item.id === 'viewport') {
+                if (!panelState.preview.open) onTogglePanel('preview');
+                onSelectPreviewMode?.('viewport3d');
                 return;
               }
               if (item.id === 'console') {
@@ -1031,7 +1047,7 @@ function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
     { id: 'sidebar', icon: <FolderTree size={20} />, label: 'Arquivos' },
     { id: 'editor', icon: <Code2 size={20} />, label: 'Editor' },
     { id: 'chat', icon: <MessageSquare size={20} />, label: 'Copiloto' },
-    { id: 'preview', icon: <Play size={20} />, label: 'Prévia' },
+    { id: 'preview', icon: <Play size={20} />, label: 'PrÃ©via' },
   ] as const;
 
   return (
@@ -1100,5 +1116,6 @@ export function ModernIDELoading() {
 }
 
 export default ModernIDEShell;
+
 
 

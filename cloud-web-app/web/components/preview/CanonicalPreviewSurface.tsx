@@ -5,6 +5,11 @@ import dynamic from 'next/dynamic';
 import { createHMRBridge, type HMRBridge } from '@/lib/preview/hmr-bridge';
 import { MagicWandChat } from './MagicWandChat';
 import { useMagicWand } from './useMagicWand';
+import { ViewportWorkbenchShell } from './ViewportWorkbenchShell';
+import { Outliner3D } from '@/components/ide/Outliner3D';
+import { PreviewViewport3D } from '@/components/ide/PreviewViewport3D';
+import { PropertiesPanel3D } from '@/components/ide/PropertiesPanel3D';
+import { Timeline3D } from '@/components/ide/Timeline3D';
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -455,7 +460,16 @@ type CanonicalSceneProps = {
   renderMode?: 'draft' | 'cinematic';
 };
 
-export type CanonicalPreviewSurfaceProps = CanonicalLiveProps | CanonicalRuntimeProps | CanonicalSceneProps;
+type CanonicalCanvasProps = {
+  variant: 'canvas';
+  renderMode?: 'draft' | 'cinematic';
+};
+
+export type CanonicalPreviewSurfaceProps =
+  | CanonicalLiveProps
+  | CanonicalRuntimeProps
+  | CanonicalSceneProps
+  | CanonicalCanvasProps;
 
 // ============================================================================
 // MAIN COMPONENT
@@ -487,10 +501,42 @@ export default function CanonicalPreviewSurface(props: CanonicalPreviewSurfacePr
   }
 
   if (props.variant === 'scene') {
-    return <NexusCanvasV2 renderMode={props.renderMode ?? 'draft'} />;
+    return <SceneViewportSurface renderMode={props.renderMode ?? 'draft'} />;
+  }
+
+  if (props.variant === 'canvas') {
+    return <CanvasViewportSurface renderMode={props.renderMode ?? 'draft'} />;
   }
 
   return <RuntimePreview {...props} />;
+}
+
+function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic' }) {
+  return (
+    <ViewportWorkbenchShell
+      mode="viewport"
+      title="Canonical Preview Surface"
+      subtitle="Viewport soberano com outliner, inspector generativo e mini timeline para animacao e filme curto."
+      left={<Outliner3D />}
+      center={<PreviewViewport3D mode="3d" onAIAction={() => undefined} />}
+      right={<PropertiesPanel3D />}
+      bottom={<Timeline3D duration={12} />}
+    />
+  );
+}
+
+function CanvasViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic' }) {
+  return (
+    <ViewportWorkbenchShell
+      mode="canvas"
+      title="Aethel Canvas Mode"
+      subtitle={`Canvas conectado ao projeto para explorar variantes, research visual e composicao ${renderMode}.`}
+      left={<Outliner3D />}
+      center={<NexusCanvasV2 renderMode={renderMode} />}
+      right={<PropertiesPanel3D />}
+      bottom={<Timeline3D duration={8} />}
+    />
+  );
 }
 
 function RuntimePreview(props: CanonicalRuntimeProps) {
