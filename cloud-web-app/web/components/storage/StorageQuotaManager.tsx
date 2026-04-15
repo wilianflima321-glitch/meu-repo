@@ -36,6 +36,19 @@ interface StorageQuotaManagerProps {
   className?: string
 }
 
+const storageCardShellStyle: React.CSSProperties = {
+  border: '1px solid var(--aethel-border-primary)',
+  borderRadius: '1rem',
+  background: 'color-mix(in srgb, var(--aethel-surface-secondary) 86%, transparent)',
+  boxShadow: 'var(--aethel-shadow-xl)',
+}
+
+const storagePrimaryButtonClass =
+  'inline-flex items-center justify-center rounded-lg bg-[var(--aethel-primary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:bg-[var(--aethel-primary-dark)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] disabled:opacity-50'
+
+const storageSecondaryButtonClass =
+  'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:bg-[var(--aethel-surface-quaternary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] disabled:opacity-50'
+
 // ============================================================================
 // ICONS
 // ============================================================================
@@ -324,7 +337,7 @@ export function StorageQuotaManager({
 
   if (isLoading) {
     return (
-      <div className={`aethel-card aethel-p-4 ${className}`}>
+      <div className={`p-4 ${className}`} style={storageCardShellStyle}>
         <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
           <div className="animate-spin">
             <Icons.Refresh />
@@ -336,7 +349,7 @@ export function StorageQuotaManager({
   }
 
   return (
-    <div className={`aethel-card ${className}`}>
+    <div className={className} style={storageCardShellStyle}>
       <div className="border-b border-[var(--aethel-border-primary)] p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -354,7 +367,8 @@ export function StorageQuotaManager({
           ) : (
             <button type="button"
               onClick={requestPersistence}
-              className="aethel-button aethel-button-secondary text-xs"
+              aria-label="Solicitar armazenamento persistente"
+              className={storageSecondaryButtonClass}
               title="Solicitar armazenamento persistente para evitar limpeza automatica pelo navegador"
             >
               <Icons.Shield />
@@ -414,6 +428,7 @@ export function StorageQuotaManager({
       <div className="border-t border-[var(--aethel-border-primary)]">
         <button type="button"
           onClick={() => setShowDetails(!showDetails)}
+          aria-label={showDetails ? 'Recolher detalhes do cache' : 'Expandir detalhes do cache'}
           className="flex w-full items-center justify-between p-3 text-xs text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]"
         >
           <span>Detalhes do cache</span>
@@ -473,7 +488,8 @@ export function StorageQuotaManager({
               <button type="button"
                 onClick={clearSelectedCache}
                 disabled={selectedForCleanup.size === 0 || isClearing}
-                className="aethel-button aethel-button-primary flex-1 gap-2 text-xs disabled:opacity-50"
+                aria-label={`Limpar ${selectedForCleanup.size} itens selecionados do cache`}
+                className={`${storagePrimaryButtonClass} flex-1 gap-2`}
               >
                 {isClearing ? (
                   <div className="animate-spin">
@@ -488,7 +504,8 @@ export function StorageQuotaManager({
               <button type="button"
                 onClick={clearAllCache}
                 disabled={cacheEntries.length === 0 || isClearing}
-                className="aethel-button aethel-button-secondary text-xs disabled:opacity-50"
+                aria-label="Limpar todo o cache local"
+                className={storageSecondaryButtonClass}
               >
                 Limpar tudo
               </button>
@@ -498,7 +515,11 @@ export function StorageQuotaManager({
       </div>
 
       <div className="border-t border-[var(--aethel-border-primary)] p-4">
-        <button type="button" className="aethel-button aethel-button-ghost w-full justify-center gap-2 text-xs">
+        <button
+          type="button"
+          aria-label="Exportar assets locais"
+          className={`${storageSecondaryButtonClass} w-full justify-center gap-2`}
+        >
           <Icons.Download />
           <span>Exportar assets locais</span>
         </button>
