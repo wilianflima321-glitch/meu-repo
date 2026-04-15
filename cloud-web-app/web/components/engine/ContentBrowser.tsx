@@ -936,7 +936,7 @@ export default function ContentBrowser({
             }}>
               <div style={{ fontSize: '64px', marginBottom: '16px' }}>📭</div>
               <div>No assets found</div>
-              <button type="button"
+              <button type="button" aria-label="Open import assets modal"
                 onClick={() => setShowImportModal(true)}
                 style={{
                   marginTop: '16px',

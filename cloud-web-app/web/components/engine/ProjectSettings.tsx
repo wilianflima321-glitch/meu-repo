@@ -595,7 +595,7 @@ function PathEditor({ setting, value, onChange }: SettingEditorProps) {
           padding: '8px 12px',
         }}
       />
-      <button type="button"
+      <button type="button" aria-label="Browse for project setting file"
         onClick={() => {/* Open file picker */}}
         style={{
           padding: '8px 16px',
@@ -639,7 +639,7 @@ function KeybindEditor({ setting, value, onChange }: SettingEditorProps) {
   }, [handleKeyDown]);
 
   return (
-    <button type="button"
+    <button type="button" aria-label={isListening ? 'Stop listening for input' : 'Start listening for input'}
       onClick={startListening}
       style={{
         padding: '8px 16px',
@@ -829,7 +829,7 @@ export default function ProjectSettings() {
 
         <div style={{ width: '1px', height: '24px', background: 'var(--aethel-border-primary)' }} />
 
-        <button type="button"
+        <button type="button" aria-label="Import project settings"
           onClick={handleImport}
           style={{
             padding: '8px 16px',
@@ -843,7 +843,7 @@ export default function ProjectSettings() {
           📥 Import
         </button>
 
-        <button type="button"
+        <button type="button" aria-label="Export project settings"
           onClick={handleExport}
           style={{
             padding: '8px 16px',
@@ -857,7 +857,7 @@ export default function ProjectSettings() {
           📤 Export
         </button>
 
-        <button type="button"
+        <button type="button" aria-label="Reset project settings"
           onClick={handleReset}
           style={{
             padding: '8px 16px',
@@ -871,7 +871,7 @@ export default function ProjectSettings() {
           🔄 Reset
         </button>
 
-        <button type="button"
+        <button type="button" aria-label="Save project settings"
           onClick={handleSave}
           disabled={!hasChanges}
           style={{
@@ -899,7 +899,7 @@ export default function ProjectSettings() {
           overflowY: 'auto',
         }}>
           {categories.map((category) => (
-            <button type="button"
+            <button type="button" aria-label={`Open ${category.name} project settings`}
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               style={{

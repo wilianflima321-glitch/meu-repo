@@ -176,7 +176,7 @@ function TreeItem({
         }}
       >
         {/* Expand Arrow */}
-        <button type="button"
+        <button type="button" aria-label={isExpanded ? `Collapse ${object.name}` : `Expand ${object.name}`}
           onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
           style={{
             width: '16px',
@@ -258,7 +258,7 @@ function TreeItem({
         )}
 
         {/* Visibility Toggle */}
-        <button type="button"
+        <button type="button" aria-label={object.visible ? `Hide ${object.name}` : `Show ${object.name}`}
           onClick={(e) => { e.stopPropagation(); onToggleVisibility(); }}
           style={{
             width: '20px',
@@ -278,7 +278,7 @@ function TreeItem({
         </button>
 
         {/* Bloquear Toggle */}
-        <button type="button"
+        <button type="button" aria-label={object.locked ? `Unlock ${object.name}` : `Lock ${object.name}`}
           onClick={(e) => { e.stopPropagation(); onToggleBloquear(); }}
           style={{
             width: '20px',
@@ -365,7 +365,7 @@ function OutlinerContextMenu({
     >
       {items.map((item) => (
         <React.Fragment key={item.id}>
-          <button type="button"
+          <button type="button" aria-label={`Run world outliner action ${item.label}`}
             onClick={() => {
               onAction(item.id);
               onClose();
@@ -437,7 +437,7 @@ function OutlinerFilterBar({
 
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
-        <button type="button"
+        <button type="button" aria-label={showTypeFilter ? 'Hide type filters' : 'Show type filters'}
           onClick={() => setMostrarTypeFilter(!showTypeFilter)}
           style={{
             padding: '4px 8px',
@@ -497,7 +497,7 @@ function OutlinerFilterBar({
       </div>
 
       {/* Recolher tudo */}
-      <button type="button"
+      <button type="button" aria-label="Collapse all world outliner items"
         onClick={onCollapseAll}
         style={{
           padding: '4px 8px',
@@ -514,7 +514,7 @@ function OutlinerFilterBar({
       </button>
 
       {/* Expandir tudo */}
-      <button type="button"
+      <button type="button" aria-label="Expand all world outliner items"
         onClick={onExpandAll}
         style={{
           padding: '4px 8px',

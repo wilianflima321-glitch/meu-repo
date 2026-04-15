@@ -109,7 +109,7 @@ export default function GameViewport({ mode = 'edit' }: GameViewportProps) {
           <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] animate-pulse"/>
           {Physics ? 'Rapier Physics v3' : 'No Physics (Rapier not installed)'}
         </div>
-        <button type="button"
+        <button type="button" aria-label="Spawn cube into game viewport"
           onClick={() => setBoxes(prev => [...prev, [(Math.random() - 0.5) * 5, 10, (Math.random() - 0.5) * 5]])}
           className="bg-[var(--aethel-info)] hover:brightness-110 text-[var(--aethel-text-primary)] px-3 py-1 rounded text-xs font-bold transition"
         >

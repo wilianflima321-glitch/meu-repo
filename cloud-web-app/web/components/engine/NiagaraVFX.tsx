@@ -629,7 +629,7 @@ function EffectPresetsPanel({ onSelect }: EffectPresetsPanelProps) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
         {presets.map((preset) => (
-          <button type="button"
+          <button type="button" aria-label={`Select Niagara preset ${preset.name}`}
             key={preset.id}
             onClick={() => onSelect(preset.id)}
             style={{
@@ -852,7 +852,7 @@ export default function NiagaraVFX() {
         gap: '8px',
       }}>
         <span style={{ fontWeight: 'bold', marginRight: '16px' }}>🎆 Niagara VFX Editor</span>
-        <button type="button"
+        <button type="button" aria-label={isPlaying ? 'Pause Niagara simulation' : 'Play Niagara simulation'}
           onClick={handlePlayPause}
           style={{
             padding: '6px 12px',
@@ -868,7 +868,7 @@ export default function NiagaraVFX() {
         >
           {isPlaying ? '⏸️ Pause' : '▶️ Play'}
         </button>
-        <button type="button"
+        <button type="button" aria-label="Restart Niagara simulation"
           onClick={handleRestart}
           style={{
             padding: '6px 12px',
@@ -1011,7 +1011,7 @@ export default function NiagaraVFX() {
           {/* Tabs */}
           <div style={{ display: 'flex', borderBottom: '1px solid var(--aethel-border-primary)' }}>
             {(['parameters', 'presets', 'timeline'] as const).map((tab) => (
-              <button type="button"
+              <button type="button" aria-label={`Open Niagara ${tab} tab`}
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{

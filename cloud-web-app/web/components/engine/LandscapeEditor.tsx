@@ -427,7 +427,7 @@ function Toolbar({
       borderBottom: '1px solid var(--aethel-border-primary)',
     }}>
       {/* Brush Active Toggle */}
-      <button type="button"
+      <button type="button" aria-label={brushActive ? 'Disable terrain brush' : 'Enable terrain brush'}
         onClick={() => onBrushActiveChange(!brushActive)}
         style={{
           padding: '8px 16px',
@@ -448,7 +448,7 @@ function Toolbar({
       {/* Mode Buttons */}
       <div style={{ display: 'flex', gap: '4px' }}>
         {modes.map(({ mode, icon, label }) => (
-          <button type="button"
+          <button type="button" aria-label={`Select terrain brush mode ${label}`}
             key={mode}
             onClick={() => onBrushSettingsChange({ ...brushSettings, mode })}
             style={{
@@ -473,7 +473,7 @@ function Toolbar({
           <div style={{ width: '1px', height: '24px', background: 'var(--aethel-surface-quaternary)' }} />
           <div style={{ display: 'flex', gap: '4px' }}>
             {operations.map(({ op, icon, label }) => (
-              <button type="button"
+              <button type="button" aria-label={`Select terrain brush operation ${label}`}
                 key={op}
                 onClick={() => onBrushSettingsChange({ ...brushSettings, operation: op })}
                 style={{
@@ -498,7 +498,7 @@ function Toolbar({
 
       {/* Generate Menu */}
       <div style={{ position: 'relative' }}>
-        <button type="button"
+        <button type="button" aria-label="Toggle terrain generate menu"
           style={{
             padding: '6px 12px',
             background: 'var(--aethel-surface-primary)',
@@ -532,7 +532,7 @@ function Toolbar({
           }}
         >
           {['flat', 'hills', 'mountains', 'valley', 'island', 'canyon'].map((type) => (
-            <button type="button"
+            <button type="button" aria-label={`Generate terrain preset ${type}`}
               key={type}
               onClick={() => {
                 onGenerateTerrain(type);
@@ -561,7 +561,7 @@ function Toolbar({
       </div>
 
       {/* Import/Export */}
-      <button type="button"
+      <button type="button" aria-label="Import terrain data"
         onClick={onImport}
         style={{
           padding: '6px 12px',
@@ -575,7 +575,7 @@ function Toolbar({
       >
         📥 Import
       </button>
-      <button type="button"
+      <button type="button" aria-label="Export terrain data"
         onClick={onExport}
         style={{
           padding: '6px 12px',
@@ -707,7 +707,7 @@ function BrushPanel({ brushSettings, onBrushSettingsChange }: BrushPanelProps) {
             { name: 'Hard', size: 5, strength: 0.8, falloff: 0.5 },
             { name: 'Large', size: 30, strength: 0.2, falloff: 3 },
           ].map((preset) => (
-            <button type="button"
+            <button type="button" aria-label={`Apply terrain brush preset ${preset.name}`}
               key={preset.name}
               onClick={() => onBrushSettingsChange({
                 ...brushSettings,
@@ -773,7 +773,7 @@ function LayersPanel({
         alignItems: 'center',
       }}>
         🎨 Terrain Layers
-        <button type="button"
+        <button type="button" aria-label="Add terrain layer"
           onClick={onAddLayer}
           style={{
             padding: '4px 8px',
@@ -814,7 +814,7 @@ function LayersPanel({
               <span style={{ flex: 1, color: 'var(--aethel-text-primary)', fontSize: '13px' }}>{layer.name}</span>
               <span style={{ color: 'var(--aethel-text-muted)', fontSize: '11px' }}>#{index}</span>
               {layers.length > 1 && (
-                <button type="button"
+                <button type="button" aria-label={`Remove terrain layer ${layer.name}`}
                   onClick={(e) => { e.stopPropagation(); onRemoveLayer(layer.id); }}
                   style={{
                     background: 'none',
@@ -1125,7 +1125,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
             borderBottom: '1px solid var(--aethel-border-primary)',
           }}>
             {(['brush', 'layers'] as const).map((panel) => (
-              <button type="button"
+              <button type="button" aria-label={`Open terrain ${panel} panel`}
                 key={panel}
                 onClick={() => setActivePanel(panel)}
                 style={{

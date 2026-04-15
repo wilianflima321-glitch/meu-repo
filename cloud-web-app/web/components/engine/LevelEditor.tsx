@@ -388,7 +388,7 @@ function Toolbar({
       {/* Transform Mode */}
       <div style={{ display: 'flex', gap: '2px', marginRight: '8px' }}>
         {(['translate', 'rotate', 'scale'] as TransformMode[]).map((mode) => (
-          <button type="button"
+          <button type="button" aria-label={`Switch transform mode to ${mode}`}
             key={mode}
             onClick={() => onTransformModeChange(mode)}
             title={mode.charAt(0).toUpperCase() + mode.slice(1) + ' (W/E/R)'}
@@ -472,7 +472,7 @@ function Toolbar({
       <div style={{ flex: 1 }} />
 
       {/* Play/Pause */}
-      <button type="button"
+      <button type="button" aria-label={isPlaying ? 'Pause level simulation' : 'Play level simulation'}
         onClick={onPlayPause}
         style={{
           padding: '6px 16px',
@@ -493,7 +493,7 @@ function Toolbar({
       <div style={{ width: '1px', height: '20px', background: 'var(--aethel-border-primary)' }} />
 
       {/* Save & Build */}
-      <button type="button"
+      <button type="button" aria-label="Save level"
         onClick={onSave}
         style={{
           padding: '6px 12px',
@@ -508,7 +508,7 @@ function Toolbar({
         💾 Save
       </button>
 
-      <button type="button"
+      <button type="button" aria-label="Build level"
         onClick={onBuild}
         style={{
           padding: '6px 12px',
@@ -585,13 +585,13 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
             <span style={{ flex: 1, fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {obj.name}
             </span>
-            <button type="button"
+            <button type="button" aria-label={obj.visible ? `Hide ${obj.name}` : `Show ${obj.name}`}
               onClick={(e) => { e.stopPropagation(); onToggleVisibility(obj.id); }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', opacity: 0.6 }}
             >
               {obj.visible ? '👁' : '👁‍🗨'}
             </button>
-            <button type="button"
+            <button type="button" aria-label={obj.locked ? `Unlock ${obj.name}` : `Lock ${obj.name}`}
               onClick={(e) => { e.stopPropagation(); onToggleLock(obj.id); }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', opacity: 0.6 }}
             >
@@ -604,8 +604,7 @@ function OutlinerMini({ objects, selectedId, onSelect, onToggleVisibility, onTog
       {/* Add object buttons */}
       <div style={{ padding: '8px', borderTop: '1px solid var(--aethel-border-primary)', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
         {['Cube', 'Sphere', 'Light', 'Camera', 'Empty'].map((type) => (
-          <button
-            type="button"
+          <button type="button" aria-label={`Add ${type} object to level`}
             key={type}
             style={{
               padding: '4px 8px',
@@ -1145,7 +1144,7 @@ export default function LevelEditor() {
             display: 'flex',
             gap: '8px',
           }}>
-            <button type="button"
+            <button type="button" aria-label={showGrid ? 'Hide viewport grid' : 'Show viewport grid'}
               onClick={() => setShowGrid(!showGrid)}
               style={{
                 padding: '4px 8px',
@@ -1159,7 +1158,7 @@ export default function LevelEditor() {
             >
               Grid
             </button>
-            <button type="button"
+            <button type="button" aria-label={showStats ? 'Hide viewport stats' : 'Show viewport stats'}
               onClick={() => setShowStats(!showStats)}
               style={{
                 padding: '4px 8px',
