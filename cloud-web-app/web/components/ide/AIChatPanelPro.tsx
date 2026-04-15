@@ -1563,21 +1563,19 @@ export default function AIChatPanelPro({
           {/* Attach buttons */}
           <div className="flex items-center gap-1 pb-1">
             {allowAttachments && (
-              <button type="button"
+              <button type="button" aria-label="Anexar arquivo"
                 onClick={handleFileAttach}
                 className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 title="Anexar arquivo"
-                aria-label="Anexar arquivo"
               >
                 <Paperclip className="w-4 h-4" />
               </button>
             )}
             {allowAttachments && selectedModel.supportsVision && (
-              <button type="button"
+              <button type="button" aria-label="Anexar imagem"
                 onClick={handleImageAttach}
                 className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 title="Anexar imagem"
-                aria-label="Anexar imagem"
               >
                 <ImageIcon className="w-4 h-4" />
               </button>

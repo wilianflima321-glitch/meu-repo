@@ -660,7 +660,7 @@ function CommandPaletteUI({
               if (mode === 'commands' && 'action' in item) {
                 const icon = item.icon || CATEGORY_ICONS[item.category]
                 return (
-                  <button type="button"
+                  <button type="button" aria-label={`Select command ${item.label}`}
                     key={item.id}
                     onClick={() => handleSelect(index)}
                     onMouseEnter={() => setSelectedIndex(index)}
@@ -686,7 +686,7 @@ function CommandPaletteUI({
               if (mode === 'files' && 'path' in item) {
                 const icon = item.type === 'folder' ? 'folder' : 'symbol-file'
                 return (
-                  <button type="button"
+                  <button type="button" aria-label={`Open file ${item.name}`}
                     key={item.path}
                     onClick={() => handleSelect(index)}
                     onMouseEnter={() => setSelectedIndex(index)}
