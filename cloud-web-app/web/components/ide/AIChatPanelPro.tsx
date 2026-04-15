@@ -236,7 +236,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             <div key={i} className="my-3 overflow-hidden rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(10,14,24,0.96),rgba(16,22,34,0.88))]">
               <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-1.5">
                 <span className="text-xs text-[var(--aethel-text-tertiary)]">{language}</span>
-                <button type="button"
+                <button type="button" aria-label="Copy code block"
                   onClick={() => onCopy(code)}
                   className="rounded p-1 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] hover:text-[var(--aethel-text-primary)]"
                 >
@@ -433,35 +433,31 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
           <span>{formatTime(message.timestamp)}</span>
           {!isUser && (
             <div className="flex items-center gap-1 ml-2">
-              <button type="button"
+              <button type="button" aria-label="Copiar resposta"
                 onClick={handleCopy}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 title="Copiar resposta"
-                aria-label="Copiar resposta"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-[var(--aethel-success)]" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
-              <button type="button"
+              <button type="button" aria-label="Regenerar resposta"
                 onClick={onRegenerate}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 title="Regenerar resposta"
-                aria-label="Regenerar resposta"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
               </button>
-              <button type="button"
+              <button type="button" aria-label="Marcar resposta como ?til"
                 onClick={() => onRate('up')}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-                title="Marcar resposta como útil"
-                aria-label="Marcar resposta como útil"
+                title="Marcar resposta como ?til"
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
               </button>
-              <button type="button"
+              <button type="button" aria-label="Marcar resposta como insuficiente"
                 onClick={() => onRate('down')}
                 className="rounded p-1 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                 title="Marcar resposta como insuficiente"
-                aria-label="Marcar resposta como insuficiente"
               >
                 <ThumbsDown className="w-3.5 h-3.5" />
               </button>
@@ -1238,11 +1234,10 @@ export default function AIChatPanelPro({
           {/* Left: History + Model */}
           <div className="flex items-center gap-2">
             {threads.length > 0 && (
-              <button type="button"
+              <button type="button" aria-label="Alternar hist?rico do chat"
                 onClick={() => setShowHistorySidebar(!showHistorySidebar)}
                 className={`rounded p-1.5 transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showHistorySidebar ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_88%,transparent)] text-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'}`}
                 title="Histórico do chat"
-                aria-label="Alternar histórico do chat"
               >
                 <History className="w-4 h-4" />
               </button>
@@ -1266,7 +1261,7 @@ export default function AIChatPanelPro({
                       <div className="fixed inset-0 z-40" onClick={() => setShowModelSelector(false)} />
                       <div className="absolute left-0 top-full z-50 mt-1 min-w-72 rounded-lg border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,22,34,0.98),rgba(10,14,24,0.94))] py-1 shadow-[0_24px_80px_rgba(2,6,23,0.48)]">
                         {models.map(model => (
-                          <button type="button"
+                          <button type="button" aria-label={`Select AI model ${model.name}`}
                             key={model.id}
                             onClick={() => {
                               onModelChange?.(model.id)
@@ -1330,7 +1325,7 @@ export default function AIChatPanelPro({
                 <div className="flex items-center gap-1">
                   <span className="text-[11px] text-[var(--aethel-text-quaternary)]">Agentes</span>
                   {[1, 2, 3].map((count) => (
-                    <button type="button"
+                    <button type="button" aria-label={`Set agent count to ${count}`}
                       key={count}
                       onClick={() => setAgentCount(count)}
                       className={`px-2 py-0.5 text-[11px] rounded border ${
@@ -1427,7 +1422,7 @@ export default function AIChatPanelPro({
                   ))}
                 </div>
               ) : (
-                <button type="button"
+                <button type="button" aria-label={showAdvancedControls ? 'Hide advanced shortcuts' : 'Show advanced shortcuts'}
                   onClick={() => setShowAdvancedControls(true)}
                   className="text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
@@ -1560,7 +1555,7 @@ export default function AIChatPanelPro({
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-warning)]" role="alert" aria-live="polite">
             <AlertTriangle className="h-3.5 w-3.5" />
             <span className="flex-1">{voiceError}</span>
-            <button type="button"
+            <button type="button" aria-label="Close voice error"
               onClick={clearVoiceError}
               className="rounded px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]"
             >

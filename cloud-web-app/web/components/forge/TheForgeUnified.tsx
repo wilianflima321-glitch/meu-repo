@@ -232,8 +232,7 @@ export class GameScene {
             }}
           >
             <span>{tab.name}</span>
-            <button type="button"
-              aria-label={`Fechar aba ${tab.name}`}
+            <button type="button" aria-label={`Fechar aba ${tab.name}`}
               onClick={(e) => {
                 e.stopPropagation();
                 closeTab(tab.id);
