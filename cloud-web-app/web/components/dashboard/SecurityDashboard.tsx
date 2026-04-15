@@ -280,7 +280,7 @@ function ErrorState({ message, onRetry }: ErrorStateProps) {
       </div>
       <h3 className="text-lg font-medium text-[var(--aethel-text-primary)] mb-2">Falha ao carregar dados de segurança</h3>
       <p className="text-[var(--aethel-text-secondary)] mb-4 max-w-md">{message}</p>
-      <button type="button"
+      <button type="button" aria-label="Tentar carregar dados de seguranca novamente"
         onClick={onRetry}
         className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary-dark)] rounded-lg text-[var(--aethel-text-primary)] text-sm transition-colors"
       >
@@ -793,7 +793,7 @@ export function SecurityDashboard({
           </span>
         </div>
 
-        <button type="button"
+        <button type="button" aria-label="Atualizar painel de seguranca"
           onClick={fetchData}
           className="p-1.5 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-border-primary)] rounded transition-colors"
           title="Atualizar"

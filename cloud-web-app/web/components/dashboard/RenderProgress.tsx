@@ -275,7 +275,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                                 className="w-full h-full object-cover"
                             />
                             {onViewFull && (
-                                <button type="button"
+                                <button type="button" aria-label={`Ampliar preview de ${job.name}`}
                                     onClick={() => onViewFull(job.thumbnail!)}
                                     className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
                                 >
@@ -340,7 +340,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                 {/* Actions */}
                 <div className="flex items-center gap-1">
                     {canPause && (
-                        <button type="button"
+                        <button type="button" aria-label={`Pausar render ${job.name}`}
                             onClick={() => onPause(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Pausar"
@@ -350,7 +350,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canResume && (
-                        <button type="button"
+                        <button type="button" aria-label={`Retomar render ${job.name}`}
                             onClick={() => onResume(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Retomar"
@@ -360,7 +360,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canCancel && (
-                        <button type="button"
+                        <button type="button" aria-label={`Cancelar render ${job.name}`}
                             onClick={() => onCancel(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Cancelar"
@@ -370,7 +370,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canRetry && (
-                        <button type="button"
+                        <button type="button" aria-label={`Tentar novamente render ${job.name}`}
                             onClick={() => onRetry(job.id)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Tentar novamente"
@@ -380,7 +380,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {canDownload && (
-                        <button type="button"
+                        <button type="button" aria-label={`Baixar resultado do render ${job.name}`}
                             onClick={() => onDownload(job.id, job.output!)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                             title="Download"
@@ -390,7 +390,7 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                     )}
 
                     {!compact && (
-                        <button type="button"
+                        <button type="button" aria-label={expanded ? `Recolher detalhes do render ${job.name}` : `Expandir detalhes do render ${job.name}`}
                             onClick={() => setExpanded(!expanded)}
                             className="p-2 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition-colors"
                         >
@@ -529,7 +529,7 @@ export const RenderQueue: React.FC<RenderQueueProps> = ({
                 </div>
 
                 {completedJobs.length > 0 && onClearCompleted && (
-                    <button type="button"
+                    <button type="button" aria-label="Limpar renders concluidos"
                         onClick={onClearCompleted}
                         className="text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                     >
