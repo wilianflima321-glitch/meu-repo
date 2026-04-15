@@ -301,11 +301,11 @@ export function InlineEditModal({
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowDiff(!showDiff)}
-                    aria-label={showDiff ? 'Ocultar diff da sugestao' : 'Mostrar diff da sugestao'}
+            <Button type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDiff(!showDiff)}
+              aria-label={showDiff ? 'Ocultar diff da sugestao' : 'Mostrar diff da sugestao'}
                     className={`text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] ${focusClass}`}
                   >
                     {showDiff ? 'Ocultar Diff' : 'Mostrar Diff'}
@@ -344,6 +344,7 @@ export function InlineEditModal({
                   <Button type="button"
                     variant="outline"
                     onClick={onClose}
+                    aria-label="Cancelar e fechar edicao inline"
                     className={`border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] ${focusClass}`}
                   >
                     Cancelar

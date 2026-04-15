@@ -393,7 +393,7 @@ interface EmotionPresetButtonProps {
 
 const EmotionPresetButton: React.FC<EmotionPresetButtonProps> = React.memo(({ preset, isActive, onClick }) => {
   return (
-    <button type="button"
+    <button type="button" aria-label={`Aplicar preset emocional ${preset.name}`}
       onClick={onClick}
       className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200
                   ${isActive
@@ -551,7 +551,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-sm font-semibold text-[var(--aethel-text-secondary)]">Lip Sync Timeline</h4>
         <div className="flex items-center gap-2">
-          <button type="button"
+          <button type="button" aria-label={isPlaying ? 'Pausar timeline de lip sync' : 'Reproduzir timeline de lip sync'}
             onClick={togglePlayback}
             className="px-3 py-1 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] rounded text-xs font-medium transition-colors"
           >
@@ -566,7 +566,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
       {/* Viseme Selector */}
       <div className="flex flex-wrap gap-1 mb-3">
         {VISEMES.map(viseme => (
-          <button type="button"
+          <button type="button" aria-label={`Selecionar visema ${viseme.label}`}
             key={viseme.id}
             onClick={() => setSelectedViseme(viseme.id)}
             className={`px-2 py-1 text-xs rounded transition-colors
@@ -697,7 +697,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
                     </span>
                   ))}
                 </div>
-                <button type="button"
+                <button type="button" aria-label={`Aplicar action unit ${au.name} aos sliders`}
                   onClick={(e) => {
                     e.stopPropagation()
                     onSelectAU(au.relatedBlendShapes)
@@ -1040,20 +1040,20 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button"
+          <button type="button" aria-label={showFACS ? 'Ocultar referência FACS' : 'Mostrar referência FACS'}
             onClick={() => setShowFACS(!showFACS)}
             className={`px-3 py-1.5 text-sm rounded transition-colors
                         ${showFACS ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
           >
              FACS Reference
           </button>
-          <button type="button"
+          <button type="button" aria-label="Resetar blend shapes faciais"
             onClick={handleReset}
             className="px-3 py-1.5 text-sm bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
           >
              Reset
           </button>
-          <button type="button"
+          <button type="button" aria-label="Exportar animacao facial em JSON"
             onClick={handleExport}
             className="px-3 py-1.5 text-sm bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] rounded transition-colors"
           >
@@ -1117,7 +1117,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
           {/* Category Tabs */}
           <div className="flex flex-wrap gap-1 p-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
             {BLEND_SHAPE_CATEGORIES.map(category => (
-              <button type="button"
+              <button type="button" aria-label={`Selecionar categoria ${category.name} de blend shapes`}
                 key={category.name}
                 onClick={() => setActiveCategory(category.name)}
                 className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1
