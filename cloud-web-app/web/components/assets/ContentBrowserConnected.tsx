@@ -211,7 +211,7 @@ function AssetPreviewModal({
           fontSize: '14px',
         }}>
           <div style={{ fontWeight: 600 }}>{asset.name}</div>
-          <button type="button"
+          <button type="button" aria-label="Fechar preview do asset"
             onClick={onClose}
             style={{
               background: 'transparent',
@@ -220,7 +220,6 @@ function AssetPreviewModal({
               cursor: 'pointer',
               fontSize: '18px',
             }}
-            aria-label="Fechar preview"
           >
             ✕
           </button>
@@ -569,7 +568,7 @@ export const ContentBrowserConnected: React.FC<ContentBrowserConnectedProps> = (
         <AlertCircle size={48} />
         <span>Erro ao carregar assets</span>
         <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>{error.message}</span>
-        <button type="button"
+        <button type="button" aria-label="Tentar recarregar assets"
           onClick={refresh}
           style={{
             padding: '8px 16px',

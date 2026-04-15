@@ -697,7 +697,7 @@ function NodeCatalog({ onAddNode, searchQuery, onSearchChange }: NodeCatalogProp
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {nodes.map((def) => (
-                <button type="button"
+                <button type="button" aria-label={`Adicionar node ${def.type}`}
                   key={def.type}
                   onClick={() => onAddNode(def.type)}
                   style={{
@@ -754,7 +754,7 @@ function PreviewPanel({ isPlaying, onPlay, onStop, volume, onVolumeChange }: Pre
 
       {/* Playback controls */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-        <button type="button"
+        <button type="button" aria-label={isPlaying ? 'Parar preview de audio' : 'Iniciar preview de audio'}
           onClick={isPlaying ? onStop : onPlay}
           style={{
             flex: 1,
@@ -876,7 +876,7 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
               <span style={{ color: 'white', fontSize: '12px' }}>{param.name}</span>
-              <button type="button"
+              <button type="button" aria-label={`Remover parametro ${param.name}`}
                 onClick={() => onChange(parameters.filter(p => p.id !== param.id))}
                 style={{
                   background: 'transparent',
@@ -929,7 +929,7 @@ function ParametersPanel({ parameters, onChange, runtimeValues, onRuntimeValueCh
             fontSize: '12px',
           }}
         />
-        <button type="button"
+        <button type="button" aria-label="Adicionar parametro de runtime"
           onClick={addParameter}
           style={{
             background: '#3b82f6',
