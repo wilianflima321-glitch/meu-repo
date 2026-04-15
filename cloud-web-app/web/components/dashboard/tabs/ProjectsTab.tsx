@@ -120,7 +120,7 @@ function ProjectCard({
           </div>
 
           <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-            <button type="button"
+            <button type="button" aria-label={project.starred ? `Remover ${project.name} dos favoritos` : `Adicionar ${project.name} aos favoritos`}
               onClick={onToggleStar}
               className={`p-1.5 rounded-lg transition-colors ${
                 project.starred
@@ -132,7 +132,7 @@ function ProjectCard({
             </button>
             <Dropdown
               trigger={
-                <button type="button" className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
+                <button type="button" aria-label={`Abrir acoes do projeto ${project.name}`} className="p-1.5 rounded-lg text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] transition-colors">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               }

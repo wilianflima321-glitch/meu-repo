@@ -165,7 +165,7 @@ export function BreakpointEditor({
           { value: 'conditional', label: 'Conditional', icon: CircleDot },
           { value: 'logpoint', label: 'Logpoint', icon: MessageSquare },
         ].map(({ value, label, icon: Icon }) => (
-          <button type="button"
+          <button type="button" aria-label={`Selecionar tipo ${label} para breakpoint`}
             key={value}
             onClick={() => setType(value as BreakpointType)}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs transition-colors ${
@@ -234,13 +234,13 @@ export function BreakpointEditor({
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-2 pt-2">
-          <button type="button"
+          <button type="button" aria-label="Cancelar configuracao de breakpoint"
             onClick={onCancel}
             className="px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >
             Cancel
           </button>
-          <button type="button"
+          <button type="button" aria-label={breakpoint?.id ? 'Atualizar breakpoint' : 'Adicionar breakpoint'}
             onClick={handleSave}
             className="px-3 py-1.5 text-sm bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded transition-colors hover:brightness-110"
           >
@@ -319,7 +319,7 @@ export function BreakpointsPanel({
           </span>
         </div>
         {onRemoveAll && breakpoints.length > 0 && (
-          <button type="button"
+          <button type="button" aria-label="Remover todos os breakpoints"
             onClick={onRemoveAll}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)]"
             title="Remove all breakpoints"
@@ -334,7 +334,7 @@ export function BreakpointsPanel({
         {/* Exception Breakpoints */}
         {exceptionBreakpoints && exceptionBreakpoints.length > 0 && (
           <div className="border-b border-[var(--aethel-border-primary)]">
-            <button type="button"
+            <button type="button" aria-label={showExceptions ? 'Recolher excecoes monitoradas' : 'Expandir excecoes monitoradas'}
               onClick={() => setShowExceptions(!showExceptions)}
               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
@@ -393,7 +393,7 @@ export function BreakpointsPanel({
                   className="flex items-center gap-2 px-3 py-1.5 hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group"
                 >
                   {/* Toggle */}
-                  <button type="button"
+                  <button type="button" aria-label={bp.enabled ? `Desativar breakpoint na linha ${bp.line}` : `Ativar breakpoint na linha ${bp.line}`}
                     onClick={() => onToggleBreakpoint(bp.id)}
                     className={`flex-shrink-0 ${colorClass}`}
                     title={bp.enabled ? 'Disable breakpoint' : 'Enable breakpoint'}
@@ -402,7 +402,7 @@ export function BreakpointsPanel({
                   </button>
 
                   {/* Info */}
-                  <button type="button"
+                  <button type="button" aria-label={`Navegar para breakpoint na linha ${bp.line}`}
                     onClick={() => onNavigateToBreakpoint(bp)}
                     className="flex-1 flex items-center gap-2 text-left min-w-0"
                   >
@@ -433,14 +433,14 @@ export function BreakpointsPanel({
 
                   {/* Actions */}
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                    <button type="button"
+                    <button type="button" aria-label={`Editar breakpoint na linha ${bp.line}`}
                       onClick={() => onEditBreakpoint(bp)}
                       className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                       title="Edit breakpoint"
                     >
                       <Edit2 className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)]" />
                     </button>
-                    <button type="button"
+                    <button type="button" aria-label={`Remover breakpoint na linha ${bp.line}`}
                       onClick={() => onRemoveBreakpoint(bp.id)}
                       className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
                       title="Remove breakpoint"
@@ -529,7 +529,7 @@ export function WatchPanel({
         >
           {/* Expand toggle */}
           {expr.expandable ? (
-            <button type="button"
+            <button type="button" aria-label={expr.expanded ? `Recolher expressao ${expr.expression}` : `Expandir expressao ${expr.expression}`}
               onClick={() => onToggleExpand?.(expr.id)}
               className="flex-shrink-0"
               disabled={disabled}
@@ -593,21 +593,21 @@ export function WatchPanel({
 
           {/* Actions */}
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 ml-auto">
-            <button type="button"
+            <button type="button" aria-label={`Editar expressao ${expr.expression}`}
               onClick={() => handleEdit(expr)}
               className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Edit"
             >
               <Edit2 className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
             </button>
-            <button type="button"
+            <button type="button" aria-label={`Copiar valor de ${expr.expression}`}
               onClick={() => navigator.clipboard.writeText(expr.value || '')}
               className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Copy value"
             >
               <Copy className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
             </button>
-            <button type="button"
+            <button type="button" aria-label={`Remover expressao ${expr.expression}`}
               onClick={() => onRemoveExpression(expr.id)}
               className="p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Remove"
@@ -632,7 +632,7 @@ export function WatchPanel({
           <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Watch</span>
         </div>
         {onRefresh && (
-          <button type="button"
+          <button type="button" aria-label="Atualizar expressoes observadas"
             onClick={onRefresh}
             className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
             title="Refresh all"
@@ -654,7 +654,7 @@ export function WatchPanel({
           className="flex-1 px-2 py-1 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded outline-none focus:ring-1 focus:ring-[var(--aethel-info)] font-mono"
           disabled={disabled}
         />
-        <button type="button"
+        <button type="button" aria-label="Adicionar expressao observada"
           onClick={handleAdd}
           disabled={disabled || !newExpression.trim()}
           className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] disabled:opacity-50"
@@ -743,7 +743,7 @@ export function CallStackPanel({
           // Multi-threaded view
           threads.map(thread => (
             <div key={thread.id} className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_50%,transparent)]">
-              <button type="button"
+              <button type="button" aria-label={expandedThreads.has(thread.id) ? `Recolher thread ${thread.name}` : `Expandir thread ${thread.name}`}
                 onClick={() => {
                   toggleThread(thread.id);
                   onSelectThread?.(thread.id);
@@ -837,7 +837,7 @@ function StackFrameItem({
   };
 
   return (
-    <button type="button"
+    <button type="button" aria-label={`Selecionar frame ${frame.name}`}
       onClick={onSelect}
       className={`w-full flex items-center gap-2 px-4 py-1.5 text-sm text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group ${
         isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' : ''
@@ -862,7 +862,7 @@ function StackFrameItem({
 
       {/* Restart button */}
       {onRestart && (
-        <button type="button"
+        <button type="button" aria-label={`Reiniciar frame ${frame.name}`}
           onClick={e => {
             e.stopPropagation();
             onRestart();
@@ -948,7 +948,7 @@ export function DebugToolbar({
   return (
     <div className="flex items-center gap-1 px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded-lg">
       {buttons.map(({ icon: Icon, label, action, disabled, primary, danger }, index) => (
-        <button type="button"
+        <button type="button" aria-label={label}
           key={label}
           onClick={action}
           disabled={disabled}

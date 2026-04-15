@@ -201,7 +201,7 @@ export function OverviewTab({
           ) : (
             <div className="space-y-3">
               {recentProjects.map((project) => (
-                <button type="button"
+                <button type="button" aria-label={`Abrir projeto recente ${project.name}`}
                   key={project.id}
                   onClick={() => onOpenProject?.(project.id)}
                   className="w-full flex items-center gap-4 p-4 rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:bg-[var(--aethel-surface-tertiary)] transition-colors text-left group"
@@ -279,7 +279,7 @@ export function OverviewTab({
               <MessageSquare className="w-4 h-4 mr-2" />
               Chat AI
             </Button>
-            <button type="button" onClick={onCreateProject}>
+            <button type="button" aria-label="Criar novo projeto" onClick={onCreateProject}>
               <FolderKanban className="w-4 h-4 mr-2" />
               Novo Projeto
             </button>
