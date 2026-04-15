@@ -347,9 +347,8 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
         <NeuralPulse active={step.status === 'active'} />
 
         {/* Header */}
-        <button type="button"
+        <button type="button" aria-label={`${isExpanded ? 'Recolher' : 'Expandir'} etapa ${step.title}`}
           onClick={() => setIsExpanded(!isExpanded)}
-          aria-label={`${isExpanded ? 'Recolher' : 'Expandir'} etapa ${step.title}`}
           className={`w-full flex items-center gap-3 p-3 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
         >
           {/* Status indicator */}
@@ -420,9 +419,8 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
                       <pre className="text-[var(--aethel-text-secondary)]">
                         {step.metadata.codePreview}
                       </pre>
-                      <button type="button"
+                      <button type="button" aria-label={copied ? 'Conteudo copiado' : `Copiar preview de codigo da etapa ${step.title}`}
                         onClick={handleCopy}
-                        aria-label={copied ? 'Conteudo copiado' : `Copiar preview de codigo da etapa ${step.title}`}
                         className={`absolute top-2 right-2 bg-[var(--aethel-surface-tertiary)] p-1 hover:bg-[var(--aethel-surface-quaternary)] ${iconButtonClass}`}
                       >
                         {copied ? (
@@ -558,9 +556,8 @@ export function AIThinkingPanel({
           <ProgressRing progress={progress} />
 
           {/* Toggle collapse */}
-          <button type="button"
+          <button type="button" aria-label={isCollapsed ? 'Expandir painel de pensamento da IA' : 'Recolher painel de pensamento da IA'}
             onClick={() => setIsCollapsed(!isCollapsed)}
-            aria-label={isCollapsed ? 'Expandir painel de pensamento da IA' : 'Recolher painel de pensamento da IA'}
             className={headerButtonClass}
           >
             {isCollapsed ? (
@@ -571,9 +568,8 @@ export function AIThinkingPanel({
           </button>
 
           {/* Maximize */}
-          <button type="button"
+          <button type="button" aria-label={isMaximized ? 'Restaurar tamanho do painel de pensamento da IA' : 'Maximizar painel de pensamento da IA'}
             onClick={() => setIsMaximized(!isMaximized)}
-            aria-label={isMaximized ? 'Restaurar tamanho do painel de pensamento da IA' : 'Maximizar painel de pensamento da IA'}
             className={headerButtonClass}
           >
             {isMaximized ? (
@@ -585,9 +581,8 @@ export function AIThinkingPanel({
 
           {/* Close */}
           {onClose && (
-            <button type="button"
+            <button type="button" aria-label="Fechar painel de pensamento da IA"
               onClick={onClose}
-              aria-label="Fechar painel de pensamento da IA"
               className={headerButtonClass}
             >
               <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />

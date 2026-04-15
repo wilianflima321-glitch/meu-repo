@@ -42,6 +42,42 @@ interface ForgeFile {
   content: string;
 }
 
+const forgeShellStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100vh',
+  background: 'var(--aethel-surface-primary)',
+  color: 'var(--aethel-text-primary)',
+};
+
+const forgePanelStyle: React.CSSProperties = {
+  background: 'var(--aethel-surface-secondary)',
+  borderColor: 'var(--aethel-border-primary)',
+};
+
+const forgeMutedTextStyle: React.CSSProperties = {
+  color: 'var(--aethel-text-tertiary)',
+};
+
+const forgeAccentButtonStyle: React.CSSProperties = {
+  padding: '6px 12px',
+  background: 'color-mix(in srgb, var(--aethel-primary) 16%, var(--aethel-surface-tertiary))',
+  border: '1px solid color-mix(in srgb, var(--aethel-primary) 24%, var(--aethel-border-primary))',
+  color: 'var(--aethel-text-primary)',
+  cursor: 'pointer',
+  borderRadius: '6px',
+};
+
+const forgePrimaryButtonStyle: React.CSSProperties = {
+  padding: '6px 12px',
+  background: 'var(--aethel-primary)',
+  color: 'var(--aethel-text-primary)',
+  border: 'none',
+  cursor: 'pointer',
+  borderRadius: '6px',
+  fontWeight: 'bold',
+};
+
 export const TheForgeUnified: React.FC = () => {
   const [tabs, setTabs] = useState<ForgeTab[]>([
     { id: '1', name: 'Scene.ts', type: 'editor', active: true },
@@ -161,25 +197,25 @@ export class GameScene {
   const activeTab = tabs.find((t) => t.active);
 
   return (
-    <div className="forge-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0a0e27', color: '#e0e0e0' }}>
+    <div className="forge-container" style={forgeShellStyle}>
       {/* Header */}
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid #1a1f3a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ ...forgePanelStyle, padding: '12px 16px', borderBottom: '1px solid var(--aethel-border-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: '18px', fontWeight: 'bold' }}>⚡ The Forge (Aethel Engine)</div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button type="button" onClick={() => addTab('editor')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
+          <button type="button" aria-label="Adicionar aba do editor ao Forge" onClick={() => addTab('editor')} style={forgeAccentButtonStyle}>
             + Editor
           </button>
-          <button type="button" onClick={() => addTab('canvas')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
+          <button type="button" aria-label="Adicionar aba de canvas ao Forge" onClick={() => addTab('canvas')} style={forgeAccentButtonStyle}>
             + Canvas
           </button>
-          <button type="button" onClick={() => addTab('chat')} style={{ padding: '6px 12px', background: '#1a1f3a', border: 'none', color: '#00ff88', cursor: 'pointer', borderRadius: '4px' }}>
+          <button type="button" aria-label="Adicionar aba de chat ao Forge" onClick={() => addTab('chat')} style={forgeAccentButtonStyle}>
             + Chat
           </button>
         </div>
       </div>
 
       {/* Tab Bar */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #1a1f3a', background: '#0f1429', overflowX: 'auto' }}>
+      <div style={{ ...forgePanelStyle, display: 'flex', borderBottom: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)', overflowX: 'auto' }}>
         {tabs.map((tab) => (
           <div
             key={tab.id}
@@ -187,8 +223,8 @@ export class GameScene {
             style={{
               padding: '10px 16px',
               cursor: 'pointer',
-              borderBottom: tab.active ? '2px solid #00ff88' : 'none',
-              background: tab.active ? '#1a1f3a' : 'transparent',
+              borderBottom: tab.active ? '2px solid var(--aethel-primary)' : 'none',
+              background: tab.active ? 'color-mix(in srgb, var(--aethel-primary) 14%, var(--aethel-surface-tertiary))' : 'transparent',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
@@ -197,6 +233,7 @@ export class GameScene {
           >
             <span>{tab.name}</span>
             <button type="button"
+              aria-label={`Fechar aba ${tab.name}`}
               onClick={(e) => {
                 e.stopPropagation();
                 closeTab(tab.id);
@@ -204,7 +241,7 @@ export class GameScene {
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#888',
+                color: 'var(--aethel-text-tertiary)',
                 cursor: 'pointer',
                 fontSize: '16px',
               }}
@@ -218,8 +255,8 @@ export class GameScene {
       {/* Main Content */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* File Explorer */}
-        <div style={{ width: '200px', borderRight: '1px solid #1a1f3a', padding: '12px', overflowY: 'auto', background: '#0f1429' }}>
-          <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#00ff88' }}>FILES</div>
+        <div style={{ ...forgePanelStyle, width: '200px', borderRight: '1px solid var(--aethel-border-primary)', padding: '12px', overflowY: 'auto', background: 'var(--aethel-surface-secondary)' }}>
+          <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: 'var(--aethel-primary)' }}>FILES</div>
           {files.map((file) => (
             <div
               key={file.id}
@@ -227,7 +264,7 @@ export class GameScene {
               style={{
                 padding: '6px 8px',
                 cursor: 'pointer',
-                background: selectedFile?.id === file.id ? '#1a1f3a' : 'transparent',
+                background: selectedFile?.id === file.id ? 'color-mix(in srgb, var(--aethel-primary) 14%, var(--aethel-surface-tertiary))' : 'transparent',
                 borderRadius: '4px',
                 fontSize: '12px',
                 marginBottom: '4px',
@@ -255,8 +292,8 @@ export class GameScene {
                 style={{
                   flex: 1,
                   padding: '16px',
-                  background: '#0a0e27',
-                  color: '#00ff88',
+                  background: 'var(--aethel-surface-primary)',
+                  color: 'var(--aethel-primary)',
                   border: 'none',
                   fontFamily: 'monospace',
                   fontSize: '13px',
@@ -266,20 +303,20 @@ export class GameScene {
               />
 
               {/* Console */}
-              <div style={{ height: '150px', borderTop: '1px solid #1a1f3a', background: '#0f1429', padding: '12px', overflowY: 'auto', fontSize: '12px', fontFamily: 'monospace' }}>
+              <div style={{ ...forgePanelStyle, height: '150px', borderTop: '1px solid var(--aethel-border-primary)', background: 'var(--aethel-surface-secondary)', padding: '12px', overflowY: 'auto', fontSize: '12px', fontFamily: 'monospace' }}>
                 {consoleOutput.map((line, i) => (
-                  <div key={i} style={{ color: line.startsWith('✓') ? '#00ff88' : line.startsWith('✗') ? '#ff4444' : '#888' }}>
+                  <div key={i} style={{ color: line.startsWith('✓') ? 'var(--aethel-success)' : line.startsWith('✗') ? 'var(--aethel-error)' : 'var(--aethel-text-tertiary)' }}>
                     {line}
                   </div>
                 ))}
               </div>
 
               {/* Toolbar */}
-              <div style={{ padding: '8px 12px', borderTop: '1px solid #1a1f3a', display: 'flex', gap: '8px' }}>
-                <button type="button" onClick={executeCode} style={{ padding: '6px 12px', background: '#00ff88', color: '#000', border: 'none', cursor: 'pointer', borderRadius: '4px', fontWeight: 'bold' }}>
+              <div style={{ padding: '8px 12px', borderTop: '1px solid var(--aethel-border-primary)', display: 'flex', gap: '8px' }}>
+                <button type="button" aria-label="Executar codigo no Forge" onClick={executeCode} style={forgePrimaryButtonStyle}>
                   ▶ Run
                 </button>
-                <button type="button" onClick={validateCode} style={{ padding: '6px 12px', background: '#1a1f3a', color: '#00ff88', border: '1px solid #00ff88', cursor: 'pointer', borderRadius: '4px' }}>
+                <button type="button" aria-label="Validar codigo com quality gates do Forge" onClick={validateCode} style={forgeAccentButtonStyle}>
                   ✓ Validate
                 </button>
               </div>
@@ -294,7 +331,7 @@ export class GameScene {
 
           {activeTab?.type === 'chat' && (
             <div style={{ flex: 1, padding: '16px', overflowY: 'auto' }}>
-              <div style={{ color: '#888', textAlign: 'center' }}>
+              <div style={{ ...forgeMutedTextStyle, textAlign: 'center' }}>
                 🤖 AI Chat Panel (Coming Soon)
               </div>
             </div>

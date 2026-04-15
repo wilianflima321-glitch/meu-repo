@@ -333,7 +333,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
               {typeof param.value === 'boolean' ? (param.value ? 'true' : 'false') : param.value.toFixed(2)}
             </span>
             {/* Delete */}
-            <button type="button"
+            <button type="button" aria-label={`Remover parametro ${param.name}`}
               onClick={() => removeParameter(param.id)}
               style={{
                 background: 'transparent',
@@ -382,7 +382,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
           <option value="bool">Bool</option>
           <option value="trigger">Trigger</option>
         </select>
-        <button type="button"
+        <button type="button" aria-label="Adicionar novo parametro de animacao"
           onClick={addParameter}
           style={{
             background: 'var(--aethel-primary)',
@@ -569,7 +569,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
         </div>
         {/* Actions */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <button type="button"
+          <button type="button" aria-label="Cancelar edicao do estado de animacao"
             onClick={onClose}
             style={{
               background: 'var(--aethel-surface-quaternary)',
@@ -582,7 +582,7 @@ function StateEditorModal({ state, onSave, onClose, availableAnimations, paramet
           >
             Cancel
           </button>
-          <button type="button"
+          <button type="button" aria-label={`Salvar alteracoes do estado ${editedState.name}`}
             onClick={() => onSave(editedState)}
             style={{
               background: 'var(--aethel-primary)',
@@ -729,7 +729,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Conditions</label>
-            <button type="button"
+            <button type="button" aria-label="Adicionar condicao de transicao"
               onClick={addCondition}
               style={{
                 background: 'var(--aethel-primary)',
@@ -807,7 +807,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
                   fontSize: '11px',
                 }}
               />
-              <button type="button"
+              <button type="button" aria-label={`Remover condicao ${index + 1}`}
                 onClick={() => removeCondition(index)}
                 style={{
                   background: 'transparent',
@@ -823,7 +823,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
         </div>
         {/* Actions */}
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <button type="button"
+          <button type="button" aria-label="Cancelar edicao da transicao"
             onClick={onClose}
             style={{
               background: 'var(--aethel-surface-quaternary)',
@@ -836,7 +836,7 @@ function TransitionEditorModal({ transition, onSave, onClose, parameters }: Tran
           >
             Cancel
           </button>
-          <button type="button"
+          <button type="button" aria-label={`Salvar transicao para ${editedTransition.targetState}`}
             onClick={() => onSave(editedTransition)}
             style={{
               background: 'var(--aethel-primary)',
@@ -1061,7 +1061,7 @@ export function AnimationBlueprintEditor({
           onValueChange={handleParameterValueChange}
         />
         <div style={{ marginTop: '16px' }}>
-          <button type="button"
+          <button type="button" aria-label="Adicionar novo estado de animacao"
             onClick={addState}
             style={{
               width: '100%',

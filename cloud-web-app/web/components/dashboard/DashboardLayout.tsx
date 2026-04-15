@@ -23,7 +23,10 @@ export function DashboardLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[var(--aethel-surface-primary)] [background-image:var(--aethel-app-background)]">
+    <div
+      className="min-h-screen bg-[var(--aethel-surface-primary)]"
+      style={{ backgroundImage: 'var(--aethel-app-background)' }}
+    >
       <AethelHeaderPro />
 
       <div className="flex h-[calc(100vh-64px)]">

@@ -45,6 +45,12 @@ const AUDIO_EXTENSIONS = new Set(['mp3', 'wav', 'ogg'])
 const VIDEO_EXTENSIONS = new Set(['mp4', 'webm'])
 const TEXT_EXTENSIONS = new Set(['txt', 'log', 'ini', 'env', 'toml', 'yaml', 'yml'])
 const MAX_INLINE_PREVIEW_CHARS = 350_000
+const PREVIEW_NOTICE_CLASS =
+  'mx-4 mt-3 rounded-lg border border-[color-mix(in_srgb,var(--aethel-warning)_24%,var(--aethel-border-primary))] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,var(--aethel-surface-secondary))] px-3 py-2 text-[11px] text-[var(--aethel-text-secondary)]'
+const PREVIEW_STATE_SHELL_CLASS =
+  'max-w-lg rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-5 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)]'
+const PREVIEW_STATE_TITLE_CLASS = 'mb-2 text-sm font-semibold text-[var(--aethel-text-primary)]'
+const PREVIEW_STATE_COPY_CLASS = 'text-xs leading-5 text-[var(--aethel-text-tertiary)]'
 
 function getExtension(filePath?: string): string {
   if (!filePath) return ''
@@ -376,7 +382,7 @@ export default function PreviewPanel({
 
       <div className="flex-1 bg-[var(--aethel-surface-secondary)]">
         {forceInlineFallback && runtimeUrl && (
-          <div className="aethel-state aethel-state-loading rounded-none border-x-0 border-t-0 text-[11px]" role="status" aria-live="polite">
+          <div className={PREVIEW_NOTICE_CLASS} role="status" aria-live="polite">
             Runtime externo indisponivel. Fallback inline ativo (recursos de runtime desabilitados).
             {runtimeUnavailableReason ? ` Motivo: ${runtimeUnavailableReason}.` : ''}
           </div>
@@ -440,10 +446,10 @@ export default function PreviewPanel({
 
         {showMedia && mediaLoadError && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-            <div className="aethel-state aethel-state-error max-w-lg">
-              <div className="aethel-state-title mb-2">Preview de midia indisponivel</div>
-              <div className="text-xs">{mediaLoadError}</div>
-              <div className="mt-2 text-xs">
+            <div className={PREVIEW_STATE_SHELL_CLASS}>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview de midia indisponivel</div>
+              <div className={PREVIEW_STATE_COPY_CLASS}>{mediaLoadError}</div>
+              <div className={`${PREVIEW_STATE_COPY_CLASS} mt-2`}>
                 Capacidade em estado parcial. Valide codecs e suporte do runtime no ambiente final.
               </div>
             </div>
@@ -452,9 +458,9 @@ export default function PreviewPanel({
 
         {mode === 'unsupported' && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-            <div className="aethel-state aethel-state-empty max-w-md">
-              <div className="aethel-state-title mb-2">Preview ainda nao suportado para este tipo de arquivo</div>
-              <div className="text-xs">
+            <div className={`${PREVIEW_STATE_SHELL_CLASS} max-w-md`}>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview ainda nao suportado para este tipo de arquivo</div>
+              <div className={PREVIEW_STATE_COPY_CLASS}>
                 A extensao &quot;{ext || 'desconhecida'}&quot; ainda esta fora do escopo validado de preview.
               </div>
             </div>
@@ -463,12 +469,12 @@ export default function PreviewPanel({
 
         {isLargeTextPreview && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-            <div className="aethel-state aethel-state-loading max-w-lg">
-              <div className="aethel-state-title mb-2">Preview bloqueado para payload grande</div>
-              <div className="text-xs">
+            <div className={PREVIEW_STATE_SHELL_CLASS}>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview bloqueado para payload grande</div>
+              <div className={PREVIEW_STATE_COPY_CLASS}>
                 Este arquivo excede o limite validado de preview inline ({MAX_INLINE_PREVIEW_CHARS.toLocaleString()} chars).
               </div>
-              <div className="mt-2 text-xs">
+              <div className={`${PREVIEW_STATE_COPY_CLASS} mt-2`}>
                 Capacidade em estado parcial. Use execucao em runtime ou abra um arquivo menor e mais focado.
               </div>
             </div>
@@ -477,20 +483,20 @@ export default function PreviewPanel({
 
         {!hasText && !showMedia && mode !== 'unsupported' && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-            <div className="aethel-state aethel-state-empty">
-              <div className="aethel-state-title mb-2">Preview ainda nao disponivel</div>
-                <div className="text-xs">
-                  Abra um arquivo no Explorer para renderizar o preview.
-                </div>
+            <div className={`${PREVIEW_STATE_SHELL_CLASS} max-w-md`}>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview ainda nao disponivel</div>
+              <div className={PREVIEW_STATE_COPY_CLASS}>
+                Abra um arquivo no Explorer para renderizar o preview.
+              </div>
             </div>
           </div>
         )}
 
         {showMedia && !rawAssetUrl && (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-            <div className="aethel-state aethel-state-empty">
-              <div className="aethel-state-title mb-2">Preview de midia indisponivel</div>
-              <div className="text-xs">Faltou o caminho da midia para este contexto de preview.</div>
+            <div className={`${PREVIEW_STATE_SHELL_CLASS} max-w-md`}>
+              <div className={PREVIEW_STATE_TITLE_CLASS}>Preview de midia indisponivel</div>
+              <div className={PREVIEW_STATE_COPY_CLASS}>Faltou o caminho da midia para este contexto de preview.</div>
             </div>
           </div>
         )}
