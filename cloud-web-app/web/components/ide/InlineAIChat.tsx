@@ -245,12 +245,11 @@ export function InlineAIChat({
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'] }}>
-          <button type="button"
+          <button type="button" aria-label={showContext ? 'Ocultar contexto ativo' : 'Mostrar contexto ativo'}
             onClick={(e) => {
               e.stopPropagation();
               setShowContext(!showContext);
             }}
-            aria-label={showContext ? 'Ocultar contexto ativo' : 'Mostrar contexto ativo'}
             style={{
               padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
               background: showContext ? 'color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)' : 'transparent',

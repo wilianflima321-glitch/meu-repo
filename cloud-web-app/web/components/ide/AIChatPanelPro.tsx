@@ -1246,9 +1246,8 @@ export default function AIChatPanelPro({
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
                 <div className="relative">
-                  <button type="button"
+                  <button type="button" aria-label="Abrir seletor de modelo de IA"
                     onClick={() => setShowModelSelector(!showModelSelector)}
-                    aria-label="Abrir seletor de modelo de IA"
                     aria-expanded={showModelSelector}
                     className="flex items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                   >
@@ -1406,10 +1405,9 @@ export default function AIChatPanelPro({
               {showAdvancedControls ? (
                 <div className="flex flex-wrap gap-2 justify-center">
                   {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
-                    <button type="button"
+                    <button type="button" aria-label={`Usar prompt rápido ${label}`}
                       key={label}
                       onClick={() => handleQuickPrompt(prompt)}
-                      aria-label={`Aplicar prompt rápido: ${label}`}
                       className="flex items-center gap-2 rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] px-3 py-2 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
                     >
                       <Icon className="w-4 h-4" />
@@ -1499,10 +1497,9 @@ export default function AIChatPanelPro({
         <div className="border-t border-[var(--aethel-border-secondary)] px-3 py-2">
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
             {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
-              <button type="button"
+              <button type="button" aria-label={`Usar prompt rápido ${label}`}
                 key={label}
                 onClick={() => handleQuickPrompt(prompt)}
-                aria-label={`Aplicar prompt rápido: ${label}`}
                 className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] px-2.5 py-1 text-xs text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -1538,10 +1535,9 @@ export default function AIChatPanelPro({
           <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg" role="status" aria-live="polite">
             <div className="w-2 h-2 bg-[var(--aethel-error)] rounded-full animate-pulse" />
             <span className="flex-1 text-sm text-[var(--aethel-error)]">Gravando... {transcript && `"${transcript}"`}</span>
-            <button type="button"
+            <button type="button" aria-label="Parar gravação de voz"
               onClick={stopRecording}
               className="rounded px-2 py-1 text-xs text-[var(--aethel-error)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-error)_26%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-error)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
-              aria-label="Parar gravação de voz"
             >
               Parar
             </button>
@@ -1580,11 +1576,10 @@ export default function AIChatPanelPro({
                 <ImageIcon className="w-4 h-4" />
               </button>
             )}
-            <button type="button"
+            <button type="button" aria-label={isRecording ? 'Parar gravação por voz' : 'Iniciar gravação por voz'}
               onClick={handleVoiceToggle}
               className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isRecording ? 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
               title={isRecording ? 'Parar gravação' : 'Entrada de voz'}
-              aria-label={isRecording ? 'Parar gravação' : 'Entrada de voz'}
             >
               {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>

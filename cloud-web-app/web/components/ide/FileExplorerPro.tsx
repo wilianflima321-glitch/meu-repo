@@ -122,7 +122,7 @@ function FileTreeNode({
 
   return (
     <>
-      <button type="button"
+      <button type="button" aria-label={isFolder ? `${isExpanded ? 'Recolher' : 'Expandir'} pasta ${node.name}` : `Abrir arquivo ${node.name}`}
         onClick={() => isFolder ? onToggle(node.id) : onSelect(node)}
         onContextMenu={(e) => onContextMenu(e, node)}
         onKeyDown={(event) => {
@@ -608,16 +608,14 @@ export default function FileExplorerPro({
                   Crie um arquivo ou pasta para comecar a editar neste projeto.
                 </div>
               <div className="flex items-center justify-center gap-2">
-                <button type="button"
+                <button type="button" aria-label="Criar novo arquivo em workspace vazio"
                   onClick={() => onFileCreate?.('/', 'file')}
-                  aria-label="Criar novo arquivo em workspace vazio"
                   className={`rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                 >
                   Novo arquivo
                 </button>
-                <button type="button"
+                <button type="button" aria-label="Criar nova pasta em workspace vazio"
                   onClick={() => onFileCreate?.('/', 'folder')}
-                  aria-label="Criar nova pasta em workspace vazio"
                   className={`rounded border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-tertiary)]/70 px-2.5 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]/80 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                 >
                   Nova pasta

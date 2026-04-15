@@ -322,7 +322,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
   switch (setting.type) {
     case 'toggle':
       return (
-        <button type="button"
+        <button type="button" aria-label={`Alternar configuração ${setting.label}`}
           onClick={() => onChange(!setting.value)}
           className={`
             w-11 h-6 rounded-full transition-colors relative
@@ -390,7 +390,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
 
     case 'keybinding':
       return (
-        <button type="button" className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] font-mono">
+        <button type="button" aria-label={`Editar atalho ${setting.label}`} className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] font-mono">
           {setting.value}
         </button>
       )
@@ -465,7 +465,7 @@ export default function EngineSettingsPage() {
         <div className="flex-1 overflow-y-auto py-2">
           {SETTING_SECTIONS.map(section => (
             <div key={section.id}>
-              <button type="button"
+              <button type="button" aria-label={`Abrir seção ${section.label}`}
                 onClick={() => {
                   setActiveSection(section.id)
                   if (section.subsections) {
@@ -488,7 +488,7 @@ export default function EngineSettingsPage() {
               {activeSection === section.id && section.subsections && (
                 <div className="ml-4 pl-4 border-l border-[var(--aethel-border-primary)]">
                   {section.subsections.map(sub => (
-                    <button type="button"
+                    <button type="button" aria-label={`Abrir subseção ${sub.label}`}
                       key={sub.id}
                       onClick={() => setActiveSubsection(sub.id)}
                       className={`
@@ -525,14 +525,14 @@ export default function EngineSettingsPage() {
           <div className="flex items-center gap-2">
             {hasChanges && (
               <>
-                <button type="button"
+                <button type="button" aria-label="Redefinir ajustes"
                   onClick={handleReset}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Redefinir
                 </button>
-                <button type="button"
+                <button type="button" aria-label="Salvar ajustes"
                   onClick={handleSave}
                   className="flex items-center gap-2 px-4 py-1.5 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] rounded-lg text-sm"
                 >

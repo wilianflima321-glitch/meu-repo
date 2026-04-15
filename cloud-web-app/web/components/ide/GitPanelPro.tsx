@@ -148,7 +148,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
       </span>
 
       {/* File info */}
-      <button type="button"
+      <button type="button" aria-label={`Abrir diff de ${fileName}`}
         onClick={onOpenDiff}
         className="flex-1 flex items-center gap-1 text-left truncate"
       >
@@ -168,7 +168,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
 
       {/* Actions */}
       <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button type="button"
+        <button type="button" aria-label={`Ver diff de ${fileName}`}
           onClick={onOpenDiff}
           className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
           title="Ver diff"
@@ -176,7 +176,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
           <Eye className="w-3.5 h-3.5" />
         </button>
         {!file.staged && file.status !== 'untracked' && (
-          <button type="button"
+          <button type="button" aria-label={`Descartar altera??es de ${fileName}`}
             onClick={onDiscard}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
             title="Descartar alterações"
@@ -185,7 +185,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
           </button>
         )}
         {file.staged ? (
-          <button type="button"
+          <button type="button" aria-label={`Remover ${fileName} do stage`}
             onClick={onUnstage}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
             title="Remover do stage"
@@ -193,7 +193,7 @@ function FileItem({ file, onStage, onUnstage, onDiscard, onOpenDiff }: FileItemP
             <Minus className="w-3.5 h-3.5" />
           </button>
         ) : (
-          <button type="button"
+          <button type="button" aria-label={`Adicionar ${fileName} ao stage`}
             onClick={onStage}
             className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]"
             title="Adicionar ao stage"
@@ -466,7 +466,7 @@ export default function GitPanelPro({
           <p className="text-[11px] text-[var(--aethel-text-quaternary)]">
             Verifique se o workspace atual possui um `.git` acessivel e tente novamente.
           </p>
-          <button type="button"
+          <button type="button" aria-label="Tentar carregar status do Git novamente"
             onClick={fetchStatus}
             className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_86%,transparent)] px-3 py-1.5 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
           >
@@ -481,7 +481,7 @@ export default function GitPanelPro({
     <div className={`h-full flex flex-col ${className}`}>
       {/* Branch Selector */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
-        <button type="button"
+        <button type="button" aria-label="Alternar seletor de branches"
           onClick={() => setShowBranches(!showBranches)}
           className="flex items-center gap-2 text-sm transition-colors hover:text-[var(--aethel-text-primary)]"
         >
@@ -495,28 +495,28 @@ export default function GitPanelPro({
           )}
         </button>
         <div className="flex items-center gap-1">
-          <button type="button"
+          <button type="button" aria-label="Buscar atualiza??es do reposit?rio"
             onClick={handleFetch}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
             title="Buscar atualizacoes"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
-          <button type="button"
+          <button type="button" aria-label="Baixar mudan?as do reposit?rio"
             onClick={handlePull}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
             title="Baixar mudanças"
           >
             <Download className="w-4 h-4" />
           </button>
-          <button type="button"
+          <button type="button" aria-label="Enviar mudan?as para o reposit?rio"
             onClick={handlePush}
             className="p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
             title="Enviar mudanças"
           >
             <Upload className="w-4 h-4" />
           </button>
-          <button type="button"
+          <button type="button" aria-label="Alternar hist?rico de commits"
             onClick={() => setShowHistory(!showHistory)}
             className={`p-1 rounded hover:bg-[var(--aethel-surface-tertiary)] ${showHistory ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-tertiary)]'}`}
             title="Historico"
@@ -534,7 +534,7 @@ export default function GitPanelPro({
               Branches locais
             </div>
             {branches.filter(b => !b.remote).map(branch => (
-              <button type="button"
+              <button type="button" aria-label={`Trocar para a branch ${branch.name}`}
                 key={branch.name}
                 onClick={() => handleCheckout(branch.name)}
                 className={`
@@ -551,7 +551,7 @@ export default function GitPanelPro({
               Branches remotas
             </div>
             {branches.filter(b => b.remote).map(branch => (
-              <button type="button"
+              <button type="button" aria-label={`Trocar para a branch ${branch.name}`}
                 key={branch.name}
                 onClick={() => handleCheckout(branch.name)}
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]"
@@ -617,7 +617,7 @@ export default function GitPanelPro({
           <span className="text-xs text-[var(--aethel-text-tertiary)]">
             {stagedFiles.length} arquivo(s) em stage
           </span>
-          <button type="button"
+          <button type="button" aria-label="Criar commit com arquivos em stage"
             onClick={handleCommit}
             disabled={!commitMessage.trim() || stagedFiles.length === 0}
             className={`
@@ -638,13 +638,13 @@ export default function GitPanelPro({
         {/* Staged Changes */}
         {stagedFiles.length > 0 && (
           <div>
-            <button type="button"
+            <button type="button" aria-label="Alternar se??o de arquivos em stage"
               onClick={() => toggleSection('staged')}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.staged ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
               <span className="flex-1 text-left">Em stage ({stagedFiles.length})</span>
-              <button type="button"
+              <button type="button" aria-label="Adicionar todas as altera??es ao stage"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleUnstageAll()
@@ -675,13 +675,13 @@ export default function GitPanelPro({
         {/* Changes */}
         {changedFiles.length > 0 && (
           <div>
-            <button type="button"
+            <button type="button" aria-label="Alternar se??o de altera??es"
               onClick={() => toggleSection('changes')}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
               {expandedSections.changes ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
               <span className="flex-1 text-left">Alteracoes ({changedFiles.length})</span>
-              <button type="button"
+              <button type="button" aria-label="Adicionar todas as altera??es ao stage"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleStageAll()
@@ -712,7 +712,7 @@ export default function GitPanelPro({
         {/* Untracked */}
         {untrackedFiles.length > 0 && (
           <div>
-            <button type="button"
+            <button type="button" aria-label="Alternar se??o de arquivos n?o rastreados"
               onClick={() => toggleSection('untracked')}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase tracking-wider hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]"
             >
@@ -746,7 +746,7 @@ export default function GitPanelPro({
             <p className="mt-1 max-w-xs text-xs text-[var(--aethel-text-tertiary)]">
               Nenhuma alteracao pendente para stage ou commit neste momento.
             </p>
-            <button type="button"
+            <button type="button" aria-label="Atualizar status do Git"
               onClick={fetchStatus}
               className="mt-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_86%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
