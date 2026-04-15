@@ -188,7 +188,12 @@ export default function LoginPageV2() {
               </div>
 
               {formError && (
-                <div id="login-form-error" className="aethel-state aethel-state-error text-xs" role="alert" aria-live="polite">
+                <div
+                  id="login-form-error"
+                  className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-3 py-2 text-xs text-[var(--aethel-error-light)]"
+                  role="alert"
+                  aria-live="polite"
+                >
                   {formError}
                 </div>
               )}
@@ -196,7 +201,7 @@ export default function LoginPageV2() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="aethel-button aethel-button-primary w-full justify-center rounded-xl px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] px-4 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? 'Entrando...' : 'Entrar no workspace'}
               </button>

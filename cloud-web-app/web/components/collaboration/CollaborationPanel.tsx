@@ -184,7 +184,7 @@ const UserListItem: React.FC<UserListItemProps> = ({ user, isHost, isCurrentUser
         )}
 
         {!isCurrentUser && onFollow && (
-          <button type="button"
+          <button type="button" aria-label={`Seguir atividade de ${user.name}`}
             onClick={onFollow}
             style={{
               padding: '4px',
@@ -256,7 +256,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
           {Object.keys(message.reactions).length > 0 && (
             <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
               {Object.entries(message.reactions).map(([emoji, users]) => (
-                <button type="button"
+                <button type="button" aria-label={`Reagir com ${emoji} na mensagem`}
                   key={emoji}
                   onClick={() => onReaction(emoji)}
                   style={{
@@ -281,7 +281,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
 
         {/* Actions */}
         <div style={{ position: 'relative' }}>
-          <button type="button"
+          <button type="button" aria-label={showReactions ? 'Fechar seletor de reacoes' : 'Abrir seletor de reacoes'}
             onClick={() => setShowReactions(!showReactions)}
             style={{
               padding: '4px',
@@ -312,7 +312,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({
               }}
             >
               {reactionEmojis.map((emoji) => (
-                <button type="button"
+                <button type="button" aria-label={`Adicionar reacao ${emoji || 'rapida'}`}
                   key={emoji}
                   onClick={() => {
                     onReaction(emoji);
@@ -489,7 +489,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
               fontSize: '12px',
             }}
           />
-          <button type="button"
+          <button type="button" aria-label={copied ? 'Link da sessao copiado' : 'Copiar link da sessao'}
             onClick={handleCopyLink}
             style={{
               display: 'flex',
@@ -511,7 +511,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-          <button type="button"
+          <button type="button" aria-label="Abrir aba de colaboradores"
             onClick={() => setActiveTab('users')}
             style={{
               flex: 1,
@@ -530,7 +530,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
             <Users size={16} />
             Users ({users.length})
           </button>
-          <button type="button"
+          <button type="button" aria-label="Abrir aba de chat colaborativo"
             onClick={() => setActiveTab('chat')}
             style={{
               flex: 1,
@@ -585,7 +585,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
               )}
 
               {/* Invite button */}
-              <button type="button"
+              <button type="button" aria-label="Convidar colaboradores copiando o link da sessao"
                 onClick={handleCopyLink}
                 style={{
                   display: 'flex',
@@ -666,6 +666,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
                     placeholder="Type a message..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
+                    aria-label="Digite uma mensagem para a sessao colaborativa"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -681,7 +682,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
                       fontSize: '14px',
                     }}
                   />
-                  <button type="button"
+                  <button type="button" aria-label="Enviar mensagem para a sessao colaborativa"
                     onClick={handleSendMessage}
                     disabled={!inputMessage.trim()}
                     style={{
@@ -711,7 +712,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
           justifyContent: 'space-between',
         }}
       >
-        <button type="button"
+        <button type="button" aria-label="Sair da sessao colaborativa"
           onClick={handleLeaveSession}
           style={{
             display: 'flex',
@@ -730,7 +731,7 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({
           Leave Session
         </button>
 
-        <button
+        <button aria-label="Abrir configuracoes da sessao colaborativa"
           type="button"
           style={{
             display: 'flex',

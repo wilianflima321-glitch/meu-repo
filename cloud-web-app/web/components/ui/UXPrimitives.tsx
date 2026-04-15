@@ -34,10 +34,11 @@ export function EmptyState({ icon = 'inbox', title, description, action, seconda
             <button
               type="button"
               onClick={action.onClick}
-              className={`aethel-button rounded-lg px-4 py-2 text-sm font-medium ${
+              aria-label={action.label}
+              className={`rounded-lg border px-4 py-2 text-sm font-medium transition ${
                 action.variant == 'secondary'
-                  ? 'aethel-button-secondary'
-                  : 'aethel-button-primary'
+                  ? 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'
+                  : 'border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)]'
               }`}
             >
               {action.label}
@@ -47,6 +48,7 @@ export function EmptyState({ icon = 'inbox', title, description, action, seconda
             <button
               type="button"
               onClick={secondaryAction.onClick}
+              aria-label={secondaryAction.label}
               className="text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]"
             >
               {secondaryAction.label}
@@ -191,6 +193,7 @@ export function Toast({ message, type = 'info', onDismiss, action }: ToastProps)
         <button
           type="button"
           onClick={action.onClick}
+          aria-label={action.label}
           className="text-sm font-medium underline underline-offset-2 transition-opacity hover:opacity-80"
         >
           {action.label}
