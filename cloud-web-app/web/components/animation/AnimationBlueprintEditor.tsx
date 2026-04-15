@@ -127,7 +127,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
           transition: 'opacity 0.2s',
         }}
       >
-        <button type="button"
+        <button type="button" aria-label={`Editar estado ${state.name}`}
           onClick={(e) => { e.stopPropagation(); onEdit(state); }}
           style={{
             background: 'var(--aethel-surface-quaternary)',
@@ -142,7 +142,7 @@ function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
           Edit
         </button>
         {!isDefault && state.type === 'state' && (
-          <button type="button"
+          <button type="button" aria-label={`Definir ${state.name} como estado padrao`}
             onClick={(e) => { e.stopPropagation(); onSetDefault(state.id); }}
             style={{
               background: 'var(--aethel-surface-quaternary)',
@@ -310,7 +310,7 @@ function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelP
               />
             )}
             {param.type === 'trigger' && (
-              <button type="button"
+              <button type="button" aria-label={`Disparar gatilho ${param.name}`}
                 onClick={() => {
                   onValueChange(param.id, true);
                   setTimeout(() => onValueChange(param.id, false), 100);

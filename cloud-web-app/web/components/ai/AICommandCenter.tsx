@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import {
   AGENTS,
   AgentExecutor,
@@ -176,9 +177,15 @@ export function AICommandCenter() {
 
   const agentList = Object.values(AGENTS)
   const selectedAgentDetails = AGENTS[selectedAgent]
+  const shellClass = [
+    'flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)]',
+    'bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_92%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_96%,transparent))]',
+    'shadow-[0_24px_80px_rgba(0,0,0,0.18)]',
+  ].join(' ')
+  const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   return (
-    <div className="flex h-full flex-col bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
+    <div className={`${shellClass} text-[var(--aethel-text-primary)]`}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-3">
         <div className="flex items-center gap-3">
@@ -204,7 +211,7 @@ export function AICommandCenter() {
           <select
             value={selectedAgent}
             onChange={(e) => setSelectedAgent(e.target.value)}
-            className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)]"
+            className={`rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)] ${focusClass}`}
             aria-label="Selecionar agente"
           >
             {agentList.map((agent) => (
@@ -232,11 +239,10 @@ export function AICommandCenter() {
             <p className="mb-3 text-sm text-[var(--aethel-text-tertiary)]">Sugestoes de comandos:</p>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               {COMMAND_SUGGESTIONS.map((suggestion, i) => (
-                <button type="button"
+                <button type="button" aria-label={`Executar sugestao ${suggestion.command} com agente ${suggestion.agentId}`}
                   key={i}
                   onClick={() => handleSuggestion(suggestion)}
-                  aria-label={`Executar sugestao ${suggestion.command} com agente ${suggestion.agentId}`}
-                  className="group rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-3 text-left transition-colors hover:border-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_85%,transparent)]"
+                  className={`group rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-3 text-left hover:border-[var(--aethel-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_85%,transparent)] ${focusClass}`}
                 >
                   <p className="text-sm text-[var(--aethel-text-secondary)] group-hover:text-[var(--aethel-text-primary)]">
                     {suggestion.command}
@@ -271,17 +277,17 @@ export function AICommandCenter() {
               placeholder="Descreva a tarefa... (Shift+Enter para nova linha)"
               disabled={isProcessing}
               rows={2}
-              className="w-full resize-none rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary)] disabled:opacity-50"
+              className={`w-full resize-none rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-4 py-3 text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] disabled:opacity-50 ${focusClass}`}
+              aria-label="Descrever tarefa para a central de comandos de IA"
             />
             <p className="mt-1 text-[11px] text-[var(--aethel-text-quaternary)]">
               Enter para executar | Shift+Enter para nova linha
             </p>
           </div>
-          <button
+          <button aria-label={isProcessing ? 'Executando agente selecionado' : 'Executar comando com o agente selecionado'}
             type="submit"
             disabled={isProcessing || !input.trim()}
-            aria-label={isProcessing ? 'Executando agente selecionado' : 'Executar comando com o agente selecionado'}
-            className="flex items-center gap-2 rounded-lg bg-[var(--aethel-primary)] px-6 py-3 font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:bg-[var(--aethel-surface-tertiary)]"
+            className={`flex items-center gap-2 rounded-lg bg-[var(--aethel-primary)] px-6 py-3 font-medium text-[var(--aethel-text-primary)] hover:brightness-110 disabled:cursor-not-allowed disabled:bg-[var(--aethel-surface-tertiary)] ${focusClass}`}
           >
             {isProcessing ? (
               <>
@@ -352,13 +358,13 @@ function ExecutionPanel({
   onClose: () => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   return (
     <div className="border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]">
-      <button type="button"
+      <button type="button" aria-label={expanded ? 'Recolher detalhes de execucao do agente' : 'Expandir detalhes de execucao do agente'}
         onClick={() => setExpanded(!expanded)}
-        aria-label={expanded ? 'Recolher detalhes de execucao do agente' : 'Expandir detalhes de execucao do agente'}
-        className="flex w-full items-center justify-between px-4 py-2 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]"
+        className={`flex w-full items-center justify-between px-4 py-2 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] ${focusClass}`}
         aria-expanded={expanded}
         aria-controls="ai-execution-panel"
       >
