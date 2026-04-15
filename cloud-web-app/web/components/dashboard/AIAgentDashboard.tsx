@@ -335,8 +335,7 @@ export function AIAgentDashboard({
             </span>
           </div>
 
-          <button type="button"
-            aria-label="Atualizar status dos agentes"
+          <button type="button" aria-label="Atualizar status dos agentes"
             onClick={refresh}
             disabled={isRefreshing}
             className={`${GHOST_BUTTON_CLASS} p-2`}
@@ -350,8 +349,7 @@ export function AIAgentDashboard({
         {/* Tabs */}
         <div className="flex gap-1 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
           {(['agents', 'history', 'metrics'] as const).map((tab) => (
-            <button type="button"
-              aria-label={`Alternar visualizacao de ${tab === 'agents' ? 'agentes' : tab === 'history' ? 'historico' : 'metricas'}`}
+            <button type="button" aria-label={`Alternar visualizacao de ${tab === 'agents' ? 'agentes' : tab === 'history' ? 'historico' : 'metricas'}`}
               key={tab}
               onClick={() => setView(tab)}
               className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
@@ -403,8 +401,7 @@ export function AIAgentDashboard({
                       {agent.status}
                     </span>
                     {(agent.status === 'running' || agent.status === 'waiting') && (
-                      <button type="button"
-                        aria-label={`Parar agente ${agent.name}`}
+                      <button type="button" aria-label={`Parar agente ${agent.name}`}
                         onClick={(e) => {
                           e.stopPropagation()
                           handleKillAgent(agent.id)

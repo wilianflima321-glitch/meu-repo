@@ -91,7 +91,7 @@ export default function ConsentDialog({
               </h2>
               <p className="text-[var(--aethel-text-secondary)]">{request.description}</p>
             </div>
-            <button type="button"
+            <button type="button" aria-label="Fechar dialogo de consentimento"
               onClick={onClose}
               className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
             >
@@ -230,14 +230,14 @@ export default function ConsentDialog({
 
         {/* Footer */}
         <div className="p-6 border-t border-[var(--aethel-border-primary)] flex gap-3">
-          <button type="button"
+          <button type="button" aria-label="Rejeitar solicitacao de consentimento"
             onClick={handleReject}
             disabled={isProcessing}
             className="flex-1 px-6 py-3 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] disabled:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors font-medium"
           >
             {isProcessing ? 'Processing...' : 'Reject'}
           </button>
-          <button type="button"
+          <button type="button" aria-label="Aprovar solicitacao de consentimento e continuar"
             onClick={handleApprove}
             disabled={isProcessing}
             className="flex-1 px-6 py-3 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded-lg transition-colors font-medium"
