@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 
 // ============================================================================
 // TYPES
@@ -91,7 +92,7 @@ export function MentionChip({
   const colors = colorClasses[data.color];
 
   return (
-    <button type="button"
+    <button type="button" aria-label={`Mention: ${data.label}`}
       onClick={onClick}
       className={`
         inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs
@@ -101,7 +102,6 @@ export function MentionChip({
         focus:outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]
       `}
       title={data.tag}
-      aria-label={`Mention: ${data.label}`}
     >
       {icons[data.icon]}
       <span className="truncate max-w-[120px]">{data.label}</span>
@@ -150,10 +150,9 @@ export function MentionPreviewPanel({
           <span className={colors.text}>{icons[chip.icon]}</span>
           <span className={`text-xs font-medium ${colors.text}`}>{chip.tag}</span>
         </div>
-        <button type="button"
+        <button type="button" aria-label="Fechar preview"
           onClick={onClose}
-          className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] text-xs"
-          aria-label="Fechar preview"
+          className={`text-xs text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
         >
           x
         </button>
@@ -205,10 +204,12 @@ export function MentionSuggestionList({
       {filtered.map((item) => {
         const colors = colorClasses[item.color];
         return (
-          <button type="button"
+          <button
+            type="button"
             key={item.trigger}
+            aria-label={`Inserir mencao ${item.trigger}`}
             onClick={() => onSelect(item.tag)}
-            className="flex items-center gap-2 w-full px-2 py-1.5 text-left rounded-md hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] transition-colors"
+            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           >
             <span className={colors.text}>{icons[item.icon]}</span>
             <div>

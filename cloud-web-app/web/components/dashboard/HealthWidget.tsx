@@ -183,7 +183,12 @@ const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({
           <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{service.name}</span>
         </div>
         {service.status === 'offline' && onFix && (
-          <button type="button" onClick={onFix} className="aethel-button aethel-button-secondary text-xs">
+          <button
+            type="button"
+            onClick={onFix}
+            aria-label={`Corrigir servico ${service.name}`}
+            className={`rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-tertiary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-focus)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
+          >
             Corrigir
           </button>
         )}

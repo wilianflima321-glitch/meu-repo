@@ -13,10 +13,11 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import useSWR from 'swr';
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 import {
   Clapperboard,
   Eye,
@@ -24,7 +25,6 @@ import {
   Palette,
   Camera,
   Volume2,
-  Layers,
   Sparkles,
   CheckCircle2,
   Clock,
@@ -32,7 +32,6 @@ import {
   ChevronDown,
   ThumbsUp,
   ThumbsDown,
-  MoreHorizontal,
   MessageSquare,
   ArrowRight,
   Wand2,
@@ -231,6 +230,8 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
   const categoryInfo = CATEGORY_INFO[note.category];
   const severityStyle = SEVERITY_STYLES[note.severity];
   const CategoryIcon = categoryInfo.icon;
+  const iconButtonClass = `rounded-lg p-1.5 text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
+  const subtleActionClass = `flex items-center gap-2 rounded-lg bg-[var(--aethel-surface-quaternary)] px-2 py-1.5 text-xs text-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
 
   const handleApplyFix = async () => {
     if (!onApplyFix) return;
@@ -255,9 +256,11 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
       `}
     >
       {/* Header */}
-      <button type="button"
+      <button
+        type="button"
+        aria-label={isExpanded ? `Recolher nota ${note.title}` : `Expandir nota ${note.title}`}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-start gap-3 p-3"
+        className={`flex w-full items-start gap-3 p-3 text-left ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
       >
         {/* Category icon */}
         <div className={`
@@ -331,11 +334,11 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
 
               {/* Reference */}
               {note.reference && (
-                <button type="button"
+                <button
+                  type="button"
+                  aria-label={`Ir para referencia ${note.reference.name}`}
                   onClick={() => onJumpTo?.(note.reference)}
-                  className="ml-11 flex items-center gap-2 px-2 py-1.5
-                           bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
-                           text-xs text-[var(--aethel-text-secondary)] transition-colors group"
+                  className={`group ml-11 ${subtleActionClass}`}
                 >
                   <Eye className="w-3.5 h-3.5 text-[var(--aethel-text-tertiary)] group-hover:text-[var(--aethel-text-primary)]" />
                   <span>Ir para: {note.reference.name}</span>
@@ -346,10 +349,11 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
               {/* Examples toggle */}
               {note.examples && note.examples.length > 0 && (
                 <div className="ml-11">
-                  <button type="button"
+                  <button
+                    type="button"
+                    aria-label={showExamples ? 'Ocultar exemplos de referencia' : 'Mostrar exemplos de referencia'}
                     onClick={() => setShowExamples(!showExamples)}
-                    className="flex items-center gap-1.5 text-xs text-[var(--aethel-text-tertiary)]
-                             hover:text-[var(--aethel-text-secondary)] transition-colors"
+                    className={`flex items-center gap-1.5 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                   >
                     <Film className="w-3.5 h-3.5" />
                     Ver exemplos de referencia
@@ -395,13 +399,12 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
               {/* Actions */}
               <div className="ml-11 flex items-center gap-2">
                 {note.autoFixAvailable && note.status !== 'applied' && (
-                  <button type="button"
+                  <button
+                    type="button"
+                    aria-label={`Aplicar correcao sugerida para ${note.title}`}
                     onClick={handleApplyFix}
                     disabled={isApplying}
-                    className="flex items-center gap-1.5 px-3 py-1.5
-                             bg-[var(--aethel-primary)] hover:brightness-110 rounded-lg
-                             text-xs font-medium transition-colors
-                             disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`flex items-center gap-1.5 rounded-lg bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                   >
                     {isApplying ? (
                       <>
@@ -427,9 +430,11 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
 
                 {/* Feedback buttons */}
                 <div className="flex items-center gap-1 ml-auto">
-                  <button type="button"
+                  <button
+                    type="button"
+                    aria-label={`Marcar a nota ${note.title} como util`}
                     onClick={() => onFeedback?.(note.id, 'helpful')}
-                    className={`p-1.5 rounded transition-colors ${
+                    className={`rounded p-1.5 ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${
                       note.feedback === 'helpful'
                         ? 'bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] text-[var(--aethel-success)]'
                         : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
@@ -438,9 +443,11 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                   >
                     <ThumbsUp className="w-3.5 h-3.5" />
                   </button>
-                  <button type="button"
+                  <button
+                    type="button"
+                    aria-label={`Marcar a nota ${note.title} como nao util`}
                     onClick={() => onFeedback?.(note.id, 'not_helpful')}
-                    className={`p-1.5 rounded transition-colors ${
+                    className={`rounded p-1.5 ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${
                       note.feedback === 'not_helpful'
                         ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)] text-[var(--aethel-error)]'
                         : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
@@ -449,9 +456,11 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
                   </button>
-                  <button type="button"
+                  <button
+                    type="button"
+                    aria-label={`Dispensar nota ${note.title}`}
                     onClick={() => onDismiss?.(note.id)}
-                    className="p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded text-[var(--aethel-text-tertiary)] transition-colors"
+                    className={iconButtonClass}
                     title="Dispensar"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -538,6 +547,7 @@ export function DirectorNotePanel({
     : projectType === 'film' ? Film
     : Clapperboard;
   const ProjectIcon = projectIcon;
+  const panelIconButtonClass = `rounded-lg p-1.5 text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
 
   return (
     <motion.div
@@ -601,20 +611,22 @@ export function DirectorNotePanel({
 
         {/* Actions */}
         <div className="flex items-center gap-2 mt-3">
-          <button type="button"
+          <button
+            type="button"
+            aria-label="Solicitar nova analise do diretor"
             onClick={requestAnalysis}
             disabled={isAnalyzing}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-quaternary)]
-                     hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-xs text-[var(--aethel-text-secondary)]
-                     transition-colors disabled:opacity-50"
+            className={`flex items-center gap-1.5 rounded-lg bg-[var(--aethel-surface-quaternary)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] disabled:opacity-50 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
             {isAnalyzing ? 'Analisando...' : 'Nova analise'}
           </button>
 
-          <button type="button"
+          <button
+            type="button"
+            aria-label={isCollapsed ? 'Expandir painel de notas do diretor' : 'Recolher painel de notas do diretor'}
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="ml-auto p-1.5 hover:bg-[var(--aethel-surface-quaternary)] rounded transition-colors"
+            className={`ml-auto ${panelIconButtonClass}`}
           >
             {isCollapsed
               ? <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
@@ -639,16 +651,12 @@ export function DirectorNotePanel({
                 { key: 'recommendation' as const, label: `Recom. (${counts.recommendation})` },
                 { key: 'suggestion' as const, label: `Sugest. (${counts.suggestion})` },
               ].map(({ key, label }) => (
-                <button type="button"
+                <button
+                  type="button"
+                  aria-label={`Filtrar notas por ${label}`}
                   key={key}
                   onClick={() => setActiveFilter(key)}
-                  className={`
-                    px-2.5 py-1 rounded-full text-xs whitespace-nowrap transition-colors
-                    ${activeFilter === key
-                      ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                      : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-                    }
-                  `}
+                  className={`px-2.5 py-1 text-xs whitespace-nowrap rounded-full ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${activeFilter === key ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'} `}
                 >
                   {label}
                 </button>
