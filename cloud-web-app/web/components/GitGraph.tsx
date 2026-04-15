@@ -168,7 +168,7 @@ export default function GitGraph() {
                     top: `${node.y - 10}px`
                   }}
                 >
-                  <button type="button"
+                  <button type="button" aria-label={`Open commit ${node.commit.hash.substring(0, 7)}`}
                     onClick={() => handleCommitClick(node.commit)}
                     className="text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] rounded px-2 py-1 transition-colors"
                   >
@@ -192,7 +192,7 @@ export default function GitGraph() {
         {selectedCommit && (
           <div className="w-96 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] backdrop-blur-sm border-l border-[var(--aethel-border-primary)] p-6 overflow-y-auto">
             <div className="mb-4">
-              <button type="button"
+              <button type="button" aria-label="Back to commit graph"
                 onClick={() => setSelectedCommit(null)}
                 className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] mb-4"
               >
@@ -254,13 +254,13 @@ export default function GitGraph() {
 
               {/* Actions */}
               <div className="pt-4 border-t border-[var(--aethel-border-primary)] space-y-2">
-                <button type="button" className="w-full px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
+                <button type="button" aria-label="View selected commit changes" className="w-full px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
                   View Changes
                 </button>
-                <button type="button" className="w-full px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
+                <button type="button" aria-label="Checkout selected commit" className="w-full px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
                   Checkout
                 </button>
-                <button type="button" className="w-full px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
+                <button type="button" aria-label="Create branch from selected commit" className="w-full px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-lg transition-colors">
                   Create Branch
                 </button>
               </div>

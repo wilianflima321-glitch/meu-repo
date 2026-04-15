@@ -188,7 +188,7 @@ export function FeatureFlagAdmin() {
               </div>
             </div>
 
-            <button type="button"
+            <button type="button" aria-label={flag.enabled ? `Disable feature flag ${flag.key}` : `Enable feature flag ${flag.key}`}
               onClick={() => toggleFlag(flag.key)}
               className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                 flag.enabled

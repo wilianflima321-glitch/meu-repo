@@ -148,7 +148,7 @@ const FileItem: React.FC<FileItemProps> = ({
 
       <div style={{ display: 'flex', gap: '2px' }} onClick={(e) => e.stopPropagation()}>
         {onView && (
-          <button type="button"
+          <button type="button" aria-label={`View diff for ${path}`}
             onClick={onView}
             style={{
               padding: '4px',
@@ -165,7 +165,7 @@ const FileItem: React.FC<FileItemProps> = ({
         )}
 
         {staged && onUnstage && (
-          <button type="button"
+          <button type="button" aria-label={`Unstage ${path}`}
             onClick={onUnstage}
             style={{
               padding: '4px',
@@ -182,7 +182,7 @@ const FileItem: React.FC<FileItemProps> = ({
         )}
 
         {!staged && onStage && (
-          <button type="button"
+          <button type="button" aria-label={`Stage ${path}`}
             onClick={onStage}
             style={{
               padding: '4px',
@@ -199,7 +199,7 @@ const FileItem: React.FC<FileItemProps> = ({
         )}
 
         {!staged && onDiscard && (
-          <button type="button"
+          <button type="button" aria-label={`Discard changes in ${path}`}
             onClick={onDiscard}
             style={{
               padding: '4px',
@@ -331,7 +331,7 @@ const BranchItem: React.FC<BranchItemProps> = ({ branch, onCheckout, onDelete })
 
       {!branch.isHead && !branch.isRemote && (
         <div style={{ display: 'flex', gap: '4px' }}>
-          <button type="button"
+          <button type="button" aria-label={`Checkout branch ${branch.name}`}
             onClick={(e) => {
               e.stopPropagation();
               onCheckout();
@@ -348,7 +348,7 @@ const BranchItem: React.FC<BranchItemProps> = ({ branch, onCheckout, onDelete })
           >
             Trocar
           </button>
-          <button type="button"
+          <button type="button" aria-label={`Delete branch ${branch.name}`}
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
@@ -519,7 +519,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
           </div>
 
           <div style={{ display: 'flex', gap: '4px' }}>
-            <button type="button"
+            <button type="button" aria-label="Refresh git status"
               onClick={refresh}
               style={{
                 padding: '6px',
@@ -533,7 +533,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             >
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
             </button>
-            <button type="button"
+            <button type="button" aria-label="Fetch from remote"
               onClick={handleFetch}
               style={{
                 padding: '6px',
@@ -547,7 +547,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             >
               <Download size={16} />
             </button>
-            <button type="button"
+            <button type="button" aria-label="Pull from remote"
               onClick={handlePull}
               style={{
                 padding: '6px',
@@ -561,7 +561,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             >
               <ArrowDown size={16} />
             </button>
-            <button type="button"
+            <button type="button" aria-label="Push to remote"
               onClick={handlePush}
               style={{
                 padding: '6px',
@@ -601,7 +601,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
             { id: 'branches' as const, label: 'Branches', count: branches.length },
             { id: 'stashes' as const, label: 'Stashes', count: stashes.length },
           ].map((tab) => (
-            <button type="button"
+            <button type="button" aria-label={`Open git tab ${tab.label}`}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
@@ -650,7 +650,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                     resize: 'vertical',
                   }}
                 />
-                <button type="button"
+                <button type="button" aria-label="Commit staged changes"
                   onClick={handleCommit}
                   disabled={!commitMessage.trim() || status.staged.length === 0}
                   style={{
@@ -685,7 +685,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                   {expandedSections.has('staged') ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   <span style={{ fontWeight: 500 }}>Staged Changes ({status.staged.length})</span>
                   {status.staged.length > 0 && (
-                    <button type="button"
+                    <button type="button" aria-label="Unstage all changes"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleUnstageAll();
@@ -734,7 +734,7 @@ export const GitPanel: React.FC<GitPanelProps> = ({ gitService }) => {
                   {expandedSections.has('changes') ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   <span style={{ fontWeight: 500 }}>Changes ({status.unstaged.length})</span>
                   {status.unstaged.length > 0 && (
-                    <button type="button"
+                    <button type="button" aria-label="Stage all changes"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleStageAll();
