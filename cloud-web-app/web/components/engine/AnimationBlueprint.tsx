@@ -246,7 +246,7 @@ function VariablesPanel({
         <span style={{ fontWeight: 'bold', fontSize: '12px', color: 'var(--aethel-text-primary)' }}>
           📊 Variables
         </span>
-        <button type="button"
+        <button type="button" aria-label={showAdd ? 'Fechar formulario de nova variavel' : 'Abrir formulario de nova variavel'}
           onClick={() => setShowAdd(!showAdd)}
           style={{
             padding: '4px 8px',
@@ -304,7 +304,7 @@ function VariablesPanel({
               <option value="int">Int</option>
               <option value="bool">Bool</option>
             </select>
-            <button type="button"
+            <button type="button" aria-label="Adicionar nova variavel ao animation blueprint"
               onClick={() => {
                 if (newVar.name) {
                   onAddVariable({
@@ -384,7 +384,7 @@ function VariablesPanel({
             />
           )}
 
-          <button type="button"
+          <button type="button" aria-label={`Remover variavel ${variable.name}`}
             onClick={() => onRemoveVariable(variable.name)}
             style={{
               background: 'none',
@@ -659,7 +659,7 @@ function TransitionInspector({
           marginBottom: '8px',
         }}>
           <span style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)' }}>Conditions</span>
-          <button type="button"
+          <button type="button" aria-label="Adicionar condicao de transicao"
             onClick={() => {
               const newCondition: TransitionCondition = {
                 variable: variables[0]?.name || '',
@@ -766,7 +766,7 @@ function TransitionInspector({
               }}
             />
 
-            <button type="button"
+            <button type="button" aria-label={`Remover condicao ${i + 1} da transicao`}
               onClick={() => {
                 const newConditions = transition.conditions.filter((_, j) => j !== i);
                 onUpdate({ conditions: newConditions });
@@ -1000,7 +1000,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           borderRadius: '6px',
           border: '1px solid var(--aethel-border-primary)',
         }}>
-          <button type="button"
+          <button type="button" aria-label="Adicionar estado ao animation blueprint"
             onClick={() => handleAddState('state')}
             style={{
               padding: '6px 12px',
@@ -1014,7 +1014,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           >
             🎭 Add State
           </button>
-          <button type="button"
+          <button type="button" aria-label="Adicionar conduit ao animation blueprint"
             onClick={() => handleAddState('conduit')}
             style={{
               padding: '6px 12px',
@@ -1028,7 +1028,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           >
             ⚡ Add Conduit
           </button>
-          <button type="button"
+          <button type="button" aria-label="Adicionar blend state ao animation blueprint"
             onClick={() => handleAddState('blend')}
             style={{
               padding: '6px 12px',
@@ -1043,7 +1043,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
             🔀 Add Blend
           </button>
           {(selectedState || selectedTransition) && (
-            <button type="button"
+            <button type="button" aria-label="Excluir item selecionado do animation blueprint"
               onClick={handleDeleteSelected}
               style={{
                 padding: '6px 12px',
@@ -1165,7 +1165,7 @@ export default function AnimationBlueprint({ onSave }: AnimationBlueprintProps) 
           padding: '12px',
           borderTop: '1px solid var(--aethel-border-primary)',
         }}>
-          <button type="button"
+          <button type="button" aria-label="Salvar animation blueprint"
             onClick={() => onSave?.({ states, transitions, variables })}
             style={{
               width: '100%',

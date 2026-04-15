@@ -31,6 +31,8 @@ interface VFXGraph {
   connections: Connection[];
 }
 
+export type { VFXGraph, VFXNode, Connection as VFXConnection };
+
 // Node Templates
 const NODE_TEMPLATES: Record<string, Omit<VFXNode, 'id' | 'position'>> = {
   'spawn-rate': {
@@ -240,8 +242,14 @@ const VFXNodeComponent: React.FC<{
   );
 };
 
+interface VFXGraphEditorProps {
+  graph?: VFXGraph;
+  onGraphChange?: (graph: VFXGraph) => void;
+  onSelectedNodeChange?: (node: VFXNode | null) => void;
+}
+
 // Main Editor Component
-export default function VFXGraphEditor() {
+export default function VFXGraphEditor({ graph: externalGraph, onGraphChange, onSelectedNodeChange }: VFXGraphEditorProps) {
   const [graph, setGraph] = useState<VFXGraph>({
     id: 'default',
     name: 'New VFX Graph',
@@ -349,6 +357,20 @@ export default function VFXGraphEditor() {
   }, []);
 
   const selectedNode = graph.nodes.find(n => n.id === selectedNodeId);
+
+  useEffect(() => {
+    if (externalGraph) {
+      setGraph(externalGraph);
+    }
+  }, [externalGraph]);
+
+  useEffect(() => {
+    onGraphChange?.(graph);
+  }, [graph, onGraphChange]);
+
+  useEffect(() => {
+    onSelectedNodeChange?.(selectedNode || null);
+  }, [onSelectedNodeChange, selectedNode]);
 
   return (
     <div className="h-full flex flex-col bg-[var(--aethel-surface-primary)]">

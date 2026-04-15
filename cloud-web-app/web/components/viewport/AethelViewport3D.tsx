@@ -25,6 +25,7 @@ import { sampleTrajectory } from '@/lib/three/physics'
 
 export type ViewportTransformMode = 'translate' | 'rotate' | 'scale'
 export type ViewportTransformSpace = 'world' | 'local'
+export type ViewportCreativeMode = 'game' | 'film'
 
 export type ViewportSceneObject = {
   id: string
@@ -45,8 +46,14 @@ type AethelViewport3DProps = {
   transformMode: ViewportTransformMode
   transformSpace: ViewportTransformSpace
   snapEnabled: boolean
+  creativeMode: ViewportCreativeMode
   renderMode?: 'draft' | 'cinematic'
   isPlaying: boolean
+  currentTime: number
+  duration: number
+  vfxGlowIntensity?: number
+  abilityAccentColor?: string | null
+  abilityLabel?: string | null
   onTogglePlayTest: () => void
   onObjectsChange: (objects: ViewportSceneObject[]) => void
   onSelectionChange: (ids: string[]) => void
@@ -225,9 +232,14 @@ function SceneObjectMesh({
   transformMode,
   transformSpace,
   snapEnabled,
+  visualGlowColor,
+  visualGlowIntensity,
   onTransformChange,
   onSelect,
-}: SceneObjectMeshProps) {
+}: SceneObjectMeshProps & {
+  visualGlowColor?: string
+  visualGlowIntensity?: number
+}) {
   const groupRef = useRef<THREE.Group>(null)
 
   const commitTransform = useCallback(() => {
@@ -252,6 +264,12 @@ function SceneObjectMesh({
       }}
     >
       <GeometryForObject object={object} isSelected={isSelected} />
+      {visualGlowIntensity && visualGlowIntensity > 0 ? (
+        <mesh scale={[1.08, 1.08, 1.08]}>
+          <sphereGeometry args={[0.95, 20, 20]} />
+          <meshBasicMaterial color={visualGlowColor ?? '#60a5fa'} transparent opacity={Math.min(0.18, visualGlowIntensity * 0.08)} />
+        </mesh>
+      ) : null}
       {isSelected ? (
         <Html position={[0, 0.95, 0]} center>
           <div className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[rgba(6,10,18,0.84)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-primary)] shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
@@ -285,8 +303,13 @@ function ViewportScene({
   transformMode,
   transformSpace,
   snapEnabled,
+  creativeMode,
   renderMode = 'draft',
   isPlaying,
+  currentTime,
+  duration,
+  vfxGlowIntensity = 0,
+  abilityAccentColor,
   onObjectsChange,
   onSelectionChange,
 }: Omit<AethelViewport3DProps, 'onTogglePlayTest' | 'onTransformModeChange' | 'onTransformSpaceChange' | 'onSnapEnabledChange' | 'onAIAction'>) {
@@ -296,8 +319,12 @@ function ViewportScene({
   const trajectoryPoints = useMemo(() => {
     if (!isPlaying || !selectedObject) return []
     const points = sampleTrajectory(8, 42, 9.81, 48, { dragCoef: 0.06, mass: 1.2, dt: 0.06 })
-    return points.map((point) => [selectedObject.position[0] + point.x / 4, selectedObject.position[1] + point.y / 4, selectedObject.position[2]] as [number, number, number])
-  }, [isPlaying, selectedObject])
+    const normalizedDuration = Math.max(duration, 0.1)
+    const visibleCount = Math.max(2, Math.min(points.length, Math.round((currentTime / normalizedDuration) * points.length)))
+    return points
+      .slice(0, visibleCount)
+      .map((point) => [selectedObject.position[0] + point.x / 4, selectedObject.position[1] + point.y / 4, selectedObject.position[2]] as [number, number, number])
+  }, [currentTime, duration, isPlaying, selectedObject])
 
   const handleSelect = useCallback((id: string, additive: boolean) => {
     if (additive) {
@@ -310,6 +337,8 @@ function ViewportScene({
   const handleTransformChange = useCallback((id: string, patch: Partial<ViewportSceneObject>) => {
     onObjectsChange(objects.map((object) => (object.id === id ? { ...object, ...patch } : object)))
   }, [objects, onObjectsChange])
+
+  const cinematicGlowIntensity = creativeMode === 'film' ? 0.28 : 0.16
 
   return (
     <Canvas
@@ -347,12 +376,14 @@ function ViewportScene({
           transformMode={transformMode}
           transformSpace={transformSpace}
           snapEnabled={snapEnabled}
+          visualGlowColor={selectedIds.includes(object.id) ? abilityAccentColor ?? '#60a5fa' : undefined}
+          visualGlowIntensity={selectedIds.includes(object.id) ? vfxGlowIntensity + cinematicGlowIntensity : 0}
           onTransformChange={handleTransformChange}
           onSelect={handleSelect}
         />
       ))}
 
-      {trajectoryPoints.length > 1 ? <Line points={trajectoryPoints} color="#38bdf8" lineWidth={2.2} dashed dashSize={0.2} gapSize={0.12} /> : null}
+      {trajectoryPoints.length > 1 ? <Line points={trajectoryPoints} color={creativeMode === 'film' ? '#f59e0b' : '#38bdf8'} lineWidth={2.2} dashed dashSize={0.2} gapSize={0.12} /> : null}
 
       <OrbitControls makeDefault enableDamping dampingFactor={0.12} maxDistance={14} minDistance={1.8} />
       <GizmoHelper alignment="bottom-right" margin={[88, 88]}>
@@ -606,8 +637,14 @@ export function AethelViewport3D({
   transformMode,
   transformSpace,
   snapEnabled,
+  creativeMode,
   renderMode = 'draft',
   isPlaying,
+  currentTime,
+  duration,
+  vfxGlowIntensity = 0,
+  abilityAccentColor,
+  abilityLabel,
   onTogglePlayTest,
   onObjectsChange,
   onSelectionChange,
@@ -649,10 +686,14 @@ export function AethelViewport3D({
 
       <div className="absolute right-4 top-4 z-20 w-[340px] rounded-2xl border border-[var(--aethel-border-subtle)] bg-[rgba(7,12,20,0.86)] p-3 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur-md">
         <div className="flex items-center justify-between gap-2">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Informative AI</p>
-            <p className="mt-1 text-sm font-medium text-[var(--aethel-text-primary)]">Aplique comandos diretamente no gizmo</p>
-          </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Informative AI</p>
+          <p className="mt-1 text-sm font-medium text-[var(--aethel-text-primary)]">Aplique comandos diretamente no gizmo</p>
+          <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">
+            {creativeMode === 'film' ? 'Film mode prioriza timing, glow cinematográfico e render rápido.' : 'Game mode prioriza play test, lógica visual e iteração de abilities.'}
+            {abilityLabel ? ` Ability ativa: ${abilityLabel}.` : ''}
+          </p>
+        </div>
           <button type="button" aria-label={isPlaying ? 'Parar play test do viewport' : 'Executar play test do viewport'} onClick={onTogglePlayTest} className={panelButton}>
             <Sparkles className="h-4 w-4" />
             {isPlaying ? 'Stop' : 'Play'}
@@ -680,8 +721,13 @@ export function AethelViewport3D({
         transformMode={transformMode}
         transformSpace={transformSpace}
         snapEnabled={snapEnabled}
+        creativeMode={creativeMode}
         renderMode={renderMode}
         isPlaying={isPlaying}
+        currentTime={currentTime}
+        duration={duration}
+        vfxGlowIntensity={vfxGlowIntensity}
+        abilityAccentColor={abilityAccentColor}
         onObjectsChange={onObjectsChange}
         onSelectionChange={onSelectionChange}
       />

@@ -14,11 +14,15 @@ import {
   SceneViewportInspector,
   SceneViewportOutliner,
   viewportSeedObjects,
+  type ViewportCreativeMode,
   type ViewportSceneObject,
   type ViewportTransformMode,
   type ViewportTransformSpace,
 } from '@/components/viewport/AethelViewport3D';
+import TimelineOverlay from '@/components/viewport/TimelineOverlay';
 import type { VisualScript } from '@/components/visual-scripting/VisualScriptEditor';
+import type { VFXGraph } from '@/components/editors/VFXGraphEditor';
+import type { GameplayAbilitySpec } from '@/lib/gameplay-ability-system';
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -508,6 +512,23 @@ function deriveVisualScriptPreviewPatch(script: VisualScript, anchor: ViewportSc
   };
 }
 
+function deriveVfxGlowIntensity(graph: VFXGraph | null): number {
+  if (!graph) return 0;
+  const emitterCount = graph.nodes.filter((node) => node.type === 'emitter').length;
+  const rendererCount = graph.nodes.filter((node) => node.type === 'renderer').length;
+  const turbulenceCount = graph.nodes.filter((node) => node.name.toLowerCase().includes('turbulence')).length;
+  return Math.min(1.4, emitterCount * 0.18 + rendererCount * 0.16 + turbulenceCount * 0.12);
+}
+
+function deriveAbilityAccent(ability: GameplayAbilitySpec | null): { color: string | null; label: string } {
+  if (!ability) return { color: null, label: 'Nenhuma ability em foco' };
+  const normalized = `${ability.name} ${ability.description}`.toLowerCase();
+  if (normalized.includes('fire')) return { color: '#f97316', label: ability.name };
+  if (normalized.includes('heal')) return { color: '#22c55e', label: ability.name };
+  if (normalized.includes('shield')) return { color: '#60a5fa', label: ability.name };
+  return { color: '#a78bfa', label: ability.name };
+}
+
 type CanonicalLiveProps = {
   variant: 'live';
   suggestions: string[];
@@ -593,14 +614,44 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
   const [selectedIds, setSelectedIds] = useState<string[]>([viewportSeedObjects[0]?.id].filter(Boolean) as string[]);
   const [transformMode, setTransformMode] = useState<ViewportTransformMode>('translate');
   const [transformSpace, setTransformSpace] = useState<ViewportTransformSpace>('world');
+  const [creativeMode, setCreativeMode] = useState<ViewportCreativeMode>('game');
   const [snapEnabled, setSnapEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [workflowTool, setWorkflowTool] = useState<ViewportWorkflowTool | null>(null);
   const [facialBlendShapeCount, setFacialBlendShapeCount] = useState(0);
   const [hairPresetLabel, setHairPresetLabel] = useState('wavy');
   const [visualScript, setVisualScript] = useState<VisualScript>(INITIAL_VIEWPORT_VISUAL_SCRIPT);
+  const [timelineTime, setTimelineTime] = useState(0);
+  const [timelineDuration] = useState(12);
+  const [exportStatus, setExportStatus] = useState('Viewport ready');
+  const [vfxGraph, setVfxGraph] = useState<VFXGraph | null>(null);
+  const [selectedAbility, setSelectedAbility] = useState<GameplayAbilitySpec | null>(null);
   const visualScriptAnchorRef = useRef<ViewportSceneObject | null>(cloneViewportObject(viewportSeedObjects[0]));
   const selectedObject = objects.find((object) => object.id === selectedIds[0]) ?? null;
+  const vfxGlowIntensity = useMemo(() => deriveVfxGlowIntensity(vfxGraph), [vfxGraph]);
+  const abilityAccent = useMemo(() => deriveAbilityAccent(selectedAbility), [selectedAbility]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    const interval = setInterval(() => {
+      setTimelineTime((current) => {
+        const next = Number((current + 0.1).toFixed(2));
+        if (next >= timelineDuration) {
+          return creativeMode === 'film' ? timelineDuration : 0;
+        }
+        return next;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [creativeMode, isPlaying, timelineDuration]);
+
+  useEffect(() => {
+    if (creativeMode === 'film' && timelineTime >= timelineDuration) {
+      setIsPlaying(false);
+    }
+  }, [creativeMode, timelineDuration, timelineTime]);
 
   const openWorkflowTool = useCallback((tool: ViewportWorkflowTool) => {
     setWorkflowTool(tool);
@@ -608,6 +659,13 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
       visualScriptAnchorRef.current = cloneViewportObject(selectedObject);
     }
   }, [selectedObject]);
+
+  const handleTogglePlay = useCallback(() => {
+    if (timelineTime >= timelineDuration && !isPlaying) {
+      setTimelineTime(0);
+    }
+    setIsPlaying((current) => !current);
+  }, [isPlaying, timelineDuration, timelineTime]);
 
   const handleVisualScriptChange = useCallback((script: VisualScript) => {
     setVisualScript(script);
@@ -624,6 +682,10 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
       )
     );
   }, []);
+
+  const handleExportViewport = useCallback(() => {
+    setExportStatus(creativeMode === 'film' ? 'Render queue primed' : 'Game clip staged');
+  }, [creativeMode]);
 
   const activeWorkflowLabel =
     workflowTool === 'visual-script'
@@ -659,9 +721,15 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
             transformMode={transformMode}
             transformSpace={transformSpace}
             snapEnabled={snapEnabled}
+            creativeMode={creativeMode}
             renderMode={renderMode}
             isPlaying={isPlaying}
-            onTogglePlayTest={() => setIsPlaying((current) => !current)}
+            currentTime={timelineTime}
+            duration={timelineDuration}
+            vfxGlowIntensity={vfxGlowIntensity}
+            abilityAccentColor={abilityAccent.color}
+            abilityLabel={abilityAccent.label}
+            onTogglePlayTest={handleTogglePlay}
             onObjectsChange={setObjects}
             onSelectionChange={setSelectedIds}
             onTransformModeChange={setTransformMode}
@@ -690,9 +758,9 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
                       {workflowTool === 'visual-script'
                         ? 'Os nos Move, Rotate e Add Force refletem no objeto selecionado em tempo real.'
                         : workflowTool === 'vfx'
-                          ? 'Use este overlay para iterar VFX sem sair do viewport soberano.'
+                          ? 'Emitter, module e renderer agora alimentam glow e leitura cinematica no objeto ativo.'
                           : workflowTool === 'ability'
-                            ? 'Abilities e preview ficam ancorados ao objeto ativo do viewport.'
+                            ? 'Abilities e preview agora podem colorir e orientar o play test do objeto ativo.'
                             : 'Ferramenta contextual de personagem conectada ao mesmo objeto 3D.'}
                     </p>
                   </div>
@@ -724,9 +792,9 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
                   ) : workflowTool === 'visual-script' ? (
                     <VisualScriptEditor script={visualScript} onChange={handleVisualScriptChange} />
                   ) : workflowTool === 'vfx' ? (
-                    <VFXGraphEditor />
+                    <VFXGraphEditor onGraphChange={setVfxGraph} />
                   ) : (
-                    <AbilityEditor entityId={selectedObject?.id ?? 'viewport-entity'} />
+                    <AbilityEditor entityId={selectedObject?.id ?? 'viewport-entity'} onAbilityChange={setSelectedAbility} />
                   )}
                 </div>
               </div>
@@ -754,10 +822,24 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
           onTransformModeChange={setTransformMode}
           onTransformSpaceChange={setTransformSpace}
           onSnapEnabledChange={setSnapEnabled}
-          onTogglePlayTest={() => setIsPlaying((current) => !current)}
+          onTogglePlayTest={handleTogglePlay}
         />
       }
-      bottom={<Timeline3D duration={12} />}
+      bottom={
+        <TimelineOverlay
+          mode={creativeMode}
+          duration={timelineDuration}
+          currentTime={timelineTime}
+          isPlaying={isPlaying}
+          activeWorkflowLabel={activeWorkflowLabel}
+          selectedObjectName={selectedObject?.name ?? null}
+          statusLabel={exportStatus}
+          onModeChange={setCreativeMode}
+          onTimeChange={setTimelineTime}
+          onTogglePlay={handleTogglePlay}
+          onExport={handleExportViewport}
+        />
+      }
     />
   );
 }
