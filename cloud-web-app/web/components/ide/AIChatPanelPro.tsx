@@ -1347,43 +1347,39 @@ export default function AIChatPanelPro({
               <>
                 {/* Live Mode Toggle */}
                 {selectedModel.supportsVoice && onToggleLiveMode && (
-                  <button type="button"
+                  <button type="button" aria-label={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo'}
                     onClick={onToggleLiveMode}
                     className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isLiveMode ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
                     title={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo (voz em tempo real)'}
-                    aria-label={isLiveMode ? 'Sair do modo ao vivo' : 'Entrar no modo ao vivo'}
                   >
                     <Radio className="w-4 h-4" />
                   </button>
                 )}
                 {/* TTS Toggle */}
-                <button type="button"
+                <button type="button" aria-label={isSpeaking ? 'Parar leitura' : 'Ler ?ltima resposta'}
                   onClick={isSpeaking ? stopSpeaking : () => {
                     const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()
                     if (lastAssistantMsg) speakMessage(lastAssistantMsg.content)
                   }}
                   className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isSpeaking ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
                   title={isSpeaking ? 'Parar leitura' : 'Ler última resposta'}
-                  aria-label={isSpeaking ? 'Parar leitura' : 'Ler última resposta'}
                 >
                   {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </button>
               </>
             )}
-            <button type="button"
+            <button type="button" aria-label="Limpar chat"
               onClick={onClearChat}
               className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
               title="Limpar chat"
-              aria-label="Limpar chat"
             >
               <Trash2 className="w-4 h-4" />
             </button>
-            <button type="button"
+            <button type="button" aria-label={showAdvancedControls ? 'Ocultar avan?ado' : 'Mostrar avan?ado'}
               onClick={() => setShowAdvancedControls((prev) => !prev)}
               className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${showAdvancedControls ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)]'}`}
               title={showAdvancedControls ? 'Ocultar avançado' : 'Mostrar avançado'}
               aria-pressed={showAdvancedControls}
-              aria-label={showAdvancedControls ? 'Ocultar avançado' : 'Mostrar avançado'}
             >
               <Settings className="w-4 h-4" />
             </button>
