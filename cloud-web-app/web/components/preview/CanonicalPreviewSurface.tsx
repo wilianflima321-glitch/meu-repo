@@ -529,6 +529,26 @@ function deriveAbilityAccent(ability: GameplayAbilitySpec | null): { color: stri
   return { color: '#a78bfa', label: ability.name };
 }
 
+function deriveFacialExpressionIntensity(blendShapes: Record<string, number>): number {
+  const values = Object.values(blendShapes);
+  if (values.length === 0) return 0;
+  const active = values.filter((value) => value > 0.01);
+  if (active.length === 0) return 0;
+  const total = active.reduce((sum, value) => sum + value, 0);
+  return Math.min(1.2, total / Math.max(active.length, 1));
+}
+
+function deriveHairPreviewSignature(hairData: { gradient?: Array<{ color: string }>; strandCount?: number; curl?: { intensity?: number }; preset?: string } | null) {
+  if (!hairData) return { color: null, density: 0, label: 'Sem preset' };
+  const tipColor = hairData.gradient?.[hairData.gradient.length - 1]?.color ?? null;
+  const density = Math.min(1.2, (hairData.strandCount ?? 0) / 12000 + (hairData.curl?.intensity ?? 0) * 0.2);
+  return {
+    color: tipColor,
+    density,
+    label: hairData.preset ?? 'custom',
+  };
+}
+
 type CanonicalLiveProps = {
   variant: 'live';
   suggestions: string[];
@@ -619,7 +639,10 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
   const [isPlaying, setIsPlaying] = useState(false);
   const [workflowTool, setWorkflowTool] = useState<ViewportWorkflowTool | null>(null);
   const [facialBlendShapeCount, setFacialBlendShapeCount] = useState(0);
+  const [facialExpressionIntensity, setFacialExpressionIntensity] = useState(0);
   const [hairPresetLabel, setHairPresetLabel] = useState('wavy');
+  const [hairHighlightColor, setHairHighlightColor] = useState<string | null>('#6b3d22');
+  const [hairVolumeIntensity, setHairVolumeIntensity] = useState(0.42);
   const [visualScript, setVisualScript] = useState<VisualScript>(INITIAL_VIEWPORT_VISUAL_SCRIPT);
   const [timelineTime, setTimelineTime] = useState(0);
   const [timelineDuration] = useState(12);
@@ -683,10 +706,6 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
     );
   }, []);
 
-  const handleExportViewport = useCallback(() => {
-    setExportStatus(creativeMode === 'film' ? 'Render queue primed' : 'Game clip staged');
-  }, [creativeMode]);
-
   const activeWorkflowLabel =
     workflowTool === 'visual-script'
       ? 'Visual Script'
@@ -699,6 +718,64 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
             : workflowTool === 'hair'
               ? 'Hair'
               : 'Nenhum';
+
+  const handleExportViewport = useCallback(() => {
+    const payload = {
+      mode: creativeMode,
+      exportedAt: new Date().toISOString(),
+      selectedObjectId: selectedObject?.id ?? null,
+      selectedObjectName: selectedObject?.name ?? null,
+      timeline: {
+        currentTime: timelineTime,
+        duration: timelineDuration,
+        isPlaying,
+      },
+      workflow: {
+        active: activeWorkflowLabel,
+        visualScriptNodes: visualScript.nodes.length,
+        visualScriptEdges: visualScript.edges.length,
+        vfxNodes: vfxGraph?.nodes.length ?? 0,
+        vfxConnections: vfxGraph?.connections.length ?? 0,
+        selectedAbility: selectedAbility?.name ?? null,
+      },
+      character: {
+        facialBlendShapeCount,
+        facialExpressionIntensity,
+        hairPresetLabel,
+        hairHighlightColor,
+        hairVolumeIntensity,
+      },
+      objects,
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `aethel-${creativeMode}-viewport-export.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    setExportStatus(creativeMode === 'film' ? 'Film export downloaded' : 'Game clip manifest downloaded');
+  }, [
+    activeWorkflowLabel,
+    creativeMode,
+    facialBlendShapeCount,
+    facialExpressionIntensity,
+    hairHighlightColor,
+    hairPresetLabel,
+    hairVolumeIntensity,
+    isPlaying,
+    objects,
+    selectedAbility?.name,
+    selectedObject?.id,
+    selectedObject?.name,
+    timelineDuration,
+    timelineTime,
+    vfxGraph,
+    visualScript.edges.length,
+    visualScript.nodes.length,
+  ]);
 
   return (
     <ViewportWorkbenchShell
@@ -729,6 +806,9 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
             vfxGlowIntensity={vfxGlowIntensity}
             abilityAccentColor={abilityAccent.color}
             abilityLabel={abilityAccent.label}
+            facialExpressionIntensity={facialExpressionIntensity}
+            hairHighlightColor={hairHighlightColor}
+            hairVolumeIntensity={hairVolumeIntensity}
             onTogglePlayTest={handleTogglePlay}
             onObjectsChange={setObjects}
             onSelectionChange={setSelectedIds}
@@ -780,13 +860,17 @@ function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic
                       onBlendShapeUpdate={(blendShapes) => {
                         const activeCount = Object.values(blendShapes).filter((value) => value > 0.01).length;
                         setFacialBlendShapeCount(activeCount);
+                        setFacialExpressionIntensity(deriveFacialExpressionIntensity(blendShapes));
                       }}
                     />
                   ) : workflowTool === 'hair' ? (
                     <HairFurEditor
                       characterId={selectedObject?.id ?? 'viewport-character'}
                       onHairUpdate={(hairData) => {
-                        setHairPresetLabel(hairData.preset);
+                        const signature = deriveHairPreviewSignature(hairData);
+                        setHairPresetLabel(signature.label);
+                        setHairHighlightColor(signature.color);
+                        setHairVolumeIntensity(signature.density);
                       }}
                     />
                   ) : workflowTool === 'visual-script' ? (

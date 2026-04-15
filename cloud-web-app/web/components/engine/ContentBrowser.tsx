@@ -249,7 +249,7 @@ function ContextMenu({
     >
       {items.map((item) => (
         <React.Fragment key={item.id}>
-          <button type="button"
+          <button type="button" aria-label={`Executar acao ${item.label}`}
             onClick={() => {
               onAction(item.id);
               onClose();
@@ -422,7 +422,7 @@ function ImportModal({
           alignItems: 'center',
         }}>
           <h2 style={{ margin: 0, fontSize: '18px', color: 'var(--aethel-text-primary)' }}>Import Assets</h2>
-          <button type="button"
+          <button type="button" aria-label="Fechar modal de importacao de assets"
             onClick={onClose}
             style={{
               background: 'none',
@@ -488,7 +488,7 @@ function ImportModal({
               }}>
                 <span style={{ color: 'var(--aethel-text-primary)' }}>{file.name}</span>
                 <span style={{ color: 'var(--aethel-text-muted)' }}>{formatFileSize(file.size)}</span>
-                <button type="button"
+                <button type="button" aria-label={`Remover arquivo ${file.name} da fila de importacao`}
                   onClick={() => setFiles(files.filter((_, j) => j !== i))}
                   style={{
                     background: 'none',
@@ -566,7 +566,7 @@ function ImportModal({
           justifyContent: 'flex-end',
           gap: '12px',
         }}>
-          <button type="button"
+          <button type="button" aria-label="Cancelar importacao de assets"
             onClick={onClose}
             style={{
               padding: '8px 24px',
@@ -580,7 +580,7 @@ function ImportModal({
           >
             Cancel
           </button>
-          <button type="button"
+          <button type="button" aria-label="Confirmar importacao de assets"
             onClick={() => {
               onImport(files, options);
               onClose();

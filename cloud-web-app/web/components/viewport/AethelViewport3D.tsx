@@ -54,6 +54,9 @@ type AethelViewport3DProps = {
   vfxGlowIntensity?: number
   abilityAccentColor?: string | null
   abilityLabel?: string | null
+  facialExpressionIntensity?: number
+  hairHighlightColor?: string | null
+  hairVolumeIntensity?: number
   onTogglePlayTest: () => void
   onObjectsChange: (objects: ViewportSceneObject[]) => void
   onSelectionChange: (ids: string[]) => void
@@ -234,29 +237,56 @@ function SceneObjectMesh({
   snapEnabled,
   visualGlowColor,
   visualGlowIntensity,
+  facialExpressionIntensity = 0,
+  hairHighlightColor,
+  hairVolumeIntensity = 0,
   onTransformChange,
   onSelect,
 }: SceneObjectMeshProps & {
   visualGlowColor?: string
   visualGlowIntensity?: number
+  facialExpressionIntensity?: number
+  hairHighlightColor?: string | null
+  hairVolumeIntensity?: number
 }) {
   const groupRef = useRef<THREE.Group>(null)
+  const displayScale: [number, number, number] = primarySelected
+    ? [
+        object.scale[0] + hairVolumeIntensity * 0.06,
+        object.scale[1] + facialExpressionIntensity * 0.04 + hairVolumeIntensity * 0.1,
+        object.scale[2] + hairVolumeIntensity * 0.06,
+      ]
+    : object.scale
+  const displayRotation: [number, number, number] = primarySelected
+    ? [
+        object.rotation[0] + facialExpressionIntensity * 0.04,
+        object.rotation[1],
+        object.rotation[2],
+      ]
+    : object.rotation
 
   const commitTransform = useCallback(() => {
     if (!groupRef.current) return
+    const expressionScaleOffset = primarySelected ? hairVolumeIntensity * 0.06 : 0
+    const expressionHeightOffset = primarySelected ? facialExpressionIntensity * 0.04 + hairVolumeIntensity * 0.1 : 0
+    const expressionRotationOffset = primarySelected ? facialExpressionIntensity * 0.04 : 0
     onTransformChange(object.id, {
       position: [groupRef.current.position.x, groupRef.current.position.y, groupRef.current.position.z],
-      rotation: [groupRef.current.rotation.x, groupRef.current.rotation.y, groupRef.current.rotation.z],
-      scale: clampScale([groupRef.current.scale.x, groupRef.current.scale.y, groupRef.current.scale.z]),
+      rotation: [groupRef.current.rotation.x - expressionRotationOffset, groupRef.current.rotation.y, groupRef.current.rotation.z],
+      scale: clampScale([
+        groupRef.current.scale.x - expressionScaleOffset,
+        groupRef.current.scale.y - expressionHeightOffset,
+        groupRef.current.scale.z - expressionScaleOffset,
+      ]),
     })
-  }, [object.id, onTransformChange])
+  }, [facialExpressionIntensity, hairVolumeIntensity, object.id, onTransformChange, primarySelected])
 
   const body = (
     <group
       ref={groupRef}
       position={object.position}
-      rotation={object.rotation}
-      scale={object.scale}
+      rotation={displayRotation}
+      scale={displayScale}
       visible={object.visible !== false}
       onClick={(event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
@@ -268,6 +298,12 @@ function SceneObjectMesh({
         <mesh scale={[1.08, 1.08, 1.08]}>
           <sphereGeometry args={[0.95, 20, 20]} />
           <meshBasicMaterial color={visualGlowColor ?? '#60a5fa'} transparent opacity={Math.min(0.18, visualGlowIntensity * 0.08)} />
+        </mesh>
+      ) : null}
+      {primarySelected && hairVolumeIntensity > 0 ? (
+        <mesh position={[0, 0.72 + hairVolumeIntensity * 0.08, 0]} scale={[1 + hairVolumeIntensity * 0.12, 0.18 + hairVolumeIntensity * 0.06, 1 + hairVolumeIntensity * 0.12]}>
+          <sphereGeometry args={[0.5, 24, 24]} />
+          <meshBasicMaterial color={hairHighlightColor ?? '#6b3d22'} transparent opacity={0.22} />
         </mesh>
       ) : null}
       {isSelected ? (
@@ -310,6 +346,9 @@ function ViewportScene({
   duration,
   vfxGlowIntensity = 0,
   abilityAccentColor,
+  facialExpressionIntensity = 0,
+  hairHighlightColor,
+  hairVolumeIntensity = 0,
   onObjectsChange,
   onSelectionChange,
 }: Omit<AethelViewport3DProps, 'onTogglePlayTest' | 'onTransformModeChange' | 'onTransformSpaceChange' | 'onSnapEnabledChange' | 'onAIAction'>) {
@@ -378,6 +417,9 @@ function ViewportScene({
           snapEnabled={snapEnabled}
           visualGlowColor={selectedIds.includes(object.id) ? abilityAccentColor ?? '#60a5fa' : undefined}
           visualGlowIntensity={selectedIds.includes(object.id) ? vfxGlowIntensity + cinematicGlowIntensity : 0}
+          facialExpressionIntensity={selectedIds.includes(object.id) ? facialExpressionIntensity : 0}
+          hairHighlightColor={selectedIds.includes(object.id) ? hairHighlightColor : undefined}
+          hairVolumeIntensity={selectedIds.includes(object.id) ? hairVolumeIntensity : 0}
           onTransformChange={handleTransformChange}
           onSelect={handleSelect}
         />
@@ -645,6 +687,9 @@ export function AethelViewport3D({
   vfxGlowIntensity = 0,
   abilityAccentColor,
   abilityLabel,
+  facialExpressionIntensity = 0,
+  hairHighlightColor,
+  hairVolumeIntensity = 0,
   onTogglePlayTest,
   onObjectsChange,
   onSelectionChange,
@@ -728,6 +773,9 @@ export function AethelViewport3D({
         duration={duration}
         vfxGlowIntensity={vfxGlowIntensity}
         abilityAccentColor={abilityAccentColor}
+        facialExpressionIntensity={facialExpressionIntensity}
+        hairHighlightColor={hairHighlightColor}
+        hairVolumeIntensity={hairVolumeIntensity}
         onObjectsChange={onObjectsChange}
         onSelectionChange={onSelectionChange}
       />

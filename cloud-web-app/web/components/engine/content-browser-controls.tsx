@@ -23,7 +23,7 @@ export function BreadcrumbNav({
       borderBottom: '1px solid var(--aethel-border-primary)',
       fontSize: '13px',
     }}>
-      <button type="button"
+      <button type="button" aria-label="Ir para a raiz do content browser"
         onClick={() => onNavigate('/')}
         style={{
           background: 'none',
@@ -44,7 +44,7 @@ export function BreadcrumbNav({
         return (
           <React.Fragment key={fullPath}>
             <span style={{ color: 'var(--aethel-text-muted)' }}>/</span>
-            <button type="button"
+            <button type="button" aria-label={`Navegar para ${part}`}
               onClick={() => onNavigate(fullPath)}
               style={{
                 background: 'none',
@@ -116,7 +116,7 @@ export function FilterBar({
 
       {/* Type Filter */}
       <div style={{ position: 'relative' }}>
-        <button type="button"
+        <button type="button" aria-label={showTypeFilter ? 'Fechar filtro de tipo de asset' : 'Abrir filtro de tipo de asset'}
           onClick={() => setShowTypeFilter(!showTypeFilter)}
           style={{
             padding: '6px 12px',
@@ -175,7 +175,7 @@ export function FilterBar({
       </div>
 
       {/* Starred Filter */}
-      <button type="button"
+      <button type="button" aria-label={filter.starred ? 'Desativar filtro de assets favoritos' : 'Ativar filtro de assets favoritos'}
         onClick={() => onFilterChange({ ...filter, starred: !filter.starred })}
         style={{
           padding: '6px 12px',
@@ -220,7 +220,7 @@ export function FilterBar({
       {/* View Mode */}
       <div style={{ display: 'flex', gap: '2px' }}>
         {(['grid', 'list', 'columns'] as const).map((mode) => (
-          <button type="button"
+          <button type="button" aria-label={`Ativar visualizacao ${mode}`}
             key={mode}
             onClick={() => onViewModeChange(mode)}
             style={{
