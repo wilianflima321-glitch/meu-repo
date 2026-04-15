@@ -343,7 +343,7 @@ export default function ExtensionManager({
 
         {/* Views */}
         <div className="p-2">
-          <button type="button"
+          <button type="button" aria-label="Open installed extensions view"
             onClick={() => setActiveView('installed')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
               activeView === 'installed' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
@@ -353,7 +353,7 @@ export default function ExtensionManager({
             <span className="flex-1 text-sm">{t.installed}</span>
             <span className="text-xs text-[var(--aethel-text-tertiary)]">{counts.installed}</span>
           </button>
-          <button type="button"
+          <button type="button" aria-label="Open marketplace extensions view"
             onClick={() => setActiveView('marketplace')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
               activeView === 'marketplace' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
@@ -363,7 +363,7 @@ export default function ExtensionManager({
             <span className="flex-1 text-sm">{t.marketplace}</span>
             <span className="text-xs text-[var(--aethel-text-tertiary)]">{counts.available}</span>
           </button>
-          <button type="button"
+          <button type="button" aria-label="Open recommended extensions view"
             onClick={() => setActiveView('recommended')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
               activeView === 'recommended' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
@@ -377,7 +377,7 @@ export default function ExtensionManager({
         {/* Categorias */}
         <div className="flex-1 overflow-y-auto p-2 border-t border-[var(--aethel-border-primary)]">
           <div className="text-xs font-semibold text-[var(--aethel-text-tertiary)] uppercase mb-2 px-3">Categorias</div>
-          <button type="button"
+          <button type="button" aria-label="Show all extension categories"
             onClick={() => setSelectedCategory('all')}
             className={`w-full flex items-center gap-3 px-3 py-1.5 rounded text-left ${
               selectedCategory === 'all' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
@@ -387,7 +387,7 @@ export default function ExtensionManager({
             <span className="text-sm">Todas</span>
           </button>
           {(Object.keys(CATEGORY_LABELS) as ExtensionCategory[]).map((cat) => (
-            <button type="button"
+            <button type="button" aria-label={`Filter extensions by ${CATEGORY_LABELS[cat]}`}
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`w-full flex items-center gap-3 px-3 py-1.5 rounded text-left ${
@@ -413,7 +413,7 @@ export default function ExtensionManager({
 
           <div className="flex items-center gap-2">
             {activeView === 'installed' && (
-              <button type="button"
+              <button type="button" aria-label={showDisabled ? 'Hide disabled extensions' : 'Show disabled extensions'}
                 onClick={() => setShowDisabled(!showDisabled)}
                 className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors ${
                   showDisabled ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]' : 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
@@ -423,7 +423,7 @@ export default function ExtensionManager({
                 {showDisabled ? t.showDisabled : t.hideDisabled}
               </button>
             )}
-            <button type="button"
+            <button type="button" aria-label="Refresh extension list"
               onClick={handleRefresh}
               disabled={apiLoading}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded disabled:opacity-50"
@@ -431,7 +431,7 @@ export default function ExtensionManager({
             >
               <RefreshCw className={`w-4 h-4 ${apiLoading ? 'animate-spin' : ''}`} />
             </button>
-            <button type="button" className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded">
+            <button type="button" aria-label="Open extension filters" className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded">
               <Filter className="w-4 h-4" />
             </button>
           </div>
@@ -451,7 +451,7 @@ export default function ExtensionManager({
               <AlertTriangle className="w-16 h-16 mb-4 text-[var(--aethel-error)]" />
               <p className="text-lg text-[var(--aethel-error)]">Falha ao carregar extensões</p>
               <p className="text-sm mb-4">{apiError}</p>
-              <button type="button"
+              <button type="button" aria-label="Retry loading extensions"
                 onClick={handleRefresh}
                 className="px-4 py-2 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] rounded transition-colors"
               >
@@ -463,7 +463,7 @@ export default function ExtensionManager({
               <Package className="w-16 h-16 mb-4 opacity-50" />
               <p className="text-lg">Nenhuma extensão instalada</p>
               <p className="text-sm mb-4">Explore o marketplace para encontrar extensões</p>
-              <button type="button"
+              <button type="button" aria-label="Open marketplace extensions"
                 onClick={() => setActiveView('marketplace')}
                 className="px-4 py-2 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] rounded transition-colors"
               >
@@ -633,7 +633,7 @@ function ExtensionCard({
           <RefreshCw className="w-4 h-4 animate-spin text-[var(--aethel-text-tertiary)]" />
         ) : extension.isInstalled ? (
           <>
-            <button type="button"
+            <button type="button" aria-label={extension.isEnabled ? `Disable extension ${extension.name}` : `Enable extension ${extension.name}`}
               onClick={onToggle}
               className={`p-1.5 rounded transition-colors ${
                 extension.isEnabled
@@ -648,7 +648,7 @@ function ExtensionCard({
                 <Circle className="w-4 h-4" />
               )}
             </button>
-            <button type="button"
+            <button type="button" aria-label={`Open settings for extension ${extension.name}`}
               onClick={onOpenSettings}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
               title="Configurações"
@@ -656,7 +656,7 @@ function ExtensionCard({
               <Settings className="w-4 h-4" />
             </button>
             {!extension.isBuiltIn && (
-              <button type="button"
+              <button type="button" aria-label={`Uninstall extension ${extension.name}`}
                 onClick={onUninstall}
                 className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
                 title="Desinstalar"
@@ -666,7 +666,7 @@ function ExtensionCard({
             )}
           </>
         ) : (
-          <button type="button"
+          <button type="button" aria-label={`Install extension ${extension.name}`}
             onClick={onInstall}
             className="px-3 py-1.5 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] text-sm rounded transition-colors"
           >Instalar</button>
@@ -722,7 +722,7 @@ function ExtensionDetalhes({
             <h3 className="font-semibold text-lg">{extension.displayName}</h3>
             <p className="text-sm text-[var(--aethel-text-tertiary)]">{extension.publisherDisplayName}</p>
           </div>
-          <button type="button" onClick={onClose} className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
+          <button type="button" aria-label="Close extension details" onClick={onClose} className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -746,13 +746,13 @@ function ExtensionDetalhes({
         {/* Actions */}
         <div className="flex items-center gap-2 mt-4">
           {isLoading ? (
-            <button type="button" disabled className="flex-1 px-4 py-2 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] rounded">
+            <button type="button" aria-label="Loading extension action" disabled className="flex-1 px-4 py-2 bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] rounded">
               <RefreshCw className="w-4 h-4 inline animate-spin mr-2" />
               Carregando...
             </button>
           ) : extension.isInstalled ? (
             <>
-              <button type="button"
+              <button type="button" aria-label={extension.isEnabled ? `Disable extension ${extension.name}` : `Enable extension ${extension.name}`}
                 onClick={onToggle}
                 className={`flex-1 px-4 py-2 rounded transition-colors ${
                   extension.isEnabled
@@ -763,7 +763,7 @@ function ExtensionDetalhes({
                 {extension.isEnabled ? 'Desativar' : 'Ativar'}
               </button>
               {!extension.isBuiltIn && (
-                <button type="button"
+                <button type="button" aria-label={`Uninstall extension ${extension.name}`}
                   onClick={onUninstall}
                   className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded"
                 >
@@ -772,13 +772,13 @@ function ExtensionDetalhes({
               )}
             </>
           ) : (
-            <button type="button"
+            <button type="button" aria-label={`Install extension ${extension.name}`}
               onClick={onInstall}
               className="flex-1 px-4 py-2 bg-[var(--aethel-info)] hover:bg-[var(--aethel-info-dark)] text-[var(--aethel-text-primary)] rounded"
             >
               <Download className="w-4 h-4 inline mr-2" />Instalar</button>
           )}
-          <button type="button"
+          <button type="button" aria-label={`Open settings for extension ${extension.name}`}
             onClick={onOpenSettings}
             className="p-2 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded"
           >
@@ -789,7 +789,7 @@ function ExtensionDetalhes({
 
       {/* Tabs */}
       <div className="flex border-b border-[var(--aethel-border-primary)]">
-        <button type="button"
+        <button type="button" aria-label="Open extension details tab"
           onClick={() => setActiveTab('details')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
             activeTab === 'details' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
@@ -797,7 +797,7 @@ function ExtensionDetalhes({
         >
           Detalhes
         </button>
-        <button type="button"
+        <button type="button" aria-label="Open extension changelog tab"
           onClick={() => setActiveTab('changelog')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
             activeTab === 'changelog' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'

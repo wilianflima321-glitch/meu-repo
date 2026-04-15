@@ -353,7 +353,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
 
   return (
     <div className="mb-4">
-      <button type="button"
+      <button type="button" aria-label={isOpen ? `Collapse ${title} section` : `Expand ${title} section`}
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)]
                    hover:text-[var(--aethel-text-primary)] transition-colors"
@@ -582,7 +582,7 @@ function FoliageTypeCard({ type, isSelecionared, onSelecionar, instanceCount }: 
   };
 
   return (
-    <button type="button"
+    <button type="button" aria-label={`${isSelecionared ? 'Deselect' : 'Select'} foliage type ${type.name}`}
       onClick={onSelecionar}
       className={`w-full p-2 rounded flex items-center gap-2 text-left transition-colors ${
         isSelecionared
@@ -634,17 +634,17 @@ function CamadaItem({
         isSelecionared ? 'bg-[var(--aethel-success)]/20 border border-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-tertiary)]'
       }`}
     >
-      <button type="button" onClick={onSelecionar} className="flex-1 text-left text-sm truncate">
+      <button type="button" aria-label={`Select foliage layer ${layer.name}`} onClick={onSelecionar} className="flex-1 text-left text-sm truncate">
         {layer.name}
       </button>
       <span className="text-[10px] text-[var(--aethel-text-quaternary)]">{layer.instancias.length}</span>
-      <button type="button"
+      <button type="button" aria-label={layer.visible ? `Hide foliage layer ${layer.name}` : `Show foliage layer ${layer.name}`}
         onClick={onToggleVisibility}
         className="p-1 rounded hover:bg-[var(--aethel-surface-quaternary)]"
       >
         {layer.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3 text-[var(--aethel-text-quaternary)]" />}
       </button>
-      <button type="button"
+      <button type="button" aria-label={`Delete foliage layer ${layer.name}`}
         onClick={onDelete}
         className="p-1 rounded hover:bg-[var(--aethel-error)]/30"
       >
@@ -890,7 +890,7 @@ export default function FoliagePintarer({
         <div className="border-t border-[var(--aethel-border-primary)] p-3">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-[var(--aethel-text-tertiary)]">Layers</span>
-            <button type="button"
+            <button type="button" aria-label="Add foliage layer"
               onClick={addCamada}
               className="p-1 rounded bg-[var(--aethel-success)]/30 hover:bg-[var(--aethel-success)]/50"
             >
@@ -956,21 +956,21 @@ export default function FoliagePintarer({
         {/* Toolbar */}
         <div className="absolute top-4 left-4 flex gap-2">
           <div className="flex bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] rounded overflow-hidden">
-            <button type="button"
+            <button type="button" aria-label="Activate paint foliage tool"
               onClick={() => setBrushSettings((s) => ({ ...s, tool: 'paint' }))}
               className={`p-2 ${brushSettings.tool === 'paint' ? 'bg-[var(--aethel-success)]' : 'hover:bg-[var(--aethel-surface-quaternary)]'}`}
               title="Pintar"
             >
               <Brush className="w-4 h-4" />
             </button>
-            <button type="button"
+            <button type="button" aria-label="Activate erase foliage tool"
               onClick={() => setBrushSettings((s) => ({ ...s, tool: 'erase' }))}
               className={`p-2 ${brushSettings.tool === 'erase' ? 'bg-[var(--aethel-error)]' : 'hover:bg-[var(--aethel-surface-quaternary)]'}`}
               title="Apagar"
             >
               <Trash2 className="w-4 h-4" />
             </button>
-            <button type="button"
+            <button type="button" aria-label="Activate select foliage tool"
               onClick={() => setBrushSettings((s) => ({ ...s, tool: 'select' }))}
               className={`p-2 ${brushSettings.tool === 'select' ? 'bg-[var(--aethel-primary)]' : 'hover:bg-[var(--aethel-surface-quaternary)]'}`}
               title="Selecionar"
@@ -979,7 +979,7 @@ export default function FoliagePintarer({
             </button>
           </div>
 
-          <button type="button"
+          <button type="button" aria-label={isSimulating ? 'Stop foliage wind simulation' : 'Start foliage wind simulation'}
             onClick={() => setIsSimulating(!isSimulating)}
             className={`p-2 rounded ${isSimulating ? 'bg-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)]'}`}
             title={isSimulating ? 'Stop Wind' : 'Simulate Wind'}
@@ -987,7 +987,7 @@ export default function FoliagePintarer({
             <Wind className="w-4 h-4" />
           </button>
 
-          <button type="button"
+          <button type="button" aria-label="Clear all foliage instances"
             onClick={clearAll}
             className="p-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] hover:bg-[var(--aethel-error)]/50"
             title="Limpar tudo"
@@ -995,7 +995,7 @@ export default function FoliagePintarer({
             <RotateCcw className="w-4 h-4" />
           </button>
 
-          <button type="button"
+          <button type="button" aria-label="Export foliage data"
             onClick={() => onExportar?.({ layers, types: foliageTypes })}
             className="p-2 rounded bg-[var(--aethel-success)] hover:bg-[var(--aethel-success)]"
             title="Exportar"
