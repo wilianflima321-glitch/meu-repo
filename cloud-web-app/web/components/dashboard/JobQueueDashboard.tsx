@@ -250,27 +250,25 @@ function JobRow({ job, isExpanded, onToggle, onRetry, onCancel }: JobRowProps) {
 
         <div className="ml-auto flex items-center gap-1">
           {(job.status === 'failed' || job.status === 'cancelled') && (
-            <button type="button"
+            <button type="button" aria-label={`Tentar novamente job ${job.id}`}
               onClick={(event) => {
                 event.stopPropagation()
                 onRetry(job.id)
               }}
               className={`rounded-xl p-1.5 text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:text-[var(--aethel-info-light)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
               title="Tentar novamente"
-              aria-label={`Tentar novamente job ${job.id}`}
             >
               <Icons.Refresh />
             </button>
           )}
           {(job.status === 'pending' || job.status === 'running') && (
-            <button type="button"
+            <button type="button" aria-label={`Cancelar job ${job.id}`}
               onClick={(event) => {
                 event.stopPropagation()
                 onCancel(job.id)
               }}
               className={`rounded-xl p-1.5 text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:text-[var(--aethel-error)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
               title="Cancelar"
-              aria-label={`Cancelar job ${job.id}`}
             >
               <Icons.X />
             </button>
@@ -483,25 +481,23 @@ export function JobQueueDashboard({
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button"
+          <button type="button" aria-label={isQueueRunning ? 'Pausar fila de jobs' : 'Iniciar fila de jobs'}
             onClick={handleToggleQueue}
             className={`${primaryButtonClass} ${
               isQueueRunning
                 ? 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)]'
                 : 'bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] shadow-[0_14px_32px_rgba(56,189,248,0.24)]'
             }`}
-            aria-label={isQueueRunning ? 'Pausar fila de jobs' : 'Iniciar fila de jobs'}
           >
             <span className="flex items-center gap-2">
               {isQueueRunning ? <Icons.Pause /> : <Icons.Play />}
               {isQueueRunning ? 'Pausar fila' : 'Iniciar fila'}
             </span>
           </button>
-          <button type="button"
+          <button type="button" aria-label="Atualizar fila de jobs"
             onClick={fetchData}
             className={ghostButtonClass}
             title="Atualizar"
-            aria-label="Atualizar fila de jobs"
           >
             <Icons.Refresh />
           </button>
@@ -589,20 +585,18 @@ export function JobQueueDashboard({
       </div>
 
       <div className="flex items-center justify-between border-t border-[var(--aethel-border-subtle)] px-4 py-3">
-        <button type="button"
+        <button type="button" aria-label="Pagina anterior da fila"
           onClick={() => setPage(Math.max(1, page - 1))}
           disabled={page === 1}
           className={`${ghostButtonClass} text-xs disabled:opacity-50`}
-          aria-label="Pagina anterior da fila"
         >
           &lt; Anterior
         </button>
         <span className="text-xs text-[var(--aethel-text-tertiary)]">Pagina {page}</span>
-        <button type="button"
+        <button type="button" aria-label="Proxima pagina da fila"
           onClick={() => setPage(page + 1)}
           disabled={filteredJobs.length < pageSize}
           className={`${ghostButtonClass} text-xs disabled:opacity-50`}
-          aria-label="Proxima pagina da fila"
         >
           Proxima &gt;
         </button>

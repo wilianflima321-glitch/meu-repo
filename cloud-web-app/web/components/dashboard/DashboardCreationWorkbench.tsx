@@ -599,7 +599,7 @@ export default function DashboardCreationWorkbench({
         <aside className="overflow-y-auto border-r border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] p-3">
           <h3 className="text-xs uppercase tracking-wider text-[var(--aethel-text-tertiary)] mb-2">Project Graph</h3>
           <div className="space-y-2 text-xs">
-            <button type="button" onClick={() => selectEntity(null)} className="w-full text-left px-2 py-1 rounded bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]">
+            <button type="button" aria-label="Selecionar raiz do projeto" onClick={() => selectEntity(null)} className="w-full text-left px-2 py-1 rounded bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]">
               Root - {graph.name}
             </button>
             <div className="px-2 py-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border border-[var(--aethel-border-primary)]">Assets - {graph.assets.length}</div>
@@ -612,9 +612,7 @@ export default function DashboardCreationWorkbench({
             <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">Recent Assets</div>
             <div className="space-y-2">
               {recentAssets.map((asset) => (
-                <button
-                  key={asset.id}
-                  type="button"
+                <button key={asset.id} type="button" aria-label={`Selecionar asset ${asset.name}`}
                   onClick={() => selectEntity(asset.id)}
                   className={`w-full text-left px-2 py-1 rounded border text-xs ${selectedEntityId === asset.id ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] border-[var(--aethel-border-primary)]'}`}
                 >
@@ -629,9 +627,7 @@ export default function DashboardCreationWorkbench({
             <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">Recent Jobs</div>
             <div className="space-y-2">
               {recentJobs.map((job) => (
-                <button
-                  key={job.id}
-                  type="button"
+                <button key={job.id} type="button" aria-label={`Selecionar job ${job.kind}`}
                   onClick={() => {
                     selectEntity(job.id);
                     setRightPanel('inspector');
@@ -750,12 +746,12 @@ export default function DashboardCreationWorkbench({
                   <div className="text-[var(--aethel-text-tertiary)]">version: {selectedAsset.version}</div>
                   <div className="mt-3 flex gap-2">
                     {(selectedAsset.kind === 'audio' || selectedAsset.kind === 'video') && (
-                      <button type="button" onClick={() => importAsset(selectedAsset)} className="rounded bg-[var(--aethel-primary-dark)] px-2 py-1 text-[11px]">
+                      <button type="button" aria-label={`Importar ${selectedAsset.name} para a timeline`} onClick={() => importAsset(selectedAsset)} className="rounded bg-[var(--aethel-primary-dark)] px-2 py-1 text-[11px]">
                         Import to Timeline
                       </button>
                     )}
                     {selectedAsset.url && (
-                      <button type="button" onClick={() => downloadAsset(selectedAsset)} className="rounded border border-[var(--aethel-border-primary)] px-2 py-1 text-[11px]">
+                      <button type="button" aria-label={`Baixar asset ${selectedAsset.name}`} onClick={() => downloadAsset(selectedAsset)} className="rounded border border-[var(--aethel-border-primary)] px-2 py-1 text-[11px]">
                         Download
                       </button>
                     )}

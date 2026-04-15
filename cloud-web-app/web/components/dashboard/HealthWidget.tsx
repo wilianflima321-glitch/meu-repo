@@ -183,10 +183,8 @@ const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({
           <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{service.name}</span>
         </div>
         {service.status === 'offline' && onFix && (
-          <button
-            type="button"
+          <button type="button" aria-label={`Corrigir servico ${service.name}`}
             onClick={onFix}
-            aria-label={`Corrigir servico ${service.name}`}
             className={`rounded-xl border border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-tertiary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-focus)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           >
             Corrigir
@@ -314,7 +312,7 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button"
+          <button type="button" aria-label="Atualizar status do sistema"
             onClick={(event) => {
               event.stopPropagation()
               checkAllServices()
@@ -322,20 +320,18 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
             disabled={isRefreshing}
             className={ghostButtonClass}
             title="Atualizar"
-            aria-label="Atualizar status do sistema"
           >
             <RefreshCw className={`h-4 w-4 text-[var(--aethel-text-secondary)] ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
 
           {onSettingsClick && (
-            <button type="button"
+            <button type="button" aria-label="Abrir configuracoes de saude"
               onClick={(event) => {
                 event.stopPropagation()
                 onSettingsClick()
               }}
               className={ghostButtonClass}
               title="Configuracoes"
-              aria-label="Abrir configuracoes de saude"
             >
               <Settings className="h-4 w-4 text-[var(--aethel-text-secondary)]" />
             </button>
@@ -381,18 +377,16 @@ export const HealthWidget: React.FC<{ className?: string; onSettingsClick?: () =
             <div className="border-t border-[var(--aethel-border-subtle)] pt-4">
               <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--aethel-text-tertiary)]">Acoes rapidas</h4>
               <div className="flex flex-wrap gap-2">
-                <button type="button"
+                <button type="button" aria-label="Baixar Ollama"
                   onClick={handleFixOllama}
                   className={secondaryButtonClass}
-                  aria-label="Baixar Ollama"
                 >
                   <Download className="h-4 w-4" />
                   Baixar Ollama
                 </button>
-                <button type="button"
+                <button type="button" aria-label="Baixar Blender"
                   onClick={handleFixBlender}
                   className={secondaryButtonClass}
-                  aria-label="Baixar Blender"
                 >
                   <Download className="h-4 w-4" />
                   Baixar Blender
