@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  Smartphone,
   LayoutDashboard,
   Zap,
   CreditCard,
@@ -312,6 +313,54 @@ export function ResponsivePageHeader({
         )}
       </div>
     </header>
+  )
+}
+
+// ============================================================================
+// MOBILE CONTINUITY CARD
+// ============================================================================
+
+interface MobileContinuityCardProps {
+  title: string
+  description: string
+  href: string
+  ctaLabel?: string
+  statusLabel?: string
+}
+
+export function MobileContinuityCard({
+  title,
+  description,
+  href,
+  ctaLabel = 'Continuar no mobile',
+  statusLabel,
+}: MobileContinuityCardProps) {
+  return (
+    <div
+      className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] p-4"
+      style={{ boxShadow: 'var(--aethel-shadow-md)' }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{title}</p>
+          <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{description}</p>
+        </div>
+        {statusLabel ? (
+          <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-info-light)]">
+            {statusLabel}
+          </span>
+        ) : null}
+      </div>
+      <Link
+        href={href}
+        aria-label={ctaLabel}
+        className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)]"
+      >
+        <Smartphone size={16} aria-hidden="true" />
+        <span>{ctaLabel}</span>
+        <ChevronRight size={16} aria-hidden="true" />
+      </Link>
+    </div>
   )
 }
 

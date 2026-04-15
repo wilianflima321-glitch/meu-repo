@@ -61,6 +61,14 @@ interface SubscriptionStatus {
   cancelAtPeriodEnd?: boolean
 }
 
+interface BillingTransparencyCardProps {
+  estimatedCost: number
+  tokenUsage: number
+  tokenLimit: number
+  nextResetLabel?: string
+  onOpenDetails?: () => void
+}
+
 // ============================================================================
 // PLAN ICONS
 // ============================================================================
@@ -441,6 +449,69 @@ export function UsageQuotaBar({ label, used, limit, unit = '', variant }: QuotaB
         />
       </div>
     </div>
+  )
+}
+
+export function BillingTransparencyCard({
+  estimatedCost,
+  tokenUsage,
+  tokenLimit,
+  nextResetLabel,
+  onOpenDetails,
+}: BillingTransparencyCardProps) {
+  const usagePercent = tokenLimit > 0 ? Math.min((tokenUsage / tokenLimit) * 100, 100) : 0
+
+  return (
+    <section className="rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+            Transparência de uso
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-[var(--aethel-text-primary)]">
+            Custo e consumo visíveis no fluxo
+          </h3>
+        </div>
+        {onOpenDetails ? (
+          <button
+            type="button"
+            onClick={onOpenDetails}
+            aria-label="Abrir detalhes de custo e consumo"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]"
+          >
+            Ver detalhes <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] p-3">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo estimado</p>
+          <p className="mt-1 text-lg font-semibold text-[var(--aethel-text-primary)]">${estimatedCost.toFixed(2)}</p>
+        </div>
+        <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] p-3">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Uso de tokens</p>
+          <p className="mt-1 text-lg font-semibold text-[var(--aethel-text-primary)]">
+            {formatTokens(tokenUsage)} / {formatTokens(tokenLimit)}
+          </p>
+        </div>
+        <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] p-3">
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">Próximo reset</p>
+          <p className="mt-1 text-lg font-semibold text-[var(--aethel-text-primary)]">{nextResetLabel || '—'}</p>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <UsageQuotaBar
+          label="Consumo mensal"
+          used={tokenUsage}
+          limit={tokenLimit}
+        />
+        <p className="mt-2 text-xs text-[var(--aethel-text-tertiary)]">
+          {Math.round(usagePercent)}% da franquia atual consumida.
+        </p>
+      </div>
+    </section>
   )
 }
 

@@ -180,7 +180,7 @@ export function TimeMachineSlider({
   if (variant === 'minimal') {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
-        <button type="button"
+        <button type="button" aria-label="Ir para a vers?o anterior"
           onClick={handlePrevious}
           disabled={selectedIndex === 0}
           className="p-1 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -192,7 +192,7 @@ export function TimeMachineSlider({
           {selectedIndex + 1} / {versions.length}
         </span>
 
-        <button type="button"
+        <button type="button" aria-label="Ir para a pr?xima vers?o"
           onClick={handleNext}
           disabled={selectedIndex === versions.length - 1}
           className="p-1 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -213,7 +213,7 @@ export function TimeMachineSlider({
         </div>
 
         <div className="flex items-center gap-1">
-          <button type="button"
+          <button type="button" aria-label={showDetails ? 'Ocultar detalhes do hist?rico' : 'Mostrar detalhes do hist?rico'}
             onClick={() => setShowDetails(!showDetails)}
             className="p-1 rounded hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
             title="Mostrar detalhes"
@@ -297,7 +297,7 @@ export function TimeMachineSlider({
         {/* Controls */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <button type="button"
+            <button type="button" aria-label="Ir para a primeira vers?o"
               onClick={handleFirst}
               disabled={selectedIndex === 0}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
@@ -306,7 +306,7 @@ export function TimeMachineSlider({
               <SkipBack className="w-4 h-4" />
             </button>
 
-            <button type="button"
+            <button type="button" aria-label="Ir para a vers?o anterior"
               onClick={handlePrevious}
               disabled={selectedIndex === 0}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
@@ -315,7 +315,7 @@ export function TimeMachineSlider({
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            <button type="button"
+            <button type="button" aria-label={isPlaying ? 'Pausar reprodu??o da linha do tempo' : 'Reproduzir linha do tempo'}
               onClick={togglePlayback}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
               title={isPlaying ? 'Pausar' : 'Reproduzir'}
@@ -323,7 +323,7 @@ export function TimeMachineSlider({
               {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             </button>
 
-            <button type="button"
+            <button type="button" aria-label="Ir para a pr?xima vers?o"
               onClick={handleNext}
               disabled={selectedIndex === versions.length - 1}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
@@ -332,7 +332,7 @@ export function TimeMachineSlider({
               <ChevronRight className="w-4 h-4" />
             </button>
 
-            <button type="button"
+            <button type="button" aria-label="Ir para a ?ltima vers?o"
               onClick={handleLast}
               disabled={selectedIndex === versions.length - 1}
               className="p-1.5 rounded hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50 text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
@@ -348,7 +348,7 @@ export function TimeMachineSlider({
             </span>
 
             {onRestore && selectedIndex < versions.length - 1 && (
-              <button type="button"
+              <button type="button" aria-label={`Restaurar vers?o ${selectedVersion.message || selectedVersion.id}`}
                 onClick={handleRestore}
                 className="flex items-center gap-1 px-2 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded"
               >
@@ -372,7 +372,7 @@ export function TimeMachineSlider({
             <div className="p-3 max-h-48 overflow-y-auto">
               <div className="space-y-2">
                 {versions.map((version, index) => (
-                  <button type="button"
+                  <button type="button" aria-label={`Selecionar vers?o ${version.message || version.id}`}
                     key={version.id}
                     onClick={() => setSelectedIndex(index)}
                     className={`w-full flex items-center gap-2 p-2 rounded text-left transition-colors ${
