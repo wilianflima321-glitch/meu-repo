@@ -24,6 +24,12 @@ const STEPS = [
   },
 ]
 
+const wizardSecondaryButtonClass =
+  'inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]'
+
+const wizardPrimaryButtonClass =
+  'inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--aethel-primary)] px-6 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] transition-colors hover:bg-[var(--aethel-primary-dark)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]'
+
 export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps) {
   const [step, setStep] = useState(0)
 
@@ -72,14 +78,16 @@ export function WelcomeWizard({ onComplete, onSkip, isOpen }: WelcomeWizardProps
             <button
               type="button"
               onClick={() => onSkip?.()}
-              className="aethel-button aethel-button-ghost rounded-xl px-4 py-2 text-sm font-medium"
+              className={wizardSecondaryButtonClass}
+              aria-label="Pular wizard de boas-vindas"
             >
               Pular
             </button>
             <button
               type="button"
               onClick={handleNext}
-              className="aethel-button aethel-button-primary rounded-xl px-6 py-2 text-sm font-semibold flex items-center gap-2"
+              className={wizardPrimaryButtonClass}
+              aria-label={isLast ? 'Abrir studio apos concluir onboarding' : 'Avancar para a proxima etapa do onboarding'}
             >
               {isLast ? 'Abrir Studio' : 'Proximo'}
               <ChevronRight className="h-4 w-4" />

@@ -13,6 +13,12 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { X, Check, ChevronRight, Award, Sparkles, Target, Users, Rocket, Layout } from 'lucide-react';
 
+const onboardingSecondaryButtonClass =
+  'inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]';
+
+const onboardingPrimaryButtonClass =
+  'inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--aethel-primary)] px-6 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg transition-colors hover:bg-[var(--aethel-primary-dark)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)]';
+
 // ============================================================================
 // TIPOS
 // ============================================================================
@@ -293,13 +299,15 @@ export function WelcomeModal({ mission }: { mission?: string }) {
           <div className="flex gap-3 justify-center">
             <button type="button"
               onClick={skipOnboarding}
-              className="aethel-button aethel-button-ghost rounded-xl px-4 py-2 text-sm font-medium"
+              className={onboardingSecondaryButtonClass}
+              aria-label="Pular onboarding inicial"
             >
               Pular
             </button>
             <button type="button"
               onClick={handleNext}
-              className="aethel-button aethel-button-primary rounded-xl px-6 py-2 text-sm font-semibold flex items-center gap-2"
+              className={onboardingPrimaryButtonClass}
+              aria-label={isLastStep ? 'Concluir onboarding e comecar' : 'Ir para a proxima etapa do onboarding'}
             >
               {isLastStep ? 'Comecar' : 'Proximo'}
               <ChevronRight className="w-4 h-4" />
@@ -564,7 +572,8 @@ export function OnboardingChecklist() {
       ) : (
         <button type="button"
           onClick={() => setIsOpen(true)}
-          className="aethel-button aethel-button-primary rounded-xl px-4 py-2 text-xs font-semibold shadow-lg flex items-center gap-2"
+          className={onboardingPrimaryButtonClass.replace('px-6 py-2 text-sm', 'px-4 py-2 text-xs')}
+          aria-label="Abrir checklist de onboarding"
         >
           <Target className="w-4 h-4" />
           {completedCount}/{items.length}
