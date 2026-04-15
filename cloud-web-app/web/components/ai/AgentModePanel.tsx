@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
 import { ScrollArea } from '@/components/ui/ScrollArea'
 import { AutonomousAgent, AgentTask, AgentStep } from '@/lib/ai/agent-mode'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 /**
  * Agent Mode Panel - Interface do modo agente autonomo
@@ -209,6 +210,9 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
     }
   }
 
+  const iconButtonClass = `h-8 w-8 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+  const stepToggleClass = `flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+
   if (!isOpen) return null
 
   return (
@@ -229,21 +233,21 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
         </div>
         <div className="flex items-center gap-1">
           {status === 'running' && (
-            <Button type="button" variant="ghost" size="icon" onClick={handlePause} className="h-8 w-8" aria-label="Pausar agente">
+            <Button type="button" variant="ghost" size="icon" onClick={handlePause} className={iconButtonClass} aria-label="Pausar agente">
               <Pause className="h-4 w-4" />
             </Button>
           )}
           {status === 'paused' && (
-            <Button type="button" variant="ghost" size="icon" onClick={handleResume} className="h-8 w-8" aria-label="Retomar agente">
+            <Button type="button" variant="ghost" size="icon" onClick={handleResume} className={iconButtonClass} aria-label="Retomar agente">
               <Play className="h-4 w-4" />
             </Button>
           )}
           {(status === 'running' || status === 'paused') && (
-            <Button type="button" variant="ghost" size="icon" onClick={handleStop} className="h-8 w-8 text-[var(--aethel-error-light)]" aria-label="Parar agente">
+            <Button type="button" variant="ghost" size="icon" onClick={handleStop} className={`${iconButtonClass} text-[var(--aethel-error-light)]`} aria-label="Parar agente">
               <Square className="h-4 w-4" />
             </Button>
           )}
-          <Button type="button" variant="ghost" size="icon" onClick={onClose} className="h-8 w-8" aria-label="Fechar modo agente">
+          <Button type="button" variant="ghost" size="icon" onClick={onClose} className={iconButtonClass} aria-label="Fechar modo agente">
             X
           </Button>
         </div>
@@ -321,10 +325,9 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
                 animate={{ opacity: 1, x: 0 }}
                 className="overflow-hidden rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_3%,transparent)]"
               >
-                <button type="button"
+                <button type="button" aria-label={`${isExpanded ? 'Recolher' : 'Expandir'} detalhes do passo ${step.type}`}
                   onClick={() => toggleStepExpand(step.id)}
-                  aria-label={`${isExpanded ? 'Recolher' : 'Expandir'} detalhes do passo ${step.type}`}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]"
+                  className={stepToggleClass}
                 >
                   {isExpanded ? (
                     <ChevronDown className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
@@ -423,7 +426,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
             onClick={handleSubmit}
             disabled={!input.trim() || status === 'running'}
             aria-label={status === 'running' ? 'Executando tarefa do agente' : 'Enviar tarefa para o agente'}
-            className="absolute bottom-2 right-2 h-8 w-8 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary-dark)]"
+            className={`absolute bottom-2 right-2 h-8 w-8 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-primary-dark)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           >
             {status === 'running' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>

@@ -38,6 +38,7 @@ import {
   Coins,
 } from 'lucide-react';
 import useSWR from 'swr';
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing';
 
 // ============================================================================
 // TIPOS
@@ -163,6 +164,7 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const agent = AGENTS[step.agentId];
+  const iconButtonClass = `rounded-lg p-1.5 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
 
   const handleCopy = useCallback(() => {
     if (step.code) {
@@ -200,9 +202,9 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
         }
       `}>
         {/* Header */}
-        <button type="button"
+        <button type="button" aria-label={`${expanded ? 'Recolher' : 'Expandir'} etapa ${step.message}`}
           onClick={() => setExpanded(!expanded)}
-          className="w-full flex items-center justify-between p-3 text-left"
+          className={`w-full flex items-center justify-between p-3 text-left ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           aria-expanded={expanded}
           aria-controls={`step-panel-${step.id}`}
         >
@@ -246,10 +248,9 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
               <div className="mt-3 relative">
                 <div className="flex items-center justify-between bg-[var(--aethel-surface-tertiary)] rounded-t-lg px-3 py-1.5 border border-b-0 border-[var(--aethel-border-primary)]">
                   <span className="text-xs text-[var(--aethel-text-quaternary)]">codigo</span>
-                  <button type="button"
+                  <button type="button" aria-label={copied ? 'Codigo copiado' : 'Copiar codigo'}
                     onClick={handleCopy}
-                    className="text-xs text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] flex items-center gap-1"
-                    aria-label={copied ? 'Codigo copiado' : 'Copiar codigo'}
+                    className={`flex items-center gap-1 text-xs text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
                   >
                     {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                     {copied ? 'Copiado!' : 'Copiar'}
@@ -303,6 +304,9 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
   const duration = task.endTime
     ? (task.endTime.getTime() - task.startTime.getTime()) / 1000
     : (Date.now() - task.startTime.getTime()) / 1000;
+  const headerButtonClass = `rounded-lg p-1 text-[var(--aethel-text-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
+  const primaryActionClass = `flex items-center gap-2 rounded-lg bg-[var(--aethel-primary)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:brightness-110 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
+  const secondaryActionClass = `flex items-center gap-2 rounded-lg bg-[var(--aethel-surface-tertiary)] px-4 py-2 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`;
 
   return (
     <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] rounded-xl border border-[var(--aethel-border-primary)] overflow-hidden">
@@ -328,9 +332,9 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
               )}
             </div>
           </div>
-          <button type="button"
+          <button type="button" aria-label={`${expanded ? 'Recolher' : 'Expandir'} tarefa ${task.prompt}`}
             onClick={() => setExpanded(!expanded)}
-            className="p-1 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]"
+            className={headerButtonClass}
             aria-expanded={expanded}
             aria-controls={`task-panel-${task.id}`}
           >
@@ -389,18 +393,16 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2 mt-4">
-                <button type="button"
+                <button type="button" aria-label="Revisar proposta"
                   onClick={onApply}
-                  className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-primary)] hover:brightness-110 rounded-lg text-sm font-medium text-[var(--aethel-text-primary)] transition-colors"
-                  aria-label="Revisar proposta"
+                  className={primaryActionClass}
                 >
                   <Play className="w-4 h-4" />
                   Revisar proposta
                 </button>
-                <button type="button"
+                <button type="button" aria-label="Descartar proposta"
                   onClick={onReject}
-                  className="flex items-center gap-2 px-4 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] rounded-lg text-sm text-[var(--aethel-text-secondary)] transition-colors"
-                  aria-label="Descartar proposta"
+                  className={secondaryActionClass}
                 >
                   <X className="w-4 h-4" />
                   Descartar proposta
@@ -416,9 +418,9 @@ function TaskCard({ task, onApply, onReject, onRetry }: TaskCardProps) {
                 <X className="w-5 h-5" />
                 <span className="font-medium">Erro na tarefa</span>
               </div>
-              <button type="button"
+              <button type="button" aria-label="Executar novamente a tarefa com erro"
                 onClick={onRetry}
-                className="mt-2 flex items-center gap-2 rounded-lg bg-[var(--aethel-error)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110"
+                className={`mt-2 flex items-center gap-2 rounded-lg bg-[var(--aethel-error)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:brightness-110 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
               >
                 <RotateCcw className="w-4 h-4" />
                 Tentar novamente
@@ -695,8 +697,14 @@ export function SystemPanel() {
     }
   }, [handleSubmit]);
 
+  const shellClass = [
+    'flex h-full flex-col overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)]',
+    'bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_92%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_96%,transparent))]',
+    'shadow-[0_24px_80px_rgba(0,0,0,0.18)]',
+  ].join(' ');
+
   return (
-    <div className={`flex flex-col h-full bg-[var(--aethel-surface-primary)] ${className}`}>
+    <div className={`${shellClass} ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-3">
@@ -789,7 +797,7 @@ export function SystemPanel() {
             disabled={isProcessing}
             aria-label="Descreva sua tarefa para o squad de IA"
           />
-          <button type="button"
+          <button type="button" aria-label="Enviar tarefa ao squad"
             onClick={handleSubmit}
             disabled={!input.trim() || isProcessing}
             className={`
@@ -797,9 +805,8 @@ export function SystemPanel() {
               ${input.trim() && !isProcessing
                 ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
                 : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
-              }
+              } ${CANONICAL_FOCUS} ${CANONICAL_MOTION}
             `}
-            aria-label="Enviar tarefa ao squad"
           >
             {isProcessing ? (
               <Loader2 className="w-5 h-5 animate-spin" />
