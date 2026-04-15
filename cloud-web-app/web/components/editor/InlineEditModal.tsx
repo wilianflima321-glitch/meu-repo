@@ -173,7 +173,12 @@ export function InlineEditModal({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.95 }}
           transition={{ type: 'spring', duration: 0.3 }}
-          className="w-full max-w-2xl bg-[var(--aethel-surface-elevated)] border border-[var(--aethel-border-primary)] rounded-xl shadow-[var(--aethel-shadow-xl)] overflow-hidden"
+          className="w-full max-w-2xl overflow-hidden rounded-xl border"
+          style={{
+            background: 'var(--aethel-surface-elevated)',
+            borderColor: 'var(--aethel-border-primary)',
+            boxShadow: 'var(--aethel-shadow-xl)',
+          }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)]">

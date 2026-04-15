@@ -623,14 +623,14 @@ const ChatComponent: React.FC = () => {
             <option value="__new__">+ Novo trabalho</option>
           </select>
 
-          <button type="button"
+          <button type="button" aria-label="Renomear workflow atual"
             onClick={() => void renameWorkflow()}
             disabled={!activeWorkflowId || isLoading || isStreaming}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
           >
             Renomear
           </button>
-          <button type="button"
+          <button type="button" aria-label="Arquivar workflow atual"
             onClick={() => void archiveWorkflow()}
             disabled={!activeWorkflowId || isLoading || isStreaming}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -655,7 +655,7 @@ const ChatComponent: React.FC = () => {
               ))}
           </select>
 
-          <button type="button"
+          <button type="button" aria-label="Copiar historico do workflow selecionado"
             onClick={() => void copyHistoryFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -664,7 +664,7 @@ const ChatComponent: React.FC = () => {
             {connectBusy ? 'Processando…' : 'Copiar histórico'}
           </button>
 
-          <button type="button"
+          <button type="button" aria-label="Importar contexto do workflow selecionado"
             onClick={() => void importContextFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -673,7 +673,7 @@ const ChatComponent: React.FC = () => {
             {connectBusy ? 'Processando…' : 'Importar contexto'}
           </button>
 
-          <button type="button"
+          <button type="button" aria-label="Mesclar workflow selecionado ao workflow atual"
             onClick={() => void mergeFromWorkflow()}
             disabled={!activeWorkflowId || !connectFromWorkflowId || isLoading || isStreaming || connectBusy}
             className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-3 py-1 text-sm hover:bg-[var(--aethel-surface-secondary)] disabled:opacity-50"
@@ -747,19 +747,20 @@ const ChatComponent: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Digite sua mensagem... (Enter para enviar, Shift+Enter para nova linha)"
+            aria-label="Digite sua mensagem para o chat"
             className="flex-1 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded px-4 py-2 text-[var(--aethel-text-primary)] resize-none focus:outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]"
             rows={2}
             disabled={isLoading || isStreaming}
           />
           <div className="flex flex-col gap-2">
-            <button type="button"
+            <button type="button" aria-label="Transmitir resposta em streaming"
               onClick={handleStreamMessage}
               disabled={isLoading || isStreaming || !input.trim()}
               className="bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"
             >
               {isStreaming ? 'Pausar' : 'Transmitir'}
             </button>
-            <button type="button"
+            <button type="button" aria-label="Enviar mensagem ao chat"
               onClick={handleSendMessage}
               disabled={isLoading || isStreaming || !input.trim()}
               className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] disabled:cursor-not-allowed px-4 py-2 rounded font-semibold transition-colors"

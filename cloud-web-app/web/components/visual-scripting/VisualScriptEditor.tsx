@@ -122,7 +122,7 @@ function VisualNode({ data }: VisualNodeProps) {
                 type={port.type === 'number' ? 'number' : 'text'}
                 defaultValue={values[port.id] as string ?? port.default}
                 onChange={(e) => onValueChange?.(port.id, e.target.value)}
-                className="aethel-input"
+                aria-label={`Valor da entrada ${port.label}`}
                 style={{
                   marginLeft: 'auto',
                   width: '70px',
@@ -130,6 +130,8 @@ function VisualNode({ data }: VisualNodeProps) {
                   fontSize: '10px',
                   background: ui.surfaceMuted,
                   borderRadius: '4px',
+                  border: `1px solid ${ui.border}`,
+                  color: ui.text,
                 }}
               />
             )}
@@ -228,11 +230,15 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
           placeholder="Buscar nos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="aethel-input"
+          aria-label="Buscar nos na paleta"
           style={{
             width: '100%',
             background: ui.surfaceAlt,
             fontSize: '13px',
+            padding: '10px 12px',
+            border: `1px solid ${ui.border}`,
+            borderRadius: '8px',
+            color: ui.text,
           }}
         />
       </div>
@@ -242,17 +248,21 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
             onClick={() =>
               setExpandedCategory(expandedCategory === category ? null : category)
             }
-            className="aethel-button aethel-button-ghost"
+            aria-label={`${expandedCategory === category ? 'Recolher' : 'Expandir'} categoria ${categoryLabels[category]}`}
             style={{
               width: '100%',
               padding: '10px 12px',
               background: expandedCategory === category ? ui.surfaceAlt : 'transparent',
               borderRadius: 0,
+              border: 'none',
               color: ui.text,
               textAlign: 'left',
               fontSize: '13px',
               fontWeight: 600,
               justifyContent: 'space-between',
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
             }}
           >
             <span>{categoryLabels[category]}</span>
@@ -264,6 +274,7 @@ function NodePalette({ onAddNode }: NodePaletteProps) {
                 <button type="button"
                   key={node.type}
                   onClick={() => onAddNode(node)}
+                  aria-label={`Adicionar no ${node.label}`}
                   style={{
                     width: '100%',
                     padding: '8px',
@@ -376,12 +387,15 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
           placeholder="Buscar no para criar..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="aethel-input"
+          aria-label="Buscar no para adicionar ao canvas"
           style={{
             width: '100%',
             padding: '10px 12px',
             background: ui.surfaceAlt,
             fontSize: '14px',
+            border: `1px solid ${ui.border}`,
+            borderRadius: '8px',
+            color: ui.text,
           }}
         />
         <div style={{ fontSize: '11px', color: ui.textDim, marginTop: '6px' }}>
@@ -400,6 +414,7 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                 <button type="button"
                   key={node.type}
                   onClick={() => handleAddNode(node)}
+                  aria-label={`Criar no ${node.label}`}
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -429,13 +444,16 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                 onClick={() =>
                   setExpandedCategory(expandedCategory === category ? null : category)
                 }
-                className="aethel-button aethel-button-ghost"
+                aria-label={`${expandedCategory === category ? 'Recolher' : 'Expandir'} categoria ${categoryLabels[category]} no menu contextual`}
                 style={{
                   width: '100%',
                   padding: '10px 14px',
                   background: expandedCategory === category ? ui.surfaceAlt : 'transparent',
                   borderRadius: 0,
                   borderBottom: `1px solid ${ui.border}`,
+                  borderLeft: 'none',
+                  borderRight: 'none',
+                  borderTop: 'none',
                   color: ui.text,
                   textAlign: 'left',
                   fontSize: '13px',
@@ -454,6 +472,7 @@ function ContextMenu({ x, y, flowPosition, onClose, onAddNode }: ContextMenuProp
                     <button type="button"
                       key={node.type}
                       onClick={() => handleAddNode(node)}
+                      aria-label={`Adicionar no ${node.label} a partir do menu contextual`}
                       style={{
                         width: '100%',
                         padding: '8px 10px',
@@ -617,15 +636,31 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
                   console.log('Compiled Script:', json);
                   navigator.clipboard.writeText(json);
                 }}
-                className="aethel-button aethel-button-primary"
-                style={{ padding: '8px 16px' }}
+                aria-label="Salvar script visual e copiar JSON"
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: `1px solid ${ui.borderStrong}`,
+                  background: ui.focus,
+                  color: ui.text,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
               >
                 Salvar
               </button>
               <button type="button"
                 onClick={handleClearGraph}
-                className="aethel-button aethel-button-danger"
-                style={{ padding: '8px 16px' }}
+                aria-label="Limpar todos os nos do script visual"
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: `1px solid ${ui.borderStrong}`,
+                  background: ui.error,
+                  color: ui.text,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
               >
                 Limpar
               </button>

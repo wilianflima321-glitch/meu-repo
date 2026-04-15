@@ -368,7 +368,7 @@ export function CineLinkClient({
             Live
           </span>
         )}
-        <button type="button"
+        <button type="button" aria-label="Expandir painel CineLink"
           onClick={() => setIsMinimized(false)}
           className="p-1 hover:bg-[var(--aethel-surface-secondary)] rounded"
         >
@@ -393,13 +393,13 @@ export function CineLinkClient({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button type="button"
+          <button type="button" aria-label="Alternar configuracoes do CineLink"
             onClick={() => setShowSettings(!showSettings)}
             className="p-1.5 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition"
           >
             <Settings className="w-4 h-4 text-[var(--aethel-text-secondary)]" />
           </button>
-          <button type="button"
+          <button type="button" aria-label="Minimizar painel CineLink"
             onClick={() => setIsMinimized(true)}
             className="p-1.5 hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition"
           >
@@ -413,7 +413,7 @@ export function CineLinkClient({
         <div className="p-4 bg-[var(--aethel-surface-secondary)]/50 border-b border-[var(--aethel-border-primary)] space-y-4">
           <div className="flex justify-between items-center">
             <h4 className="text-sm font-medium text-[var(--aethel-text-primary)]">Settings</h4>
-            <button type="button" onClick={() => setShowSettings(false)}>
+            <button type="button" onClick={() => setShowSettings(false)} aria-label="Fechar painel de configuracoes do CineLink">
               <X className="w-4 h-4 text-[var(--aethel-text-secondary)]" />
             </button>
           </div>
@@ -429,6 +429,7 @@ export function CineLinkClient({
               max="100"
               value={settings.smoothing * 100}
               onChange={(e) => setSettings(s => ({ ...s, smoothing: Number(e.target.value) / 100 }))}
+              aria-label="Ajustar suavizacao da camera virtual"
               className="w-full h-1 bg-[var(--aethel-surface-secondary)] rounded appearance-none cursor-pointer"
             />
           </div>
@@ -444,6 +445,7 @@ export function CineLinkClient({
               max="300"
               value={settings.sensitivity * 100}
               onChange={(e) => setSettings(s => ({ ...s, sensitivity: Number(e.target.value) / 100 }))}
+              aria-label="Ajustar sensibilidade da camera virtual"
               className="w-full h-1 bg-[var(--aethel-surface-secondary)] rounded appearance-none cursor-pointer"
             />
           </div>
@@ -455,6 +457,7 @@ export function CineLinkClient({
                 type="checkbox"
                 checked={settings.invertX}
                 onChange={(e) => setSettings(s => ({ ...s, invertX: e.target.checked }))}
+                aria-label="Inverter eixo X da camera virtual"
                 className="rounded bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-primary)]"
               />
               Invert X
@@ -464,6 +467,7 @@ export function CineLinkClient({
                 type="checkbox"
                 checked={settings.invertY}
                 onChange={(e) => setSettings(s => ({ ...s, invertY: e.target.checked }))}
+                aria-label="Inverter eixo Y da camera virtual"
                 className="rounded bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-primary)]"
               />
               Invert Y
@@ -491,9 +495,10 @@ export function CineLinkClient({
                 type="text"
                 value={connectionUrl.replace('/cinelink', '/mobile-cam')}
                 readOnly
+                aria-label="URL de conexao do CineLink para camera mobile"
                 className="flex-1 px-3 py-2 text-xs bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-secondary)] truncate"
               />
-              <button type="button"
+              <button type="button" aria-label="Copiar URL do CineLink"
                 onClick={copyUrl}
                 className="p-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg hover:bg-[var(--aethel-surface-secondary)] transition"
               >
@@ -554,14 +559,14 @@ export function CineLinkClient({
 
             {/* Actions */}
             <div className="flex gap-2">
-              <button type="button"
+              <button type="button" aria-label="Resetar orientacao da camera virtual"
                 onClick={resetCamera}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded-lg transition"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="text-sm">Reset</span>
               </button>
-              <button type="button"
+              <button type="button" aria-label="Desconectar camera virtual do CineLink"
                 onClick={disconnect}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-lg transition"
               >
@@ -587,7 +592,7 @@ export function CineLinkClient({
         </div>
 
         {!state.isConnected && (
-          <button type="button"
+          <button type="button" aria-label="Conectar CineLink ao servidor"
             onClick={connect}
             className="flex items-center gap-1 px-3 py-1 text-xs bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded transition"
           >
@@ -709,7 +714,7 @@ export function CineLinkMobile({ serverUrl }: CineLinkMobileProps): JSX.Element 
 
         {/* Status */}
         {!isStreaming ? (
-          <button type="button"
+          <button type="button" aria-label="Iniciar transmissao da camera virtual"
             onClick={startStreaming}
             className="w-full py-4 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] rounded-xl text-lg font-medium transition flex items-center justify-center gap-3"
           >
@@ -747,7 +752,7 @@ export function CineLinkMobile({ serverUrl }: CineLinkMobileProps): JSX.Element 
             </div>
 
             {/* Stop button */}
-            <button type="button"
+            <button type="button" aria-label="Parar transmissao da camera virtual"
               onClick={stopStreaming}
               className="w-full py-4 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded-xl text-lg font-medium transition flex items-center justify-center gap-3"
             >
