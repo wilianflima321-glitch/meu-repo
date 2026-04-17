@@ -249,7 +249,7 @@ export default function KeyboardShortcutsEditor() {
               : keybindings.filter(kb => kb.category === category).length;
 
             return (
-              <button type="button"
+              <button type="button" aria-label={`Filtrar atalhos da categoria ${category}`}
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`w-full px-4 py-3 text-left hover:bg-[var(--aethel-surface-secondary)] ${
@@ -265,7 +265,7 @@ export default function KeyboardShortcutsEditor() {
 
         {/* Reset all */}
         <div className="p-4 border-t border-[var(--aethel-border-primary)]">
-          <button type="button"
+          <button type="button" aria-label="Restaurar todos os atalhos"
             onClick={resetAll}
             className="w-full px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded text-sm font-medium"
           >
@@ -345,7 +345,7 @@ export default function KeyboardShortcutsEditor() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button type="button"
+                          <button type="button" aria-label={`Alterar atalho ${binding.command}`}
                             onClick={() => startRecording(binding.id)}
                             disabled={recordingKey}
                             className="px-3 py-1 text-xs bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded disabled:opacity-50"
@@ -353,7 +353,7 @@ export default function KeyboardShortcutsEditor() {
                             Change
                           </button>
                           {binding.isCustom && (
-                            <button type="button"
+                            <button type="button" aria-label={`Restaurar atalho ${binding.command}`}
                               onClick={() => resetKeybinding(binding.id)}
                               className="px-3 py-1 text-xs bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
                             >

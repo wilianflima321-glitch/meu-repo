@@ -824,7 +824,7 @@ function PropertyInput({ property }: { property: MaterialProperty }) {
       return (
         <div className="flex items-center gap-2">
           <span className="text-xs text-[var(--aethel-text-secondary)]">{property.name}</span>
-          <button type="button" className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)]">
+          <button type="button" aria-label={`Selecionar recurso para ${property.name}`} className="px-2 py-1 text-xs bg-[var(--aethel-surface-secondary)] rounded hover:bg-[var(--aethel-surface-secondary)]">
             Select...
           </button>
         </div>
@@ -860,7 +860,7 @@ function NodePalette({ onAddNode }: { onAddNode: (type: string) => void }) {
               const def = NODE_DEFINITIONS[type];
               if (!def) return null;
               return (
-                <button type="button"
+                <button type="button" aria-label={`Adicionar nó ${def.label}`}
                   key={type}
                   onClick={() => onAddNode(type)}
                   className="w-full text-left px-2 py-1.5 text-sm text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded"
@@ -1057,13 +1057,13 @@ export function MaterialEditor() {
 
         <Panel position="top-left">
           <div className="flex gap-2">
-            <button type="button"
+            <button type="button" aria-label={showPalette ? 'Ocultar paleta de material' : 'Mostrar paleta de material'}
               onClick={() => setShowPalette(!showPalette)}
               className="px-3 py-2 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded hover:bg-[var(--aethel-surface-secondary)]"
             >
               {showPalette ? 'Hide Palette' : 'Show Palette'}
             </button>
-            <button type="button"
+            <button type="button" aria-label="Compilar shader do material"
               onClick={compileShader}
               className="px-3 py-2 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)] rounded hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]"
             >

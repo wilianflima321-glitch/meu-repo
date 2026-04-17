@@ -366,13 +366,13 @@ const KeybindingRecordModal: React.FC<KeybindingRecordModalProps> = ({
           )}
         </div>
         <div style={styles.modalFooter}>
-          <button type="button"
+          <button type="button" aria-label="Cancelar gravação de atalho"
             style={{ ...styles.button, ...styles.secondaryButton }}
             onClick={onClose}
           >
             Cancelar
           </button>
-          <button type="button"
+          <button type="button" aria-label="Salvar atalho gravado"
             style={{ ...styles.button, ...styles.primaryButton }}
             onClick={() => {
               if (recordedKey) {
@@ -561,7 +561,7 @@ export const KeybindingsPanel: React.FC = () => {
 
       <div style={styles.toolbar}>
         {(['all', 'default', 'user', 'extension'] as FilterType[]).map(f => (
-          <button type="button"
+          <button type="button" aria-label={`Filtrar atalhos por ${f}`}
             key={f}
             style={{
               ...styles.filterButton,

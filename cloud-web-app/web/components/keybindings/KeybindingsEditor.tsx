@@ -663,7 +663,7 @@ function KeybindingRow({
             )}
 
             <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
-              <button type="button"
+              <button type="button" aria-label={`Editar atalho ${keybinding.command}`}
                 onClick={onEdit}
                 className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
                 title="Editar atalho"
@@ -671,7 +671,7 @@ function KeybindingRow({
                 <Edit3 className="w-3 h-3 text-[var(--aethel-text-tertiary)]" />
               </button>
               {isModified && (
-                <button type="button"
+                <button type="button" aria-label={`Restaurar atalho padrão ${keybinding.command}`}
                   onClick={onReset}
                   className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
                   title="Restaurar padr?o"

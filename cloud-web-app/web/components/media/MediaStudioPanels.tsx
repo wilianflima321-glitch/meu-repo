@@ -48,7 +48,7 @@ export function MediaStudioToolbar({
     <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]">
       <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">Media Studio</div>
 
-      <button type="button"
+      <button type="button" aria-label="Alternar reprodução do Media Studio"
         className="ml-3 px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         onClick={onTogglePlay}
       >

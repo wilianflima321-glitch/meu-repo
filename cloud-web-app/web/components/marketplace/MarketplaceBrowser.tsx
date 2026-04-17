@@ -478,7 +478,7 @@ function FilterSidebar({
                 </h4>
                 <div className="space-y-2">
                     {CATEGORIES.map((category) => (
-                        <button type="button"
+                        <button type="button" aria-label={`${filters.categories.includes(category.id) ? 'Remover' : 'Adicionar'} categoria ${category.name}`}
                             key={category.id}
                             onClick={() => toggleCategory(category.id)}
                             className={cn(
@@ -539,7 +539,7 @@ function FilterSidebar({
                 </h4>
                 <div className="flex gap-1">
                     {[0, 1, 2, 3, 4, 5].map((rating) => (
-                        <button type="button"
+                        <button type="button" aria-label={`Filtrar marketplace com nota mínima ${rating}`}
                             key={rating}
                             onClick={() => onChange({ ...filters, minRating: rating })}
                             className={cn(
