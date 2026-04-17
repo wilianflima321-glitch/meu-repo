@@ -262,12 +262,11 @@ export function InlineAIChat({
           >
             Contexto
           </button>
-          <button type="button"
+          <button type="button" aria-label="Fechar chat inline"
             onClick={(e) => {
               e.stopPropagation();
               onClose?.();
             }}
-            aria-label="Fechar chat inline de IA"
             style={{
               background: 'transparent',
               border: 'none',
@@ -368,7 +367,7 @@ export function InlineAIChat({
             }}
           >
             {suggestionChips.map((chip, index) => (
-              <button type="button"
+              <button type="button" aria-label={`Usar sugestão rápida ${chip.label}`}
                 key={index}
                 onClick={() => {
                   setInput(chip.prompt);
@@ -452,10 +451,9 @@ export function InlineAIChat({
                 }}
                 rows={1}
               />
-              <button type="button"
+              <button type="button" aria-label="Enviar mensagem no chat inline"
                 onClick={sendMessage}
                 disabled={!input.trim() || isLoading}
-                aria-label="Enviar mensagem no chat inline"
                 style={{
                   padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
                   background: input.trim() && !isLoading
@@ -624,9 +622,8 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
           {language}
         </span>
         <div style={{ display: 'flex', gap: tokens.spacing['2'] }}>
-          <button type="button"
+          <button type="button" aria-label="Copiar bloco de código"
             onClick={copyToClipboard}
-            aria-label="Copiar bloco de código"
             style={{
               padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
               background: 'transparent',
@@ -644,9 +641,8 @@ function CodeBlock({ language, code, onApply }: CodeBlockProps) {
             {copied ? 'Copiado' : 'Copiar'}
           </button>
           {onApply && (
-            <button type="button"
+            <button type="button" aria-label="Aplicar bloco de código ao editor"
               onClick={() => onApply(code)}
-              aria-label="Aplicar bloco de código ao editor"
               style={{
                 padding: `${tokens.spacing['1']} ${tokens.spacing['2']}`,
                 background: 'linear-gradient(135deg, var(--aethel-primary), var(--aethel-info))',

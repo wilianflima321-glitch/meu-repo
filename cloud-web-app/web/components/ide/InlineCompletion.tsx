@@ -450,7 +450,7 @@ export function CompletionStatusBar({
 }: CompletionStatusProps) {
   return (
     <div className="flex items-center gap-3 text-xs">
-      <button type="button"
+      <button type="button" aria-label={enabled ? 'Desativar completacao inline' : 'Ativar completacao inline'}
         onClick={onToggle}
         className={`flex items-center gap-1 px-2 py-1 rounded ${
           enabled
@@ -497,7 +497,7 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
       {/* Enable toggle */}
       <div className="flex items-center justify-between">
         <label className="text-sm text-[var(--aethel-text-tertiary)]">Ativar completacao inline</label>
-        <button type="button"
+        <button type="button" aria-label={settings.enabled ? 'Desativar completacao inline' : 'Ativar completacao inline'}
           onClick={() => onSettingsChange({ ...settings, enabled: !settings.enabled })}
           className={`w-10 h-5 rounded-full transition-colors ${
             settings.enabled ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'

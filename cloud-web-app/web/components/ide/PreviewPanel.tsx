@@ -365,13 +365,12 @@ export default function PreviewPanel({
             </span>
           )}
         </div>
-        <button type="button"
+        <button type="button" aria-label={canUseDevRuntime ? 'Atualizar preview em runtime de desenvolvimento' : 'Atualizar preview'}
           onClick={() => {
             if (canUseDevRuntime) setRuntimeReloadTick((prev) => prev + 1)
             onRefresh?.()
           }}
           disabled={!onRefresh && !canUseDevRuntime}
-          aria-label="Atualizar painel de preview"
           className="flex items-center gap-1 rounded px-2 py-1 text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--aethel-primary)]"
           title="Atualizar preview"
         >

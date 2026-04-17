@@ -218,7 +218,7 @@ function KeyRecorder({ value, onChange, onCancel }: KeyRecorderProps) {
           <span className="text-[var(--aethel-text-tertiary)]">Pressione as teclas...</span>
         )}
       </span>
-      <button type="button"
+      <button type="button" aria-label="Cancelar gravação de atalho"
         onClick={onCancel}
         className="ml-auto p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded"
       >
@@ -460,21 +460,21 @@ export default function KeybindingsEditor({
         </div>
 
         <div className="flex items-center gap-2">
-          <button type="button"
+          <button type="button" aria-label="Importar atalhos"
             onClick={handleImport}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
             <Upload className="w-4 h-4" />
             Importar
           </button>
-          <button type="button"
+          <button type="button" aria-label="Exportar atalhos"
             onClick={handleExport}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
             <Download className="w-4 h-4" />
             Exportar
           </button>
-          <button type="button"
+          <button type="button" aria-label="Restaurar todos os atalhos"
             onClick={resetAll}
             className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
           >
@@ -482,7 +482,7 @@ export default function KeybindingsEditor({
             Restaurar tudo
           </button>
           {hasChanges && (
-            <button type="button"
+            <button type="button" aria-label="Salvar alterações de atalhos"
               onClick={handleSave}
               className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[var(--aethel-info)] rounded transition-colors hover:brightness-110"
             >
@@ -491,7 +491,7 @@ export default function KeybindingsEditor({
             </button>
           )}
           {onClose && (
-            <button type="button"
+            <button type="button" aria-label="Fechar editor de atalhos"
               onClick={onClose}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
             >
@@ -514,7 +514,7 @@ export default function KeybindingsEditor({
           />
         </div>
 
-        <button type="button"
+        <button type="button" aria-label={showOnlyModified ? 'Mostrar todos os atalhos' : 'Mostrar apenas atalhos modificados'}
           onClick={() => setShowOnlyModified(!showOnlyModified)}
           className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
             showOnlyModified
@@ -553,7 +553,7 @@ export default function KeybindingsEditor({
         {Object.entries(groupedKeybindings).map(([category, kbs]) => (
           <div key={category}>
             {/* Category Header */}
-            <button type="button"
+            <button type="button" aria-label={`${expandedCategories.has(category) ? 'Recolher' : 'Expandir'} categoria ${category}`}
               onClick={() => toggleCategory(category)}
               className="w-full flex items-center gap-2 px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] hover:bg-[var(--aethel-surface-secondary)] text-left"
             >
