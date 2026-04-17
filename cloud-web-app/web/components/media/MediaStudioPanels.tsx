@@ -54,14 +54,14 @@ export function MediaStudioToolbar({
       >
         {isPlaying ? 'Pausar' : 'Tocar'}
       </button>
-      <button type="button"
+      <button type="button" aria-label="Parar reprodução do Media Studio"
         className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
         onClick={onStop}
       >
         Parar
       </button>
 
-      <button type="button"
+      <button type="button" aria-label={exporting ? 'Exportando mídia do Media Studio' : 'Exportar mídia do Media Studio'}
         className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)] disabled:opacity-50"
         onClick={onExport}
         disabled={exporting}
@@ -123,7 +123,7 @@ export function MediaStudioAssetBin({ assets, selectedAssetId, onSelectAsset }: 
           </div>
         ) : (
           assets.map((asset) => (
-            <button type="button"
+            <button type="button" aria-label={`Selecionar asset ${asset.name}`}
               key={asset.id}
               onClick={() => onSelectAsset(asset.id)}
               className={
@@ -202,13 +202,13 @@ export function MediaStudioPreviewPanel({
               onSeek={onAudioSeek}
             />
             <div className="mt-2 flex gap-2">
-              <button type="button"
+              <button type="button" aria-label="Tocar áudio do Media Studio"
                 className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
                 onClick={onAudioPlay}
               >
                 Tocar audio
               </button>
-              <button type="button"
+              <button type="button" aria-label="Pausar áudio do Media Studio"
                 className="px-3 py-1 rounded bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)] text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_85%,transparent)]"
                 onClick={onAudioPause}
               >

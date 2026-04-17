@@ -164,7 +164,7 @@ function LobbyCard({
         <div className="text-xs text-[var(--aethel-text-secondary)]">
           Mapa: {(lobby.settings as any).mapName || 'Aleatório'}
         </div>
-        <button type="button"
+        <button type="button" aria-label={isFull ? `Sala ${lobby.name} lotada` : `Entrar na sala ${lobby.name}`}
           onClick={() => !isFull && onJoin(lobby.id)}
           disabled={isFull}
           className={`px-4 py-2 rounded font-medium transition-colors ${
@@ -217,7 +217,7 @@ function CreateLobbyModal({
             <label className="block text-sm text-[var(--aethel-text-secondary)] mb-2">Modo de Jogo</label>
             <div className="grid grid-cols-2 gap-2">
               {GAME_MODES.map(m => (
-                <button type="button"
+                <button type="button" aria-label={`Selecionar modo de jogo ${m.name}`}
                   key={m.id}
                   onClick={() => setMode(m.id)}
                   className={`p-3 rounded text-left transition-colors ${
@@ -257,13 +257,13 @@ function CreateLobbyModal({
         </div>
 
         <div className="flex gap-3 mt-6">
-          <button type="button"
+          <button type="button" aria-label="Cancelar criação de sala"
             onClick={onClose}
             className="flex-1 px-4 py-2 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)] rounded font-medium transition-colors"
           >
             Cancelar
           </button>
-          <button type="button"
+          <button type="button" aria-label="Criar sala multiplayer"
             onClick={() => {
               onCreate(name || 'Minha Sala', mode, maxPlayers, isPrivate);
               onClose();
@@ -589,7 +589,7 @@ export default function LobbyScreen({
             </div>
           )}
 
-          <button type="button"
+          <button type="button" aria-label={isConnecting ? 'Conectando ao lobby multiplayer' : 'Conectar ao lobby multiplayer'}
             onClick={handleConnect}
             disabled={isConnecting}
             className="px-8 py-4 bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] disabled:bg-[var(--aethel-surface-secondary)] rounded-lg font-bold text-xl transition-colors"
@@ -619,7 +619,7 @@ export default function LobbyScreen({
                 {currentLobby.players.length}/{currentLobby.maxPlayers} jogadores
               </p>
             </div>
-            <button type="button"
+            <button type="button" aria-label="Sair do lobby atual"
               onClick={handleLeaveLobby}
               className="px-4 py-2 bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] rounded font-medium transition-colors"
             >
@@ -644,7 +644,7 @@ export default function LobbyScreen({
           {/* Action buttons */}
           <div className="flex gap-3">
             {isHost ? (
-              <button type="button"
+              <button type="button" aria-label="Iniciar partida multiplayer"
                 onClick={handleStartGame}
                 className="flex-1 px-6 py-4 bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] rounded-lg font-bold text-xl transition-colors"
               >

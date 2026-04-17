@@ -35,13 +35,12 @@ export const IDE_CONVERGENCE_REDIRECTS: Record<string, string> = {
 }
 
 /**
- * Labs ficam visiveis em desenvolvimento por padrao. Em producao, so aparecem se a variavel estiver ativa.
+ * Labs so ficam visiveis quando a variavel estiver explicitamente ativa.
+ * Isso evita vazar shells aspiracionais em dev/staging por heranca acidental de ambiente.
  */
 export function shouldShowAspirationalRoutes(): boolean {
   const value = process.env.NEXT_PUBLIC_SHOW_ASPIRATIONAL_ROUTES
-  if (value === 'true') return true
-  if (value === 'false') return false
-  return process.env.NODE_ENV !== 'production'
+  return value === 'true'
 }
 
 export function resolveWorkbenchConvergenceRedirect(
