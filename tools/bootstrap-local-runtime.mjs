@@ -8,7 +8,7 @@ const repoRoot = process.cwd()
 const webRoot = path.join(repoRoot, 'cloud-web-app', 'web')
 const envExamplePath = path.join(webRoot, '.env.local.example')
 const envLocalPath = path.join(webRoot, '.env.local')
-const rootEnvTemplatePath = path.join(repoRoot, '.env.template')
+const rootEnvExamplePath = path.join(repoRoot, '.env.example')
 const rootEnvPath = path.join(repoRoot, '.env')
 
 function randomSecret() {
@@ -99,3 +99,4 @@ console.log(
     2
   )
 )
+
