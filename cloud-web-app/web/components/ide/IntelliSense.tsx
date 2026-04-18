@@ -96,10 +96,10 @@ export function IntelliSense({ suggestions = [], onSuggestionSelect, visible = t
               type="button"
               onClick={() => onSuggestionSelect?.(suggestion)}
               className={`w-full flex items-start gap-3 px-3 py-2 text-left transition-colors ${
-                index === selectedIndex ?
-                   'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)]'
-                  : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-              }`}
+ index === selectedIndex ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)]'
+ : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             >
               <div className={`p-1 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] ${getTypeColor(suggestion.type)}`}>
                 {getSuggestionIcon(suggestion.type)}

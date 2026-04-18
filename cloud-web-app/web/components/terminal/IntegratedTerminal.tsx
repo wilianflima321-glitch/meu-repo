@@ -416,6 +416,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
         <div className="flex items-center gap-1 overflow-x-auto">
           {terminals.map((t) => (
             <button type="button"
+              aria-label="Terminal"
               key={t.id}
               onClick={() => setActiveTerminalId(t.id)}
               className={cn(
@@ -428,6 +429,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
               <Terminal className="h-3 w-3" />
               {t.name}
               <button type="button"
+                aria-label="Close terminal tab"
                 onClick={(e) => {
                   e.stopPropagation();
                   closeTerminal(t.id);

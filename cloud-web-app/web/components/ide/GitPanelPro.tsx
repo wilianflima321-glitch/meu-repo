@@ -537,10 +537,7 @@ export default function GitPanelPro({
               <button type="button" aria-label={`Trocar para a branch ${branch.name}`}
                 key={branch.name}
                 onClick={() => handleCheckout(branch.name)}
-                className={`
-                  w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm
-                  ${branch.current ? 'border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]' : 'hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}
-                `}
+                className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm ${branch.current ? 'border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]' : 'hover:bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
               >
                 <GitBranch className="w-4 h-4" />
                 <span className="flex-1 text-left">{branch.name}</span>
@@ -620,13 +617,10 @@ export default function GitPanelPro({
           <button type="button" aria-label="Criar commit com arquivos em stage"
             onClick={handleCommit}
             disabled={!commitMessage.trim() || stagedFiles.length === 0}
-            className={`
-              rounded px-3 py-1.5 text-sm font-medium transition-colors
-              ${commitMessage.trim() && stagedFiles.length > 0
-                ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] hover:brightness-110'
-                : 'cursor-not-allowed bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
-              }
-            `}
+            className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${commitMessage.trim() && stagedFiles.length > 0
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] hover:brightness-110'
+ : 'cursor-not-allowed bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
+ }`}
           >
             Commit (Ctrl+Enter)
           </button>

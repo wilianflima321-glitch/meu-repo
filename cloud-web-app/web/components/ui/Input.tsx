@@ -96,19 +96,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             disabled={disabled}
-            className={`
-              block w-full
-              text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)]
-              transition-all duration-200 ease-out
-              focus:outline-none
-              disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[var(--aethel-border-primary)]
-              ${variantClasses[variant]}
-              ${sizeClasses[inputSize]}
-              ${stateClasses}
-              ${icon && iconPosition === 'left' ? 'pl-11' : ''}
-              ${icon && iconPosition === 'right' || hasError || hasSuccess ? 'pr-11' : ''}
-              ${className}
-            `}
+            className={`block w-full text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] transition-all duration-200 ease-out focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[var(--aethel-border-primary)] ${variantClasses[variant]} ${sizeClasses[inputSize]} ${stateClasses} ${icon && iconPosition === 'left' ? 'pl-11' : ''} ${icon && iconPosition === 'right' || hasError || hasSuccess ? 'pr-11' : ''} ${className}`}
             {...props}
           />
 
@@ -134,8 +122,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {(error || success || hint) && (
           <div
             className={`mt-2 flex items-start gap-1.5 text-sm ${
-              hasError ? 'text-[var(--aethel-error)]' : hasSuccess ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-text-tertiary)]'
-            }`}
+ hasError ? 'text-[var(--aethel-error)]' : hasSuccess ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-text-tertiary)]'
+ }`}
           >
             {hint && !hasError && !hasSuccess && (
               <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />

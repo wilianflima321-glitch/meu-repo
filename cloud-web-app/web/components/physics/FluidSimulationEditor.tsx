@@ -113,15 +113,7 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, icon
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:w-3
-                   [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-[var(--aethel-info)]
-                   [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:hover:bg-[var(--aethel-info-light)]
-                   [&::-webkit-slider-thumb]:transition-colors"
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-[var(--aethel-info)] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:bg-[var(--aethel-info-light)] [&::-webkit-slider-thumb]:transition-colors"
       />
     </div>
   );
@@ -157,8 +149,7 @@ function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.
               max={max}
               step={step}
               onChange={(e) => onChange({ ...value, [axis]: parseFloat(e.target.value) || 0 })}
-              className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 pl-6
-                       text-xs text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
+              className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 pl-6 text-xs text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
             />
           </div>
         ))}
@@ -192,8 +183,7 @@ function ColorPicker({ label, value, onChange }: ColorPickerProps) {
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5
-                   text-xs text-[var(--aethel-text-primary)] font-mono focus:border-[var(--aethel-info)] focus:outline-none"
+          className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 text-xs text-[var(--aethel-text-primary)] font-mono focus:border-[var(--aethel-info)] focus:outline-none"
         />
       </div>
     </div>
@@ -217,9 +207,9 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
   return (
     <div className="mb-4">
       <button type="button"
+        aria-label="Expand"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
-                   hover:text-[var(--aethel-text-primary)] transition-colors"
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {icon}
@@ -473,10 +463,10 @@ function Toolbar({
       <button type="button"
         onClick={onToggleSimulation}
         className={`p-2 rounded transition-colors ${
-          isSimulating
-            ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-        }`}
+ isSimulating
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
         title={isSimulating ? 'Pause Simulation' : 'Play Simulation'}
       >
         {isSimulating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -498,10 +488,10 @@ function Toolbar({
           key={tool.id}
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
-            selectedTool === tool.id
-              ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-          }`}
+ selectedTool === tool.id
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
           title={tool.label}
         >
           {tool.icon}
@@ -804,32 +794,32 @@ export default function FluidSimulationEditor({
           <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showBoundary: !p.showBoundary }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showBoundary ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
+ editorState.showBoundary ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+ }`}
           >
             <Box className="w-3 h-3" /> Boundary
           </button>
           <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showFlowArrows: !p.showFlowArrows }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showFlowArrows ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
+ editorState.showFlowArrows ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+ }`}
           >
             <Wind className="w-3 h-3" /> Flow
           </button>
           <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showVelocityColors: !p.showVelocityColors }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showVelocityColors ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
+ editorState.showVelocityColors ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+ }`}
           >
             <Zap className="w-3 h-3" /> Velocity
           </button>
           <button type="button"
             onClick={() => setEditorState((p) => ({ ...p, showDensityColors: !p.showDensityColors }))}
             className={`p-1.5 rounded text-xs flex items-center gap-1.5 ${
-              editorState.showDensityColors ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
+ editorState.showDensityColors ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+ }`}
           >
             <Layers className="w-3 h-3" /> Density
           </button>
@@ -871,10 +861,10 @@ export default function FluidSimulationEditor({
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded transition-colors text-left ${
-                    editorState.currentPreset === preset.id
-                      ? 'bg-[var(--aethel-info)]/30 border border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] text-[var(--aethel-text-primary)]'
-                      : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-                  }`}
+ editorState.currentPreset === preset.id
+ ? 'bg-[var(--aethel-info)]/30 border border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
                 >
                   <div className="text-xs font-medium">{preset.name}</div>
                   <div className="text-[10px] opacity-70 truncate">{preset.description}</div>
@@ -1091,9 +1081,7 @@ export default function FluidSimulationEditor({
             <button type="button"
               onClick={bakeToMesh}
               disabled={isBaking}
-              className="w-full mt-3 p-2 rounded bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)]
-                       disabled:bg-[var(--aethel-surface-quaternary)] disabled:text-[var(--aethel-text-tertiary)]
-                       transition-colors flex items-center justify-center gap-2"
+              className="w-full mt-3 p-2 rounded bg-[var(--aethel-info)] hover:bg-[var(--aethel-info)] disabled:bg-[var(--aethel-surface-quaternary)] disabled:text-[var(--aethel-text-tertiary)] transition-colors flex items-center justify-center gap-2"
             >
               {isBaking ? (
                 <>

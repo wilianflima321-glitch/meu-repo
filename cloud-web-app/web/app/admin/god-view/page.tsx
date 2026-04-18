@@ -180,10 +180,7 @@ function SessionCard({
 
   return (
     <div
-      className={`
-        bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg overflow-hidden
-        ${session.aiCostIncurred > 1 ? 'border-l-4 border-l-yellow-500' : ''}
-      `}
+      className={`bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg overflow-hidden ${session.aiCostIncurred > 1 ? 'border-l-4 border-l-yellow-500' : ''}`}
     >
       {/* Header Row */}
       <div
@@ -244,8 +241,8 @@ function SessionCard({
             <div className="text-right">
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo</p>
               <p className={`text-sm font-medium flex items-center gap-1 ${
-                session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-text-primary)]'
-              }`}>
+ session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-text-primary)]'
+ }`}>
                 <DollarSign className="w-3 h-3" />
                 {session.aiCostIncurred.toFixed(3)}
               </p>
@@ -254,8 +251,8 @@ function SessionCard({
             <DeviceIcon className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
 
             <ChevronDown className={`w-4 h-4 text-[var(--aethel-text-tertiary)] transition-transform ${
-              isExpanded ? 'rotate-180' : ''
-            }`} />
+ isExpanded ? 'rotate-180' : ''
+ }`} />
           </div>
         </div>
       </div>
@@ -336,8 +333,8 @@ function SessionCard({
               <div className="bg-[var(--aethel-surface-tertiary)] rounded p-2">
                 <p className="text-xs text-[var(--aethel-text-tertiary)]">Custo da sessao</p>
                 <p className={`text-xl font-bold ${
-                  session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-success)]'
-                }`}>
+ session.aiCostIncurred > 1 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-success)]'
+ }`}>
                   ${session.aiCostIncurred.toFixed(4)}
                 </p>
               </div>
@@ -505,10 +502,10 @@ export default function GodViewPage() {
           <button type="button"
             onClick={() => setPaused(!paused)}
             className={`p-2 rounded-lg border ${
-              paused
-                ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning)]'
-                : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
+ paused
+ ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] text-[var(--aethel-warning)]'
+ : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
             title={paused ? 'Retomar atualizacoes ao vivo' : 'Pausar atualizacoes ao vivo'}
           >
             {paused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
@@ -516,6 +513,7 @@ export default function GodViewPage() {
 
           {/* Manual Refresh */}
           <button type="button"
+            aria-label="Refresh"
             onClick={fetchSessions}
             className="p-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >

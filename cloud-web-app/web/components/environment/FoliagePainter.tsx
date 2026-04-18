@@ -326,12 +326,7 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange }: Sl
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:w-3
-                   [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-[var(--aethel-success)]
-                   [&::-webkit-slider-thumb]:rounded-full"
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-[var(--aethel-success)] [&::-webkit-slider-thumb]:rounded-full"
       />
     </div>
   );
@@ -355,8 +350,7 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
     <div className="mb-4">
       <button type="button" aria-label={isOpen ? `Collapse ${title} section` : `Expand ${title} section`}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)]
-                   hover:text-[var(--aethel-text-primary)] transition-colors"
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {icon}
@@ -585,10 +579,10 @@ function FoliageTypeCard({ type, isSelecionared, onSelecionar, instanceCount }: 
     <button type="button" aria-label={`${isSelecionared ? 'Deselect' : 'Select'} foliage type ${type.name}`}
       onClick={onSelecionar}
       className={`w-full p-2 rounded flex items-center gap-2 text-left transition-colors ${
-        isSelecionared
-          ? 'bg-[var(--aethel-success)]/30 border border-[var(--aethel-success)]'
-          : 'bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]/50 border border-transparent'
-      }`}
+ isSelecionared
+ ? 'bg-[var(--aethel-success)]/30 border border-[var(--aethel-success)]'
+ : 'bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]/50 border border-transparent'
+ }`}
     >
       <div className={`p-1.5 rounded ${categoryColors[type.category]}`}>
         {categoryIcons[type.category]}
@@ -631,8 +625,8 @@ function CamadaItem({
   return (
     <div
       className={`flex items-center gap-2 p-2 rounded ${
-        isSelecionared ? 'bg-[var(--aethel-success)]/20 border border-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-tertiary)]'
-      }`}
+ isSelecionared ? 'bg-[var(--aethel-success)]/20 border border-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-tertiary)]'
+ }`}
     >
       <button type="button" aria-label={`Select foliage layer ${layer.name}`} onClick={onSelecionar} className="flex-1 text-left text-sm truncate">
         {layer.name}

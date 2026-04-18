@@ -84,10 +84,10 @@ export function DashboardHeader({
         <div className="hidden items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-3 py-2 xl:flex">
           <div
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              backendOnline
-                ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
-                : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]'
-            }`}
+ backendOnline
+ ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+ : 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]'
+ }`}
           >
             <div
               className={`h-2 w-2 rounded-full ${backendOnline ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-error)]'}`}
@@ -97,20 +97,20 @@ export function DashboardHeader({
 
           <div
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              aiProviderConfigured
-                ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
-            }`}
+ aiProviderConfigured
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ : 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+ }`}
           >
             IA {aiProviderConfigured ? 'configurada' : 'pendente'}
           </div>
 
           <div
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              fullAccessActive
-                ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-secondary)]'
-            }`}
+ fullAccessActive
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
           >
             {fullAccessActive ? `Full Access${fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}` : 'Guardrails ativos'}
           </div>
@@ -158,10 +158,10 @@ export function DashboardHeader({
             onClick={onToggleFullAccess}
             disabled={fullAccessBusy}
             className={`hidden rounded-xl border px-3 py-2 text-xs font-medium transition disabled:opacity-60 lg:inline-flex ${
-              fullAccessActive
-                ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]'
-                : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
-            }`}
+ fullAccessActive
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]'
+ : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)]'
+ }`}
             title={
               fullAccessActive
                 ? `Acesso total ativo${fullAccessExpiryLabel ? ` ate ${fullAccessExpiryLabel}` : ''}. Clique para revogar.`

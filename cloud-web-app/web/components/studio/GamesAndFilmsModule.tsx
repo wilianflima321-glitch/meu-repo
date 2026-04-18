@@ -170,12 +170,13 @@ export function GamesAndFilmsModule() {
       {/* Tabs */}
       <div className="flex gap-2 border-b border-[var(--aethel-border-primary)]">
         <button type="button"
+          aria-label="Set active tab"
           onClick={() => setActiveTab('games')}
           className={`px-4 py-3 font-medium text-sm transition-all ${
-            activeTab === 'games'
-              ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-              : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
-          }`}
+ activeTab === 'games'
+ ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
         >
           <div className="flex items-center gap-2">
             <Gamepad2 size={16} />
@@ -183,12 +184,13 @@ export function GamesAndFilmsModule() {
           </div>
         </button>
         <button type="button"
+          aria-label="Set active tab"
           onClick={() => setActiveTab('films')}
           className={`px-4 py-3 font-medium text-sm transition-all ${
-            activeTab === 'films'
-              ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-              : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
-          }`}
+ activeTab === 'films'
+ ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
         >
           <div className="flex items-center gap-2">
             <Film size={16} />
@@ -339,6 +341,7 @@ function GameCard({
           Publicar
         </button>
         <button type="button"
+          aria-label="Delete"
           onClick={() => onDelete(game.id)}
           className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
@@ -393,6 +396,7 @@ function FilmCard({
           Publicar
         </button>
         <button type="button"
+          aria-label="Delete"
           onClick={() => onDelete(film.id)}
           className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >

@@ -391,15 +391,16 @@ function TourOverlay() {
           <div className="flex gap-1.5">
             {Array.from({ length: totalSteps }).map((_, i) => (
               <button type="button"
+                aria-label="Go to step"
                 key={i}
                 onClick={() => goToStep(i)}
                 className={`w-2 h-2 rounded-full transition-all ${
-                  i === currentStepIndex
-                    ? 'bg-[var(--aethel-info)] w-4'
-                    : i < currentStepIndex
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]'
-                    : 'bg-[var(--aethel-surface-quaternary)]'
-                }`}
+ i === currentStepIndex
+ ? 'bg-[var(--aethel-info)] w-4'
+ : i < currentStepIndex
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_45%,transparent)]'
+ : 'bg-[var(--aethel-surface-quaternary)]'
+ }`}
               />
             ))}
           </div>

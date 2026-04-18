@@ -77,12 +77,13 @@ export function SettingsSidebar({
         {categories.map((category) => (
           <div key={category.id}>
             <button type="button"
+              aria-label="Select category"
               onClick={() => onSelectCategory(category.id)}
               className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
-                selectedCategory === category.id && !selectedSubcategory
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)]'
-              }`}
+ selectedCategory === category.id && !selectedSubcategory
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
             >
               {category.icon}
               <span className="text-sm">{category.label}</span>
@@ -92,13 +93,14 @@ export function SettingsSidebar({
               <div className="ml-6 border-l border-[var(--aethel-border-primary)]">
                 {category.subcategories.map((subcategory) => (
                   <button type="button"
+                    aria-label="Select subcategory"
                     key={subcategory.id}
                     onClick={() => onSelectSubcategory(subcategory.id)}
                     className={`w-full flex items-center gap-2 px-4 py-1.5 text-left text-sm transition-colors ${
-                      selectedSubcategory === subcategory.id
-                        ? 'text-[var(--aethel-info-light)]'
-                        : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]'
-                    }`}
+ selectedSubcategory === subcategory.id
+ ? 'text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                   >
                     {subcategory.label}
                   </button>

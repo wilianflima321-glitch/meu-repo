@@ -320,6 +320,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onActivate
 
           {profile.id !== 'default' && (
             <button type="button"
+              aria-label="Delete"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
@@ -507,6 +508,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           />
           {searchQuery && (
             <button type="button"
+              aria-label="Set search query"
               onClick={() => setSearchQuery('')}
               style={{
                 background: 'transparent',
@@ -534,6 +536,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
             { id: 'sync' as const, label: 'Sincronizar', icon: Cloud },
           ].map((tab) => (
             <button type="button"
+              aria-label="Set active tab"
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
@@ -578,6 +581,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                 {filteredSettings.map((category) => (
                   <div key={category.id}>
                     <button type="button"
+                      aria-label="Expand"
                       onClick={() => toggleCategory(category.id)}
                       style={{
                         display: 'flex',
@@ -763,6 +767,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     {syncState.enabled ? (
                       <>
                         <button type="button"
+                          aria-label="Refresh"
                           onClick={handleSync}
                           disabled={syncState.status === 'syncing'}
                           style={{

@@ -98,18 +98,7 @@ export function Select({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`
-          ${sizeClasses[size]}
-          w-full flex items-center justify-between gap-2
-          bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)]
-          border ${error ? 'border-[color-mix(in_srgb,var(--aethel-error)_70%,transparent)]' : isOpen ? 'border-[var(--aethel-info)]' : 'border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]'}
-          rounded-lg
-          text-left
-          transition-all duration-200 ease-out
-          hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)]
-          focus:outline-none focus:border-[var(--aethel-info)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]
-          disabled:opacity-40 disabled:cursor-not-allowed
-        `}
+        className={`${sizeClasses[size]} w-full flex items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] border ${error ? 'border-[color-mix(in_srgb,var(--aethel-error)_70%,transparent)]' : isOpen ? 'border-[var(--aethel-info)]' : 'border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]'} rounded-lg text-left transition-all duration-200 ease-out hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-primary)_90%,transparent)] focus:outline-none focus:border-[var(--aethel-info)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] disabled:opacity-40 disabled:cursor-not-allowed`}
       >
         <span className={`flex items-center gap-2 truncate ${!selectedOption ? 'text-[var(--aethel-text-tertiary)]' : 'text-[var(--aethel-text-primary)]'}`}>
           {selectedOption?.icon}
@@ -123,15 +112,7 @@ export function Select({
       {/* Dropdown */}
       {isOpen && (
         <div
-          className={`
-            absolute z-50 w-full mt-1.5
-            bg-[var(--aethel-surface-primary)]/95 backdrop-blur-xl
-            border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]
-            rounded-xl
-            shadow-2xl shadow-black/40
-            overflow-hidden
-            animate-in fade-in slide-in-from-top-2 duration-150
-          `}
+          className={`absolute z-50 w-full mt-1.5 bg-[var(--aethel-surface-primary)]/95 backdrop-blur-xl border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] rounded-xl shadow-2xl shadow-black/40 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150`}
         >
           {/* Search Input */}
           {searchable && (
@@ -142,13 +123,7 @@ export function Select({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar..."
-                className="
-                  w-full px-3 py-2
-                  bg-[var(--aethel-surface-secondary)]/80 border border-[var(--aethel-border-primary)]/50
-                  rounded-lg
-                  text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)]
-                  focus:outline-none focus:border-[var(--aethel-info)] focus:ring-1 focus:ring-[var(--aethel-info)]/30
-                "
+                className="w-full px-3 py-2 bg-[var(--aethel-surface-secondary)]/80 border border-[var(--aethel-border-primary)]/50 rounded-lg text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:border-[var(--aethel-info)] focus:ring-1 focus:ring-[var(--aethel-info)]/30"
               />
             </div>
           )}
@@ -166,16 +141,10 @@ export function Select({
                   type="button"
                   onClick={() => !option.disabled && handleSelect(option.value)}
                   disabled={option.disabled}
-                  className={`
-                    w-full px-4 py-2.5 flex items-center justify-between gap-3
-                    text-left text-sm
-                    transition-colors duration-100
-                    ${option.value === value
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info-light)]'
-                      : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)]/80'
-                    }
-                    ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
-                  `}
+                  className={`w-full px-4 py-2.5 flex items-center justify-between gap-3 text-left text-sm transition-colors duration-100 ${option.value === value
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)]/80'
+ } ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     {option.icon && (

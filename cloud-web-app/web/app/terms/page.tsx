@@ -65,13 +65,13 @@ export default function TermsPage() {
           <footer className="space-y-3 border-t border-[var(--aethel-border-subtle)] pt-4">
             <p className="text-xs text-[var(--aethel-text-tertiary)]">Ultima atualizacao: {new Date().toLocaleDateString('pt-BR')}</p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/dashboard" className="aethel-button aethel-button-secondary rounded-xl px-4 py-2 text-sm">
+              <Link href="/dashboard" className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl px-4 py-2 text-sm">
                 Voltar ao painel
               </Link>
-              <a href="mailto:legal@aethel.ai" className="aethel-button aethel-button-ghost rounded-xl px-4 py-2 text-sm">
+              <a href="mailto:legal@aethel.ai" className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] rounded-xl px-4 py-2 text-sm">
                 Contato juridico
               </a>
-              <Link href="/privacy" className="aethel-button aethel-button-ghost rounded-xl px-4 py-2 text-sm">
+              <Link href="/privacy" className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] rounded-xl px-4 py-2 text-sm">
                 Politica de privacidade
               </Link>
             </div>

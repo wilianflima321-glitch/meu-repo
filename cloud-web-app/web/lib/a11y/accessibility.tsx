@@ -662,12 +662,7 @@ export function SkipLinks() {
     <div className="skip-links">
       <a
         href="#main-content"
-        className="
-          sr-only focus:not-sr-only
-          fixed top-0 left-0 z-[9999]
-          px-4 py-2 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]
-          focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary-light)]
-        "
+        className="sr-only focus:not-sr-only fixed top-0 left-0 z-[9999] px-4 py-2 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary-light)]"
         onClick={(e) => {
           e.preventDefault();
           const main = document.getElementById('main-content') || 
@@ -682,12 +677,7 @@ export function SkipLinks() {
       </a>
       <a
         href="#navigation"
-        className="
-          sr-only focus:not-sr-only
-          fixed top-0 left-0 z-[9999]
-          px-4 py-2 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]
-          focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary-light)]
-        "
+        className="sr-only focus:not-sr-only fixed top-0 left-0 z-[9999] px-4 py-2 bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--aethel-primary-light)]"
         onClick={(e) => {
           e.preventDefault();
           const nav = document.getElementById('navigation') || 

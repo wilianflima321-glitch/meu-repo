@@ -93,11 +93,11 @@ export function TabList({
     <div
       role="tablist"
       className={`
-        flex items-center
-        ${variantClasses[variant]}
-        ${fullWidth ? 'w-full' : 'w-fit'}
-        ${className}
-      `}
+ flex items-center
+ ${variantClasses[variant]}
+ ${fullWidth ? 'w-full' : 'w-fit'}
+ ${className}
+ `}
       data-variant={variant}
       data-size={size}
     >
@@ -145,41 +145,29 @@ export function TabTrigger({
       aria-controls={`panel-${value}`}
       disabled={disabled}
       onClick={() => !disabled && setActiveTab(value)}
-      className={`
-        ${triggerSizeClasses[size]}
-        relative flex items-center justify-center gap-2
-        font-medium rounded-lg
-        transition-all duration-200 ease-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
-        disabled:opacity-40 disabled:cursor-not-allowed
-        ${isActive
-          ? `
-            bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)]
-            text-[var(--aethel-text-primary)]
-            shadow-lg shadow-black/20
-            border border-[var(--aethel-border-secondary)]/50
-          `
-          : `
-            bg-transparent
-            text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
-            hover:bg-[var(--aethel-surface-secondary)]/40
-            border border-transparent
-          `
-        }
-        ${className}
-      `}
+      className={`${triggerSizeClasses[size]} relative flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:opacity-40 disabled:cursor-not-allowed ${isActive
+ ? `
+ bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-tertiary)_90%,transparent)]
+ text-[var(--aethel-text-primary)]
+ shadow-lg shadow-black/20
+ border border-[var(--aethel-border-secondary)]/50
+ `
+ : `
+ bg-transparent
+ text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
+ hover:bg-[var(--aethel-surface-secondary)]/40
+ border border-transparent
+ `
+ } ${className}`}
     >
       {icon && <span className="flex-shrink-0">{icon}</span>}
       <span>{children}</span>
       {badge !== undefined && (
         <span
-          className={`
-            px-1.5 py-0.5 text-[10px] font-semibold rounded-full
-            ${isActive
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-              : 'bg-[var(--aethel-surface-quaternary)]/80 text-[var(--aethel-text-tertiary)]'
-            }
-          `}
+          className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-full ${isActive
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
+ : 'bg-[var(--aethel-surface-quaternary)]/80 text-[var(--aethel-text-tertiary)]'
+ }`}
         >
           {badge}
         </span>
@@ -216,10 +204,10 @@ export function TabContent({
       aria-labelledby={`tab-${value}`}
       hidden={!isActive && forceMount}
       className={`
-        mt-4
-        animate-in fade-in-0 slide-in-from-bottom-2 duration-200
-        ${className}
-      `}
+ mt-4
+ animate-in fade-in-0 slide-in-from-bottom-2 duration-200
+ ${className}
+ `}
     >
       {children}
     </div>

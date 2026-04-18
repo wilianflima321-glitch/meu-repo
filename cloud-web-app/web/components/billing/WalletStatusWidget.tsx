@@ -229,8 +229,7 @@ export function WalletStatusWidget({
     return (
       <button type="button" aria-label="Tentar recarregar saldo da carteira"
         onClick={() => mutate()}
-        className={`flex items-center gap-1.5 px-2 py-1 text-[var(--aethel-text-tertiary)]
-                   hover:text-[var(--aethel-text-tertiary)] transition-colors ${className}`}
+        className={`flex items-center gap-1.5 px-2 py-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-tertiary)] transition-colors ${className}`}
         title="Erro ao carregar saldo. Clique para tentar novamente."
       >
         <AlertTriangle className="w-4 h-4" />
@@ -247,12 +246,7 @@ export function WalletStatusWidget({
       {/* Main Widget Button */}
       <button type="button" aria-label={isExpanded ? 'Recolher widget da carteira' : 'Expandir widget da carteira'}
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`
-          flex items-center gap-2 px-2.5 py-1 rounded-md transition-all
-          hover:bg-[var(--aethel-surface-quaternary)] group
-          ${isExpanded ? 'bg-[var(--aethel-surface-quaternary)]' : ''}
-          ${wallet.lowBalanceWarning ? 'animate-pulse' : ''}
-        `}
+        className={`flex items-center gap-2 px-2.5 py-1 rounded-md transition-all hover:bg-[var(--aethel-surface-quaternary)] group ${isExpanded ? 'bg-[var(--aethel-surface-quaternary)]' : ''} ${wallet.lowBalanceWarning ? 'animate-pulse' : ''}`}
       >
         {/* Credits */}
         <div className="flex items-center gap-1.5">
@@ -275,9 +269,9 @@ export function WalletStatusWidget({
 
         {/* Plan badge */}
         <div className={`
-          flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border
-          ${getPlanBadgeClass(wallet.plan)}
-        `}>
+ flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border
+ ${getPlanBadgeClass(wallet.plan)}
+ `}>
           {getPlanIcon(wallet.plan)}
           <span>{wallet.planLabel}</span>
         </div>
@@ -296,9 +290,7 @@ export function WalletStatusWidget({
 
       {/* Expanded Dropdown */}
       {isExpanded && (
-        <div className="absolute bottom-full right-0 mb-2 w-72
-                      bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg shadow-xl
-                      animate-in slide-in-from-bottom-2 fade-in duration-200">
+        <div className="absolute bottom-full right-0 mb-2 w-72 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-lg shadow-xl animate-in slide-in-from-bottom-2 fade-in duration-200">
           {/* Header */}
           <div className="p-3 border-b border-[var(--aethel-border-primary)]">
             <div className="flex items-center justify-between mb-2">
@@ -338,9 +330,9 @@ export function WalletStatusWidget({
             <div className="h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-500 ${
-                  usagePercent > 80 ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
-                  usagePercent > 50 ? 'bg-[var(--aethel-warning)]' : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-                }`}
+ usagePercent > 80 ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
+ usagePercent > 50 ? 'bg-[var(--aethel-warning)]' : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ }`}
                 style={{ width: `${Math.min(usagePercent, 100)}%` }}
               />
             </div>
@@ -391,9 +383,7 @@ export function WalletStatusWidget({
                 setIsExpanded(false);
                 onRecharge?.();
               }}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2
-                       bg-[var(--aethel-accent)] rounded-md
-                       text-sm font-medium transition-colors hover:brightness-110"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[var(--aethel-accent)] rounded-md text-sm font-medium transition-colors hover:brightness-110"
             >
               <CreditCard className="w-4 h-4" />
               Recarregar
@@ -403,9 +393,7 @@ export function WalletStatusWidget({
                 setIsExpanded(false);
                 onOpenWallet?.();
               }}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2
-                       bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] rounded-md
-                       text-sm text-[var(--aethel-text-secondary)] transition-colors"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] rounded-md text-sm text-[var(--aethel-text-secondary)] transition-colors"
             >
               Ver Detalhes
               <ExternalLink className="w-3.5 h-3.5" />
@@ -416,8 +404,7 @@ export function WalletStatusWidget({
 
       {/* Low Balance Modal (non-blocking) */}
       {showLowBalanceAlert && wallet.lowBalanceWarning && (
-        <div className="fixed bottom-20 right-4 w-80 bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]
-                      rounded-lg shadow-2xl p-4 animate-in slide-in-from-right-5 z-50">
+        <div className="fixed bottom-20 right-4 w-80 bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] rounded-lg shadow-2xl p-4 animate-in slide-in-from-right-5 z-50">
           <button type="button" aria-label="Fechar alerta de saldo baixo"
             onClick={() => setShowLowBalanceAlert(false)}
             className="absolute top-2 right-2 p-1 hover:bg-[var(--aethel-surface-quaternary)] rounded"
@@ -441,15 +428,13 @@ export function WalletStatusWidget({
                     setShowLowBalanceAlert(false);
                     onRecharge?.();
                   }}
-                  className="px-3 py-1.5 bg-[var(--aethel-accent)]
-                           rounded text-sm font-medium transition-colors hover:brightness-110"
+                  className="px-3 py-1.5 bg-[var(--aethel-accent)] rounded text-sm font-medium transition-colors hover:brightness-110"
                 >
                   Recarregar agora
                 </button>
                 <button type="button" aria-label="Fechar alerta e decidir depois"
                   onClick={() => setShowLowBalanceAlert(false)}
-                  className="px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)]
-                           rounded text-sm text-[var(--aethel-text-secondary)] transition-colors"
+                  className="px-3 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-tertiary)] rounded text-sm text-[var(--aethel-text-secondary)] transition-colors"
                 >
                   Depois
                 </button>

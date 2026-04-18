@@ -635,6 +635,7 @@ const MemberListItem: React.FC<MemberListItemProps> = ({
       {canManage && (
         <div style={{ position: 'relative' }}>
           <button type="button"
+            aria-label="Refresh"
             onClick={() => setShowMenu(!showMenu)}
             disabled={isLoading}
             style={{
@@ -711,6 +712,7 @@ const MemberListItem: React.FC<MemberListItemProps> = ({
                     </div>
                     {(['admin', 'editor', 'viewer'] as const).filter(r => r !== member.role).map((role) => (
                       <button type="button"
+                        aria-label="Edit"
                         key={role}
                         onClick={() => handleAction(() => onChangeRole(member.id, role))}
                         style={{

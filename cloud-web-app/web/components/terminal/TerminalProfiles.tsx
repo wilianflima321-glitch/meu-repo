@@ -196,6 +196,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
     <div style={{ position: 'relative' }}>
       {/* Trigger Button */}
       <button type="button"
+        aria-label="Set is open"
         onClick={() => setIsOpen(!isOpen)}
         style={{
           display: 'flex',
@@ -260,6 +261,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
             >
               {(['all', 'development', 'monitoring', 'tools'] as const).map((f) => (
                 <button type="button"
+                  aria-label="Set filter"
                   key={f}
                   onClick={() => setFilter(f)}
                   style={{
@@ -285,6 +287,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
               {filteredProfiles.map((profile) => (
                 <button type="button"
                   key={profile.id}
+                  aria-label={`Select ${profile.name} terminal profile`}
                   onClick={() => {
                     onSelect(profile);
                     setIsOpen(false);
@@ -357,6 +360,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
             {/* Custom Profile */}
             <div style={{ padding: '8px' }}>
               <button type="button"
+                aria-label="Open settings"
                 onClick={() => {
                   // Open custom profile dialog
                   setIsOpen(false);
@@ -455,6 +459,7 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
       <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
         {terminal.status !== 'running' && (
           <button type="button"
+            aria-label="Rotate counter-clockwise"
             onClick={(e) => {
               e.stopPropagation();
               onRestart();
@@ -477,6 +482,7 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
         )}
 
         <button type="button"
+          aria-label="Close terminal profile picker"
           onClick={(e) => {
             e.stopPropagation();
             onClose();

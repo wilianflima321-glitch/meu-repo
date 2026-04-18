@@ -339,11 +339,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
         <div className="absolute left-4 top-10 w-0.5 h-full -translate-x-1/2 bg-[var(--aethel-border-primary)]" />
       )}
 
-      <div className={`
-        relative rounded-lg border transition-all duration-200
-        ${colors.bg} ${colors.border}
-        ${step.status === 'active' ? 'ring-1 ring-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]' : ''}
-      `}>
+      <div className={`relative rounded-lg border transition-all duration-200 ${colors.bg} ${colors.border} ${step.status === 'active' ? 'ring-1 ring-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)]' : ''}`}>
         <NeuralPulse active={step.status === 'active'} />
 
         {/* Header */}
@@ -352,10 +348,7 @@ function StepItem({ step, index, isLast, onCopy }: StepItemProps) {
           className={`w-full flex items-center gap-3 p-3 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
         >
           {/* Status indicator */}
-          <div className={`
-            w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-            ${step.status === 'active' ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)]'}
-          `}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${step.status === 'active' ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)]'}`}>
             {step.status === 'active' ? (
               <Loader2 className={`w-4 h-4 ${colors.text} animate-spin`} />
             ) : step.status === 'error' ? (
@@ -516,12 +509,7 @@ export function AIThinkingPanel({
         height: isMaximized ? '80vh' : undefined,
       }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className={`
-        ${isMaximized ? 'fixed inset-10' : positionClasses[position]}
-        bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-xl shadow-2xl
-        flex flex-col overflow-hidden z-40
-        ${className}
-      `}
+      className={`${isMaximized ? 'fixed inset-10' : positionClasses[position]} bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-xl shadow-2xl flex flex-col overflow-hidden z-40 ${className}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] backdrop-blur-sm">

@@ -415,6 +415,7 @@ export function TransitionSelector({
     <div style={{ position: 'relative' }}>
       {/* Current selection button */}
       <button type="button"
+        aria-label="Set show picker"
         onClick={() => setShowPicker(!showPicker)}
         style={{
           display: 'flex',

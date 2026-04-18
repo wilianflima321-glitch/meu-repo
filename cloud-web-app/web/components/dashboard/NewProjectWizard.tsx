@@ -362,14 +362,10 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             onClick={() => handleGenreSelect(genre.id)}
             onMouseEnter={() => handleGenreHover(genre.id)}
             onMouseLeave={() => handleGenreHover(null)}
-            className={`
-              relative group p-4 rounded-xl border-2 transition-all duration-300
-              ${selectedGenre === genre.id
-                ? 'border-[var(--aethel-accent)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] scale-105'
-                : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-              }
-              ${genre.expertOnly ? 'opacity-60' : ''}
-            `}
+            className={`relative group p-4 rounded-xl border-2 transition-all duration-300 ${selectedGenre === genre.id
+ ? 'border-[var(--aethel-accent)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] scale-105'
+ : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ } ${genre.expertOnly ? 'opacity-60' : ''}`}
           >
             {/* Expert Badge */}
             {genre.expertOnly && (
@@ -379,13 +375,10 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
             )}
 
             {/* Icon */}
-            <div className={`
-              w-16 h-16 mx-auto mb-3 rounded-xl flex items-center justify-center
-              ${selectedGenre === genre.id
-                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] group-hover:bg-[var(--aethel-surface-quaternary)]'
-              }
-            `}>
+            <div className={`w-16 h-16 mx-auto mb-3 rounded-xl flex items-center justify-center ${selectedGenre === genre.id
+ ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] group-hover:bg-[var(--aethel-surface-quaternary)]'
+ }`}>
               {genre.icon}
             </div>
 
@@ -434,13 +427,10 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           <button type="button" aria-label="Avancar para escolha de estilo"
             onClick={handleNext}
             disabled={!selectedGenre}
-            className={`
-              flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all
-              ${selectedGenre
-                ? 'bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
-              }
-            `}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all ${selectedGenre
+ ? 'bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
+ }`}
           >
             Proximo
             <ChevronRight className="w-5 h-5" />
@@ -472,13 +462,10 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           <button type="button" aria-label={`Selecionar estilo ${style.name}`}
             key={style.id}
             onClick={() => handleStyleSelect(style.id)}
-            className={`
-              relative group p-4 rounded-xl border-2 transition-all duration-300
-              ${selectedStyle === style.id
-                ? 'border-[var(--aethel-accent)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] scale-105'
-                : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)]'
-              }
-            `}
+            className={`relative group p-4 rounded-xl border-2 transition-all duration-300 ${selectedStyle === style.id
+ ? 'border-[var(--aethel-accent)] bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] scale-105'
+ : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
           >
             {/* GPU Badge */}
             {style.requiresGPU && (
@@ -561,13 +548,10 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
         <button type="button" aria-label="Materializar universo do projeto"
           onClick={handleNext}
           disabled={!selectedStyle || !projectName.trim()}
-          className={`
-            flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all
-            ${selectedStyle && projectName.trim()
-              ? 'bg-gradient-to-r from-[var(--aethel-primary-dark)] to-[var(--aethel-info-dark)] hover:from-[var(--aethel-primary)] hover:to-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
-            }
-          `}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all ${selectedStyle && projectName.trim()
+ ? 'bg-gradient-to-r from-[var(--aethel-primary-dark)] to-[var(--aethel-info-dark)] hover:from-[var(--aethel-primary)] hover:to-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
+ }`}
         >
           <Rocket className="w-5 h-5" />
           Materializar Universo
@@ -610,12 +594,12 @@ export function NewProjectWizard({ onComplete, onCancel }: NewProjectWizardProps
           <div
             key={s.id}
             className={`w-2 h-2 rounded-full transition-all ${
-              i < loadingStep
-                ? 'bg-[var(--aethel-primary)]'
-                : i === loadingStep
-                ? 'bg-[var(--aethel-primary-light)] animate-pulse'
-                : 'bg-[var(--aethel-surface-quaternary)]'
-            }`}
+ i < loadingStep
+ ? 'bg-[var(--aethel-primary)]'
+ : i === loadingStep
+ ? 'bg-[var(--aethel-primary-light)] animate-pulse'
+ : 'bg-[var(--aethel-surface-quaternary)]'
+ }`}
           />
         ))}
       </div>

@@ -116,11 +116,12 @@ export default function Support() {
         <div className="flex items-center gap-2 flex-wrap">
           {(['all', 'open', 'pending', 'resolved', 'closed'] as const).map((status) => (
             <button type="button"
+              aria-label="Set status filter"
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-              }`}
+ statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
             >
               {status === 'all' ? 'Todos' : (statusLabels[status] || status)}
             </button>
@@ -130,8 +131,8 @@ export default function Support() {
               key={priority}
               onClick={() => setPriorityFilter(priority)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                priorityFilter === priority ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-              }`}
+ priorityFilter === priority ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
             >
               {priority === 'all' ? 'Todas prioridades' : (priorityLabels[priority] || priority)}
             </button>
@@ -187,12 +188,12 @@ export default function Support() {
                 </td>
                 <td className='p-2'>
                   <span className={`px-2 py-1 rounded text-xs ${
-                    ticket.priority === 'urgent'
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
-                      : ticket.priority === 'high'
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                      : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                  }`}>
+ ticket.priority === 'urgent'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+ : ticket.priority === 'high'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}>
                     {priorityLabels[ticket.priority] || ticket.priority}
                   </span>
                 </td>

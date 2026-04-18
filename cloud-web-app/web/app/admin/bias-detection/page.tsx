@@ -270,26 +270,28 @@ export default function BiasDetectionPage() {
           <div className="flex flex-wrap items-center gap-2">
             {(['all', 'pending', 'resolved'] as const).map((status) => (
               <button type="button"
+                aria-label="Set status filter"
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
-                  statusFilter === status
-                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
-                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                }`}
+ statusFilter === status
+ ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
               >
                 {status === 'all' ? 'Todos' : status === 'pending' ? 'Pendentes' : 'Resolvidos'}
               </button>
             ))}
             {(['all', 'high', 'medium', 'low', 'none'] as const).map((bias) => (
               <button type="button"
+                aria-label="Set bias filter"
                 key={bias}
                 onClick={() => setBiasFilter(bias)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
-                  biasFilter === bias
-                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
-                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                }`}
+ biasFilter === bias
+ ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
               >
                 {bias === 'all'
                   ? 'Todos scores'

@@ -55,11 +55,11 @@ export function Badge({
   return (
     <span
       className={`
-        inline-flex items-center gap-1.5 font-medium rounded-full border
-        ${variantClasses[variant]}
-        ${sizeClasses[size]}
-        ${className}
-      `}
+ inline-flex items-center gap-1.5 font-medium rounded-full border
+ ${variantClasses[variant]}
+ ${sizeClasses[size]}
+ ${className}
+ `}
       {...props}
     >
       {dot && (

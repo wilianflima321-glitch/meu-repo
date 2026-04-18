@@ -424,6 +424,7 @@ function SearchInput({
           {history.map((item, index) => (
             <button type="button"
               key={index}
+              aria-label={`Use recent search: ${item}`}
               onClick={() => {
                 onChange(item);
                 onHistorySelect?.(item);
@@ -461,10 +462,10 @@ function OptionButton({
       onClick={onClick}
       title={title}
       className={`p-1 rounded transition-colors ${
-        active
-          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-          : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
-      }`}
+ active
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
+ }`}
     >
       <Icon className="w-4 h-4" />
     </button>
@@ -497,6 +498,7 @@ function SearchResultFile({
     <div className="border-b border-[color-mix(in_srgb,var(--aethel-border-primary)_60%,transparent)]">
       {/* File header */}
       <button type="button"
+        aria-label="Next"
         onClick={onToggle}
         className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] group"
       >
@@ -530,6 +532,7 @@ function SearchResultFile({
         <div className="pl-6">
           {result.matches.map((match, index) => (
             <button type="button"
+              aria-label="Navigate"
               key={`${match.line}-${match.column}-${index}`}
               onClick={() => onNavigate(match)}
               className="w-full flex items-center gap-3 px-3 py-1 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-left group"
@@ -643,10 +646,10 @@ export function GlobalSearchPanel({
           <button type="button"
             onClick={() => setShowReplace(!showReplace)}
             className={`p-1 rounded transition-colors ${
-              showReplace
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
-            }`}
+ showReplace
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
+ }`}
             title="Alternar substituicao (Ctrl+Shift+H)"
           >
             <Replace className="w-4 h-4" />
@@ -737,6 +740,7 @@ export function GlobalSearchPanel({
 
         {/* File filters */}
         <button type="button"
+          aria-label="More options"
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center gap-1 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
         >

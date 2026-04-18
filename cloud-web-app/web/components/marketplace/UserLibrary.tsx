@@ -288,6 +288,7 @@ function AssetCard({
                         {/* Quick download */}
                         <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button type="button" onClick={handleDownload} disabled={isDownloading}>
+                              aria-label="Download"
                                 <Download className="w-4 h-4 mr-2" />
                                 {isDownloading ? 'Baixando...' : 'Baixar'}
                             </button>

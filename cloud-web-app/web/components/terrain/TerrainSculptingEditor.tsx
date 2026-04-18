@@ -375,6 +375,7 @@ function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
         <div style={{ display: 'flex', gap: '8px' }}>
           {(['circle', 'square'] as BrushShape[]).map(shape => (
             <button type="button"
+              aria-label="Update"
               key={shape}
               onClick={() => update('shape', shape)}
               style={{

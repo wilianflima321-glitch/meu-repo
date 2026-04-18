@@ -263,13 +263,10 @@ export default function AethelHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`
-                    rounded-xl px-3 py-2 text-sm font-medium transition-colors
-                    ${pathname === link.href
-                      ? 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] text-[var(--aethel-text-primary)]'
-                      : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]'
-                    }
-                  `}
+                  className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${pathname === link.href
+ ? 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                 >
                   {link.label}
                 </Link>
@@ -421,13 +418,10 @@ export default function AethelHeader() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`
-                    px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                    ${pathname === link.href
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]'
-                      : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]'
-                    }
-                  `}
+                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === link.href
+ ? 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                 >
                   {link.label}
                 </Link>

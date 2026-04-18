@@ -453,10 +453,10 @@ export function CompletionStatusBar({
       <button type="button" aria-label={enabled ? 'Desativar completacao inline' : 'Ativar completacao inline'}
         onClick={onToggle}
         className={`flex items-center gap-1 px-2 py-1 rounded ${
-          enabled
-            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]'
-            : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
-        }`}
+ enabled
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]'
+ : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
+ }`}
       >
         <Sparkles className="w-3 h-3" />
         <span>Copilot {enabled ? 'ATIVO' : 'DESLIGADO'}</span>
@@ -500,12 +500,12 @@ export function CompletionSettings({ settings, onSettingsChange }: CompletionSet
         <button type="button" aria-label={settings.enabled ? 'Desativar completacao inline' : 'Ativar completacao inline'}
           onClick={() => onSettingsChange({ ...settings, enabled: !settings.enabled })}
           className={`w-10 h-5 rounded-full transition-colors ${
-            settings.enabled ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'
-          }`}
+ settings.enabled ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'
+ }`}
         >
           <div className={`w-4 h-4 rounded-full bg-[var(--aethel-surface-secondary)] transition-transform ${
-            settings.enabled ? 'translate-x-5' : 'translate-x-1'
-          }`} />
+ settings.enabled ? 'translate-x-5' : 'translate-x-1'
+ }`} />
         </button>
       </div>
 

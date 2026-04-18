@@ -210,8 +210,8 @@ export function AethelDashboardSidebar({
     <nav
       id="dashboard-sidebar"
       className={`fixed z-50 h-full w-[300px] shrink-0 transform border-r border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(10,13,20,0.98),rgba(8,10,16,0.96))] shadow-[0_30px_80px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-in-out md:sticky md:top-[88px] md:h-[calc(100vh-104px)] md:rounded-r-3xl ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-      }`}
+ sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+ }`}
       aria-label="Navegacao principal do studio"
     >
       <div className="flex h-full flex-col overflow-hidden">

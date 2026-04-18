@@ -123,7 +123,7 @@ export default function OnboardingAdminPage() {
       </div>
 
       {error && (
-        <div role="alert" aria-live="polite" className="aethel-state aethel-state-error mb-4">
+        <div role="alert" aria-live="polite" className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] mb-4">
           {error}
         </div>
       )}
@@ -163,12 +163,12 @@ export default function OnboardingAdminPage() {
           {!loading && stats?.firstValue && (
             <p
               className={`mt-1 text-xs ${
-                stats.firstValue.sloStatus === 'pass'
-                  ? 'text-[var(--aethel-success)]'
-                  : stats.firstValue.sloStatus === 'fail'
-                    ? 'text-[var(--aethel-error)]'
-                    : 'text-[var(--aethel-warning)]'
-              }`}
+ stats.firstValue.sloStatus === 'pass'
+ ? 'text-[var(--aethel-success)]'
+ : stats.firstValue.sloStatus === 'fail'
+ ? 'text-[var(--aethel-error)]'
+ : 'text-[var(--aethel-warning)]'
+ }`}
             >
               {formatSloStatus(stats.firstValue.sloStatus)} (avaliado em P95)
             </p>

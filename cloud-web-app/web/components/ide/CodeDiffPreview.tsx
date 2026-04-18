@@ -113,10 +113,10 @@ export function CodeDiffPreview({
               type="button"
               onClick={() => setSelectedFile(diff.path)}
               className={`flex items-center gap-2 px-4 py-2 text-xs border-b-2 transition-colors whitespace-nowrap ${
-                selectedFile === diff.path
-                  ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] text-[var(--aethel-text-primary)]'
-                  : 'border-transparent text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ selectedFile === diff.path
+ ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'border-transparent text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             >
               <AlertTriangle className="w-3 h-3 text-[var(--aethel-warning)]" />
               <span className="truncate max-w-[200px]">{diff.path}</span>

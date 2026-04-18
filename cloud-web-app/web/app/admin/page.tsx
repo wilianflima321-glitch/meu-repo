@@ -119,12 +119,12 @@ export default function Admin() {
                     <td className='p-2'>
                       <span
                         className={`rounded-full px-2.5 py-1 text-xs ${
-                          user.plan === 'enterprise'
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
-                            : user.plan === 'pro'
-                              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info)]'
-                              : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'
-                        }`}
+ user.plan === 'enterprise'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
+ : user.plan === 'pro'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)] text-[var(--aethel-info)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
                       >
                         {planLabels[user.plan] ?? user.plan}
                       </span>

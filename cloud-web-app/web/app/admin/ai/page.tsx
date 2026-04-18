@@ -181,6 +181,7 @@ export default function AdminAI() {
           />
         </div>
         <button type="button"
+          aria-label="Update"
           onClick={handleUpdate}
           disabled={saving}
           className='bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50'

@@ -198,12 +198,12 @@ const ServiceCard: React.FC<{ service: ServiceStatus; onFix?: () => void }> = ({
       {service.message && (
         <p
           className={`text-xs ${
-            service.status === 'offline'
-              ? 'text-[var(--aethel-error)]'
-              : service.status === 'warning'
-                ? 'text-[var(--aethel-warning)]'
-                : 'text-[var(--aethel-text-tertiary)]'
-          }`}
+ service.status === 'offline'
+ ? 'text-[var(--aethel-error)]'
+ : service.status === 'warning'
+ ? 'text-[var(--aethel-warning)]'
+ : 'text-[var(--aethel-text-tertiary)]'
+ }`}
         >
           {service.message}
         </p>

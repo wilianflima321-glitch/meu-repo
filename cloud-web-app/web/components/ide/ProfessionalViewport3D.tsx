@@ -31,10 +31,10 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setLeftPanel('outliner')}
               className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors ${
-                leftPanel === 'outliner' ?
-                   'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ leftPanel === 'outliner' ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             >
               <Layers className="w-3 h-3" />
               Cena
@@ -43,10 +43,10 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setLeftPanel('assets')}
               className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors ${
-                leftPanel === 'assets' ?
-                   'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ leftPanel === 'assets' ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             >
               <Grid3x3 className="w-3 h-3" />
               Assets
@@ -72,10 +72,10 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setShowLeftPanel(!showLeftPanel)}
               className={`p-1.5 rounded transition-colors ${
-                showLeftPanel ?
-                   'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ showLeftPanel ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
               title="Painel esquerdo"
             >
               <PanelLeft className="w-4 h-4" />
@@ -84,10 +84,10 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setShowRightPanel(!showRightPanel)}
               className={`p-1.5 rounded transition-colors ${
-                showRightPanel ?
-                   'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ showRightPanel ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
               title="Painel direito"
             >
               <PanelRight className="w-4 h-4" />
@@ -96,10 +96,10 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setShowTimeline(!showTimeline)}
               className={`p-1.5 rounded transition-colors ${
-                showTimeline ?
-                   'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ showTimeline ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
               title="Timeline"
             >
               <PanelBottom className="w-4 h-4" />
@@ -108,10 +108,10 @@ export function ProfessionalViewport3D() {
               type="button"
               onClick={() => setShowAI(!showAI)}
               className={`p-1.5 rounded transition-colors ${
-                showAI ?
-                   'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ showAI ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
               title="Assistente IA"
             >
               <Settings className="w-4 h-4" />

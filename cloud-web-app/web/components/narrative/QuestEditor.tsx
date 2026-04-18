@@ -199,8 +199,8 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
   return (
     <div
       className={`w-72 rounded-lg border-2 shadow-lg ${stateColors[data.state]} ${
-        selected ? 'ring-2 ring-white' : ''
-      }`}
+ selected ? 'ring-2 ring-white' : ''
+ }`}
     >
       <Handle type="target" position={Position.Top} className="!bg-[var(--aethel-text-tertiary)]" />
 
@@ -244,8 +244,8 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
             <div
               key={obj.id}
               className={`flex items-center gap-1.5 text-[10px] ${
-                obj.currentCount >= obj.targetCount ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-text-tertiary)]'
-              }`}
+ obj.currentCount >= obj.targetCount ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-text-tertiary)]'
+ }`}
             >
               {OBJECTIVE_ICONS[obj.type]}
               <span className="truncate flex-1">{obj.description}</span>
@@ -506,6 +506,7 @@ function RewardEditor({ reward, onUpdate, onDelete }: RewardEditorProps) {
       />
 
       <button type="button"
+        aria-label="Delete"
         onClick={onDelete}
         className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
       >
@@ -668,6 +669,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
       {/* Objectives */}
       <div>
         <button type="button"
+          aria-label="Expand"
           onClick={() => toggleSection('objectives')}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
@@ -721,6 +723,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
       {/* Rewards */}
       <div>
         <button type="button"
+          aria-label="Expand"
           onClick={() => toggleSection('rewards')}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
@@ -770,6 +773,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
       {/* Prerequisites */}
       <div>
         <button type="button"
+          aria-label="Expand"
           onClick={() => toggleSection('prerequisites')}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
@@ -826,6 +830,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                 )}
 
                 <button type="button"
+                  aria-label="Delete"
                   onClick={() => {
                     const prerequisites = [...data.prerequisites];
                     prerequisites.splice(i, 1);
@@ -1103,6 +1108,7 @@ export default function QuestEditor({
           <Panel position="top-left" className="flex gap-2 flex-wrap">
             {QUEST_CATEGORIES.map((cat) => (
               <button type="button"
+                aria-label="Add quest"
                 key={cat.id}
                 onClick={() => addQuest(cat.id)}
                 className="flex items-center gap-1 px-3 py-2 rounded text-sm"

@@ -102,13 +102,7 @@ export function Avatar({
   return (
     <div className={`relative inline-block ${className}`} {...props}>
       <div
-        className={`
-          ${sizeConfig.container}
-          rounded-full overflow-hidden
-          flex items-center justify-center
-          ring-2 ring-[var(--aethel-border-primary)]
-          ${!src ? getColorFromName(name) : 'bg-[var(--aethel-surface-tertiary)]'}
-        `}
+        className={`${sizeConfig.container} rounded-full overflow-hidden flex items-center justify-center ring-2 ring-[var(--aethel-border-primary)] ${!src ? getColorFromName(name) : 'bg-[var(--aethel-surface-tertiary)]'}`}
       >
         {src ? (
           <Image
@@ -126,13 +120,7 @@ export function Avatar({
 
       {status && (
         <span
-          className={`
-            absolute bottom-0 right-0
-            ${sizeConfig.status}
-            rounded-full
-            ring-2 ring-[var(--aethel-border-secondary)]
-            ${statusColors[status]}
-          `}
+          className={`absolute bottom-0 right-0 ${sizeConfig.status} rounded-full ring-2 ring-[var(--aethel-border-secondary)] ${statusColors[status]}`}
         />
       )}
     </div>
@@ -162,14 +150,7 @@ export function AvatarGroup({ avatars, max = 4, size = 'sm' }: AvatarGroupProps)
       ))}
       {remaining > 0 && (
         <div
-          className={`
-            ${sizeClasses[size].container}
-            rounded-full bg-[var(--aethel-surface-tertiary)]
-            flex items-center justify-center
-            ring-2 ring-[var(--aethel-border-secondary)]
-            ${sizeClasses[size].text}
-            text-[var(--aethel-text-secondary)] font-medium
-          `}
+          className={`${sizeClasses[size].container} rounded-full bg-[var(--aethel-surface-tertiary)] flex items-center justify-center ring-2 ring-[var(--aethel-border-secondary)] ${sizeClasses[size].text} text-[var(--aethel-text-secondary)] font-medium`}
         >
           +{remaining}
         </div>

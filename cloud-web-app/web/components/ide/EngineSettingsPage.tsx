@@ -324,15 +324,9 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
       return (
         <button type="button" aria-label={`Alternar configuração ${setting.label}`}
           onClick={() => onChange(!setting.value)}
-          className={`
-            w-11 h-6 rounded-full transition-colors relative
-            ${setting.value ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}
-          `}
+          className={`w-11 h-6 rounded-full transition-colors relative ${setting.value ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'}`}
         >
-          <div className={`
-            absolute top-1 w-4 h-4 rounded-full bg-[var(--aethel-surface-secondary)] transition-transform
-            ${setting.value ? 'left-6' : 'left-1'}
-          `} />
+          <div className={`absolute top-1 w-4 h-4 rounded-full bg-[var(--aethel-surface-secondary)] transition-transform ${setting.value ? 'left-6' : 'left-1'}`} />
         </button>
       )
 
@@ -472,13 +466,10 @@ export default function EngineSettingsPage() {
                     setActiveSubsection(section.subsections[0].id)
                   }
                 }}
-                className={`
-                  w-full flex items-center gap-3 px-4 py-2 text-sm
-                  ${activeSection === section.id
-                    ? 'text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]/30'
-                  }
-                `}
+                className={`w-full flex items-center gap-3 px-4 py-2 text-sm ${activeSection === section.id
+ ? 'text-[var(--aethel-text-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]/30'
+ }`}
               >
                 <section.icon className="w-4 h-4" />
                 {section.label}
@@ -491,13 +482,10 @@ export default function EngineSettingsPage() {
                     <button type="button" aria-label={`Abrir subseção ${sub.label}`}
                       key={sub.id}
                       onClick={() => setActiveSubsection(sub.id)}
-                      className={`
-                        w-full flex items-center gap-2 px-3 py-1.5 text-sm
-                        ${activeSubsection === sub.id
-                          ? 'text-[var(--aethel-info)]'
-                          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }
-                      `}
+                      className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm ${activeSubsection === sub.id
+ ? 'text-[var(--aethel-info)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                     >
                       <ChevronRight className="w-3 h-3" />
                       {sub.label}

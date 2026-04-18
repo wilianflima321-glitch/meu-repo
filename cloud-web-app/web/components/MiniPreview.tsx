@@ -29,8 +29,8 @@ export default function MiniPreview({ isExpanded, onToggleExpand, aiActivity, su
 
   return (
     <div className={`bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-xl overflow-hidden transition-all duration-300 shadow-xl ${
-      isExpanded ? 'fixed inset-4 z-50' : 'w-72 h-56'
-    }`}>
+ isExpanded ? 'fixed inset-4 z-50' : 'w-72 h-56'
+ }`}>
       <div className="flex items-center justify-between px-3 py-2 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <h4 className="text-[var(--aethel-text-primary)] text-sm font-semibold flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] animate-pulse" />

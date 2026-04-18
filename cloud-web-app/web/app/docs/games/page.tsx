@@ -77,8 +77,8 @@ export default function GamesDocsPage() {
                   <Icon className="h-5 w-5 text-[var(--aethel-success)]" />
                   <h3 className="font-semibold">{cap.title}</h3>
                   <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
-                    cap.status === 'available' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-                  }`}>
+ cap.status === 'available' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+ }`}>
                     {cap.status}
                   </span>
                 </div>

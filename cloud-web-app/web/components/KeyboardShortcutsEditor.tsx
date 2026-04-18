@@ -253,8 +253,8 @@ export default function KeyboardShortcutsEditor() {
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`w-full px-4 py-3 text-left hover:bg-[var(--aethel-surface-secondary)] ${
-                  selectedCategory === category ? 'bg-[var(--aethel-surface-secondary)] border-l-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : ''
-                }`}
+ selectedCategory === category ? 'bg-[var(--aethel-surface-secondary)] border-l-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : ''
+ }`}
               >
                 <div className="text-sm font-medium">{category}</div>
                 <div className="text-xs text-[var(--aethel-text-secondary)]">{count} shortcuts</div>

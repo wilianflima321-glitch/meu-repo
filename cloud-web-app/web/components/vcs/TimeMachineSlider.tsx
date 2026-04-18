@@ -177,20 +177,15 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
         y: isActive ? 0 : 10,
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className={`
-        relative flex-shrink-0 w-[280px] rounded-xl border transition-all cursor-pointer
-        ${isActive
-          ? 'bg-[var(--aethel-surface-tertiary)] border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_25%,transparent)]'
-          : 'bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
-        }
-        ${isPreviewing ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)]' : ''}
-      `}
+      className={`relative flex-shrink-0 w-[280px] rounded-xl border transition-all cursor-pointer ${isActive
+ ? 'bg-[var(--aethel-surface-tertiary)] border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_25%,transparent)]'
+ : 'bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
+ } ${isPreviewing ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)]' : ''}`}
       onClick={onClick}
     >
       {/* Merge indicator */}
       {commit.isMerge && (
-        <div className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--aethel-primary)] rounded-full
-                      flex items-center justify-center">
+        <div className="absolute -top-2 -right-2 w-6 h-6 bg-[var(--aethel-primary)] rounded-full flex items-center justify-center">
           <GitBranch className="w-3.5 h-3.5 text-[var(--aethel-text-primary)]" />
         </div>
       )}
@@ -210,8 +205,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
                 className="w-8 h-8 rounded-full"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]
-                            flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] flex items-center justify-center">
                 <User className="w-4 h-4 text-[var(--aethel-primary)]" />
               </div>
             )}
@@ -226,8 +220,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
             </div>
           </div>
 
-          <span className="px-2 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded-full
-                         font-mono text-[10px] text-[var(--aethel-text-tertiary)]">
+          <span className="px-2 py-0.5 bg-[var(--aethel-surface-quaternary)] rounded-full font-mono text-[10px] text-[var(--aethel-text-tertiary)]">
             {commit.shortHash}
           </span>
         </div>
@@ -260,8 +253,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
         )}
 
         {commit.tags && commit.tags.length > 0 && (
-          <span className="ml-auto px-1.5 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]
-                         rounded text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] text-[10px]">
+          <span className="ml-auto px-1.5 py-0.5 bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] rounded text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)] text-[10px]">
             {commit.tags[0]}
           </span>
         )}
@@ -283,10 +275,9 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
               {commit.changes.files.slice(0, 5).map((file, i) => (
                 <button type="button"
                   key={i}
+                  aria-label={`View diff for ${file.path}`}
                   onClick={(e) => { e.stopPropagation(); onDiff(file); }}
-                  className="w-full flex items-center gap-2 px-2 py-1
-                           bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] rounded text-left
-                           transition-colors group"
+                  className="w-full flex items-center gap-2 px-2 py-1 bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] rounded text-left transition-colors group"
                 >
                   <FileIcon type={file.type} />
                   <span className="text-xs text-[var(--aethel-text-tertiary)] truncate flex-1">
@@ -308,18 +299,14 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
             <div className="p-3 pt-0 flex gap-2">
               <button type="button"
                 onClick={(e) => { e.stopPropagation(); onPreview(); }}
-                className="flex-1 flex items-center justify-center gap-1.5 py-1.5
-                         bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
-                         text-xs text-[var(--aethel-text-secondary)] transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-xs text-[var(--aethel-text-secondary)] transition-colors"
               >
                 <Eye className="w-3.5 h-3.5" />
                 Preview
               </button>
               <button type="button"
                 onClick={(e) => { e.stopPropagation(); onDiff(); }}
-                className="flex-1 flex items-center justify-center gap-1.5 py-1.5
-                         bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary)] rounded-lg
-                         text-xs font-medium transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary)] rounded-lg text-xs font-medium transition-colors"
               >
                 <History className="w-3.5 h-3.5" />
                 Ver Diff
@@ -378,15 +365,13 @@ function TimelineBar({ commits, activeIndex, onSelect }: {
       <div className="absolute inset-0 flex items-center px-2">
         {commits.map((_, i) => (
           <button type="button"
+            aria-label="Select"
             key={i}
             onClick={() => onSelect(i)}
-            className={`
-              w-2 h-2 rounded-full transition-all mx-0.5
-              ${i === activeIndex
-                ? 'bg-[var(--aethel-primary)] scale-150'
-                : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'
-              }
-            `}
+            className={`w-2 h-2 rounded-full transition-all mx-0.5 ${i === activeIndex
+ ? 'bg-[var(--aethel-primary)] scale-150'
+ : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ }`}
           />
         ))}
       </div>
@@ -515,17 +500,12 @@ export function TimeMachineSlider({
   return (
     <motion.div
       layout
-      className={`
-        bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] overflow-hidden
-        ${isFullscreen ? 'fixed inset-4 z-50' : ''}
-        ${className}
-      `}
+      className={`bg-[var(--aethel-surface-secondary)] rounded-xl border border-[var(--aethel-border-primary)] overflow-hidden ${isFullscreen ? 'fixed inset-4 z-50' : ''} ${className}`}
     >
       {/* Header */}
       <div className="p-4 border-b border-[var(--aethel-border-primary)] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] rounded-lg
-                        flex items-center justify-center">
+          <div className="w-10 h-10 bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] rounded-lg flex items-center justify-center">
             <History className="w-5 h-5 text-[var(--aethel-primary)]" />
           </div>
           <div>
@@ -554,6 +534,7 @@ export function TimeMachineSlider({
 
           {/* Fullscreen toggle */}
           <button type="button"
+            aria-label="Exit fullscreen"
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="p-2 hover:bg-[var(--aethel-surface-tertiary)] rounded-lg transition-colors"
           >
@@ -598,10 +579,10 @@ export function TimeMachineSlider({
       <div className="p-4 pt-0 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button type="button"
+            aria-label="Previous"
             onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))}
             disabled={activeIndex === 0}
-            className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
-                     transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -613,8 +594,7 @@ export function TimeMachineSlider({
           <button type="button"
             onClick={() => setActiveIndex(prev => Math.min(commits.length - 1, prev + 1))}
             disabled={activeIndex === commits.length - 1}
-            className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
-                     transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -624,9 +604,7 @@ export function TimeMachineSlider({
           {/* Preview current state */}
           <button type="button"
             onClick={() => handlePreview(activeCommit, activeIndex)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)]
-                     hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-xs text-[var(--aethel-text-secondary)]
-                     transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-xs text-[var(--aethel-text-secondary)] transition-colors"
           >
             <Eye className="w-3.5 h-3.5" />
             Preview Estado
@@ -636,9 +614,7 @@ export function TimeMachineSlider({
           {onRestoreCommit && (
             <button type="button"
               onClick={handleRestore}
-              className="flex items-center gap-1.5 px-3 py-1.5
-                       bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary)] rounded-lg
-                       text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--aethel-primary)] hover:bg-[var(--aethel-primary)] rounded-lg text-xs font-medium transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Restaurar para Este Commit

@@ -181,6 +181,7 @@ export default function AIEnhancements() {
                   </span>
                 </div>
                 <button type="button"
+                  aria-label="Toggle applied"
                   onClick={() => toggleApplied(item)}
                   className='mt-3 px-3 py-2 rounded bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] text-sm'
                 >

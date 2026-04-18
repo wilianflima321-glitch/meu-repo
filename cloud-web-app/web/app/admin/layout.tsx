@@ -154,10 +154,10 @@ function QuickStatPill({
   return (
     <div
       className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition-colors ${
-        alert
-          ? 'border-[var(--aethel-error)]/40 bg-[var(--aethel-error)]/10'
-          : 'border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)]/40'
-      }`}
+ alert
+ ? 'border-[var(--aethel-error)]/40 bg-[var(--aethel-error)]/10'
+ : 'border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)]/40'
+ }`}
     >
       <Icon className={`h-3.5 w-3.5 ${alert ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'}`} />
       <div>
@@ -204,10 +204,10 @@ function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?
                 key={item.href}
                 href={item.href}
                 className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs transition-all duration-150 ${
-                  isActive
-                    ? 'bg-[var(--aethel-primary)]/15 text-[var(--aethel-info-light)] border border-[var(--aethel-primary)]/25'
-                    : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]'
-                }`}
+ isActive
+ ? 'bg-[var(--aethel-primary)]/15 text-[var(--aethel-info-light)] border border-[var(--aethel-primary)]/25'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
               >
                 <span className="flex items-center gap-2">
                   <item.icon className="h-3.5 w-3.5" />
@@ -241,8 +241,8 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
       )}
       <aside
         className={`fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] transition-transform duration-200 lg:static lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+ isOpen ? 'translate-x-0' : '-translate-x-full'
+ }`}
         role="navigation"
         aria-label="Navegação administrativa"
       >

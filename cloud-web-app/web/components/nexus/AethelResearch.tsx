@@ -178,8 +178,8 @@ export default function AethelResearch() {
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--aethel-surface-tertiary)]">
                     <div
                       className={`h-full bg-[var(--aethel-info)] transition-all duration-1000 ${
-                        result.status === 'searching' ? 'w-1/3' : 'w-2/3'
-                      }`}
+ result.status === 'searching' ? 'w-1/3' : 'w-2/3'
+ }`}
                     ></div>
                   </div>
                   <p className="mt-2 text-[10px] font-bold uppercase tracking-tighter text-[var(--aethel-text-quaternary)]">

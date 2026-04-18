@@ -707,14 +707,14 @@ const ChatComponent: React.FC = () => {
           >
             <div
               className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                msg.role === 'user'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
-                  : msg.role === 'error'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)]'
-                  : msg.role === 'system'
-                  ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] italic'
-                  : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]'
-              }`}
+ msg.role === 'user'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
+ : msg.role === 'error'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-text-primary)]'
+ : msg.role === 'system'
+ ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] italic'
+ : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]'
+ }`}
             >
               <p className="whitespace-pre-wrap">{msg.content}</p>
               <span className="text-xs opacity-70 mt-1 block">

@@ -225,12 +225,12 @@ export default function APIs() {
       </div>
 
       {error && (
-        <div className='aethel-state aethel-state-error mb-4' role='alert' aria-live='polite'>
+        <div className='rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] mb-4' role='alert' aria-live='polite'>
           {error}
         </div>
       )}
       {statusMessage && !error && (
-        <div className='aethel-state aethel-state-success mb-4' role='status' aria-live='polite'>
+        <div className='rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success-light)] mb-4' role='status' aria-live='polite'>
           {statusMessage}
         </div>
       )}
@@ -536,8 +536,8 @@ export default function APIs() {
               onClick={() => setStatusFilter(status)}
               aria-pressed={statusFilter === status}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-              }`}
+ statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
             >
               {status === 'all' ? 'Todas' : status === 'configured' ? 'Configuradas' : 'Ausentes'}
             </button>
@@ -558,11 +558,11 @@ export default function APIs() {
           {loading ? (
             <tr>
               <td className='p-2' colSpan={4}>
-                <div className='aethel-state aethel-state-loading text-xs'>
-                  <p className='aethel-state-title mb-2'>Carregando integracoes...</p>
+                <div className='rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-secondary)] text-xs'>
+                  <p className='text-sm font-semibold text-[var(--aethel-text-primary)] mb-2'>Carregando integracoes...</p>
                   <div className='space-y-1.5'>
-                    <div className='aethel-skeleton-line w-full' />
-                    <div className='aethel-skeleton-line w-5/6' />
+                    <div className='h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-full' />
+                    <div className='h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-5/6' />
                   </div>
                 </div>
               </td>
@@ -577,8 +577,8 @@ export default function APIs() {
                 <td className='p-2'>
                   <span
                     className={`px-2 py-1 rounded text-xs ${
-                      integration.configured ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                    }`}
+ integration.configured ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ }`}
                   >
                     {integration.configured ? 'Configurada' : 'Ausente'}
                   </span>
@@ -596,7 +596,7 @@ export default function APIs() {
         </tbody>
       </table>
       {!loading && filteredIntegrations.length === 0 && !error && (
-        <div className='aethel-state aethel-state-empty mt-3'>
+        <div className='rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-tertiary)] mt-3'>
           Nenhuma integração corresponde ao filtro atual.
         </div>
       )}
@@ -611,17 +611,17 @@ export default function APIs() {
           <span className='text-xs text-[var(--aethel-text-tertiary)]'>Telemetria operacional</span>
         </div>
         {compatError ? (
-          <div className='aethel-state aethel-state-error text-sm' role='alert' aria-live='polite'>{compatError}</div>
+          <div className='rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-sm' role='alert' aria-live='polite'>{compatError}</div>
         ) : loading ? (
-          <div className='aethel-state aethel-state-loading text-xs'>
-            <p className='aethel-state-title mb-2'>Carregando metricas de deprecacao...</p>
+          <div className='rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-secondary)] text-xs'>
+            <p className='text-sm font-semibold text-[var(--aethel-text-primary)] mb-2'>Carregando metricas de deprecacao...</p>
             <div className='space-y-1.5'>
-              <div className='aethel-skeleton-line w-full' />
-              <div className='aethel-skeleton-line w-4/5' />
+              <div className='h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-full' />
+              <div className='h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-4/5' />
             </div>
           </div>
         ) : compatRoutes.length === 0 ? (
-          <div className='aethel-state aethel-state-empty text-xs'>Sem eventos de rota legada registrados no periodo atual.</div>
+          <div className='rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-tertiary)] text-xs'>Sem eventos de rota legada registrados no periodo atual.</div>
         ) : (
           <div className='overflow-x-auto'>
             <table className='w-full text-sm'>
@@ -646,10 +646,10 @@ export default function APIs() {
                     <td className='p-2'>
                       <span
                         className={`rounded px-2 py-1 text-xs ${
-                          route.candidateForRemoval
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
-                            : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                        }`}
+ route.candidateForRemoval
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ }`}
                       >
                         {route.candidateForRemoval ? 'candidate' : 'monitor'}
                       </span>

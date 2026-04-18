@@ -274,12 +274,12 @@ function DiffHunkComponent({ hunk, onAccept, onReject, showLineNumbers }: DiffHu
 
   return (
     <div className={`border rounded-lg overflow-hidden mb-4 ${
-      hunk.accepted === true
-        ? 'border-[color-mix(in_srgb,var(--aethel-success)_45%,transparent)]'
-        : hunk.accepted === false
-        ? 'border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] opacity-50'
-        : 'border-[var(--aethel-border-secondary)]'
-    }`}>
+ hunk.accepted === true
+ ? 'border-[color-mix(in_srgb,var(--aethel-success)_45%,transparent)]'
+ : hunk.accepted === false
+ ? 'border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] opacity-50'
+ : 'border-[var(--aethel-border-secondary)]'
+ }`}>
       {/* Hunk header */}
       <div className="flex items-center justify-between px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] border-b border-[var(--aethel-border-secondary)]">
         <span className="text-xs text-[var(--aethel-text-tertiary)] font-mono">
@@ -609,10 +609,10 @@ export default function DiffViewer({
             onClick={handleApply}
             disabled={stats.pending > 0}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-sm font-medium ${
-              stats.pending > 0
-                ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
-                : 'bg-[var(--aethel-info)] hover:brightness-110 text-[var(--aethel-text-primary)]'
-            }`}
+ stats.pending > 0
+ ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
+ : 'bg-[var(--aethel-info)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+ }`}
           >
             <FilePlus className="w-4 h-4" />
             Aplicar mudancas

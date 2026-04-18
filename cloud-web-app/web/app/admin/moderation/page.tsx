@@ -175,10 +175,10 @@ function ItemCard({
   return (
     <div
       className={`
-        border rounded-lg p-4 cursor-pointer transition-all
-        ${priorityColors[item.priority]}
-        ${isSelected ? 'ring-2 ring-blue-500' : ''}
-      `}
+ border rounded-lg p-4 cursor-pointer transition-all
+ ${priorityColors[item.priority]}
+ ${isSelected ? 'ring-2 ring-blue-500' : ''}
+ `}
       onClick={onClick}
     >
       {/* Header */}
@@ -234,6 +234,7 @@ function ItemCard({
       {item.contentSnapshot && (
         <div className="mb-3">
           <button type="button"
+            aria-label="Hide"
             onClick={(e) => { e.stopPropagation(); setShowContent(!showContent); }}
             className="flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
@@ -516,13 +517,14 @@ export default function ModerationQueue() {
           <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-1">
             {(['pending', 'urgent', 'all'] as const).map((f) => (
               <button type="button"
+                aria-label="Set filter"
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1 text-xs rounded capitalize ${
-                  filter === f
-                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
-                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-                }`}
+ filter === f
+ ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
               >
                 {f === 'pending' ? 'pendentes' : f === 'urgent' ? 'urgentes' : 'todos'}
               </button>

@@ -276,14 +276,15 @@ export default function QuickOpen({ isOpen, onClose }: { isOpen: boolean; onClos
 
                 return (
                   <button type="button"
+                    aria-label="Open file"
                     key={file.path}
                     onClick={() => openFile(file)}
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full px-4 py-3 flex items-center justify-between rounded-lg transition-colors ${
-                      isSelected
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
-                        : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-                    }`}
+ isSelected
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ }`}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <span className={`text-xs font-semibold w-10 text-center flex-shrink-0 ${isSelected ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)]'}`}>{getFileIcon(file.name)}</span>

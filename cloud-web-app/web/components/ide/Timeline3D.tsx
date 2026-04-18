@@ -67,10 +67,10 @@ export function Timeline3D({
             type="button"
             onClick={() => setIsPlaying(!isPlaying)}
             className={`p-1.5 rounded-lg transition-colors ${
-              isPlaying ?
-                 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
-            }`}
+ isPlaying ?
+ 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
+ }`}
             title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -141,10 +141,10 @@ export function Timeline3D({
             <div
               key={track}
               className={`h-8 flex items-center px-3 text-xs cursor-pointer transition-colors ${
-                selectedTrack === track ?
-                   'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]'
-                  : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-              }`}
+ selectedTrack === track ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
               onClick={() => setSelectedTrack(track)}
             >
               {track}

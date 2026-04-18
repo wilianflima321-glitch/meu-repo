@@ -389,8 +389,8 @@ export default function VFXGraphEditor({ graph: externalGraph, onGraphChange, on
           <button type="button" aria-label={isPlaying ? 'Parar simulacao do VFX graph' : 'Executar simulacao do VFX graph'}
             onClick={() => setIsPlaying(!isPlaying)}
             className={`px-3 py-1 rounded text-sm font-medium ${
-              isPlaying ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : 'bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-            } text-[var(--aethel-text-primary)]`}
+ isPlaying ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : 'bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ } text-[var(--aethel-text-primary)]`}
           >
             {isPlaying ? ' Stop' : ' Play'}
           </button>

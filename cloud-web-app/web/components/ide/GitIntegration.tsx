@@ -118,10 +118,10 @@ export function GitIntegration({
                 setShowBranchMenu(false)
               }}
               className={`w-full px-3 py-2 text-left text-xs transition-colors ${
-                branch === status.branch
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]'
-                  : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-              }`}
+ branch === status.branch
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             >
               {branch}
             </button>
@@ -138,14 +138,14 @@ export function GitIntegration({
 
       {/* Status */}
       <div className={`px-4 py-2 border-b border-[var(--aethel-border-primary)] flex items-center justify-between ${
-        status?.status === 'clean'
-          ? 'bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]'
-          : status?.status === 'conflict'
-            ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
-            : status?.status === 'modified'
-              ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]'
-              : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
-      }`}>
+ status?.status === 'clean'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)]'
+ : status?.status === 'conflict'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
+ : status?.status === 'modified'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
+ }`}>
         <div className="flex items-center gap-2">
           {status?.status === 'clean' && <Check className="w-3.5 h-3.5 text-[var(--aethel-success-light)]" />}
           {status?.status === 'conflict' && <AlertTriangle className="w-3.5 h-3.5 text-[var(--aethel-error-light)]" />}

@@ -78,10 +78,10 @@ export default function CodeEditor({
             type="button"
             onClick={handleSave}
             className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-              isDirty
-                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110'
-                : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
-            }`}
+ isDirty
+ ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110'
+ : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
+ }`}
             disabled={!isDirty}
           >
             Salvar

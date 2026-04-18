@@ -157,12 +157,12 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
             <div key={s} className="flex items-center gap-2">
               <div
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-                  step === s
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
-                    : (['domain', 'provider', 'ready'].indexOf(step) > i)
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
-                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-quaternary)]'
-                }`}
+ step === s
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
+ : (['domain', 'provider', 'ready'].indexOf(step) > i)
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-quaternary)]'
+ }`}
               >
                 {(['domain', 'provider', 'ready'].indexOf(step) > i) ? (
                   <Codicon name="check" />
@@ -199,10 +199,10 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                   type="button"
                   onClick={() => setDomainFilter(f.id)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
-                    domainFilter === f.id
-                      ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]'
-                      : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
+ domainFilter === f.id
+ ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                 >
                   {f.label}
                 </button>
@@ -220,10 +220,10 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                     onClick={() => !isDisabled && setSelectedTemplate(tpl.id)}
                     disabled={isDisabled}
                     className={`group relative rounded-xl border p-4 text-left transition-all ${
-                      selectedTemplate === tpl.id
-                        ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
-                        : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
-                    } ${isDisabled ? 'cursor-not-allowed opacity-60' : ''}`}
+ selectedTemplate === tpl.id
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
+ : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
+ } ${isDisabled ? 'cursor-not-allowed opacity-60' : ''}`}
                   >
                     {isDisabled && (
                       <span className="absolute right-3 top-3 rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] font-semibold text-[color-mix(in_srgb,var(--aethel-warning-light)_85%,transparent)]">
@@ -290,14 +290,14 @@ export default function QuickStartWizard({ isOpen, onComplete, onDismiss, initia
                   type="button"
                   onClick={() => setSelectedProvider(prov.id)}
                   className={`group relative flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all ${
-                    selectedProvider === prov.id
-                      ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
-                      : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
-                  }`}
+ selectedProvider === prov.id
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
+ : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
+ }`}
                 >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                    prov.id === 'demo' ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-primary)]'
-                  }`}>
+ prov.id === 'demo' ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] text-[var(--aethel-text-primary)]'
+ }`}>
                     <Codicon name={prov.id === 'demo' ? 'beaker' : 'key'} />
                   </div>
                   <div className="flex-1">

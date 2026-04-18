@@ -86,10 +86,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               <div className="flex items-center gap-2">
                 <div
                   className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
-                    i <= step
-                      ? 'bg-[var(--aethel-primary)] text-white'
-                      : 'border border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]'
-                  }`}
+ i <= step
+ ? 'bg-[var(--aethel-primary)] text-white'
+ : 'border border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]'
+ }`}
                 >
                   {s.done ? <Check className="h-4 w-4" /> : i + 1}
                 </div>
@@ -121,10 +121,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                 type="button"
                 onClick={() => setSelectedTemplate(t.id)}
                 className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-all duration-200 ${
-                  selectedTemplate === t.id
-                    ? 'border-[var(--aethel-primary)] bg-[var(--aethel-primary)]/10 shadow-lg shadow-[var(--aethel-primary)]/10'
-                    : 'border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-                }`}
+ selectedTemplate === t.id
+ ? 'border-[var(--aethel-primary)] bg-[var(--aethel-primary)]/10 shadow-lg shadow-[var(--aethel-primary)]/10'
+ : 'border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--aethel-surface-tertiary)]">
                   <t.icon className="h-5 w-5 text-[var(--aethel-info)]" />

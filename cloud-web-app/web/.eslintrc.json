@@ -1,4 +1,30 @@
 {
   "extends": "next/core-web-vitals",
-  "ignorePatterns": ["components/_deprecated/**"]
+  "ignorePatterns": [
+    "components/_deprecated/**",
+    "**/*.config.*",
+    "**/scripts/**",
+    "**/tools/**",
+    "**/__tests__/**",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ],
+  "rules": {
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }]
+  },
+  "overrides": [
+    {
+      "files": [
+        "lib/logger/**",
+        "lib/debug/**",
+        "instrumentation.ts",
+        "instrumentation-*.ts",
+        "lib/sentry.ts",
+        "middleware.ts"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
 }

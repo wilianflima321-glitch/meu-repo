@@ -159,12 +159,12 @@ export default function Automation() {
                   <td className='p-2'>{item.category || '—'}</td>
                   <td className='p-2'>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      item.severity === 'critical'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
-                        : item.severity === 'warning'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                    }`}>
+ item.severity === 'critical'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+ : item.severity === 'warning'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}>
                       {severityLabels[item.severity || 'info'] || item.severity || 'informação'}
                     </span>
                   </td>

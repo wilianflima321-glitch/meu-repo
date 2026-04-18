@@ -282,8 +282,8 @@ export default function Payments() {
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-              }`}
+ statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
             >
               {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
             </button>
@@ -320,12 +320,12 @@ export default function Payments() {
                   <td className='p-2'>
                     <span
                       className={`px-2 py-1 rounded text-xs ${
-                        item.status === 'succeeded'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
-                          : item.status === 'pending'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                          : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
-                      }`}
+ item.status === 'succeeded'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
+ : item.status === 'pending'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+ }`}
                     >
                       {statusLabels[item.status] ?? item.status}
                     </span>

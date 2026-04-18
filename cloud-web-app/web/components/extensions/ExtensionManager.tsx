@@ -346,8 +346,8 @@ export default function ExtensionManager({
           <button type="button" aria-label="Open installed extensions view"
             onClick={() => setActiveView('installed')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
-              activeView === 'installed' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
-            }`}
+ activeView === 'installed' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
+ }`}
           >
             <Package className="w-4 h-4" />
             <span className="flex-1 text-sm">{t.installed}</span>
@@ -356,8 +356,8 @@ export default function ExtensionManager({
           <button type="button" aria-label="Open marketplace extensions view"
             onClick={() => setActiveView('marketplace')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
-              activeView === 'marketplace' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
-            }`}
+ activeView === 'marketplace' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
+ }`}
           >
             <Globe className="w-4 h-4" />
             <span className="flex-1 text-sm">{t.marketplace}</span>
@@ -366,8 +366,8 @@ export default function ExtensionManager({
           <button type="button" aria-label="Open recommended extensions view"
             onClick={() => setActiveView('recommended')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded text-left ${
-              activeView === 'recommended' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
-            }`}
+ activeView === 'recommended' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
+ }`}
           >
             <Star className="w-4 h-4" />
             <span className="flex-1 text-sm">{t.recommended}</span>
@@ -380,8 +380,8 @@ export default function ExtensionManager({
           <button type="button" aria-label="Show all extension categories"
             onClick={() => setSelectedCategory('all')}
             className={`w-full flex items-center gap-3 px-3 py-1.5 rounded text-left ${
-              selectedCategory === 'all' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
+ selectedCategory === 'all' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
           >
             <Layers className="w-4 h-4" />
             <span className="text-sm">Todas</span>
@@ -391,8 +391,8 @@ export default function ExtensionManager({
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`w-full flex items-center gap-3 px-3 py-1.5 rounded text-left ${
-                selectedCategory === cat ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-              }`}
+ selectedCategory === cat ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
             >
               {CATEGORY_ICONS[cat]}
               <span className="text-sm">{CATEGORY_LABELS[cat]}</span>
@@ -416,8 +416,8 @@ export default function ExtensionManager({
               <button type="button" aria-label={showDisabled ? 'Hide disabled extensions' : 'Show disabled extensions'}
                 onClick={() => setShowDisabled(!showDisabled)}
                 className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded transition-colors ${
-                  showDisabled ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]' : 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                }`}
+ showDisabled ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]' : 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ }`}
               >
                 {showDisabled ? <ToggleLeft className="w-4 h-4" /> : <ToggleRight className="w-4 h-4" />}
                 {showDisabled ? t.showDisabled : t.hideDisabled}
@@ -582,8 +582,8 @@ function ExtensionCard({
   return (
     <div
       className={`flex items-start gap-3 px-4 py-3 border-b border-[var(--aethel-border-primary)] cursor-pointer transition-colors ${
-        isSelected ? 'bg-[var(--aethel-surface-secondary)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
-      } ${!extension.isEnabled && extension.isInstalled ? 'opacity-60' : ''}`}
+ isSelected ? 'bg-[var(--aethel-surface-secondary)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
+ } ${!extension.isEnabled && extension.isInstalled ? 'opacity-60' : ''}`}
       onClick={onSelect}
     >
       {/* Icon */}
@@ -636,10 +636,10 @@ function ExtensionCard({
             <button type="button" aria-label={extension.isEnabled ? `Disable extension ${extension.name}` : `Enable extension ${extension.name}`}
               onClick={onToggle}
               className={`p-1.5 rounded transition-colors ${
-                extension.isEnabled
-                  ? 'text-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
-              }`}
+ extension.isEnabled
+ ? 'text-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ }`}
               title={extension.isEnabled ? 'Desativar' : 'Ativar'}
             >
               {extension.isEnabled ? (
@@ -755,10 +755,10 @@ function ExtensionDetalhes({
               <button type="button" aria-label={extension.isEnabled ? `Disable extension ${extension.name}` : `Enable extension ${extension.name}`}
                 onClick={onToggle}
                 className={`flex-1 px-4 py-2 rounded transition-colors ${
-                  extension.isEnabled
-                    ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-                    : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-                }`}
+ extension.isEnabled
+ ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ }`}
               >
                 {extension.isEnabled ? 'Desativar' : 'Ativar'}
               </button>
@@ -792,16 +792,16 @@ function ExtensionDetalhes({
         <button type="button" aria-label="Open extension details tab"
           onClick={() => setActiveTab('details')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
-            activeTab === 'details' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
-          }`}
+ activeTab === 'details' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
+ }`}
         >
           Detalhes
         </button>
         <button type="button" aria-label="Open extension changelog tab"
           onClick={() => setActiveTab('changelog')}
           className={`flex-1 px-4 py-2 text-sm font-medium ${
-            activeTab === 'changelog' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
-          }`}
+ activeTab === 'changelog' ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-info)]' : 'text-[var(--aethel-text-tertiary)]'
+ }`}
         >
           Histórico
         </button>

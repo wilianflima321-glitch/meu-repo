@@ -69,11 +69,7 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
 
   return (
     <div
-      className={`
-        min-w-[180px] rounded-lg shadow-lg border-2
-        ${selected ? 'ring-2 ring-blue-500' : ''}
-        ${isEvent ? 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : 'border-[var(--aethel-border-secondary)]'}
-      `}
+      className={`min-w-[180px] rounded-lg shadow-lg border-2 ${selected ? 'ring-2 ring-blue-500' : ''} ${isEvent ? 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : 'border-[var(--aethel-border-secondary)]'}`}
       style={{ backgroundColor: 'var(--aethel-surface-primary)' }}
     >
       {/* Header */}
@@ -96,12 +92,9 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
                 type="target"
                 position={Position.Left}
                 id={input.id}
-                className={`
-                  w-3 h-3 rounded-full border-2
-                  ${input.type === 'exec'
-                    ? 'border-[var(--aethel-border-primary)] bg-transparent'
-                    : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'}
-                `}
+                className={`w-3 h-3 rounded-full border-2 ${input.type === 'exec'
+ ? 'border-[var(--aethel-border-primary)] bg-transparent'
+ : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'}`}
                 style={{ left: -6 }}
               />
               <span className="text-xs text-[var(--aethel-text-secondary)] ml-2">{input.name}</span>
@@ -118,12 +111,9 @@ const BlueprintNode = ({ data, selected }: NodeProps<BlueprintFlowNode>) => {
                 type="source"
                 position={Position.Right}
                 id={output.id}
-                className={`
-                  w-3 h-3 rounded-full border-2
-                  ${output.type === 'exec'
-                    ? 'border-[var(--aethel-border-primary)] bg-transparent'
-                    : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'}
-                `}
+                className={`w-3 h-3 rounded-full border-2 ${output.type === 'exec'
+ ? 'border-[var(--aethel-border-primary)] bg-transparent'
+ : 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'}`}
                 style={{ right: -6 }}
               />
             </div>
@@ -304,10 +294,7 @@ const ComponentsPanel: React.FC<{
       <div key={comp.id}>
         <div
           onClick={() => onSelect(comp.id)}
-          className={`
-            flex items-center gap-2 px-2 py-1 text-xs cursor-pointer rounded
-            ${selectedId === comp.id ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'}
-          `}
+          className={`flex items-center gap-2 px-2 py-1 text-xs cursor-pointer rounded ${selectedId === comp.id ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'}`}
           style={{ paddingLeft: `${8 + depth * 16}px` }}
         >
           <span>{comp.isRootComponent ? '📦' : '🔧'}</span>
@@ -375,10 +362,7 @@ const FunctionsPanel: React.FC<{
             <div
               key={f.id}
               onClick={() => onSelect(f.id)}
-              className={`
-                flex items-center justify-between px-2 py-1 rounded text-xs cursor-pointer
-                ${selectedId === f.id ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'}
-              `}
+              className={`flex items-center justify-between px-2 py-1 rounded text-xs cursor-pointer ${selectedId === f.id ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'}`}
             >
               <div className="flex items-center gap-2">
                 <span>{f.isEvent ? '⚡' : 'ƒ'}</span>
@@ -742,20 +726,20 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
           <button type="button" aria-label="Abrir aba Event Graph"
             onClick={() => setActiveTab('eventGraph')}
             className={`px-3 py-1 text-xs rounded ${
-              activeTab === 'eventGraph'
-                ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
+ activeTab === 'eventGraph'
+ ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
           >
             Event Graph
           </button>
           <button type="button" aria-label="Abrir aba Construction Script"
             onClick={() => setActiveTab('constructionScript')}
             className={`px-3 py-1 text-xs rounded ${
-              activeTab === 'constructionScript'
-                ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
+ activeTab === 'constructionScript'
+ ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
           >
             Construction Script
           </button>

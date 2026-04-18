@@ -99,10 +99,10 @@ export function MemoryPanel({ memories = [], onAdd, onDelete, onUpdate }: Memory
             type="button"
             onClick={() => setActiveScope(scope)}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-xs font-medium transition-colors ${
-              activeScope === scope ?
-                 `text-[var(--aethel-primary-light)] border-b-2 border-[var(--aethel-primary)]`
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
+ activeScope === scope ?
+ `text-[var(--aethel-primary-light)] border-b-2 border-[var(--aethel-primary)]`
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
           >
             {getScopeIcon(scope)}
             <span className="capitalize">{scope}</span>

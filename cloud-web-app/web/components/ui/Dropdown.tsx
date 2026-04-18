@@ -58,6 +58,7 @@ export function Dropdown({ trigger, items, align = 'right', width = 'auto' }: Dr
   return (
     <div className="relative inline-block" ref={dropdownRef}>
       <button type="button"
+        aria-label="Set is open"
         onClick={() => setIsOpen(!isOpen)}
         className="focus:outline-none"
         aria-expanded={isOpen}
@@ -68,15 +69,7 @@ export function Dropdown({ trigger, items, align = 'right', width = 'auto' }: Dr
 
       {isOpen && (
         <div
-          className={`
-            absolute z-50 mt-2
-            ${align === 'right' ? 'right-0' : 'left-0'}
-            ${widthClasses[width]}
-            py-1 rounded-lg
-            bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]
-            shadow-xl shadow-black/30
-            animate-in fade-in-0 zoom-in-95 duration-200
-          `}
+          className={`absolute z-50 mt-2 ${align === 'right' ? 'right-0' : 'left-0'} ${widthClasses[width]} py-1 rounded-lg bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] shadow-xl shadow-black/30 animate-in fade-in-0 zoom-in-95 duration-200`}
           role="menu"
         >
           {items.map((item, index) => {

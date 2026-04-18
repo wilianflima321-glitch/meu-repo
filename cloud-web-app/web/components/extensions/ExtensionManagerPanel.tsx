@@ -261,12 +261,9 @@ export function ExtensionManagerPanel({
             <button type="button" aria-label={`Open ${mode} extensions view`}
               key={mode}
               onClick={() => setViewMode(mode)}
-              className={`
-                px-3 py-1.5 text-sm rounded-lg transition-colors capitalize
-                ${viewMode === mode
-                  ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                  : 'hover:bg-[var(--aethel-surface-secondary)]'}
-              `}
+              className={`px-3 py-1.5 text-sm rounded-lg transition-colors capitalize ${viewMode === mode
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'hover:bg-[var(--aethel-surface-secondary)]'}`}
             >
               {mode}
               {mode === 'updates' && updates.length > 0 && (
@@ -462,10 +459,7 @@ function InstalledExtensionCard({
     return (
       <div
         onClick={onSelect}
-        className={`
-          p-4 rounded-lg border cursor-pointer transition-colors
-          ${selected ? 'border-[var(--aethel-info)] bg-[var(--aethel-surface-secondary)]' : 'border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-strong)]'}
-        `}
+        className={`p-4 rounded-lg border cursor-pointer transition-colors ${selected ? 'border-[var(--aethel-info)] bg-[var(--aethel-surface-secondary)]' : 'border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-strong)]'}`}
       >
         <div className="flex items-start gap-3">
           <div className="w-12 h-12 bg-[var(--aethel-surface-tertiary)] rounded-lg flex items-center justify-center text-2xl">
@@ -492,10 +486,7 @@ function InstalledExtensionCard({
           {extension.manifest.description}
         </p>
         <div className="mt-3 flex items-center gap-2">
-          <span className={`
-            px-2 py-0.5 rounded text-xs
-            ${isActive ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_20%,transparent)] text-[var(--aethel-text-tertiary)]'}
-          `}>
+          <span className={`px-2 py-0.5 rounded text-xs ${isActive ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-text-tertiary)_20%,transparent)] text-[var(--aethel-text-tertiary)]'}`}>
             {isActive ? 'Active' : 'Inactive'}
           </span>
           <span className="text-xs text-[var(--aethel-text-tertiary)]">v{extension.manifest.version}</span>
@@ -507,10 +498,7 @@ function InstalledExtensionCard({
   return (
     <div
       onClick={onSelect}
-      className={`
-        flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors
-        ${selected ? 'bg-[var(--aethel-surface-secondary)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'}
-      `}
+      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${selected ? 'bg-[var(--aethel-surface-secondary)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'}`}
     >
       <div className="w-10 h-10 bg-[var(--aethel-surface-tertiary)] rounded-lg flex items-center justify-center">
         {extension.manifest.icon ? (

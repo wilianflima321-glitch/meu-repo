@@ -424,12 +424,9 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
           <button type="button" aria-label={`Abrir aba ${tab.label}`}
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`
-              flex items-center gap-1.5 px-3 py-2 text-xs transition-colors
-              ${activeTab === tab.id
-                ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'}
-            `}
+            className={`flex items-center gap-1.5 px-3 py-2 text-xs transition-colors ${activeTab === tab.id
+ ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'}`}
           >
             {tab.icon}
             {tab.label}
@@ -553,10 +550,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                 <div
                   key={frame.id}
                   onClick={() => handleFrameSelect(frame)}
-                  className={`
-                    flex items-center gap-2 py-1 px-2 cursor-pointer rounded text-sm
-                    ${selectedFrame === frame.id ? 'bg-[var(--aethel-surface-quaternary)]' : 'hover:bg-[var(--aethel-border-primary)]'}
-                  `}
+                  className={`flex items-center gap-2 py-1 px-2 cursor-pointer rounded text-sm ${selectedFrame === frame.id ? 'bg-[var(--aethel-surface-quaternary)]' : 'hover:bg-[var(--aethel-border-primary)]'}`}
                 >
                   <span className="text-[var(--aethel-warning-light)]">{frame.name}</span>
                   <span className="text-[var(--aethel-text-quaternary)] text-xs">
@@ -625,13 +619,7 @@ export function DebugPanel({ onBreakpointClick, onFrameSelect }: DebugPanelProps
                 {consoleMessages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`
-                      flex items-start gap-2 py-0.5
-                      ${msg.type === 'error' ? 'text-[var(--aethel-error-light)]' : ''}
-                      ${msg.type === 'warn' ? 'text-[var(--aethel-warning-light)]' : ''}
-                      ${msg.type === 'info' ? 'text-[var(--aethel-primary-light)]' : ''}
-                      ${msg.type === 'input' ? 'text-[var(--aethel-text-quaternary)]' : ''}
-                    `}
+                    className={`flex items-start gap-2 py-0.5 ${msg.type === 'error' ? 'text-[var(--aethel-error-light)]' : ''} ${msg.type === 'warn' ? 'text-[var(--aethel-warning-light)]' : ''} ${msg.type === 'info' ? 'text-[var(--aethel-primary-light)]' : ''} ${msg.type === 'input' ? 'text-[var(--aethel-text-quaternary)]' : ''}`}
                   >
                     {msg.type === 'error' && <AlertCircle size={12} />}
                     {msg.type === 'info' && <Info size={12} />}

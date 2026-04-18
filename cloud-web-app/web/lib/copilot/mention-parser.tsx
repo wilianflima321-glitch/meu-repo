@@ -586,8 +586,8 @@ export function SuggestionList({ suggestions, activeIndex, onSelect, onHover, li
           role="option"
           aria-selected={idx === activeIndex}
           className={`flex items-center gap-3 px-3 py-2 cursor-pointer ${
-            idx === activeIndex ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_30%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)]'
-          }`}
+ idx === activeIndex ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_30%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_55%,transparent)]'
+ }`}
           onClick={() => onSelect(suggestion)}
           onMouseEnter={() => onHover(idx)}
         >

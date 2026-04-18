@@ -376,14 +376,14 @@ export function TimeMachineSlider({
                     key={version.id}
                     onClick={() => setSelectedIndex(index)}
                     className={`w-full flex items-center gap-2 p-2 rounded text-left transition-colors ${
-                      index === selectedIndex
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-                        : 'hover:bg-[var(--aethel-surface-secondary)]/50'
-                    }`}
+ index === selectedIndex
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ : 'hover:bg-[var(--aethel-surface-secondary)]/50'
+ }`}
                   >
                     <div className={`w-2 h-2 rounded-full ${
-                      index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
-                    }`} />
+ index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
+ }`} />
 
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-[var(--aethel-text-primary)] truncate">

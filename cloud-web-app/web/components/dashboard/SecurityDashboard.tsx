@@ -431,10 +431,10 @@ function RateLimitCard({ status }: RateLimitCardProps) {
 
   return (
     <div className={`p-3 rounded-lg border ${
-      isCritical ? 'border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
-      isWarning ? 'border-[var(--aethel-warning)]/50 bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]' :
-      'border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]'
-    }`}>
+ isCritical ? 'border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
+ isWarning ? 'border-[var(--aethel-warning)]/50 bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]' :
+ 'border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]'
+ }`}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm text-[var(--aethel-text-primary)]">{status.category}</span>
         {status.blocked > 0 && (
@@ -445,10 +445,10 @@ function RateLimitCard({ status }: RateLimitCardProps) {
         <div className="flex-1 h-2 bg-[var(--aethel-border-primary)] rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-300 ${
-              isCritical ? 'bg-[var(--aethel-error)]' :
-              isWarning ? 'bg-[var(--aethel-warning)]' :
-              'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-            }`}
+ isCritical ? 'bg-[var(--aethel-error)]' :
+ isWarning ? 'bg-[var(--aethel-warning)]' :
+ 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ }`}
             style={{ width: `${percent}%` }}
           />
         </div>

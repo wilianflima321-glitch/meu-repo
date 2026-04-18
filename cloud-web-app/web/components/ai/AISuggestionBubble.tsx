@@ -364,11 +364,7 @@ export function AISuggestionBubble({
         style={bubbleStyle()}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`
-          relative z-50 w-72
-          bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-xl shadow-xl
-          ${className}
-        `}
+        className={`relative z-50 w-72 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-xl shadow-xl ${className}`}
       >
         {/* Arrow */}
         <div className={`absolute w-0 h-0 border-solid ${posStyle.arrow}`} />
@@ -384,7 +380,7 @@ export function AISuggestionBubble({
                   animate={{ rotate: [0, 5, -5, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                   className={`relative z-10 w-6 h-6 rounded-lg ${config.bgColor}
-                            flex items-center justify-center`}
+ flex items-center justify-center`}
                 >
                   <Brain className={`w-4 h-4 ${config.color}`} />
                 </motion.div>
@@ -449,13 +445,7 @@ export function AISuggestionBubble({
               type="button"
               onClick={handleApply}
               disabled={isApplying}
-              className={`
-                flex-1 flex items-center justify-center gap-1.5 py-2
-                bg-[linear-gradient(120deg,var(--aethel-primary),var(--aethel-info))]
-                hover:brightness-110
-                rounded-lg text-sm font-medium text-[var(--aethel-text-primary)] transition-all
-                disabled:opacity-50 disabled:cursor-not-allowed
-              `}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 bg-[linear-gradient(120deg,var(--aethel-primary),var(--aethel-info))] hover:brightness-110 rounded-lg text-sm font-medium text-[var(--aethel-text-primary)] transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isApplying ? (
                 <>
@@ -480,9 +470,7 @@ export function AISuggestionBubble({
             <button
               type="button"
               onClick={() => onLearnMore(suggestion)}
-              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)]
-                       hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-sm text-[var(--aethel-text-secondary)]
-                       transition-colors"
+              className="flex items-center gap-1 px-3 py-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg text-sm text-[var(--aethel-text-secondary)] transition-colors"
             >
               Saiba mais
               <ChevronRight className="w-3.5 h-3.5" />
@@ -508,14 +496,12 @@ export function AISuggestionBubble({
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute bottom-full right-0 mb-1 py-1 w-40
-                           bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-xl"
+                  className="absolute bottom-full right-0 mb-1 py-1 w-40 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-xl"
                 >
                   <button
                     type="button"
                     onClick={() => handleFeedback(true)}
-                    className="w-full flex items-center gap-2 px-3 py-1.5
-                             hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-secondary)] transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-secondary)] transition-colors"
                   >
                     <ThumbsUp className="w-3.5 h-3.5" />
                     Util
@@ -523,8 +509,7 @@ export function AISuggestionBubble({
                   <button
                     type="button"
                     onClick={() => handleFeedback(false)}
-                    className="w-full flex items-center gap-2 px-3 py-1.5
-                             hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-secondary)] transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-secondary)] transition-colors"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
                     Nao util
@@ -533,8 +518,7 @@ export function AISuggestionBubble({
                   <button
                     type="button"
                     onClick={handleDismiss}
-                    className="w-full flex items-center gap-2 px-3 py-1.5
-                             hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-tertiary)] transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 hover:bg-[var(--aethel-surface-quaternary)] text-sm text-[var(--aethel-text-tertiary)] transition-colors"
                   >
                     <VolumeX className="w-3.5 h-3.5" />
                     Nao mostrar novamente

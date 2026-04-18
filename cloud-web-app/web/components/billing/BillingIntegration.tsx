@@ -154,10 +154,10 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
   return (
     <div
       className={`relative flex flex-col rounded-xl border p-6 transition-all ${
-        plan.popular
-          ? 'border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_8%,transparent)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
-          : 'border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]'
-      } ${isCurrent ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-success)_55%,transparent)]' : ''}`}
+ plan.popular
+ ? 'border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_8%,transparent)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
+ : 'border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)]'
+ } ${isCurrent ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-success)_55%,transparent)]' : ''}`}
     >
       {/* Popular badge */}
       {plan.popular && (
@@ -170,8 +170,8 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
       <div className="mb-4 flex items-center gap-3">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-            plan.popular ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]' : 'bg-[var(--aethel-surface-tertiary)]'
-          }`}
+ plan.popular ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]' : 'bg-[var(--aethel-surface-tertiary)]'
+ }`}
         >
           <Icon className={`h-5 w-5 ${plan.popular ? 'text-[var(--aethel-primary-light)]' : 'text-[var(--aethel-text-tertiary)]'}`} />
         </div>
@@ -232,12 +232,12 @@ export function PlanCard({ plan, currentPlan, interval, onSelect, loading }: Pla
         onClick={() => onSelect(plan.id)}
         disabled={isCurrent || loading}
         className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all ${
-          isCurrent
-            ? 'cursor-default border border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
-            : plan.popular
-            ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
-            : 'border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
-        }`}
+ isCurrent
+ ? 'cursor-default border border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
+ : plan.popular
+ ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
+ : 'border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)]'
+ }`}
         aria-label={isCurrent ? `Plano atual: ${plan.name}` : `Selecionar plano ${plan.name}`}
       >
         {loading ? (
@@ -385,10 +385,10 @@ export function SubscriptionStatusWidget() {
         </div>
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            subscription.status === 'active'
-              ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
-              : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
-          }`}
+ subscription.status === 'active'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
+ }`}
         >
           {formatSubscriptionStatus(subscription.status)}
         </span>

@@ -250,10 +250,10 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       className={`
-        rounded-lg border transition-all
-        ${severityStyle.bg} ${severityStyle.border}
-        ${note.status === 'dismissed' ? 'opacity-50' : ''}
-      `}
+ rounded-lg border transition-all
+ ${severityStyle.bg} ${severityStyle.border}
+ ${note.status === 'dismissed' ? 'opacity-50' : ''}
+ `}
     >
       {/* Header */}
       <button
@@ -263,10 +263,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
         className={`flex w-full items-start gap-3 p-3 text-left ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
       >
         {/* Category icon */}
-        <div className={`
-          w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
-          bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] ${categoryInfo.color}
-        `}>
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] ${categoryInfo.color}`}>
           <CategoryIcon className="w-4 h-4" />
         </div>
 
@@ -274,9 +271,9 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2 mb-1">
             <span className={`
-              px-1.5 py-0.5 rounded text-xs font-medium
-              ${severityStyle.badge}
-            `}>
+ px-1.5 py-0.5 rounded text-xs font-medium
+ ${severityStyle.badge}
+ `}>
               {severityStyle.label}
             </span>
             <span className="text-xs text-[var(--aethel-text-tertiary)]">{categoryInfo.label}</span>
@@ -421,8 +418,7 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                 )}
 
                 {note.status === 'applied' && (
-                  <span className="flex items-center gap-1.5 px-3 py-1.5
-                                 bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] rounded-lg text-xs text-[var(--aethel-success)]">
+                  <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] rounded-lg text-xs text-[var(--aethel-success)]">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Aplicado
                   </span>
@@ -435,10 +431,10 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                     aria-label={`Marcar a nota ${note.title} como util`}
                     onClick={() => onFeedback?.(note.id, 'helpful')}
                     className={`rounded p-1.5 ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${
-                      note.feedback === 'helpful'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] text-[var(--aethel-success)]'
-                        : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
-                    }`}
+ note.feedback === 'helpful'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_16%,transparent)] text-[var(--aethel-success)]'
+ : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
+ }`}
                     title="Util"
                   >
                     <ThumbsUp className="w-3.5 h-3.5" />
@@ -448,10 +444,10 @@ function NoteCard({ note, onApplyFix, onJumpTo, onFeedback, onDismiss }: NoteCar
                     aria-label={`Marcar a nota ${note.title} como nao util`}
                     onClick={() => onFeedback?.(note.id, 'not_helpful')}
                     className={`rounded p-1.5 ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${
-                      note.feedback === 'not_helpful'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)] text-[var(--aethel-error)]'
-                        : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
-                    }`}
+ note.feedback === 'not_helpful'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)] text-[var(--aethel-error)]'
+ : 'hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
+ }`}
                     title="Nao util"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
@@ -552,17 +548,13 @@ export function DirectorNotePanel({
   return (
     <motion.div
       layout
-      className={`
-        bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-xl overflow-hidden
-        ${className}
-      `}
+      className={`bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-xl overflow-hidden ${className}`}
     >
       {/* Header */}
       <div className="p-4 border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-warning-dark)_20%,transparent)]
-                          rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] to-[color-mix(in_srgb,var(--aethel-warning-dark)_20%,transparent)] rounded-lg flex items-center justify-center">
               <ProjectIcon className="w-5 h-5 text-[var(--aethel-warning-light)]" />
             </div>
             <div>
@@ -656,7 +648,7 @@ export function DirectorNotePanel({
                   aria-label={`Filtrar notas por ${label}`}
                   key={key}
                   onClick={() => setActiveFilter(key)}
-                  className={`px-2.5 py-1 text-xs whitespace-nowrap rounded-full ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${activeFilter === key ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'} `}
+                  className={`px-2.5 py-1 text-xs whitespace-nowrap rounded-full ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${activeFilter === key ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'}`}
                 >
                   {label}
                 </button>

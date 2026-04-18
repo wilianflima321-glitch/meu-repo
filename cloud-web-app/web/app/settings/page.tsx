@@ -96,10 +96,10 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
                     className={`rounded-md border px-3 py-2 text-left transition ${
-                      isActive
-                        ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]'
-                        : 'border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-                    }`}
+ isActive
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]'
+ : 'border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
                   >
                     <p className="text-sm font-medium">{tab.label}</p>
                     <p className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">{tab.description}</p>
@@ -171,16 +171,16 @@ export default function SettingsPage() {
                 </div>
 
                 {providerError && (
-                  <div className="aethel-state aethel-state-error mt-4 text-xs" role="alert" aria-live="polite">
+                  <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] mt-4 text-xs" role="alert" aria-live="polite">
                     {providerError}
                   </div>
                 )}
                 {providerLoading && (
-                  <div className="aethel-state aethel-state-loading mt-4 text-xs" aria-live="polite">
-                    <p className="aethel-state-title mb-2">Verificando status de providers...</p>
+                  <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-secondary)] mt-4 text-xs" aria-live="polite">
+                    <p className="text-sm font-semibold text-[var(--aethel-text-primary)] mb-2">Verificando status de providers...</p>
                     <div className="space-y-1.5">
-                      <div className="aethel-skeleton-line w-full" />
-                      <div className="aethel-skeleton-line w-4/5" />
+                      <div className="h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-full" />
+                      <div className="h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-4/5" />
                     </div>
                   </div>
                 )}
@@ -192,7 +192,7 @@ export default function SettingsPage() {
                       <p className="mt-1 text-xl font-semibold text-[var(--aethel-success)]">{configuredProviders.length}</p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {configuredProviders.length === 0 && (
-                          <span className="aethel-state aethel-state-empty text-xs">Nenhum provider configurado.</span>
+                          <span className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-tertiary)] text-xs">Nenhum provider configurado.</span>
                         )}
                         {configuredProviders.map((provider) => (
                           <span
@@ -209,7 +209,7 @@ export default function SettingsPage() {
                       <p className="text-xs text-[var(--aethel-text-tertiary)]">Providers pendentes</p>
                       <p className="mt-1 text-xl font-semibold text-[var(--aethel-warning)]">{missingProviders.length}</p>
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {missingProviders.length === 0 && <span className="aethel-state aethel-state-empty text-xs">Nenhum pendente.</span>}
+                        {missingProviders.length === 0 && <span className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-tertiary)] text-xs">Nenhum pendente.</span>}
                         {missingProviders.map((provider) => (
                           <span
                             key={provider}
@@ -223,7 +223,7 @@ export default function SettingsPage() {
                   </div>
                 )}
                 {!providerLoading && providerStatusLoaded && configuredProviders.length === 0 && missingProviders.length === 0 && !providerError && (
-                  <div className="aethel-state aethel-state-empty mt-4 text-xs">
+                  <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 text-[var(--aethel-text-tertiary)] mt-4 text-xs">
                     Nenhum provider encontrado no status atual. Atualize apos configurar variaveis de ambiente.
                   </div>
                 )}

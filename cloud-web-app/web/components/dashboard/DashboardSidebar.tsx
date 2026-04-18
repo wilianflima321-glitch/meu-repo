@@ -80,11 +80,7 @@ export function DashboardSidebar({
 
   return (
     <aside
-      className={`
-        flex flex-col h-full bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)]
-        transition-all duration-300 ease-in-out
-        ${collapsed ? 'w-16' : 'w-64'}
-      `}
+      className={`flex flex-col h-full bg-[var(--aethel-surface-secondary)] border-r border-[var(--aethel-border-primary)] transition-all duration-300 ease-in-out ${collapsed ? 'w-16' : 'w-64'}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between h-14 px-4 border-b border-[var(--aethel-border-primary)]">
@@ -112,15 +108,10 @@ export function DashboardSidebar({
             <button type="button" aria-label={`Abrir ${tab.label}`}
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`
-                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg
-                transition-all duration-200
-                ${isActive
-                  ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] shadow-lg shadow-sky-500/20'
-                  : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-                }
-                ${collapsed ? 'justify-center' : ''}
-              `}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isActive
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] shadow-lg shadow-sky-500/20'
+ : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ } ${collapsed ? 'justify-center' : ''}`}
               title={collapsed ? tab.label : undefined}
             >
               <span className="flex-shrink-0">{tab.icon}</span>

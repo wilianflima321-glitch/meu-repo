@@ -73,20 +73,13 @@ export function Card({
 }: CardProps) {
   return (
     <div
-      className={`
-        ${roundedClasses[rounded]}
-        transition-all duration-300 ease-out
-        ${variantClasses[variant]}
-        ${paddingClasses[padding]}
-        ${hoverable ? `
-          hover:translate-y-[-2px]
-          hover:shadow-2xl hover:shadow-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)]
-          hover:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]
-          cursor-pointer
-          active:translate-y-0 active:shadow-xl
-        ` : ''}
-        ${className}
-      `}
+      className={`${roundedClasses[rounded]} transition-all duration-300 ease-out ${variantClasses[variant]} ${paddingClasses[padding]} ${hoverable ? `
+ hover:translate-y-[-2px]
+ hover:shadow-2xl hover:shadow-[color-mix(in_srgb,var(--aethel-info)_15%,transparent)]
+ hover:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]
+ cursor-pointer
+ active:translate-y-0 active:shadow-xl
+ ` : ''} ${className}`}
       {...props}
     >
       {children}
@@ -179,12 +172,7 @@ export function CardFooter({
 }: CardFooterProps) {
   return (
     <div
-      className={`
-        mt-6 pt-5
-        border-t border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]
-        flex items-center ${justifyClasses[justify]} gap-3
-        ${className}
-      `}
+      className={`mt-6 pt-5 border-t border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] flex items-center ${justifyClasses[justify]} gap-3 ${className}`}
       {...props}
     >
       {children}

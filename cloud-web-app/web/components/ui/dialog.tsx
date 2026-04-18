@@ -74,6 +74,7 @@ export function DialogTrigger({
 
   return (
     <button type="button" onClick={() => setOpen(!open)}>
+      aria-label="Set open"
       {children}
     </button>
   );

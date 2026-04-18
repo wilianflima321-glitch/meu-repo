@@ -188,10 +188,10 @@ function AbilityCard({
     <div
       onClick={onClick}
       className={`p-3 rounded-lg cursor-pointer transition-all ${
-        isSelected
-          ? 'bg-[var(--aethel-primary)] ring-2 ring-[var(--aethel-info-light)]'
-          : 'bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)]'
-      }`}
+ isSelected
+ ? 'bg-[var(--aethel-primary)] ring-2 ring-[var(--aethel-info-light)]'
+ : 'bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-secondary)]'
+ }`}
     >
       <div className="flex items-center gap-3">
         <span className="text-2xl">{ability.icon || '⚡'}</span>
@@ -215,9 +215,9 @@ function EffectCard({ effect }: { effect: GameplayEffectSpec }) {
       <div className="flex items-center justify-between">
         <span className="font-medium text-[var(--aethel-text-primary)]">{effect.name}</span>
         <span className={`px-2 py-0.5 text-xs rounded ${
-          effect.durationType === 'instant' ? 'bg-[var(--aethel-success)]' :
-          effect.durationType === 'duration' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[var(--aethel-primary)]'
-        }`}>
+ effect.durationType === 'instant' ? 'bg-[var(--aethel-success)]' :
+ effect.durationType === 'duration' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[var(--aethel-primary)]'
+ }`}>
           {effect.durationType}
         </span>
       </div>
@@ -392,10 +392,10 @@ export function AbilityEditor({
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 text-sm font-medium transition ${
-                activeTab === tab
-                  ? 'text-[var(--aethel-text-primary)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-              }`}
+ activeTab === tab
+ ? 'text-[var(--aethel-text-primary)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>

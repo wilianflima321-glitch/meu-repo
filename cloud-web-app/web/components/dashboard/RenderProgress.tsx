@@ -453,11 +453,11 @@ export const RenderProgress: React.FC<RenderProgressProps> = ({
                                     <div
                                         key={frame.frame}
                                         className={`w-4 h-4 rounded ${
-                                            frame.status === 'completed' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' :
-                                            frame.status === 'rendering' ? 'bg-[var(--aethel-primary)] animate-pulse' :
-                                            frame.status === 'failed' ? 'bg-[var(--aethel-error)]' :
-                                            'bg-[var(--aethel-surface-secondary)]'
-                                        }`}
+ frame.status === 'completed' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' :
+ frame.status === 'rendering' ? 'bg-[var(--aethel-primary)] animate-pulse' :
+ frame.status === 'failed' ? 'bg-[var(--aethel-error)]' :
+ 'bg-[var(--aethel-surface-secondary)]'
+ }`}
                                         title={`Frame ${frame.frame}: ${frame.status}`}
                                     />
                                 ))}

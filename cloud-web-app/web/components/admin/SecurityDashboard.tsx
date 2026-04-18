@@ -401,8 +401,8 @@ export const SecurityDashboard: React.FC<{ className?: string }> = ({ className 
         <div className="flex flex-wrap items-center gap-2">
           <div
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              stats.activeAttacks > 0 ? 'bg-[var(--aethel-error)]/20 text-[var(--aethel-error-light)] animate-pulse' : 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success-light)]'
-            }`}
+ stats.activeAttacks > 0 ? 'bg-[var(--aethel-error)]/20 text-[var(--aethel-error-light)] animate-pulse' : 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success-light)]'
+ }`}
           >
             {stats.activeAttacks > 0 ? `${stats.activeAttacks} ataques ativos` : 'Sistema seguro'}
           </div>

@@ -191,10 +191,10 @@ export function FeatureFlagAdmin() {
             <button type="button" aria-label={flag.enabled ? `Disable feature flag ${flag.key}` : `Enable feature flag ${flag.key}`}
               onClick={() => toggleFlag(flag.key)}
               className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                flag.enabled
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-                  : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
-              }`}
+ flag.enabled
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)]'
+ }`}
             >
               {flag.enabled ? 'Ativo' : 'Inativo'}
             </button>

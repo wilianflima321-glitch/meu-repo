@@ -131,10 +131,10 @@ export default function DownloadPage() {
                   key={platform}
                   onClick={() => setSelectedPlatform(platform)}
                   className={`flex items-center gap-3 rounded-2xl border px-5 py-4 text-left transition-all ${
-                    isSelected
-                      ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[var(--aethel-primary)]/10 text-[var(--aethel-text-primary)]'
-                      : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
-                  }`}
+ isSelected
+ ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-[var(--aethel-primary)]/10 text-[var(--aethel-text-primary)]'
+ : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
                 >
                   <Icon />
                   <div>
@@ -161,7 +161,7 @@ export default function DownloadPage() {
                 <p className="mt-4 text-sm text-[var(--aethel-text-tertiary)]">Requisitos: {current.requirements}</p>
                 <a
                   href={`/downloads/${current.file}`}
-                  className="aethel-button aethel-button-primary mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
+                  className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
                   download
                 >
                   <DownloadIcon />
@@ -217,7 +217,7 @@ export default function DownloadPage() {
           </p>
           <Link
             href="/login"
-            className="aethel-button aethel-button-secondary mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
+            className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
           >
             Abrir Aethel Web
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

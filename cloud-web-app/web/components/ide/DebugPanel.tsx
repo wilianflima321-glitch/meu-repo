@@ -175,8 +175,8 @@ function VariableTree({ variables, depth = 0, onInspect }: VariableTreeProps) {
         <div key={`${variable.name}-${idx}`}>
           <div
             className={`flex items-center gap-1 px-3 py-0.5 hover:bg-[var(--aethel-surface-quaternary)]/50 cursor-pointer ${
-              variable.changed ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]' : ''
-            }`}
+ variable.changed ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)]' : ''
+ }`}
             style={{ paddingLeft: `${depth * 16 + 12}px` }}
             onClick={() => variable.expandable && toggleExpanded(variable.name)}
             onDoubleClick={() => onInspect?.(variable)}
@@ -262,12 +262,12 @@ function BreakpointList({ breakpoints, onToggle, onRemove, onEdit, onNavigate }:
             <button type="button" aria-label={bp.enabled ? `Disable breakpoint at ${bp.filePath}:${bp.line}` : `Enable breakpoint at ${bp.filePath}:${bp.line}`}
               onClick={() => onToggle(bp.id)}
               className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-                bp.enabled
-                  ? bp.verified
-                    ? 'bg-[var(--aethel-success)] border-[var(--aethel-success)]'
-                    : 'bg-[var(--aethel-text-tertiary)] border-[var(--aethel-border-secondary)]'
-                  : 'border-[var(--aethel-border-secondary)]'
-              }`}
+ bp.enabled
+ ? bp.verified
+ ? 'bg-[var(--aethel-success)] border-[var(--aethel-success)]'
+ : 'bg-[var(--aethel-text-tertiary)] border-[var(--aethel-border-secondary)]'
+ : 'border-[var(--aethel-border-secondary)]'
+ }`}
             />
 
             <button type="button" aria-label={`Open breakpoint ${bp.filePath}:${bp.line}`}
@@ -322,10 +322,10 @@ function CallStack({ frames, selectedFrameId, onSelectFrame }: CallStackProps) {
             key={frame.id}
             onClick={() => onSelectFrame(frame)}
             className={`flex items-center gap-2 w-full px-3 py-1 text-left ${
-              frame.id === selectedFrameId
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)]'
-                : 'hover:bg-[var(--aethel-surface-quaternary)]/50'
-            }`}
+ frame.id === selectedFrameId
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)]'
+ : 'hover:bg-[var(--aethel-surface-quaternary)]/50'
+ }`}
           >
             <FunctionSquare className="w-3 h-3 text-[var(--aethel-warning-light)] flex-shrink-0" />
             <span className="text-[var(--aethel-text-primary)] truncate">{frame.name}</span>
@@ -500,10 +500,10 @@ function ConsoleOutput({ messages, onClear, filter }: ConsoleOutputProps) {
                 })
               }}
               className={`px-2 py-0.5 text-xs rounded ${
-                typeFilter.has(type)
-                  ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                  : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
-              }`}
+ typeFilter.has(type)
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
+ }`}
             >
               {type}
             </button>
@@ -712,10 +712,10 @@ export default function DebugPanel({
           {demoSession.name}
         </span>
         <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
-          isPaused ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]' :
-          isRunning ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]' :
-          'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
-        }`}>
+ isPaused ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]' :
+ isRunning ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]' :
+ 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)]'
+ }`}>
           {demoSession.state}
         </span>
       </div>
@@ -787,10 +787,10 @@ export default function DebugPanel({
             <button type="button" aria-label="Open debug console tab"
               onClick={() => setActiveTab('console')}
               className={`px-3 py-1 text-xs rounded ${
-                activeTab === 'console'
-                  ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-              }`}
+ activeTab === 'console'
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
             >
               <Terminal className="w-3 h-3 inline mr-1" />
               Console

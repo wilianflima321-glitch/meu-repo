@@ -485,10 +485,7 @@ export const VirtualFileTree: React.FC<VirtualFileTreeProps> = ({
 
     return (
       <div
-        className={`
-          flex items-center gap-1 px-2 py-1 cursor-pointer select-none
-          ${isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]/60'}
-        `}
+        className={`flex items-center gap-1 px-2 py-1 cursor-pointer select-none ${isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_25%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]/60'}`}
         style={{ paddingLeft: `${node.depth * 16 + 8}px` }}
         onClick={() => {
           onNodeClick?.(node);

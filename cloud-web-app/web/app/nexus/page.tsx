@@ -33,24 +33,24 @@ export default function NexusPage() {
         <button type="button"
           onClick={() => setRightPanelMode('chat')}
           className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
-            rightPanelMode === 'chat' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-          }`}
+ rightPanelMode === 'chat' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
         >
           Nexus Chat
         </button>
         <button type="button"
           onClick={() => setRightPanelMode('research')}
           className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
-            rightPanelMode === 'research' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-          }`}
+ rightPanelMode === 'research' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
         >
           Pesquisa
         </button>
         <button type="button"
           onClick={() => setRightPanelMode('director')}
           className={`rounded px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
-            rightPanelMode === 'director' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-          }`}
+ rightPanelMode === 'director' ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
         >
           Direcao
         </button>

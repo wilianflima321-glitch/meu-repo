@@ -32,10 +32,10 @@ export default function PublicHeader() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-2xl shadow-xl shadow-black/20'
-            : 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-xl'
-        }`}
+ scrolled
+ ? 'border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-2xl shadow-xl shadow-black/20'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-xl'
+ }`}
       >
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Navegacao principal">
           <div className="flex items-center gap-3">
@@ -71,10 +71,10 @@ export default function PublicHeader() {
                   key={link.href}
                   href={link.href}
                   className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
+ isActive
+ ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                 >
                   {link.label}
                 </Link>
@@ -126,8 +126,8 @@ export default function PublicHeader() {
         <div
           id="mobile-menu"
           className={`border-t border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] backdrop-blur-2xl transition-all duration-300 md:hidden ${
-            mobileOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 overflow-hidden opacity-0'
-          }`}
+ mobileOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 overflow-hidden opacity-0'
+ }`}
         >
           <div className="space-y-1 px-4 py-4">
             {PUBLIC_NAV_LINKS.map((link) => {
@@ -137,10 +137,10 @@ export default function PublicHeader() {
                   key={link.href}
                   href={link.href}
                   className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)]'
-                      : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
+ isActive
+ ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                 >
                   {link.label}
                 </Link>

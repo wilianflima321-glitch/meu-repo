@@ -832,15 +832,16 @@ interface SettingInputProps {
 function SettingToggle({ setting, value, onChange }: SettingInputProps) {
   return (
     <button type="button"
+      aria-label="Change"
       onClick={() => onChange(!value)}
       className={`relative w-11 h-6 rounded-full transition-colors ${
-        value ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)]'
-      }`}
+ value ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)]'
+ }`}
     >
       <span
         className={`absolute top-0.5 left-0.5 w-5 h-5 bg-[var(--aethel-surface-secondary)] rounded-full transition-transform ${
-          value ? 'translate-x-5' : 'translate-x-0'
-        }`}
+ value ? 'translate-x-5' : 'translate-x-0'
+ }`}
       />
     </button>
   )

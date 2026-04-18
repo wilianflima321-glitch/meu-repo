@@ -131,6 +131,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
             )}
           </div>
           <button type="button"
+            aria-label="Close"
             onClick={onClose}
             className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
           >
@@ -142,13 +143,14 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
         <div className="flex gap-2">
           {(['all', 'info', 'success', 'warning', 'error'] as const).map(f => (
             <button type="button"
+              aria-label="Set filter"
               key={f}
               onClick={() => setFilter(f)}
               className={`px-3 py-1 rounded text-xs transition-colors ${
-                filter === f
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
-                  : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
-              }`}
+ filter === f
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -187,10 +189,10 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
               <div
                 key={notification.id}
                 className={`p-4 rounded-lg border transition-colors ${
-                  notification.read
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] border-[var(--aethel-border-primary)]'
-                    : 'bg-[var(--aethel-surface-primary)] border-[var(--aethel-border-secondary)]'
-                } ${getSeverityColor(notification.severity)}`}
+ notification.read
+ ? 'bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] border-[var(--aethel-border-primary)]'
+ : 'bg-[var(--aethel-surface-primary)] border-[var(--aethel-border-secondary)]'
+ } ${getSeverityColor(notification.severity)}`}
               >
                 <div className="flex items-start gap-3">
                   <span className="text-2xl flex-shrink-0">
@@ -203,6 +205,7 @@ export default function NotificationCenter({ isOpen, onClose }: { isOpen: boolea
                         {notification.title}
                       </h3>
                       <button type="button"
+                        aria-label="Delete notification"
                         onClick={() => deleteNotification(notification.id)}
                         className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors"
                       >

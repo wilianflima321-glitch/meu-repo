@@ -258,10 +258,10 @@ export default function MultiAgentOrchestrator() {
             type="button"
             onClick={() => setExecutionMode('heuristic')}
             className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
-              executionMode === 'heuristic'
-                ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                : 'border-[var(--aethel-border-primary)]/50 bg-[var(--aethel-surface-tertiary)]/50 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
+ executionMode === 'heuristic'
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ : 'border-[var(--aethel-border-primary)]/50 bg-[var(--aethel-surface-tertiary)]/50 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             disabled={isStreaming}
             aria-pressed={executionMode === 'heuristic'}
           >
@@ -271,10 +271,10 @@ export default function MultiAgentOrchestrator() {
             type="button"
             onClick={() => setExecutionMode('provider-backed')}
             className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
-              executionMode === 'provider-backed'
-                ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                : 'border-[var(--aethel-border-primary)]/50 bg-[var(--aethel-surface-tertiary)]/50 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
+ executionMode === 'provider-backed'
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ : 'border-[var(--aethel-border-primary)]/50 bg-[var(--aethel-surface-tertiary)]/50 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             disabled={isStreaming}
             aria-pressed={executionMode === 'provider-backed'}
           >
@@ -299,10 +299,10 @@ export default function MultiAgentOrchestrator() {
                 )
               }
               className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
-                selectedAgents.includes(agent.id)
-                  ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                  : 'border-[var(--aethel-border-primary)]/50 bg-[var(--aethel-surface-tertiary)]/50 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ selectedAgents.includes(agent.id)
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ : 'border-[var(--aethel-border-primary)]/50 bg-[var(--aethel-surface-tertiary)]/50 text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
               aria-pressed={selectedAgents.includes(agent.id)}
             >
               {agent.label}

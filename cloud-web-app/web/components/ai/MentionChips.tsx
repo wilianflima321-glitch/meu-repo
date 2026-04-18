@@ -94,13 +94,7 @@ export function MentionChip({
   return (
     <button type="button" aria-label={`Mention: ${data.label}`}
       onClick={onClick}
-      className={`
-        inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs
-        border transition-all duration-150
-        ${colors.bg} ${colors.text} ${colors.border}
-        hover:brightness-125 cursor-pointer
-        focus:outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]
-      `}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs border transition-all duration-150 ${colors.bg} ${colors.text} ${colors.border} hover:brightness-125 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[var(--aethel-primary)]`}
       title={data.tag}
     >
       {icons[data.icon]}

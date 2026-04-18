@@ -115,8 +115,8 @@ export function ResponsiveContainer({
   return (
     <div
       className={`mx-auto w-full ${MAX_WIDTH_MAP[maxWidth]} ${
-        padding ? 'px-4 sm:px-6 lg:px-8' : ''
-      } ${className}`}
+ padding ? 'px-4 sm:px-6 lg:px-8' : ''
+ } ${className}`}
     >
       {children}
     </div>
@@ -183,8 +183,8 @@ export function MobileSidebarOverlay({
       {/* Drawer */}
       <div
         className={`relative z-10 flex h-full w-[min(85vw,360px)] flex-col bg-[var(--aethel-surface-secondary)] shadow-2xl ${
-          side === 'right' ? 'ml-auto' : 'mr-auto'
-        }`}
+ side === 'right' ? 'ml-auto' : 'mr-auto'
+ }`}
         style={{
           animation: `aethel-slide-in-${side === 'right' ? 'right' : 'left'} 200ms ease-out`,
         }}

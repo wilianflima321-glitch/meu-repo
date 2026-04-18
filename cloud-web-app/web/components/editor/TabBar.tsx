@@ -525,10 +525,10 @@ function TabContextMenu({
             }}
             disabled={action.disabled}
             className={`w-full flex items-center justify-between gap-4 px-3 py-1.5 text-sm ${
-              action.danger
-                ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)]'
-                : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)]'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+ action.danger
+ ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)]'
+ } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <div className="flex items-center gap-2">
               {action.icon && <action.icon className="w-4 h-4" />}
@@ -598,18 +598,10 @@ function Tab({
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDrop={onDrop}
-      className={`
-        group flex h-9 items-center gap-2 border-r border-[var(--aethel-border-subtle)] px-3 cursor-pointer
-        transition-all select-none
-        ${isActive
-          ? 'bg-[linear-gradient(180deg,rgba(18,23,33,0.98),rgba(14,18,25,0.98))] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-info)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
-          : 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)] border-t-2 border-t-transparent hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)]'
-        }
-        ${tab.isPreview ? 'italic' : ''}
-        ${isDragging ? 'opacity-50' : ''}
-        ${isDragOver ? 'border-l-2 border-l-[var(--aethel-info)]' : ''}
-        ${tab.isPinned ? 'px-2' : ''}
-      `}
+      className={`group flex h-9 items-center gap-2 border-r border-[var(--aethel-border-subtle)] px-3 cursor-pointer transition-all select-none ${isActive
+ ? 'bg-[linear-gradient(180deg,rgba(18,23,33,0.98),rgba(14,18,25,0.98))] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-info)] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
+ : 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)] border-t-2 border-t-transparent hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)]'
+ } ${tab.isPreview ? 'italic' : ''} ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'border-l-2 border-l-[var(--aethel-info)]' : ''} ${tab.isPinned ? 'px-2' : ''}`}
     >
       {/* Pin indicator */}
       {tab.isPinned && (
@@ -643,14 +635,10 @@ function Tab({
             e.stopPropagation();
             onClose();
           }}
-          className={`
-            flex-shrink-0 rounded-md p-0.5
-            ${isActive || tab.isDirty
-              ? 'opacity-100'
-              : 'opacity-0 group-hover:opacity-100'
-            }
-            hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
-          `}
+          className={`flex-shrink-0 rounded-md p-0.5 ${isActive || tab.isDirty
+ ? 'opacity-100'
+ : 'opacity-0 group-hover:opacity-100'
+ } hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]`}
         >
           {tab.isDirty ? (
             <div className="h-2.5 w-2.5 rounded-full bg-[var(--aethel-warning-light)]" />
@@ -779,10 +767,10 @@ export function TabBar({ className }: { className?: string }) {
                       setShowOverflowMenu(false);
                     }}
                     className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm ${
-                      tab.id === activeTabId
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                        : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
-                    }`}
+ tab.id === activeTabId
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
+ }`}
                   >
                     <Icon className="w-4 h-4" />
                     <span className="truncate">{tab.title}</span>
@@ -879,8 +867,8 @@ export function TabGroupContainer({
             <div
               onMouseDown={() => handleResizeStart(group.id)}
               className={`absolute right-0 top-0 bottom-0 w-1 cursor-col-resize z-10 ${
-                resizing === group.id ? 'bg-[var(--aethel-info)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)]'
-              }`}
+ resizing === group.id ? 'bg-[var(--aethel-info)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)]'
+ }`}
             />
           )}
         </div>

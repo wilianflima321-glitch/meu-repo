@@ -213,10 +213,10 @@ export default function MarketplacePage() {
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
-                    selectedCategory === category
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[var(--aethel-accent-light)] border border-[color-mix(in_srgb,var(--aethel-accent)_35%,transparent)]'
-                      : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
+ selectedCategory === category
+ ? 'bg-[color-mix(in_srgb,var(--aethel-accent)_20%,transparent)] text-[var(--aethel-accent-light)] border border-[color-mix(in_srgb,var(--aethel-accent)_35%,transparent)]'
+ : 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                 >
                   {categoryLabels[category] ?? category}
                 </button>
@@ -265,18 +265,18 @@ export default function MarketplacePage() {
                       <>
                         <button type="button"
                           onClick={() => handleUninstall(ext.id)}
-                          className="aethel-button aethel-button-danger w-full rounded-xl px-3 py-2 text-xs font-semibold"
+                          className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-error)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-error-dark)] w-full rounded-xl px-3 py-2 text-xs font-semibold"
                         >
                           Desinstalar
                         </button>
-                        <button type="button" className="aethel-button aethel-button-secondary rounded-xl px-3 py-2 text-xs font-semibold">
+                        <button type="button" className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl px-3 py-2 text-xs font-semibold">
                           Configurar
                         </button>
                       </>
                     ) : (
                       <button type="button"
                         onClick={() => handleInstall(ext.id)}
-                        className="aethel-button aethel-button-primary w-full rounded-xl px-3 py-2 text-xs font-semibold"
+                        className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 w-full rounded-xl px-3 py-2 text-xs font-semibold"
                       >
                         Instalar
                       </button>

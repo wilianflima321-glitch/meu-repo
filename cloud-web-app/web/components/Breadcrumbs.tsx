@@ -39,10 +39,10 @@ export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
             disabled={!item.path}
             aria-label={item.path ? `Navegar para ${item.label}` : `Breadcrumb atual ${item.label}`}
             className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-              item.path
-                ? 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] cursor-pointer'
-                : 'text-[var(--aethel-text-primary)] cursor-default'
-            }`}
+ item.path
+ ? 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)] cursor-pointer'
+ : 'text-[var(--aethel-text-primary)] cursor-default'
+ }`}
           >
             {item.icon && <span>{item.icon}</span>}
             <span>{item.label}</span>

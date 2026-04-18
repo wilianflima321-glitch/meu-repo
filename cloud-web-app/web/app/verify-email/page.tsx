@@ -100,7 +100,7 @@ function VerifyEmailContent() {
               <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">Conta validada. Redirecionando para o painel.</p>
               <Link
                 href="/dashboard"
-                className="aethel-button aethel-button-primary mt-6 inline-flex rounded-xl px-5 py-2 text-sm font-semibold"
+                className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 mt-6 inline-flex rounded-xl px-5 py-2 text-sm font-semibold"
               >
                 Ir para dashboard
               </Link>
@@ -118,14 +118,14 @@ function VerifyEmailContent() {
                 <button type="button"
                   onClick={resendVerification}
                   disabled={isResending}
-                  className="aethel-button aethel-button-primary w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 w-full rounded-xl px-4 py-2 text-sm font-semibold"
                 >
                   {isResending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                   {isResending ? 'Enviando...' : 'Reenviar verificacao'}
                 </button>
                 <Link
                   href="/dashboard"
-                  className="aethel-button aethel-button-secondary w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
                 >
                   Continuar para dashboard
                 </Link>
@@ -145,14 +145,14 @@ function VerifyEmailContent() {
                 <button type="button"
                   onClick={resendVerification}
                   disabled={isResending}
-                  className="aethel-button aethel-button-primary w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 w-full rounded-xl px-4 py-2 text-sm font-semibold"
                 >
                   {isResending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                   {isResending ? 'Enviando...' : 'Solicitar novo link'}
                 </button>
                 <Link
                   href="/login"
-                  className="aethel-button aethel-button-secondary w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                  className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
                 >
                   Voltar para login
                 </Link>

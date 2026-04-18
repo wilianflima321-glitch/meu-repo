@@ -212,10 +212,10 @@ function ToolButton({ icon, active, onClick, tooltip, shortcut }: ToolButtonProp
     <button type="button" aria-label={tooltip}
       onClick={onClick}
       className={`p-2 rounded transition-colors ${
-        active
-          ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-          : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)]'
-      }`}
+ active
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
       title={`${tooltip}${shortcut ? ` (${shortcut})` : ''}`}
     >
       {icon}
@@ -248,8 +248,8 @@ function ColorSwatch({ color, selected, onClick, onRightClick, size = 'md' }: Co
         onRightClick?.()
       }}
       className={`${sizeClass} rounded border-2 ${
-        selected ? 'border-[var(--aethel-border-primary)]' : 'border-[var(--aethel-border-secondary)]'
-      }`}
+ selected ? 'border-[var(--aethel-border-primary)]' : 'border-[var(--aethel-border-secondary)]'
+ }`}
       style={{ backgroundColor: colorToRgba(color) }}
       title={colorToHex(color)}
     />
@@ -302,8 +302,8 @@ function LayerPanel({
           <div
             key={layer.id}
             className={`flex items-center gap-2 px-2 py-1.5 border-b border-[var(--aethel-border-primary)] cursor-pointer ${
-              layer.id === currentLayerId ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)]'
-            }`}
+ layer.id === currentLayerId ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)]'
+ }`}
             onClick={() => onSelectLayer(layer.id)}
           >
             <button type="button" aria-label={`${layer.visible ? 'Ocultar' : 'Mostrar'} camada ${layer.name}`}
@@ -437,10 +437,10 @@ function Timeline({
           <div
             key={frame.id}
             className={`relative flex-shrink-0 w-16 h-16 rounded border-2 cursor-pointer ${
-              idx === currentFrameIndex
-                ? 'border-[var(--aethel-info)]'
-                : 'border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
-            }`}
+ idx === currentFrameIndex
+ ? 'border-[var(--aethel-info)]'
+ : 'border-[var(--aethel-border-secondary)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
             onClick={() => onSelectFrame(idx)}
           >
             {/* Mini preview would go here */}

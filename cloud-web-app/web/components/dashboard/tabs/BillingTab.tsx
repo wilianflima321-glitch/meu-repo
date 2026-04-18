@@ -191,10 +191,7 @@ function PlanCard({
       <div className="p-6">
         <div className="flex items-center gap-3 mb-4">
           <div
-            className={`
-              w-12 h-12 rounded-xl flex items-center justify-center
-              ${isPopular ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}
-            `}
+            className={`w-12 h-12 rounded-xl flex items-center justify-center ${isPopular ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
           >
             {planIcons[plan.id] || <Sparkles className="w-6 h-6" />}
           </div>
@@ -389,8 +386,8 @@ export function BillingTab({
             type="button"
             onClick={() => setBillingCycle('month')}
             className={`rounded-full px-4 py-1.5 transition-colors ${
-              billingCycle === 'month' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
+ billingCycle === 'month' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
           >
             Mensal
           </button>
@@ -398,8 +395,8 @@ export function BillingTab({
             type="button"
             onClick={() => setBillingCycle('year')}
             className={`rounded-full px-4 py-1.5 transition-colors ${
-              billingCycle === 'year' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
+ billingCycle === 'year' ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
           >
             Anual (-20%)
           </button>

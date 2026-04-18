@@ -176,10 +176,10 @@ export default function AdminPanel() {
               key={tab.id}
               onClick={() => setActiveAdminTab(tab.id as any)}
               className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
-                activeAdminTab === tab.id
-                  ? 'bg-[var(--aethel-primary)] text-white shadow-[0_12px_28px_rgba(79,70,229,0.22)]'
-                  : 'border border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)]'
-              }`}
+ activeAdminTab === tab.id
+ ? 'bg-[var(--aethel-primary)] text-white shadow-[0_12px_28px_rgba(79,70,229,0.22)]'
+ : 'border border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)]'
+ }`}
             >
               {tab.label}
             </button>
@@ -254,15 +254,15 @@ export default function AdminPanel() {
                 {recentTransactions.map((transaction) => (
                   <div key={transaction.id} className="flex items-center gap-3 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] p-3">
                     <div className={`flex h-8 w-8 items-center justify-center rounded-full ${
-                      transaction.type === 'usage' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
-                      transaction.type === 'purchase' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' :
-                      'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
-                    }`}>
+ transaction.type === 'usage' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' :
+ transaction.type === 'purchase' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' :
+ 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
+ }`}>
                       <svg className={`w-4 h-4 ${
-                        transaction.type === 'usage' ? 'text-[var(--aethel-error-light)]' :
-                        transaction.type === 'purchase' ? 'text-[var(--aethel-success-light)]' :
-                        'text-[var(--aethel-info-light)]'
-                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ transaction.type === 'usage' ? 'text-[var(--aethel-error-light)]' :
+ transaction.type === 'purchase' ? 'text-[var(--aethel-success-light)]' :
+ 'text-[var(--aethel-info-light)]'
+ }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         {transaction.type === 'usage' ? (
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         ) : transaction.type === 'purchase' ? (
@@ -277,8 +277,8 @@ export default function AdminPanel() {
                       <p className="text-xs text-[var(--aethel-text-tertiary)]">{transaction.userEmail} - {new Date(transaction.timestamp).toLocaleString()}</p>
                     </div>
                     <span className={`text-sm font-medium ${
-                      transaction.amount > 0 ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'
-                    }`}>
+ transaction.amount > 0 ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'
+ }`}>
                       {transaction.amount > 0 ? '+' : ''}{transaction.amount}
                     </span>
                   </div>
@@ -334,9 +334,9 @@ export default function AdminPanel() {
                       </td>
                       <td className="py-3 px-4">
                         <span className={`rounded-full px-2 py-1 text-xs ${
-                          user.is_active ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]' :
-                          'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
-                        }`}>
+ user.is_active ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]' :
+ 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
+ }`}>
                           {user.is_active ? 'Ativo' : 'Suspenso'}
                         </span>
                       </td>
@@ -497,16 +497,16 @@ export default function AdminPanel() {
                         <td className="py-3 px-4 text-[var(--aethel-text-tertiary)]">{transaction.userEmail}</td>
                         <td className="py-3 px-4">
                           <span className={`rounded-full px-2 py-1 text-xs ${
-                            transaction.type === 'usage' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]' :
-                            transaction.type === 'purchase' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]' :
-                            'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                          }`}>
+ transaction.type === 'usage' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]' :
+ transaction.type === 'purchase' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]' :
+ 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ }`}>
                             {transaction.type}
                           </span>
                         </td>
                         <td className={`py-3 px-4 font-medium ${
-                          transaction.amount > 0 ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'
-                        }`}>
+ transaction.amount > 0 ? 'text-[var(--aethel-success-light)]' : 'text-[var(--aethel-error-light)]'
+ }`}>
                           {transaction.amount > 0 ? '+' : ''}{transaction.amount}
                         </td>
                         <td className="py-3 px-4">{transaction.description}</td>

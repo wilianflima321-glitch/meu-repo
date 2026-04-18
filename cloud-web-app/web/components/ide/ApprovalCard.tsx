@@ -132,10 +132,10 @@ export function ApprovalCard({
                 <div
                   key={change.filePath}
                   className={`rounded-lg border p-3 transition-colors ${
-                    isSelected ?
-                       'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
-                      : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
-                  }`}
+ isSelected ?
+ 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
+ : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
+ }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-2 flex-1">

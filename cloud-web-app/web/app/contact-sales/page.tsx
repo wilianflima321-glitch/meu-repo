@@ -285,10 +285,10 @@ export default function ContactSalesPage() {
                     type="submit"
                     disabled={!requiredReady || loading}
                     className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold transition ${
-                      requiredReady && !loading
-                        ? 'bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] text-[var(--aethel-text-primary)] shadow-lg hover:brightness-110'
-                        : 'cursor-not-allowed border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
-                    }`}
+ requiredReady && !loading
+ ? 'bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] text-[var(--aethel-text-primary)] shadow-lg hover:brightness-110'
+ : 'cursor-not-allowed border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
+ }`}
                   >
                     {loading ? 'Enviando briefing...' : 'Enviar briefing para vendas'}
                     {!loading && <ArrowRight className="h-4 w-4" />}

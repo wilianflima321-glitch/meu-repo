@@ -47,10 +47,10 @@ export default function TimelineOverlay({
             aria-label={isPlaying ? 'Pausar timeline do viewport' : 'Reproduzir timeline do viewport'}
             onClick={onTogglePlay}
             className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition ${
-              isPlaying
-                ? 'border-[color-mix(in_srgb,var(--aethel-warning)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)] text-[var(--aethel-warning-light)]'
-                : 'border-[color-mix(in_srgb,var(--aethel-success)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_14%,transparent)] text-[var(--aethel-success-light)]'
-            }`}
+ isPlaying
+ ? 'border-[color-mix(in_srgb,var(--aethel-warning)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)] text-[var(--aethel-warning-light)]'
+ : 'border-[color-mix(in_srgb,var(--aethel-success)_36%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_14%,transparent)] text-[var(--aethel-success-light)]'
+ }`}
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
@@ -76,10 +76,10 @@ export default function TimelineOverlay({
               aria-label="Ativar modo game para o viewport"
               onClick={() => onModeChange('game')}
               className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition ${
-                mode === 'game'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-              }`}
+ mode === 'game'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
             >
               <Gamepad2 className="h-3.5 w-3.5" />
               Game
@@ -89,10 +89,10 @@ export default function TimelineOverlay({
               aria-label="Ativar modo film para o viewport"
               onClick={() => onModeChange('film')}
               className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition ${
-                mode === 'film'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-              }`}
+ mode === 'film'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
             >
               <Film className="h-3.5 w-3.5" />
               Film

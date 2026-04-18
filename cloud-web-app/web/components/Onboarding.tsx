@@ -289,8 +289,8 @@ export function WelcomeModal({ mission }: { mission?: string }) {
               <div
                 key={i}
                 className={`w-2 h-2 rounded-full transition-colors ${
-                  i === step ? 'bg-[var(--aethel-info)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
-                }`}
+ i === step ? 'bg-[var(--aethel-info)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
+ }`}
               />
             ))}
           </div>
@@ -455,6 +455,7 @@ export function OnboardingChecklist() {
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-[var(--aethel-text-primary)]">Primeiros passos</h3>
               <button type="button"
+                aria-label="Set is open"
                 onClick={() => setIsOpen(false)}
                 className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
               >
@@ -539,21 +540,22 @@ export function OnboardingChecklist() {
             </div>
             {items.map(item => (
               <button type="button"
+                aria-label="Confirm"
                 key={item.id}
                 onClick={() => !item.completed && completeStep(item.id)}
                 disabled={item.completed}
                 className={`w-full p-3 rounded-xl text-left transition-colors ${
-                  item.completed
-                    ? 'opacity-60'
-                    : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
-                }`}
+ item.completed
+ ? 'opacity-60'
+ : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
+ }`}
               >
                 <div className="flex items-start gap-3">
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                    item.completed
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
-                      : 'border-[var(--aethel-border-primary)]'
-                  }`}>
+ item.completed
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
+ : 'border-[var(--aethel-border-primary)]'
+ }`}>
                     {item.completed && <Check className="w-3 h-3 text-[var(--aethel-text-primary)]" />}
                   </div>
                   <div>
@@ -623,6 +625,7 @@ export function AchievementToast({ achievement, onClose }: { achievement: Achiev
           <div className="text-sm text-[var(--aethel-text-secondary)]">{achievement.description}</div>
         </div>
         <button type="button" onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
+          aria-label="Close"
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -653,10 +656,10 @@ export function AchievementsPanel() {
           <div
             key={achievement.id}
             className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-              achievement.unlocked
-                ? 'bg-[linear-gradient(90deg,color-mix(in_srgb,var(--aethel-warning)_14%,transparent),color-mix(in_srgb,var(--aethel-warning-dark)_18%,transparent))] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
-                : 'bg-[var(--aethel-surface-tertiary)] opacity-50 grayscale'
-            }`}
+ achievement.unlocked
+ ? 'bg-[linear-gradient(90deg,color-mix(in_srgb,var(--aethel-warning)_14%,transparent),color-mix(in_srgb,var(--aethel-warning-dark)_18%,transparent))] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
+ : 'bg-[var(--aethel-surface-tertiary)] opacity-50 grayscale'
+ }`}
           >
             <div className="text-2xl">{achievement.icon}</div>
             <div className="flex-1">

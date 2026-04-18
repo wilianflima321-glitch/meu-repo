@@ -95,13 +95,7 @@ export function GlassCard({
       variants={animated ? eliteAnimations.itemVariants : undefined}
       initial={animated ? 'hidden' : undefined}
       animate={animated ? 'visible' : undefined}
-      className={`
-        relative rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] backdrop-blur-xl
-        transition-all duration-300
-        ${hover ? 'hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:shadow-2xl' : ''}
-        ${glow ? 'shadow-[0_0_40px_rgba(59,130,246,0.2)]' : ''}
-        ${className}
-      `}
+      className={`relative rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] backdrop-blur-xl transition-all duration-300 ${hover ? 'hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:shadow-2xl' : ''} ${glow ? 'shadow-[0_0_40px_rgba(59,130,246,0.2)]' : ''} ${className}`}
     >
       {/* Glow effect background */}
       {glow && (
@@ -155,12 +149,12 @@ export function GlassButton({
       onClick={onClick}
       disabled={disabled || loading}
       className={`
-        ${baseClasses}
-        ${variantClasses[variant]}
-        ${sizeClasses[size]}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-        ${className}
-      `}
+ ${baseClasses}
+ ${variantClasses[variant]}
+ ${sizeClasses[size]}
+ ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+ ${className}
+ `}
     >
       {loading && (
         <motion.div
@@ -200,16 +194,7 @@ export function GlassInput({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`
-          w-full px-4 py-2.5 rounded-lg
-          bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)]
-          text-[var(--aethel-text-primary)] placeholder-[color-mix(in_srgb,var(--aethel-text-primary)_40%,transparent)]
-          backdrop-blur-xl
-          transition-all duration-200
-          focus:outline-none focus:border-[var(--aethel-border-primary)] focus:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]
-          ${Icon ? 'pl-10' : ''}
-          ${className}
-        `}
+        className={`w-full px-4 py-2.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)] placeholder-[color-mix(in_srgb,var(--aethel-text-primary)_40%,transparent)] backdrop-blur-xl transition-all duration-200 focus:outline-none focus:border-[var(--aethel-border-primary)] focus:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] ${Icon ? 'pl-10' : ''} ${className}`}
       />
     </div>
   )
@@ -239,10 +224,10 @@ export function AnimatedBadge({
     <motion.div
       {...(animated ? eliteAnimations.scaleIn : {})}
       className={`
-        inline-flex items-center gap-2 px-3 py-1 rounded-full
-        text-xs font-medium border
-        ${variantClasses[variant]}
-      `}
+ inline-flex items-center gap-2 px-3 py-1 rounded-full
+ text-xs font-medium border
+ ${variantClasses[variant]}
+ `}
     >
       {children}
     </motion.div>
@@ -420,13 +405,7 @@ export function HoverCard({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className={`
-              absolute ${tooltipPosition[side]} whitespace-nowrap
-              px-3 py-1.5 rounded-lg
-              bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] backdrop-blur-xl border border-[var(--aethel-border-primary)]
-              text-xs text-[var(--aethel-text-primary)]/80
-              pointer-events-none z-50
-            `}
+            className={`absolute ${tooltipPosition[side]} whitespace-nowrap px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] backdrop-blur-xl border border-[var(--aethel-border-primary)] text-xs text-[var(--aethel-text-primary)]/80 pointer-events-none z-50`}
           >
             {tooltip}
           </motion.div>
@@ -454,13 +433,7 @@ export function ShimmerSkeleton({
         backgroundPosition: ['200% 0', '-200% 0'],
       }}
       transition={{ duration: 2, repeat: Infinity }}
-      className={`
-        ${width} ${height}
-        rounded-lg
-        bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-text-primary)_6%,transparent)] via-[color-mix(in_srgb,var(--aethel-text-primary)_12%,transparent)] to-[color-mix(in_srgb,var(--aethel-text-primary)_6%,transparent)]
-        bg-[length:200%_100%]
-        ${className}
-      `}
+      className={`${width} ${height} rounded-lg bg-gradient-to-r from-[color-mix(in_srgb,var(--aethel-text-primary)_6%,transparent)] via-[color-mix(in_srgb,var(--aethel-text-primary)_12%,transparent)] to-[color-mix(in_srgb,var(--aethel-text-primary)_6%,transparent)] bg-[length:200%_100%] ${className}`}
     />
   )
 }
@@ -527,14 +500,7 @@ export function FloatingActionButton({
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`
-        fixed bottom-8 right-8 z-40
-        w-14 h-14 rounded-full
-        bg-gradient-to-r ${colorClasses[color]}
-        text-[var(--aethel-text-primary)] shadow-lg hover:shadow-2xl
-        flex items-center justify-center
-        transition-all duration-200
-      `}
+      className={`fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full bg-gradient-to-r ${colorClasses[color]} text-[var(--aethel-text-primary)] shadow-lg hover:shadow-2xl flex items-center justify-center transition-all duration-200`}
       title={label}
     >
       {Icon}

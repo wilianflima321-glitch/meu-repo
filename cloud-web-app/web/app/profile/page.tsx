@@ -326,6 +326,7 @@ export default function ProfilePage() {
                 )}
               </div>
               <button type="button" className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                aria-label="Camera"
                 <Camera className="w-6 h-6" />
               </button>
             </div>
@@ -343,9 +344,11 @@ export default function ProfilePage() {
                       autoFocus
                     />
                     <button type="button" onClick={saveName} className="text-[var(--aethel-success)] hover:text-[var(--aethel-success-light)]">
+                      aria-label="Confirm"
                       <Check className="w-5 h-5" />
                     </button>
                     <button type="button" onClick={() => setEditingName(false)} className="text-[var(--aethel-error)] hover:text-[var(--aethel-error-light)]">
+                      aria-label="Set editing name"
                       <X className="w-5 h-5" />
                     </button>
                   </div>
@@ -395,13 +398,14 @@ export default function ProfilePage() {
               { id: 'preferences', label: 'Preferencias', icon: Palette },
             ].map((tab) => (
               <button type="button"
+                aria-label="Set active tab"
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-4 border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                    : 'border-transparent text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
-                }`}
+ activeTab === tab.id
+ ? 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : 'border-transparent text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -490,6 +494,7 @@ export default function ProfilePage() {
                 value={profile.twoFactorEnabled ? 'Ativada' : 'Desativada'}
                 action={
                   <button type="button"
+                    aria-label={profile.twoFactorEnabled ? 'Disable two-factor authentication' : 'Enable two-factor authentication'}
                     onClick={() => {
                       if (profile.twoFactorEnabled) {
                         setTwoFactorModal('disable')
@@ -502,10 +507,10 @@ export default function ProfilePage() {
                     }}
                     disabled={twoFactorLoading}
                     className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                      profile.twoFactorEnabled
-                        ? 'bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)]'
-                        : 'bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)]'
-                    }`}
+ profile.twoFactorEnabled
+ ? 'bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)]'
+ : 'bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)]'
+ }`}
                   >
                     {twoFactorLoading ? 'Processando...' : profile.twoFactorEnabled ? 'Desativar' : 'Ativar'}
                   </button>
@@ -583,16 +588,17 @@ export default function ProfilePage() {
                 label="Notificacoes por e-mail"
                 action={
                   <button type="button"
+                    aria-label="Update profile"
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, email: !profile.notifications.email }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.email ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-                    }`}
+ profile.notifications.email ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-[var(--aethel-text-primary)] transform transition-transform ${
-                      profile.notifications.email ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
+ profile.notifications.email ? 'translate-x-6' : 'translate-x-1'
+ }`} />
                   </button>
                 }
               />
@@ -601,16 +607,17 @@ export default function ProfilePage() {
                 label="Notificacoes push"
                 action={
                   <button type="button"
+                    aria-label="Update profile"
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, push: !profile.notifications.push }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.push ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-                    }`}
+ profile.notifications.push ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-[var(--aethel-text-primary)] transform transition-transform ${
-                      profile.notifications.push ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
+ profile.notifications.push ? 'translate-x-6' : 'translate-x-1'
+ }`} />
                   </button>
                 }
               />
@@ -619,16 +626,17 @@ export default function ProfilePage() {
                 label="E-mails de marketing"
                 action={
                   <button type="button"
+                    aria-label="Update profile"
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, marketing: !profile.notifications.marketing }
                     })}
                     className={`w-12 h-6 rounded-full transition-colors ${
-                      profile.notifications.marketing ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-                    }`}
+ profile.notifications.marketing ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
                   >
                     <div className={`w-5 h-5 rounded-full bg-[var(--aethel-text-primary)] transform transition-transform ${
-                      profile.notifications.marketing ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
+ profile.notifications.marketing ? 'translate-x-6' : 'translate-x-1'
+ }`} />
                   </button>
                 }
               />
@@ -731,6 +739,7 @@ export default function ProfilePage() {
                 Cancelar
               </button>
               <button type="button"
+                aria-label={twoFactorModal === 'setup' ? 'Confirm two-factor setup' : 'Confirm disable two-factor'}
                 onClick={twoFactorModal === 'setup' ? confirmTwoFactorSetup : confirmTwoFactorDisable}
                 disabled={twoFactorLoading}
                 className="flex-1 px-4 py-2 bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] rounded-lg transition-colors"

@@ -68,10 +68,10 @@ export function Outliner3D({
       <div key={node.id}>
         <div
           className={`flex items-center gap-1.5 px-2 py-1 text-xs cursor-pointer transition-colors ${
-            isSelected ?
-               'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-              : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-          }`}
+ isSelected ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
           onClick={() => onNodeSelect(node.id)}
         >

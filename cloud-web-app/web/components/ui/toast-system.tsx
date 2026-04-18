@@ -273,6 +273,7 @@ function ToastItem({
           <div style={messageStyle}>{toast.message}</div>
           {toast.action && (
             <button type="button"
+              aria-label="Dismiss"
               onClick={toast.action.onClick}
               style={{
                 marginTop: tokens.spacing['2'],

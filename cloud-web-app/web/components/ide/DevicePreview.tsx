@@ -39,10 +39,10 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setDevice('desktop')}
             className={`p-2 rounded-lg transition-colors ${
-              device === 'desktop' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-            }`}
+ device === 'desktop' ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             title="Desktop"
           >
             <Monitor className="w-4 h-4" />
@@ -51,10 +51,10 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setDevice('tablet')}
             className={`p-2 rounded-lg transition-colors ${
-              device === 'tablet' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-            }`}
+ device === 'tablet' ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             title="Tablet"
           >
             <Tablet className="w-4 h-4" />
@@ -63,10 +63,10 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setDevice('mobile')}
             className={`p-2 rounded-lg transition-colors ${
-              device === 'mobile' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-            }`}
+ device === 'mobile' ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             title="Mobile"
           >
             <Smartphone className="w-4 h-4" />
@@ -79,10 +79,10 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setIsRotated(!isRotated)}
             className={`p-2 rounded-lg transition-colors ${
-              isRotated ?
-                 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-            }`}
+ isRotated ?
+ 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             title="Rotacionar dispositivo"
           >
             <RotateCw className="w-4 h-4" />
@@ -118,10 +118,10 @@ export function DevicePreview({ children, defaultDevice = 'desktop' }: DevicePre
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
             className={`p-2 rounded-lg transition-colors ${
-              isFullscreen ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-            }`}
+ isFullscreen ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             title="Tela cheia"
           >
             <Maximize2 className="w-4 h-4" />

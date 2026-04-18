@@ -77,10 +77,10 @@ export function AssetBrowser3D({ assets = defaultAssets, onAssetSelect, onAssetD
             type="button"
             onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-lg transition-colors ${
-              viewMode === 'grid' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
+ viewMode === 'grid' ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             title="Grid"
           >
             <Grid className="w-4 h-4" />
@@ -89,10 +89,10 @@ export function AssetBrowser3D({ assets = defaultAssets, onAssetSelect, onAssetD
             type="button"
             onClick={() => setViewMode('list')}
             className={`p-1.5 rounded-lg transition-colors ${
-              viewMode === 'list' ?
-                 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
+ viewMode === 'list' ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             title="Lista"
           >
             <List className="w-4 h-4" />
@@ -129,10 +129,10 @@ export function AssetBrowser3D({ assets = defaultAssets, onAssetSelect, onAssetD
             type="button"
             onClick={() => setSelectedCategory(category)}
             className={`px-3 py-1 text-xs rounded-full whitespace-nowrap transition-colors ${
-              selectedCategory === category ?
-                 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-            }`}
+ selectedCategory === category ?
+ 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
           >
             {category.charAt(0).toUpperCase() + category.slice(1)}
           </button>
@@ -153,10 +153,10 @@ export function AssetBrowser3D({ assets = defaultAssets, onAssetSelect, onAssetD
                   onAssetSelect?.(asset)
                 }}
                 className={`rounded-lg border p-3 cursor-pointer transition-all hover:shadow-lg ${
-                  selectedAsset === asset.id ?
-                     'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
-                    : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:border-[var(--aethel-border-primary)]'
-                }`}
+ selectedAsset === asset.id ?
+ 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
+ : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:border-[var(--aethel-border-primary)]'
+ }`}
               >
                 <div className="aspect-square mb-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] flex items-center justify-center">
                   {asset.thumbnail ? (
@@ -191,10 +191,10 @@ export function AssetBrowser3D({ assets = defaultAssets, onAssetSelect, onAssetD
                   onAssetSelect?.(asset)
                 }}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                  selectedAsset === asset.id ?
-                     'bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] text-[var(--aethel-primary-light)]'
-                    : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-                }`}
+ selectedAsset === asset.id ?
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
               >
                 <div className={`p-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] ${getTypeColor(asset.type)}`}>
                   {getAssetIcon(asset.type)}

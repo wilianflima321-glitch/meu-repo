@@ -460,8 +460,8 @@ export function StatusSelector() {
                 setIsOpen(false);
               }}
               className={`w-full flex items-center gap-2 px-3 py-2 hover:bg-[var(--aethel-surface-quaternary)] transition-colors ${
-                status.value === currentUser.status ? 'bg-[var(--aethel-surface-quaternary)]' : ''
-              }`}
+ status.value === currentUser.status ? 'bg-[var(--aethel-surface-quaternary)]' : ''
+ }`}
             >
               <div className={`w-2.5 h-2.5 rounded-full ${status.color}`} />
               <span className="text-sm text-[var(--aethel-text-primary)]">{status.label}</span>
@@ -503,8 +503,8 @@ export function UserListPanel() {
           <div
             key={user.id}
             className={`flex items-center gap-3 p-2 rounded-lg ${
-              user.id === currentUser?.id ? 'bg-[var(--aethel-surface-tertiary)]' : ''
-            }`}
+ user.id === currentUser?.id ? 'bg-[var(--aethel-surface-tertiary)]' : ''
+ }`}
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--aethel-text-primary)] font-medium relative"
@@ -522,10 +522,10 @@ export function UserListPanel() {
                 user.name.charAt(0).toUpperCase()
               )}
               <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--aethel-border-primary)] ${
-                user.status === 'online' ? 'bg-[var(--aethel-success)]' :
-                user.status === 'away' ? 'bg-[var(--aethel-warning)]' :
-                user.status === 'busy' ? 'bg-[var(--aethel-error)]' : 'bg-[var(--aethel-text-quaternary)]'
-              }`} />
+ user.status === 'online' ? 'bg-[var(--aethel-success)]' :
+ user.status === 'away' ? 'bg-[var(--aethel-warning)]' :
+ user.status === 'busy' ? 'bg-[var(--aethel-error)]' : 'bg-[var(--aethel-text-quaternary)]'
+ }`} />
             </div>
 
             <div className="flex-1 min-w-0">

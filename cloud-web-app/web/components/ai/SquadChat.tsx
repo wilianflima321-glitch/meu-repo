@@ -177,11 +177,7 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
   return (
     <div className={`relative pl-8 pb-4 ${!isLast ? 'border-l-2 border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)] ml-3' : 'ml-3'}`}>
       {/* Agent Avatar */}
-      <div className={`
-        absolute -left-4 w-8 h-8 rounded-full flex items-center justify-center
-        ${agent.bgColor} ${agent.color}
-        ${isActive ? `ring-2 ring-offset-2 ring-offset-[var(--aethel-surface-primary)] ${agent.ringColor} animate-pulse` : ''}
-      `}>
+      <div className={`absolute -left-4 w-8 h-8 rounded-full flex items-center justify-center ${agent.bgColor} ${agent.color} ${isActive ? `ring-2 ring-offset-2 ring-offset-[var(--aethel-surface-primary)] ${agent.ringColor} animate-pulse` : ''}`}>
         {isActive ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : step.phase === 'complete' ? (
@@ -194,13 +190,8 @@ function StepVisualization({ step, isActive, isLast }: StepVisualizationProps) {
       </div>
 
       {/* Step Content */}
-      <div className={`
-        rounded-lg border transition-all
-        ${isActive
-          ? `${agent.bgColor} ${agent.borderColor}`
-          : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] border-[var(--aethel-border-primary)]'
-        }
-      `}>
+      <div className={`rounded-lg border transition-all ${isActive
+ ? `${agent.bgColor} ${agent.borderColor}` : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] border-[var(--aethel-border-primary)]' }`}>
         {/* Header */}
         <button type="button" aria-label={`${expanded ? 'Recolher' : 'Expandir'} etapa ${step.message}`}
           onClick={() => setExpanded(!expanded)}
@@ -800,13 +791,10 @@ export function SystemPanel() {
           <button type="button" aria-label="Enviar tarefa ao squad"
             onClick={handleSubmit}
             disabled={!input.trim() || isProcessing}
-            className={`
-              p-3 rounded-xl transition-all
-              ${input.trim() && !isProcessing
-                ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
-              } ${CANONICAL_FOCUS} ${CANONICAL_MOTION}
-            `}
+            className={`p-3 rounded-xl transition-all ${input.trim() && !isProcessing
+ ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)] cursor-not-allowed'
+ } ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
           >
             {isProcessing ? (
               <Loader2 className="w-5 h-5 animate-spin" />

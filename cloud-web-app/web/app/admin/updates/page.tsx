@@ -163,12 +163,12 @@ export default function Updates() {
                   <td className='p-2'>{item.resource || '—'}</td>
                   <td className='p-2'>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      item.status === 'approved'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
-                        : item.status === 'review'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
-                    }`}>
+ item.status === 'approved'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
+ : item.status === 'review'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+ }`}>
                       {statusLabels[item.status] ?? item.status}
                     </span>
                   </td>

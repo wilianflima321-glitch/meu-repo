@@ -368,11 +368,7 @@ const BlendShapeSlider: React.FC<BlendShapeSliderProps> = React.memo(({ name, va
         step="0.01"
         value={value}
         onChange={(e) => onChange(name, parseFloat(e.target.value))}
-        className="flex-1 h-1 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3
-                   [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-[var(--aethel-info)] [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:hover:bg-[var(--aethel-info-light)]"
+        className="flex-1 h-1 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--aethel-info)] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:bg-[var(--aethel-info-light)]"
       />
       <span className="text-xs text-[var(--aethel-text-tertiary)] w-10 text-right font-mono">
         {value.toFixed(2)}
@@ -395,10 +391,9 @@ const EmotionPresetButton: React.FC<EmotionPresetButtonProps> = React.memo(({ pr
   return (
     <button type="button" aria-label={`Aplicar preset emocional ${preset.name}`}
       onClick={onClick}
-      className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200
-                  ${isActive
-                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-[var(--aethel-info-light)]'
-                    : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
+      className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${isActive
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-[var(--aethel-info-light)]'
+ : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
     >
       <span className="text-2xl mb-1">{preset.icon}</span>
       <span className="text-xs font-medium">{preset.name}</span>
@@ -569,10 +564,9 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
           <button type="button" aria-label={`Selecionar visema ${viseme.label}`}
             key={viseme.id}
             onClick={() => setSelectedViseme(viseme.id)}
-            className={`px-2 py-1 text-xs rounded transition-colors
-                        ${selectedViseme === viseme.id
-                          ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                          : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
+            className={`px-2 py-1 text-xs rounded transition-colors ${selectedViseme === viseme.id
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
           >
             {viseme.label}
           </button>
@@ -608,8 +602,7 @@ const LipSyncTimeline: React.FC<LipSyncTimelineProps> = React.memo(({
               }
             }}
           >
-            <div className="w-4 h-8 bg-[var(--aethel-info)] rounded-sm flex items-center justify-center
-                            group-hover:bg-[var(--aethel-info-light)] transition-colors">
+            <div className="w-4 h-8 bg-[var(--aethel-info)] rounded-sm flex items-center justify-center group-hover:bg-[var(--aethel-info-light)] transition-colors">
               <span className="text-xs font-bold text-[var(--aethel-text-primary)]">
                 {VISEMES.find(v => v.id === kf.viseme)?.label.charAt(0) || '?'}
               </span>
@@ -662,9 +655,7 @@ const FACSReference: React.FC<FACSReferenceProps> = React.memo(({ onSelectAU }) 
         placeholder="Search action units..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full px-3 py-2 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded text-sm
-                   text-[var(--aethel-text-secondary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2
-                   focus:ring-sky-500 mb-3"
+        className="w-full px-3 py-2 bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded text-sm text-[var(--aethel-text-secondary)] placeholder-[var(--aethel-text-quaternary)] focus:outline-none focus:ring-2 focus:ring-sky-500 mb-3"
       />
 
       <div className="max-h-64 overflow-y-auto space-y-1 custom-scrollbar">
@@ -1042,8 +1033,7 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
         <div className="flex items-center gap-2">
           <button type="button" aria-label={showFACS ? 'Ocultar referência FACS' : 'Mostrar referência FACS'}
             onClick={() => setShowFACS(!showFACS)}
-            className={`px-3 py-1.5 text-sm rounded transition-colors
-                        ${showFACS ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
+            className={`px-3 py-1.5 text-sm rounded transition-colors ${showFACS ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
           >
              FACS Reference
           </button>
@@ -1120,10 +1110,9 @@ const FacialAnimationEditor: React.FC<FacialAnimationEditorProps> = ({
               <button type="button" aria-label={`Selecionar categoria ${category.name} de blend shapes`}
                 key={category.name}
                 onClick={() => setActiveCategory(category.name)}
-                className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1
-                            ${activeCategory === category.name
-                              ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
+                className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1 ${activeCategory === category.name
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
               >
                 <span>{category.icon}</span>
                 <span>{category.name}</span>

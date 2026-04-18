@@ -382,8 +382,8 @@ export function ImageEditor({
             key={t}
             onClick={() => setTool(t)}
             className={`w-10 h-10 rounded flex items-center justify-center text-lg ${
-              tool === t ? 'bg-[var(--aethel-primary)]' : 'hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ tool === t ? 'bg-[var(--aethel-primary)]' : 'hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
             title={t.charAt(0).toUpperCase() + t.slice(1)}
           >
             {t === 'brush' && ''}
@@ -469,8 +469,8 @@ export function ImageEditor({
               key={layer.id}
               onClick={() => setActiveLayerId(layer.id)}
               className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
-                activeLayerId === layer.id ? 'bg-[var(--aethel-surface-quaternary)]' : 'hover:bg-[var(--aethel-surface-tertiary)]'
-              }`}
+ activeLayerId === layer.id ? 'bg-[var(--aethel-surface-quaternary)]' : 'hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
             >
               <input
                 type="checkbox"

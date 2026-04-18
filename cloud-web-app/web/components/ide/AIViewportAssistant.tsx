@@ -106,10 +106,10 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
             type="button"
             onClick={() => setIsPlaying(!isPlaying)}
             className={`p-1.5 rounded-lg transition-colors ${
-              isPlaying ?
-                 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
-            }`}
+ isPlaying ?
+ 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
+ }`}
             title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -144,19 +144,19 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
                     <div
                       key={step.id}
                       className={`rounded-lg border p-3 transition-all ${
-                        isCurrent ?
-                           'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
-                          : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
-                      }`}
+ isCurrent ?
+ 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
+ : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)]'
+ }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className={`p-1.5 rounded-lg ${
-                          step.type === 'thinking' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' :
-                          step.type === 'search' ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]' :
-                          step.type === 'code' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]' :
-                          step.type === 'preview' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)]' :
-                          'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
-                        }`}>
+ step.type === 'thinking' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' :
+ step.type === 'search' ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]' :
+ step.type === 'code' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]' :
+ step.type === 'preview' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)]' :
+ 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
+ }`}>
                           {step.type === 'thinking' && <Brain className="w-3.5 h-3.5 text-[var(--aethel-info-light)]" />}
                           {step.type === 'search' && <Search className="w-3.5 h-3.5 text-[var(--aethel-primary-light)]" />}
                           {step.type === 'code' && <Code className="w-3.5 h-3.5 text-[var(--aethel-warning-light)]" />}

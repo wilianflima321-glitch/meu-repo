@@ -74,7 +74,7 @@ export default function ContactPage() {
             </p>
             <Link
               href="/"
-              className="aethel-button aethel-button-primary mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
+              className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
             >
               Voltar ao inicio
             </Link>
@@ -230,10 +230,10 @@ export default function ContactPage() {
                           setFormData((prev) => ({ ...prev, reason: reason.value }))
                         }
                         className={`flex items-center gap-3 rounded-xl border p-4 text-left text-sm transition-all ${
-                          formData.reason == reason.value
-                            ? 'border-[var(--aethel-primary)]/50 bg-[var(--aethel-primary)]/15 text-[var(--aethel-text-primary)]'
-                            : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
-                        }`}
+ formData.reason == reason.value
+ ? 'border-[var(--aethel-primary)]/50 bg-[var(--aethel-primary)]/15 text-[var(--aethel-text-primary)]'
+ : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
                       >
                         <reason.icon className="h-5 w-5" />
                         <span className="font-medium">{reason.label}</span>
@@ -257,7 +257,7 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="aethel-button aethel-button-primary w-full rounded-xl px-6 py-3 text-sm font-semibold"
+                  className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 w-full rounded-xl px-6 py-3 text-sm font-semibold"
                 >
                   {loading ? 'Enviando...' : 'Enviar mensagem'}
                   {!loading && <Send className="h-4 w-4" />}

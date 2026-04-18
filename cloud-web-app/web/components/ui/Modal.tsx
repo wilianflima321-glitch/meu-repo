@@ -78,16 +78,7 @@ export function Modal({
           aria-labelledby={title ? 'modal-title' : undefined}
           aria-describedby={description ? 'modal-description' : undefined}
           onClick={(e) => e.stopPropagation()}
-          className={`
-            ${sizeClasses[size]} w-full
-            bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-secondary)_95%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)]
-            backdrop-blur-xl
-            border border-[var(--aethel-border-primary)]/50
-            rounded-2xl
-            shadow-2xl shadow-black/50
-            animate-in fade-in zoom-in-95 duration-200
-            flex flex-col max-h-[90vh]
-          `}
+          className={`${sizeClasses[size]} w-full bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-surface-secondary)_95%,transparent)] to-[color-mix(in_srgb,var(--aethel-surface-primary)_95%,transparent)] backdrop-blur-xl border border-[var(--aethel-border-primary)]/50 rounded-2xl shadow-2xl shadow-black/50 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]`}
         >
           {/* Header */}
           {(title || showCloseButton) && (
@@ -113,13 +104,7 @@ export function Modal({
               {showCloseButton && (
                 <button type="button"
                   onClick={onClose}
-                  className="
-                    flex-shrink-0 p-2 rounded-lg
-                    text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
-                    bg-transparent hover:bg-[var(--aethel-surface-quaternary)]/50
-                    transition-all duration-200
-                    focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)]
-                  "
+                  className="flex-shrink-0 p-2 rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] bg-transparent hover:bg-[var(--aethel-surface-quaternary)]/50 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)]"
                   aria-label="Fechar modal"
                 >
                   <X className="h-5 w-5" />

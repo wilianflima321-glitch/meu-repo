@@ -107,20 +107,14 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onSelect(pkg)}
-      className={`
-        relative p-4 rounded-xl border-2 transition-all text-left w-full
-        ${isSelected
-          ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]'
-          : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)]'
-        }
-        ${pkg.popular ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : ''}
-      `}
+      className={`relative p-4 rounded-xl border-2 transition-all text-left w-full ${isSelected
+ ? 'border-[var(--aethel-primary)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)]'
+ : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] hover:border-[var(--aethel-border-secondary)]'
+ } ${pkg.popular ? 'ring-2 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : ''}`}
     >
       {/* Popular badge */}
       {pkg.popular && (
-        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2
-                      px-2 py-0.5 bg-[var(--aethel-primary)] rounded-full
-                      text-[10px] font-semibold uppercase tracking-wider">
+        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[var(--aethel-primary)] rounded-full text-[10px] font-semibold uppercase tracking-wider">
           Mais Popular
         </div>
       )}
@@ -163,8 +157,7 @@ function PackageCard({ pkg, onSelect, isSelected }: PackageCardProps) {
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute top-2 right-2 w-5 h-5 bg-[var(--aethel-primary)] rounded-full
-                   flex items-center justify-center"
+          className="absolute top-2 right-2 w-5 h-5 bg-[var(--aethel-primary)] rounded-full flex items-center justify-center"
         >
           <Check className="w-3 h-3 text-[var(--aethel-text-primary)]" />
         </motion.div>
@@ -254,18 +247,12 @@ export function LowBalanceModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`
-              fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-              w-full max-w-lg max-h-[90vh] overflow-y-auto
-              bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-2xl shadow-2xl z-50
-              ${className}
-            `}
+            className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-secondary)] rounded-2xl shadow-2xl z-50 ${className}`}
           >
             {/* Close button */}
             <button type="button" aria-label="Fechar modal de saldo baixo"
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 hover:bg-[var(--aethel-surface-quaternary)]
-                       rounded-lg transition-colors z-10"
+              className="absolute top-4 right-4 p-2 hover:bg-[var(--aethel-surface-quaternary)] rounded-lg transition-colors z-10"
             >
               <X className="w-5 h-5 text-[var(--aethel-text-tertiary)]" />
             </button>
@@ -274,12 +261,9 @@ export function LowBalanceModal({
             <div className="p-6 pb-0">
               <div className="flex items-start gap-4">
                 {/* Icon with animation */}
-                <div className={`
-                  relative w-14 h-14 rounded-2xl flex items-center justify-center
-                  ${balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]'
-                    : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
-                    : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'}
-                `}>
+                <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]'
+ : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'}`}>
                   <motion.div
                     animate={{
                       scale: [1, 1.1, 1],
@@ -297,10 +281,10 @@ export function LowBalanceModal({
                   {/* Pulse effect */}
                   <motion.div
                     className={`absolute inset-0 rounded-2xl ${
-                      balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]'
-                        : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'
-                    }`}
+ balanceLevel === 'empty' ? 'bg-[color-mix(in_srgb,var(--aethel-error)_16%,transparent)]'
+ : balanceLevel === 'critical' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_16%,transparent)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)]'
+ }`}
                     animate={{
                       scale: [1, 1.3],
                       opacity: [0.5, 0]
@@ -377,11 +361,7 @@ export function LowBalanceModal({
               <button type="button" aria-label="Recarregar creditos agora"
                 onClick={handleContinue}
                 disabled={!selectedPackage || isProcessing}
-                className="w-full flex items-center justify-center gap-2 py-3
-                         bg-[linear-gradient(120deg,var(--aethel-primary),var(--aethel-info))]
-                         hover:brightness-110
-                         rounded-xl text-[var(--aethel-text-primary)] font-semibold transition-all
-                         disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-[linear-gradient(120deg,var(--aethel-primary),var(--aethel-info))] hover:brightness-110 rounded-xl text-[var(--aethel-text-primary)] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? (
                   <>
@@ -408,8 +388,7 @@ export function LowBalanceModal({
 
               <button type="button" aria-label="Lembrar mais tarde sobre saldo baixo"
                 onClick={handleRemindLater}
-                className="w-full py-2.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]
-                         transition-colors"
+                className="w-full py-2.5 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] transition-colors"
               >
                 Lembrar mais tarde
               </button>
@@ -417,8 +396,7 @@ export function LowBalanceModal({
 
             {/* Upgrade suggestion for heavy users */}
             {balanceLevel === 'critical' && (
-              <div className="mx-6 mb-6 p-4 bg-[linear-gradient(120deg,color-mix(in_srgb,var(--aethel-primary)_18%,transparent),color-mix(in_srgb,var(--aethel-info)_18%,transparent))]
-                            border border-[var(--aethel-primary)]/20 rounded-xl">
+              <div className="mx-6 mb-6 p-4 bg-[linear-gradient(120deg,color-mix(in_srgb,var(--aethel-primary)_18%,transparent),color-mix(in_srgb,var(--aethel-info)_18%,transparent))] border border-[var(--aethel-primary)]/20 rounded-xl">
                 <div className="flex items-start gap-3">
                   <TrendingUp className="w-5 h-5 text-[var(--aethel-primary)] flex-shrink-0 mt-0.5" />
                   <div>
@@ -428,8 +406,7 @@ export function LowBalanceModal({
                     <p className="text-xs text-[color-mix(in_srgb,var(--aethel-primary)_70%,transparent)] mt-1">
                       Considere o plano Pro para creditos ilimitados por $49/mês
                     </p>
-                    <button type="button" aria-label="Ver planos para upgrade de creditos" className="flex items-center gap-1 mt-2 text-xs font-medium
-                                      text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
+                    <button type="button" aria-label="Ver planos para upgrade de creditos" className="flex items-center gap-1 mt-2 text-xs font-medium text-[var(--aethel-primary)] hover:text-[var(--aethel-primary)] transition-colors">
                       Ver planos
                       <ChevronRight className="w-3 h-3" />
                     </button>

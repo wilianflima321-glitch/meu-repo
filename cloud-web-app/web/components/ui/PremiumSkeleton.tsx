@@ -285,14 +285,7 @@ function GlassSkeleton({
   className?: string
 }) {
   return (
-    <div className={`
-      rounded-xl
-      bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
-      border border-[var(--aethel-border-primary)]
-      backdrop-blur-sm
-      animate-pulse
-      ${className}
-    `}>
+    <div className={`rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)] backdrop-blur-sm animate-pulse ${className}`}>
       {children}
     </div>
   )

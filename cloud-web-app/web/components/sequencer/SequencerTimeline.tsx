@@ -359,6 +359,7 @@ const TrackRow: React.FC<{
         {/* Controls */}
         <div style={{ display: 'flex', gap: '4px' }}>
           <button type="button"
+            aria-label="Lock"
             onClick={onToggleLock}
             style={{
               background: 'transparent',
@@ -371,6 +372,7 @@ const TrackRow: React.FC<{
             {track.locked ? <Lock size={12} /> : <Unlock size={12} />}
           </button>
           <button type="button"
+            aria-label="Hide"
             onClick={onToggleVisible}
             style={{
               background: 'transparent',
@@ -383,6 +385,7 @@ const TrackRow: React.FC<{
             {track.visible === false ? <EyeOff size={12} /> : <Eye size={12} />}
           </button>
           <button type="button"
+            aria-label="Mute audio"
             onClick={onToggleMute}
             style={{
               background: 'transparent',
@@ -584,6 +587,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
         {/* Play Controls */}
         <div style={{ display: 'flex', gap: '4px' }}>
           <button type="button"
+            aria-label="Stop"
             onClick={onStop}
             style={{
               padding: '6px',
@@ -597,6 +601,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
             <Square size={14} />
           </button>
           <button type="button"
+            aria-label="Skip back"
             onClick={() => onTimeChange(Math.max(0, currentTime - 1))}
             style={{
               padding: '6px',
@@ -610,6 +615,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
             <SkipBack size={14} />
           </button>
           <button type="button"
+            aria-label="Pause"
             onClick={isPlaying ? onPause : onPlay}
             style={{
               padding: '6px 12px',
@@ -623,6 +629,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
             {isPlaying ? <Pause size={14} /> : <Play size={14} />}
           </button>
           <button type="button"
+            aria-label="Skip forward"
             onClick={() => onTimeChange(Math.min(sequence.duration, currentTime + 1))}
             style={{
               padding: '6px',
@@ -672,6 +679,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
         {/* Zoom */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <button type="button"
+            aria-label="Zoom out"
             onClick={handleZoomOut}
             style={{
               padding: '4px',
@@ -687,6 +695,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
             {Math.round(pixelsPerSecond)}px/s
           </span>
           <button type="button"
+            aria-label="Zoom in"
             onClick={handleZoomIn}
             style={{
               padding: '4px',

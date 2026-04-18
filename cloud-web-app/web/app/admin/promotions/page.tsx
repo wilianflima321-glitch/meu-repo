@@ -251,13 +251,14 @@ export default function PromotionsPage() {
           <div className="flex items-center gap-2">
             {(['all', 'active', 'inactive'] as const).map((status) => (
               <button type="button"
+                aria-label="Set status filter"
                 key={status}
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
-                  statusFilter === status
-                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
-                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                }`}
+ statusFilter === status
+ ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
               >
                 {status === 'all' ? 'Todas' : status === 'active' ? 'Ativas' : 'Inativas'}
               </button>
@@ -291,8 +292,8 @@ export default function PromotionsPage() {
                 <div className="flex items-center gap-2 mt-2 md:mt-0">
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
-                      promo.active ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                    }`}
+ promo.active ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
                   >
                     {promo.active ? 'Ativa' : 'Inativa'}
                   </span>

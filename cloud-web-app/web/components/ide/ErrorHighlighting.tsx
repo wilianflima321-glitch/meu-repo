@@ -87,10 +87,10 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               type="button"
               onClick={() => setFilter('all')}
               className={`px-3 py-1 text-[10px] rounded-full transition-colors ${
-                filter === 'all' ?
-                   'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-              }`}
+ filter === 'all' ?
+ 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             >
               Todos {filteredErrors.length}
             </button>
@@ -98,10 +98,10 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               type="button"
               onClick={() => setFilter('error')}
               className={`px-3 py-1 text-[10px] rounded-full transition-colors ${
-                filter === 'error' ?
-                   'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-              }`}
+ filter === 'error' ?
+ 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             >
               Erros {getTypeCount('error')}
             </button>
@@ -109,10 +109,10 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               type="button"
               onClick={() => setFilter('warning')}
               className={`px-3 py-1 text-[10px] rounded-full transition-colors ${
-                filter === 'warning' ?
-                   'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-              }`}
+ filter === 'warning' ?
+ 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             >
               Alertas {getTypeCount('warning')}
             </button>
@@ -120,10 +120,10 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
               type="button"
               onClick={() => setFilter('info')}
               className={`px-3 py-1 text-[10px] rounded-full transition-colors ${
-                filter === 'info' ?
-                   'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
-              }`}
+ filter === 'info' ?
+ 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)]'
+ }`}
             >
               Info {getTypeCount('info')}
             </button>
@@ -146,8 +146,8 @@ export function ErrorHighlighting({ errors = [], onErrorSelect, onErrorDismiss, 
                 <div
                   key={error.id}
                   className={`rounded-lg border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-3 ${getSeverityColor(error.severity)} ${
-                    selectedError === error.id ? 'ring-2 ring-[var(--aethel-primary)]' : ''
-                  }`}
+ selectedError === error.id ? 'ring-2 ring-[var(--aethel-primary)]' : ''
+ }`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5">

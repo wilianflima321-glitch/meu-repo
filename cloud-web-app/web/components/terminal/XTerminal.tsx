@@ -381,14 +381,10 @@ const TerminalTab: React.FC<TerminalTabProps> = ({
 
   return (
     <div
-      className={`
-        flex items-center gap-2 px-3 py-1.5 border-r border-[var(--aethel-border-primary)]
-        cursor-pointer select-none min-w-0 max-w-[200px] group
-        ${isActive
-          ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
-          : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-        }
-      `}
+      className={`flex items-center gap-2 px-3 py-1.5 border-r border-[var(--aethel-border-primary)] cursor-pointer select-none min-w-0 max-w-[200px] group ${isActive
+ ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
       onClick={onSelect}
       onDoubleClick={() => setIsEditing(true)}
       role="tab"
@@ -497,11 +493,7 @@ const ShellSelector: React.FC<ShellSelectorProps> = ({ onSelect, selectedShell }
                 onSelect(shell);
                 setIsOpen(false);
               }}
-              className={`
-                w-full flex items-center gap-2 px-3 py-2 text-sm text-left
-                hover:bg-[var(--aethel-surface-tertiary)] transition-colors
-                ${selectedShell === shell.path ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-secondary)]'}
-              `}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left hover:bg-[var(--aethel-surface-tertiary)] transition-colors ${selectedShell === shell.path ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-secondary)]'}`}
               role="option"
               aria-selected={selectedShell === shell.path}
             >
@@ -996,11 +988,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
 
     return (
       <div
-        className={`
-          flex flex-col h-full bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg overflow-hidden
-          ${isMaximized ? 'fixed inset-0 z-50' : ''}
-          ${className}
-        `}
+        className={`flex flex-col h-full bg-[var(--aethel-surface-primary)] border border-[var(--aethel-border-primary)] rounded-lg overflow-hidden ${isMaximized ? 'fixed inset-0 z-50' : ''} ${className}`}
         role="application"
         aria-label="Terminal"
       >
@@ -1030,8 +1018,8 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
             {/* Connection Status */}
             <div
               className={`w-2 h-2 rounded-full mr-2 ${
-                isConnected ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
-              }`}
+ isConnected ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
+ }`}
               title={isConnected ? 'Connected' : 'Disconnected'}
             />
 
@@ -1170,8 +1158,8 @@ export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
       {/* Terminal Grid */}
       <div
         className={`flex-1 flex ${
-          splitDirection === 'horizontal' ? 'flex-row' : 'flex-col'
-        } gap-px bg-[var(--aethel-surface-tertiary)]`}
+ splitDirection === 'horizontal' ? 'flex-row' : 'flex-col'
+ } gap-px bg-[var(--aethel-surface-tertiary)]`}
       >
         {terminals.map((id, index) => (
           <div key={id} className="flex-1 min-w-0 min-h-0">

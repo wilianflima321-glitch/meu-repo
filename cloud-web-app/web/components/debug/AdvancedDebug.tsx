@@ -169,10 +169,10 @@ export function BreakpointEditor({
             key={value}
             onClick={() => setType(value as BreakpointType)}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs transition-colors ${
-              type === value
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border-b-2 border-[var(--aethel-info)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ type === value
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border-b-2 border-[var(--aethel-info)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
           >
             <Icon className="w-3.5 h-3.5" />
             {label}
@@ -523,8 +523,8 @@ export function WatchPanel({
       <div key={expr.id}>
         <div
           className={`flex items-center gap-2 px-2 py-1 hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group ${
-            disabled ? 'opacity-50' : ''
-          }`}
+ disabled ? 'opacity-50' : ''
+ }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
         >
           {/* Expand toggle */}
@@ -574,11 +574,11 @@ export function WatchPanel({
               ) : (
                 <>
                   <span className={`text-sm font-mono truncate ${
-                    expr.type === 'string' ? 'text-[var(--aethel-success-light)]' :
-                    expr.type === 'number' ? 'text-[var(--aethel-warning-light)]' :
-                    expr.type === 'boolean' ? 'text-[var(--aethel-info-light)]' :
-                    'text-[var(--aethel-text-secondary)]'
-                  }`}>
+ expr.type === 'string' ? 'text-[var(--aethel-success-light)]' :
+ expr.type === 'number' ? 'text-[var(--aethel-warning-light)]' :
+ expr.type === 'boolean' ? 'text-[var(--aethel-info-light)]' :
+ 'text-[var(--aethel-text-secondary)]'
+ }`}>
                     {expr.value ?? 'undefined'}
                   </span>
                   {expr.type && (
@@ -749,8 +749,8 @@ export function CallStackPanel({
                   onSelectThread?.(thread.id);
                 }}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] ${
-                  selectedThreadId === thread.id ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : ''
-                }`}
+ selectedThreadId === thread.id ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : ''
+ }`}
               >
                 {expandedThreads.has(thread.id) ? (
                   <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
@@ -840,8 +840,8 @@ function StackFrameItem({
     <button type="button" aria-label={`Selecionar frame ${frame.name}`}
       onClick={onSelect}
       className={`w-full flex items-center gap-2 px-4 py-1.5 text-sm text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_50%,transparent)] group ${
-        isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' : ''
-      }`}
+ isSelected ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]' : ''
+ }`}
     >
       {/* Frame number */}
       <span className="w-5 text-right text-xs text-[var(--aethel-text-quaternary)]">
@@ -954,14 +954,14 @@ export function DebugToolbar({
           disabled={disabled}
           title={label}
           className={`p-1.5 rounded transition-colors ${
-            disabled
-              ? 'text-[var(--aethel-text-quaternary)] cursor-not-allowed'
-              : primary
-                ? 'text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-                : danger
-                  ? 'text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
-                  : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-          }`}
+ disabled
+ ? 'text-[var(--aethel-text-quaternary)] cursor-not-allowed'
+ : primary
+ ? 'text-[var(--aethel-success-light)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ : danger
+ ? 'text-[var(--aethel-error-light)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ }`}
         >
           <Icon className="w-4 h-4" fill={primary && !disabled ? 'currentColor' : 'none'} />
         </button>

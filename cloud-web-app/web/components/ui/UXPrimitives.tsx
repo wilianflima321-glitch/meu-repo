@@ -36,10 +36,10 @@ export function EmptyState({ icon = 'inbox', title, description, action, seconda
               onClick={action.onClick}
               aria-label={action.label}
               className={`rounded-lg border px-4 py-2 text-sm font-medium transition ${
-                action.variant == 'secondary'
-                  ? 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'
-                  : 'border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)]'
-              }`}
+ action.variant == 'secondary'
+ ? 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'
+ : 'border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)]'
+ }`}
             >
               {action.label}
             </button>
@@ -133,12 +133,12 @@ export function ProgressStepper({ steps }: { steps: ProgressStep[] }) {
         <div key={step.label} className="flex items-center gap-1">
           <div
             className={`flex h-6 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors ${
-              step.completed
-                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
-                : step.active
-                ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-tertiary)]'
-            }`}
+ step.completed
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
+ : step.active
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_15%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-tertiary)]'
+ }`}
           >
             {step.completed ? <Codicon name="check" /> : null}
             <span className="hidden sm:inline">{step.label}</span>
@@ -146,10 +146,10 @@ export function ProgressStepper({ steps }: { steps: ProgressStep[] }) {
           {i < steps.length - 1 && (
             <div
               className={`h-px w-4 ${
-                step.completed
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
-                  : 'bg-[var(--aethel-border-subtle)]'
-              }`}
+ step.completed
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
+ : 'bg-[var(--aethel-border-subtle)]'
+ }`}
             />
           )}
         </div>

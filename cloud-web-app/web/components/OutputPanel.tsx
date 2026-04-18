@@ -69,13 +69,14 @@ export default function OutputPanel() {
         <div className="flex">
           {channels.map(channel => (
             <button type="button"
+              aria-label="Set active channel"
               key={channel}
               onClick={() => setActiveChannel(channel)}
               className={`px-4 py-2 text-sm transition-colors border-b-2 ${
-                activeChannel === channel
-                  ? 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)] bg-[var(--aethel-surface-tertiary)]'
-                  : 'border-transparent text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-              }`}
+ activeChannel === channel
+ ? 'border-[var(--aethel-primary)] text-[var(--aethel-text-primary)] bg-[var(--aethel-surface-tertiary)]'
+ : 'border-transparent text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
             >
               {channel}
             </button>

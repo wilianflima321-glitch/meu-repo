@@ -76,10 +76,10 @@ export default function FilmsDocsPage() {
                   <Icon className="h-5 w-5 text-[var(--aethel-info-light)]" />
                   <h3 className="font-semibold">{cap.title}</h3>
                   <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
-                    cap.status === 'available' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' :
-                    cap.status === 'experimental' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]' :
-                    'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_20%,transparent)] text-[var(--aethel-text-tertiary)]'
-                  }`}>
+ cap.status === 'available' ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' :
+ cap.status === 'experimental' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]' :
+ 'bg-[color-mix(in_srgb,var(--aethel-border-secondary)_20%,transparent)] text-[var(--aethel-text-tertiary)]'
+ }`}>
                     {cap.status}
                   </span>
                 </div>

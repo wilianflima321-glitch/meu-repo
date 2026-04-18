@@ -111,10 +111,10 @@ export default function AdminDashboardPro() {
             onClick={() => setActiveTab(tab)}
             aria-label={`Abrir aba ${tab === 'overview' ? 'visao geral' : tab === 'billing' ? 'faturamento' : tab === 'security' ? 'seguranca' : 'operacoes'}`}
             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider whitespace-nowrap ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
-              activeTab === tab
-                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-            }`}
+ activeTab === tab
+ ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
           >
             {tab === 'overview' && <Activity className="inline mr-2" size={14} />}
             {tab === 'billing' && <CreditCard className="inline mr-2" size={14} />}
@@ -141,9 +141,9 @@ export default function AdminDashboardPro() {
                   <div className="flex items-end justify-between">
                     <p className="text-2xl font-bold text-[var(--aethel-text-primary)]">{metric.value}</p>
                     <div className={`flex items-center gap-1 text-xs font-bold ${
-                      metric.status === 'up' ? 'text-[var(--aethel-success)]' :
-                      metric.status === 'down' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'
-                    }`}>
+ metric.status === 'up' ? 'text-[var(--aethel-success)]' :
+ metric.status === 'down' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-text-tertiary)]'
+ }`}>
                       <TrendingUp size={14} />
                       {metric.change > 0 ? '+' : ''}{metric.change}%
                     </div>
@@ -245,10 +245,10 @@ export default function AdminDashboardPro() {
               {opsNotice && (
                 <div
                   className={`mb-4 rounded-lg border px-3 py-2 text-sm ${
-                    opsNotice.type === 'success'
-                      ? 'border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success-light)]'
-                      : 'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 text-[var(--aethel-error-light)]'
-                  }`}
+ opsNotice.type === 'success'
+ ? 'border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success-light)]'
+ : 'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 text-[var(--aethel-error-light)]'
+ }`}
                   role="status"
                   aria-live="polite"
                 >

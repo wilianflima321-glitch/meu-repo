@@ -358,8 +358,8 @@ export function DiffHunkPreview({
     <div
       ref={previewRef}
       className={`fixed z-50 w-96 bg-[var(--aethel-surface-primary)] border-l-4 ${getColor()} rounded-r-lg shadow-2xl overflow-hidden transition-all duration-150 ${
-        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-      }`}
+ isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+ }`}
       style={{
         left: Math.min(position.x + 10, window.innerWidth - 400),
         top: Math.min(position.y, window.innerHeight - 300),

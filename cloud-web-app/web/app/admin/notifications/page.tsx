@@ -106,8 +106,8 @@ export default function Notifications() {
               key={status}
               onClick={() => setReadFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                readFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-              }`}
+ readFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
             >
               {status === 'all' ? 'Todas' : status === 'read' ? 'Lidas' : 'Não lidas'}
             </button>
@@ -157,8 +157,8 @@ export default function Notifications() {
                   <td className='p-2'>{item.userEmail || '—'}</td>
                   <td className='p-2'>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      item.read ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                    }`}>
+ item.read ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ }`}>
                       {item.read ? 'Lida' : 'Não lida'}
                     </span>
                   </td>

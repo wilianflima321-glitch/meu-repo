@@ -127,16 +127,10 @@ const Tab: React.FC<TabProps> = ({
 
   return (
     <div
-      className={`
-        group relative flex items-center gap-1.5 h-9 px-3 cursor-pointer
-        border-r border-[var(--aethel-border-primary)] select-none
-        ${isActive
-          ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-primary)]'
-          : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
-        }
-        ${tab.preview ? 'italic' : ''}
-        ${tab.pinned ? 'bg-[var(--aethel-surface-tertiary)]' : ''}
-      `}
+      className={`group relative flex items-center gap-1.5 h-9 px-3 cursor-pointer border-r border-[var(--aethel-border-primary)] select-none ${isActive
+ ? 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] border-t-2 border-t-[var(--aethel-primary)]'
+ : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ } ${tab.preview ? 'italic' : ''} ${tab.pinned ? 'bg-[var(--aethel-surface-tertiary)]' : ''}`}
       onClick={onTabClick}
       onDoubleClick={() => {
         if (tab.preview) onTabClick(); // Makes permanent
@@ -175,11 +169,7 @@ const Tab: React.FC<TabProps> = ({
 
       {/* Close button */}
       <button type="button" aria-label={`Close ${tab.title}`}
-        className={`
-          flex-shrink-0 p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)]
-          ${isActive || tab.dirty ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
-          transition-opacity
-        `}
+        className={`flex-shrink-0 p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] ${isActive || tab.dirty ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}
         onClick={(e) => {
           e.stopPropagation();
           onTabClose();
@@ -196,8 +186,7 @@ const Tab: React.FC<TabProps> = ({
       {showMenu && (
         <div
           ref={menuRef}
-          className="absolute top-full left-0 mt-1 w-48 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)]
-                     rounded-md shadow-xl z-50 py-1"
+          className="absolute top-full left-0 mt-1 w-48 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-md shadow-xl z-50 py-1"
           onClick={(e) => e.stopPropagation()}
         >
           <button type="button" aria-label={`Close ${tab.title}`}
@@ -328,18 +317,14 @@ const TabBar: React.FC<TabBarProps> = ({
 
   return (
     <div
-      className={`
-        flex items-center h-9 bg-[var(--aethel-surface-tertiary)] border-b
-        ${isActiveGroup ? 'border-b-[var(--aethel-surface-secondary)]' : 'border-b-[var(--aethel-border-secondary)]'}
-      `}
+      className={`flex items-center h-9 bg-[var(--aethel-surface-tertiary)] border-b ${isActiveGroup ? 'border-b-[var(--aethel-surface-secondary)]' : 'border-b-[var(--aethel-border-secondary)]'}`}
       onClick={onGroupFocus}
       role="tablist"
     >
       {/* Tabs */}
       <div
         ref={tabsContainerRef}
-        className="flex-1 flex items-center overflow-x-auto overflow-y-hidden
-                   scrollbar-thin scrollbar-thumb-[var(--aethel-border-secondary)] scrollbar-track-transparent"
+        className="flex-1 flex items-center overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-[var(--aethel-border-secondary)] scrollbar-track-transparent"
         onDragLeave={handleDragLeave}
       >
         {sortedTabs.map((tab, index) => (
@@ -447,10 +432,7 @@ const EditorGroupView: React.FC<EditorGroupViewProps> = ({
 
   return (
     <div
-      className={`
-        flex flex-col h-full
-        ${isActiveGroup ? 'ring-1 ring-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]' : ''}
-      `}
+      className={`flex flex-col h-full ${isActiveGroup ? 'ring-1 ring-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]' : ''}`}
       onClick={onGroupFocus}
     >
       {/* Tab Bar */}
@@ -535,14 +517,10 @@ const ResizableDivider: React.FC<ResizableDividerProps> = ({
 
   return (
     <div
-      className={`
-        ${direction === 'horizontal'
-          ? 'w-1 cursor-col-resize hover:bg-[var(--aethel-primary)]/50'
-          : 'h-1 cursor-row-resize hover:bg-[var(--aethel-primary)]/50'
-        }
-        ${isDragging ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-border-secondary)]'}
-        transition-colors
-      `}
+      className={`${direction === 'horizontal'
+ ? 'w-1 cursor-col-resize hover:bg-[var(--aethel-primary)]/50'
+ : 'h-1 cursor-row-resize hover:bg-[var(--aethel-primary)]/50'
+ } ${isDragging ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-border-secondary)]'} transition-colors`}
       onMouseDown={handleMouseDown}
     />
   );
@@ -615,9 +593,9 @@ export const SplitEditor: React.FC<SplitEditorProps> = ({
   return (
     <div
       className={`
-        flex h-full w-full
-        ${splitDirection === 'horizontal' ? 'flex-row' : 'flex-col'}
-      `}
+ flex h-full w-full
+ ${splitDirection === 'horizontal' ? 'flex-row' : 'flex-col'}
+ `}
     >
       {groups.map((group, index) => (
         <React.Fragment key={group.id}>

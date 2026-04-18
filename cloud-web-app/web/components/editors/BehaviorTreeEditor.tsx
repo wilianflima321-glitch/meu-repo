@@ -445,8 +445,8 @@ export default function BehaviorTreeEditor() {
           <button type="button" aria-label={isSimulating ? 'Parar simulação da behavior tree' : 'Iniciar simulação da behavior tree'}
             onClick={() => setIsSimulating(!isSimulating)}
             className={`px-3 py-1 rounded text-sm font-medium ${
-              isSimulating ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : 'bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-            } text-[var(--aethel-text-primary)]`}
+ isSimulating ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : 'bg-[var(--aethel-success)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ } text-[var(--aethel-text-primary)]`}
           >
             {isSimulating ? ' Stop' : ' Simulate'}
           </button>

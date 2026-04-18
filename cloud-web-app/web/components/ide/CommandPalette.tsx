@@ -667,8 +667,8 @@ function CommandPaletteUI({
                     role="option"
                     aria-selected={index === selectedIndex}
                     className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
-                      index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]' : 'hover:bg-[var(--aethel-surface-tertiary)]/70'
-                    }`}
+ index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]' : 'hover:bg-[var(--aethel-surface-tertiary)]/70'
+ }`}
                   >
                     <Codicon name={icon} className="text-[var(--aethel-text-tertiary)]" />
                     <div className="min-w-0 flex-1">
@@ -693,8 +693,8 @@ function CommandPaletteUI({
                     role="option"
                     aria-selected={index === selectedIndex}
                     className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
-                      index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]' : 'hover:bg-[var(--aethel-surface-tertiary)]/70'
-                    }`}
+ index === selectedIndex ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)]' : 'hover:bg-[var(--aethel-surface-tertiary)]/70'
+ }`}
                   >
                     <Codicon name={icon} className="text-[var(--aethel-text-tertiary)]" />
                     <div className="min-w-0 flex-1">

@@ -179,10 +179,10 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
           <button type="button" aria-label="Resolver conflito mantendo suas alterações"
             onClick={() => setResolution('ours')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
-              resolution === 'ours'
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ resolution === 'ours'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
           >
             <div className="font-semibold mb-1">Accept Current (Ours)</div>
             <div className="text-xs opacity-75">Keep your changes</div>
@@ -191,10 +191,10 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
           <button type="button" aria-label="Resolver conflito usando alterações remotas"
             onClick={() => setResolution('theirs')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
-              resolution === 'theirs'
-                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ resolution === 'theirs'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
           >
             <div className="font-semibold mb-1">Accept Incoming (Theirs)</div>
             <div className="text-xs opacity-75">Use their changes</div>
@@ -203,10 +203,10 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
           <button type="button" aria-label="Resolver conflito manualmente"
             onClick={() => setResolution('manual')}
             className={`flex-1 px-4 py-3 rounded-lg transition-colors ${
-              resolution === 'manual'
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ resolution === 'manual'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
           >
             <div className="font-semibold mb-1">Manual Resolution</div>
             <div className="text-xs opacity-75">Edit manually</div>
@@ -275,12 +275,12 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
                   <div
                     key={`ours-${index}`}
                     className={`p-2 font-mono text-sm ${
-                      line.status === 'same'
-                        ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]'
-                        : line.status === 'removed'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                    }`}
+ line.status === 'same'
+ ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]'
+ : line.status === 'removed'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ }`}
                   >
                     <span className="text-[var(--aethel-text-quaternary)] mr-4">{line.lineNumber}</span>
                     {line.ours || ' '}
@@ -288,12 +288,12 @@ export default function MergeConflictResolver({ filePath }: { filePath: string }
                   <div
                     key={`theirs-${index}`}
                     className={`p-2 font-mono text-sm ${
-                      line.status === 'same'
-                        ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]'
-                        : line.status === 'added'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
-                    }`}
+ line.status === 'same'
+ ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-tertiary)]'
+ : line.status === 'added'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+ }`}
                   >
                     <span className="text-[var(--aethel-text-quaternary)] mr-4">{line.lineNumber}</span>
                     {line.theirs || ' '}

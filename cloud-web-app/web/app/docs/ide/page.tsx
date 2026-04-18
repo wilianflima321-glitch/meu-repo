@@ -98,8 +98,8 @@ export default function IDEDocsPage() {
             <div
               key={shortcut.key}
               className={`flex items-center justify-between px-4 py-2.5 ${
-                i < KEYBOARD_SHORTCUTS.length - 1 ? 'border-b border-[var(--aethel-border-subtle)]' : ''
-              }`}
+ i < KEYBOARD_SHORTCUTS.length - 1 ? 'border-b border-[var(--aethel-border-subtle)]' : ''
+ }`}
             >
               <span className="text-sm text-[var(--aethel-text-secondary)]">{shortcut.action}</span>
               <kbd className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] px-2 py-0.5 text-xs font-mono text-[var(--aethel-text-tertiary)]">

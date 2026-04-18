@@ -517,10 +517,10 @@ export default function KeybindingsEditor({
         <button type="button" aria-label={showOnlyModified ? 'Mostrar todos os atalhos' : 'Mostrar apenas atalhos modificados'}
           onClick={() => setShowOnlyModified(!showOnlyModified)}
           className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition-colors ${
-            showOnlyModified
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] text-[var(--aethel-text-primary)]'
-              : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-          }`}
+ showOnlyModified
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
         >
           <Filter className="w-4 h-4" />
           Somente modificados
@@ -633,8 +633,8 @@ function KeybindingRow({
   return (
     <div
       className={`grid grid-cols-[1fr_200px_120px_80px] gap-4 px-4 py-2 border-b border-[var(--aethel-border-primary)] hover:bg-[var(--aethel-surface-secondary)]/30 items-center ${
-        hasConflict ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)]' : ''
-      }`}
+ hasConflict ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_5%,transparent)]' : ''
+ }`}
     >
       {/* Command */}
       <div>
@@ -654,8 +654,8 @@ function KeybindingRow({
           <div className="flex items-center gap-2 group">
             {keybinding.keybinding ? (
               <kbd className={`px-2 py-1 bg-[var(--aethel-surface-tertiary)] rounded text-xs ${
-                hasConflict ? 'text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]' : 'text-[var(--aethel-text-secondary)]'
-              }`}>
+ hasConflict ? 'text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]' : 'text-[var(--aethel-text-secondary)]'
+ }`}>
                 {keybinding.keybinding}
               </kbd>
             ) : (
@@ -703,12 +703,12 @@ function KeybindingRow({
       <div>
         <span
           className={`px-2 py-0.5 rounded text-xs ${
-            keybinding.source === 'user'
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-              : keybinding.source === 'extension'
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-              : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
-          }`}
+ keybinding.source === 'user'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+ : keybinding.source === 'extension'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-tertiary)]'
+ }`}
         >
           {keybinding.source}
         </span>

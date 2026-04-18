@@ -388,6 +388,7 @@ export default function IDESettings() {
             </button>
             {environment === 'staging' && (
               <button type="button"
+                aria-label="Publish"
                 onClick={handlePublish}
                 disabled={publishing}
                 className='px-3 py-2 rounded bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'

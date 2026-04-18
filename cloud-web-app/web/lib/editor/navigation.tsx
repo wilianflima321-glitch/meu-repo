@@ -356,10 +356,10 @@ export function PeekWidget({
                 key={`${def.uri}-${def.range.startLine}`}
                 onClick={() => setSelectedIndex(index)}
                 className={`w-full px-3 py-2 text-left text-sm transition-colors ${
-                  index === selectedIndex
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)] text-[var(--aethel-text-primary)]'
-                    : 'hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]'
-                }`}
+ index === selectedIndex
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]'
+ }`}
               >
                 <div className="font-medium truncate">
                   {def.name || getFileName(def.uri)}
@@ -395,8 +395,8 @@ export function PeekWidget({
                     className={`flex ${isTargetLine ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_20%,transparent)]' : ''}`}
                   >
                     <span className={`w-10 pr-2 text-right select-none ${
-                      isTargetLine ? 'text-[var(--aethel-primary-light)]' : 'text-[var(--aethel-text-quaternary)]'
-                    }`}>
+ isTargetLine ? 'text-[var(--aethel-primary-light)]' : 'text-[var(--aethel-text-quaternary)]'
+ }`}>
                       {lineNumber}
                     </span>
                     <span className="text-[var(--aethel-text-secondary)] whitespace-pre">
@@ -543,8 +543,8 @@ export function ReferencesPanel({
               <button type="button"
                 onClick={() => toggleFile(uri)}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--aethel-surface-secondary)]/50 transition-colors ${
-                  isCurrentFile ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_10%,transparent)]' : ''
-                }`}
+ isCurrentFile ? 'bg-[color-mix(in_srgb,var(--aethel-primary-dark)_10%,transparent)]' : ''
+ }`}
               >
                 {isExpanded ? (
                   <ChevronDown className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />

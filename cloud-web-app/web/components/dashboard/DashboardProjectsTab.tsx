@@ -131,10 +131,10 @@ export function DashboardProjectsTab({
                     <button key={option.value} type="button" aria-label={`Selecionar tipo de projeto ${option.label}`}
                       onClick={() => onProjectTypeChange(option.value)}
                       className={`rounded-2xl border p-3 text-left transition ${
-                        selected
-                          ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
-                          : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] hover:border-[var(--aethel-border-secondary)]'
-                      }`}
+ selected
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
+ : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
                     >
                       <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">{option.label}</div>
                       <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{option.description}</div>
@@ -185,10 +185,10 @@ export function DashboardProjectsTab({
                 Status:{' '}
                 <span
                   className={`px-2.5 py-1 rounded-full text-xs ${
-                    project.status === 'active'
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
-                      : 'bg-[var(--aethel-surface-secondary)]/20 text-[var(--aethel-text-secondary)]'
-                  }`}
+ project.status === 'active'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+ : 'bg-[var(--aethel-surface-secondary)]/20 text-[var(--aethel-text-secondary)]'
+ }`}
                 >
                   {project.status}
                 </span>
@@ -223,10 +223,10 @@ export function DashboardProjectsTab({
                     <button key={option.value} type="button" aria-label={`Selecionar tipo de projeto ${option.label}`}
                       onClick={() => onProjectTypeChange(option.value)}
                       className={`rounded-2xl border p-3 text-left transition ${
-                        selected
-                          ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
-                          : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] hover:border-[var(--aethel-border-secondary)]'
-                      }`}
+ selected
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_24%,transparent),color-mix(in_srgb,var(--aethel-info)_14%,transparent))]'
+ : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_36%,transparent)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
                     >
                       <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">{option.label}</div>
                       <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{option.description}</div>

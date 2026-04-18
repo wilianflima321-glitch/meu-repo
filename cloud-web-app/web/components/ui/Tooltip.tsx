@@ -113,24 +113,15 @@ export function Tooltip({
           ref={tooltipRef}
           role="tooltip"
           style={{ ...coords, maxWidth: `${maxWidth}px` }}
-          className={`
-            fixed z-[9999]
-            px-3 py-2
-            bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)]
-            text-sm text-[var(--aethel-text-secondary)]
-            rounded-lg
-            shadow-xl shadow-black/30
-            animate-in fade-in zoom-in-95 duration-150
-            ${className}
-          `}
+          className={`fixed z-[9999] px-3 py-2 bg-[var(--aethel-surface-secondary)] border border-[color-mix(in_srgb,var(--aethel-border-primary)_80%,transparent)] text-sm text-[var(--aethel-text-secondary)] rounded-lg shadow-xl shadow-black/30 animate-in fade-in zoom-in-95 duration-150 ${className}`}
         >
           {content}
           <span
             className={`
-              absolute w-0 h-0
-              border-4 border-solid
-              ${arrowClasses[position]}
-            `}
+ absolute w-0 h-0
+ border-4 border-solid
+ ${arrowClasses[position]}
+ `}
           />
         </div>
       )}

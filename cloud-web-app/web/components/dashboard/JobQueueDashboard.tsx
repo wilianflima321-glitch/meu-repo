@@ -473,8 +473,8 @@ export function JobQueueDashboard({
           <h2 className="text-base font-semibold text-[var(--aethel-text-primary)]">Fila de jobs</h2>
           <span
             className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-              isQueueRunning ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-            }`}
+ isQueueRunning ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+ }`}
           >
             {isQueueRunning ? 'Executando' : 'Pausada'}
           </span>
@@ -484,10 +484,10 @@ export function JobQueueDashboard({
           <button type="button" aria-label={isQueueRunning ? 'Pausar fila de jobs' : 'Iniciar fila de jobs'}
             onClick={handleToggleQueue}
             className={`${primaryButtonClass} ${
-              isQueueRunning
-                ? 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)]'
-                : 'bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] shadow-[0_14px_32px_rgba(56,189,248,0.24)]'
-            }`}
+ isQueueRunning
+ ? 'border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)]'
+ : 'bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] shadow-[0_14px_32px_rgba(56,189,248,0.24)]'
+ }`}
           >
             <span className="flex items-center gap-2">
               {isQueueRunning ? <Icons.Pause /> : <Icons.Play />}

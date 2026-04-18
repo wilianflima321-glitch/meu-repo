@@ -85,12 +85,12 @@ function PingIndicator({ ping }: { ping: number }) {
 function PlayerCard({ player, isReady }: { player: NetworkPlayer; isReady?: boolean }) {
   return (
     <div className={`flex items-center justify-between p-3 rounded ${
-      player.isHost ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
-    }`}>
+ player.isHost ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
+ }`}>
       <div className="flex items-center gap-3">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
-          player.isHost ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
-        }`}>
+ player.isHost ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
+ }`}>
           {player.name[0].toUpperCase()}
         </div>
         <div>
@@ -104,8 +104,8 @@ function PlayerCard({ player, isReady }: { player: NetworkPlayer; isReady?: bool
       </div>
       {isReady !== undefined && (
         <div className={`px-3 py-1 rounded text-sm font-medium ${
-          isReady ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
-        }`}>
+ isReady ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' : 'bg-[var(--aethel-surface-secondary)]'
+ }`}>
           {isReady ? 'PRONTO' : 'NÃO PRONTO'}
         </div>
       )}
@@ -125,8 +125,8 @@ function LobbyCard({
 
   return (
     <div className={`p-4 bg-[var(--aethel-surface-secondary)] rounded-lg border transition-colors ${
-      isFull ? 'border-[var(--aethel-border-primary)] opacity-60' : 'border-[var(--aethel-border-primary)] hover:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-    }`}>
+ isFull ? 'border-[var(--aethel-border-primary)] opacity-60' : 'border-[var(--aethel-border-primary)] hover:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ }`}>
       <div className="flex justify-between items-start mb-3">
         <div>
           <h3 className="font-bold text-lg">{lobby.name}</h3>
@@ -168,10 +168,10 @@ function LobbyCard({
           onClick={() => !isFull && onJoin(lobby.id)}
           disabled={isFull}
           className={`px-4 py-2 rounded font-medium transition-colors ${
-            isFull
-              ? 'bg-[var(--aethel-surface-secondary)] cursor-not-allowed'
-              : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
-          }`}
+ isFull
+ ? 'bg-[var(--aethel-surface-secondary)] cursor-not-allowed'
+ : 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]'
+ }`}
         >
           {isFull ? 'Cheio' : 'Entrar'}
         </button>
@@ -221,10 +221,10 @@ function CreateLobbyModal({
                   key={m.id}
                   onClick={() => setMode(m.id)}
                   className={`p-3 rounded text-left transition-colors ${
-                    mode === m.id
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-                      : 'bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-primary)]'
-                  } border`}
+ mode === m.id
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ : 'bg-[var(--aethel-surface-secondary)] border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-primary)]'
+ } border`}
                 >
                   <div className="font-medium">{m.icon} {m.name}</div>
                   <div className="text-xs text-[var(--aethel-text-secondary)]">{m.description}</div>
@@ -654,10 +654,10 @@ export default function LobbyScreen({
               <button type="button"
                 onClick={handleToggleReady}
                 className={`flex-1 px-6 py-4 rounded-lg font-bold text-xl transition-colors ${
-                  isReady
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]'
-                    : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
-                }`}
+ isReady
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]'
+ }`}
               >
                 {isReady ? 'Não Pronto' : 'Pronto'}
               </button>
@@ -679,8 +679,8 @@ export default function LobbyScreen({
                 ) : (
                   <>
                     <span className={`font-medium ${
-                      msg.playerId === localPlayer.id ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-secondary)]'
-                    }`}>
+ msg.playerId === localPlayer.id ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-secondary)]'
+ }`}>
                       {msg.playerName}:
                     </span>
                     <span className="text-[var(--aethel-text-secondary)] ml-2">{msg.content}</span>

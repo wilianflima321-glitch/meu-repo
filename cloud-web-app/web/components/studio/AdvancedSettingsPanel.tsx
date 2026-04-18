@@ -56,13 +56,14 @@ export function AdvancedSettingsPanel() {
           { id: 'team', label: 'Time', icon: Users },
         ].map(({ id, label, icon: Icon }) => (
           <button type="button"
+            aria-label="Set active tab"
             key={id}
             onClick={() => setActiveTab(id as any)}
             className={`px-4 py-3 font-medium text-sm transition-all flex items-center gap-2 ${
-              activeTab === id
-                ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-                : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
+ activeTab === id
+ ? 'text-[var(--aethel-info-light)] border-b-2 border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
           >
             <Icon size={16} />
             {label}
@@ -232,12 +233,14 @@ function APIKeyCard({
             className="flex-1 px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)] text-sm font-mono"
           />
           <button type="button"
+            aria-label="Copy"
             onClick={() => onCopy(apiKey.key)}
             className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
             <Copy size={16} />
           </button>
           <button type="button"
+            aria-label="Hide"
             onClick={() => setShowSecret(!showSecret)}
             className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >

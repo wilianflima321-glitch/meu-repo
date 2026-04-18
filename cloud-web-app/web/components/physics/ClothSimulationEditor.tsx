@@ -198,15 +198,7 @@ function Slider({ label, value, min, max, step = 0.01, unit = '', onChange, tool
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:w-3
-                   [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-[var(--aethel-info)]
-                   [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:hover:bg-[var(--aethel-info-light)]
-                   [&::-webkit-slider-thumb]:transition-colors"
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-[var(--aethel-info)] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:hover:bg-[var(--aethel-info-light)] [&::-webkit-slider-thumb]:transition-colors"
       />
     </div>
   );
@@ -239,8 +231,7 @@ function Vector3Input({ label, value, onChange, min = -100, max = 100, step = 0.
               max={max}
               step={step}
               onChange={(e) => onChange({ ...value, [axis]: parseFloat(e.target.value) || 0 })}
-              className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 pl-6
-                       text-xs text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
+              className="w-full bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-2 py-1.5 pl-6 text-xs text-[var(--aethel-text-primary)] focus:border-[var(--aethel-info)] focus:outline-none"
             />
           </div>
         ))}
@@ -263,9 +254,9 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
   return (
     <div className="mb-4">
       <button type="button"
+        aria-label="Expand"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
-                   hover:text-[var(--aethel-text-primary)] transition-colors"
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {icon}
@@ -602,10 +593,10 @@ function Toolbar({
       <button type="button"
         onClick={onToggleSimulation}
         className={`p-2 rounded transition-colors ${
-          isSimulating
-            ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]'
-            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-        }`}
+ isSimulating
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
         title={isSimulating ? 'Pause Simulation' : 'Play Simulation'}
       >
         {isSimulating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -627,10 +618,10 @@ function Toolbar({
           key={tool.id}
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
-            selectedTool === tool.id
-              ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-          }`}
+ selectedTool === tool.id
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
           title={tool.label}
         >
           {tool.icon}
@@ -924,10 +915,10 @@ export default function ClothSimulationEditor({
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
                   className={`p-2 rounded text-left transition-colors ${
-                    editorState.currentPreset === preset.id
-                      ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                      : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-                  }`}
+ editorState.currentPreset === preset.id
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
                 >
                   <div className="text-xs font-medium">{preset.name}</div>
                   <div className="text-[10px] opacity-70 truncate">{preset.description}</div>
@@ -991,8 +982,7 @@ export default function ClothSimulationEditor({
                 type="checkbox"
                 checked={config.selfCollision}
                 onChange={(e) => setConfig((p) => ({ ...p, selfCollision: e.target.checked }))}
-                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)]
-                         focus:ring-[var(--aethel-primary)] focus:ring-offset-[var(--aethel-surface-primary)]"
+                className="w-4 h-4 rounded bg-[var(--aethel-surface-quaternary)] border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] text-[var(--aethel-info)] focus:ring-[var(--aethel-primary)] focus:ring-offset-[var(--aethel-surface-primary)]"
               />
             </div>
           </CollapsibleSection>
@@ -1070,10 +1060,10 @@ export default function ClothSimulationEditor({
               <div
                 key={index}
                 className={`p-2 rounded mb-1.5 cursor-pointer transition-colors ${
-                  selectedCollider === index
-                    ? 'bg-[var(--aethel-info)]/30 border border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]'
-                    : 'bg-[var(--aethel-surface-quaternary)]'
-                }`}
+ selectedCollider === index
+ ? 'bg-[var(--aethel-info)]/30 border border-[color-mix(in_srgb,var(--aethel-info)_60%,transparent)]'
+ : 'bg-[var(--aethel-surface-quaternary)]'
+ }`}
                 onClick={() => setSelectedCollider(index)}
               >
                 <div className="flex items-center justify-between">

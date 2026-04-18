@@ -140,12 +140,7 @@ function FileTreeNode({
             )
           }
         }}
-        className={`
-          w-full density-row flex items-center gap-1.5 px-2 text-xs text-left
-          hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] active:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_88%,transparent)] transition-colors
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
-          ${isSelected ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}
-        `}
+        className={`w-full density-row flex items-center gap-1.5 px-2 text-xs text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] active:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_88%,transparent)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${isSelected ? 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}`}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
         {/* Chevron for folders */}
@@ -309,10 +304,7 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
                   onAction(item.id!)
                   onClose()
                 }}
-                className={`
-                  w-full flex items-center gap-2 px-3 py-1.5 text-xs
-                  ${item.danger ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'}
-                `}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs ${item.danger ? 'text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]' : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
               >
                 {item.icon && <Codicon name={item.icon} />}
                 <span className="flex-1 text-left">{item.label}</span>

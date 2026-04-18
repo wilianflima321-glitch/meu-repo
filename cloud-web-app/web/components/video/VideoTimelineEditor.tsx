@@ -1009,6 +1009,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
           </span>
           {/* Zoom controls */}
           <button type="button"
+            aria-label="Set zoom"
             onClick={() => setZoom(z => Math.max(0.1, z / 1.5))}
             style={{
               background: 'var(--aethel-surface-tertiary)',
@@ -1026,6 +1027,7 @@ export function VideoTimelineEditor({ project: initialProject, onChange }: Video
             {Math.round(zoom * 100)}%
           </span>
           <button type="button"
+            aria-label="Set zoom"
             onClick={() => setZoom(z => Math.min(10, z * 1.5))}
             style={{
               background: 'var(--aethel-surface-tertiary)',

@@ -78,8 +78,8 @@ export function EnhancedDashboardSidebar({
   return (
     <aside
       className={`flex flex-col border-r border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] transition-all duration-200 ${
-        collapsed ? 'w-16' : 'w-60'
-      } ${className}`}
+ collapsed ? 'w-16' : 'w-60'
+ } ${className}`}
       role="navigation"
       aria-label="Sidebar de navegacao"
     >
@@ -137,12 +137,12 @@ export function EnhancedDashboardSidebar({
                         onMouseLeave={() => setHoveredId(null)}
                         disabled={isDisabled}
                         className={`group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-all ${
-                          isActive
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
-                            : isDisabled
-                            ? 'cursor-not-allowed text-[var(--aethel-text-tertiary)]'
-                            : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-secondary)]'
-                        } ${collapsed ? 'justify-center' : ''}`}
+ isActive
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-text-primary)]'
+ : isDisabled
+ ? 'cursor-not-allowed text-[var(--aethel-text-tertiary)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-secondary)]'
+ } ${collapsed ? 'justify-center' : ''}`}
                         aria-current={isActive ? 'page' : undefined}
                         title={collapsed ? item.label : undefined}
                       >
@@ -164,12 +164,12 @@ export function EnhancedDashboardSidebar({
                             {item.badge !== undefined && (
                               <span
                                 className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
-                                  item.badgeVariant === 'error'
-                                    ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
-                                    : item.badgeVariant === 'warning'
-                                    ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                                    : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-tertiary)]'
-                                }`}
+ item.badgeVariant === 'error'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+ : item.badgeVariant === 'warning'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-tertiary)]'
+ }`}
                               >
                                 {item.badge}
                               </span>

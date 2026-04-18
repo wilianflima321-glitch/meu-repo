@@ -96,8 +96,8 @@ export function DashboardShell({
   return (
     <div
       className={`relative flex min-h-screen flex-col overflow-hidden ${
-        'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
-      }`}
+ 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
+ }`}
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.1),transparent_28%),linear-gradient(180deg,transparent,rgba(2,6,23,0.18))]" />
       <a

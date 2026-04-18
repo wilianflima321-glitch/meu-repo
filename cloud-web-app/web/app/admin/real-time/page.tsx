@@ -88,8 +88,8 @@ export default function RealTimePage() {
           <button type="button"
             onClick={() => setAutoRefresh((prev) => !prev)}
             className={`px-3 py-2 rounded text-sm ${
-              autoRefresh ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-            }`}
+ autoRefresh ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
           >
             {autoRefresh ? 'Auto: ativado' : 'Auto: desativado'}
           </button>

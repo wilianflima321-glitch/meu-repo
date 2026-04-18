@@ -120,8 +120,8 @@ export default function AdminUsers() {
               key={plan}
               onClick={() => setPlanFilter(plan)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                planFilter === plan ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-              }`}
+ planFilter === plan ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
             >
               {plan === 'all' ? 'Todos' : (planLabels[plan] || plan)}
             </button>

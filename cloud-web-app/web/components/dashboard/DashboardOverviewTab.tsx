@@ -181,12 +181,12 @@ export function DashboardOverviewTab({
                   type="button"
                   onClick={action.onClick}
                   className={`rounded-2xl border px-4 py-3 text-left transition ${
-                    action.variant === 'primary'
-                      ? 'border-[color-mix(in_srgb,var(--aethel-primary)_38%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.22),rgba(14,165,233,0.16))] text-[var(--aethel-text-primary)] shadow-[0_14px_30px_rgba(56,189,248,0.12)] hover:brightness-110'
-                      : action.variant === 'secondary'
-                      ? 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)]'
-                      : 'border-[var(--aethel-border-subtle)] bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
+ action.variant === 'primary'
+ ? 'border-[color-mix(in_srgb,var(--aethel-primary)_38%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.22),rgba(14,165,233,0.16))] text-[var(--aethel-text-primary)] shadow-[0_14px_30px_rgba(56,189,248,0.12)] hover:brightness-110'
+ : action.variant === 'secondary'
+ ? 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)]'
+ : 'border-[var(--aethel-border-subtle)] bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                 >
                   <div className="text-sm font-semibold">{action.label}</div>
                   <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{action.description}</div>
@@ -284,8 +284,8 @@ export function DashboardOverviewTab({
                           </span>
                           <span
                             className={`text-sm font-semibold ${
-                              entry.entry_type === 'credit' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'
-                            }`}
+ entry.entry_type === 'credit' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'
+ }`}
                           >
                             {entry.entry_type === 'credit' ? '+' : '-'}
                             {entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
@@ -321,12 +321,12 @@ export function DashboardOverviewTab({
             {connectivityData && (
               <span
                 className={`text-xs rounded-full px-3 py-1 border ${
-                  connectivityData.overall_status === 'healthy'
-                    ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
-                    : connectivityData.overall_status === 'degraded'
-                    ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-                    : 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-                }`}
+ connectivityData.overall_status === 'healthy'
+ ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
+ : connectivityData.overall_status === 'degraded'
+ ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+ : 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
+ }`}
               >
                 {formatConnectivityStatus(connectivityData.overall_status).toUpperCase()}
               </span>
@@ -361,12 +361,12 @@ export function DashboardOverviewTab({
                           </span>
                           <span
                             className={`text-xs rounded-full px-2.5 py-1 ${
-                              service.status === 'healthy'
-                                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
-                                : service.status === 'degraded'
-                                ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-                                : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-                            }`}
+ service.status === 'healthy'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
+ : service.status === 'degraded'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
+ }`}
                           >
                             {formatConnectivityStatus(service.status).toUpperCase()}
                           </span>

@@ -477,6 +477,7 @@ function HierarchyPanel({
         <span style={{ flex: 1, fontSize: '13px' }}>{obj.name}</span>
         {obj.id === selectedId && (
           <button type="button"
+            aria-label="Delete scene object"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(obj.id);
@@ -548,6 +549,7 @@ function HierarchyPanel({
               {Object.keys(PRIMITIVE_GEOMETRIES).map(geom => (
                 <button type="button"
                   key={geom}
+                  aria-label={`Add ${geom} mesh to the scene`}
                   onClick={() => {
                     onAdd('mesh', geom);
                     setShowAddMenu(false);
@@ -1050,6 +1052,7 @@ function Toolbar({
       <div style={{ width: '1px', height: '24px', background: '#444' }} />
       {/* View options */}
       <button type="button"
+        aria-label="Toggle grid"
         onClick={onToggleGrid}
         style={buttonStyle(showGrid)}
       >

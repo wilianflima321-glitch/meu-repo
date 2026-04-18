@@ -160,10 +160,7 @@ function AICallRow({
               </div>
             </div>
             <pre
-              className={`
-                text-xs bg-[var(--aethel-surface-primary)] rounded p-2 overflow-auto max-h-40
-                ${showPrompt ? 'text-[var(--aethel-text-secondary)]' : 'text-[var(--aethel-text-tertiary)] blur-sm select-none'}
-              `}
+              className={`text-xs bg-[var(--aethel-surface-primary)] rounded p-2 overflow-auto max-h-40 ${showPrompt ? 'text-[var(--aethel-text-secondary)]' : 'text-[var(--aethel-text-tertiary)] blur-sm select-none'}`}
             >
               {call.prompt.slice(0, 500)}
               {call.prompt.length > 500 && '...'}
@@ -446,8 +443,8 @@ export default function AgentMonitorPage() {
               <button type="button"
                 onClick={() => setIsPaused((prev) => !prev)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
-                  isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
-                }`}
+ isPaused ? 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-secondary)]' : 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
+ }`}
               >
                 {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
                 {isPaused ? 'Retomar' : 'Pausar stream'}
@@ -460,6 +457,7 @@ export default function AgentMonitorPage() {
                 Atualizar
               </button>
               <button type="button"
+                aria-label="Action"
                 onClick={() => void runCoreLoopDrill()}
                 disabled={isRunningDrill}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] text-[var(--aethel-info-light)] disabled:opacity-60"
@@ -504,10 +502,10 @@ export default function AgentMonitorPage() {
       {operatorNotice && (
         <div
           className={`rounded-xl border p-3 text-sm ${
-            operatorNotice.tone === 'success'
-              ? 'border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success-light)]'
-              : 'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
-          }`}
+ operatorNotice.tone === 'success'
+ ? 'border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_10%,transparent)] text-[var(--aethel-success-light)]'
+ : 'border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
+ }`}
         >
           {operatorNotice.text}
         </div>
@@ -552,16 +550,13 @@ export default function AgentMonitorPage() {
 
       {emergencyState && emergencyState.level !== 'normal' && (
         <div
-          className={`
-            flex items-center justify-between p-4 rounded-xl border
-            ${
-              emergencyState.level === 'shutdown'
-                ? 'bg-[var(--aethel-error)]/20 border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)]'
-                : emergencyState.level === 'critical'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]'
-                  : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]'
-            }
-          `}
+          className={`flex items-center justify-between p-4 rounded-xl border ${
+ emergencyState.level === 'shutdown'
+ ? 'bg-[var(--aethel-error)]/20 border-[color-mix(in_srgb,var(--aethel-error)_50%,transparent)]'
+ : emergencyState.level === 'critical'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_50%,transparent)]'
+ }`}
         >
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-[var(--aethel-error)]" />
@@ -592,8 +587,8 @@ export default function AgentMonitorPage() {
             <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Core Loop Readiness (L4 gate)</h3>
             <span
               className={`text-xs px-2 py-1 rounded ${
-                readiness.promotionEligible ? 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-              }`}
+ readiness.promotionEligible ? 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+ }`}
             >
               {readiness.promotionEligible ? 'PROMOTION ELIGIBLE' : 'PARTIAL'}
             </span>
@@ -639,10 +634,10 @@ export default function AgentMonitorPage() {
                 <p className="font-medium text-[var(--aethel-text-secondary)]">Production runtime preflight</p>
                 <span
                   className={`rounded px-2 py-1 ${
-                    readiness.runtimeReadiness.probeReady
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
-                      : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
-                  }`}
+ readiness.runtimeReadiness.probeReady
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
+ }`}
                 >
                   {readiness.runtimeReadiness.probeReady ? 'PROBE READY' : 'BLOCKED'}
                 </span>
@@ -777,10 +772,10 @@ export default function AgentMonitorPage() {
             <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Promotion Verdict (Policy Scope)</h3>
             <span
               className={`rounded px-2 py-1 text-xs ${
-                promotionData.promotionEligible
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
-                  : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-              }`}
+ promotionData.promotionEligible
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
+ }`}
             >
               {promotionData.promotionEligible ? 'ELIGIBLE' : 'BLOCKED'}
             </span>
@@ -821,10 +816,10 @@ export default function AgentMonitorPage() {
             </div>
             <span
               className={`rounded px-2 py-1 text-xs ${
-                dossier.status === 'COMPLETE' || dossier.status === 'ACTIVE'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
-                  : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
-              }`}
+ dossier.status === 'COMPLETE' || dossier.status === 'ACTIVE'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
+ }`}
             >
               {dossier.status}
             </span>
@@ -1015,12 +1010,12 @@ export default function AgentMonitorPage() {
                   <li key={recommendation.id} className="text-[var(--aethel-text-secondary)]">
                     <span
                       className={`mr-2 inline-flex rounded px-1.5 py-0.5 text-[10px] ${
-                        recommendation.severity === 'critical'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-                          : recommendation.severity === 'warning'
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
-                            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-                      }`}
+ recommendation.severity === 'critical'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
+ : recommendation.severity === 'warning'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+ }`}
                     >
                       {recommendation.severity.toUpperCase()}
                     </span>
@@ -1054,10 +1049,10 @@ export default function AgentMonitorPage() {
             <h3 className="text-sm font-medium text-[var(--aethel-text-secondary)]">Ledger integrity</h3>
             <span
               className={`rounded px-2 py-1 text-xs ${
-                ledgerIntegrity.integrityOk
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
-                  : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-              }`}
+ ledgerIntegrity.integrityOk
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
+ }`}
             >
               {ledgerIntegrity.integrityOk ? 'OK' : 'ISSUES'}
             </span>

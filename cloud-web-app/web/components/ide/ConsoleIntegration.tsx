@@ -173,10 +173,10 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
               type="button"
               onClick={() => setActiveFilter('all')}
               className={`px-2 py-1 text-[10px] rounded transition-colors ${
-                activeFilter === 'all' ?
-                   'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ activeFilter === 'all' ?
+ 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             >
               Todos ({logCounts.all})
             </button>
@@ -184,10 +184,10 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
               type="button"
               onClick={() => setActiveFilter('error')}
               className={`px-2 py-1 text-[10px] rounded transition-colors ${
-                activeFilter === 'error' ?
-                   'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ activeFilter === 'error' ?
+ 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             >
               Erros ({logCounts.error})
             </button>
@@ -195,10 +195,10 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
               type="button"
               onClick={() => setActiveFilter('warn')}
               className={`px-2 py-1 text-[10px] rounded transition-colors ${
-                activeFilter === 'warn' ?
-                   'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ activeFilter === 'warn' ?
+ 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             >
               Alertas ({logCounts.warn})
             </button>
@@ -206,10 +206,10 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
               type="button"
               onClick={() => setActiveFilter('log')}
               className={`px-2 py-1 text-[10px] rounded transition-colors ${
-                activeFilter === 'log' ?
-                   'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ activeFilter === 'log' ?
+ 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             >
               Logs ({logCounts.log})
             </button>

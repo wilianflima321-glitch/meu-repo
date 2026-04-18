@@ -107,13 +107,13 @@ export function PropertiesPanel3D({
             onClick={() => handleValueChange(sectionIndex, propIndex, !prop.value)}
             aria-label={`${prop.name} ${prop.value ? 'enabled' : 'disabled'}`}
             className={`w-10 h-5 rounded-full transition-colors ${
-              prop.value ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ prop.value ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-tertiary)]'
+ }`}
           >
             <div
               className={`w-4 h-4 rounded-full bg-[var(--aethel-text-primary)] transition-transform ${
-                prop.value ? 'translate-x-5' : 'translate-x-0.5'
-              }`}
+ prop.value ? 'translate-x-5' : 'translate-x-0.5'
+ }`}
             />
           </button>
         )

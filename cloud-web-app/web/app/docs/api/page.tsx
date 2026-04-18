@@ -108,8 +108,8 @@ export default function APIDocsPage() {
                   <div
                     key={ep.path}
                     className={`flex items-center gap-4 px-4 py-3 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_64%,transparent)] transition-colors ${
-                      i < category.endpoints.length - 1 ? 'border-b border-[var(--aethel-border-subtle)]' : ''
-                    }`}
+ i < category.endpoints.length - 1 ? 'border-b border-[var(--aethel-border-subtle)]' : ''
+ }`}
                   >
                     <span className={`inline-flex w-16 justify-center rounded-md px-2 py-0.5 text-xs font-bold ${METHOD_COLORS[ep.method] || ''}`}>
                       {ep.method}

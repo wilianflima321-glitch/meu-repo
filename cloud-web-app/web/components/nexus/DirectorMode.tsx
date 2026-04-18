@@ -49,18 +49,18 @@ export default function DirectorMode() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-                    shot.status === 'completed' ? 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success)]' :
-                    shot.status === 'rendering' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)]'
-                  }`}>
+ shot.status === 'completed' ? 'bg-[var(--aethel-success)]/20 text-[var(--aethel-success)]' :
+ shot.status === 'rendering' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)]'
+ }`}>
                     {shot.id}
                   </div>
                   <span className="text-sm font-bold text-[var(--aethel-text-primary)]">{shot.title}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                    shot.visualQuality === 'aaa' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' :
-                    shot.visualQuality === 'high' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)]'
-                  }`}>
+ shot.visualQuality === 'aaa' ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning-light)] border border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' :
+ shot.visualQuality === 'high' ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-quaternary)]'
+ }`}>
                     {shot.visualQuality}
                   </span>
                   <Settings size={14} className="text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)] cursor-pointer" />

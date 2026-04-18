@@ -123,10 +123,10 @@ function ProjectCard({
             <button type="button" aria-label={project.starred ? `Remover ${project.name} dos favoritos` : `Adicionar ${project.name} aos favoritos`}
               onClick={onToggleStar}
               className={`p-1.5 rounded-lg transition-colors ${
-                project.starred
-                  ? 'text-[var(--aethel-warning)] hover:text-[var(--aethel-warning)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }`}
+ project.starred
+ ? 'text-[var(--aethel-warning)] hover:text-[var(--aethel-warning)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             >
               <Star className={`w-4 h-4 ${project.starred ? 'fill-current' : ''}`} />
             </button>

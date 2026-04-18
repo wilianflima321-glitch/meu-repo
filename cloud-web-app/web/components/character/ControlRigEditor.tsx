@@ -214,12 +214,7 @@ function Slider({ label, value, min, max, step = 0.01, onChange }: SliderProps) 
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:w-3
-                   [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]
-                   [&::-webkit-slider-thumb]:rounded-full"
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] [&::-webkit-slider-thumb]:rounded-full"
       />
     </div>
   );
@@ -532,8 +527,7 @@ function BoneTreeItem({
   return (
     <div>
       <div
-        className={`flex items-center gap-1 py-0.5 px-1 rounded cursor-pointer group
-          ${selectedBone === bone.id ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)]'}`}
+        className={`flex items-center gap-1 py-0.5 px-1 rounded cursor-pointer group ${selectedBone === bone.id ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)]'}`}
         style={{ paddingLeft: `${level * 12 + 4}px` }}
         onClick={() => onSelect(bone.id)}
       >
@@ -910,8 +904,8 @@ export default function ControlRigEditor({
                 <button type="button" aria-label={selectedBoneData.ikEnabled ? 'Desativar IK do bone selecionado' : 'Ativar IK do bone selecionado'}
                   onClick={() => toggleBoneIK(selectedBoneData.id)}
                   className={`flex-1 p-2 rounded text-xs ${
-                    selectedBoneData.ikEnabled ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)]'
-                  }`}
+ selectedBoneData.ikEnabled ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-surface-quaternary)]'
+ }`}
                 >
                   <Target className="w-3 h-3 inline mr-1" />
                   IK
@@ -919,8 +913,8 @@ export default function ControlRigEditor({
                 <button type="button" aria-label={selectedBoneData.locked ? 'Desbloquear bone selecionado' : 'Bloquear bone selecionado'}
                   onClick={() => toggleBoneLock(selectedBoneData.id)}
                   className={`flex-1 p-2 rounded text-xs ${
-                    selectedBoneData.locked ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[var(--aethel-surface-quaternary)]'
-                  }`}
+ selectedBoneData.locked ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)]' : 'bg-[var(--aethel-surface-quaternary)]'
+ }`}
                 >
                   {selectedBoneData.locked ? <Lock className="w-3 h-3 inline mr-1" /> : <Unlock className="w-3 h-3 inline mr-1" />}
                   Lock

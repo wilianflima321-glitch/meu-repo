@@ -223,22 +223,16 @@ function PackageCard({ pkg, onSelect, isLoading }: PackageCardProps) {
     <button type="button" aria-label={`Selecionar pacote ${pkg.name}`}
       onClick={onSelect}
       disabled={isLoading}
-      className={`
-        relative p-4 rounded-xl border text-left transition-all hover:scale-[1.02]
-        ${pkg.popular
-          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-          : pkg.bestValue
-          ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
-          : 'bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-secondary)]'
-        }
-      `}
+      className={`relative p-4 rounded-xl border text-left transition-all hover:scale-[1.02] ${pkg.popular
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ : pkg.bestValue
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-success)_40%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)]'
+ : 'bg-[var(--aethel-surface-tertiary)] border-[var(--aethel-border-primary)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
     >
       {/* Badge */}
       {(pkg.popular || pkg.bestValue) && (
-        <span className={`
-          absolute -top-2 left-4 px-2 py-0.5 text-xs font-medium rounded-full
-          ${pkg.popular ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'}
-        `}>
+        <span className={`absolute -top-2 left-4 px-2 py-0.5 text-xs font-medium rounded-full ${pkg.popular ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'}`}>
           {pkg.popular ? 'Popular' : 'Melhor valor'}
         </span>
       )}
@@ -399,13 +393,10 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
           <button type="button" aria-label={`Abrir aba ${tab.label.toLowerCase()} da carteira`}
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`
-              flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors
-              ${activeTab === tab.id
-                ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-              }
-            `}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${activeTab === tab.id
+ ? 'text-[var(--aethel-text-primary)] border-b-2 border-[var(--aethel-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
           >
             {tab.icon}
             {tab.label}
@@ -452,8 +443,8 @@ export function CreditWallet({ onPurchase, onUpgrade, className }: CreditWalletP
               <div className="h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
-                    usagePercent > 90 ? 'bg-[var(--aethel-error)]' : usagePercent > 70 ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]'
-                  }`}
+ usagePercent > 90 ? 'bg-[var(--aethel-error)]' : usagePercent > 70 ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]'
+ }`}
                   style={{ width: `${Math.min(usagePercent, 100)}%` }}
                 />
               </div>

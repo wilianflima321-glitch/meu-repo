@@ -206,8 +206,8 @@ export function MixerChannel({
       <div className="w-4 h-32 bg-[var(--aethel-surface-secondary)] rounded relative">
         <div
           className={`absolute bottom-0 w-full rounded transition-all ${
-            peakLevel > 0.9 ? 'bg-[var(--aethel-error)]' : peakLevel > 0.7 ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]'
-          }`}
+ peakLevel > 0.9 ? 'bg-[var(--aethel-error)]' : peakLevel > 0.7 ? 'bg-[var(--aethel-warning)]' : 'bg-[var(--aethel-success)]'
+ }`}
           style={{ height: `${peakLevel * 100}%` }}
         />
       </div>

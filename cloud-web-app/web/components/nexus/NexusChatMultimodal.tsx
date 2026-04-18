@@ -176,10 +176,10 @@ export default function NexusChatMultimodal() {
             key={agent.id}
             onClick={() => setActiveAgent(agent)}
             className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 ${
-              activeAgent.id === agent.id
-                ? agent.chipClass
-                : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
+ activeAgent.id === agent.id
+ ? agent.chipClass
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-quaternary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
             aria-pressed={activeAgent.id === agent.id}
             aria-label={`Selecionar agente ${agent.name}`}
           >
@@ -210,10 +210,10 @@ export default function NexusChatMultimodal() {
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div
               className={`max-w-[85%] rounded-2xl p-4 ${
-                msg.role === 'user'
-                  ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]'
-                  : 'bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)]'
-              }`}
+ msg.role === 'user'
+ ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] shadow-lg shadow-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)]'
+ : 'bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] text-[var(--aethel-text-primary)]'
+ }`}
             >
               {msg.role === 'assistant' && (
                 <div className="mb-2 flex items-center gap-2">

@@ -256,12 +256,7 @@ const SymbolItem: React.FC<SymbolItemProps> = ({
 
   return (
     <div
-      className={`
-        flex items-center gap-1 px-2 py-1 cursor-pointer select-none
-        transition-colors duration-100
-        ${isActive ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : isHovered ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]' : ''}
-        ${symbol.deprecated ? 'opacity-50 line-through' : ''}
-      `}
+      className={`flex items-center gap-1 px-2 py-1 cursor-pointer select-none transition-colors duration-100 ${isActive ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)]' : isHovered ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]' : ''} ${symbol.deprecated ? 'opacity-50 line-through' : ''}`}
       style={{ paddingLeft: `${depth * 16 + 8}px` }}
       onClick={onClick}
       onDoubleClick={() => hasChildren && onToggle()}
@@ -273,10 +268,7 @@ const SymbolItem: React.FC<SymbolItemProps> = ({
     >
       {/* Expand/Collapse Toggle */}
       <Button type="button"
-        className={`
-          p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors
-          ${!hasChildren ? 'invisible' : ''}
-        `}
+        className={`p-0.5 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors ${!hasChildren ? 'invisible' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
           onToggle();
@@ -420,22 +412,21 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   return (
     <div
       ref={menuRef}
-      className="absolute top-full right-0 mt-1 w-48 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]
-                 rounded-md shadow-lg z-50 py-1"
+      className="absolute top-full right-0 mt-1 w-48 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-md shadow-lg z-50 py-1"
     >
       <div className="px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] border-b border-[var(--aethel-border-primary)]">
         Symbol Types
       </div>
       {allKinds.map((kind) => (
         <button type="button"
+          aria-label="Toggle kind"
           key={kind}
-          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)]
-                     hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
+          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
           onClick={() => onToggleKind(kind)}
         >
           <div className={`w-4 h-4 rounded border ${visibleKinds.has(kind)
-            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
-            : 'border-[var(--aethel-border-primary)]'}`}
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]'
+ : 'border-[var(--aethel-border-primary)]'}`}
           >
             {visibleKinds.has(kind) && (
               <svg viewBox="0 0 16 16" fill="white" className="w-4 h-4">
@@ -590,8 +581,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
           </button>
           <div className="relative">
             <button type="button"
-              className={`p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors
-                ${visibleKinds.size < allKinds.length ? 'text-[var(--aethel-info-light)]' : ''}`}
+              className={`p-1 rounded hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors ${visibleKinds.size < allKinds.length ? 'text-[var(--aethel-info-light)]' : ''}`}
               onClick={() => setShowFilterMenu(!showFilterMenu)}
               title="Filter symbols"
               aria-label="Filter symbols"
@@ -627,9 +617,7 @@ export const OutlinePanel: React.FC<OutlinePanelProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter symbols..."
-            className="w-full bg-[var(--aethel-surface-tertiary)] text-sm text-[var(--aethel-text-secondary)] rounded px-7 py-1.5
-                       placeholder:text-[var(--aethel-text-tertiary)] border border-transparent
-                       focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] focus:outline-none"
+            className="w-full bg-[var(--aethel-surface-tertiary)] text-sm text-[var(--aethel-text-secondary)] rounded px-7 py-1.5 placeholder:text-[var(--aethel-text-tertiary)] border border-transparent focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] focus:outline-none"
             aria-label="Filter symbols"
           />
           {searchQuery && (

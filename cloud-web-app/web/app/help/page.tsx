@@ -249,6 +249,7 @@ export default function HelpPage() {
                 className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)]"
               >
                 <button type="button"
+                  aria-label="Expand"
                   onClick={() =>
                     setExpandedCategory(expandedCategory === category.name ? null : category.name)
                   }
@@ -261,8 +262,8 @@ export default function HelpPage() {
                   <span className="text-xs text-[var(--aethel-text-tertiary)]">{category.faqs.length} perguntas</span>
                   <ChevronDown
                     className={`h-5 w-5 text-[var(--aethel-text-secondary)] transition-transform ${
-                      expandedCategory === category.name ? 'rotate-180' : ''
-                    }`}
+ expandedCategory === category.name ? 'rotate-180' : ''
+ }`}
                   />
                 </button>
 
@@ -279,8 +280,8 @@ export default function HelpPage() {
                           <span className="text-sm text-[var(--aethel-text-primary)]">{faq.question}</span>
                           <ChevronRight
                             className={`h-4 w-4 text-[var(--aethel-text-tertiary)] transition-transform ${
-                              expandedFaq === faq.question ? 'rotate-90' : ''
-                            }`}
+ expandedFaq === faq.question ? 'rotate-90' : ''
+ }`}
                           />
                         </button>
 
@@ -290,22 +291,24 @@ export default function HelpPage() {
                             <div className="mt-4 flex items-center gap-4 border-t border-[var(--aethel-border-subtle)] pt-4">
                               <span className="text-xs text-[var(--aethel-text-tertiary)]">Esta resposta foi ?til?</span>
                               <button type="button"
+                                aria-label="Helpful"
                                 onClick={() => handleHelpful(faq.question, true)}
                                 className={`rounded-lg p-2 transition-colors ${
-                                  helpful[faq.question] === true
-                                    ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
-                                    : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
-                                }`}
+ helpful[faq.question] === true
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
+ }`}
                               >
                                 <ThumbsUp className="h-4 w-4" />
                               </button>
                               <button type="button"
+                                aria-label="Helpful"
                                 onClick={() => handleHelpful(faq.question, false)}
                                 className={`rounded-lg p-2 transition-colors ${
-                                  helpful[faq.question] === false
-                                    ? 'bg-[var(--aethel-error)]/20 text-[var(--aethel-error)]'
-                                    : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
-                                }`}
+ helpful[faq.question] === false
+ ? 'bg-[var(--aethel-error)]/20 text-[var(--aethel-error)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
+ }`}
                               >
                                 <ThumbsDown className="h-4 w-4" />
                               </button>
@@ -330,21 +333,21 @@ export default function HelpPage() {
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 href="/contact"
-                className="aethel-button aethel-button-primary rounded-xl px-6 py-3 text-sm font-semibold"
+                className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 rounded-xl px-6 py-3 text-sm font-semibold"
               >
                 <MessageSquare className="h-4 w-4" />
                 Abrir ticket
               </Link>
               <Link
                 href="/contact-sales"
-                className="aethel-button aethel-button-secondary rounded-xl px-6 py-3 text-sm font-semibold"
+                className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl px-6 py-3 text-sm font-semibold"
               >
                 Falar com vendas
               </Link>
               <Link
                 href="https://discord.gg/aethel"
                 target="_blank"
-                className="aethel-button aethel-button-ghost rounded-xl px-6 py-3 text-sm font-semibold"
+                className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] rounded-xl px-6 py-3 text-sm font-semibold"
               >
                 <ExternalLink className="h-4 w-4" />
                 Discord

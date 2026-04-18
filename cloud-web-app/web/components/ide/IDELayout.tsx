@@ -519,10 +519,10 @@ export default function IDELayout({
                     <button type="button" aria-label={`Alternar menu ${menu.label}`}
                       onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
                       className={`rounded-lg px-2 py-1.5 transition-colors ${
-                        activeMenu === menu.label
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_90%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
-                          : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]'
-                      }`}
+ activeMenu === menu.label
+ ? 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_90%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.04)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]'
+ }`}
                     >
                       {menu.label}
                     </button>
@@ -540,10 +540,10 @@ export default function IDELayout({
                               }}
                               disabled={item.disabled ?? !item.action}
                               className={`flex w-full items-center justify-between px-2.5 py-1.5 text-xs ${
-                                item.disabled ?? !item.action
-                                  ? 'cursor-not-allowed opacity-50'
-                                  : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-                              }`}
+ item.disabled ?? !item.action
+ ? 'cursor-not-allowed opacity-50'
+ : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
                             >
                               <span>{item.label}</span>
                               {item.shortcut && <span className="text-xs text-[var(--aethel-text-quaternary)]">{item.shortcut}</span>}
@@ -618,10 +618,10 @@ export default function IDELayout({
                 if (!panels.leftSidebar) setPanels((prev) => ({ ...prev, leftSidebar: true }))
               }}
               className={`relative mb-1 flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
-                activeSidebarTab === tab.id && panels.leftSidebar
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] focus-visible:text-[var(--aethel-text-primary)]'
-              }`}
+ activeSidebarTab === tab.id && panels.leftSidebar
+ ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_6%,transparent)] focus-visible:text-[var(--aethel-text-primary)]'
+ }`}
               title={`${tab.label} (${tab.shortcut})`}
               aria-pressed={activeSidebarTab === tab.id && panels.leftSidebar}
             >
@@ -686,10 +686,10 @@ export default function IDELayout({
                     key={tab.id}
                     onClick={() => setActiveBottomTab(tab.id)}
                     className={`density-row flex items-center gap-1.5 rounded-lg px-2.5 text-[11px] transition-colors ${
-                      activeBottomTab === tab.id
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.05)]'
-                        : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] focus-visible:text-[var(--aethel-text-primary)]'
-                    }`}
+ activeBottomTab === tab.id
+ ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_8%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_0_0_1px_rgba(255,255,255,0.05)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_5%,transparent)] focus-visible:text-[var(--aethel-text-primary)]'
+ }`}
                     aria-pressed={activeBottomTab === tab.id}
                   >
                     <Codicon name={tab.icon} className="text-[12px]" />

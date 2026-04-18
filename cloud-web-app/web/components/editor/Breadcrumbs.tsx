@@ -314,10 +314,10 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                       key={`${symbol.name}-${symbol.range.startLine}`}
                       onClick={() => handleItemClick(item)}
                       className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-colors ${
-                        index === selectedIndex
-                          ? 'bg-[var(--aethel-info)]/30'
-                          : 'hover:bg-[var(--aethel-surface-secondary)]'
-                      }`}
+ index === selectedIndex
+ ? 'bg-[var(--aethel-info)]/30'
+ : 'hover:bg-[var(--aethel-surface-secondary)]'
+ }`}
                     >
                       <Icon className={`w-4 h-4 flex-shrink-0 ${colorClass}`} />
                       <span className="text-[var(--aethel-text-primary)] truncate">{symbol.name}</span>
@@ -337,14 +337,14 @@ function Dropdown({ trigger, items, isSymbol, onSelect, className }: DropdownPro
                       key={segment.id}
                       onClick={() => handleItemClick(item)}
                       className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm text-left transition-colors ${
-                        index === selectedIndex
-                          ? 'bg-[var(--aethel-info)]/30'
-                          : 'hover:bg-[var(--aethel-surface-secondary)]'
-                      }`}
+ index === selectedIndex
+ ? 'bg-[var(--aethel-info)]/30'
+ : 'hover:bg-[var(--aethel-surface-secondary)]'
+ }`}
                     >
                       <Icon className={`w-4 h-4 flex-shrink-0 ${
-                        segment.type === 'folder' ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-info)]'
-                      }`} />
+ segment.type === 'folder' ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-info)]'
+ }`} />
                       <span className="text-[var(--aethel-text-primary)] truncate">{segment.label}</span>
                     </button>
                   );
@@ -526,14 +526,14 @@ export default function Breadcrumbs({
               <button type="button" aria-label={`Abrir ${segment.label}`}
                 onClick={() => handlePathClick(segment)}
                 className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded transition-colors ${
-                  isLast
-                    ? 'text-[var(--aethel-text-primary)] font-medium'
-                    : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
-                }`}
+ isLast
+ ? 'text-[var(--aethel-text-primary)] font-medium'
+ : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)]'
+ }`}
               >
                 <Icon className={`w-4 h-4 ${
-                  segment.type === 'folder' ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-info)]'
-                }`} />
+ segment.type === 'folder' ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-info)]'
+ }`} />
                 {segment.label}
               </button>
             )}
@@ -565,8 +565,8 @@ export default function Breadcrumbs({
                 <Dropdown
                   trigger={
                     <span className={`flex items-center gap-1.5 ${
-                      isLast ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'
-                    }`}>
+ isLast ? 'text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'
+ }`}>
                       <Icon className={`w-4 h-4 ${colorClass}`} />
                       {symbol.name}
                     </span>
@@ -657,16 +657,16 @@ export function SymbolOutlinePanel({
             onNavigate?.(symbol);
           }}
           className={`w-full flex items-center gap-1 px-2 py-1 text-sm text-left transition-colors ${
-            isActive
-              ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-text-primary)]'
-              : 'hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]'
-          }`}
+ isActive
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'hover:bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)]'
+ }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
         >
           {hasChildren ? (
             <ChevronRight className={`w-3 h-3 text-[var(--aethel-text-tertiary)] transition-transform ${
-              isExpanded ? 'rotate-90' : ''
-            }`} />
+ isExpanded ? 'rotate-90' : ''
+ }`} />
           ) : (
             <span className="w-3" />
           )}

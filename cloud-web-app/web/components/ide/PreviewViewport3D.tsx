@@ -244,10 +244,10 @@ export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', 
             onClick={() => setIsPlaying(!isPlaying)}
             aria-label={isPlaying ? 'Pausar viewport 3D' : 'Reproduzir viewport 3D'}
             className={`rounded-lg p-2 ${CANONICAL_FOCUS} ${CANONICAL_MOTION} ${
-              isPlaying
-                ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
-            }`}
+ isPlaying
+ ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
+ }`}
             title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
             {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}

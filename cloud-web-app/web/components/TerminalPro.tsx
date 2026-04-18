@@ -305,11 +305,7 @@ Press Ctrl+C to cancel running command
   return (
     <div
       ref={terminalRef}
-      className={`
-        flex flex-col bg-[var(--aethel-surface-primary)] rounded-lg border border-[var(--aethel-border-primary)] overflow-hidden
-        ${isMaximized ? 'fixed inset-4 z-50' : 'h-80'}
-        ${className}
-      `}
+      className={`flex flex-col bg-[var(--aethel-surface-primary)] rounded-lg border border-[var(--aethel-border-primary)] overflow-hidden ${isMaximized ? 'fixed inset-4 z-50' : 'h-80'} ${className}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-[var(--aethel-surface-primary)] border-b border-[var(--aethel-border-primary)]">
@@ -326,15 +322,11 @@ Press Ctrl+C to cancel running command
           <div className="hidden sm:flex items-center gap-1 mr-4">
             {QUICK_TASKS.map(task => (
               <button type="button"
+                aria-label="Quick task"
                 key={task.command}
                 onClick={() => handleQuickTask(task.command)}
                 disabled={isExecuting}
-                className={`
-                  px-2 py-1 text-xs font-medium rounded
-                  bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] transition-colors
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  ${task.color}
-                `}
+                className={`px-2 py-1 text-xs font-medium rounded bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${task.color}`}
               >
                 {task.label}
               </button>
@@ -342,6 +334,7 @@ Press Ctrl+C to cancel running command
           </div>
 
           <button type="button"
+            aria-label="Exit fullscreen"
             onClick={() => setIsMaximized(!isMaximized)}
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
           >
@@ -352,6 +345,7 @@ Press Ctrl+C to cancel running command
             )}
           </button>
           <button type="button"
+            aria-label="Set lines"
             onClick={() => setLines([])}
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
           >
@@ -395,13 +389,10 @@ Press Ctrl+C to cancel running command
                   setShowSuggestions(false)
                   inputRef.current?.focus()
                 }}
-                className={`
-                  w-full px-3 py-2 text-left text-sm font-mono
-                  ${index === selectedSuggestion
-                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                    : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
-                  }
-                `}
+                className={`w-full px-3 py-2 text-left text-sm font-mono ${index === selectedSuggestion
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
               >
                 {suggestion}
               </button>

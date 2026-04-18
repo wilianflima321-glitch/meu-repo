@@ -91,7 +91,7 @@ function ResetPasswordForm() {
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">Este link expirou ou nao e valido.</p>
               <Link
                 href="/forgot-password"
-                className="aethel-button aethel-button-primary mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
+                className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 mt-6 inline-flex rounded-xl px-6 py-3 text-sm font-semibold"
               >
                 Solicitar novo link
               </Link>
@@ -107,7 +107,7 @@ function ResetPasswordForm() {
               <p className="mt-3 text-sm text-[var(--aethel-text-secondary)]">Sua senha foi redefinida. Redirecionando para o login.</p>
               <Link
                 href="/login"
-                className="aethel-button aethel-button-ghost mt-6 inline-flex rounded-xl px-5 py-2 text-sm font-semibold"
+                className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-6 inline-flex rounded-xl px-5 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Ir para login agora
@@ -182,7 +182,7 @@ function ResetPasswordForm() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="aethel-button aethel-button-primary w-full rounded-xl px-4 py-3 text-sm font-semibold"
+                className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:brightness-110 w-full rounded-xl px-4 py-3 text-sm font-semibold"
               >
                 {isLoading ? (
                   <>
@@ -197,7 +197,7 @@ function ResetPasswordForm() {
 
             <Link
               href="/login"
-              className="aethel-button aethel-button-ghost mt-4 w-full rounded-xl px-4 py-2 text-sm font-semibold"
+              className="inline-flex items-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-4 w-full rounded-xl px-4 py-2 text-sm font-semibold"
             >
               <ArrowLeft className="h-4 w-4" />
               Voltar para o login

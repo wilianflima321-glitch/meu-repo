@@ -113,8 +113,8 @@ export default function Feedback() {
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded text-xs font-semibold ${
-                statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-              }`}
+ statusFilter === status ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
             >
               {status === 'all' ? 'Todos' : statusLabels[status] ?? status}
             </button>

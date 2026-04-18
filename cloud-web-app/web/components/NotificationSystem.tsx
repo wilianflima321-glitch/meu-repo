@@ -270,17 +270,17 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
   return (
     <div
       className={`
-        w-80 p-4 rounded-xl border backdrop-blur-xl shadow-xl
-        ${color.bg} ${color.border}
-        ${isExiting ? 'animate-fade-out' : 'animate-slide-in-right'}
-      `}
+ w-80 p-4 rounded-xl border backdrop-blur-xl shadow-xl
+ ${color.bg} ${color.border}
+ ${isExiting ? 'animate-fade-out' : 'animate-slide-in-right'}
+ `}
       role="alert"
     >
       <div className="flex gap-3">
         <Icon
           className={`w-5 h-5 flex-shrink-0 ${color.icon} ${
-            notification.type === 'loading' ? 'animate-spin' : ''
-          }`}
+ notification.type === 'loading' ? 'animate-spin' : ''
+ }`}
         />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{notification.title}</p>
@@ -298,6 +298,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
         </div>
         {notification.dismissible && (
           <button type="button"
+            aria-label="Dismiss"
             onClick={handleDismiss}
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors rounded"
           >

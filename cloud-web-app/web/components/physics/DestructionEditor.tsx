@@ -205,13 +205,7 @@ function Slider({ label, value, min, max, step = 1, unit = '', onChange, icon }:
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:w-3
-                   [&::-webkit-slider-thumb]:h-3
-                   [&::-webkit-slider-thumb]:bg-[var(--aethel-error)]
-                   [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:cursor-pointer"
+        className="w-full h-1.5 bg-[var(--aethel-surface-quaternary)] rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-[var(--aethel-error)] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
       />
     </div>
   );
@@ -234,9 +228,9 @@ function CollapsibleSection({ title, icon, defaultOpen = true, children }: Colla
   return (
     <div className="mb-4">
       <button type="button"
+        aria-label="Expand"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)]
-                   hover:text-[var(--aethel-text-primary)] transition-colors"
+        className="flex items-center gap-2 w-full text-left py-1.5 text-sm text-[var(--aethel-text-primary)] hover:text-[var(--aethel-text-primary)] transition-colors"
       >
         {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         {icon}
@@ -270,13 +264,14 @@ function PatternSelector({ value, onChange }: PatternSelectorProps) {
       <label className="text-xs text-[var(--aethel-text-secondary)] block mb-2">Fracture Pattern</label>
       {patterns.map((pattern) => (
         <button type="button"
+          aria-label="Change"
           key={pattern.id}
           onClick={() => onChange(pattern.id)}
           className={`w-full p-2 rounded flex items-center gap-2 transition-colors ${
-            value === pattern.id
-              ? 'bg-[var(--aethel-error-dark)]/30 border border-[color-mix(in_srgb,var(--aethel-error)_60%,transparent)] text-[var(--aethel-text-primary)]'
-              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-          }`}
+ value === pattern.id
+ ? 'bg-[var(--aethel-error-dark)]/30 border border-[color-mix(in_srgb,var(--aethel-error)_60%,transparent)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
         >
           {pattern.icon}
           <div className="text-left">
@@ -499,8 +494,8 @@ function DestructionLevels({ levels, currentLevel, health, maxHealth }: Destruct
         return (
           <div key={i} className="flex items-center gap-2">
             <div className={`w-6 h-6 rounded flex items-center justify-center text-xs ${
-              isActive ? 'bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}>
+ isActive ? 'bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+ }`}>
               {levels - i}
             </div>
             <div className="flex-1 h-2 bg-[var(--aethel-surface-quaternary)] rounded-full overflow-hidden">
@@ -564,10 +559,10 @@ function Toolbar({ selectedTool, onToolChange, onPreviewDestruction, onReset }: 
           key={tool.id}
           onClick={() => onToolChange(tool.id)}
           className={`p-2 rounded transition-colors ${
-            selectedTool === tool.id
-              ? 'bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)]'
-              : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
-          }`}
+ selectedTool === tool.id
+ ? 'bg-[var(--aethel-error-dark)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
+ }`}
           title={tool.label}
         >
           {tool.icon}
@@ -787,8 +782,7 @@ export default function DestructionEditor({
                 <button type="button"
                   key={preset.id}
                   onClick={() => applyPreset(preset)}
-                  className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]
-                           transition-colors text-left"
+                  className="p-2 rounded bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] transition-colors text-left"
                 >
                   <div className="text-xs font-medium">{preset.name}</div>
                   <div className="text-[10px] opacity-70 truncate">{preset.description}</div>
@@ -851,8 +845,7 @@ export default function DestructionEditor({
                 <button type="button"
                   key={dmg}
                   onClick={() => applyDamage(dmg)}
-                  className="p-1.5 text-xs bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] rounded
-                           text-[var(--aethel-error-light)] transition-colors"
+                  className="p-1.5 text-xs bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error-dark)_50%,transparent)] rounded text-[var(--aethel-error-light)] transition-colors"
                 >
                   -{dmg}
                 </button>

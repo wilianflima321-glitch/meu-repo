@@ -138,8 +138,8 @@ export default function AdminSubscriptions() {
                   <td className='p-3'>US${plan.mrr.toFixed(2)}</td>
                   <td className='p-3'>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      plan.isTrial ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
-                    }`}>
+ plan.isTrial ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]' : 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
+ }`}>
                       {plan.isTrial ? 'Teste' : 'Pago'}
                     </span>
                   </td>

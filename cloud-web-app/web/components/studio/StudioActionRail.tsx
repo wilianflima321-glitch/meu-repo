@@ -55,8 +55,8 @@ export default function StudioActionRail({
           <span className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${operationalTone}`}>
             <span
               className={`h-2 w-2 rounded-full ${
-                backendOnline && aiProviderConfigured ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-warning)]'
-              }`}
+ backendOnline && aiProviderConfigured ? 'bg-[var(--aethel-success)]' : 'bg-[var(--aethel-warning)]'
+ }`}
             />
             {operationalLabel}
           </span>
@@ -98,10 +98,10 @@ export default function StudioActionRail({
           onClick={onToggleFullAccess}
           disabled={fullAccessBusy}
           className={`hidden rounded-xl border px-3 py-2 text-xs font-medium transition disabled:opacity-60 lg:inline-flex ${
-            fullAccessActive
-              ? 'border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
-              : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
-          }`}
+ fullAccessActive
+ ? 'border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] text-[var(--aethel-primary-light)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)]'
+ : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
         >
           {fullAccessBusy ? 'Aguarde...' : fullAccessActive ? 'Revogar Full Access' : 'Habilitar Full Access'}
         </button>

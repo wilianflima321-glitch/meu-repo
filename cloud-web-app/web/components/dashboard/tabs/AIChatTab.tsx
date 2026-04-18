@@ -66,10 +66,7 @@ function MessageBubble({
     <div className={`flex gap-4 ${isUser ? 'flex-row-reverse' : ''}`}>
       {/* Avatar */}
       <div
-        className={`
-          flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
-          ${isUser ? 'bg-[var(--aethel-info)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}
-        `}
+        className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${isUser ? 'bg-[var(--aethel-info)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}`}
       >
         {isUser ? (
           <User className="w-4 h-4 text-[var(--aethel-text-primary)]" />
@@ -81,23 +78,17 @@ function MessageBubble({
       {/* Message */}
       <div className={`flex-1 max-w-[80%] ${isUser ? 'text-right' : ''}`}>
         <div
-          className={`
-            inline-block p-4 rounded-2xl
-            ${isUser
-              ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded-tr-none'
-              : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-tl-none'
-            }
-          `}
+          className={`inline-block p-4 rounded-2xl ${isUser
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] rounded-tr-none'
+ : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded-tl-none'
+ }`}
         >
           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         </div>
 
         {/* Actions */}
         <div
-          className={`
-            flex items-center gap-2 mt-2 text-xs text-[var(--aethel-text-tertiary)]
-            ${isUser ? 'justify-end' : 'justify-start'}
-          `}
+          className={`flex items-center gap-2 mt-2 text-xs text-[var(--aethel-text-tertiary)] ${isUser ? 'justify-end' : 'justify-start'}`}
         >
           <span>
             {message.timestamp.toLocaleTimeString([], {

@@ -376,8 +376,8 @@ function GradientPicker({ gradient, onChange }: GradientPickerProps) {
           <div
             key={index}
             className={`absolute top-0 bottom-0 w-1 cursor-pointer transition-transform ${
-              selectedStop === index ? 'ring-2 ring-white' : ''
-            }`}
+ selectedStop === index ? 'ring-2 ring-white' : ''
+ }`}
             style={{ left: `${stop.position * 100}%`, transform: 'translateX(-50%)' }}
             onClick={() => setSelectedStop(index)}
           >
@@ -440,12 +440,12 @@ function LODPreview({ lod, currentDistance }: LODPreviewProps) {
         <span className="text-sm text-[var(--aethel-text-secondary)]">Modo Atual:</span>
         <span
           className={`px-2 py-1 text-xs rounded font-medium ${
-            currentMode === 'strands'
-              ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
-              : currentMode === 'cards'
-              ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
-              : 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
-          }`}
+ currentMode === 'strands'
+ ? 'bg-[var(--aethel-success)] text-[var(--aethel-text-primary)]'
+ : currentMode === 'cards'
+ ? 'bg-[var(--aethel-warning)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-error)] text-[var(--aethel-text-primary)]'
+ }`}
         >
           {currentMode === 'strands' ? 'Strands (Alta Qualidade)' : currentMode === 'cards' ? 'Cards (Média)' : 'Billboard (Baixa)'}
         </span>
@@ -652,10 +652,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
           <button type="button" aria-label={animatePhysics ? 'Pausar simulacao de fisica do cabelo' : 'Ativar simulacao de fisica do cabelo'}
             onClick={() => setAnimatePhysics(!animatePhysics)}
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              animatePhysics
-                ? 'bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]'
-                : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-            }`}
+ animatePhysics
+ ? 'bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+ }`}
           >
             {animatePhysics ? 'Pausar fisica' : 'Animar fisica'}
           </button>
@@ -683,10 +683,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 key={p}
                 onClick={() => applyPreset(p)}
                 className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-all ${
-                  preset === p
-                    ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                    : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-                }`}
+ preset === p
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ }`}
               >
                 {p === 'straight' && 'Liso'}
                 {p === 'wavy' && 'Ondulado'}
@@ -711,10 +711,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex-1 px-3 py-2.5 text-sm font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)] border-b-2 border-[var(--aethel-info)]'
-                  : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)]'
-              }`}
+ activeTab === tab.id
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)] border-b-2 border-[var(--aethel-info)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)]'
+ }`}
             >
               {tab.label}
             </button>
@@ -742,10 +742,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                   <div
                     key={region.id}
                     className={`p-3 rounded-lg border transition-all ${
-                      region.enabled
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border-[var(--aethel-border-secondary)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border-[var(--aethel-border-primary)] opacity-60'
-                    }`}
+ region.enabled
+ ? 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border-[var(--aethel-border-secondary)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] border-[var(--aethel-border-primary)] opacity-60'
+ }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-[var(--aethel-text-primary)]">{region.name}</span>
@@ -848,10 +848,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                           setPreset('custom');
                         }}
                         className={`flex-1 px-3 py-2 text-sm rounded-lg font-medium transition-all ${
-                          curl.type === type
-                            ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
-                            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-                        }`}
+ curl.type === type
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ }`}
                       >
                         {type === 'wave' && 'Onda'}
                         {type === 'curl' && 'Cacho'}
@@ -1027,10 +1027,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                       key={tool}
                       onClick={() => setBrush((prev) => ({ ...prev, tool }))}
                       className={`px-4 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
-                        brush.tool === tool
-                          ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-[var(--aethel-info-light)]'
-                          : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
-                      }`}
+ brush.tool === tool
+ ? 'bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] ring-2 ring-[var(--aethel-info-light)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-quaternary)]'
+ }`}
                     >
                       <span className="text-xl">{brushIcons[tool]}</span>
                       <span className="text-sm capitalize">
@@ -1066,10 +1066,10 @@ export default function HairFurEditor({ characterId, onHairUpdate }: HairFurEdit
                 <button type="button" aria-label={brushActive ? 'Desativar brush de cabelo' : 'Ativar brush de cabelo'}
                   onClick={() => setBrushActive(!brushActive)}
                   className={`w-full py-3 rounded-lg font-medium transition-all ${
-                    brushActive
-                      ? 'bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]'
-                      : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
-                  }`}
+ brushActive
+ ? 'bg-[var(--aethel-success)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] hover:bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-secondary)]'
+ }`}
                 >
                   {brushActive ? 'Brush ativo - clique no viewport' : 'Ativar brush'}
                 </button>

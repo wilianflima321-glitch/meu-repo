@@ -382,12 +382,12 @@ export function StorageQuotaManager({
         {storageInfo.warningLevel !== 'ok' && (
           <div
             className={`mb-4 flex items-start gap-2 rounded-lg p-3 ${
-              storageInfo.warningLevel === 'blocked'
-                ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
-                : storageInfo.warningLevel === 'critical'
-                  ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
-                  : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
-            }`}
+ storageInfo.warningLevel === 'blocked'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
+ : storageInfo.warningLevel === 'critical'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+ }`}
           >
             <Icons.Warning />
             <div>
@@ -450,10 +450,10 @@ export function StorageQuotaManager({
                   <div
                     key={entry.name}
                     className={`flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors ${
-                      selectedForCleanup.has(entry.name)
-                        ? 'border border-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
-                    }`}
+ selectedForCleanup.has(entry.name)
+ ? 'border border-[color-mix(in_srgb,var(--aethel-info)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]'
+ }`}
                     onClick={() => {
                       const newSelection = new Set(selectedForCleanup)
                       if (newSelection.has(entry.name)) {

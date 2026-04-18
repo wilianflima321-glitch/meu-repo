@@ -353,10 +353,10 @@ export function AIAgentDashboard({
               key={tab}
               onClick={() => setView(tab)}
               className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
-                view === tab
-                  ? PRIMARY_TAB_CLASS
-                  : 'border border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]'
-              }`}
+ view === tab
+ ? PRIMARY_TAB_CLASS
+ : 'border border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]'
+ }`}
             >
               {tab === 'agents' ? 'Agentes' : tab === 'history' ? 'Historico' : 'Metricas'}
             </button>
@@ -380,10 +380,10 @@ export function AIAgentDashboard({
                   onAgentSelect?.(agent)
                 }}
                 className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                  selectedAgent?.id === agent.id
-                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
-                    : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] hover:border-[var(--aethel-border-secondary)]'
-                }`}
+ selectedAgent?.id === agent.id
+ ? 'border-[color-mix(in_srgb,var(--aethel-primary)_50%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]'
+ : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] hover:border-[var(--aethel-border-secondary)]'
+ }`}
               >
                 {/* Agent Header */}
                 <div className="flex items-center justify-between mb-2">

@@ -238,8 +238,8 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
 
   return (
     <div className={`bg-[var(--aethel-surface-secondary)] rounded-xl p-5 border ${
-      isCritical ? 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : isWarning ? 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]' : 'border-[var(--aethel-border-primary)]'
-    }`}>
+ isCritical ? 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]' : isWarning ? 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)]' : 'border-[var(--aethel-border-primary)]'
+ }`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -277,8 +277,8 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
       <div className="h-2 bg-[var(--aethel-surface-tertiary)] rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            isCritical ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : isWarning ? 'bg-[var(--aethel-warning)]' : colorClasses.bg
-          }`}
+ isCritical ? 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]' : isWarning ? 'bg-[var(--aethel-warning)]' : colorClasses.bg
+ }`}
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -286,8 +286,8 @@ function UsageCard({ metric }: { metric: UsageMetric }) {
       {/* Percentage */}
       <div className="mt-2 flex items-center justify-between text-xs">
         <span className={`${
-          isCritical ? 'text-[var(--aethel-error-light)]' : isWarning ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-text-tertiary)]'
-        }`}>
+ isCritical ? 'text-[var(--aethel-error-light)]' : isWarning ? 'text-[var(--aethel-warning-light)]' : 'text-[var(--aethel-text-tertiary)]'
+ }`}>
           {percentage.toFixed(1)}% usado
         </span>
         <span className="text-[var(--aethel-text-quaternary)]">

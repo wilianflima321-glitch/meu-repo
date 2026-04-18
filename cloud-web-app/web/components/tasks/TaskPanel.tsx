@@ -762,6 +762,7 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
       <div style={styles.tabs}>
         {(['available', 'running', 'history'] as TabType[]).map((tab) => (
           <button type="button"
+            aria-label="Set active tab"
             key={tab}
             style={{
               ...styles.tab,

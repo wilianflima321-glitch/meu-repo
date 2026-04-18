@@ -904,6 +904,7 @@ export function AdvancedProfiler({
 
           <div style={{ display: 'flex', gap: '8px' }}>
             <button type="button"
+              aria-label="Set is recording"
               onClick={() => setIsRecording(!isRecording)}
               style={{
                 background: isRecording ? '#ef4444' : '#22c55e',
@@ -920,6 +921,7 @@ export function AdvancedProfiler({
             </button>
 
             <button type="button"
+              aria-label="Start a new profiler session"
               onClick={() => {
                 setSession({
                   id: crypto.randomUUID(),
@@ -951,6 +953,7 @@ export function AdvancedProfiler({
         <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
           {(['timeline', 'memory', 'gpu'] as const).map(tab => (
             <button type="button"
+              aria-label="Set active tab"
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{

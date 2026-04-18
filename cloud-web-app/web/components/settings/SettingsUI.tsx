@@ -707,6 +707,7 @@ function ArraySetting({
               className="flex-1 px-3 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
             />
             <button type="button"
+              aria-label="Remove"
               onClick={() => removeItem(index)}
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
             >
@@ -724,6 +725,7 @@ function ArraySetting({
             className="flex-1 px-3 py-1.5 text-sm bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-quaternary)] rounded border border-[var(--aethel-border-primary)] outline-none focus:ring-1 focus:ring-[var(--aethel-info)]"
           />
           <button type="button"
+            aria-label="Add new"
             onClick={addItem}
             disabled={!newItem.trim()}
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-success)] hover:bg-[var(--aethel-surface-tertiary)] rounded disabled:opacity-50"
@@ -968,10 +970,10 @@ export function SettingsUI({
           <button type="button"
             onClick={() => setScope('user')}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition-colors ${
-              scope === 'user'
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ scope === 'user'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
           >
             <User className="w-4 h-4" />
             Usuário
@@ -979,10 +981,10 @@ export function SettingsUI({
           <button type="button"
             onClick={() => setScope('workspace')}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded transition-colors ${
-              scope === 'workspace'
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ scope === 'workspace'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
           >
             <Folder className="w-4 h-4" />
             Workspace
@@ -991,10 +993,10 @@ export function SettingsUI({
           <button type="button"
             onClick={() => setShowJSON(!showJSON)}
             className={`p-1.5 rounded transition-colors ${
-              showJSON
-                ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-            }`}
+ showJSON
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
             title="Abrir configurações (JSON)"
           >
             <FileJson className="w-4 h-4" />
@@ -1015,6 +1017,7 @@ export function SettingsUI({
           />
           {searchQuery && (
             <button type="button"
+              aria-label="Set search query"
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2"
             >
@@ -1035,6 +1038,7 @@ export function SettingsUI({
           {categories.map(category => (
             <div key={category.id}>
               <button type="button"
+                aria-label="Expand"
                 onClick={() => toggleCategory(category.id)}
                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]/50"
               >
@@ -1131,6 +1135,7 @@ export function QuickSettingsPopup({
       <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--aethel-border-primary)]">
         <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Ajustes rápidos</span>
         <button type="button" onClick={onClose} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
+          aria-label="Close"
           <X className="w-4 h-4 text-[var(--aethel-text-tertiary)]" />
         </button>
       </div>

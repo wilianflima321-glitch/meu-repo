@@ -333,12 +333,12 @@ function MessageBubble({ message }: { message: Message }) {
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
         className={`max-w-[80%] rounded-lg p-4 ${
-          isUser
-            ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-            : isSystem
-            ? 'bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)]'
-            : 'bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]'
-        } ${message.isStreaming ? 'animate-pulse' : ''}`}
+ isUser
+ ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : isSystem
+ ? 'bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-primary)]'
+ : 'bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)]'
+ } ${message.isStreaming ? 'animate-pulse' : ''}`}
       >
         <div
           className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap text-sm"

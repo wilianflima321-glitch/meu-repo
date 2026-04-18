@@ -78,12 +78,12 @@ export function DashboardConnectivityTab({
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <h3 className="text-lg font-semibold capitalize">{service.name.replace(/_/g, ' ')}</h3>
                   <span className={`text-xs rounded-full px-2 py-1 ${
-                    service.status === 'healthy'
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
-                      : service.status === 'degraded'
-                      ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-                      : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-                  }`}>
+ service.status === 'healthy'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
+ : service.status === 'degraded'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
+ }`}>
                     {String(formatConnectivityStatus(service.status)).toUpperCase()}
                   </span>
                 </div>

@@ -116,11 +116,8 @@ function StatusBadge({ status }: { status: 'healthy' | 'degraded' | 'down' }) {
 
 function ServiceCard({ service }: { service: ServiceHealth }) {
   return (
-    <div className={`
-      bg-[var(--aethel-surface-secondary)] border rounded-lg p-4
-      ${service.status === 'healthy' ? 'border-[var(--aethel-border-primary)]' :
-        service.status === 'degraded' ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'}
-    `}>
+    <div className={`bg-[var(--aethel-surface-secondary)] border rounded-lg p-4 ${service.status === 'healthy' ? 'border-[var(--aethel-border-primary)]' :
+ service.status === 'degraded' ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'}`}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-[var(--aethel-text-primary)]">{service.name}</h3>
         <StatusBadge status={service.status} />
@@ -131,9 +128,9 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
           <div>
             <span className="text-[var(--aethel-text-tertiary)]">Latência</span>
             <p className={`text-sm font-medium ${
-              service.latency < 100 ? 'text-[var(--aethel-success)]' :
-              service.latency < 500 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
-            }`}>
+ service.latency < 100 ? 'text-[var(--aethel-success)]' :
+ service.latency < 500 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
+ }`}>
               {service.latency}ms
             </p>
           </div>
@@ -214,10 +211,7 @@ function QueueCard({ queue }: { queue: QueueMetrics }) {
   const failRate = total > 0 ? (queue.failed / total) * 100 : 0;
 
   return (
-    <div className={`
-      bg-[var(--aethel-surface-secondary)] border rounded-lg p-4
-      ${queue.isPaused ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'border-[var(--aethel-border-primary)]'}
-    `}>
+    <div className={`bg-[var(--aethel-surface-secondary)] border rounded-lg p-4 ${queue.isPaused ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]' : 'border-[var(--aethel-border-primary)]'}`}>
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-sm font-medium text-[var(--aethel-text-primary)] capitalize">
           {queue.name.replace(/_/g, ' ')}
@@ -334,12 +328,13 @@ export default function InfrastructureDashboard() {
 
         <div className="flex items-center gap-3">
           <button type="button"
+            aria-label="Refresh"
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${
-              autoRefresh
-                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
-                : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]'
-            }`}
+ autoRefresh
+ ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
+ : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]'
+ }`}
           >
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
             {autoRefresh ? 'Ao vivo' : 'Pausado'}
@@ -460,9 +455,9 @@ export default function InfrastructureDashboard() {
             <div className="flex items-center justify-between">
               <span className="text-xs text-[var(--aethel-text-tertiary)]">Tempo médio de consulta</span>
               <span className={`text-sm font-medium ${
-                data.dbQueryTime < 50 ? 'text-[var(--aethel-success)]' :
-                data.dbQueryTime < 200 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
-              }`}>
+ data.dbQueryTime < 50 ? 'text-[var(--aethel-success)]' :
+ data.dbQueryTime < 200 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
+ }`}>
                 {data.dbQueryTime}ms
               </span>
             </div>
@@ -480,9 +475,9 @@ export default function InfrastructureDashboard() {
             <div>
               <p className="text-xs text-[var(--aethel-text-tertiary)]">Taxa de acerto</p>
               <p className={`text-xl font-bold ${
-                data.cacheHitRate > 80 ? 'text-[var(--aethel-success)]' :
-                data.cacheHitRate > 50 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
-              }`}>
+ data.cacheHitRate > 80 ? 'text-[var(--aethel-success)]' :
+ data.cacheHitRate > 50 ? 'text-[var(--aethel-warning)]' : 'text-[var(--aethel-error)]'
+ }`}>
                 {data.cacheHitRate.toFixed(1)}%
               </p>
             </div>

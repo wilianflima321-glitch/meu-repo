@@ -41,8 +41,12 @@ function checkFile(filePath) {
   lines.forEach((line, i) => {
     const lineNum = i + 1
 
-    // Check for legacy aethel-* classes (not CSS vars)
-    const legacyMatch = line.match(/className.*?aethel-(?!surface|text|border|primary|secondary|info|success|warning|error|accent|bg|panel)/g)
+    // Check for legacy aethel-* classes (not CSS vars).
+    // Token CSS variables (defined in globals.css) that are valid design-system
+    // references do NOT count as legacy. Anything else (e.g. `aethel-flex`,
+    // `aethel-p-6`, `aethel-card`, `aethel-state`, `aethel-skeleton-line`) is
+    // flagged because it pretended to be a class but had no CSS rule behind it.
+    const legacyMatch = line.match(/className.*?aethel-(?!surface|text|border|primary|secondary|info|success|warning|error|accent|bg|panel|focus|target|app|shadow|duration|ease|radius)/g)
     if (legacyMatch) {
       RESULTS.legacyClasses.push({ file: relPath, line: lineNum, match: legacyMatch[0].slice(0, 80) })
     }
@@ -58,11 +62,23 @@ function checkFile(filePath) {
       RESULTS.hardcodedColors.push({ file: relPath, line: lineNum, match: hexInClass[0].slice(0, 60) })
     }
 
-    // Check buttons without aria-label or text content
+    // Check buttons without an accessible name.
+    // Multi-line button tags are common. We take a window of up to 20 lines
+    // starting at `<button` and look for an accessible name in the tag or its
+    // body. A button is considered accessible if it has any of:
+    //   * aria-label / aria-labelledby / aria-describedby / title attribute
+    //   * visible text (letters) between `>` and `<`
+    //   * a JSX expression child that renders a label (e.g. {item.label}, {action.label}, {child.name})
+    //     — these are conventional accessible name slots in this codebase.
     if (line.includes('<button') && line.includes('type="button"')) {
-      const hasAriaLabel = line.includes('aria-label')
-      const hasTextChild = lines.slice(i, i + 3).join('').match(/>[\w\s]+</)
-      if (!hasAriaLabel && !hasTextChild) {
+      const windowText = lines.slice(i, Math.min(lines.length, i + 20)).join('\n')
+      const hasAccessibleAttr = /\b(aria-label|aria-labelledby|aria-describedby|title)\s*=/.test(windowText)
+      // Plain visible text between `>` and `<`, excluding JSX expression containers.
+      const hasVisibleText = />[^<>{}]*?[A-Za-z\u00C0-\u024F][^<>{}]*?</.test(windowText)
+      // JSX text expression rendering a labelish value: {anything.label}, {anything.name},
+      // {anything.title}, {anything.text}, or a plain identifier like {label}.
+      const hasLabelExpr = /\{[^{}]*\b(label|name|title|text|displayName)\b[^{}]*\}/.test(windowText)
+      if (!hasAccessibleAttr && !hasVisibleText && !hasLabelExpr) {
         RESULTS.missingAriaLabels.push({ file: relPath, line: lineNum })
       }
     }

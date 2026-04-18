@@ -1283,10 +1283,10 @@ function IDEContent() {
                       type="button"
                       onClick={() => setSidebarTab('explorer')}
                       className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
-                        sidebarTab === 'explorer'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                      }`}
+ sidebarTab === 'explorer'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                     >
                       Arquivos
                     </button>
@@ -1294,10 +1294,10 @@ function IDEContent() {
                       type="button"
                       onClick={() => setSidebarTab('git')}
                       className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
-                        sidebarTab === 'git'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-                          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                      }`}
+ sidebarTab === 'git'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                     >
                       Git
                     </button>
@@ -1343,10 +1343,10 @@ function IDEContent() {
                         type="button"
                         onClick={handleToggleSplitEditor}
                         className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                          splitEditorOpen
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
+ splitEditorOpen
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                       >
                         {splitEditorOpen ? 'Fechar split' : 'Dividir editor'}
                       </button>
@@ -1356,10 +1356,10 @@ function IDEContent() {
                             type="button"
                             onClick={() => setNextOpenTarget((prev) => (prev === 'secondary' ? 'primary' : 'secondary'))}
                             className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                              nextOpenTarget === 'secondary'
-                                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]'
-                                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                            }`}
+ nextOpenTarget === 'secondary'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                           >
                             {nextOpenTarget === 'secondary' ? 'Próximo arquivo: lateral' : 'Próximo arquivo: principal'}
                           </button>
@@ -1376,10 +1376,10 @@ function IDEContent() {
                         type="button"
                         onClick={() => setShowIntelliSense((prev) => !prev)}
                         className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                          showIntelliSense
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
+ showIntelliSense
+ ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                       >
                         IntelliSense
                       </button>
@@ -1387,10 +1387,10 @@ function IDEContent() {
                         type="button"
                         onClick={() => setShowOutline((prev) => !prev)}
                         className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                          showOutline
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
+ showOutline
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                       >
                         Outline
                       </button>
@@ -1398,10 +1398,10 @@ function IDEContent() {
                         type="button"
                         onClick={() => setShowDiagnostics((prev) => !prev)}
                         className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                          showDiagnostics
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
+ showDiagnostics
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                       >
                         Diagnósticos
                       </button>
@@ -1683,10 +1683,10 @@ function IDEContent() {
                         type="button"
                         onClick={() => setPreviewMode(mode.id)}
                         className={`rounded-lg px-3 py-1.5 font-medium transition-colors min-h-[36px] ${
-                          previewMode === mode.id
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
+ previewMode === mode.id
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                       >
                         {mode.label}
                       </button>

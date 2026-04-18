@@ -479,6 +479,7 @@ function DialogueLineEditor({ line, characters, onUpdate, onDelete }: DialogueLi
         </select>
 
         <button type="button"
+          aria-label="Delete"
           onClick={onDelete}
           className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
         >
@@ -700,6 +701,7 @@ function VariablesPanel({ variables, onAdd, onUpdate, onDelete }: VariablesPanel
   return (
     <div className="border-t border-[var(--aethel-border-primary)]">
       <button type="button"
+        aria-label="Expand"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 w-full p-3 text-sm text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
       >
@@ -781,6 +783,7 @@ function PreviewPanel({
       <div className="flex items-center justify-between p-3 border-b border-[var(--aethel-border-primary)]">
         <span className="text-sm font-medium">Prévia do diálogo</span>
         <button type="button" onClick={onToggle} className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded">
+          aria-label="Pause"
           <Pause className="w-4 h-4" />
         </button>
       </div>
@@ -816,6 +819,7 @@ function PreviewPanel({
         <div className="p-4 space-y-2">
           {data.choices?.map((choice) => (
             <button type="button"
+              aria-label="Choose"
               key={choice.id}
               onClick={() => onChoose(choice.id)}
               className="w-full p-3 bg-[color-mix(in_srgb,var(--aethel-warning-dark)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-warning-dark)_50%,transparent)] rounded text-left text-sm"

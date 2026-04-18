@@ -429,8 +429,8 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={`fixed bottom-0 left-0 right-0 z-50 bg-[var(--aethel-surface-primary)] border-t border-[var(--aethel-border-primary)] shadow-2xl ${
-              isMinimized ? 'h-12' : 'h-80'
-            }`}
+ isMinimized ? 'h-12' : 'h-80'
+ }`}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-3 h-12 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]">
@@ -447,17 +447,17 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-colors ${
-                          activeTab === tab.id
-                            ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
-                        }`}
+ activeTab === tab.id
+ ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
                       >
                         {tab.icon}
                         <span>{tab.label}</span>
                         {tab.count > 0 && (
                           <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                            activeTab === tab.id ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'
-                          }`}>
+ activeTab === tab.id ? 'bg-[var(--aethel-primary)]' : 'bg-[var(--aethel-surface-quaternary)]'
+ }`}>
                             {tab.count > 99 ? '99+' : tab.count}
                           </span>
                         )}
@@ -486,8 +486,8 @@ function DevToolsPanel({ isMinimized, onMinimize }: { isMinimized: boolean; onMi
                     <button type="button"
                       onClick={toggleRecording}
                       className={`p-1.5 rounded-md transition-colors ${
-                        isRecording ? 'text-[var(--aethel-error-light)] bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                      }`}
+ isRecording ? 'text-[var(--aethel-error-light)] bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)]' : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
                       title={isRecording ? 'Stop Recording' : 'Start Recording'}
                     >
                       {isRecording ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}

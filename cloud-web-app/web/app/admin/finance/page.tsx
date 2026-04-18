@@ -198,14 +198,14 @@ function AlertsPanel({ alerts }: { alerts: FinanceMetrics['alerts'] }) {
           <div
             key={i}
             className={`p-3 rounded-lg border ${
-              alert.type === 'critical'
-                ? 'bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'
-                : 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
-            }`}
+ alert.type === 'critical'
+ ? 'bg-[var(--aethel-error)]/10 border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)]'
+ }`}
           >
             <p className={`text-sm ${
-              alert.type === 'critical' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-warning)]'
-            }`}>
+ alert.type === 'critical' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-warning)]'
+ }`}>
               {alert.message}
             </p>
             <p className="text-xs text-[var(--aethel-text-tertiary)] mt-1">
@@ -360,13 +360,14 @@ export default function FinanceDashboard() {
           <div className="flex items-center gap-1 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-secondary)] rounded-lg p-1">
             {(['today', '7d', '30d', 'mtd'] as const).map((range) => (
               <button type="button"
+                aria-label="Set date range"
                 key={range}
                 onClick={() => setDateRange(range)}
                 className={`px-3 py-1 text-xs rounded ${
-                  dateRange === range
-                    ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
-                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
-                }`}
+ dateRange === range
+ ? 'bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]'
+ }`}
               >
                 {range === 'today' ? 'HOJE' : range === '7d' ? '7D' : range === '30d' ? '30D' : 'MTD'}
               </button>
@@ -377,10 +378,10 @@ export default function FinanceDashboard() {
           <button type="button"
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`p-2 rounded-lg border ${
-              autoRefresh
-                ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
-                : 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-tertiary)]'
-            }`}
+ autoRefresh
+ ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[var(--aethel-success)]/10 text-[var(--aethel-success)]'
+ : 'border-[var(--aethel-border-secondary)] text-[var(--aethel-text-tertiary)]'
+ }`}
             aria-label={autoRefresh ? 'Atualização automática ligada' : 'Atualização automática desligada'}
           >
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />

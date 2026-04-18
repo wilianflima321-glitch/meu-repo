@@ -109,12 +109,12 @@ export default function Compliance() {
                   <td className='p-2'>{policy.name}</td>
                   <td className='p-2'>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      policy.status === 'active'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
-                        : policy.status === 'review'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                    }`}>
+ policy.status === 'active'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
+ : policy.status === 'review'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}>
                       {policy.status === 'active'
                         ? 'Ativa'
                         : policy.status === 'review'

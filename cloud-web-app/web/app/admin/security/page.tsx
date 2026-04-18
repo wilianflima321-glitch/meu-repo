@@ -141,8 +141,8 @@ export default function AdminSecurity() {
               </div>
               <span
                 className={`px-2 py-1 rounded text-xs ${
-                  data?.settings.enforce2FA ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                }`}
+ data?.settings.enforce2FA ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
               >
                 {data?.settings.enforce2FA ? 'Ativo' : 'Inativo'}
               </span>
@@ -154,8 +154,8 @@ export default function AdminSecurity() {
               </div>
               <span
                 className={`px-2 py-1 rounded text-xs ${
-                  data?.settings.blockSuspiciousIps ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                }`}
+ data?.settings.blockSuspiciousIps ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
               >
                 {data?.settings.blockSuspiciousIps ? 'Ativo' : 'Inativo'}
               </span>
@@ -202,12 +202,12 @@ export default function AdminSecurity() {
                   <td className='p-3'>
                     <span
                       className={`px-2 py-1 rounded text-xs ${
-                        log.severity === 'critical'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
-                          : log.severity === 'warning'
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                            : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                      }`}
+ log.severity === 'critical'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+ : log.severity === 'warning'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
                     >
                       {severityLabels[log.severity || 'info'] || log.severity || 'informacao'}
                     </span>

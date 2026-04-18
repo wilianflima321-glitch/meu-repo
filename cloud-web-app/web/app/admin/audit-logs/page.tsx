@@ -221,12 +221,12 @@ export default function AuditLogsPage() {
                   <td className="p-2">
                     <span
                       className={`px-2 py-1 rounded text-xs ${
-                        log.severity === 'critical'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
-                          : log.severity === 'warning'
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
-                            : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                      }`}
+ log.severity === 'critical'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-error)_15%,transparent)] text-[var(--aethel-error)]'
+ : log.severity === 'warning'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
                     >
                       {severityLabels[log.severity || 'info'] ?? 'Informação'}
                     </span>

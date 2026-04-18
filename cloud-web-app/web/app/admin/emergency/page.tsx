@@ -190,6 +190,7 @@ export default function AdminEmergencyPage() {
             Desativa o modo de contingência e restaura as políticas normais de execução.
           </p>
           <button type="button"
+            aria-label="Deactivate emergency"
             onClick={deactivateEmergency}
             disabled={!isActive || pending !== null}
             className="inline-flex items-center gap-2 rounded bg-[var(--aethel-error-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)] disabled:cursor-not-allowed disabled:opacity-60"

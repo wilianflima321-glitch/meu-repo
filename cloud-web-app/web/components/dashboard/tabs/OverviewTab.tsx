@@ -80,12 +80,12 @@ function StatCard({
               ) : null}
               <span
                 className={`text-sm ${
-                  trend === 'up'
-                    ? 'text-[var(--aethel-success)]'
-                    : trend === 'down'
-                    ? 'text-[var(--aethel-error)]'
-                    : 'text-[var(--aethel-text-secondary)]'
-                }`}
+ trend === 'up'
+ ? 'text-[var(--aethel-success)]'
+ : trend === 'down'
+ ? 'text-[var(--aethel-error)]'
+ : 'text-[var(--aethel-text-secondary)]'
+ }`}
               >
                 {change > 0 ? '+' : ''}{change}% vs mês passado
               </span>

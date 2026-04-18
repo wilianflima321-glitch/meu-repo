@@ -191,17 +191,17 @@ export function GradientButton({
   return (
     <motion.button
       className={`
-        relative
-        inline-flex items-center justify-center gap-2
-        ${sizeClasses[size]}
-        ${variantClasses[variant]}
-        ${fullWidth ? 'w-full' : ''}
-        rounded-xl
-        font-medium
-        transition-all duration-200
-        disabled:opacity-50 disabled:cursor-not-allowed
-        ${className}
-      `}
+ relative
+ inline-flex items-center justify-center gap-2
+ ${sizeClasses[size]}
+ ${variantClasses[variant]}
+ ${fullWidth ? 'w-full' : ''}
+ rounded-xl
+ font-medium
+ transition-all duration-200
+ disabled:opacity-50 disabled:cursor-not-allowed
+ ${className}
+ `}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       disabled={loading || props.disabled}
@@ -261,15 +261,15 @@ export function GlowBadge({
   return (
     <motion.span
       className={`
-        inline-flex items-center gap-1.5
-        rounded-full
-        ${colorClasses[color]}
-        border
-        ${sizeClasses[size]}
-        font-medium
-        backdrop-blur-sm
-        ${className}
-      `}
+ inline-flex items-center gap-1.5
+ rounded-full
+ ${colorClasses[color]}
+ border
+ ${sizeClasses[size]}
+ font-medium
+ backdrop-blur-sm
+ ${className}
+ `}
       animate={pulse ? {
         boxShadow: [
           '0 0 0 rgba(99, 102, 241, 0)',
@@ -311,10 +311,10 @@ export function GradientText({
   return (
     <motion.span
       className={`
-        bg-gradient-to-r ${from} ${via} ${to}
-        bg-clip-text text-transparent
-        ${className}
-      `}
+ bg-gradient-to-r ${from} ${via} ${to}
+ bg-clip-text text-transparent
+ ${className}
+ `}
       animate={animate ? {
         backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
       } : {}}
@@ -393,21 +393,7 @@ export function GlowInput({
           </div>
         )}
         <input
-          className={`
-            w-full
-            ${icon ? 'pl-10' : 'pl-4'} pr-4 py-3
-            bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
-            border border-[var(--aethel-border-primary)]
-            rounded-xl
-            text-[var(--aethel-text-secondary)] placeholder:text-[var(--aethel-text-tertiary)]
-            transition-all duration-200
-            focus:outline-none
-            focus:border-[var(--aethel-primary)]/50
-            focus:shadow-[0_0_20px_rgba(99,102,241,0.2)]
-            focus:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]
-            ${error ? 'border-[var(--aethel-error)]/50 focus:border-[var(--aethel-error)]/50 focus:shadow-[0_0_20px_rgba(239,68,68,0.2)]' : ''}
-            ${className}
-          `}
+          className={`w-full ${icon ? 'pl-10' : 'pl-4'} pr-4 py-3 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] border border-[var(--aethel-border-primary)] rounded-xl text-[var(--aethel-text-secondary)] placeholder:text-[var(--aethel-text-tertiary)] transition-all duration-200 focus:outline-none focus:border-[var(--aethel-primary)]/50 focus:shadow-[0_0_20px_rgba(99,102,241,0.2)] focus:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] ${error ? 'border-[var(--aethel-error)]/50 focus:border-[var(--aethel-error)]/50 focus:shadow-[0_0_20px_rgba(239,68,68,0.2)]' : ''} ${className}`}
           {...props}
         />
       </motion.div>
@@ -457,12 +443,12 @@ export function FeatureCard({
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`
-          p-3 rounded-xl
-          ${colorClasses[color]}
-          shadow-lg
-          transition-transform duration-300
-          group-hover:scale-110 group-hover:rotate-3
-        `}>
+ p-3 rounded-xl
+ ${colorClasses[color]}
+ shadow-lg
+ transition-transform duration-300
+ group-hover:scale-110 group-hover:rotate-3
+ `}>
           {icon}
         </div>
         {badge && (

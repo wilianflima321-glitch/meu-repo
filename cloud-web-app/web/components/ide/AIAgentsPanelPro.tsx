@@ -444,10 +444,10 @@ function TaskTimeline({ tasks }: TaskTimelineProps) {
         <div key={task.id} className="flex gap-3">
           <div className="flex flex-col items-center">
             <div className={`w-2 h-2 rounded-full ${
-              task.status === 'completed' ? 'bg-[var(--aethel-success)]' :
-              task.status === 'failed' ? 'bg-[var(--aethel-error)]' :
-              'bg-[var(--aethel-surface-quaternary)]'
-            }`} />
+ task.status === 'completed' ? 'bg-[var(--aethel-success)]' :
+ task.status === 'failed' ? 'bg-[var(--aethel-error)]' :
+ 'bg-[var(--aethel-surface-quaternary)]'
+ }`} />
             {index < tasks.length - 1 && (
               <div className="w-0.5 flex-1 bg-[var(--aethel-surface-quaternary)] my-1" />
             )}
@@ -455,10 +455,10 @@ function TaskTimeline({ tasks }: TaskTimelineProps) {
           <div className="flex-1 pb-3">
             <div className="flex items-center gap-2">
               <span className={`text-sm ${
-                task.status === 'completed' ? 'text-[var(--aethel-text-primary)]' :
-                task.status === 'failed' ? 'text-[var(--aethel-error)]' :
-                'text-[var(--aethel-text-tertiary)]'
-              }`}>
+ task.status === 'completed' ? 'text-[var(--aethel-text-primary)]' :
+ task.status === 'failed' ? 'text-[var(--aethel-error)]' :
+ 'text-[var(--aethel-text-tertiary)]'
+ }`}>
                 {task.description}
               </span>
             </div>
@@ -583,13 +583,10 @@ function WorkflowBuilder({
       <button type="button" aria-label="Start AI workflow"
         onClick={() => onCreateWorkflow(steps)}
         disabled={steps.length === 0 || !objective}
-        className={`
-          w-full py-2 rounded font-medium text-sm
-          ${steps.length > 0 && objective
-            ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
-            : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
-          }
-        `}
+        className={`w-full py-2 rounded font-medium text-sm ${steps.length > 0 && objective
+ ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+ : 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-tertiary)] cursor-not-allowed'
+ }`}
       >
         Iniciar workflow
       </button>
@@ -720,13 +717,10 @@ export default function AIAgentsPanelPro({ onSendToChat, className = '' }: AIAge
           <button type="button" aria-label={`Open ${tab} agents tab`}
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`
-              flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors capitalize
-              ${activeTab === tab
-                ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
-              }
-            `}
+            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors capitalize ${activeTab === tab
+ ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)]'
+ }`}
           >
             {tab === 'agents' && <Bot className="w-3 h-3 inline-block mr-1" />}
             {tab === 'workflow' && <Workflow className="w-3 h-3 inline-block mr-1" />}

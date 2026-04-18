@@ -471,8 +471,8 @@ export default function SettingsEditor() {
               onClick={() => setScope('user')}
               aria-label="Mostrar configuracoes do usuario"
               className={`flex-1 ${
-                scope === 'user' ? settingsPrimaryButtonClass : settingsSecondaryButtonClass
-              }`}
+ scope === 'user' ? settingsPrimaryButtonClass : settingsSecondaryButtonClass
+ }`}
             >
               Usuario
             </button>
@@ -480,8 +480,8 @@ export default function SettingsEditor() {
               onClick={() => setScope('workspace')}
               aria-label="Mostrar configuracoes do workspace"
               className={`flex-1 ${
-                scope === 'workspace' ? settingsPrimaryButtonClass : settingsSecondaryButtonClass
-              }`}
+ scope === 'workspace' ? settingsPrimaryButtonClass : settingsSecondaryButtonClass
+ }`}
             >
               Workspace
             </button>
@@ -491,11 +491,12 @@ export default function SettingsEditor() {
         <div className="flex-1 overflow-y-auto">
           {filteredCategories.map((category) => (
             <button type="button"
+              aria-label="Set selected category"
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
               className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
-                selectedCategory === category.id ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
-              }`}
+ selectedCategory === category.id ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
+ }`}
             >
               <span className="rounded-md bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2 py-1 text-[11px] text-[var(--aethel-text-tertiary)]">{category.icon}</span>
               <div className="flex-1">

@@ -115,10 +115,10 @@ export default function MultiTenancyPage() {
                   </div>
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
-                      tenant.status === 'active'
-                        ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
-                        : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
-                    }`}
+ tenant.status === 'active'
+ ? 'bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success)]'
+ : 'bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
                   >
                     {tenant.status === 'active' ? 'Ativo' : 'Inativo'}
                   </span>

@@ -251,10 +251,10 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                   type="button"
                   disabled={!editorBridge?.activeFilePath}
                   className={`rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] transition-colors ${
-                    editorBridge?.activeFilePath
-                      ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
-                      : 'cursor-not-allowed opacity-50'
-                  }`}
+ editorBridge?.activeFilePath
+ ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
+ : 'cursor-not-allowed opacity-50'
+ }`}
                   title={
                     editorBridge
                       ? editorBridge.activeFilePath
@@ -274,10 +274,10 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                   type="button"
                   disabled={!editorBridge?.activeFilePath}
                   className={`rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] transition-colors ${
-                    editorBridge?.activeFilePath
-                      ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
-                      : 'cursor-not-allowed opacity-50'
-                  }`}
+ editorBridge?.activeFilePath
+ ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
+ : 'cursor-not-allowed opacity-50'
+ }`}
                   title={
                     editorBridge
                       ? editorBridge.activeFilePath
@@ -297,10 +297,10 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                   type="button"
                   disabled={!editorBridge}
                   className={`rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] transition-colors ${
-                    editorBridge
-                      ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
-                      : 'cursor-not-allowed opacity-50'
-                  }`}
+ editorBridge
+ ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
+ : 'cursor-not-allowed opacity-50'
+ }`}
                   title={editorBridge ? 'Cria arquivo via API e abre no editor' : 'Disponível no workbench (/ide)'}
                   onClick={() => {
                     if (!editorBridge) return
@@ -315,10 +315,10 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
                   type="button"
                   disabled={!editorBridge?.activeFilePath}
                   className={`rounded border border-[var(--aethel-border-secondary)] px-2 py-1 text-[10px] uppercase tracking-[0.12em] transition-colors ${
-                    editorBridge?.activeFilePath
-                      ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
-                      : 'cursor-not-allowed opacity-50'
-                  }`}
+ editorBridge?.activeFilePath
+ ? 'cursor-pointer text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_55%,transparent)]'
+ : 'cursor-not-allowed opacity-50'
+ }`}
                   title={
                     editorBridge
                       ? editorBridge.activeFilePath
@@ -365,10 +365,7 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       {/* Avatar */}
-      <div className={`
-        w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-        ${isUser ? 'bg-[var(--aethel-primary)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}
-      `}>
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isUser ? 'bg-[var(--aethel-primary)]' : 'bg-gradient-to-br from-[var(--aethel-primary)] to-[var(--aethel-info)]'}`}>
         {isUser ? <User className="w-4 h-4 text-[var(--aethel-text-primary)]" /> : <Bot className="w-4 h-4 text-[var(--aethel-text-primary)]" />}
       </div>
       {/* Content */}
@@ -407,13 +404,10 @@ function MessageBubble({ message, onCopy, onRegenerate, onRate }: MessageBubbleP
             ))}
           </div>
         )}
-        <div className={`
-          inline-block max-w-full text-left px-4 py-2.5 rounded-2xl
-          ${isUser ?
-             'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] rounded-tr-sm'
-            : 'rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] text-[var(--aethel-text-secondary)]'
-          }
-        `}>
+        <div className={`inline-block max-w-full text-left px-4 py-2.5 rounded-2xl ${isUser ?
+ 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] rounded-tr-sm'
+ : 'rounded-tl-sm bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_86%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}>
           <div className="text-sm">{renderContent(message.content)}</div>
         </div>
         {/* Meta & Actions */}
@@ -1212,13 +1206,10 @@ export default function AIChatPanelPro({
                 key={mode.id}
                 type="button"
                 onClick={() => setConsoleMode(mode.id)}
-                className={`
-                  flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-                  ${consoleMode === mode.id ?
-                     'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] shadow-sm'
-                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'
-                  }
-                `}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${consoleMode === mode.id ?
+ 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] shadow-sm'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)]'
+ }`}
                 title={mode.description}
                 aria-label={`Modo ${mode.label}: ${mode.description}`}
                 aria-pressed={consoleMode === mode.id}
@@ -1266,10 +1257,7 @@ export default function AIChatPanelPro({
                               onModelChange?.(model.id)
                               setShowModelSelector(false)
                             }}
-                            className={`
-                              w-full flex items-start gap-3 px-3 py-2 text-left
-                              ${model.id === currentModel ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)]'}
-                            `}
+                            className={`w-full flex items-start gap-3 px-3 py-2 text-left ${model.id === currentModel ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)]' : 'hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)]'}`}
                           >
                             <Sparkles className={`mt-0.5 h-4 w-4 ${model.id === currentModel ? 'text-[var(--aethel-info)]' : 'text-[var(--aethel-text-quaternary)]'}`} />
                             <div className="flex-1 min-w-0">
@@ -1328,10 +1316,10 @@ export default function AIChatPanelPro({
                       key={count}
                       onClick={() => setAgentCount(count)}
                       className={`px-2 py-0.5 text-[11px] rounded border ${
-                        agentCount === count ?
-                           'border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
-                          : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
-                      }`}
+ agentCount === count ?
+ 'border-[color-mix(in_srgb,var(--aethel-info)_48%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_14%,transparent)] text-[var(--aethel-info-light)]'
+ : 'border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)] hover:border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)]'
+ }`}
                     >
                       {count}
                     </button>
@@ -1610,13 +1598,10 @@ export default function AIChatPanelPro({
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className={`
-                absolute right-2 bottom-2 rounded-lg p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]
-                ${input.trim() && !isLoading
-                  ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
-                  : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
-                }
-              `}
+              className={`absolute right-2 bottom-2 rounded-lg p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${input.trim() && !isLoading
+ ? 'bg-[var(--aethel-primary)] hover:brightness-110 text-[var(--aethel-text-primary)]'
+ : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
+ }`}
               aria-label={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
               title={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
             >
@@ -1689,10 +1674,10 @@ export default function AIChatPanelPro({
                 type="button"
                 onClick={() => setOpsTab(tab.id)}
                 className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                  opsTab === tab.id
-                    ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                }`}
+ opsTab === tab.id
+ ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+ : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+ }`}
               >
                 <span className="inline-flex items-center justify-center gap-1">
                   <tab.icon className="h-3 w-3" />

@@ -79,10 +79,10 @@ export function ChatHistorySidebar({
           <div
             key={thread.id}
             className={`mb-2 rounded-lg border px-3 py-2 text-xs ${
-              thread.id === activeThreadId
-                ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
-                : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] text-[var(--aethel-text-secondary)]'
-            }`}
+ thread.id === activeThreadId
+ ? 'border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+ : 'border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] text-[var(--aethel-text-secondary)]'
+ }`}
           >
             <button
               type="button"
@@ -200,19 +200,19 @@ export function ThinkingDisplay({ thinking, isExpanded, onToggle, steps }: Think
                   <Loader2 className="h-3 w-3 animate-spin text-[var(--aethel-info-light)]" />
                 ) : (
                   <StepIcon className={`h-3 w-3 ${
-                    step.status === 'completed' ? 'text-[var(--aethel-success-light)]' 
-                    : step.status === 'failed' ? 'text-[var(--aethel-error-light)]'
-                    : 'text-[var(--aethel-text-quaternary)]'
-                  }`} />
+ step.status === 'completed' ? 'text-[var(--aethel-success-light)]' 
+ : step.status === 'failed' ? 'text-[var(--aethel-error-light)]'
+ : 'text-[var(--aethel-text-quaternary)]'
+ }`} />
                 )}
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <span className={`text-[10px] ${
-                    step.status === 'completed' ? 'text-[var(--aethel-text-primary)]'
-                    : step.status === 'in_progress' ? 'text-[var(--aethel-info-light)] font-medium'
-                    : 'text-[var(--aethel-text-tertiary)]'
-                  }`}>
+ step.status === 'completed' ? 'text-[var(--aethel-text-primary)]'
+ : step.status === 'in_progress' ? 'text-[var(--aethel-info-light)] font-medium'
+ : 'text-[var(--aethel-text-tertiary)]'
+ }`}>
                     {step.title}
                   </span>
                   {step.duration && (
