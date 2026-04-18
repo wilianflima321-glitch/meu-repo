@@ -233,12 +233,15 @@ function APIKeyCard({
           />
           <button type="button"
             onClick={() => onCopy(apiKey.key)}
+            aria-label="Copiar chave da API"
             className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
             <Copy size={16} />
           </button>
           <button type="button"
             onClick={() => setShowSecret(!showSecret)}
+            aria-label={showSecret ? 'Ocultar segredo da API' : 'Exibir segredo da API'}
+            aria-pressed={showSecret}
             className="px-3 py-2 rounded-lg bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)] transition-colors"
           >
             {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}

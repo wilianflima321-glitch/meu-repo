@@ -517,6 +517,7 @@ export default function GodViewPage() {
           {/* Manual Refresh */}
           <button type="button"
             onClick={fetchSessions}
+            aria-label="Atualizar sessoes do god view"
             className="p-2 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             <RefreshCw className="w-4 h-4" />

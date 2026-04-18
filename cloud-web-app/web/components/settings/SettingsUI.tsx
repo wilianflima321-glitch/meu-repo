@@ -708,6 +708,7 @@ function ArraySetting({
             />
             <button type="button"
               onClick={() => removeItem(index)}
+              aria-label="Remover item"
               className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-error)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
             >
               <Minus className="w-4 h-4" />
@@ -726,6 +727,7 @@ function ArraySetting({
           <button type="button"
             onClick={addItem}
             disabled={!newItem.trim()}
+            aria-label="Adicionar item"
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-success)] hover:bg-[var(--aethel-surface-tertiary)] rounded disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
@@ -1016,6 +1018,7 @@ export function SettingsUI({
           {searchQuery && (
             <button type="button"
               onClick={() => setSearchQuery('')}
+              aria-label="Limpar busca nas configuracoes"
               className="absolute right-3 top-1/2 -translate-y-1/2"
             >
               <X className="w-4 h-4 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]" />

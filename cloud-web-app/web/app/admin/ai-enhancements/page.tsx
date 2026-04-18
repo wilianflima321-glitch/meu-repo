@@ -182,6 +182,7 @@ export default function AIEnhancements() {
                 </div>
                 <button type="button"
                   onClick={() => toggleApplied(item)}
+                  aria-label={item.applied ? `Reverter melhoria ${item.name}` : `Aplicar melhoria ${item.name}`}
                   className='mt-3 px-3 py-2 rounded bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] text-sm'
                 >
                   {item.applied ? 'Reverter' : 'Aplicar'}

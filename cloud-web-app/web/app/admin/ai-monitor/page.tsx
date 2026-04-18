@@ -462,6 +462,7 @@ export default function AgentMonitorPage() {
               <button type="button"
                 onClick={() => void runCoreLoopDrill()}
                 disabled={isRunningDrill}
+                aria-label="Executar drill do core loop"
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] text-[var(--aethel-info-light)] disabled:opacity-60"
               >
                 <Zap className="w-4 h-4" />

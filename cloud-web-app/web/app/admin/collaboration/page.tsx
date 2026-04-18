@@ -277,30 +277,30 @@ export default function CollaborationAdminPage() {
           onClick={() => {
             void fetchAll()
           }}
-          className="aethel-button aethel-button-secondary px-4 py-2 text-sm"
+          className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] px-4 py-2 text-sm"
         >
           Atualizar
         </button>
       </div>
 
       {error && (
-        <div role="alert" aria-live="polite" className="aethel-state aethel-state-error mb-4">
+        <div role="alert" aria-live="polite" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)] mb-4">
           {error}
         </div>
       )}
       {statusMessage && !error && (
-        <div role="status" aria-live="polite" className="aethel-state aethel-state-success mb-4">
+        <div role="status" aria-live="polite" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 border-[color-mix(in_srgb,var(--aethel-success)_45%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)] mb-4">
           {statusMessage}
         </div>
       )}
 
       {loading && (
-        <div className="aethel-state aethel-state-loading mb-6">
-          <p className="aethel-state-title mb-2">Carregando colaboracao...</p>
+        <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 text-[var(--aethel-text-secondary)] mb-6">
+          <p className="text-sm font-semibold text-[var(--aethel-text-primary)] mb-2">Carregando colaboracao...</p>
           <div className="space-y-2">
-            <div className="aethel-skeleton-line w-full" />
-            <div className="aethel-skeleton-line w-5/6" />
-            <div className="aethel-skeleton-line w-2/3" />
+            <div className="h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-full" />
+            <div className="h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-5/6" />
+            <div className="h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-2/3" />
           </div>
         </div>
       )}
@@ -366,9 +366,7 @@ export default function CollaborationAdminPage() {
                 <span className="text-sm text-[var(--aethel-text-secondary)]">{row.label}</span>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`rounded border px-2 py-0.5 text-xs ${
-                      row.value ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]' : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
-                    }`}
+                    className={`rounded border px-2 py-0.5 text-xs ${ row.value ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]' : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]' }`}
                   >
                     {row.value ? 'OK' : 'PENDENTE'}
                   </span>
@@ -386,11 +384,7 @@ export default function CollaborationAdminPage() {
             <div className="mb-2 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">Evidence ledger</h3>
               <span
-                className={`rounded border px-2 py-0.5 text-[11px] ${
-                  readiness.promotionEligible
-                    ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
-                    : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
-                }`}
+                className={`rounded border px-2 py-0.5 text-[11px] ${ readiness.promotionEligible ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]' : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]' }`}
               >
                 {readiness.promotionEligible ? 'promotion-eligible' : 'pending-evidence'}
               </span>
@@ -409,11 +403,7 @@ export default function CollaborationAdminPage() {
                     <div className="mb-2 flex items-center justify-between">
                       <span className="text-xs text-[var(--aethel-text-secondary)]">{label}</span>
                       <span
-                        className={`rounded border px-2 py-0.5 text-[11px] ${
-                          passed
-                            ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
-                            : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
-                        }`}
+                        className={`rounded border px-2 py-0.5 text-[11px] ${ passed ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]' : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]' }`}
                       >
                         {passed ? 'PASS' : 'PENDING'}
                       </span>
@@ -425,7 +415,7 @@ export default function CollaborationAdminPage() {
                         onClick={() => {
                           void recordEvidence(evidenceType, true)
                         }}
-                        className="aethel-button aethel-button-primary rounded px-2 py-1 text-[11px] disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] rounded px-2 py-1 text-[11px] disabled:opacity-60"
                       >
                         {submittingEvidenceKey === `${evidenceType}:pass` ? 'Salvando...' : 'Mark PASS'}
                       </button>
@@ -435,7 +425,7 @@ export default function CollaborationAdminPage() {
                         onClick={() => {
                           void recordEvidence(evidenceType, false)
                         }}
-                        className="aethel-button aethel-button-ghost rounded px-2 py-1 text-[11px] border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] text-[var(--aethel-warning-light)] disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] rounded px-2 py-1 text-[11px] border border-[color-mix(in_srgb,var(--aethel-warning)_40%,transparent)] text-[var(--aethel-warning-light)] disabled:opacity-60"
                       >
                         {submittingEvidenceKey === `${evidenceType}:fail` ? 'Salvando...' : 'Mark FAIL'}
                       </button>
@@ -475,7 +465,7 @@ export default function CollaborationAdminPage() {
                 onClick={() => {
                   void recordStressProof()
                 }}
-                className="aethel-button aethel-button-primary rounded px-3 py-2 text-xs disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] rounded px-3 py-2 text-xs disabled:opacity-60"
               >
                 {submittingEvidenceKey === 'stress-proof' ? 'Salvando...' : 'Registrar proof'}
               </button>
@@ -518,11 +508,7 @@ export default function CollaborationAdminPage() {
                   <div key={event.id} className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--aethel-text-secondary)]">
                     <span className="font-mono text-[var(--aethel-text-secondary)]">{event.evidenceType}</span>
                     <span
-                      className={`rounded border px-1.5 py-0.5 ${
-                        event.passed
-                          ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]'
-                          : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]'
-                      }`}
+                      className={`rounded border px-1.5 py-0.5 ${ event.passed ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_15%,transparent)] text-[var(--aethel-success-light)]' : 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_15%,transparent)] text-[var(--aethel-warning-light)]' }`}
                     >
                       {event.passed ? 'PASS' : 'FAIL'}
                     </span>
@@ -536,7 +522,7 @@ export default function CollaborationAdminPage() {
         </section>
       )}
       {!loading && !readiness && !error && (
-        <div className="aethel-state aethel-state-empty mb-6">
+        <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 text-[var(--aethel-text-tertiary)] mb-6">
           Readiness de colaboracao indisponivel para o ambiente atual.
         </div>
       )}
@@ -545,7 +531,7 @@ export default function CollaborationAdminPage() {
         <h2 className="mb-3 text-base font-semibold text-[var(--aethel-text-primary)]">Projetos colaborativos</h2>
 
         {!loading && projects.length === 0 && (
-          <div className="aethel-state aethel-state-empty">
+          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 text-[var(--aethel-text-tertiary)]">
             Nenhum projeto colaborativo encontrado para o escopo atual.
           </div>
         )}
@@ -581,7 +567,7 @@ export default function CollaborationAdminPage() {
                           onClick={() => {
                             void updateStatus(project.id, 'paused')
                           }}
-                          className="aethel-button aethel-button-ghost rounded px-2 py-1 text-xs disabled:opacity-60"
+                          className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] rounded px-2 py-1 text-xs disabled:opacity-60"
                         >
                           {submittingProjectId === project.id ? 'Salvando...' : 'Suspender'}
                         </button>
@@ -592,7 +578,7 @@ export default function CollaborationAdminPage() {
                           onClick={() => {
                             void updateStatus(project.id, 'active')
                           }}
-                          className="aethel-button aethel-button-primary rounded px-2 py-1 text-xs disabled:opacity-60"
+                          className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] rounded px-2 py-1 text-xs disabled:opacity-60"
                         >
                           {submittingProjectId === project.id ? 'Salvando...' : 'Reativar'}
                         </button>

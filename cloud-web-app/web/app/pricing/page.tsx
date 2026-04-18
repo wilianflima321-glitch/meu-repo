@@ -104,13 +104,13 @@ export default function PricingPage() {
               <div className="mt-8 flex flex-wrap justify-start gap-3">
                 <Link
                   href="/dashboard-onboarding=1&source=pricing-hero"
-                  className="aethel-button aethel-button-primary rounded-xl px-5 py-3 text-sm font-semibold"
+                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] rounded-xl px-5 py-3 text-sm font-semibold"
                 >
                   Comecar no Studio
                 </Link>
                 <Link
                   href="/contact-sales"
-                  className="aethel-button aethel-button-secondary rounded-xl px-5 py-3 text-sm font-medium"
+                  className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl px-5 py-3 text-sm font-medium"
                 >
                   Falar com vendas
                 </Link>
@@ -120,18 +120,14 @@ export default function PricingPage() {
                 <button
                   type="button"
                   onClick={() => setBillingCycle('month')}
-                  className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                    billingCycle === 'month' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
+                  className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${ billingCycle === 'month' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]' }`}
                 >
                   Mensal
                 </button>
                 <button
                   type="button"
                   onClick={() => setBillingCycle('year')}
-                  className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors ${
-                    billingCycle === 'year' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
+                  className={`flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-colors ${ billingCycle === 'year' ? 'bg-[var(--aethel-text-primary)] text-[var(--aethel-surface-primary)]' : 'text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]' }`}
                 >
                   Anual
                   <span className="rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] px-2 py-0.5 text-[10px] font-bold text-[var(--aethel-success)]">
@@ -186,11 +182,7 @@ export default function PricingPage() {
             {corePlans.map((plan) => (
               <article
                 key={plan.id}
-                className={`relative flex h-full flex-col rounded-[24px] border p-5 transition-all ${
-                  plan.popular
-                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] to-transparent shadow-xl'
-                    : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]'
-                }`}
+                className={`relative flex h-full flex-col rounded-[24px] border p-5 transition-all ${ plan.popular ? 'border-[color-mix(in_srgb,var(--aethel-primary)_40%,transparent)] bg-gradient-to-b from-[color-mix(in_srgb,var(--aethel-primary)_22%,transparent)] to-transparent shadow-xl' : 'border-[color-mix(in_srgb,var(--aethel-border-secondary)_60%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] hover:border-[color-mix(in_srgb,var(--aethel-border-secondary)_80%,transparent)]' }`}
               >
                 {plan.popular ? (
                   <div className="absolute -top-3.5 left-6 rounded-full bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-4 py-1 text-xs font-bold text-[var(--aethel-text-primary)] shadow-lg">
@@ -242,9 +234,7 @@ export default function PricingPage() {
 
                 <Link
                   href={`/dashboard-tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`}
-                  className={`aethel-button w-full rounded-xl px-4 py-3 text-sm font-semibold ${
-                    plan.popular ? 'aethel-button-primary shadow-lg' : 'aethel-button-secondary'
-                  }`}
+                  className={`inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] w-full rounded-xl px-4 py-3 text-sm font-semibold ${plan.popular ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] shadow-lg' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 >
                   Selecionar {plan.name}
                 </Link>
@@ -293,7 +283,7 @@ export default function PricingPage() {
                       ))}
                     </ul>
                   </div>
-                  <Link href="/contact-sales" className="aethel-button aethel-button-primary mt-2 w-full justify-center rounded-xl px-4 py-3 text-sm font-semibold md:col-span-2">
+                  <Link href="/contact-sales" className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] mt-2 w-full rounded-xl px-4 py-3 text-sm font-semibold md:col-span-2">
                     Falar com vendas
                   </Link>
                 </div>

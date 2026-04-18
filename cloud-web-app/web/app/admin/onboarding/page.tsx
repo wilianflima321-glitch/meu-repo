@@ -123,7 +123,7 @@ export default function OnboardingAdminPage() {
       </div>
 
       {error && (
-        <div role="alert" aria-live="polite" className="aethel-state aethel-state-error mb-4">
+        <div role="alert" aria-live="polite" className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)] mb-4">
           {error}
         </div>
       )}
@@ -162,13 +162,7 @@ export default function OnboardingAdminPage() {
           </p>
           {!loading && stats?.firstValue && (
             <p
-              className={`mt-1 text-xs ${
-                stats.firstValue.sloStatus === 'pass'
-                  ? 'text-[var(--aethel-success)]'
-                  : stats.firstValue.sloStatus === 'fail'
-                    ? 'text-[var(--aethel-error)]'
-                    : 'text-[var(--aethel-warning)]'
-              }`}
+              className={`mt-1 text-xs ${ stats.firstValue.sloStatus === 'pass' ? 'text-[var(--aethel-success)]' : stats.firstValue.sloStatus === 'fail' ? 'text-[var(--aethel-error)]' : 'text-[var(--aethel-warning)]' }`}
             >
               {formatSloStatus(stats.firstValue.sloStatus)} (avaliado em P95)
             </p>

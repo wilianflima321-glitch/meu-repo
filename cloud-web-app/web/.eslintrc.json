@@ -1,4 +1,12 @@
 {
   "extends": "next/core-web-vitals",
-  "ignorePatterns": ["components/_deprecated/**"]
+  "ignorePatterns": ["components/_deprecated/**"],
+  "overrides": [
+    {
+      "files": ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}"],
+      "rules": {
+        "no-console": ["error", { "allow": ["warn", "error"] }]
+      }
+    }
+  ]
 }

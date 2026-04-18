@@ -637,6 +637,8 @@ const MemberListItem: React.FC<MemberListItemProps> = ({
           <button type="button"
             onClick={() => setShowMenu(!showMenu)}
             disabled={isLoading}
+            aria-label={showMenu ? 'Fechar menu de acoes do membro' : 'Abrir menu de acoes do membro'}
+            aria-expanded={showMenu}
             style={{
               padding: '6px',
               background: 'transparent',

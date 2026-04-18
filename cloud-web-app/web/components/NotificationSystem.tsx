@@ -299,6 +299,7 @@ function NotificationItem({ notification, onDismiss }: NotificationItemProps) {
         {notification.dismissible && (
           <button type="button"
             onClick={handleDismiss}
+            aria-label="Dispensar notificacao"
             className="p-1 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] transition-colors rounded"
           >
             <X className="w-4 h-4" />

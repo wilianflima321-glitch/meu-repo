@@ -256,12 +256,12 @@ export default function AdminAnalytics() {
       />
 
       {error && (
-        <div role='alert' aria-live='polite' className='aethel-state aethel-state-error mb-4'>
+        <div role='alert' aria-live='polite' className='rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 border-[color-mix(in_srgb,var(--aethel-error)_45%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)] mb-4'>
           {error}
         </div>
       )}
       {baseline?.dataQuality?.hasAnyMissingSamples && (
-        <div role='status' aria-live='polite' className='aethel-state aethel-state-loading mb-4'>
+        <div role='status' aria-live='polite' className='rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 text-[var(--aethel-text-secondary)] mb-4'>
           Baseline parcial: sem amostras para {baseline.dataQuality.missingSamples.join(', ')}.
         </div>
       )}
@@ -285,12 +285,12 @@ export default function AdminAnalytics() {
       </div>
 
       {loading && (
-        <div className='aethel-state aethel-state-loading mb-6'>
-          <p className='aethel-state-title mb-2'>Carregando baseline operacional...</p>
+        <div className='rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-4 text-[var(--aethel-text-secondary)] mb-6'>
+          <p className='text-sm font-semibold text-[var(--aethel-text-primary)] mb-2'>Carregando baseline operacional...</p>
           <div className='space-y-2'>
-            <div className='aethel-skeleton-line w-full' />
-            <div className='aethel-skeleton-line w-4/5' />
-            <div className='aethel-skeleton-line w-2/3' />
+            <div className='h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-full' />
+            <div className='h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-4/5' />
+            <div className='h-3 rounded bg-[var(--aethel-surface-tertiary)] animate-pulse w-2/3' />
           </div>
         </div>
       )}

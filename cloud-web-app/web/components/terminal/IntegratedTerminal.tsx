@@ -432,6 +432,7 @@ export function IntegratedTerminal({ initialCwd = '~', onCommand }: IntegratedTe
                   e.stopPropagation();
                   closeTerminal(t.id);
                 }}
+                aria-label="Fechar aba do terminal"
                 className="ml-1 hover:text-[var(--aethel-error-light)]"
               >
                 <X className="h-3 w-3" />

@@ -285,6 +285,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
               {filteredProfiles.map((profile) => (
                 <button type="button"
                   key={profile.id}
+                  aria-label={`Selecionar perfil de terminal ${profile.name}`}
                   onClick={() => {
                     onSelect(profile);
                     setIsOpen(false);
@@ -361,6 +362,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
                   // Open custom profile dialog
                   setIsOpen(false);
                 }}
+                aria-label="Abrir configuracao de perfil personalizado"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -459,6 +461,7 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
               e.stopPropagation();
               onRestart();
             }}
+            aria-label="Reiniciar terminal"
             style={{
               width: '20px',
               height: '20px',
@@ -481,6 +484,7 @@ export const TerminalTab: React.FC<TerminalTabProps> = ({
             e.stopPropagation();
             onClose();
           }}
+          aria-label="Fechar seletor de perfis de terminal"
           style={{
             width: '20px',
             height: '20px',

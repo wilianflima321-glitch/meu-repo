@@ -833,6 +833,8 @@ function SettingToggle({ setting, value, onChange }: SettingInputProps) {
   return (
     <button type="button"
       onClick={() => onChange(!value)}
+      aria-label={setting.label}
+      aria-pressed={!!value}
       className={`relative w-11 h-6 rounded-full transition-colors ${
         value ? 'bg-[var(--aethel-info)]' : 'bg-[var(--aethel-surface-quaternary)]'
       }`}

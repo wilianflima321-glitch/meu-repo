@@ -59,6 +59,7 @@ export function Dropdown({ trigger, items, align = 'right', width = 'auto' }: Dr
     <div className="relative inline-block" ref={dropdownRef}>
       <button type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={typeof trigger === 'string' ? trigger : 'Abrir dropdown'}
         className="focus:outline-none"
         aria-expanded={isOpen}
         aria-haspopup="true"

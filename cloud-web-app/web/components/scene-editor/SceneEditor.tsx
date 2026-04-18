@@ -481,6 +481,7 @@ function HierarchyPanel({
               e.stopPropagation();
               onDelete(obj.id);
             }}
+            aria-label="Remover objeto da cena"
             style={{
               background: 'rgba(255,0,0,0.3)',
               border: 'none',
@@ -552,6 +553,7 @@ function HierarchyPanel({
                     onAdd('mesh', geom);
                     setShowAddMenu(false);
                   }}
+                  aria-label={`Adicionar ${geom} na cena`}
                   style={{
                     display: 'block',
                     width: '100%',
@@ -1051,6 +1053,8 @@ function Toolbar({
       {/* View options */}
       <button type="button"
         onClick={onToggleGrid}
+        aria-label={showGrid ? 'Ocultar grade da cena' : 'Exibir grade da cena'}
+        aria-pressed={showGrid}
         style={buttonStyle(showGrid)}
       >
         {showGrid ? '▦' : '▢'} Grid

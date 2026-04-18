@@ -340,6 +340,7 @@ function GameCard({
         </button>
         <button type="button"
           onClick={() => onDelete(game.id)}
+          aria-label={`Excluir jogo ${game.name}`}
           className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
           <Trash2 size={14} />
@@ -394,6 +395,7 @@ function FilmCard({
         </button>
         <button type="button"
           onClick={() => onDelete(film.id)}
+          aria-label={`Excluir filme ${film.name}`}
           className="px-3 py-1.5 rounded-lg bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] text-[var(--aethel-error-light)] text-xs font-medium hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] transition-colors"
         >
           <Trash2 size={14} />

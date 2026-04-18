@@ -284,6 +284,7 @@ function CommitCard({ commit, isActive, isPreviewing, onClick, onPreview, onDiff
                 <button type="button"
                   key={i}
                   onClick={(e) => { e.stopPropagation(); onDiff(file); }}
+                  aria-label={`Ver diff de ${file.path}`}
                   className="w-full flex items-center gap-2 px-2 py-1
                            bg-[var(--aethel-surface-secondary)] hover:bg-[var(--aethel-surface-tertiary)] rounded text-left
                            transition-colors group"
@@ -380,6 +381,7 @@ function TimelineBar({ commits, activeIndex, onSelect }: {
           <button type="button"
             key={i}
             onClick={() => onSelect(i)}
+            aria-label={`Selecionar commit ${i + 1}`}
             className={`
               w-2 h-2 rounded-full transition-all mx-0.5
               ${i === activeIndex
@@ -600,6 +602,7 @@ export function TimeMachineSlider({
           <button type="button"
             onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))}
             disabled={activeIndex === 0}
+            aria-label="Ir para o commit anterior"
             className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
                      transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -613,6 +616,7 @@ export function TimeMachineSlider({
           <button type="button"
             onClick={() => setActiveIndex(prev => Math.min(commits.length - 1, prev + 1))}
             disabled={activeIndex === commits.length - 1}
+            aria-label="Ir para o proximo commit"
             className="p-2 bg-[var(--aethel-surface-tertiary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-lg
                      transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >

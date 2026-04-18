@@ -192,6 +192,7 @@ export default function AdminEmergencyPage() {
           <button type="button"
             onClick={deactivateEmergency}
             disabled={!isActive || pending !== null}
+            aria-label="Desativar estado de emergencia"
             className="inline-flex items-center gap-2 rounded bg-[var(--aethel-error-dark)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-error)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <StopCircle className="h-4 w-4" />

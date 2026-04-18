@@ -429,6 +429,8 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
       {allKinds.map((kind) => (
         <button type="button"
           key={kind}
+          aria-label={`${visibleKinds.has(kind) ? 'Ocultar' : 'Exibir'} itens do tipo ${kind}`}
+          aria-pressed={visibleKinds.has(kind)}
           className="w-full flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)]
                      hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] transition-colors"
           onClick={() => onToggleKind(kind)}

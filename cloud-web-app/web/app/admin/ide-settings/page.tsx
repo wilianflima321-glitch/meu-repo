@@ -390,6 +390,7 @@ export default function IDESettings() {
               <button type="button"
                 onClick={handlePublish}
                 disabled={publishing}
+                aria-label="Publicar configuracoes do IDE em producao"
                 className='px-3 py-2 rounded bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] text-sm disabled:opacity-50'
               >
                 {publishing ? 'Publicando...' : 'Publicar em produção'}

@@ -507,6 +507,7 @@ function RewardEditor({ reward, onUpdate, onDelete }: RewardEditorProps) {
 
       <button type="button"
         onClick={onDelete}
+        aria-label="Remover objetivo"
         className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
       >
         <Trash2 className="w-3 h-3 text-[var(--aethel-error-light)]" />
@@ -669,6 +670,8 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
       <div>
         <button type="button"
           onClick={() => toggleSection('objectives')}
+          aria-label={openSections.objectives ? 'Recolher objetivos' : 'Expandir objetivos'}
+          aria-expanded={openSections.objectives}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.objectives ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -722,6 +725,8 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
       <div>
         <button type="button"
           onClick={() => toggleSection('rewards')}
+          aria-label={openSections.rewards ? 'Recolher recompensas' : 'Expandir recompensas'}
+          aria-expanded={openSections.rewards}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.rewards ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -771,6 +776,8 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
       <div>
         <button type="button"
           onClick={() => toggleSection('prerequisites')}
+          aria-label={openSections.prerequisites ? 'Recolher pre-requisitos' : 'Expandir pre-requisitos'}
+          aria-expanded={openSections.prerequisites}
           className="flex items-center gap-2 w-full text-left text-sm font-medium mb-2"
         >
           {openSections.prerequisites ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -831,6 +838,7 @@ function QuestInspector({ node, onUpdate, onDelete }: QuestInspectorProps) {
                     prerequisites.splice(i, 1);
                     updateData({ prerequisites });
                   }}
+                  aria-label="Remover pre-requisito"
                   className="p-1 rounded bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]"
                 >
                   <Trash2 className="w-3 h-3 text-[var(--aethel-error-light)]" />

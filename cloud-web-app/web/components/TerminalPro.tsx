@@ -343,6 +343,8 @@ Press Ctrl+C to cancel running command
 
           <button type="button"
             onClick={() => setIsMaximized(!isMaximized)}
+            aria-label={isMaximized ? 'Restaurar terminal' : 'Maximizar terminal'}
+            aria-pressed={isMaximized}
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
           >
             {isMaximized ? (
@@ -353,6 +355,7 @@ Press Ctrl+C to cancel running command
           </button>
           <button type="button"
             onClick={() => setLines([])}
+            aria-label="Limpar saida do terminal"
             className="p-1.5 text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-secondary)] rounded transition-colors"
           >
             <X className="w-4 h-4" />

@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
               <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">Nao encontrou? Verifique sua caixa de spam.</p>
               <Link
                 href="/login"
-                className="aethel-button aethel-button-ghost mt-6 inline-flex rounded-xl px-5 py-2 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] mt-6 rounded-xl px-5 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar para o login
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="aethel-button aethel-button-primary w-full rounded-xl px-4 py-3 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full rounded-xl px-4 py-3 text-sm font-semibold"
               >
                 {isLoading ? (
                   <>
@@ -116,7 +116,7 @@ export default function ForgotPasswordPage() {
 
               <Link
                 href="/login"
-                className="aethel-button aethel-button-ghost w-full rounded-xl px-4 py-2 text-sm font-semibold"
+                className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-primary)] w-full rounded-xl px-4 py-2 text-sm font-semibold"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar para o login

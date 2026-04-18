@@ -235,6 +235,8 @@ function ItemCard({
         <div className="mb-3">
           <button type="button"
             onClick={(e) => { e.stopPropagation(); setShowContent(!showContent); }}
+            aria-label={showContent ? 'Ocultar conteudo moderado' : 'Exibir conteudo moderado'}
+            aria-expanded={showContent}
             className="flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
           >
             {showContent ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}

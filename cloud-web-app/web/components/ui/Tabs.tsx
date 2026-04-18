@@ -141,6 +141,7 @@ export function TabTrigger({
   return (
     <button type="button"
       role="tab"
+      aria-label={typeof children === 'string' ? children : String(value)}
       aria-selected={isActive}
       aria-controls={`panel-${value}`}
       disabled={disabled}

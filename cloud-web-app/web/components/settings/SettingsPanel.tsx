@@ -324,6 +324,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, isActive, onActivate
                 e.stopPropagation();
                 onDelete();
               }}
+              aria-label="Remover configuracao"
               style={{
                 padding: '6px',
                 background: 'transparent',
@@ -508,6 +509,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
           {searchQuery && (
             <button type="button"
               onClick={() => setSearchQuery('')}
+              aria-label="Limpar busca de configuracoes"
               style={{
                 background: 'transparent',
                 border: 'none',

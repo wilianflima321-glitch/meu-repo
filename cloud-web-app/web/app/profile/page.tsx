@@ -325,7 +325,11 @@ export default function ProfilePage() {
                   profile.name.charAt(0).toUpperCase()
                 )}
               </div>
-              <button type="button" className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                type="button"
+                aria-label="Alterar foto de perfil"
+                className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              >
                 <Camera className="w-6 h-6" />
               </button>
             </div>
@@ -490,6 +494,7 @@ export default function ProfilePage() {
                 value={profile.twoFactorEnabled ? 'Ativada' : 'Desativada'}
                 action={
                   <button type="button"
+                    aria-label={profile.twoFactorEnabled ? 'Desativar autenticacao de dois fatores' : 'Ativar autenticacao de dois fatores'}
                     onClick={() => {
                       if (profile.twoFactorEnabled) {
                         setTwoFactorModal('disable')
@@ -586,6 +591,8 @@ export default function ProfilePage() {
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, email: !profile.notifications.email }
                     })}
+                    aria-label="Alternar notificacoes por email"
+                    aria-pressed={profile.notifications.email}
                     className={`w-12 h-6 rounded-full transition-colors ${
                       profile.notifications.email ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                     }`}
@@ -604,6 +611,8 @@ export default function ProfilePage() {
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, push: !profile.notifications.push }
                     })}
+                    aria-label="Alternar notificacoes push"
+                    aria-pressed={profile.notifications.push}
                     className={`w-12 h-6 rounded-full transition-colors ${
                       profile.notifications.push ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                     }`}
@@ -622,6 +631,8 @@ export default function ProfilePage() {
                     onClick={() => updateProfile({
                       notifications: { ...profile.notifications, marketing: !profile.notifications.marketing }
                     })}
+                    aria-label="Alternar emails de marketing"
+                    aria-pressed={profile.notifications.marketing}
                     className={`w-12 h-6 rounded-full transition-colors ${
                       profile.notifications.marketing ? 'bg-[var(--aethel-primary-dark)]' : 'bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)]'
                     }`}
@@ -731,6 +742,7 @@ export default function ProfilePage() {
                 Cancelar
               </button>
               <button type="button"
+                aria-label={twoFactorModal === 'setup' ? 'Confirmar configuracao da autenticacao de dois fatores' : 'Confirmar desativacao da autenticacao de dois fatores'}
                 onClick={twoFactorModal === 'setup' ? confirmTwoFactorSetup : confirmTwoFactorDisable}
                 disabled={twoFactorLoading}
                 className="flex-1 px-4 py-2 bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] rounded-lg transition-colors"

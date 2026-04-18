@@ -456,6 +456,7 @@ export function OnboardingChecklist() {
               <h3 className="font-semibold text-[var(--aethel-text-primary)]">Primeiros passos</h3>
               <button type="button"
                 onClick={() => setIsOpen(false)}
+                aria-label="Fechar onboarding"
                 className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
               >
                 <X className="w-4 h-4" />
@@ -622,7 +623,7 @@ export function AchievementToast({ achievement, onClose }: { achievement: Achiev
           <div className="text-[var(--aethel-text-primary)] font-semibold">{achievement.name}</div>
           <div className="text-sm text-[var(--aethel-text-secondary)]">{achievement.description}</div>
         </div>
-        <button type="button" onClick={onClose} className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
+        <button type="button" onClick={onClose} aria-label="Fechar tour de onboarding" className="text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]">
           <X className="w-4 h-4" />
         </button>
       </div>

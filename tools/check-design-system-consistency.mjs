@@ -41,8 +41,10 @@ function checkFile(filePath) {
   lines.forEach((line, i) => {
     const lineNum = i + 1
 
-    // Check for legacy aethel-* classes (not CSS vars)
-    const legacyMatch = line.match(/className.*?aethel-(?!surface|text|border|primary|secondary|info|success|warning|error|accent|bg|panel)/g)
+    // Check for legacy aethel-* classes (not CSS vars).
+    // Token CSS variables that are valid design-system references do NOT count as legacy.
+    // Anything else (e.g. `aethel-flex`, `aethel-p-6`, `aethel-card`) is flagged.
+    const legacyMatch = line.match(/className.*?aethel-(?!surface|text|border|primary|secondary|info|success|warning|error|accent|bg|panel|focus|target|app|shadow|duration|ease|radius)/g)
     if (legacyMatch) {
       RESULTS.legacyClasses.push({ file: relPath, line: lineNum, match: legacyMatch[0].slice(0, 80) })
     }
@@ -58,11 +60,16 @@ function checkFile(filePath) {
       RESULTS.hardcodedColors.push({ file: relPath, line: lineNum, match: hexInClass[0].slice(0, 60) })
     }
 
-    // Check buttons without aria-label or text content
+    // Check buttons without an accessible name.
+    // Multi-line button tags are common, so we scan a window after the opening
+    // tag and accept any explicit aria*/title attribute, visible text, or
+    // common JSX label expressions such as {item.label}.
     if (line.includes('<button') && line.includes('type="button"')) {
-      const hasAriaLabel = line.includes('aria-label')
-      const hasTextChild = lines.slice(i, i + 3).join('').match(/>[\w\s]+</)
-      if (!hasAriaLabel && !hasTextChild) {
+      const windowText = lines.slice(i, Math.min(lines.length, i + 20)).join('\n')
+      const hasAccessibleAttr = /\b(aria-label|aria-labelledby|aria-describedby|title)\s*=/.test(windowText)
+      const hasVisibleText = />[^<>{}]*?[A-Za-z\u00C0-\u024F][^<>{}]*?</.test(windowText)
+      const hasLabelExpr = /\{[^{}]*\b(label|name|title|text|displayName)\b[^{}]*\}/.test(windowText)
+      if (!hasAccessibleAttr && !hasVisibleText && !hasLabelExpr) {
         RESULTS.missingAriaLabels.push({ file: relPath, line: lineNum })
       }
     }

@@ -882,6 +882,7 @@ export const Switch: React.FC<SwitchProps> = ({
       <button type="button"
         id={id}
         role="switch"
+        aria-label={label ?? id}
         aria-checked={checked}
         disabled={disabled}
         onClick={() => !disabled && onCheckedChange(!checked)}

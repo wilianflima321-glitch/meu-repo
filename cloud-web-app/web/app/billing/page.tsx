@@ -110,8 +110,8 @@ export default function BillingPage() {
   if (isLoading) {
     return (
     <StudioLayout title="Faturamento" subtitle="Planos, consumo e faturamento do workspace.">
-        <div className="aethel-flex aethel-items-center aethel-justify-center px-6 py-12">
-          <div className="aethel-card aethel-p-6">
+        <div className="flex items-center justify-center px-6 py-12">
+          <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] shadow-[var(--aethel-shadow-md)] p-6">
             <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando planos...</p>
           </div>
         </div>
@@ -122,8 +122,8 @@ export default function BillingPage() {
   if (error) {
     return (
     <StudioLayout title="Faturamento" subtitle="Planos, consumo e faturamento do workspace.">
-        <div className="aethel-flex aethel-items-center aethel-justify-center px-6 py-12">
-          <div className="aethel-card aethel-p-6 max-w-md">
+        <div className="flex items-center justify-center px-6 py-12">
+          <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] shadow-[var(--aethel-shadow-md)] p-6 max-w-md">
             <h1 className="text-xl font-bold mb-2">Falha ao carregar billing</h1>
             <p className="text-sm text-[var(--aethel-text-secondary)]">
               Nao foi possivel recuperar os planos neste momento. Tente novamente em instantes.
@@ -140,24 +140,24 @@ export default function BillingPage() {
       subtitle="Controle de uso, previsibilidade de custos e upgrade instantaneo."
       maxWidth="7xl"
     >
-      <div className="aethel-p-6">
-        <div className="aethel-flex aethel-items-center aethel-justify-between mb-6">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-3xl font-bold">Planos e Consumo</h2>
             <p className="text-[var(--aethel-text-secondary)] text-sm">
               Ajuste plano mensal/anual e acompanhe limites em tempo real.
             </p>
           </div>
-          <div className="aethel-flex aethel-gap-2">
+          <div className="flex gap-2">
             <button type="button"
               onClick={() => setCurrency('BRL')}
-              className={`px-4 py-2 aethel-rounded ${currency === 'BRL' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
+              className={`px-4 py-2 rounded ${currency === 'BRL' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
             >
               BRL
             </button>
             <button type="button"
               onClick={() => setCurrency('USD')}
-              className={`px-4 py-2 aethel-rounded ${currency === 'USD' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
+              className={`px-4 py-2 rounded ${currency === 'USD' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-secondary)]'}`}
             >
               USD
             </button>
@@ -170,7 +170,7 @@ export default function BillingPage() {
         </div>
 
         <div className="mb-6">
-          <div className="inline-flex aethel-items-center aethel-gap-2 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] aethel-p-1">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-1">
             <button type="button"
               onClick={() => setBillingCycle('month')}
               className={`rounded-full px-4 py-1.5 text-sm ${billingCycle === 'month' ? 'bg-[var(--aethel-surface-quaternary)] text-[var(--aethel-text-primary)]' : 'text-[var(--aethel-text-secondary)]'}`}
@@ -187,7 +187,7 @@ export default function BillingPage() {
         </div>
 
         <div className="mb-8">
-          <div className="aethel-flex aethel-items-center aethel-justify-between mb-3">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-bold">Uso atual</h2>
             <button type="button"
               onClick={() => setShowUsage((prev) => !prev)}
@@ -210,7 +210,7 @@ export default function BillingPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 aethel-gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {plans.map((plan) => {
             const monthlyPrice = currency === 'BRL' ? plan.priceBRL || 0 : plan.price || 0
             const annualPrice = currency === 'BRL'
@@ -225,9 +225,9 @@ export default function BillingPage() {
             return (
               <div
                 key={plan.id}
-                className={`aethel-card aethel-p-6 aethel-flex aethel-flex-col ${plan.popular ? 'border border-[var(--aethel-border-secondary)]' : ''}`}
+                className={`rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] shadow-[var(--aethel-shadow-md)] p-6 flex flex-col ${plan.popular ? 'border border-[var(--aethel-border-secondary)]' : ''}`}
               >
-                <div className="aethel-flex aethel-items-center aethel-justify-between mb-2">
+                <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   {plan.popular ? <Badge variant="primary" size="sm">Recomendado</Badge> : null}
                 </div>
@@ -238,7 +238,7 @@ export default function BillingPage() {
                   <span className="text-[var(--aethel-text-secondary)]">/{billingCycle === 'year' ? 'ano' : 'mes'}</span>
                 </div>
 
-                <div className="mb-4 aethel-p-3 bg-[var(--aethel-surface-secondary)] aethel-rounded border border-[var(--aethel-border-primary)]">
+                <div className="mb-4 p-3 bg-[var(--aethel-surface-secondary)] rounded border border-[var(--aethel-border-primary)]">
                   <span className="text-2xl font-bold text-[var(--aethel-text-primary)]">{formatTokens(tokens)}</span>
                   <span className="text-[var(--aethel-text-secondary)] text-sm"> tokens/mes</span>
                 </div>
@@ -264,7 +264,7 @@ export default function BillingPage() {
 
                 <ul className="flex-1 space-y-2 mb-4">
                   {(plan.features || []).slice(0, 6).map((feature) => (
-                    <li key={feature} className="aethel-flex items-start aethel-gap-2 text-sm">
+                    <li key={feature} className="flex items-start gap-2 text-sm">
                       <span className="text-[var(--aethel-success)]">+</span>
                       <span className="text-[var(--aethel-text-secondary)]">{feature}</span>
                     </li>
@@ -275,7 +275,7 @@ export default function BillingPage() {
                   type="button"
                   onClick={() => handleSubscribe(plan.id)}
                   disabled={isBusy || isCheckoutBlocked}
-                  className={`aethel-button aethel-button-primary w-full ${isBusy ? 'opacity-50' : ''}`}
+                  className={`inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] w-full ${isBusy ? 'opacity-50' : ''}`}
                 >
                   {isBusy
                     ? 'Processando...'

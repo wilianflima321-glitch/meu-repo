@@ -198,6 +198,7 @@ export default function FeatureFlagsAdmin() {
                   <td className='p-2'>
                     <button type="button"
                       onClick={() => toggleFlag(flag.key, flag.enabled)}
+                      aria-label={flag.enabled ? `Desativar flag ${flag.key}` : `Ativar flag ${flag.key}`}
                       className='px-2 py-1 bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] rounded text-sm'
                     >
                       {flag.enabled ? 'Desativar' : 'Ativar'}

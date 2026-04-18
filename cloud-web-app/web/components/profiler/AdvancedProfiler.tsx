@@ -905,6 +905,8 @@ export function AdvancedProfiler({
           <div style={{ display: 'flex', gap: '8px' }}>
             <button type="button"
               onClick={() => setIsRecording(!isRecording)}
+              aria-label={isRecording ? 'Parar gravacao do profiler' : 'Iniciar gravacao do profiler'}
+              aria-pressed={isRecording}
               style={{
                 background: isRecording ? '#ef4444' : '#22c55e',
                 border: 'none',
@@ -920,6 +922,7 @@ export function AdvancedProfiler({
             </button>
 
             <button type="button"
+              aria-label="Iniciar nova sessao de profiler"
               onClick={() => {
                 setSession({
                   id: crypto.randomUUID(),
@@ -953,6 +956,7 @@ export function AdvancedProfiler({
             <button type="button"
               key={tab}
               onClick={() => setActiveTab(tab)}
+              aria-label={`Abrir aba ${tab}`}
               style={{
                 background: activeTab === tab ? '#3b82f6' : '#1e293b',
                 border: 'none',

@@ -424,6 +424,7 @@ function SearchInput({
           {history.map((item, index) => (
             <button type="button"
               key={index}
+              aria-label={`Usar busca recente ${item}`}
               onClick={() => {
                 onChange(item);
                 onHistorySelect?.(item);
@@ -532,6 +533,7 @@ function SearchResultFile({
             <button type="button"
               key={`${match.line}-${match.column}-${index}`}
               onClick={() => onNavigate(match)}
+              aria-label={`Ir para linha ${match.line}, coluna ${match.column}`}
               className="w-full flex items-center gap-3 px-3 py-1 hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-left group"
             >
               <span className="text-xs text-[var(--aethel-text-quaternary)] w-8 text-right flex-shrink-0">
@@ -738,6 +740,8 @@ export function GlobalSearchPanel({
         {/* File filters */}
         <button type="button"
           onClick={() => setShowFilters(!showFilters)}
+          aria-label={showFilters ? 'Ocultar filtros de busca' : 'Exibir filtros de busca'}
+          aria-expanded={showFilters}
           className="flex items-center gap-1 text-xs text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)]"
         >
           <MoreVertical className="w-3 h-3" />

@@ -360,6 +360,8 @@ const TrackRow: React.FC<{
         <div style={{ display: 'flex', gap: '4px' }}>
           <button type="button"
             onClick={onToggleLock}
+            aria-label={track.locked ? 'Desbloquear faixa' : 'Bloquear faixa'}
+            aria-pressed={track.locked}
             style={{
               background: 'transparent',
               border: 'none',
@@ -372,6 +374,8 @@ const TrackRow: React.FC<{
           </button>
           <button type="button"
             onClick={onToggleVisible}
+            aria-label={track.visible === false ? 'Mostrar faixa' : 'Ocultar faixa'}
+            aria-pressed={track.visible !== false}
             style={{
               background: 'transparent',
               border: 'none',
@@ -384,6 +388,8 @@ const TrackRow: React.FC<{
           </button>
           <button type="button"
             onClick={onToggleMute}
+            aria-label={track.muted ? 'Ativar audio da faixa' : 'Silenciar faixa'}
+            aria-pressed={track.muted}
             style={{
               background: 'transparent',
               border: 'none',
@@ -673,6 +679,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <button type="button"
             onClick={handleZoomOut}
+            aria-label="Diminuir zoom da timeline"
             style={{
               padding: '4px',
               background: 'transparent',
@@ -688,6 +695,7 @@ export const SequencerTimeline: React.FC<SequencerTimelineProps> = ({
           </span>
           <button type="button"
             onClick={handleZoomIn}
+            aria-label="Aumentar zoom da timeline"
             style={{
               padding: '4px',
               background: 'transparent',

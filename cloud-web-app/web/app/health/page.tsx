@@ -14,19 +14,19 @@ export default function HealthPage(){
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Backend Health</h1>
 
-  <section className="aethel-card p-4">
+  <section className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] shadow-[var(--aethel-shadow-md)] p-4">
         <h2 className="text-lg font-semibold mb-2">/health</h2>
         {healthErr && <div className="text-[var(--aethel-error)]">Erro: {String(healthErr)}</div>}
         <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(health ?? { status: 'unknown' }, null, 2)}</pre>
       </section>
 
-  <section className="aethel-card p-4">
+  <section className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] shadow-[var(--aethel-shadow-md)] p-4">
         <h2 className="text-lg font-semibold mb-2">/auth/providers</h2>
         {provErr && <div className="text-[var(--aethel-warning)]">Aviso: {String(provErr)}</div>}
         <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(providers ?? {}, null, 2)}</pre>
       </section>
 
-  <section className="aethel-card p-4">
+  <section className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] shadow-[var(--aethel-shadow-md)] p-4">
         <h2 className="text-lg font-semibold mb-2">/billing/plans</h2>
         {plansErr && <div className="text-[var(--aethel-warning)]">Aviso: {String(plansErr)}</div>}
         <pre className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-3 rounded overflow-auto min-h-[80px]">{JSON.stringify(plans ?? [], null, 2)}</pre>

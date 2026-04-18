@@ -393,6 +393,7 @@ function TourOverlay() {
               <button type="button"
                 key={i}
                 onClick={() => goToStep(i)}
+                aria-label={`Ir para a etapa ${i + 1} do tour`}
                 className={`w-2 h-2 rounded-full transition-all ${
                   i === currentStepIndex
                     ? 'bg-[var(--aethel-info)] w-4'

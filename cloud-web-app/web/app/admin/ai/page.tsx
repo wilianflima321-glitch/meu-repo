@@ -183,6 +183,7 @@ export default function AdminAI() {
         <button type="button"
           onClick={handleUpdate}
           disabled={saving}
+          aria-label="Salvar alteracoes da configuracao de IA"
           className='bg-[var(--aethel-primary-dark)] text-[var(--aethel-text-primary)] px-4 py-2 rounded disabled:opacity-50'
         >
           {saving ? 'Salvando...' : 'Salvar alterações'}
