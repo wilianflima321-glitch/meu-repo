@@ -1,5 +1,5 @@
 import { DirectorNotePanel } from '../ai/DirectorNotePanel'
-import { TimeMachineSlider } from '../collaboration/TimeMachineSlider'
+import { VersionHistorySlider } from '../collaboration/VersionHistorySlider'
 import { PremiumEmptyProjects } from '../ui/PremiumEmptyState'
 import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_SPACING, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
@@ -69,7 +69,7 @@ export function DashboardProjectsTab({
         </div>
         {projects.length > 0 && (
           <div className="w-96">
-            <TimeMachineSlider versions={[]} onVersionChange={onProjectVersionChange} variant="compact" />
+            <VersionHistorySlider versions={[]} onVersionChange={onProjectVersionChange} variant="compact" />
           </div>
         )}
       </div>

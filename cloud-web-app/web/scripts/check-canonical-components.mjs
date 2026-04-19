@@ -4,6 +4,7 @@ import path from 'node:path';
 const ROOT = process.cwd();
 const TARGET_DIRS = ['app', 'components', 'lib'];
 const EXTENSIONS = new Set(['.ts', '.tsx']);
+const COMPONENT_EXTENSIONS = new Set(['.tsx']);
 
 const bannedSuffixes = [
   { suffix: '/CommandPalette', replacement: '@/components/ide/CommandPalette' },
@@ -35,8 +36,20 @@ function rel(file) {
 
 const files = TARGET_DIRS.flatMap((dir) => walk(path.join(ROOT, dir)));
 const violations = [];
+const duplicateComponentNames = new Map();
 
 for (const file of files) {
+  const fileRel = rel(file);
+  if (fileRel.startsWith('components/')) {
+    const ext = path.extname(file);
+    const base = path.basename(file);
+    if (COMPONENT_EXTENSIONS.has(ext) && base.toLowerCase() !== 'index.tsx') {
+      const bucket = duplicateComponentNames.get(base) ?? [];
+      bucket.push(fileRel);
+      duplicateComponentNames.set(base, bucket);
+    }
+  }
+
   const content = fs.readFileSync(file, 'utf8');
   const lines = content.split(/\r?\n/);
   lines.forEach((line, index) => {
@@ -44,7 +57,6 @@ for (const file of files) {
     if (!match) return;
 
     const importPath = match[1];
-    const fileRel = rel(file);
     if (importPath.includes('/ide/CommandPalette')) return;
     if (fileRel.startsWith('components/ide/') && importPath === './CommandPalette') return;
 
@@ -59,6 +71,21 @@ for (const file of files) {
       }
     }
   });
+}
+
+const duplicateEntries = [...duplicateComponentNames.entries()]
+  .filter(([, paths]) => paths.length > 1)
+  .sort(([a], [b]) => a.localeCompare(b));
+
+if (duplicateEntries.length > 0) {
+  console.error('[canonical-components] duplicate component filenames found:');
+  for (const [name, paths] of duplicateEntries) {
+    console.error(`- ${name}`);
+    for (const componentPath of paths) {
+      console.error(`  - ${componentPath}`);
+    }
+  }
+  process.exit(1);
 }
 
 if (violations.length > 0) {

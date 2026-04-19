@@ -1,10 +1,10 @@
 /**
- * TimeMachineSlider - Componente de Viagem no Tempo para Versões
+ * VersionHistorySlider - Componente de Viagem no Tempo para Versões
  *
  * Permite navegar entre versões históricas do projeto.
  * Integrado com sistema de controle de versão.
  *
- * @module components/collaboration/TimeMachineSlider
+ * @module components/collaboration/VersionHistorySlider
  */
 
 'use client';
@@ -46,7 +46,7 @@ export interface VersionSnapshot {
   };
 }
 
-export interface TimeMachineSliderProps {
+export interface VersionHistorySliderProps {
   versions: VersionSnapshot[];
   currentVersion?: string;
   onVersionChange?: (versionId: string) => void;
@@ -62,7 +62,7 @@ export interface TimeMachineSliderProps {
 // TIME MACHINE SLIDER COMPONENT
 // ============================================================================
 
-export function TimeMachineSlider({
+export function VersionHistorySlider({
   versions = [],
   currentVersion,
   onVersionChange,
@@ -72,7 +72,7 @@ export function TimeMachineSlider({
   showThumbnails = true,
   autoPlay = false,
   playbackSpeed = 1000,
-}: TimeMachineSliderProps) {
+}: VersionHistorySliderProps) {
   const [selectedIndex, setSelectedIndex] = useState(() => {
     if (currentVersion) {
       const idx = versions.findIndex(v => v.id === currentVersion);
@@ -404,4 +404,4 @@ export function TimeMachineSlider({
   );
 }
 
-export default TimeMachineSlider;
+export default VersionHistorySlider;

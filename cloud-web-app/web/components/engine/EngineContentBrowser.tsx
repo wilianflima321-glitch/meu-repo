@@ -615,7 +615,7 @@ export interface ContentBrowserProps {
   onAssetOpen?: (asset: Asset) => void;
 }
 
-export default function ContentBrowser({
+export default function EngineContentBrowser({
   projectId,
   onAssetSelect,
   onAssetOpen,

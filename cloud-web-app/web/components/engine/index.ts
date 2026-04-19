@@ -8,7 +8,7 @@
 // CORE ENGINE COMPONENTS
 // ============================================================================
 
-export { default as ContentBrowser } from './ContentBrowser';
+export { default as ContentBrowser } from './EngineContentBrowser';
 export { default as WorldOutliner } from './WorldOutliner';
 export { default as DetailsPanel } from './DetailsPanel';
 export { default as LevelEditor } from './LevelEditor';
@@ -28,7 +28,7 @@ export { default as AbilityEditor } from './AbilityEditor'; // GAS Editor
 export type {
   Asset,
   AssetType,
-} from './ContentBrowser';
+} from './EngineContentBrowser';
 
 // World Outliner Types
 export type {
