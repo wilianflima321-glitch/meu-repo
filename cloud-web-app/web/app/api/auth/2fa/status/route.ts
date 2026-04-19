@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth-server';
 import { twoFactorService } from '@/lib/security/two-factor-auth';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const logger = createComponentLogger('api.auth.2fa.status');
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('2FA status error:', error);
+    logger.error('2FA status error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

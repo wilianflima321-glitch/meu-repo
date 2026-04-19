@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
 import { aiService } from '@/lib/ai-service';
+import type { Message } from '@/lib/ai-service';
 import { checkModelAccess } from '@/lib/plan-limits';
 import {
   acquireConcurrencyLease,
@@ -22,6 +23,7 @@ import {
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
+import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 
 function inferProviderFromModel(model?: string): 'openai' | 'openrouter' | 'anthropic' | 'google' | 'groq' | undefined {
   const raw = String(model || '').trim().toLowerCase()
@@ -65,6 +67,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const messages = Array.isArray((body as any).messages) ? (body as any).messages : [];
+    const projectId = typeof (body as any).projectId === 'string' ? (body as any).projectId : undefined
     const requestedModel = typeof (body as any).model === 'string' ? (body as any).model : undefined
     const requestedProvider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined
     const promptText = messages
@@ -226,12 +229,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const aiMessages = messages
+    const aiMessages: Message[] = messages
       .filter((m: any) => typeof m?.role === 'string' && typeof m?.content === 'string')
-      .map((m: any) => ({ role: m.role, content: m.content }));
+      .map((m: any) => ({ role: m.role as Message['role'], content: m.content }));
+    const projectRulesContext = await loadProjectRulesContext({ userId: auth.userId, projectId })
+    const aiMessagesWithRules = applyProjectRulesToMessages(aiMessages, projectRulesContext)
 
     const response = await aiService.chat({
-      messages: aiMessages,
+      messages: aiMessagesWithRules,
       model: typeof (body as any).model === 'string' ? (body as any).model : undefined,
       provider: typeof (body as any).provider === 'string' ? (body as any).provider : undefined,
       temperature: typeof (body as any).temperature === 'number' ? (body as any).temperature : undefined,

@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth-server';
 import { twoFactorService } from '@/lib/security/two-factor-auth';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const logger = createComponentLogger('api.auth.2fa.setup');
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('2FA setup error:', error);
+    logger.error('2FA setup error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

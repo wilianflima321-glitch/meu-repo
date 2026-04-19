@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { twoFactorService } from '@/lib/security/two-factor-auth'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const logger = createComponentLogger('api.auth.2fa.validate')
 
 const ValidateSchema = z.object({
   userId: z.string(),
@@ -69,7 +72,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error('2FA validate error:', error)
+    logger.error('2FA validate error', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -22,6 +22,7 @@ import {
   releaseConcurrencyLease,
 } from '@/lib/metering'
 import { capabilityResponse } from '@/lib/server/capability-response'
+import { loadProjectRulesContext } from '@/lib/server/project-rules'
 
 export const runtime = 'nodejs'
 
@@ -30,6 +31,7 @@ type StreamRequestBody = {
   agents?: unknown
   priority?: unknown
   executionMode?: unknown
+  projectId?: unknown
 }
 
 const MAX_PROMPT_LENGTH = 12_000
@@ -76,7 +78,12 @@ function getAvailableModes(): Array<'heuristic' | 'provider-backed'> {
   return ['heuristic']
 }
 
-function buildProviderBackedMessages(agent: AgentType, prompt: string, priority: OrchestrationTask['priority']) {
+function buildProviderBackedMessages(
+  agent: AgentType,
+  prompt: string,
+  priority: OrchestrationTask['priority'],
+  projectRulesContext?: string
+) {
   const priorityHint =
     priority === 'high'
       ? 'Priority: high. Focus on reliability and critical path completion first.'
@@ -91,6 +98,7 @@ function buildProviderBackedMessages(agent: AgentType, prompt: string, priority:
     'Do not overlap other roles; provide output strictly for your role scope.',
     'Return concise, actionable output with deterministic checks when possible.',
     priorityHint,
+    projectRulesContext || '',
   ].join(' ')
 
   return [
@@ -133,6 +141,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const requestedAgents = normalizeAgents(body.agents)
     const priority = normalizePriority(body.priority)
     const executionMode = normalizeExecutionMode(body.executionMode)
+    const projectId = typeof body.projectId === 'string' ? body.projectId.trim() || undefined : undefined
+    const projectRulesContext = await loadProjectRulesContext({ userId: auth.userId, projectId })
 
     const maxAgentsForPlan = getMaxAgentsForPlan(entitlements.plan.limits.concurrent)
 
@@ -180,7 +190,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const selectedAgents = filteredByPlan.slice(0, maxAgentsForPlan)
     const task: OrchestrationTask = {
       id: `task-${Date.now()}`,
-      prompt,
+      prompt: projectRulesContext ? `${prompt}\n\n${projectRulesContext}` : prompt,
       agents: selectedAgents,
       priority,
       timeout: 45_000,
@@ -274,7 +284,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
               try {
                 const response = await aiService.chat({
-                  messages: buildProviderBackedMessages(agent, prompt, priority),
+                  messages: buildProviderBackedMessages(agent, prompt, priority, projectRulesContext),
                   maxTokens: 700,
                   temperature: 0.2,
                 })

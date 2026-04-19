@@ -9,6 +9,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserFromRequest } from '@/lib/auth-server';
 import { twoFactorService } from '@/lib/security/two-factor-auth';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const logger = createComponentLogger('api.auth.2fa.verify');
 
 const VerifySchema = z.object({
   code: z.string().length(6).regex(/^\d{6}$/, 'Code must be 6 digits'),
@@ -49,7 +52,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('2FA verify error:', error);
+    logger.error('2FA verify error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

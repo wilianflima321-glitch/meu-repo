@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { aiService } from '@/lib/ai-service'
+import { aiService, type Message } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { capabilityResponse } from '@/lib/server/capability-response'
@@ -14,7 +14,11 @@ import {
 } from '@/lib/server/ai-demo-mode'
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
+import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const logger = createComponentLogger('api.ai.complete')
 
 /**
  * POST /api/ai/complete
@@ -85,6 +89,7 @@ export async function POST(req: NextRequest) {
 
     const provider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined
     const model = typeof (body as any).model === 'string' ? (body as any).model : undefined
+    const projectId = typeof (body as any).projectId === 'string' ? (body as any).projectId : undefined
     const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(1, Math.floor((body as any).maxTokens)) : 256
     const temperature = typeof (body as any).temperature === 'number' ? Math.min(1, Math.max(0, (body as any).temperature)) : 0.1
 
@@ -181,11 +186,17 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const response = await aiService.chat({
-      messages: [
+    const projectRulesContext = await loadProjectRulesContext({ userId: user.userId, projectId })
+    const messages: Message[] = applyProjectRulesToMessages<Message>(
+      [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: prompt },
       ],
+      projectRulesContext
+    )
+
+    const response = await aiService.chat({
+      messages,
       provider,
       model,
       temperature,
@@ -204,7 +215,7 @@ export async function POST(req: NextRequest) {
       latencyMs: response.latencyMs,
     })
   } catch (error) {
-    console.error('[AI Complete] Error:', error)
+    logger.error('AI complete error', error)
     return NextResponse.json(
       { error: 'AI_ERROR', message: error instanceof Error ? error.message : 'AI request failed' },
       { status: 500 }

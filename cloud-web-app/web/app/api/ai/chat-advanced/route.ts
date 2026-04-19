@@ -29,11 +29,15 @@ import {
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage';
 import { AI_CORE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit';
 import { buildMentionContextBlock } from '@/lib/server/mention-context'
+import { loadProjectRulesContext } from '@/lib/server/project-rules'
 import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
+import { createComponentLogger } from '@/lib/observability/logger'
 
 // Importa web tools para registro
 import '@/lib/ai-web-tools';
+
+const logger = createComponentLogger('api.ai.chat-advanced')
 
 // ============================================================================
 // TIPOS
@@ -518,15 +522,17 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
       userId,
       projectId,
     })
+    const projectRulesContext = await loadProjectRulesContext({ userId, projectId })
     const webBenchmark = await maybeCollectWebBenchmarkContext(lastUserMessage, enableWebResearch);
     const qualityInstruction = `${QUALITY_POLICY[qualityMode]}\n\n${buildSelfQuestioningChecklist()}`;
+    const rulesInstruction = projectRulesContext ? `\n\n${projectRulesContext}` : ''
     const mentionInstruction = mentionContext.context
       ? `\n\n${mentionContext.context}\nUse esse contexto apenas quando ele ajudar a responder com mais precisao.`
       : ''
     const benchmarkInstruction = webBenchmark.summary
       ? `\n\nReferencias externas (pesquisa automatica, best-effort):\n${webBenchmark.summary}\nUse como benchmark, sem copiar cegamente.`
       : '';
-    const enhancedSystemMessage = `${systemMessage}\n\n${qualityInstruction}${mentionInstruction}${benchmarkInstruction}`;
+    const enhancedSystemMessage = `${systemMessage}\n\n${qualityInstruction}${rulesInstruction}${mentionInstruction}${benchmarkInstruction}`;
     
     // Se streaming, usar streaming response
     if (stream) {
@@ -676,7 +682,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
           trace: chatResponse.traceSummary,
           kind: 'chat',
           projectId,
-        }).catch((err) => console.warn('[AI Trace] Falha ao persistir trace:', err));
+        }).catch((err) => logger.warn('Falha ao persistir trace de chat multi-role', err, { traceId, projectId }));
       }
 
       return NextResponse.json(chatResponse);
@@ -762,7 +768,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
         trace: chatResponse.traceSummary,
         kind: 'chat',
         projectId,
-      }).catch((err) => console.warn('[AI Trace] Falha ao persistir trace:', err));
+      }).catch((err) => logger.warn('Falha ao persistir trace de chat', err, { traceId, projectId }));
     }
 
     return NextResponse.json(chatResponse);
@@ -771,7 +777,7 @@ Arquivos recentes: ${project.files.map((f: { path: string }) => f.path).join(', 
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
 
-    console.error('Advanced Chat API error:', error);
+    logger.error('Erro na API de advanced chat', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
@@ -843,12 +849,17 @@ async function handleAgentRequest(
 ): Promise<NextResponse> {
   try {
     const lastMessage = messages[messages.length - 1];
+    const projectRulesContext = await loadProjectRulesContext({ userId, projectId })
     
     const executor = new AgentExecutor(agentId);
     const execution = await executor.execute({
       id: `task-${Date.now()}`,
-      description: lastMessage.content,
-      context: projectId ? `Project ID: ${projectId}` : undefined,
+      description: projectRulesContext
+        ? `${lastMessage.content}\n\n${projectRulesContext}`
+        : lastMessage.content,
+      context: [projectId ? `Project ID: ${projectId}` : null, projectRulesContext || null]
+        .filter(Boolean)
+        .join('\n\n') || undefined,
       executionContext: {
         userId,
         projectId,
@@ -916,7 +927,7 @@ async function handleAgentRequest(
         kind: 'agent',
         trace: traceSummary,
         projectId,
-      }).catch((err) => console.warn('[AI Trace] Falha ao persistir trace (agent):', err));
+      }).catch((err) => logger.warn('Falha ao persistir trace de agent request', err, { traceId, projectId }));
     }
 
     return NextResponse.json({
@@ -934,7 +945,7 @@ async function handleAgentRequest(
     });
 
   } catch (error) {
-    console.error('Agent execution error:', error);
+    logger.error('Erro em execucao de agente', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Agent execution failed' },
       { status: 500 }
@@ -991,13 +1002,14 @@ async function handleStreamingResponse(
             evidence: [{ kind: 'context', label: `historyContextMessages=${messages.length - 1}` }],
             telemetry: { model, estimatedTokens, tokensUsed: result.tokensUsed },
           },
-        }).catch((err) => console.warn('[AI Trace] Falha ao persistir trace:', err));
+        }).catch((err) => logger.warn('Falha ao persistir trace de streaming', err, { traceId }));
         const doneData = JSON.stringify({ type: 'done', tokensUsed: result.tokensUsed, traceId });
 				controller.enqueue(encoder.encode(`data: ${doneData}\n\n`));
 
 				controller.close();
 
       } catch (error) {
+        logger.error('Erro no streaming de advanced chat', error, { traceId })
         const errorData = JSON.stringify({ 
           type: 'error', 
           error: error instanceof Error ? error.message : 'Stream error' 

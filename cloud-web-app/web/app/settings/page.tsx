@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import StudioLayout from '@/components/studio/StudioLayout'
+import TwoFactorSecurityPanel from '@/components/settings/TwoFactorSecurityPanel'
 
 const SettingsEditor = dynamic(() => import('../../components/SettingsEditor'), { ssr: false })
 
-type Tab = 'editor' | 'profile' | 'billing' | 'api'
+type Tab = 'editor' | 'profile' | 'security' | 'billing' | 'api'
 
 type ProviderStatusResponse = {
   configured?: boolean
@@ -52,7 +53,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     const queryTab = new URLSearchParams(window.location.search).get('tab')
-    if (queryTab === 'editor' || queryTab === 'profile' || queryTab === 'billing' || queryTab === 'api') {
+    if (queryTab === 'editor' || queryTab === 'profile' || queryTab === 'security' || queryTab === 'billing' || queryTab === 'api') {
       setActiveTab(queryTab)
     }
   }, [])
@@ -70,6 +71,7 @@ export default function SettingsPage() {
     () => [
       { id: 'editor' as const, label: 'Editor', description: 'Preferencias do editor e workspace' },
       { id: 'profile' as const, label: 'Perfil', description: 'Conta e informacoes pessoais' },
+      { id: 'security' as const, label: 'Seguranca', description: '2FA, recuperacao e endurecimento da conta' },
       { id: 'billing' as const, label: 'Faturamento', description: 'Plano, assinatura e consumo' },
       { id: 'api' as const, label: 'Provedores IA', description: 'Status e setup de provedores IA' },
     ],
@@ -127,6 +129,18 @@ export default function SettingsPage() {
                   >
                     Abrir perfil completo
                   </Link>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'security' && (
+              <div className="p-4 sm:p-6">
+                <h2 className="text-lg font-semibold">Seguranca</h2>
+                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">
+                  Proteja a conta com MFA canonica, codigos de recuperacao e um fluxo claro de manutencao.
+                </p>
+                <div className="mt-4">
+                  <TwoFactorSecurityPanel />
                 </div>
               </div>
             )}

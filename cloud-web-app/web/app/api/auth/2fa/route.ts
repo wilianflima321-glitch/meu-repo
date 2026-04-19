@@ -15,6 +15,9 @@ import bcrypt from 'bcryptjs';
 import { getUserFromRequest } from '@/lib/auth-server';
 import { twoFactorService } from '@/lib/security/two-factor-auth';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger';
+
+const logger = createComponentLogger('api.auth.2fa');
 
 // ============================================================================
 // SCHEMAS
@@ -82,7 +85,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('2FA status error:', error);
+    logger.error('2FA status error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -135,7 +138,7 @@ async function handleSetup(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('2FA setup error:', error);
+    logger.error('2FA setup error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -175,7 +178,7 @@ async function handleVerify(request: NextRequest) {
       );
     }
 
-    console.error('2FA verify error:', error);
+    logger.error('2FA verify error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -252,7 +255,7 @@ async function handleValidate(request: NextRequest) {
       );
     }
 
-    console.error('2FA validate error:', error);
+    logger.error('2FA validate error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -311,7 +314,7 @@ async function handleDisable(request: NextRequest) {
       );
     }
 
-    console.error('2FA disable error:', error);
+    logger.error('2FA disable error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -355,7 +358,7 @@ async function handleBackupCodes(request: NextRequest) {
       );
     }
 
-    console.error('2FA backup codes error:', error);
+    logger.error('2FA backup codes error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

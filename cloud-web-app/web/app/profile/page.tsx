@@ -19,14 +19,14 @@ import {
   X,
   Camera,
   Edit2,
-  Save,
   AlertTriangle,
-  Smartphone,
   Calendar
 } from 'lucide-react'
 import { AethelAPIClient } from '@/lib/api'
 import { isAuthenticated, logout } from '@/lib/auth'
 import StudioLayout from '@/components/studio/StudioLayout'
+import TwoFactorSecurityPanel from '@/components/settings/TwoFactorSecurityPanel'
+import { createComponentLogger } from '@/lib/observability/logger'
 
 // ============================================================================
 // Types
@@ -107,6 +107,8 @@ function SettingRow({
 // Main Component
 // ============================================================================
 
+const logger = createComponentLogger('ProfilePage')
+
 export default function ProfilePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -117,12 +119,6 @@ export default function ProfilePage() {
   const [editingName, setEditingName] = useState(false)
   const [tempName, setTempName] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [twoFactorModal, setTwoFactorModal] = useState<'setup' | 'disable' | null>(null)
-  const [twoFactorSetup, setTwoFactorSetup] = useState<{ qrCode: string; backupCodes: string[] } | null>(null)
-  const [twoFactorCode, setTwoFactorCode] = useState('')
-  const [twoFactorPassword, setTwoFactorPassword] = useState('')
-  const [twoFactorLoading, setTwoFactorLoading] = useState(false)
-  const [twoFactorError, setTwoFactorError] = useState<string | null>(null)
   const planLabels: Record<string, string> = {
     starter: 'Inicial',
     basic: 'Basico',
@@ -167,7 +163,7 @@ export default function ProfilePage() {
       })
       setProfileError(null)
     } catch (error) {
-      console.error('Falha ao carregar o perfil:', error)
+      logger.error('Falha ao carregar o perfil', error)
       setProfileError('Nao foi possivel carregar o perfil. Tente novamente.')
       setProfile(null)
     } finally {
@@ -192,78 +188,9 @@ export default function ProfilePage() {
         },
       })
     } catch (error) {
-      console.error('Falha ao atualizar o perfil:', error)
+      logger.error('Falha ao atualizar o perfil', error)
     } finally {
       setSaving(false)
-    }
-  }
-
-  async function startTwoFactorSetup() {
-    try {
-      setTwoFactorLoading(true)
-      setTwoFactorError(null)
-      setTwoFactorCode('')
-      const res = await fetch('/api/auth/2fa/setup', { method: 'POST' })
-      const data = await res.json().catch(() => null)
-      if (!res.ok) {
-        throw new Error(data?.error || 'Falha ao iniciar 2FA')
-      }
-      setTwoFactorSetup({
-        qrCode: data.qrCode,
-        backupCodes: Array.isArray(data.backupCodes) ? data.backupCodes : [],
-      })
-      setTwoFactorModal('setup')
-    } catch (error) {
-      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao configurar 2FA')
-    } finally {
-      setTwoFactorLoading(false)
-    }
-  }
-
-  async function confirmTwoFactorSetup() {
-    try {
-      setTwoFactorLoading(true)
-      setTwoFactorError(null)
-      const res = await fetch('/api/auth/2fa/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: twoFactorCode }),
-      })
-      const data = await res.json().catch(() => null)
-      if (!res.ok) {
-        throw new Error(data?.error || 'Falha ao validar 2FA')
-      }
-      setTwoFactorModal(null)
-      setTwoFactorSetup(null)
-      await loadProfile()
-    } catch (error) {
-      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao validar 2FA')
-    } finally {
-      setTwoFactorLoading(false)
-    }
-  }
-
-  async function confirmTwoFactorDisable() {
-    try {
-      setTwoFactorLoading(true)
-      setTwoFactorError(null)
-      const res = await fetch('/api/auth/2fa/disable', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: twoFactorCode, password: twoFactorPassword }),
-      })
-      const data = await res.json().catch(() => null)
-      if (!res.ok) {
-        throw new Error(data?.error || 'Falha ao desativar 2FA')
-      }
-      setTwoFactorModal(null)
-      setTwoFactorCode('')
-      setTwoFactorPassword('')
-      await loadProfile()
-    } catch (error) {
-      setTwoFactorError(error instanceof Error ? error.message : 'Erro ao desativar 2FA')
-    } finally {
-      setTwoFactorLoading(false)
     }
   }
 
@@ -279,7 +206,7 @@ export default function ProfilePage() {
       logout()
       router.push('/')
     } catch (error) {
-      console.error('Falha ao excluir a conta:', error)
+      logger.error('Falha ao excluir a conta', error)
     }
   }
 
@@ -488,35 +415,14 @@ export default function ProfilePage() {
                   </button>
                 }
               />
-              <SettingRow
-                icon={Smartphone}
-                label="Autenticacao de dois fatores"
-                value={profile.twoFactorEnabled ? 'Ativada' : 'Desativada'}
-                action={
-                  <button type="button"
-                    aria-label={profile.twoFactorEnabled ? 'Desativar autenticacao de dois fatores' : 'Ativar autenticacao de dois fatores'}
-                    onClick={() => {
-                      if (profile.twoFactorEnabled) {
-                        setTwoFactorModal('disable')
-                        setTwoFactorError(null)
-                        setTwoFactorCode('')
-                        setTwoFactorPassword('')
-                      } else {
-                        startTwoFactorSetup()
-                      }
-                    }}
-                    disabled={twoFactorLoading}
-                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                      profile.twoFactorEnabled
-                        ? 'bg-[var(--aethel-error-dark)] hover:bg-[var(--aethel-error)]'
-                        : 'bg-[var(--aethel-success)] hover:bg-[var(--aethel-success-dark)]'
-                    }`}
-                  >
-                    {twoFactorLoading ? 'Processando...' : profile.twoFactorEnabled ? 'Desativar' : 'Ativar'}
-                  </button>
-                }
-              />
             </ProfileSection>
+
+            <TwoFactorSecurityPanel
+              variant="profile"
+              onStatusChange={(enabled) =>
+                setProfile((current) => (current ? { ...current, twoFactorEnabled: enabled } : current))
+              }
+            />
 
             <ProfileSection title="Zona de Perigo" description="Acoes irreversiveis">
               <SettingRow
@@ -648,111 +554,6 @@ export default function ProfilePage() {
         )}
 
       </main>
-
-      {/* Two-Factor Modal */}
-      {twoFactorModal && (
-        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_80%,transparent)] flex items-center justify-center z-50">
-          <div className="bg-[var(--aethel-surface-tertiary)] rounded-xl p-6 max-w-lg w-full mx-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-[var(--aethel-primary)]/20 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-[var(--aethel-primary-light)]" />
-              </div>
-              <h3 className="text-xl font-bold text-[var(--aethel-text-primary)]">
-                {twoFactorModal === 'setup' ? 'Ativar 2FA' : 'Desativar 2FA'}
-              </h3>
-            </div>
-
-            {twoFactorError && (
-              <div className="mb-4 rounded-lg border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[var(--aethel-error)]/10 p-3 text-sm text-[var(--aethel-error-light)]">
-                {twoFactorError}
-              </div>
-            )}
-
-            {twoFactorModal === 'setup' && (
-              <div className="space-y-4">
-                {twoFactorSetup?.qrCode && (
-                  <div className="flex flex-col items-center gap-3">
-                    <Image
-                      src={twoFactorSetup.qrCode}
-                      alt="QR Code 2FA"
-                      width={160}
-                      height={160}
-                      unoptimized
-                      className="w-40 h-40"
-                    />
-                    <p className="text-sm text-[var(--aethel-text-secondary)]">Escaneie o QR Code no seu autenticador.</p>
-                  </div>
-                )}
-                <div>
-                  <label className="text-sm text-[var(--aethel-text-secondary)]">Codigo do autenticador</label>
-                  <input
-                    type="text"
-                    value={twoFactorCode}
-                    onChange={(e) => setTwoFactorCode(e.target.value)}
-                    className="mt-1 w-full bg-[var(--aethel-surface-quaternary)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] rounded px-3 py-2 text-sm"
-                    placeholder="000000"
-                  />
-                </div>
-                {twoFactorSetup?.backupCodes?.length ? (
-                  <div className="rounded-lg border border-[var(--aethel-border-secondary)] bg-[var(--aethel-surface-secondary)]/60 p-3">
-                    <p className="text-xs text-[var(--aethel-text-secondary)] mb-2">Codigos de backup (salve em local seguro):</p>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-[var(--aethel-text-primary)]">
-                      {twoFactorSetup.backupCodes.map((code) => (
-                        <div key={code} className="bg-[var(--aethel-surface-tertiary)] rounded px-2 py-1 text-center">{code}</div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            )}
-
-            {twoFactorModal === 'disable' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm text-[var(--aethel-text-secondary)]">Codigo 2FA</label>
-                  <input
-                    type="text"
-                    value={twoFactorCode}
-                    onChange={(e) => setTwoFactorCode(e.target.value)}
-                    className="mt-1 w-full bg-[var(--aethel-surface-quaternary)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] rounded px-3 py-2 text-sm"
-                    placeholder="000000"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-[var(--aethel-text-secondary)]">Senha da conta</label>
-                  <input
-                    type="password"
-                    value={twoFactorPassword}
-                    onChange={(e) => setTwoFactorPassword(e.target.value)}
-                    className="mt-1 w-full bg-[var(--aethel-surface-quaternary)] border border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] rounded px-3 py-2 text-sm"
-                    placeholder=""
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="mt-6 flex gap-3">
-              <button type="button"
-                onClick={() => {
-                  setTwoFactorModal(null)
-                  setTwoFactorError(null)
-                }}
-                className="flex-1 px-4 py-2 bg-[var(--aethel-surface-quaternary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_70%,transparent)] rounded-lg transition-colors"
-              >
-                Cancelar
-              </button>
-              <button type="button"
-                aria-label={twoFactorModal === 'setup' ? 'Confirmar configuracao da autenticacao de dois fatores' : 'Confirmar desativacao da autenticacao de dois fatores'}
-                onClick={twoFactorModal === 'setup' ? confirmTwoFactorSetup : confirmTwoFactorDisable}
-                disabled={twoFactorLoading}
-                className="flex-1 px-4 py-2 bg-[var(--aethel-primary-dark)] hover:bg-[var(--aethel-primary)] rounded-lg transition-colors"
-              >
-                {twoFactorLoading ? 'Processando...' : twoFactorModal === 'setup' ? 'Confirmar' : 'Desativar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (

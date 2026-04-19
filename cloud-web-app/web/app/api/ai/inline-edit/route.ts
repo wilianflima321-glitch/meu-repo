@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth-server'
-import { aiService, type LLMProvider } from '@/lib/ai-service'
+import { aiService, type LLMProvider, type Message } from '@/lib/ai-service'
 import { prisma } from '@/lib/db'
 import { checkAIQuota, checkModelAccess, recordTokenUsage, getPlanLimits } from '@/lib/plan-limits'
 import { capabilityResponse } from '@/lib/server/capability-response'
@@ -14,7 +14,11 @@ import {
 } from '@/lib/server/ai-demo-mode'
 import { consumeAiDemoUsage } from '@/lib/server/ai-demo-usage'
 import { AI_INLINE_RATE_LIMIT, enforceAiCoreRateLimit } from '@/lib/server/ai-core-rate-limit'
+import { applyProjectRulesToMessages, loadProjectRulesContext } from '@/lib/server/project-rules'
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard'
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const logger = createComponentLogger('api.ai.inline-edit')
 
 const INLINE_EDIT_SYSTEM_PROMPT = `You are an inline code editing assistant.
 Rules:
@@ -33,6 +37,7 @@ type InlineEditBody = {
   instruction?: string
   language?: string
   filePath?: string
+  projectId?: string
   context?: InlineEditContext
   provider?: string
   model?: string
@@ -71,6 +76,7 @@ export async function POST(req: NextRequest) {
     const code = typeof body.code === 'string' ? body.code : ''
     const language = typeof body.language === 'string' ? body.language : undefined
     const filePath = typeof body.filePath === 'string' ? body.filePath : undefined
+    const projectId = typeof body.projectId === 'string' ? body.projectId : undefined
     const context = body.context && typeof body.context === 'object' ? body.context : undefined
     const provider = asProvider(body.provider)
     const model = typeof body.model === 'string' ? body.model : undefined
@@ -162,11 +168,17 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const result = await aiService.chat({
-      messages: [
+    const projectRulesContext = await loadProjectRulesContext({ userId: user.userId, projectId })
+    const messages: Message[] = applyProjectRulesToMessages<Message>(
+      [
         { role: 'system', content: INLINE_EDIT_SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
+      projectRulesContext
+    )
+
+    const result = await aiService.chat({
+      messages,
       provider,
       model,
       temperature,
@@ -177,7 +189,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(parseInlineEditResponse(result.content))
   } catch (error) {
-    console.error('Inline Edit Error:', error)
+    logger.error('Inline edit error', error)
     return NextResponse.json(
       {
         error: 'AI_ERROR',

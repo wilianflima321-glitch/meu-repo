@@ -9,6 +9,9 @@ import bcrypt from 'bcryptjs'
 import { getUserFromRequest } from '@/lib/auth-server'
 import { twoFactorService } from '@/lib/security/two-factor-auth'
 import { prisma } from '@/lib/db'
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const logger = createComponentLogger('api.auth.2fa.disable')
 
 const DisableSchema = z.object({
   code: z.string().min(6).max(9),
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error('2FA disable error:', error)
+    logger.error('2FA disable error', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
