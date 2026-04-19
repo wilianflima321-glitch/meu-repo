@@ -85,11 +85,11 @@ function writeLog(entry: LogEntry): void {
   const output = formatLog(entry);
 
   if (LOG_LEVELS[entry.level] >= LOG_LEVELS.error) {
-    console.error(output);
+    writeToStream(process.stderr, output, entry.level);
   } else if (entry.level === 'warn') {
-    console.warn(output);
+    writeToStream(process.stderr, output, entry.level);
   } else {
-    console.log(output);
+    writeToStream(process.stdout, output, entry.level);
   }
 }
 
@@ -115,12 +115,12 @@ function createLogEntry(
 // ============================================================================
 
 export interface Logger {
-  trace(msg: string, context?: LogContext): void;
-  debug(msg: string, context?: LogContext): void;
-  info(msg: string, context?: LogContext): void;
-  warn(msg: string, context?: LogContext): void;
-  error(msg: string, err?: Error | unknown, context?: LogContext): void;
-  fatal(msg: string, err?: Error | unknown, context?: LogContext): void;
+  trace(message: unknown, ...args: unknown[]): void;
+  debug(message: unknown, ...args: unknown[]): void;
+  info(message: unknown, ...args: unknown[]): void;
+  warn(message: unknown, ...args: unknown[]): void;
+  error(message: unknown, ...args: unknown[]): void;
+  fatal(message: unknown, ...args: unknown[]): void;
   child(context: LogContext): Logger;
   timed(msg: string, context?: LogContext): () => void;
 }
@@ -132,26 +132,71 @@ function createLogger(baseContext: LogContext = {}): Logger {
     writeLog(createLogEntry(level, msg, merged, extra));
   };
 
+  const parseLogArgs = (args: unknown[]): { msg: string; context?: LogContext; extra?: Record<string, unknown> } => {
+    const [message, ...rest] = args;
+    const msg = typeof message === 'string' ? message : stringifyValue(message);
+
+    if (rest.length === 0) {
+      return { msg };
+    }
+
+    if (rest.length === 1) {
+      const single = rest[0];
+      if (isLogContext(single)) {
+        return { msg, context: single };
+      }
+      if (single instanceof Error) {
+        return { msg, extra: { err: normalizeError(single) } };
+      }
+      return { msg, extra: { data: normalizeExtra(single) } };
+    }
+
+    const maybeContext = rest[rest.length - 1];
+    const payload = rest.slice(0, maybeContext && isLogContext(maybeContext) ? -1 : rest.length);
+    const extra: Record<string, unknown> = {};
+
+    if (payload.length === 1) {
+      const item = payload[0];
+      if (item instanceof Error) {
+        extra.err = normalizeError(item);
+      } else {
+        extra.data = normalizeExtra(item);
+      }
+    } else if (payload.length > 1) {
+      extra.data = payload.map(normalizeExtra);
+    }
+
+    return {
+      msg,
+      context: maybeContext && isLogContext(maybeContext) ? maybeContext : undefined,
+      extra: Object.keys(extra).length > 0 ? extra : undefined,
+    };
+  };
+
   return {
-    trace: (msg, ctx) => log('trace', msg, ctx),
-    debug: (msg, ctx) => log('debug', msg, ctx),
-    info: (msg, ctx) => log('info', msg, ctx),
-    warn: (msg, ctx) => log('warn', msg, ctx),
-    error: (msg, err, ctx) => {
-      const errObj = err instanceof Error
-        ? { message: err.message, stack: err.stack, code: (err as any).code }
-        : err
-          ? { message: String(err) }
-          : undefined;
-      log('error', msg, ctx, errObj ? { err: errObj } : undefined);
+    trace: (...args) => {
+      const parsed = parseLogArgs(args);
+      log('trace', parsed.msg, parsed.context, parsed.extra);
     },
-    fatal: (msg, err, ctx) => {
-      const errObj = err instanceof Error
-        ? { message: err.message, stack: err.stack, code: (err as any).code }
-        : err
-          ? { message: String(err) }
-          : undefined;
-      log('fatal', msg, ctx, errObj ? { err: errObj } : undefined);
+    debug: (...args) => {
+      const parsed = parseLogArgs(args);
+      log('debug', parsed.msg, parsed.context, parsed.extra);
+    },
+    info: (...args) => {
+      const parsed = parseLogArgs(args);
+      log('info', parsed.msg, parsed.context, parsed.extra);
+    },
+    warn: (...args) => {
+      const parsed = parseLogArgs(args);
+      log('warn', parsed.msg, parsed.context, parsed.extra);
+    },
+    error: (...args) => {
+      const parsed = parseLogArgs(args);
+      log('error', parsed.msg, parsed.context, parsed.extra);
+    },
+    fatal: (...args) => {
+      const parsed = parseLogArgs(args);
+      log('fatal', parsed.msg, parsed.context, parsed.extra);
     },
     child: (childCtx) => createLogger({ ...baseContext, ...childCtx }),
     timed: (msg, ctx) => {
@@ -235,6 +280,77 @@ function generateId(length: number): string {
     result += chars[Math.floor(Math.random() * chars.length)];
   }
   return result;
+}
+
+function writeToStream(stream: NodeJS.WriteStream | undefined, output: string, level: LogLevel): void {
+  if (stream?.write) {
+    stream.write(`${output}\n`);
+    return;
+  }
+
+  const consoleLike = Reflect.get(globalThis, 'console') as
+    | { log?(message?: unknown): void; warn?(message?: unknown): void; error?(message?: unknown): void }
+    | undefined;
+
+  if (level === 'warn') {
+    consoleLike?.warn?.(output);
+    return;
+  }
+
+  if (LOG_LEVELS[level] >= LOG_LEVELS.error) {
+    consoleLike?.error?.(output);
+    return;
+  }
+
+  consoleLike?.log?.(output);
+}
+
+function normalizeError(err: Error | unknown): { message: string; stack?: string; code?: string } {
+  if (err instanceof Error) {
+    const code = (err as Error & { code?: string }).code;
+    return { message: err.message, stack: err.stack, code };
+  }
+  return { message: String(err) };
+}
+
+function normalizeExtra(value: unknown): unknown {
+  if (value instanceof Error) {
+    return normalizeError(value);
+  }
+  return value;
+}
+
+function stringifyValue(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (value instanceof Error) return value.message;
+  if (typeof value === 'number' || typeof value === 'boolean' || value == null) return String(value);
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return Object.prototype.toString.call(value);
+  }
+}
+
+function isLogContext(value: unknown): value is LogContext {
+  if (!value || typeof value !== 'object' || Array.isArray(value) || value instanceof Error) {
+    return false;
+  }
+
+  const keys = Object.keys(value as Record<string, unknown>);
+  if (keys.length === 0) return true;
+
+  return keys.some((key) =>
+    [
+      'requestId',
+      'userId',
+      'sessionId',
+      'traceId',
+      'spanId',
+      'service',
+      'component',
+      'action',
+    ].includes(key)
+  );
 }
 
 // ============================================================================

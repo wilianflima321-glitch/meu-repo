@@ -81,9 +81,12 @@ const securityHeaders = {
   'Content-Security-Policy': getCSP(),
 };
 
-function withSecurityHeaders(res: NextResponse, req?: NextRequest): NextResponse {
+function withSecurityHeaders(res: NextResponse, req?: NextRequest, requestId?: string): NextResponse {
   for (const [key, value] of Object.entries(securityHeaders)) {
     res.headers.set(key, value);
+  }
+  if (requestId) {
+    res.headers.set('X-Request-Id', requestId);
   }
   
   // CORS: Only allow specific origins instead of wildcard
@@ -215,6 +218,7 @@ const PUBLIC_EXACT_PATHS = new Set([
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
 
   const convergence = resolveWorkbenchConvergenceRedirect(pathname);
   if (convergence && req.method === 'GET') {
@@ -222,7 +226,7 @@ export async function middleware(req: NextRequest) {
     const internal = new URL(convergence.target, req.nextUrl.origin);
     url.pathname = internal.pathname;
     url.search = internal.search;
-    return withSecurityHeaders(NextResponse.redirect(url), req);
+    return withSecurityHeaders(NextResponse.redirect(url), req, requestId);
   }
 
   const isApi = pathname.startsWith('/api');
@@ -249,7 +253,8 @@ export async function middleware(req: NextRequest) {
             { error: 'RATE_LIMIT_NOT_CONFIGURED', message: 'Configure UPSTASH_REDIS_REST_URL/TOKEN.' },
             { status: 503 }
           ),
-          req
+          req,
+          requestId
         );
       }
     } else {
@@ -275,7 +280,8 @@ export async function middleware(req: NextRequest) {
               },
             }
           ),
-          req
+          req,
+          requestId
         );
       }
     }
@@ -287,7 +293,9 @@ export async function middleware(req: NextRequest) {
     PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (isPublicPath) {
-    return withSecurityHeaders(NextResponse.next(), req);
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-request-id', requestId);
+    return withSecurityHeaders(NextResponse.next({ request: { headers: requestHeaders } }), req, requestId);
   }
 
   // 3) CSRF proteção simples para cookie-based sessions em APIs
@@ -302,7 +310,8 @@ export async function middleware(req: NextRequest) {
           { error: 'CSRF_BLOCKED', message: 'Origem inválida.' },
           { status: 403 }
         ),
-        req
+        req,
+        requestId
       );
     }
   }
@@ -314,10 +323,10 @@ export async function middleware(req: NextRequest) {
       const url = req.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('from', pathname);
-      return withSecurityHeaders(NextResponse.redirect(url), req);
+      return withSecurityHeaders(NextResponse.redirect(url), req, requestId);
     }
     // Return 401 for API calls
-    return withSecurityHeaders(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), req);
+    return withSecurityHeaders(NextResponse.json({ error: 'Unauthorized' }, { status: 401 }), req, requestId);
   }
 
   try {
@@ -332,14 +341,16 @@ export async function middleware(req: NextRequest) {
         if (!pathname.startsWith('/api')) {
           const url = req.nextUrl.clone();
           url.pathname = '/dashboard';
-          return withSecurityHeaders(NextResponse.redirect(url), req);
+          return withSecurityHeaders(NextResponse.redirect(url), req, requestId);
         }
-        return withSecurityHeaders(NextResponse.json({ error: 'Admin access required' }, { status: 403 }), req);
+        return withSecurityHeaders(NextResponse.json({ error: 'Admin access required' }, { status: 403 }), req, requestId);
       }
     }
 
-    const response = NextResponse.next();
-    withSecurityHeaders(response, req);
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-request-id', requestId);
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    withSecurityHeaders(response, req, requestId);
     
     // Adiciona informações do usuário nos headers para APIs
     if (pathname.startsWith('/api')) {
@@ -355,16 +366,17 @@ export async function middleware(req: NextRequest) {
           { error: 'AUTH_NOT_CONFIGURED', message: (error as Error).message },
           { status: 503 }
         ),
-        req
+        req,
+        requestId
       );
     }
     // Invalid token
     if (!pathname.startsWith('/api')) {
       const url = req.nextUrl.clone();
       url.pathname = '/login';
-      return withSecurityHeaders(NextResponse.redirect(url), req);
+      return withSecurityHeaders(NextResponse.redirect(url), req, requestId);
     }
-    return withSecurityHeaders(NextResponse.json({ error: 'Invalid Token' }, { status: 401 }), req);
+    return withSecurityHeaders(NextResponse.json({ error: 'Invalid Token' }, { status: 401 }), req, requestId);
   }
 }
 

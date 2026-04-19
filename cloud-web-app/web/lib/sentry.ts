@@ -10,6 +10,7 @@
  */
 
 import * as Sentry from '@sentry/nextjs';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // ============================================================================
 // CONFIGURATION
@@ -18,6 +19,7 @@ import * as Sentry from '@sentry/nextjs';
 const SENTRY_DSN = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
 const ENVIRONMENT = process.env.NODE_ENV || 'development';
 const RELEASE = process.env.NEXT_PUBLIC_APP_VERSION || process.env.VERCEL_GIT_COMMIT_SHA || 'dev';
+const logger = createComponentLogger('sentry');
 
 export const sentryConfig: Sentry.BrowserOptions = {
   dsn: SENTRY_DSN,
@@ -384,7 +386,7 @@ let initialized = false;
 export function initSentry(): void {
   if (initialized || !SENTRY_DSN) {
     if (!SENTRY_DSN) {
-      console.warn('[Sentry] DSN not configured, error tracking disabled');
+      logger.warn('[Sentry] DSN not configured, error tracking disabled');
     }
     return;
   }
@@ -398,12 +400,7 @@ export function initSentry(): void {
   }
   
   initialized = true;
-  console.log(`[Sentry] Initialized for ${ENVIRONMENT}`);
-}
-
-// Auto-init if DSN is available
-if (SENTRY_DSN) {
-  initSentry();
+  logger.info(`[Sentry] Initialized for ${ENVIRONMENT}`);
 }
 
 export default Sentry;

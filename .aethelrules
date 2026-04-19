@@ -1,0 +1,23 @@
+# Aethel Rules
+
+## Product Bar
+- Optimize for the user-facing path first: `/`, `/dashboard`, `/ide`, `/docs`, billing, auth, preview.
+- Prefer fewer, stronger surfaces over many shallow placeholders.
+- If a route only redirects, implement it in `next.config.js` or middleware instead of shipping a stub page.
+
+## Architecture
+- Keep the canonical design system in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lib\design-tokens.ts` + CSS variables from `globals.css`.
+- New UI primitives belong in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ui`.
+- Avoid duplicate component names across folders. If a duplicate is unavoidable, document the canonical owner first.
+- Do not vendor third-party source trees into the main repo.
+
+## Quality
+- No `console.log`, `console.info`, or `console.debug` in app code. Use `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lib\observability\logger.ts`.
+- All new buttons must have an accessible name through text, `aria-label`, or `aria-labelledby`.
+- Prefer request IDs, structured logs, and explicit error capture on server paths.
+- Add or update tests when touching auth, billing, editor state, preview, or collaboration flows.
+
+## Workbench
+- The workbench is the product core. Favor `entry`-based convergence over parallel standalone shells.
+- Split orchestration from panels and hooks before growing god-components further.
+- Collaboration features must degrade gracefully when realtime services are unavailable.

@@ -92,6 +92,29 @@ services:
     volumes:
       - ./cloud-web-app/web/public/exports:/app/public/exports
 
+  # Dedicated WebSocket server for collaboration, terminal, LSP and AI streaming
+  websocket:
+    build:
+      context: .
+      dockerfile: ./cloud-web-app/websocket/Dockerfile
+    container_name: aethel-websocket
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      WS_HOST: 0.0.0.0
+      WS_PORT: 3001
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Nginx Reverse Proxy (optional)
   nginx:
     image: nginx:alpine

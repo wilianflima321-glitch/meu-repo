@@ -79,6 +79,32 @@ const hasValidIpcConfig = Number.isInteger(ipcPort) && ipcPort > 0 && ipcKeyRaw.
 
 if (!hasValidIpcConfig) clearIpcEnv()
 
+const routeRedirects = [
+  ['/ai-command', '/ide?entry=ai-command'],
+  ['/animation-blueprint', '/ide?entry=animation-blueprint'],
+  ['/blueprint-editor', '/ide?entry=blueprint-editor'],
+  ['/chat', '/ide?entry=chat'],
+  ['/dashboard/legacy', '/dashboard?legacy=1'],
+  ['/debugger', '/ide?entry=debugger'],
+  ['/docs/changelog', '/docs#changelog'],
+  ['/docs/community', '/docs#community'],
+  ['/docs/support', '/docs#support'],
+  ['/editor-hub', '/ide'],
+  ['/explorer', '/ide?entry=explorer'],
+  ['/git', '/ide?entry=git'],
+  ['/landscape-editor', '/ide?entry=landscape-editor'],
+  ['/level-editor', '/ide?entry=level-editor'],
+  ['/live-preview', '/ide?entry=live-preview'],
+  ['/niagara-editor', '/ide?entry=niagara-editor'],
+  ['/playground', '/ide?entry=playground'],
+  ['/preview', '/ide?entry=live-preview'],
+  ['/search', '/ide?entry=search'],
+  ['/team', '/contact-sales'],
+  ['/terminal', '/ide?entry=terminal'],
+  ['/testing', '/ide?entry=testing'],
+  ['/vr-preview', '/ide?entry=vr-preview'],
+]
+
 const nextConfig = {
   ...(enableStandalone ? { output: 'standalone' } : {}),
   reactStrictMode: true,
@@ -97,6 +123,13 @@ const nextConfig = {
         headers: securityHeaders,
       },
     ]
+  },
+  async redirects() {
+    return routeRedirects.map(([source, destination]) => ({
+      source,
+      destination,
+      permanent: false,
+    }))
   },
 }
 

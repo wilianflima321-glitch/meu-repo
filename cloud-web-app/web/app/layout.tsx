@@ -5,8 +5,10 @@ import { Inter, JetBrains_Mono } from 'next/font/google'
 import ClientLayout from '../components/ClientLayout'
 import { ServiceWorkerProvider } from '../components/ServiceWorkerProvider'
 import WebVitalsReporter from '../components/analytics/WebVitalsReporter'
+import TelemetryBootstrap from '../components/observability/TelemetryBootstrap'
 import CookieConsent from '../components/ui/CookieConsent'
 import { ToastProvider } from '../components/ui/toast-system'
+import { initSentry } from '../lib/sentry'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -83,6 +85,8 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  initSentry()
+
   return (
     <html lang="pt-BR" className={`dark ${inter.variable} ${jetbrains.variable}`}>
       <head>
@@ -101,6 +105,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </a>
         <ServiceWorkerProvider>
           <ToastProvider>
+            <TelemetryBootstrap />
             <WebVitalsReporter />
             <div
               id="main-content"

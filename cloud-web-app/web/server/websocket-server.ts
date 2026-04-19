@@ -20,6 +20,9 @@ import * as Y from 'yjs';
 import { EventEmitter } from 'events';
 
 import { getQueueRedis } from '../lib/redis-queue';
+import { createComponentLogger } from '../lib/observability/logger';
+
+const logger = createComponentLogger('websocket-server');
 
 // y-websocket setup - dynamic import for compatibility
 let setupWSConnection: ((conn: any, req: http.IncomingMessage, options?: any) => void) | null = null;
@@ -31,7 +34,7 @@ async function initYWebsocket() {
     const utils = await import('y-websocket/bin/utils.cjs').catch(() => null);
     if (utils?.setupWSConnection) {
       setupWSConnection = utils.setupWSConnection;
-      console.log('[Y-Websocket] Loaded from y-websocket/bin/utils.cjs');
+      logger.info('[Y-Websocket] Loaded from y-websocket/bin/utils.cjs');
       return;
     }
     
@@ -39,13 +42,13 @@ async function initYWebsocket() {
     const utilsEsm = await import('y-websocket').catch(() => null);
     if (utilsEsm) {
       // y-websocket may export WSSharedDoc or similar
-      console.log('[Y-Websocket] Loaded y-websocket module');
+      logger.info('[Y-Websocket] Loaded y-websocket module');
       return;
     }
     
-    console.warn('[Y-Websocket] Could not load y-websocket utilities, collaboration will use fallback');
+    logger.warn('[Y-Websocket] Could not load y-websocket utilities, collaboration will use fallback');
   } catch (error) {
-    console.warn('[Y-Websocket] Init error:', error);
+    logger.warn('[Y-Websocket] Init error:', error);
   }
 }
 
@@ -128,6 +131,25 @@ const httpServer = http.createServer((req, res) => {
     return;
   }
 
+  if (req.url === '/metrics') {
+    const lines = [
+      '# HELP aethel_ws_connections Current active WebSocket connections',
+      '# TYPE aethel_ws_connections gauge',
+      `aethel_ws_connections ${connections.size}`,
+      '# HELP aethel_ws_rooms Current active collaboration rooms',
+      '# TYPE aethel_ws_rooms gauge',
+      `aethel_ws_rooms ${rooms.size}`,
+    ];
+
+    for (const [type, count] of Object.entries(getConnectionStats())) {
+      lines.push(`aethel_ws_connections_by_type{type="${type}"} ${count}`);
+    }
+
+    res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4' });
+    res.end(lines.join('\n'));
+    return;
+  }
+
   res.writeHead(404);
   res.end('Not Found');
 });
@@ -151,7 +173,7 @@ wss.on('connection', (ws: WebSocket, req) => {
   const path = url.pathname;
   
   // Generate connection ID
-  const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const connectionId = `conn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   
   // Determine connection type from path
   let connectionType: ConnectionInfo['type'] = 'general';
@@ -179,7 +201,7 @@ wss.on('connection', (ws: WebSocket, req) => {
   };
   connections.set(ws, connectionInfo);
 
-  console.log(`[WS] New ${connectionType} connection: ${connectionId}`);
+  logger.info(`[WS] New ${connectionType} connection: ${connectionId}`);
 
   // Handle different connection types
   switch (connectionType) {
@@ -207,7 +229,7 @@ wss.on('connection', (ws: WebSocket, req) => {
 
   // Cleanup on close
   ws.on('close', () => {
-    console.log(`[WS] Connection closed: ${connectionId}`);
+    logger.info(`[WS] Connection closed: ${connectionId}`);
     connections.delete(ws);
     
     // Remove from rooms
@@ -220,7 +242,7 @@ wss.on('connection', (ws: WebSocket, req) => {
   });
 
   ws.on('error', (error) => {
-    console.error(`[WS] Connection error: ${connectionId}`, error.message);
+    logger.error(`[WS] Connection error: ${connectionId}`, error);
   });
 });
 
@@ -317,7 +339,7 @@ function handleCollaborationConnection(ws: WebSocket, req: http.IncomingMessage,
   const pathParts = url.pathname.split('/').filter(Boolean);
   const roomName = pathParts[1] || 'default';
 
-  console.log(`[Collaboration] Client joining room: ${roomName}`);
+  logger.info(`[Collaboration] Client joining room: ${roomName}`);
 
   // Use y-websocket's built-in handler if available
   if (setupWSConnection) {
@@ -327,7 +349,7 @@ function handleCollaborationConnection(ws: WebSocket, req: http.IncomingMessage,
     });
   } else {
     // Fallback: manual Yjs document management
-    console.log('[Collaboration] Using fallback Yjs handler (y-websocket not available)');
+    logger.warn('[Collaboration] Using fallback Yjs handler (y-websocket not available)');
     
     // Create or get shared document
     if (!collaborationDocs.has(roomName)) {
@@ -342,7 +364,7 @@ function handleCollaborationConnection(ws: WebSocket, req: http.IncomingMessage,
         // Broadcast to all clients in room
         broadcastToRoom(roomName, message, ws);
       } catch (error) {
-        console.error('[Collaboration] Sync error:', error);
+        logger.error('[Collaboration] Sync error', error);
       }
     });
     
@@ -389,7 +411,7 @@ function handleTerminalConnection(ws: WebSocket, info: ConnectionInfo) {
           break;
       }
     } catch (error) {
-      console.error('[Terminal] Message parse error:', error);
+      logger.error('[Terminal] Message parse error', error);
     }
   });
 
@@ -413,7 +435,7 @@ function handleLSPConnection(ws: WebSocket, info: ConnectionInfo) {
         ws.send(JSON.stringify(response));
       }});
     } catch (error) {
-      console.error('[LSP] Message parse error:', error);
+      logger.error('[LSP] Message parse error', error);
     }
   });
 
@@ -443,7 +465,7 @@ function handleAIConnection(ws: WebSocket, info: ConnectionInfo) {
         }
       });
     } catch (error) {
-      console.error('[AI] Message parse error:', error);
+      logger.error('[AI] Message parse error', error);
     }
   });
 
@@ -467,7 +489,7 @@ function handleDAPConnection(ws: WebSocket, info: ConnectionInfo) {
         }
       });
     } catch (error) {
-      console.error('[DAP] Message parse error:', error);
+      logger.error('[DAP] Message parse error', error);
     }
   });
 
@@ -502,7 +524,7 @@ function handleGeneralConnection(ws: WebSocket, info: ConnectionInfo) {
         ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
       }
     } catch (error) {
-      console.error('[General] Message parse error:', error);
+      logger.error('[General] Message parse error', error);
     }
   });
 
@@ -541,7 +563,7 @@ function broadcastAll(message: any, exclude?: WebSocket) {
 // ============================================================================
 
 function shutdown() {
-  console.log('\n[WS] Shutting down...');
+  logger.info('[WS] Shutting down...');
   
   // Close all connections
   for (const ws of connections.keys()) {
@@ -550,14 +572,14 @@ function shutdown() {
   
   wss.close(() => {
     httpServer.close(() => {
-      console.log('[WS] Server stopped');
+      logger.info('[WS] Server stopped');
       process.exit(0);
     });
   });
   
   // Force exit after timeout
   setTimeout(() => {
-    console.log('[WS] Forcing exit...');
+    logger.error('[WS] Forcing exit after shutdown timeout');
     process.exit(1);
   }, 5000);
 }
@@ -574,7 +596,7 @@ async function startServer() {
   await initYWebsocket();
   
   httpServer.listen(PORT, HOST, () => {
-    console.log(`
+    logger.info(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║   🚀 Aethel WebSocket Server                                  ║
@@ -600,7 +622,7 @@ async function startServer() {
 
 // Start the server
 startServer().catch((error) => {
-  console.error('[WS] Failed to start server:', error);
+  logger.error('[WS] Failed to start server', error);
   process.exit(1);
 });
 
