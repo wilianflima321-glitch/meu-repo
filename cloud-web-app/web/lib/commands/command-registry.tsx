@@ -10,6 +10,7 @@
 'use client';
 
 import { createContext, useContext, useCallback, useMemo, useState, useEffect, type ReactNode } from 'react';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // ============================================================================
 // TYPES
@@ -98,6 +99,11 @@ interface CommandRegistryContextValue {
 // ============================================================================
 
 const CommandRegistryContext = createContext<CommandRegistryContextValue | null>(null);
+const logger = createComponentLogger('command-registry');
+
+function logCommandIntent(label: string) {
+  return () => logger.info(`Command triggered: ${label}`);
+}
 
 // ============================================================================
 // HOOKS
@@ -435,7 +441,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'file-plus',
     priority: 100,
     tags: ['create', 'new', 'file', 'criar', 'novo', 'arquivo'],
-    handler: () => console.log('New file'),
+    handler: logCommandIntent('New file'),
   },
   {
     id: 'file.newFolder',
@@ -446,7 +452,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'folder-plus',
     priority: 99,
     tags: ['create', 'folder', 'directory', 'pasta', 'diretório'],
-    handler: () => console.log('New folder'),
+    handler: logCommandIntent('New folder'),
   },
   {
     id: 'file.open',
@@ -457,7 +463,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'folder-open',
     priority: 98,
     tags: ['open', 'file', 'abrir', 'arquivo'],
-    handler: () => console.log('Open file'),
+    handler: logCommandIntent('Open file'),
   },
   {
     id: 'file.save',
@@ -468,7 +474,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'save',
     priority: 97,
     tags: ['save', 'salvar', 'gravar'],
-    handler: () => console.log('Save file'),
+    handler: logCommandIntent('Save file'),
   },
   {
     id: 'file.saveAll',
@@ -479,7 +485,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'save-all',
     priority: 96,
     tags: ['save', 'all', 'salvar', 'todos'],
-    handler: () => console.log('Save all'),
+    handler: logCommandIntent('Save all'),
   },
 
   // === EDIT ===
@@ -492,7 +498,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'undo',
     priority: 100,
     tags: ['undo', 'desfazer', 'voltar'],
-    handler: () => console.log('Undo'),
+    handler: logCommandIntent('Undo'),
   },
   {
     id: 'edit.redo',
@@ -503,7 +509,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'redo',
     priority: 99,
     tags: ['redo', 'refazer'],
-    handler: () => console.log('Redo'),
+    handler: logCommandIntent('Redo'),
   },
   {
     id: 'edit.cut',
@@ -514,7 +520,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'scissors',
     priority: 98,
     tags: ['cut', 'recortar', 'cortar'],
-    handler: () => console.log('Cut'),
+    handler: logCommandIntent('Cut'),
   },
   {
     id: 'edit.copy',
@@ -525,7 +531,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'copy',
     priority: 97,
     tags: ['copy', 'copiar'],
-    handler: () => console.log('Copy'),
+    handler: logCommandIntent('Copy'),
   },
   {
     id: 'edit.paste',
@@ -536,7 +542,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'clipboard',
     priority: 96,
     tags: ['paste', 'colar'],
-    handler: () => console.log('Paste'),
+    handler: logCommandIntent('Paste'),
   },
   {
     id: 'edit.find',
@@ -547,7 +553,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'search',
     priority: 95,
     tags: ['find', 'search', 'buscar', 'procurar', 'pesquisar'],
-    handler: () => console.log('Find'),
+    handler: logCommandIntent('Find'),
   },
   {
     id: 'edit.replace',
@@ -558,7 +564,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'replace',
     priority: 94,
     tags: ['replace', 'substituir', 'trocar'],
-    handler: () => console.log('Replace'),
+    handler: logCommandIntent('Replace'),
   },
 
   // === VIEW ===
@@ -571,7 +577,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'command',
     priority: 100,
     tags: ['command', 'palette', 'comando', 'paleta'],
-    handler: () => console.log('Command palette'),
+    handler: logCommandIntent('Command palette'),
   },
   {
     id: 'view.explorer',
@@ -582,7 +588,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'files',
     priority: 99,
     tags: ['explorer', 'files', 'explorador', 'arquivos'],
-    handler: () => console.log('Explorer'),
+    handler: logCommandIntent('Explorer'),
   },
   {
     id: 'view.search',
@@ -593,7 +599,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'search',
     priority: 98,
     tags: ['search', 'files', 'buscar', 'arquivos'],
-    handler: () => console.log('Search'),
+    handler: logCommandIntent('Search'),
   },
   {
     id: 'view.git',
@@ -604,7 +610,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'git-branch',
     priority: 97,
     tags: ['git', 'source', 'control', 'versão'],
-    handler: () => console.log('Git'),
+    handler: logCommandIntent('Git'),
   },
   {
     id: 'view.terminal',
@@ -615,7 +621,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'terminal',
     priority: 96,
     tags: ['terminal', 'console', 'shell'],
-    handler: () => console.log('Terminal'),
+    handler: logCommandIntent('Terminal'),
   },
   {
     id: 'view.toggleSidebar',
@@ -626,7 +632,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'panel-left',
     priority: 95,
     tags: ['sidebar', 'toggle', 'barra', 'lateral'],
-    handler: () => console.log('Toggle sidebar'),
+    handler: logCommandIntent('Toggle sidebar'),
   },
   {
     id: 'view.togglePanel',
@@ -637,7 +643,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'panel-bottom',
     priority: 94,
     tags: ['panel', 'bottom', 'painel', 'inferior'],
-    handler: () => console.log('Toggle panel'),
+    handler: logCommandIntent('Toggle panel'),
   },
   {
     id: 'view.zoomIn',
@@ -648,7 +654,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'zoom-in',
     priority: 93,
     tags: ['zoom', 'in', 'aumentar'],
-    handler: () => console.log('Zoom in'),
+    handler: logCommandIntent('Zoom in'),
   },
   {
     id: 'view.zoomOut',
@@ -659,7 +665,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'zoom-out',
     priority: 92,
     tags: ['zoom', 'out', 'diminuir'],
-    handler: () => console.log('Zoom out'),
+    handler: logCommandIntent('Zoom out'),
   },
 
   // === RUN ===
@@ -672,7 +678,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'play',
     priority: 100,
     tags: ['run', 'start', 'executar', 'iniciar', 'play'],
-    handler: () => console.log('Run'),
+    handler: logCommandIntent('Run'),
   },
   {
     id: 'run.debug',
@@ -683,7 +689,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'bug',
     priority: 99,
     tags: ['debug', 'depurar'],
-    handler: () => console.log('Debug'),
+    handler: logCommandIntent('Debug'),
   },
   {
     id: 'run.stop',
@@ -694,7 +700,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'square',
     priority: 98,
     tags: ['stop', 'parar'],
-    handler: () => console.log('Stop'),
+    handler: logCommandIntent('Stop'),
   },
   {
     id: 'run.restart',
@@ -705,7 +711,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'refresh-cw',
     priority: 97,
     tags: ['restart', 'reiniciar'],
-    handler: () => console.log('Restart'),
+    handler: logCommandIntent('Restart'),
   },
   {
     id: 'run.build',
@@ -716,7 +722,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'package',
     priority: 96,
     tags: ['build', 'compile', 'compilar'],
-    handler: () => console.log('Build'),
+    handler: logCommandIntent('Build'),
   },
 
   // === AI ===
@@ -729,7 +735,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'message-square',
     priority: 100,
     tags: ['ai', 'chat', 'copilot', 'ia', 'assistente'],
-    handler: () => console.log('AI Chat'),
+    handler: logCommandIntent('AI Chat'),
   },
   {
     id: 'ai.generateCode',
@@ -740,7 +746,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'sparkles',
     priority: 99,
     tags: ['ai', 'generate', 'code', 'gerar', 'código'],
-    handler: () => console.log('Generate code'),
+    handler: logCommandIntent('Generate code'),
   },
   {
     id: 'ai.explain',
@@ -750,7 +756,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'help-circle',
     priority: 98,
     tags: ['ai', 'explain', 'explicar'],
-    handler: () => console.log('Explain'),
+    handler: logCommandIntent('Explain'),
   },
   {
     id: 'ai.refactor',
@@ -760,7 +766,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'wand',
     priority: 97,
     tags: ['ai', 'refactor', 'refatorar'],
-    handler: () => console.log('Refactor'),
+    handler: logCommandIntent('Refactor'),
   },
 
   // === ENGINE ===
@@ -772,7 +778,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'box',
     priority: 100,
     tags: ['3d', 'viewport', 'scene', 'cena'],
-    handler: () => console.log('3D Viewport'),
+    handler: logCommandIntent('3D Viewport'),
   },
   {
     id: 'engine.visualScripting',
@@ -782,7 +788,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'workflow',
     priority: 99,
     tags: ['visual', 'scripting', 'blueprint', 'node'],
-    handler: () => console.log('Visual Scripting'),
+    handler: logCommandIntent('Visual Scripting'),
   },
   {
     id: 'engine.materials',
@@ -792,7 +798,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'palette',
     priority: 98,
     tags: ['material', 'shader', 'texture', 'textura'],
-    handler: () => console.log('Materials'),
+    handler: logCommandIntent('Materials'),
   },
   {
     id: 'engine.animation',
@@ -802,7 +808,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'clapperboard',
     priority: 97,
     tags: ['animation', 'timeline', 'animação'],
-    handler: () => console.log('Animation'),
+    handler: logCommandIntent('Animation'),
   },
   {
     id: 'engine.particles',
@@ -812,7 +818,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'sparkles',
     priority: 96,
     tags: ['particles', 'niagara', 'vfx', 'partículas'],
-    handler: () => console.log('Particles'),
+    handler: logCommandIntent('Particles'),
   },
 
   // === PREFERENCES ===
@@ -825,7 +831,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'settings',
     priority: 100,
     tags: ['settings', 'preferences', 'configurações', 'preferências'],
-    handler: () => console.log('Settings'),
+    handler: logCommandIntent('Settings'),
   },
   {
     id: 'preferences.keyboardShortcuts',
@@ -836,7 +842,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'keyboard',
     priority: 99,
     tags: ['keyboard', 'shortcuts', 'teclado', 'atalhos'],
-    handler: () => console.log('Keyboard shortcuts'),
+    handler: logCommandIntent('Keyboard shortcuts'),
   },
   {
     id: 'preferences.themes',
@@ -846,7 +852,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'palette',
     priority: 98,
     tags: ['theme', 'colors', 'tema', 'cores'],
-    handler: () => console.log('Themes'),
+    handler: logCommandIntent('Themes'),
   },
 
   // === HELP ===
@@ -869,7 +875,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'keyboard',
     priority: 99,
     tags: ['shortcuts', 'reference', 'atalhos', 'referência'],
-    handler: () => console.log('Shortcuts reference'),
+    handler: logCommandIntent('Shortcuts reference'),
   },
   {
     id: 'help.about',
@@ -879,7 +885,7 @@ export const DEFAULT_COMMANDS: CommandDefinition[] = [
     icon: 'info',
     priority: 98,
     tags: ['about', 'version', 'sobre', 'versão'],
-    handler: () => console.log('About'),
+    handler: logCommandIntent('About'),
   },
 ];
 

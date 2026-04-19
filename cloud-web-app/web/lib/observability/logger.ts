@@ -83,13 +83,15 @@ function formatLog(entry: LogEntry): string {
 
 function writeLog(entry: LogEntry): void {
   const output = formatLog(entry);
+  const stdout = typeof process !== 'undefined' ? process.stdout : undefined;
+  const stderr = typeof process !== 'undefined' ? process.stderr : undefined;
 
   if (LOG_LEVELS[entry.level] >= LOG_LEVELS.error) {
-    writeToStream(process.stderr, output, entry.level);
+    writeToStream(stderr, output, entry.level);
   } else if (entry.level === 'warn') {
-    writeToStream(process.stderr, output, entry.level);
+    writeToStream(stderr, output, entry.level);
   } else {
-    writeToStream(process.stdout, output, entry.level);
+    writeToStream(stdout, output, entry.level);
   }
 }
 

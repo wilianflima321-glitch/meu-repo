@@ -28,6 +28,7 @@ import {
     useContext,
     ReactNode
 } from 'react';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // ============================================================================
 // TYPES
@@ -140,6 +141,7 @@ export interface DownloadProgress {
 // ============================================================================
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'ws://localhost:4000';
+const logger = createComponentLogger('aethel-gateway');
 
 interface GatewayContextValue {
     ws: WebSocket | null;
@@ -169,7 +171,7 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
             ws.onopen = () => {
                 setConnected(true);
                 reconnectAttemptsRef.current = 0;
-                console.log('🔗 Connected to Aethel Gateway');
+                logger.info('Connected to Aethel Gateway');
             };
             
             ws.onmessage = (event) => {
@@ -192,7 +194,7 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
                         listenersRef.current.get('*')?.forEach(cb => cb({ event: eventType, data: msg.data || msg.payload }));
                     }
                 } catch (err) {
-                    console.error('Gateway message parse error:', err);
+                    logger.error('Gateway message parse error', err);
                 }
             };
             
@@ -205,16 +207,16 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
                 reconnectAttemptsRef.current++;
                 
                 if (reconnectAttemptsRef.current < 10) {
-                    console.log(`Reconnecting in ${delay}ms...`);
+                    logger.warn(`Reconnecting in ${delay}ms...`);
                     reconnectTimeoutRef.current = setTimeout(connect, delay);
                 }
             };
             
             ws.onerror = (err) => {
-                console.error('Gateway WebSocket error:', err);
+                logger.error('Gateway WebSocket error', err);
             };
         } catch (err) {
-            console.error('Failed to connect to Gateway:', err);
+            logger.error('Failed to connect to Gateway', err);
         }
     }, []);
     
@@ -253,7 +255,7 @@ export function GatewayProvider({ children }: { children: ReactNode }) {
                 return;
             }
             
-            const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const requestId = `req-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
             
             const timeout = setTimeout(() => {
                 pendingRequestsRef.current.delete(requestId);

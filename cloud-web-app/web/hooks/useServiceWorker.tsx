@@ -10,6 +10,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export interface ServiceWorkerState {
   isSupported: boolean;
@@ -28,6 +29,7 @@ export interface ServiceWorkerActions {
 }
 
 export type UseServiceWorkerReturn = ServiceWorkerState & ServiceWorkerActions;
+const logger = createComponentLogger('service-worker');
 
 /**
  * Hook para gerenciar o Service Worker
@@ -52,6 +54,7 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
   });
 
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
+  const updateCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Registrar Service Worker
   useEffect(() => {
@@ -98,7 +101,7 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
           registration,
         }));
 
-        console.log('[SW Hook] Service Worker registered:', registration.scope);
+        logger.info('[SW Hook] Service Worker registered', { scope: registration.scope });
 
         // Verificar se há SW aguardando
         if (registration.waiting) {
@@ -114,19 +117,21 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // Novo SW instalado, update disponível
                 setState((prev) => ({ ...prev, isUpdateAvailable: true }));
-                console.log('[SW Hook] New version available');
+                logger.info('[SW Hook] New version available');
               }
             });
           }
         });
 
         // Verificar atualizações periodicamente
-        setInterval(() => {
-          registration.update().catch(console.error);
+        updateCheckIntervalRef.current = setInterval(() => {
+          registration.update().catch((error) => {
+            logger.error('[SW Hook] Periodic update check failed', error);
+          });
         }, 60 * 60 * 1000); // A cada hora
 
       } catch (error) {
-        console.error('[SW Hook] Registration failed:', error);
+        logger.error('[SW Hook] Registration failed', error);
         setState((prev) => ({
           ...prev,
           error: error instanceof Error ? error : new Error('Registration failed'),
@@ -148,11 +153,11 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
       switch (type) {
         case 'UPDATE_AVAILABLE':
           setState((prev) => ({ ...prev, isUpdateAvailable: true }));
-          console.log('[SW Hook] Update available:', payload?.version);
+          logger.info('[SW Hook] Update available', { version: payload?.version });
           break;
 
         case 'CACHE_UPDATED':
-          console.log('[SW Hook] Cache updated');
+          logger.info('[SW Hook] Cache updated');
           break;
       }
     };
@@ -161,7 +166,7 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
 
     // Listener para controllerchange (SW atualizado)
     const handleControllerChange = () => {
-      console.log('[SW Hook] Controller changed, reloading...');
+      logger.info('[SW Hook] Controller changed, reloading...');
       window.location.reload();
     };
 
@@ -174,6 +179,10 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
       window.removeEventListener('load', registerServiceWorker);
       navigator.serviceWorker.removeEventListener('message', handleMessage);
       navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+      if (updateCheckIntervalRef.current) {
+        clearInterval(updateCheckIntervalRef.current);
+        updateCheckIntervalRef.current = null;
+      }
     };
   }, [enabled]);
 
@@ -182,15 +191,15 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
     const registration = registrationRef.current;
 
     if (!registration) {
-      console.warn('[SW Hook] No registration to update');
+      logger.warn('[SW Hook] No registration to update');
       return;
     }
 
     try {
       await registration.update();
-      console.log('[SW Hook] Update check triggered');
+      logger.info('[SW Hook] Update check triggered');
     } catch (error) {
-      console.error('[SW Hook] Update failed:', error);
+      logger.error('[SW Hook] Update failed', error);
     }
   }, []);
 
