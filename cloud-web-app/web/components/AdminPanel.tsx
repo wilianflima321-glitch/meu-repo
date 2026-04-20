@@ -47,7 +47,7 @@ const fetcher = (url: string) => {
 }
 
 const PANEL_CLASS = 'rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] p-6 shadow-[0_18px_48px_rgba(2,6,23,0.18)]'
-const BUTTON_PRIMARY_CLASS = `inline-flex items-center justify-center rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50`
+const BUTTON_PRIMARY_CLASS = `inline-flex items-center justify-center rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-xs font-semibold text-[var(--aethel-text-inverse)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50`
 const BUTTON_SECONDARY_CLASS = `inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-4 py-2 text-xs font-semibold text-[var(--aethel-text-secondary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] disabled:cursor-not-allowed disabled:opacity-50`
 const INPUT_CLASS = `rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)] px-3 py-2 text-sm text-[var(--aethel-text-primary)] placeholder-[var(--aethel-text-tertiary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`
 
@@ -177,7 +177,7 @@ export default function AdminPanel() {
               onClick={() => setActiveAdminTab(tab.id as any)}
               className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${CANONICAL_MOTION} ${CANONICAL_FOCUS} ${
                 activeAdminTab === tab.id
-                  ? 'bg-[var(--aethel-primary)] text-white shadow-[0_12px_28px_rgba(79,70,229,0.22)]'
+                  ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] shadow-[0_12px_28px_rgba(79,70,229,0.22)]'
                   : 'border border-transparent bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)]'
               }`}
             >

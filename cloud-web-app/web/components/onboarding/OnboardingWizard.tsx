@@ -87,7 +87,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                 <div
                   className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
                     i <= step
-                      ? 'bg-[var(--aethel-primary)] text-white'
+                      ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)]'
                       : 'border border-[var(--aethel-border-primary)] text-[var(--aethel-text-tertiary)]'
                   }`}
                 >
@@ -233,7 +233,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               type="button"
               onClick={handleNext}
               disabled={(step === 0 && !selectedTemplate) || (step === 1 && !projectName.trim())}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-[var(--aethel-primary)]/25 transition-all duration-200 hover:shadow-[var(--aethel-primary)]/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] px-6 py-2.5 text-sm font-medium text-[var(--aethel-text-inverse)] shadow-lg shadow-[var(--aethel-primary)]/25 transition-all duration-200 hover:shadow-[var(--aethel-primary)]/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               Próximo <ArrowRight className="h-4 w-4" />
             </button>
@@ -241,7 +241,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
             <button
               type="button"
               onClick={handleComplete}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-success)] to-[var(--aethel-secondary)] px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-[var(--aethel-success)]/25 transition-all duration-200 hover:shadow-[var(--aethel-success)]/40 hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[var(--aethel-success)] to-[var(--aethel-secondary)] px-6 py-2.5 text-sm font-medium text-[var(--aethel-text-inverse)] shadow-lg shadow-[var(--aethel-success)]/25 transition-all duration-200 hover:shadow-[var(--aethel-success)]/40 hover:scale-[1.02] active:scale-[0.98]"
             >
               Abrir no IDE <Sparkles className="h-4 w-4" />
             </button>

@@ -467,7 +467,7 @@ export default function TwoFactorSecurityPanel({
               <div className="mt-5 space-y-4">
                 {setup?.qrCode && (
                   <div className="grid grid-cols-1 gap-4 rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_45%,transparent)] p-4 md:grid-cols-[176px_minmax(0,1fr)] md:items-center">
-                    <div className="mx-auto rounded-xl border border-[var(--aethel-border-primary)] bg-white p-3">
+                    <div className="mx-auto rounded-xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-contrast)] p-3">
                       <Image
                         src={setup.qrCode}
                         alt="QR code para ativar autenticacao de dois fatores"

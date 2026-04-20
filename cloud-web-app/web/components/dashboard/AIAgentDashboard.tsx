@@ -212,7 +212,7 @@ function formatTokens(tokens: number): string {
 
 const PANEL_CLASS = 'rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] shadow-[0_18px_48px_rgba(2,6,23,0.18)]'
 const GHOST_BUTTON_CLASS = `inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] text-[var(--aethel-text-secondary)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS} hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]`
-const PRIMARY_TAB_CLASS = 'bg-[var(--aethel-primary)] text-white shadow-[0_12px_28px_rgba(79,70,229,0.22)]'
+const PRIMARY_TAB_CLASS = 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] shadow-[0_12px_28px_rgba(79,70,229,0.22)]'
 const EMPTY_STATE_CLASS = 'rounded-2xl border border-dashed border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-6 py-12 text-center text-sm text-[var(--aethel-text-secondary)]'
 
 // ============================================================================

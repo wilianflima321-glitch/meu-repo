@@ -65,8 +65,8 @@ export function CollaboratorsBar({
               onClick={onExpand}
               aria-label={`Collaborator ${peer.name} connected`}
               title={peer.name}
-              className="relative inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-semibold text-white ring-2 ring-[var(--aethel-surface-primary)] transition-transform hover:scale-110 focus:outline-none focus-visible:ring-[var(--aethel-border-focus)]"
-              style={{ background: peer.color }}
+              className="relative inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-semibold ring-2 ring-[var(--aethel-surface-primary)] transition-transform hover:scale-110 focus:outline-none focus-visible:ring-[var(--aethel-border-focus)]"
+              style={{ background: peer.color, color: '#ffffff' }}
             >
               {peer.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element

@@ -307,7 +307,7 @@ export default function AethelHeader() {
                   >
                     <Bell className="w-5 h-5" />
                     {notifications > 0 && (
-                      <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aethel-error)] px-1 text-[10px] font-bold text-white">
+                      <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--aethel-error)] px-1 text-[10px] font-bold text-[var(--aethel-text-inverse)]">
                         {notifications > 9 ? '9+' : notifications}
                       </span>
                     )}
@@ -393,7 +393,7 @@ export default function AethelHeader() {
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition-all hover:brightness-110"
+                  className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-inverse)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition-all hover:brightness-110"
                 >
                   Comecar Gratis
                 </Link>

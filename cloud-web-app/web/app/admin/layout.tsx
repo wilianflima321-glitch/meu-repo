@@ -234,7 +234,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] backdrop-blur-sm lg:hidden"
           onClick={onClose}
           aria-hidden
         />

@@ -75,8 +75,8 @@ export function RemoteCursorLayer({
               />
             </svg>
             <span
-              className="inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium text-white shadow-sm ml-3 -mt-1"
-              style={{ background: peer.color }}
+              className="inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium shadow-sm ml-3 -mt-1"
+              style={{ background: peer.color, color: '#ffffff' }}
             >
               {peer.name}
             </span>

@@ -40,7 +40,7 @@ export default function Error({
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(90deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-white transition-all hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(90deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-inverse)] transition-all hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
           >
             <RefreshCw className="h-4 w-4" />
             Tentar novamente

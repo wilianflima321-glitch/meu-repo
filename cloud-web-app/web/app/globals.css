@@ -49,12 +49,16 @@
     --aethel-surface-secondary: #101622;
     --aethel-surface-tertiary: #171f2d;
     --aethel-surface-quaternary: #202a3a;
+    /* High-contrast surface for QR codes, barcodes and print-style content */
+    --aethel-surface-contrast: #ffffff;
 
     /* Text */
     --aethel-text-primary: #f7f9fc;
     --aethel-text-secondary: #c6cfdd;
     --aethel-text-tertiary: #94a0b8;
     --aethel-text-quaternary: #6d7891;
+    /* Inverse text used on saturated primary/success/error buttons */
+    --aethel-text-inverse: #ffffff;
 
     /* Borders */
     --aethel-border-primary: rgba(148, 163, 184, 0.18);

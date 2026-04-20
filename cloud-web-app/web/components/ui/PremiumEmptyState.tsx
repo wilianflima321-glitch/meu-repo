@@ -59,7 +59,7 @@ export function PremiumEmptyState({
             className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-200 ${
               action.variant === 'secondary'
                 ? 'border border-[var(--aethel-border-primary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)]'
-                : 'bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] text-white shadow-lg shadow-[var(--aethel-primary)]/25 hover:shadow-[var(--aethel-primary)]/40 hover:scale-[1.02] active:scale-[0.98]'
+                : 'bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)] text-[var(--aethel-text-inverse)] shadow-lg shadow-[var(--aethel-primary)]/25 hover:shadow-[var(--aethel-primary)]/40 hover:scale-[1.02] active:scale-[0.98]'
             }`}
           >
             {action.label}
