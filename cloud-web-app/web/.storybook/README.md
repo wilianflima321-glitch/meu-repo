@@ -3,23 +3,21 @@
 Storybook hosts visual documentation and axe-core a11y checks for every
 primitive exported under `components/**`.
 
-## One-time install
+## Install
 
-Storybook is not listed in `package.json` by default to keep Next.js build
-times low. Install the peer set on demand:
+Storybook now ships as a first-class dev dependency so stories participate in
+local typecheck and the workspace can run Storybook without manual setup:
 
 ```bash
-npm --prefix cloud-web-app/web install -D \
-  storybook @storybook/react @storybook/nextjs \
-  @storybook/addon-essentials @storybook/addon-a11y \
-  @storybook/addon-interactions @storybook/addon-links
+cd cloud-web-app/web
+npm install
 ```
 
 ## Running
 
 ```bash
 cd cloud-web-app/web
-npx storybook dev -p 6006
+npm run storybook
 ```
 
 Open http://localhost:6006 — the sidebar groups stories by domain

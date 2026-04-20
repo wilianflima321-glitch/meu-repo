@@ -1,6 +1,6 @@
 import { createComponentLogger } from '@/lib/observability/logger'
 
-const log = createComponentLogger('advanced-config')
+const logger = createComponentLogger('advanced-config')
 
 
 /**
@@ -326,21 +326,21 @@ export class AuditManager {
    * Registrar ação
    */
   log(audit: Omit<AuditLog, 'id' | 'timestamp'>): AuditLog {
-    const log: AuditLog = {
+    const entry: AuditLog = {
       ...audit,
       id: `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date(),
     }
 
-    this.logs.push(log)
-    log.info('[Audit]', log)
+    this.logs.push(entry)
+    logger.info('[Audit]', entry)
 
     // Enviar para servidor em produção
     if (typeof window !== 'undefined') {
-      this.sendToServer(log)
+      void this.sendToServer(entry)
     }
 
-    return log
+    return entry
   }
 
   /**
@@ -368,7 +368,7 @@ export class AuditManager {
         body: JSON.stringify(log),
       })
     } catch (error) {
-      console.error('[Audit] Falha ao enviar:', error)
+      logger.error('[Audit] Falha ao enviar', error)
     }
   }
 }
