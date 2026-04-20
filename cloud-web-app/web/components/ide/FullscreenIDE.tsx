@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import type * as monacoEditor from 'monaco-editor'
+import CollaboratorsBar from "@/components/collaboration/CollaboratorsBar";
 import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
 import CanonicalPreviewSurface from "@/components/preview/CanonicalPreviewSurface";
@@ -26,6 +27,7 @@ import OutlinePanel, { type DocumentSymbol } from "@/components/outline/OutlineP
 import { buildOutlineSymbols } from "@/components/outline/outline-parser";
 import { analytics } from "@/lib/analytics";
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
+import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
@@ -63,6 +65,28 @@ type FullAccessResponse = {
   }
 }
 
+type CollaborationRoomParticipant = {
+  userId: string
+  status: 'online' | 'away' | 'offline' | string
+  lastSeen: string
+  user?: {
+    name?: string | null
+    avatar?: string | null
+  } | null
+}
+
+type CollaborationRoomSummary = {
+  id: string
+  name: string
+  updatedAt: string
+  participants: CollaborationRoomParticipant[]
+}
+
+type CollaborationRoomsResponse = {
+  success: boolean
+  rooms: CollaborationRoomSummary[]
+}
+
 type InlineApplyResult = {
   runId?: string
   rollbackToken?: string
@@ -97,6 +121,17 @@ function resolveLanguage(path: string): string {
 function normalizePath(input: string): string {
   if (!input) return "/";
   return input.startsWith("/") ? input : `/${input}`;
+}
+
+function collaborationColorForUser(userId: string): string {
+  let hash = 0
+  for (let index = 0; index < userId.length; index += 1) {
+    hash = (hash << 5) - hash + userId.charCodeAt(index)
+    hash |= 0
+  }
+
+  const hue = Math.abs(hash) % 360
+  return `hsl(${hue}, 72%, 56%)`
 }
 
 function pickFirstFilePath(nodes: WorkspaceTreeNode[]): string | null {
@@ -401,6 +436,79 @@ function IDEContent() {
       refreshInterval: 30000,
     }
   )
+
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const rawToken = window.localStorage.getItem('token')
+    if (!rawToken) {
+      setCurrentUserId(null)
+      return
+    }
+
+    try {
+      const payload = JSON.parse(window.atob(rawToken.split('.')[1] ?? ''))
+      setCurrentUserId(payload.userId ?? payload.sub ?? payload.id ?? null)
+    } catch {
+      setCurrentUserId(null)
+    }
+  }, [hasToken])
+
+  const { data: collaborationRoomsData } = useSWR<CollaborationRoomsResponse>(
+    hasToken && projectId && projectId !== 'default'
+      ? `/api/collaboration/rooms?projectId=${encodeURIComponent(projectId)}`
+      : null,
+    async (url: string) => {
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+      })
+      const payload = (await response.json().catch(() => ({ success: false, rooms: [] }))) as CollaborationRoomsResponse
+      if (!response.ok) {
+        throw new Error(`Falha ao carregar presença colaborativa: ${response.status}`)
+      }
+      return payload
+    },
+    {
+      refreshInterval: 15000,
+      revalidateOnFocus: true,
+    },
+  )
+
+  const headerCollaborators = useMemo<RemotePeer[]>(() => {
+    const rooms = collaborationRoomsData?.rooms ?? []
+    const collaborators = new Map<string, RemotePeer>()
+
+    for (const room of rooms) {
+      for (const participant of room.participants ?? []) {
+        if (!participant?.userId) continue
+        if (currentUserId && participant.userId === currentUserId) continue
+
+        const candidate: RemotePeer = {
+          clientId: Math.abs(
+            Array.from(participant.userId).reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0),
+          ),
+          id: participant.userId,
+          name: participant.user?.name?.trim() || `Usuário ${participant.userId.slice(0, 6)}`,
+          avatar: participant.user?.avatar ?? undefined,
+          color: collaborationColorForUser(participant.userId),
+          lastActivity: participant.lastSeen ? new Date(participant.lastSeen).getTime() : Date.now(),
+        }
+
+        const existing = collaborators.get(participant.userId)
+        if (!existing || existing.lastActivity < candidate.lastActivity) {
+          collaborators.set(participant.userId, candidate)
+        }
+      }
+    }
+
+    return Array.from(collaborators.values())
+      .sort((a, b) => b.lastActivity - a.lastActivity)
+      .slice(0, 6)
+  }, [collaborationRoomsData?.rooms, currentUserId])
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1223,6 +1331,26 @@ function IDEContent() {
         <ModernIDEShell
             projectName={`Projeto ${projectId}`}
             activeFileName={activeFile?.path}
+            headerExtras={
+              headerCollaborators.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '4px 8px',
+                    borderRadius: '999px',
+                    border: '1px solid var(--aethel-border-secondary)',
+                    background: 'color-mix(in srgb, var(--aethel-surface-secondary) 68%, transparent)',
+                  }}
+                >
+                  <CollaboratorsBar
+                    peers={headerCollaborators}
+                    maxVisible={4}
+                    showStatusDot
+                  />
+                </div>
+              ) : null
+            }
             banner={
               entryNotice ? (
                 <WorkbenchEntryNotice

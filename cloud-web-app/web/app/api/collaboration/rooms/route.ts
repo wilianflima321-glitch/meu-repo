@@ -9,8 +9,44 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const logger = createComponentLogger('api.collaboration.rooms');
+
+type RoomParticipantSnapshot = {
+  userId: string;
+  status: string;
+  lastSeen: Date;
+};
+
+async function enrichParticipants<T extends RoomParticipantSnapshot>(participants: T[]) {
+  const userIds = [...new Set(participants.map((participant) => participant.userId))];
+  if (userIds.length === 0) {
+    return participants.map((participant) => ({
+      ...participant,
+      user: { name: null, avatar: null },
+    }));
+  }
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, name: true, avatar: true },
+  });
+
+  const usersById = new Map(users.map((user) => [user.id, user]));
+
+  return participants.map((participant) => ({
+    ...participant,
+    user: usersById.get(participant.userId)
+      ? {
+          name: usersById.get(participant.userId)?.name ?? null,
+          avatar: usersById.get(participant.userId)?.avatar ?? null,
+        }
+      : { name: null, avatar: null },
+  }));
+}
 
 function requireCollaborationEnabled(collaboratorsLimit: number): void {
 	if (collaboratorsLimit === 0) {
@@ -55,12 +91,19 @@ export async function GET(request: NextRequest) {
       orderBy: { updatedAt: 'desc' },
     });
 
+    const roomsWithUsers = await Promise.all(
+      rooms.map(async (room) => ({
+        ...room,
+        participants: await enrichParticipants(room.participants),
+      })),
+    );
+
     return NextResponse.json({
       success: true,
-      rooms,
+      rooms: roomsWithUsers,
     });
   } catch (error) {
-    console.error('Failed to list rooms:', error);
+    logger.error('Failed to list rooms', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -129,13 +172,18 @@ export async function POST(request: NextRequest) {
         participants: { select: { userId: true, status: true, lastSeen: true } },
       },
     });
+
+    const roomWithUsers = {
+      ...room,
+      participants: await enrichParticipants(room.participants),
+    };
     
     return NextResponse.json({
       success: true,
-      room,
+      room: roomWithUsers,
     });
   } catch (error) {
-    console.error('Failed to create room:', error);
+    logger.error('Failed to create room', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

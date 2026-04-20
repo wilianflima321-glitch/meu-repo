@@ -23,6 +23,7 @@ import {
 
 interface ModernIDEShellProps {
   banner?: React.ReactNode;
+  headerExtras?: React.ReactNode;
   children: {
     sidebar: React.ReactNode;
     editor: React.ReactNode;
@@ -100,6 +101,7 @@ const iconButtonStyle: React.CSSProperties = {
 
 export function ModernIDEShell({
   banner,
+  headerExtras,
   children,
   projectName = 'Projeto sem nome',
   activeFileName,
@@ -269,6 +271,7 @@ export function ModernIDEShell({
         projectName={projectName}
         activeFileName={activeFileName}
         panelState={panelState}
+        headerExtras={headerExtras}
         onTogglePanel={togglePanel}
         onToggleSidebar={onToggleSidebar}
         isCompact={isCompact}
@@ -639,6 +642,7 @@ interface IDEHeaderProps {
   projectName: string;
   activeFileName?: string;
   panelState: PanelState;
+  headerExtras?: React.ReactNode;
   onTogglePanel: (panel: keyof PanelState) => void;
   onToggleSidebar?: () => void;
   isCompact: boolean;
@@ -651,6 +655,7 @@ function IDEHeader({
   projectName,
   activeFileName,
   panelState,
+  headerExtras,
   onTogglePanel,
   onToggleSidebar,
   isCompact,
@@ -722,6 +727,7 @@ function IDEHeader({
 
       {!isCompact && (
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexWrap: 'wrap', justifyContent: 'center' }}>
+          {headerExtras}
           <PanelToggle
             icon={<FolderTree size={16} />}
             label="Arquivos"

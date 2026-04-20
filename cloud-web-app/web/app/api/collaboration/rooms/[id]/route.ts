@@ -10,8 +10,44 @@ import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { prisma } from '@/lib/db';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
+
+const logger = createComponentLogger('api.collaboration.room');
+
+type RoomParticipantSnapshot = {
+  userId: string;
+  status: string;
+  lastSeen: Date;
+};
+
+async function enrichParticipants<T extends RoomParticipantSnapshot>(participants: T[]) {
+  const userIds = [...new Set(participants.map((participant) => participant.userId))];
+  if (userIds.length === 0) {
+    return participants.map((participant) => ({
+      ...participant,
+      user: { name: null, avatar: null },
+    }));
+  }
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, name: true, avatar: true },
+  });
+
+  const usersById = new Map(users.map((user) => [user.id, user]));
+
+  return participants.map((participant) => ({
+    ...participant,
+    user: usersById.get(participant.userId)
+      ? {
+          name: usersById.get(participant.userId)?.name ?? null,
+          avatar: usersById.get(participant.userId)?.avatar ?? null,
+        }
+      : { name: null, avatar: null },
+  }));
+}
 
 function requireCollaborationEnabled(collaboratorsLimit: number): void {
 	if (collaboratorsLimit === 0) {
@@ -65,19 +101,24 @@ export async function GET(
       }
     }
 
-    const presence = room.participants.map((p) => ({
+    const participants = await enrichParticipants(room.participants);
+    const presence = participants.map((p) => ({
       userId: p.userId,
       status: p.status,
       lastSeen: p.lastSeen,
+      user: p.user,
     }));
     
     return NextResponse.json({
       success: true,
-      room,
+      room: {
+        ...room,
+        participants,
+      },
       presence,
     });
   } catch (error) {
-    console.error('Failed to get room:', error);
+    logger.error('Failed to get room', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -159,7 +200,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Failed to join/touch room:', error);
+    logger.error('Failed to join or touch room', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();
@@ -183,7 +224,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Failed to leave room:', error);
+    logger.error('Failed to leave room', error);
     const mapped = apiErrorToResponse(error);
     if (mapped) return mapped;
     return apiInternalError();

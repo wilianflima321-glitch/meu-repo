@@ -1,4 +1,4 @@
-# Storybook — Aethel Design System
+﻿# Storybook — Aethel Design System
 
 Storybook hosts visual documentation and axe-core a11y checks for every
 primitive exported under `components/**`.
@@ -6,7 +6,8 @@ primitive exported under `components/**`.
 ## Install
 
 Storybook now ships as a first-class dev dependency so stories participate in
-local typecheck and the workspace can run Storybook without manual setup:
+local typecheck and the workspace can run the component lab without manual
+setup:
 
 ```bash
 cd cloud-web-app/web
@@ -22,6 +23,17 @@ npm run storybook
 
 Open http://localhost:6006 — the sidebar groups stories by domain
 (`Collaboration/*`, `UI/*`, `Design System/*`).
+
+## Runtime model
+
+This setup intentionally uses the Vite-backed React framework
+(`@storybook/react-vite`):
+
+- it is faster and more stable than the legacy Webpack path for our current
+  stories
+- the current stories are component-focused and do not need full Next.js page
+  emulation
+- Next.js remains the app runtime, while Storybook acts as an isolated UI lab
 
 ## Adding a story
 
