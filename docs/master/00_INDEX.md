@@ -31,6 +31,7 @@ Status: CANONICAL ENTRYPOINT
 26. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
 27. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
 28. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+29. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -93,6 +94,7 @@ Rules:
 | `78_EXECUTION_MASTER_PLAN_2026-04-12.md` | Plano mestre de execucao para converter a auditoria em fechamento operacional por fases | ACTIVE |
 | `79_TUDO_QUE_PRECISA_SABER_2026-04-12.md` | Compilacao de thesis, benchmark, gaps e prioridades da plataforma inteira | ACTIVE |
 | `80_CONVERSA_10_10_2026-04-12.md` | Mapa de conversa e critica continua para fechar a plataforma web + IDE + app | ACTIVE |
+| `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` | Backlog validado contra o estado real do repo com correcoes de claims e prioridade executiva | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |
