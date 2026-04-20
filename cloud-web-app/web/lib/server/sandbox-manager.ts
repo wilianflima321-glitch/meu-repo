@@ -18,6 +18,10 @@ import { promisify } from 'util';
 import { EventEmitter } from 'events';
 import { randomBytes } from 'crypto';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/sandbox-manager')
+
 const execFileAsync = promisify(execFile);
 
 export interface SandboxConfig {
@@ -91,7 +95,7 @@ class DockerSandboxManager extends EventEmitter {
     try {
       await execFileAsync('docker', ['info'], { timeout: 5000 });
       this.isAvailable = true;
-      console.log('[Sandbox] Docker daemon is available');
+      log.info('[Sandbox] Docker daemon is available');
     } catch (error) {
       this.isAvailable = false;
       console.warn('[Sandbox] Docker not available, falling back to direct execution');
@@ -210,7 +214,7 @@ class DockerSandboxManager extends EventEmitter {
       this.sessions.set(sessionId, session);
       this.userSessionCount.set(config.userId, currentCount + 1);
 
-      console.log(`[Sandbox] Created container ${containerName} for user ${config.userId}`);
+      log.info(`[Sandbox] Created container ${containerName} for user ${config.userId}`);
       this.emit('sandbox:created', session);
 
       // Set timeout to destroy container
@@ -355,7 +359,7 @@ class DockerSandboxManager extends EventEmitter {
     const currentCount = this.userSessionCount.get(session.userId) || 1;
     this.userSessionCount.set(session.userId, Math.max(0, currentCount - 1));
 
-    console.log(`[Sandbox] Destroyed container ${session.containerName}`);
+    log.info(`[Sandbox] Destroyed container ${session.containerName}`);
     this.emit('sandbox:destroyed', session);
   }
 
@@ -409,7 +413,7 @@ class DockerSandboxManager extends EventEmitter {
           if (!session || status.includes('Exited')) {
             try {
               await execFileAsync('docker', ['rm', '-f', name], { timeout: 5000 });
-              console.log(`[Sandbox] Cleaned up orphaned container: ${name}`);
+              log.info(`[Sandbox] Cleaned up orphaned container: ${name}`);
             } catch {
               // Ignore cleanup errors
             }
@@ -433,7 +437,7 @@ class DockerSandboxManager extends EventEmitter {
     const sessions = Array.from(this.sessions.keys());
     await Promise.all(sessions.map(id => this.destroySandbox(id)));
 
-    console.log('[Sandbox] Manager shut down');
+    log.info('[Sandbox] Manager shut down');
   }
 }
 

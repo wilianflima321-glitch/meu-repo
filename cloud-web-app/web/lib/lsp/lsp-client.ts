@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('lsp/lsp-client')
+
+
 /**
  * LSP Client Implementation
  * Provides Language Server Protocol client for multiple languages
@@ -218,7 +223,7 @@ export class LSPClient {
       const response = await this.sendRequest('initialize', initializeParams);
       this.initialized = true;
       await this.sendNotification('initialized', {});
-      console.log(`LSP client initialized for ${this.config.language}`);
+      log.info(`LSP client initialized for ${this.config.language}`);
     } catch (error) {
       console.error(`Failed to initialize LSP client for ${this.config.language}:`, error);
       throw error;
@@ -234,7 +239,7 @@ export class LSPClient {
       await this.sendRequest('shutdown', null);
       await this.sendNotification('exit', null);
       this.initialized = false;
-      console.log(`LSP client shut down for ${this.config.language}`);
+      log.info(`LSP client shut down for ${this.config.language}`);
     } catch (error) {
       console.error(`Failed to shutdown LSP client for ${this.config.language}:`, error);
     }

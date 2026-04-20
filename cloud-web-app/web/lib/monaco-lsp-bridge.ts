@@ -7,6 +7,10 @@
 
 import * as monaco from 'monaco-editor';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('monaco-lsp-bridge')
+
 // LSP Message Types
 interface LspMessage {
   jsonrpc: '2.0';
@@ -138,13 +142,13 @@ export class MonacoLspBridge {
       this.ws = new WebSocket(this.wsUrl);
 
       this.ws.onopen = () => {
-        console.log('[LSP Bridge] Connected to LSP server');
+        log.info('[LSP Bridge] Connected to LSP server');
         this.reconnectAttempts = 0;
         resolve();
       };
 
       this.ws.onclose = () => {
-        console.log('[LSP Bridge] Disconnected from LSP server');
+        log.info('[LSP Bridge] Disconnected from LSP server');
         this.handleDisconnect();
       };
 
@@ -166,7 +170,7 @@ export class MonacoLspBridge {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-      console.log(`[LSP Bridge] Attempting reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+      log.info(`[LSP Bridge] Attempting reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
       
       setTimeout(async () => {
         try {
@@ -245,7 +249,7 @@ export class MonacoLspBridge {
 
     this.serverCapabilities = result.capabilities;
     await this.sendNotification('initialized', {});
-    console.log('[LSP Bridge] LSP initialized with capabilities:', this.serverCapabilities);
+    log.info('[LSP Bridge] LSP initialized with capabilities:', this.serverCapabilities);
   }
 
   /**
@@ -330,10 +334,10 @@ export class MonacoLspBridge {
         this.handleDiagnostics(params as { uri: string; diagnostics: Diagnostic[] });
         break;
       case 'window/showMessage':
-        console.log('[LSP Message]', params);
+        log.info('[LSP Message]', params);
         break;
       case 'window/logMessage':
-        console.log('[LSP Log]', params);
+        log.info('[LSP Log]', params);
         break;
     }
   }

@@ -16,6 +16,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('input/controller-mapper')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -904,7 +908,7 @@ export class ControllerMapper extends EventEmitter {
   
   private log(message: string): void {
     if (this.config.enableDebug) {
-      console.log(`[ControllerMapper] ${message}`);
+      log.info(`[ControllerMapper] ${message}`);
     }
   }
   

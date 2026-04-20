@@ -11,6 +11,10 @@ import { getHotReloadManager, HotReloadManager } from './hot-reload-runtime';
 import { getTerminalPtyManager, TerminalPtyManager } from './terminal-pty-runtime';
 import * as path from 'path';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/bootstrap')
+
 // ============================================================================
 // Configuration
 // ============================================================================
@@ -60,29 +64,29 @@ const state: ServerState = {
 export async function bootstrap(config: ServerConfig = {}): Promise<void> {
   const finalConfig = { ...defaultConfig, ...config };
   
-  console.log('═'.repeat(60));
-  console.log('  🚀 Aethel Engine Runtime Server');
-  console.log('═'.repeat(60));
-  console.log(`  Port: ${finalConfig.wsPort}`);
-  console.log(`  Workspace: ${finalConfig.workspacePath}`);
-  console.log(`  Hot Reload: ${finalConfig.enableHotReload ? 'Enabled' : 'Disabled'}`);
-  console.log(`  File Watcher: ${finalConfig.enableFileWatcher ? 'Enabled' : 'Disabled'}`);
-  console.log('═'.repeat(60));
+  log.info('═'.repeat(60));
+  log.info('  🚀 Aethel Engine Runtime Server');
+  log.info('═'.repeat(60));
+  log.info(`  Port: ${finalConfig.wsPort}`);
+  log.info(`  Workspace: ${finalConfig.workspacePath}`);
+  log.info(`  Hot Reload: ${finalConfig.enableHotReload ? 'Enabled' : 'Disabled'}`);
+  log.info(`  File Watcher: ${finalConfig.enableFileWatcher ? 'Enabled' : 'Disabled'}`);
+  log.info('═'.repeat(60));
   
   try {
     // 1. Start WebSocket Server
-    console.log('\n📡 Starting WebSocket server...');
+    log.info('\n📡 Starting WebSocket server...');
     state.wsServer = await startWebSocketServer(finalConfig.wsPort);
-    console.log(`   ✓ WebSocket server running on port ${finalConfig.wsPort}`);
+    log.info(`   ✓ WebSocket server running on port ${finalConfig.wsPort}`);
     
     // 2. Initialize Terminal PTY Manager
-    console.log('\n💻 Initializing Terminal PTY Manager...');
+    log.info('\n💻 Initializing Terminal PTY Manager...');
     state.terminalManager = getTerminalPtyManager();
-    console.log('   ✓ Terminal PTY Manager ready');
+    log.info('   ✓ Terminal PTY Manager ready');
     
     // 3. Initialize File Watcher
     if (finalConfig.enableFileWatcher) {
-      console.log('\n👁️  Initializing File Watcher...');
+      log.info('\n👁️  Initializing File Watcher...');
       state.fileWatcher = getFileWatcherManager();
       
       // Watch workspace
@@ -95,12 +99,12 @@ export async function bootstrap(config: ServerConfig = {}): Promise<void> {
         },
       });
       
-      console.log('   ✓ File Watcher active');
+      log.info('   ✓ File Watcher active');
     }
     
     // 4. Initialize Hot Reload
     if (finalConfig.enableHotReload) {
-      console.log('\n🔥 Initializing Hot Reload...');
+      log.info('\n🔥 Initializing Hot Reload...');
       state.hotReload = getHotReloadManager();
       
       await state.hotReload.enable({
@@ -111,18 +115,18 @@ export async function bootstrap(config: ServerConfig = {}): Promise<void> {
         fastRefresh: true,
       });
       
-      console.log('   ✓ Hot Reload enabled');
+      log.info('   ✓ Hot Reload enabled');
     }
     
     state.isRunning = true;
     state.startTime = Date.now();
     
-    console.log('\n' + '═'.repeat(60));
-    console.log('  ✅ Aethel Engine Runtime Server is ready!');
-    console.log('═'.repeat(60));
-    console.log(`\n  WebSocket: ws://localhost:${finalConfig.wsPort}`);
-    console.log(`  Health: http://localhost:${finalConfig.wsPort}/health`);
-    console.log('\n  Press Ctrl+C to stop the server.\n');
+    log.info('\n' + '═'.repeat(60));
+    log.info('  ✅ Aethel Engine Runtime Server is ready!');
+    log.info('═'.repeat(60));
+    log.info(`\n  WebSocket: ws://localhost:${finalConfig.wsPort}`);
+    log.info(`  Health: http://localhost:${finalConfig.wsPort}/health`);
+    log.info('\n  Press Ctrl+C to stop the server.\n');
     
   } catch (error) {
     console.error('\n❌ Failed to start server:', error);
@@ -136,32 +140,32 @@ export async function bootstrap(config: ServerConfig = {}): Promise<void> {
 // ============================================================================
 
 export async function shutdown(): Promise<void> {
-  console.log('\n🛑 Shutting down Aethel Engine Runtime Server...');
+  log.info('\n🛑 Shutting down Aethel Engine Runtime Server...');
   
   // Stop hot reload
   if (state.hotReload) {
-    console.log('   Stopping Hot Reload...');
+    log.info('   Stopping Hot Reload...');
     state.hotReload.shutdown();
     state.hotReload = null;
   }
   
   // Stop file watcher
   if (state.fileWatcher) {
-    console.log('   Stopping File Watcher...');
+    log.info('   Stopping File Watcher...');
     await state.fileWatcher.unwatchAll();
     state.fileWatcher = null;
   }
   
   // Stop terminal manager
   if (state.terminalManager) {
-    console.log('   Stopping Terminal Manager...');
+    log.info('   Stopping Terminal Manager...');
     await state.terminalManager.shutdown();
     state.terminalManager = null;
   }
   
   // Stop WebSocket server
   if (state.wsServer) {
-    console.log('   Stopping WebSocket Server...');
+    log.info('   Stopping WebSocket Server...');
     await state.wsServer.stop();
     state.wsServer = null;
   }
@@ -169,7 +173,7 @@ export async function shutdown(): Promise<void> {
   state.isRunning = false;
   state.startTime = null;
   
-  console.log('   ✓ Server stopped.\n');
+  log.info('   ✓ Server stopped.\n');
 }
 
 // ============================================================================

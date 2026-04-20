@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('notifications/notification-manager')
+
+
 /**
  * Notification Manager
  * Manages toast notifications and progress indicators
@@ -108,7 +113,7 @@ export class NotificationManager {
       // Trim old notifications
       this.trimNotifications();
 
-      console.log(`[Notification] ${severity.toUpperCase()}: ${message}`);
+      log.info(`[Notification] ${severity.toUpperCase()}: ${message}`);
     });
   }
 

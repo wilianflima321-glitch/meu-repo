@@ -15,6 +15,10 @@
 
 import * as THREE from 'three';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('world-partition')
+
 // ============================================================================
 // TIPOS E INTERFACES
 // ============================================================================
@@ -748,7 +752,7 @@ export class WorldPartitionManager {
         callback(cell);
       }
       
-      console.log(`[WorldPartition] Loaded cell: ${cellId}`);
+      log.info(`[WorldPartition] Loaded cell: ${cellId}`);
       
     } catch (error) {
       cell.state = 'unloaded';
@@ -870,7 +874,7 @@ export class WorldPartitionManager {
       callback(cellId);
     }
     
-    console.log(`[WorldPartition] Unloaded cell: ${cellId}`);
+    log.info(`[WorldPartition] Unloaded cell: ${cellId}`);
   }
   
   // ============================================================================

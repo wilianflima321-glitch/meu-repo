@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('themes/theme-manager')
+
+
 /**
  * Theme Manager
  * Manages color themes, icon themes, and theme customization
@@ -286,7 +291,7 @@ export class ThemeManager {
       this.currentTheme = theme;
       this.saveCurrentTheme();
       this.applyTheme();
-      console.log(`[Theme Manager] Applied theme: ${theme.name}`);
+      log.info(`[Theme Manager] Applied theme: ${theme.name}`);
     }
   }
 
@@ -298,7 +303,7 @@ export class ThemeManager {
     if (theme) {
       this.currentIconTheme = theme;
       this.saveCurrentIconTheme();
-      console.log(`[Theme Manager] Applied icon theme: ${theme.name}`);
+      log.info(`[Theme Manager] Applied icon theme: ${theme.name}`);
     }
   }
 
@@ -308,7 +313,7 @@ export class ThemeManager {
   createCustomTheme(theme: ColorTheme): void {
     this.customThemes.set(theme.id, theme);
     this.saveCustomThemes();
-    console.log(`[Theme Manager] Created custom theme: ${theme.name}`);
+    log.info(`[Theme Manager] Created custom theme: ${theme.name}`);
   }
 
   /**
@@ -326,7 +331,7 @@ export class ThemeManager {
         this.applyTheme();
       }
       
-      console.log(`[Theme Manager] Updated custom theme: ${themeId}`);
+      log.info(`[Theme Manager] Updated custom theme: ${themeId}`);
     }
   }
 
@@ -341,7 +346,7 @@ export class ThemeManager {
       this.setTheme(BUILTIN_THEMES[0].id);
     }
     
-    console.log(`[Theme Manager] Deleted custom theme: ${themeId}`);
+    log.info(`[Theme Manager] Deleted custom theme: ${themeId}`);
   }
 
   /**
@@ -433,7 +438,7 @@ export class ThemeManager {
         themes.forEach(theme => {
           this.customThemes.set(theme.id, theme);
         });
-        console.log(`[Theme Manager] Loaded ${themes.length} custom themes`);
+        log.info(`[Theme Manager] Loaded ${themes.length} custom themes`);
       }
     } catch (error) {
       console.error('[Theme Manager] Failed to load custom themes:', error);

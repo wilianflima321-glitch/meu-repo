@@ -2,6 +2,10 @@
 import { EventEmitter } from 'events';
 
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('settings/settings-system')
+
 export type GraphicsQuality = 'very_low' | 'low' | 'medium' | 'high' | 'ultra' | 'custom';
 export type Difficulty = 'story' | 'easy' | 'normal' | 'hard' | 'nightmare' | 'custom';
 export type TextSize = 'small' | 'medium' | 'large' | 'extra_large';
@@ -871,7 +875,7 @@ export class SettingsManager extends EventEmitter {
   }
   
   private migrateSettings(settings: unknown, fromVersion: number): void {
-    console.log(`Migrating settings from v${fromVersion} to v${this.config.version}`);
+    log.info(`Migrating settings from v${fromVersion} to v${this.config.version}`);
     
     this.settings = this.mergeWithDefaults(settings as Partial<AllSettings>);
   }

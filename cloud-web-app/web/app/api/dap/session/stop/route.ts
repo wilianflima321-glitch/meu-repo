@@ -4,6 +4,10 @@ import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { stopDapSession } from '@/lib/server/dap-runtime';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/dap/session/stop/route')
+
 interface StopSessionRequest {
   sessionId: string;
 }
@@ -23,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Debug session stop requested: ${sessionId}`);
+    log.info(`Debug session stop requested: ${sessionId}`);
 
     const stopped = stopDapSession(sessionId);
 

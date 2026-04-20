@@ -7,6 +7,10 @@ import { DAPAdapterBase } from './dap-adapter-base';
 import { createNodeJSDAPAdapter } from './adapters/nodejs-dap';
 import { createPythonDAPAdapter } from './adapters/python-dap';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('dap/dap-client')
+
 export interface DAPClientConfig {
   type: string; // nodejs, python, go, etc.
   request: 'launch' | 'attach';
@@ -125,7 +129,7 @@ export class DAPClient {
       });
 
       this.initialized = true;
-      console.log(`DAP client initialized for ${this.config.type}`);
+      log.info(`DAP client initialized for ${this.config.type}`);
 
       // Start event polling
       this.startEventPolling();
@@ -245,7 +249,7 @@ export class DAPClient {
 
       this.initialized = false;
       this.sessionId = null;
-      console.log(`DAP client disconnected for ${this.config.type}`);
+      log.info(`DAP client disconnected for ${this.config.type}`);
     } catch (error) {
       console.error(`Failed to disconnect DAP client for ${this.config.type}:`, error);
     }

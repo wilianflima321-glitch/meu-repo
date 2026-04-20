@@ -15,6 +15,10 @@ import { sandboxManager, SandboxSession } from '@/lib/server/sandbox-manager';
 import { prisma } from '@/lib/db';
 import { checkRateLimit } from '@/lib/rate-limit';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/terminal/sandbox/route')
+
 // Track sandbox creation rate per user
 const sandboxRateStore = new Map<string, { count: number; resetTime: number }>();
 const SANDBOX_RATE_LIMIT = 10; // max per hour
@@ -125,7 +129,7 @@ export async function POST(req: NextRequest) {
     }, tier);
 
     // Log sandbox creation
-    console.log(`[Sandbox API] Created sandbox for user ${user.userId}, workspace ${workspaceId}`);
+    log.info(`[Sandbox API] Created sandbox for user ${user.userId}, workspace ${workspaceId}`);
 
     return NextResponse.json({
       success: true,
@@ -196,7 +200,7 @@ export async function DELETE(req: NextRequest) {
     // Destroy sandbox
     await sandboxManager.destroySandbox(sessionId);
 
-    console.log(`[Sandbox API] Destroyed sandbox ${sessionId} for user ${user.userId}`);
+    log.info(`[Sandbox API] Destroyed sandbox ${sessionId} for user ${user.userId}`);
 
     return NextResponse.json({ success: true });
 

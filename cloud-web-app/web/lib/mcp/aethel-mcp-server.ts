@@ -1,6 +1,10 @@
 
 import { MCPServer, MCPTool, MCPToolResult, MCPResource, MCPPrompt } from './mcp-core';
 import { prisma } from '@/lib/db';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('mcp/aethel-mcp-server')
+
 const USE_REAL_FILESYSTEM = typeof process !== 'undefined' &&
   process.env.USE_REAL_FILESYSTEM === 'true';
 
@@ -234,9 +238,9 @@ if (USE_REAL_FILESYSTEM) {
   createRealFSAdapter().then(adapter => {
     if (adapter) {
       fsAdapter = adapter;
-      console.log('[MCP] Using real filesystem adapter');
+      log.info('[MCP] Using real filesystem adapter');
     } else {
-      console.log('[MCP] Falling back to Prisma adapter');
+      log.info('[MCP] Falling back to Prisma adapter');
     }
   });
 }

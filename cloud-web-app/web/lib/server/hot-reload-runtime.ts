@@ -12,6 +12,10 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as crypto from 'crypto';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/hot-reload-runtime')
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -153,7 +157,7 @@ export class HotReloadManager extends EventEmitter {
       });
     }
     
-    console.log(`[HotReload] Enabled for workspace ${workspaceId}, watching ${existingPaths.length} paths`);
+    log.info(`[HotReload] Enabled for workspace ${workspaceId}, watching ${existingPaths.length} paths`);
     this.emit('enabled', { workspaceId });
   }
   
@@ -163,7 +167,7 @@ export class HotReloadManager extends EventEmitter {
     const fileWatcher = getFileWatcherManager();
     fileWatcher.unwatch(workspaceId);
     
-    console.log(`[HotReload] Disabled for workspace ${workspaceId}`);
+    log.info(`[HotReload] Disabled for workspace ${workspaceId}`);
     this.emit('disabled', { workspaceId });
   }
   
@@ -273,7 +277,7 @@ export class HotReloadManager extends EventEmitter {
       needsFullReload,
     });
     
-    console.log(`[HotReload] Processed ${finalUpdates.length} updates, full reload: ${needsFullReload}`);
+    log.info(`[HotReload] Processed ${finalUpdates.length} updates, full reload: ${needsFullReload}`);
   }
   
   private broadcastUpdates(updates: ModuleUpdate[], needsFullReload: boolean): void {
@@ -298,7 +302,7 @@ export class HotReloadManager extends EventEmitter {
         wsServer.broadcastToChannel(`hmr:${workspaceId}`, message);
       }
     } catch (error) {
-      console.debug('[HotReload] WebSocket broadcast skipped:', error);
+      log.debug('[HotReload] WebSocket broadcast skipped:', error);
     }
   }
   
@@ -307,7 +311,7 @@ export class HotReloadManager extends EventEmitter {
   // ==========================================================================
   
   triggerFullReload(workspaceId?: string): void {
-    console.log('[HotReload] Manual full reload triggered');
+    log.info('[HotReload] Manual full reload triggered');
     
     this.broadcastUpdates([{
       type: 'full-reload',

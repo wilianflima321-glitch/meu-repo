@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/terminal/input/route')
+
 /**
  * POST /api/terminal/input
  * 
@@ -19,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Em produção, isso enviaria dados para o processo PTY via WebSocket
-    console.log(`[terminal/input] Input para sessão ${sessionId}`);
+    log.info(`[terminal/input] Input para sessão ${sessionId}`);
 
     return NextResponse.json({
       success: true,

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('terminal/terminal-manager')
+
+
 /**
  * Terminal Manager
  * Manages persistent terminal sessions with task execution
@@ -348,7 +353,7 @@ export class TerminalManager {
     // Problem matching implementation
     // This would parse terminal output and extract problems based on patterns
     // For now, this is a placeholder
-    console.log(`Started problem matching for execution ${executionId}`);
+    log.info(`Started problem matching for execution ${executionId}`);
   }
 }
 

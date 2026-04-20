@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('extensions/extension-loader')
+
+
 /**
  * Extension Loader
  * Loads and manages VS Code compatible extensions
@@ -309,7 +314,7 @@ export class ExtensionLoader {
       }
 
       extension.isActive = true;
-      console.log(`Extension activated: ${extension.id}`);
+      log.info(`Extension activated: ${extension.id}`);
     } catch (error) {
       console.error(`Failed to activate extension ${extension.id}:`, error);
       throw error;
@@ -341,7 +346,7 @@ export class ExtensionLoader {
 
       extension.isActive = false;
       extension.activationPromise = undefined;
-      console.log(`Extension deactivated: ${extension.id}`);
+      log.info(`Extension deactivated: ${extension.id}`);
     } catch (error) {
       console.error(`Failed to deactivate extension ${extension.id}:`, error);
     }
@@ -497,35 +502,35 @@ export class ExtensionLoader {
   private async registerCommand(extensionId: string, command: CommandContribution): Promise<void> {
     this.commands.set(command.command, { extensionId, command });
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`Registered command: ${command.command} from ${extensionId}`);
+      log.info(`Registered command: ${command.command} from ${extensionId}`);
     }
   }
 
   private async registerLanguage(extensionId: string, language: LanguageContribution): Promise<void> {
     this.languages.set(language.id, { extensionId, language });
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`Registered language: ${language.id} from ${extensionId}`);
+      log.info(`Registered language: ${language.id} from ${extensionId}`);
     }
   }
 
   private async registerTheme(extensionId: string, theme: ThemeContribution): Promise<void> {
     this.themes.set(theme.label, { extensionId, theme });
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`Registered theme: ${theme.label} from ${extensionId}`);
+      log.info(`Registered theme: ${theme.label} from ${extensionId}`);
     }
   }
 
   private async registerKeybinding(extensionId: string, keybinding: KeybindingContribution): Promise<void> {
     this.keybindings.push({ extensionId, keybinding });
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`Registered keybinding: ${keybinding.key} -> ${keybinding.command} from ${extensionId}`);
+      log.info(`Registered keybinding: ${keybinding.key} -> ${keybinding.command} from ${extensionId}`);
     }
   }
 
   private async registerDebugger(extensionId: string, debuggerContribution: DebuggerContribution): Promise<void> {
     this.debuggers.set(debuggerContribution.type, { extensionId, debugger: debuggerContribution });
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`Registered debugger: ${debuggerContribution.type} from ${extensionId}`);
+      log.info(`Registered debugger: ${debuggerContribution.type} from ${extensionId}`);
     }
   }
 

@@ -9,6 +9,10 @@ import { EventEmitter } from 'events';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('engine/asset-pipeline')
+
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
@@ -861,7 +865,7 @@ export class AssetManager extends EventEmitter {
     this.hotReloadEnabled = true;
     
     // In a real implementation, this would use WebSocket or file watchers
-    console.log('[AssetManager] Hot reload enabled');
+    log.info('[AssetManager] Hot reload enabled');
   }
 
   disableHotReload(): void {

@@ -12,6 +12,10 @@ import { VisualScriptRuntime, RuntimeContext, Vector3 } from '../components/visu
 import type { VisualScript } from '../components/visual-scripting/VisualScriptEditor';
 import * as THREE from 'three';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('visual-script-integration')
+
 // ============================================================================
 // VISUAL SCRIPT COMPONENT
 // ============================================================================
@@ -251,7 +255,7 @@ export class VisualScriptSystem implements System {
   }
 
   private contextLog(message: string): void {
-    console.log(`[VisualScriptBridge] ${message}`);
+    log.info(`[VisualScriptBridge] ${message}`);
   }
   
   private createRuntimeContext(entity: Entity, deltaTime: number): RuntimeContext {
@@ -288,14 +292,14 @@ export class VisualScriptSystem implements System {
       audio: {
         playSound: (sound, volume = 1, loop = false) => this.playSound(sound, volume, loop),
         stopSound: (sound) => {
-          console.log('[VisualScript] stopSound:', sound);
+          log.info('[VisualScript] stopSound:', sound);
         },
       },
       
       objects: {
         spawn: (prefab, position) => this.spawnObject(prefab, position),
         destroy: (target, delay = 0) => {
-          console.log('[VisualScript] destroy:', target, 'delay:', delay);
+          log.info('[VisualScript] destroy:', target, 'delay:', delay);
         },
         find: (name) => {
           // Search in scene
@@ -307,7 +311,7 @@ export class VisualScriptSystem implements System {
       },
       
       log: (message) => {
-        console.log('[VisualScript]', message);
+        log.info('[VisualScript]', message);
       },
     };
   }

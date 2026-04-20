@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/terminal/resize/route')
+
 /**
  * POST /api/terminal/resize
  * 
@@ -23,7 +27,7 @@ export async function POST(request: NextRequest) {
     const validRows = Math.max(5, Math.min(200, parseInt(rows)));
 
     // Em produção, isso enviaria SIGWINCH para o processo PTY
-    console.log(`[terminal/resize] Redimensionando sessão ${sessionId} para ${validCols}x${validRows}`);
+    log.info(`[terminal/resize] Redimensionando sessão ${sessionId} para ${validCols}x${validRows}`);
 
     return NextResponse.json({
       success: true,

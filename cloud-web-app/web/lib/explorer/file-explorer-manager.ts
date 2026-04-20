@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('explorer/file-explorer-manager')
+
+
 /**
  * File Explorer Manager
  * Advanced file explorer with drag & drop, multi-select, and context menu
@@ -43,7 +48,7 @@ export class FileExplorerManager {
    */
   async initialize(workspaceRoot: string): Promise<void> {
     this.root = await this.loadDirectory(workspaceRoot);
-    console.log(`[File Explorer] Initialized with root: ${workspaceRoot}`);
+    log.info(`[File Explorer] Initialized with root: ${workspaceRoot}`);
   }
 
   /**
@@ -59,7 +64,7 @@ export class FileExplorerManager {
   async refresh(): Promise<void> {
     if (!this.root) return;
     this.root = await this.loadDirectory(this.root.path);
-    console.log('[File Explorer] Refreshed');
+    log.info('[File Explorer] Refreshed');
   }
 
   /**
@@ -71,7 +76,7 @@ export class FileExplorerManager {
     const node = this.findNode(this.root, path);
     if (node && node.type === 'directory') {
       node.children = await this.loadChildren(path);
-      console.log(`[File Explorer] Refreshed: ${path}`);
+      log.info(`[File Explorer] Refreshed: ${path}`);
     }
   }
 
@@ -87,7 +92,7 @@ export class FileExplorerManager {
         node.children = await this.loadChildren(path);
       }
       node.expanded = true;
-      console.log(`[File Explorer] Expanded: ${path}`);
+      log.info(`[File Explorer] Expanded: ${path}`);
     }
   }
 
@@ -100,7 +105,7 @@ export class FileExplorerManager {
     const node = this.findNode(this.root, path);
     if (node && node.type === 'directory') {
       node.expanded = false;
-      console.log(`[File Explorer] Collapsed: ${path}`);
+      log.info(`[File Explorer] Collapsed: ${path}`);
     }
   }
 
@@ -112,7 +117,7 @@ export class FileExplorerManager {
       this.selectedPaths.clear();
     }
     this.selectedPaths.add(path);
-    console.log(`[File Explorer] Selected: ${path}`);
+    log.info(`[File Explorer] Selected: ${path}`);
   }
 
   /**
@@ -120,7 +125,7 @@ export class FileExplorerManager {
    */
   deselect(path: string): void {
     this.selectedPaths.delete(path);
-    console.log(`[File Explorer] Deselected: ${path}`);
+    log.info(`[File Explorer] Deselected: ${path}`);
   }
 
   /**
@@ -154,7 +159,7 @@ export class FileExplorerManager {
 
     // Select the file
     this.select(path);
-    console.log(`[File Explorer] Revealed: ${path}`);
+    log.info(`[File Explorer] Revealed: ${path}`);
   }
 
   /**
@@ -162,7 +167,7 @@ export class FileExplorerManager {
    */
   copy(paths: string[]): void {
     this.clipboard = { operation: 'copy', paths };
-    console.log(`[File Explorer] Copied ${paths.length} items`);
+    log.info(`[File Explorer] Copied ${paths.length} items`);
   }
 
   /**
@@ -170,7 +175,7 @@ export class FileExplorerManager {
    */
   cut(paths: string[]): void {
     this.clipboard = { operation: 'cut', paths };
-    console.log(`[File Explorer] Cut ${paths.length} items`);
+    log.info(`[File Explorer] Cut ${paths.length} items`);
   }
 
   /**
@@ -207,7 +212,7 @@ export class FileExplorerManager {
       throw new Error('Failed to copy files');
     }
 
-    console.log(`[File Explorer] Copied ${sources.length} files to ${destination}`);
+    log.info(`[File Explorer] Copied ${sources.length} files to ${destination}`);
   }
 
   /**
@@ -230,7 +235,7 @@ export class FileExplorerManager {
       await this.refreshPath(parentPath);
     }
 
-    console.log(`[File Explorer] Moved ${sources.length} files to ${destination}`);
+    log.info(`[File Explorer] Moved ${sources.length} files to ${destination}`);
   }
 
   /**
@@ -253,7 +258,7 @@ export class FileExplorerManager {
       await this.refreshPath(parentPath);
     }
 
-    console.log(`[File Explorer] Deleted ${paths.length} files`);
+    log.info(`[File Explorer] Deleted ${paths.length} files`);
   }
 
   /**
@@ -274,7 +279,7 @@ export class FileExplorerManager {
     }
 
     await this.refreshPath(parentPath);
-    console.log(`[File Explorer] Renamed: ${path} → ${newPath}`);
+    log.info(`[File Explorer] Renamed: ${path} → ${newPath}`);
   }
 
   /**
@@ -294,7 +299,7 @@ export class FileExplorerManager {
     }
 
     await this.refreshPath(parentPath);
-    console.log(`[File Explorer] Created file: ${path}`);
+    log.info(`[File Explorer] Created file: ${path}`);
   }
 
   /**
@@ -314,7 +319,7 @@ export class FileExplorerManager {
     }
 
     await this.refreshPath(parentPath);
-    console.log(`[File Explorer] Created directory: ${path}`);
+    log.info(`[File Explorer] Created directory: ${path}`);
   }
 
   /**

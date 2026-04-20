@@ -33,6 +33,10 @@ export type {
   AIConflictResolutionResponse,
 } from './ai-api';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api')
+
 /**
  * Initialize all API clients
  */
@@ -40,5 +44,5 @@ export function initializeApiClients(): void {
   getLSPApiClient();
   getDAPApiClient();
   getAIApiClient();
-  console.log('[API] All clients initialized');
+  log.info('[API] All clients initialized');
 }

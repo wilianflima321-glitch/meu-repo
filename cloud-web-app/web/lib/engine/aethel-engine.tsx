@@ -79,6 +79,10 @@ import EventDefaults, { EventBus, EventChannel } from '../events/event-bus-syste
 // Visual Scripting
 import VisualScriptDefaults, { VisualScriptRuntime } from '../visual-script/runtime';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('engine/aethel-engine')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -151,7 +155,7 @@ export class AethelEngine extends EventEmitter {
     };
     
     if (this.config.debug) {
-      console.log(`[${this.config.name}] v${this.config.version} initialized`);
+      log.info(`[${this.config.name}] v${this.config.version} initialized`);
     }
   }
   
@@ -184,7 +188,7 @@ export class AethelEngine extends EventEmitter {
     this.loop();
     
     if (this.config.debug) {
-      console.log(`[${this.config.name}] Started`);
+      log.info(`[${this.config.name}] Started`);
     }
   }
   
@@ -201,7 +205,7 @@ export class AethelEngine extends EventEmitter {
     this.emit('stop');
     
     if (this.config.debug) {
-      console.log(`[${this.config.name}] Stopped`);
+      log.info(`[${this.config.name}] Stopped`);
     }
   }
   
@@ -312,7 +316,7 @@ export class AethelEngine extends EventEmitter {
     this.removeAllListeners();
     
     if (this.config.debug) {
-      console.log(`[${this.config.name}] Disposed`);
+      log.info(`[${this.config.name}] Disposed`);
     }
   }
 }

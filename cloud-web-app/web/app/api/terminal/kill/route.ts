@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/terminal/kill/route')
+
 /**
  * POST /api/terminal/kill
  * 
@@ -23,7 +27,7 @@ export async function POST(request: NextRequest) {
     const normalizedSignal = validSignals.includes(signal) ? signal : 'SIGTERM';
 
     // Em produção, isso enviaria o sinal para o processo PTY
-    console.log(`[terminal/kill] Enviando ${normalizedSignal} para sessão ${sessionId}`);
+    log.info(`[terminal/kill] Enviando ${normalizedSignal} para sessão ${sessionId}`);
 
     return NextResponse.json({
       success: true,

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('notifications-system')
+
+
 /**
  * Sistema de Notificações Real-time - Aethel Engine
  * 
@@ -215,7 +220,7 @@ export class NotificationManager {
       this.ws = new WebSocket(wsUrl);
       
       this.ws.onopen = () => {
-        console.log('[Notifications] WebSocket connected');
+        log.info('[Notifications] WebSocket connected');
         this.reconnectAttempts = 0;
       };
       
@@ -229,7 +234,7 @@ export class NotificationManager {
       };
       
       this.ws.onclose = () => {
-        console.log('[Notifications] WebSocket closed');
+        log.info('[Notifications] WebSocket closed');
         this.attemptReconnect();
       };
       

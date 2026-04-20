@@ -5,6 +5,10 @@ import { apiErrorToResponse } from '@/lib/api-errors';
 import { getOrCreateLspSession } from '@/lib/server/lsp-runtime';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/lsp/request/route')
+
 interface LSPRequest {
   language: string;
   method: string;
@@ -38,7 +42,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`LSP Request [${language}]: ${method}`);
+    log.info(`LSP Request [${language}]: ${method}`);
 
     // Deriva workspace a partir do initialize.rootUri/workspaceFolders quando disponível.
     let workspaceRoot = process.env.AETHEL_WORKSPACE_ROOT || process.cwd();

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/dap-api')
+
+
 /**
  * DAP API Client
  * Handles communication with backend DAP adapters
@@ -57,7 +62,7 @@ export class DAPApiClient {
     const sessionId = data.sessionId;
     this.sessions.set(config.name, sessionId);
 
-    console.log(`[DAP API] Started adapter for ${config.name}: ${sessionId}`);
+    log.info(`[DAP API] Started adapter for ${config.name}: ${sessionId}`);
     return sessionId;
   }
 
@@ -79,7 +84,7 @@ export class DAPApiClient {
     }
 
     this.sessions.delete(sessionName);
-    console.log(`[DAP API] Stopped adapter: ${sessionName}`);
+    log.info(`[DAP API] Stopped adapter: ${sessionName}`);
   }
 
   /**

@@ -8,6 +8,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('dap/dap-adapter-base')
+
 export interface DAPAdapterConfig {
   command: string;
   args: string[];
@@ -165,7 +169,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
             if (data.success && data.sessionId) {
               this.sessionId = data.sessionId;
               this.emit('ready');
-              console.log(`[DAP] ${this.config.command} adapter started (real API, session: ${this.sessionId})`);
+              log.info(`[DAP] ${this.config.command} adapter started (real API, session: ${this.sessionId})`);
               return;
             }
           }
@@ -177,7 +181,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
 
       // Fallback to mock mode
       this.emit('ready');
-      console.log(`[DAP] ${this.config.command} adapter started (mock mode - API unavailable)`);
+      log.info(`[DAP] ${this.config.command} adapter started (mock mode - API unavailable)`);
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -210,7 +214,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
       this.initialized = false;
       this.sessionId = null;
       this.emit('stopped');
-      console.log(`[DAP] ${this.config.command} adapter stopped`);
+      log.info(`[DAP] ${this.config.command} adapter stopped`);
     } catch (error) {
       this.emit('error', error);
       throw error;

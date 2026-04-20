@@ -6,6 +6,10 @@ import { createHash } from 'crypto';
 import { readFile, stat } from 'fs/promises';
 import { extname, relative, resolve, normalize } from 'path';
 import { parse as parseUrl } from 'url';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('hot-reload/hot-reload-server')
+
 /** Supported file types for hot reload */
 export type HotReloadFileType = 'css' | 'js' | 'ts' | 'jsx' | 'tsx' | 'json' | 'html' | 'vue' | 'svelte' | 'unknown';
 /** Hot reload update strategies */
@@ -245,12 +249,12 @@ class Logger {
   }
   debug(message: string, ...args: unknown[]): void {
     if (this.shouldLog('debug')) {
-      console.debug(this.formatMessage('debug', message), ...args);
+      log.debug(this.formatMessage('debug', message), ...args);
     }
   }
   info(message: string, ...args: unknown[]): void {
     if (this.shouldLog('info')) {
-      console.info(this.formatMessage('info', message), ...args);
+      log.info(this.formatMessage('info', message), ...args);
     }
   }
   warn(message: string, ...args: unknown[]): void {
@@ -839,14 +843,14 @@ export class HotReloadServer extends EventEmitter {
       try {
         this.socket = new WebSocket(this.wsUrl);
         this.socket.onopen = () => {
-          console.log('[HMR] Connected to Hot Reload Server');
+          log.info('[HMR] Connected to Hot Reload Server');
           this.reconnectAttempts = 0;
         };
         this.socket.onmessage = (event) => {
           this.handleMessage(JSON.parse(event.data));
         };
         this.socket.onclose = () => {
-          console.log('[HMR] Disconnected from Hot Reload Server');
+          log.info('[HMR] Disconnected from Hot Reload Server');
           this.attemptReconnect();
         };
         this.socket.onerror = (error) => {
@@ -861,7 +865,7 @@ export class HotReloadServer extends EventEmitter {
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++;
         const delay = this.reconnectDelay * Math.pow(1.5, this.reconnectAttempts - 1);
-        console.log('[HMR] Reconnecting in ' + Math.round(delay) + 'ms...');
+        log.info('[HMR] Reconnecting in ' + Math.round(delay) + 'ms...');
         setTimeout(() => this.connect(), delay);
       }
     },
@@ -869,7 +873,7 @@ export class HotReloadServer extends EventEmitter {
       switch (message.type) {
         case 'connected':
           this.clientId = message.clientId;
-          console.log('[HMR] Client ID:', message.clientId);
+          log.info('[HMR] Client ID:', message.clientId);
           break;
         case 'ping':
           this.send({ type: 'pong', timestamp: Date.now() });
@@ -878,7 +882,7 @@ export class HotReloadServer extends EventEmitter {
           this.handleUpdate(message);
           break;
         case 'reload':
-          console.log('[HMR] Full reload:', message.reason);
+          log.info('[HMR] Full reload:', message.reason);
           location.reload();
           break;
         case 'error':
@@ -888,15 +892,15 @@ export class HotReloadServer extends EventEmitter {
           this.hideErrorOverlay();
           break;
         case 'build-start':
-          console.log('[HMR] Build started...');
+          log.info('[HMR] Build started...');
           break;
         case 'build-end':
-          console.log('[HMR] Build completed in ' + message.duration + 'ms');
+          log.info('[HMR] Build completed in ' + message.duration + 'ms');
           break;
       }
     },
     handleUpdate: function(message) {
-      console.log('[HMR] Received update:', message.strategy, message.files.map(f => f.path));
+      log.info('[HMR] Received update:', message.strategy, message.files.map(f => f.path));
       switch (message.strategy) {
         case 'css-inject':
           this.injectCSS(message.files);
@@ -919,7 +923,7 @@ export class HotReloadServer extends EventEmitter {
             const newHref = href.split('?')[0] + '?t=' + Date.now();
             link.setAttribute('href', newHref);
             updated = true;
-            console.log('[HMR] CSS updated:', file.path);
+            log.info('[HMR] CSS updated:', file.path);
           }
         });
         if (!updated && file.content) {
@@ -927,7 +931,7 @@ export class HotReloadServer extends EventEmitter {
           style.setAttribute('data-hmr-path', file.path);
           style.textContent = file.content;
           document.head.appendChild(style);
-          console.log('[HMR] CSS injected:', file.path);
+          log.info('[HMR] CSS injected:', file.path);
         }
       });
     },
@@ -937,7 +941,7 @@ export class HotReloadServer extends EventEmitter {
         if (window.__HMR_MODULES__ && window.__HMR_MODULES__[file.path]) {
           try {
             window.__HMR_MODULES__[file.path](file);
-            console.log('[HMR] Module updated:', file.path);
+            log.info('[HMR] Module updated:', file.path);
             this.send({ type: 'hmr-accept', path: file.path });
           } catch (error) {
             console.error('[HMR] Module update failed:', file.path, error);
@@ -949,7 +953,7 @@ export class HotReloadServer extends EventEmitter {
         }
       });
       if (reloadNeeded) {
-        console.log('[HMR] HMR not available, reloading...');
+        log.info('[HMR] HMR not available, reloading...');
         location.reload();
       }
     },

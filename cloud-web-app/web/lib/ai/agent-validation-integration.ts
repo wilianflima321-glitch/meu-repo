@@ -12,6 +12,10 @@ import { AutonomousAgent, AgentStep, ToolCall } from './agent-mode';
 import { aiService } from '@/lib/ai-service';
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ai/agent-validation-integration')
+
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -99,7 +103,7 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
       return { success: true, validation: null, attempts: 0 };
     }
 
-    console.log(`[CodeValidation] Validating ${filePath} after ${operation}...`);
+    log.info(`[CodeValidation] Validating ${filePath} after ${operation}...`);
     this.emit('validation:started', { filePath, operation });
 
     let currentContent = content;
@@ -125,7 +129,7 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
 
       // Check if clean
       if (lastValidation.success) {
-        console.log(`[CodeValidation] ✅ ${filePath} is clean after ${attempts} attempt(s)`);
+        log.info(`[CodeValidation] ✅ ${filePath} is clean after ${attempts} attempt(s)`);
         this.emit('validation:success', { filePath, attempts });
         return { 
           success: true, 
@@ -138,11 +142,11 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
       // Log errors
       const errorCount = lastValidation.errors.length;
       const warningCount = lastValidation.warnings.length;
-      console.log(`[CodeValidation] ❌ ${filePath}: ${errorCount} errors, ${warningCount} warnings`);
+      log.info(`[CodeValidation] ❌ ${filePath}: ${errorCount} errors, ${warningCount} warnings`);
 
       // Try to fix
       if (this.config.autoFix && attempts < this.config.maxFixAttempts) {
-        console.log(`[CodeValidation] Attempting auto-fix (attempt ${attempts + 1}/${this.config.maxFixAttempts})...`);
+        log.info(`[CodeValidation] Attempting auto-fix (attempt ${attempts + 1}/${this.config.maxFixAttempts})...`);
         
         const fixedContent = await this.attemptFix(
           currentContent,
@@ -156,7 +160,7 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
           this.emit('validation:fixed', { filePath, attempt: attempts });
         } else {
           // No fix possible, break
-          console.log(`[CodeValidation] No automatic fix available`);
+          log.info(`[CodeValidation] No automatic fix available`);
           break;
         }
       } else {
@@ -165,7 +169,7 @@ export class AgentCodeValidationMiddleware extends EventEmitter {
     }
 
     // Failed to fix
-    console.log(`[CodeValidation] ❌ Failed to fix ${filePath} after ${attempts} attempts`);
+    log.info(`[CodeValidation] ❌ Failed to fix ${filePath} after ${attempts} attempts`);
     this.emit('validation:failed', { 
       filePath, 
       attempts, 

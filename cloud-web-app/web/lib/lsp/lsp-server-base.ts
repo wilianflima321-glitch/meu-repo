@@ -5,6 +5,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('lsp/lsp-server-base')
+
 export interface LSPServerConfig {
   command: string;
   args: string[];
@@ -195,7 +199,7 @@ export abstract class LSPServerBase extends EventEmitter {
       this.process = null;
       this.initialized = false;
       this.emit('stopped');
-      console.log(`[LSP] ${this.config.command} server stopped`);
+      log.info(`[LSP] ${this.config.command} server stopped`);
     } catch (error) {
       this.emit('error', error);
       throw error;

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('cache-system')
+
+
 /**
  * Sistema de Cache e Performance - Aethel Engine
  * 
@@ -554,7 +559,7 @@ export class RequestCache {
    */
   private revalidateAll(): void {
     // Implementação simplificada
-    console.log('[Cache] Revalidating all active entries');
+    log.info('[Cache] Revalidating all active entries');
   }
   
   /**

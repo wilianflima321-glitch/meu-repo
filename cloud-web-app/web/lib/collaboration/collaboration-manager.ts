@@ -18,6 +18,10 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import * as monaco from 'monaco-editor';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('collaboration/collaboration-manager')
+
 // Dynamic import for y-monaco (optional dependency)
 let MonacoBinding: typeof import('y-monaco').MonacoBinding | null = null;
 
@@ -25,9 +29,9 @@ let MonacoBinding: typeof import('y-monaco').MonacoBinding | null = null;
 try {
   const yMonaco = require('y-monaco') as { MonacoBinding: typeof import('y-monaco').MonacoBinding };
   MonacoBinding = yMonaco.MonacoBinding;
-  console.log('[Collaboration] y-monaco loaded successfully');
+  log.info('[Collaboration] y-monaco loaded successfully');
 } catch {
-  console.log('[Collaboration] y-monaco not available, using fallback sync');
+  log.info('[Collaboration] y-monaco not available, using fallback sync');
 }
 
 // Types
@@ -316,7 +320,7 @@ export class CollaborationManager extends EventEmitter {
         destroy: () => binding.destroy()
       });
 
-      console.log(`[Collaboration] Monaco binding created for ${uri} (y-monaco)`);
+      log.info(`[Collaboration] Monaco binding created for ${uri} (y-monaco)`);
     } else {
       // Fallback: Manual sync without y-monaco
       const disposables: monaco.IDisposable[] = [];
@@ -366,7 +370,7 @@ export class CollaborationManager extends EventEmitter {
         }
       });
 
-      console.log(`[Collaboration] Monaco binding created for ${uri} (fallback sync)`);
+      log.info(`[Collaboration] Monaco binding created for ${uri} (fallback sync)`);
     }
 
     // Track cursor/selection changes

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('blueprint-system')
+
+
 /**
  * Blueprint System - Sistema de Blueprints
  * 
@@ -775,7 +780,7 @@ export class BlueprintRuntime {
     
     switch (node.type) {
       case 'PrintString':
-        console.log('[Blueprint]', inputValues?.string);
+        log.info('[Blueprint]', inputValues?.string);
         break;
       case 'Add':
         outputs.result = (inputValues?.a as number || 0) + (inputValues?.b as number || 0);

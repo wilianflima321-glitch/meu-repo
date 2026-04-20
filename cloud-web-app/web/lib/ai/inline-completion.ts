@@ -13,6 +13,10 @@
 
 import * as monaco from 'monaco-editor';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ai/inline-completion')
+
 // AI completion types
 interface AICompletionRequest {
   prompt: string;
@@ -483,7 +487,7 @@ export function registerInlineCompletionProvider(
   // Register command for tracking accepted completions
   monaco.editor.registerCommand('aethel.inlineCompletion.accepted', () => {
     // Track completion acceptance for analytics
-    console.log('[Inline Completion] Completion accepted');
+    log.info('[Inline Completion] Completion accepted');
   });
 
   return providerDisposable;

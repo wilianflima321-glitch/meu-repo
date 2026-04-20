@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('extensions/vscode-api/window')
+
+
 /**
  * VS Code Window API Implementation
  * Provides window-related functionality (messages, input, quick pick, etc.)
@@ -131,7 +136,7 @@ class WindowAPI {
   ): Promise<T | T[] | undefined> {
     const resolvedItems = await Promise.resolve(items);
     
-    console.log('[Window] Show quick pick:', {
+    log.info('[Window] Show quick pick:', {
       itemCount: resolvedItems.length,
       options,
     });
@@ -151,7 +156,7 @@ class WindowAPI {
    * Show input box
    */
   async showInputBox(options?: InputBoxOptions): Promise<string | undefined> {
-    console.log('[Window] Show input box:', options);
+    log.info('[Window] Show input box:', options);
 
     // Mock implementation - return default value or empty string
     return options?.value || '';
@@ -161,7 +166,7 @@ class WindowAPI {
    * Show open dialog
    */
   async showOpenDialog(options?: OpenDialogOptions): Promise<string[] | undefined> {
-    console.log('[Window] Show open dialog:', options);
+    log.info('[Window] Show open dialog:', options);
 
     // Mock implementation
     return undefined;
@@ -171,7 +176,7 @@ class WindowAPI {
    * Show save dialog
    */
   async showSaveDialog(options?: SaveDialogOptions): Promise<string | undefined> {
-    console.log('[Window] Show save dialog:', options);
+    log.info('[Window] Show save dialog:', options);
 
     // Mock implementation
     return undefined;
@@ -181,7 +186,7 @@ class WindowAPI {
    * Show text document
    */
   async showTextDocument(uri: string, options?: any): Promise<any> {
-    console.log('[Window] Show text document:', uri, options);
+    log.info('[Window] Show text document:', uri, options);
 
     // Mock implementation
     return {
@@ -194,16 +199,16 @@ class WindowAPI {
    * Create output channel
    */
   createOutputChannel(name: string): any {
-    console.log('[Window] Create output channel:', name);
+    log.info('[Window] Create output channel:', name);
 
     return {
       name,
-      append: (value: string) => console.log(`[Output:${name}]`, value),
-      appendLine: (value: string) => console.log(`[Output:${name}]`, value),
-      clear: () => console.log(`[Output:${name}] Cleared`),
-      show: (preserveFocus?: boolean) => console.log(`[Output:${name}] Shown`),
-      hide: () => console.log(`[Output:${name}] Hidden`),
-      dispose: () => console.log(`[Output:${name}] Disposed`),
+      append: (value: string) => log.info(`[Output:${name}]`, value),
+      appendLine: (value: string) => log.info(`[Output:${name}]`, value),
+      clear: () => log.info(`[Output:${name}] Cleared`),
+      show: (preserveFocus?: boolean) => log.info(`[Output:${name}] Shown`),
+      hide: () => log.info(`[Output:${name}] Hidden`),
+      dispose: () => log.info(`[Output:${name}] Disposed`),
     };
   }
 
@@ -215,25 +220,25 @@ class WindowAPI {
       name: name || `Terminal ${this._terminals.length + 1}`,
       processId: Promise.resolve(Math.floor(Math.random() * 10000)),
       sendText: (text: string, addNewLine?: boolean) => {
-        console.log(`[Terminal:${terminal.name}] Send text:`, text);
+        log.info(`[Terminal:${terminal.name}] Send text:`, text);
       },
       show: (preserveFocus?: boolean) => {
-        console.log(`[Terminal:${terminal.name}] Shown`);
+        log.info(`[Terminal:${terminal.name}] Shown`);
       },
       hide: () => {
-        console.log(`[Terminal:${terminal.name}] Hidden`);
+        log.info(`[Terminal:${terminal.name}] Hidden`);
       },
       dispose: () => {
         const index = this._terminals.indexOf(terminal);
         if (index > -1) {
           this._terminals.splice(index, 1);
         }
-        console.log(`[Terminal:${terminal.name}] Disposed`);
+        log.info(`[Terminal:${terminal.name}] Disposed`);
       },
     };
 
     this._terminals.push(terminal);
-    console.log('[Window] Created terminal:', terminal.name);
+    log.info('[Window] Created terminal:', terminal.name);
 
     return terminal;
   }
@@ -244,21 +249,21 @@ class WindowAPI {
   setStatusBarMessage(text: string, hideAfterTimeout?: number): { dispose: () => void };
   setStatusBarMessage(text: string, hideWhenDone: Promise<any>): { dispose: () => void };
   setStatusBarMessage(text: string, arg?: any): { dispose: () => void } {
-    console.log('[Window] Status bar message:', text);
+    log.info('[Window] Status bar message:', text);
 
     if (typeof arg === 'number') {
       setTimeout(() => {
-        console.log('[Window] Status bar message cleared after timeout');
+        log.info('[Window] Status bar message cleared after timeout');
       }, arg);
     } else if (arg instanceof Promise) {
       arg.then(() => {
-        console.log('[Window] Status bar message cleared after promise');
+        log.info('[Window] Status bar message cleared after promise');
       });
     }
 
     return {
       dispose: () => {
-        console.log('[Window] Status bar message disposed');
+        log.info('[Window] Status bar message disposed');
       },
     };
   }
@@ -274,9 +279,9 @@ class WindowAPI {
       command: undefined,
       alignment,
       priority,
-      show: () => console.log('[Window] Status bar item shown'),
-      hide: () => console.log('[Window] Status bar item hidden'),
-      dispose: () => console.log('[Window] Status bar item disposed'),
+      show: () => log.info('[Window] Status bar item shown'),
+      hide: () => log.info('[Window] Status bar item hidden'),
+      dispose: () => log.info('[Window] Status bar item disposed'),
     };
   }
 
@@ -291,11 +296,11 @@ class WindowAPI {
     },
     task: (progress: any, token: any) => Promise<R>
   ): Promise<R> {
-    console.log('[Window] With progress:', options);
+    log.info('[Window] With progress:', options);
 
     const progress = {
       report: (value: { message?: string; increment?: number }) => {
-        console.log('[Window] Progress report:', value);
+        log.info('[Window] Progress report:', value);
       },
     };
 
@@ -353,7 +358,7 @@ class WindowAPI {
     const options = args.find(arg => typeof arg === 'object' && 'modal' in arg);
     const items = args.filter(arg => typeof arg === 'string' || (typeof arg === 'object' && 'title' in arg));
 
-    console.log(`[Window] Show ${type} message:`, message, { options, items });
+    log.info(`[Window] Show ${type} message:`, message, { options, items });
 
     // Notify listeners
     this.messageListeners.forEach(listener => {

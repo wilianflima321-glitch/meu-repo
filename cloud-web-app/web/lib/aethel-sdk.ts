@@ -13,6 +13,10 @@
 
 import { openSdkModalDialog, openSdkModalPrompt } from '@/lib/ui/sdk-modal-dialogs';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('aethel-sdk')
+
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
@@ -181,7 +185,7 @@ const theiaAdapter = {
                     });
                 });
             }
-            console.info(`[INFO] ${message}`);
+            log.info(`[INFO] ${message}`);
             return undefined;
         },
         
@@ -878,7 +882,7 @@ class AethelSDK {
                 : 'http://localhost:4000'
         );
         
-        console.log(`🚀 Aethel SDK initialized (Platform: ${this.platform})`);
+        log.info(`🚀 Aethel SDK initialized (Platform: ${this.platform})`);
     }
     
     /**

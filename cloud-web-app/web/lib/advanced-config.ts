@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('advanced-config')
+
+
 /**
  * Advanced Configuration System - Enterprise Grade
  * 
@@ -328,7 +333,7 @@ export class AuditManager {
     }
 
     this.logs.push(log)
-    console.log('[Audit]', log)
+    log.info('[Audit]', log)
 
     // Enviar para servidor em produção
     if (typeof window !== 'undefined') {

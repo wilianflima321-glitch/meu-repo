@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('editor/folding-provider')
+
+
 /**
  * Folding Provider
  * Provides code folding ranges for different languages
@@ -73,7 +78,7 @@ export class FoldingProvider {
       states.push({ range, collapsed: true });
     }
 
-    console.log(`[Folding] Folded lines ${range.start}-${range.end} in ${uri}`);
+    log.info(`[Folding] Folded lines ${range.start}-${range.end} in ${uri}`);
   }
 
   /**
@@ -88,7 +93,7 @@ export class FoldingProvider {
       existing.collapsed = false;
     }
 
-    console.log(`[Folding] Unfolded lines ${range.start}-${range.end} in ${uri}`);
+    log.info(`[Folding] Unfolded lines ${range.start}-${range.end} in ${uri}`);
   }
 
   /**
@@ -102,7 +107,7 @@ export class FoldingProvider {
     const state = states.find(s => s.range.start === line);
     if (state) {
       state.collapsed = !state.collapsed;
-      console.log(`[Folding] Toggled fold at line ${line}`);
+      log.info(`[Folding] Toggled fold at line ${line}`);
     }
   }
 
@@ -116,7 +121,7 @@ export class FoldingProvider {
     }));
 
     this.foldingStates.set(uri, states);
-    console.log(`[Folding] Folded all ${ranges.length} ranges in ${uri}`);
+    log.info(`[Folding] Folded all ${ranges.length} ranges in ${uri}`);
   }
 
   /**
@@ -128,7 +133,7 @@ export class FoldingProvider {
       states.forEach(state => state.collapsed = false);
     }
 
-    console.log(`[Folding] Unfolded all in ${uri}`);
+    log.info(`[Folding] Unfolded all in ${uri}`);
   }
 
   /**

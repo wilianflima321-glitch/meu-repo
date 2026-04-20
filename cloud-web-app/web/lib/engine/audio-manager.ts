@@ -7,6 +7,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('engine/audio-manager')
+
 // ============================================================================
 // Types & Interfaces
 // ============================================================================
@@ -654,7 +658,7 @@ export class AudioManager extends EventEmitter {
       this.isInitialized = true;
       this.emit('initialized');
       
-      console.log('[Audio] System initialized');
+      log.info('[Audio] System initialized');
     } catch (error) {
       console.error('[Audio] Failed to initialize:', error);
       throw error;

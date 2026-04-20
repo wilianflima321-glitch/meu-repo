@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('rate-limiting')
+
+
 /**
  * Sistema de Rate Limiting Avançado - Aethel Engine
  * 
@@ -912,7 +917,7 @@ export class DDoSProtection {
     
     if (count >= this.threshold) {
       this.blacklist.add(ip);
-      console.log(`[DDoS] IP blocked: ${ip}`);
+      log.info(`[DDoS] IP blocked: ${ip}`);
     }
   }
   

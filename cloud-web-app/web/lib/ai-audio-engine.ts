@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ai-audio-engine')
+
+
 export interface EmotionalContext {
   joy: number;
   sadness: number;
@@ -173,7 +178,7 @@ export class AIEmotionalAudioSystem {
     this.musicAnalyzer = this.audioContext.createAnalyser();
     this.musicAnalyzer.fftSize = 2048;
     this.musicAnalyzer.connect(this.masterGain);
-    console.log('[AIEmotionalAudio] Initialized');
+    log.info('[AIEmotionalAudio] Initialized');
   }
   dispose(): void {
     this.stopAllAudio();
@@ -191,7 +196,7 @@ export class AIEmotionalAudioSystem {
     this.updateMusicForContext(context, previousContext);
     this.updateAmbientForContext(context);
     this.contextTracker.track(context);
-    console.log('[AIEmotionalAudio] Context updated:', context.type, context.emotion);
+    log.info('[AIEmotionalAudio] Context updated:', context.type, context.emotion);
   }
   analyzeScript(script: string): EmotionalContext {
     return this.emotionAnalyzer.analyzeText(script);
@@ -705,7 +710,7 @@ export class AIEmotionalAudioSystem {
     this.playSFX(buffer, sfxParams);
   }
   async generateVoice(text: string, profile: VoiceProfile, emotion?: EmotionalContext): Promise<AudioBuffer> {
-    console.log(`[AIEmotionalAudio] Generating voice: "${text}" with emotion:`, emotion);
+    log.info(`[AIEmotionalAudio] Generating voice: "${text}" with emotion:`, emotion);
     const wordsPerSecond = profile.speed * 2.5;
     const wordCount = text.split(/\s+/).length;
     const duration = wordCount / wordsPerSecond;

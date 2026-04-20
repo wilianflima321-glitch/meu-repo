@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('search/search-manager')
+
+
 /**
  * Search Manager
  * Orchestrates search and replace operations across workspace
@@ -71,7 +76,7 @@ export class SearchManager {
       return results;
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        console.log('[Search Manager] Search cancelled');
+        log.info('[Search Manager] Search cancelled');
         return [];
       }
       throw error;
@@ -110,7 +115,7 @@ export class SearchManager {
     // Write back
     await this.writeFile(file, lines.join('\n'));
 
-    console.log(`[Search Manager] Replaced in ${file}:${line}`);
+    log.info(`[Search Manager] Replaced in ${file}:${line}`);
   }
 
   /**
@@ -160,7 +165,7 @@ export class SearchManager {
       await this.writeFile(file, lines.join('\n'));
     }
 
-    console.log(`[Search Manager] Replaced ${totalReplaced} occurrences in ${byFile.size} files`);
+    log.info(`[Search Manager] Replaced ${totalReplaced} occurrences in ${byFile.size} files`);
     return totalReplaced;
   }
 

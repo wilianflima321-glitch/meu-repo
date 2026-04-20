@@ -16,6 +16,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('events/event-bus-system')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -139,7 +143,7 @@ export class EventBus extends EventEmitter {
     }
     
     if (this.config.enableLogging) {
-      console.log(`[EventBus] Subscribed: ${eventType} (id: ${id})`);
+      log.info(`[EventBus] Subscribed: ${eventType} (id: ${id})`);
     }
     
     return id;
@@ -160,7 +164,7 @@ export class EventBus extends EventEmitter {
       if (index !== -1) {
         subs.splice(index, 1);
         if (this.config.enableLogging) {
-          console.log(`[EventBus] Unsubscribed: ${eventType} (id: ${subscriptionId})`);
+          log.info(`[EventBus] Unsubscribed: ${eventType} (id: ${subscriptionId})`);
         }
         return true;
       }
@@ -207,7 +211,7 @@ export class EventBus extends EventEmitter {
     };
     
     if (this.config.enableLogging) {
-      console.log(`[EventBus] Dispatch: ${eventType}`, payload);
+      log.info(`[EventBus] Dispatch: ${eventType}`, payload);
     }
     
     // Add to history

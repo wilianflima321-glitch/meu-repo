@@ -18,6 +18,10 @@ import { generateDownloadUrl, isS3Available, putObject, S3_BUCKET } from '../../
 import { existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('workers/build-queue-worker')
+
 const SOURCE_QUEUE = 'build-queue';
 const PROCESSING_QUEUE = 'build-queue:processing';
 const DELAYED_QUEUE = 'build-queue:delayed';
@@ -118,7 +122,7 @@ function addWebTemplate(zip: AdmZip, projectName: string) {
     </div>
   </body>
 </html>`;
-  const js = `console.log('Aethel Web Runtime');`;
+  const js = `log.info('Aethel Web Runtime');`;
   zip.addFile('index.html', Buffer.from(html, 'utf8'));
   zip.addFile('app.js', Buffer.from(js, 'utf8'));
 }
@@ -868,16 +872,16 @@ async function processExportJob(redis: any, msg: BuildQueueMessage) {
 async function run() {
   const redis = await createRedisClient();
 
-  redis.on('connect', () => console.log('[build-queue-worker] Redis connected'));
+  redis.on('connect', () => log.info('[build-queue-worker] Redis connected'));
   redis.on('error', (err: any) => console.error('[build-queue-worker] Redis error:', err?.message || err));
 
-  console.log('[build-queue-worker] Started. Waiting for jobs on build-queue...');
+  log.info('[build-queue-worker] Started. Waiting for jobs on build-queue...');
 
   let shouldStop = false;
   const requestStop = (signal: string) => {
     if (shouldStop) return;
     shouldStop = true;
-    console.log(`[build-queue-worker] Received ${signal}. Draining and shutting down...`);
+    log.info(`[build-queue-worker] Received ${signal}. Draining and shutting down...`);
   };
 
   process.once('SIGTERM', () => requestStop('SIGTERM'));
@@ -945,7 +949,7 @@ async function run() {
     }
 
     if (msg.type !== 'export') {
-      console.log('[build-queue-worker] Unsupported job type:', msg.type);
+      log.info('[build-queue-worker] Unsupported job type:', msg.type);
       // ack
       try {
         await redis.lrem(PROCESSING_QUEUE, 1, value);
@@ -955,7 +959,7 @@ async function run() {
       continue;
     }
 
-    console.log('[build-queue-worker] Received export job', msg.exportId);
+    log.info('[build-queue-worker] Received export job', msg.exportId);
 
     try {
       await markProcessing(redis, msg);
@@ -995,7 +999,7 @@ async function run() {
   } catch {
     // ignore
   }
-  console.log('[build-queue-worker] Stopped');
+  log.info('[build-queue-worker] Stopped');
 }
 
 run().catch((err) => {

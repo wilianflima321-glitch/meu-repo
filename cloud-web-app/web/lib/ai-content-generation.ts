@@ -15,6 +15,10 @@
 import * as THREE from 'three';
 import { SimplexNoise } from './terrain-engine';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ai-content-generation')
+
 // ============================================================================
 // AI GENERATION CONFIG
 // ============================================================================
@@ -616,7 +620,7 @@ export class AITextureGenerator {
     const prompt = params.prompt || `${params.material} ${params.type} texture, ${params.style} style, seamless, PBR`;
     
     // Placeholder - would actually call API
-    console.log('AI Texture Generation:', prompt);
+    log.info('AI Texture Generation:', prompt);
     
     // Fall back to procedural for now
     return this.generateProcedural(params);

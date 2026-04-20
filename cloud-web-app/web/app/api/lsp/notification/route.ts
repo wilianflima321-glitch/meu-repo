@@ -4,6 +4,10 @@ import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { getOrCreateLspSession } from '@/lib/server/lsp-runtime';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/lsp/notification/route')
+
 interface LSPNotification {
   language: string;
   method: string;
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`LSP Notification [${language}]: ${method}`);
+    log.info(`LSP Notification [${language}]: ${method}`);
 
     const workspaceRoot = process.env.AETHEL_WORKSPACE_ROOT || process.cwd();
     const session = await getOrCreateLspSession({

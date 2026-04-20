@@ -15,6 +15,10 @@ import { getTerminalManager } from '../terminal/terminal-manager';
 import { getSettingsManager } from '../settings/settings-manager';
 import { getKeybindingManager } from '../keybindings/keybinding-manager';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('integration/ide-integration')
+
 export interface IDEConfig {
   workspaceRoot: string;
   userId: string;
@@ -55,7 +59,7 @@ export class IDEIntegration {
       return;
     }
 
-    console.log('[IDE Integration] Initializing...');
+    log.info('[IDE Integration] Initializing...');
 
     try {
       // Initialize in order of dependencies
@@ -72,7 +76,7 @@ export class IDEIntegration {
       await this.initializeExtensions();
 
       this.initialized = true;
-      console.log('[IDE Integration] Initialization complete');
+      log.info('[IDE Integration] Initialization complete');
     } catch (error) {
       console.error('[IDE Integration] Initialization failed:', error);
       throw error;
@@ -83,29 +87,29 @@ export class IDEIntegration {
    * Initialize settings
    */
   private async initializeSettings(): Promise<void> {
-    console.log('[IDE Integration] Initializing settings...');
+    log.info('[IDE Integration] Initializing settings...');
     
     // Settings are loaded automatically on construction
     const settings = this.settingsManager.getAllSettings();
-    console.log(`[IDE Integration] Loaded ${Object.keys(settings).length} settings`);
+    log.info(`[IDE Integration] Loaded ${Object.keys(settings).length} settings`);
   }
 
   /**
    * Initialize theme
    */
   private async initializeTheme(): Promise<void> {
-    console.log('[IDE Integration] Initializing theme...');
+    log.info('[IDE Integration] Initializing theme...');
     
     // Theme is applied automatically on construction
     const currentTheme = this.themeManager.getCurrentTheme();
-    console.log(`[IDE Integration] Applied theme: ${currentTheme.name}`);
+    log.info(`[IDE Integration] Applied theme: ${currentTheme.name}`);
   }
 
   /**
    * Initialize keybindings
    */
   private async initializeKeybindings(): Promise<void> {
-    console.log('[IDE Integration] Initializing keybindings...');
+    log.info('[IDE Integration] Initializing keybindings...');
     
     // Register global keybindings
     this.keybindingManager.registerKeybinding({
@@ -121,19 +125,19 @@ export class IDEIntegration {
       command: 'workbench.action.files.saveAll',
     });
 
-    console.log('[IDE Integration] Registered global keybindings');
+    log.info('[IDE Integration] Registered global keybindings');
   }
 
   /**
    * Initialize terminal
    */
   private async initializeTerminal(): Promise<void> {
-    console.log('[IDE Integration] Initializing terminal...');
+    log.info('[IDE Integration] Initializing terminal...');
 
     try {
       // Create default terminal (backend pode não estar disponível em testes)
       const sessionId = await this.terminalManager.createSession('bash', this.config.workspaceRoot, '/bin/bash');
-      console.log(`[IDE Integration] Created default terminal: ${sessionId}`);
+      log.info(`[IDE Integration] Created default terminal: ${sessionId}`);
     } catch (error) {
       console.warn('[IDE Integration] Terminal not available:', error);
     }
@@ -143,11 +147,11 @@ export class IDEIntegration {
    * Initialize Git
    */
   private async initializeGit(): Promise<void> {
-    console.log('[IDE Integration] Initializing Git...');
+    log.info('[IDE Integration] Initializing Git...');
     
     try {
       const status = await this.gitManager.getStatus();
-      console.log(`[IDE Integration] Git status: ${status.files.length} changes`);
+      log.info(`[IDE Integration] Git status: ${status.files.length} changes`);
     } catch (error) {
       console.warn('[IDE Integration] Git not available:', error);
     }
@@ -157,7 +161,7 @@ export class IDEIntegration {
    * Initialize LSP
    */
   private async initializeLSP(): Promise<void> {
-    console.log('[IDE Integration] Initializing LSP...');
+    log.info('[IDE Integration] Initializing LSP...');
     
     // Start LSP servers for common languages
     const languages = ['typescript', 'python', 'go'];
@@ -174,7 +178,7 @@ export class IDEIntegration {
           },
         });
         await this.lspClient.initialized(language);
-        console.log(`[IDE Integration] Started LSP for ${language}`);
+        log.info(`[IDE Integration] Started LSP for ${language}`);
       } catch (error) {
         console.warn(`[IDE Integration] Failed to start LSP for ${language}:`, error);
       }
@@ -185,29 +189,29 @@ export class IDEIntegration {
    * Initialize DAP
    */
   private async initializeDAP(): Promise<void> {
-    console.log('[IDE Integration] Initializing DAP...');
+    log.info('[IDE Integration] Initializing DAP...');
     
     // DAP adapters are started on-demand when debugging
-    console.log('[IDE Integration] DAP ready for debugging sessions');
+    log.info('[IDE Integration] DAP ready for debugging sessions');
   }
 
   /**
    * Initialize AI
    */
   private async initializeAI(): Promise<void> {
-    console.log('[IDE Integration] Initializing AI...');
+    log.info('[IDE Integration] Initializing AI...');
     
     if (this.config.enableAI) {
       this.aiClient.setConsent(true);
       
       try {
         const modelInfo = await this.aiClient.getModelInfo();
-        console.log(`[IDE Integration] AI model: ${modelInfo.name}`);
+        log.info(`[IDE Integration] AI model: ${modelInfo.name}`);
       } catch (error) {
         console.warn('[IDE Integration] AI not available:', error);
       }
     } else {
-      console.log('[IDE Integration] AI disabled by config');
+      log.info('[IDE Integration] AI disabled by config');
     }
   }
 
@@ -215,13 +219,13 @@ export class IDEIntegration {
    * Initialize tasks
    */
   private async initializeTasks(): Promise<void> {
-    console.log('[IDE Integration] Initializing tasks...');
+    log.info('[IDE Integration] Initializing tasks...');
 
     try {
       // Detect tasks in workspace
       await this.taskManager.detectTasks(this.config.workspaceRoot);
       const tasks = this.taskManager.getTasks();
-      console.log(`[IDE Integration] Detected ${tasks.length} tasks`);
+      log.info(`[IDE Integration] Detected ${tasks.length} tasks`);
     } catch (error) {
       console.warn('[IDE Integration] Tasks not available:', error);
     }
@@ -231,23 +235,23 @@ export class IDEIntegration {
    * Initialize tests
    */
   private async initializeTests(): Promise<void> {
-    console.log('[IDE Integration] Initializing tests...');
+    log.info('[IDE Integration] Initializing tests...');
     
     // Test discovery happens on-demand
-    console.log('[IDE Integration] Test framework ready');
+    log.info('[IDE Integration] Test framework ready');
   }
 
   /**
    * Initialize extensions
    */
   private async initializeExtensions(): Promise<void> {
-    console.log('[IDE Integration] Initializing extensions...');
+    log.info('[IDE Integration] Initializing extensions...');
 
     try {
       // Load and activate extensions
       await this.extensionHost.loadExtensions();
       const extensions = this.extensionHost.getExtensions();
-      console.log(`[IDE Integration] Loaded ${extensions.length} extensions`);
+      log.info(`[IDE Integration] Loaded ${extensions.length} extensions`);
     } catch (error) {
       console.warn('[IDE Integration] Extensions not available:', error);
     }
@@ -282,7 +286,7 @@ export class IDEIntegration {
    * Shutdown IDE
    */
   async shutdown(): Promise<void> {
-    console.log('[IDE Integration] Shutting down...');
+    log.info('[IDE Integration] Shutting down...');
 
     try {
       // Stop LSP servers
@@ -302,7 +306,7 @@ export class IDEIntegration {
       await this.extensionHost.deactivateAll();
 
       this.initialized = false;
-      console.log('[IDE Integration] Shutdown complete');
+      log.info('[IDE Integration] Shutdown complete');
     } catch (error) {
       console.error('[IDE Integration] Shutdown failed:', error);
       throw error;
@@ -328,7 +332,7 @@ export class IDEIntegration {
    */
   updateConfig(updates: Partial<IDEConfig>): void {
     this.config = { ...this.config, ...updates };
-    console.log('[IDE Integration] Config updated');
+    log.info('[IDE Integration] Config updated');
   }
 }
 

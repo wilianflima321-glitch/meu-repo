@@ -20,6 +20,10 @@
 
 import { Howl, Howler } from 'howler';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('audio-engine')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -98,7 +102,7 @@ class AethelAudioEngine {
         this.initializeChannels();
         this.initializeWebAudio();
         
-        console.log('🎵 Aethel Audio Engine initialized');
+        log.info('🎵 Aethel Audio Engine initialized');
     }
     
     private initializeChannels(): void {

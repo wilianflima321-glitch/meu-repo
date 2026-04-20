@@ -9,6 +9,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/ai/suggestions/feedback/route')
+
 export const dynamic = 'force-dynamic';
 
 interface FeedbackPayload {
@@ -39,7 +43,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Log para analytics
-    console.log(`[AI Suggestion Feedback] User ${user.userId}:`, {
+    log.info(`[AI Suggestion Feedback] User ${user.userId}:`, {
       suggestionId: body.suggestionId,
       action: body.action,
       helpful: body.helpful,

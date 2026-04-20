@@ -18,6 +18,10 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { Awareness } from 'y-protocols/awareness';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('yjs-collaboration')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -120,7 +124,7 @@ export class CollaborationSession {
         // Initialize shared types
         this.initializeSharedTypes();
         
-        console.log(`🔗 CollaborationSession created for document: ${config.documentName}`);
+        log.info(`🔗 CollaborationSession created for document: ${config.documentName}`);
     }
     
     private initializeSharedTypes(): void {
@@ -222,7 +226,7 @@ export class CollaborationSession {
         this.provider?.destroy();
         this.doc.destroy();
         this.listeners.clear();
-        console.log(`🔗 CollaborationSession destroyed: ${this.config.documentName}`);
+        log.info(`🔗 CollaborationSession destroyed: ${this.config.documentName}`);
     }
     
     // ========================================================================

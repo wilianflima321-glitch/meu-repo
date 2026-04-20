@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('workspace/workspace-manager')
+
+
 /**
  * Workspace Manager
  * Manages multi-root workspaces, trust, and recommendations
@@ -43,7 +48,7 @@ export class WorkspaceManager {
     // Check trust status
     this.loadTrustStatus(workspaceUri);
 
-    console.log(`[Workspace] Initialized: ${workspaceUri}`);
+    log.info(`[Workspace] Initialized: ${workspaceUri}`);
   }
 
   /**
@@ -66,7 +71,7 @@ export class WorkspaceManager {
     await this.saveConfiguration();
     this.notifyListeners();
 
-    console.log(`[Workspace] Added folder: ${folder.name}`);
+    log.info(`[Workspace] Added folder: ${folder.name}`);
   }
 
   /**
@@ -87,7 +92,7 @@ export class WorkspaceManager {
     await this.saveConfiguration();
     this.notifyListeners();
 
-    console.log(`[Workspace] Removed folder: ${removed.name}`);
+    log.info(`[Workspace] Removed folder: ${removed.name}`);
   }
 
   /**
@@ -102,7 +107,7 @@ export class WorkspaceManager {
     await this.saveConfiguration();
     this.notifyListeners();
 
-    console.log(`[Workspace] Updated folder at index ${index}`);
+    log.info(`[Workspace] Updated folder at index ${index}`);
   }
 
   /**
@@ -127,7 +132,7 @@ export class WorkspaceManager {
     this.saveTrustStatus();
     this.notifyListeners();
 
-    console.log(`[Workspace] Trust ${trusted ? 'granted' : 'revoked'}`);
+    log.info(`[Workspace] Trust ${trusted ? 'granted' : 'revoked'}`);
   }
 
   /**
@@ -156,7 +161,7 @@ export class WorkspaceManager {
     await this.saveConfiguration();
     this.notifyListeners();
 
-    console.log('[Workspace] Updated settings');
+    log.info('[Workspace] Updated settings');
   }
 
   /**
@@ -221,7 +226,7 @@ export class WorkspaceManager {
       await this.saveConfiguration();
       this.notifyListeners();
 
-      console.log(`[Workspace] Added recommendation: ${extensionId}`);
+      log.info(`[Workspace] Added recommendation: ${extensionId}`);
     }
   }
 
@@ -237,7 +242,7 @@ export class WorkspaceManager {
       await this.saveConfiguration();
       this.notifyListeners();
 
-      console.log(`[Workspace] Removed recommendation: ${extensionId}`);
+      log.info(`[Workspace] Removed recommendation: ${extensionId}`);
     }
   }
 
@@ -304,7 +309,7 @@ export class WorkspaceManager {
       throw new Error('Failed to create workspace file');
     }
 
-    console.log(`[Workspace] Created workspace file: ${fileName}`);
+    log.info(`[Workspace] Created workspace file: ${fileName}`);
     return fileName;
   }
 
@@ -325,7 +330,7 @@ export class WorkspaceManager {
     this.folders = workspace.folders;
     this.notifyListeners();
 
-    console.log(`[Workspace] Loaded workspace file: ${path}`);
+    log.info(`[Workspace] Loaded workspace file: ${path}`);
     return workspace;
   }
 

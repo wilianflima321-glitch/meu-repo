@@ -16,6 +16,10 @@
 
 import * as THREE from 'three';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('save-load-system')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -616,7 +620,7 @@ export class SaveManager {
     // Migration logic for different versions
     // This would be implemented based on actual version changes
     
-    console.log(`Migrating save from version ${fromVersion} to ${this.currentVersion}`);
+    log.info(`Migrating save from version ${fromVersion} to ${this.currentVersion}`);
     
     // Example migration
     // if (fromVersion < 2) {

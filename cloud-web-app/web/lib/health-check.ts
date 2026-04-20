@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('health-check')
+
+
 /**
  * Sistema de Health Check e Monitoring - Aethel Engine
  * 
@@ -593,7 +598,7 @@ export class HealthCheckService {
     
     // Console (sempre)
     const prefix = alert.severity === 'critical' ? '🚨' : alert.severity === 'error' ? '❌' : '⚠️';
-    console.log(`${prefix} [HealthAlert] ${alert.message}`);
+    log.info(`${prefix} [HealthAlert] ${alert.message}`);
   }
   
   /**

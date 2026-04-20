@@ -16,6 +16,10 @@
 
 import * as THREE from 'three';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('nanite-virtualized-geometry')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -985,7 +989,7 @@ export class NaniteRenderer {
     const virtualizedMesh = this.meshletBuilder.buildFromGeometry(geometry, name);
     this.virtualizedMeshes.set(virtualizedMesh.id, virtualizedMesh);
     
-    console.log(`[Nanite] Imported "${name}":`, {
+    log.info(`[Nanite] Imported "${name}":`, {
       vertices: virtualizedMesh.totalVertices,
       triangles: virtualizedMesh.totalTriangles,
       clusters: virtualizedMesh.clusters.length,

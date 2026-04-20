@@ -7,6 +7,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('dap-client')
+
 // DAP Message Types
 interface DapMessage {
   seq: number;
@@ -180,14 +184,14 @@ export class DapClient extends EventEmitter {
       this.ws = new WebSocket(this.wsUrl);
 
       this.ws.onopen = () => {
-        console.log('[DAP Client] Connected to debug server');
+        log.info('[DAP Client] Connected to debug server');
         this.reconnectAttempts = 0;
         this.emit('connected');
         resolve();
       };
 
       this.ws.onclose = () => {
-        console.log('[DAP Client] Disconnected from debug server');
+        log.info('[DAP Client] Disconnected from debug server');
         this.emit('disconnected');
         this.handleDisconnect();
       };
@@ -212,7 +216,7 @@ export class DapClient extends EventEmitter {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = 1000 * Math.pow(2, this.reconnectAttempts - 1);
-      console.log(`[DAP Client] Attempting reconnect in ${delay}ms`);
+      log.info(`[DAP Client] Attempting reconnect in ${delay}ms`);
       
       setTimeout(async () => {
         try {
@@ -345,7 +349,7 @@ export class DapClient extends EventEmitter {
         break;
 
       default:
-        console.log('[DAP Client] Unknown event:', event.event, body);
+        log.info('[DAP Client] Unknown event:', event.event, body);
     }
   }
 

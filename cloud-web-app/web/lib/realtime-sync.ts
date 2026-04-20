@@ -7,6 +7,10 @@
 
 import { EventEmitter } from 'events'
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('realtime-sync')
+
 /**
  * Tipos de eventos em tempo real
  */
@@ -92,7 +96,7 @@ export class RealtimeSyncManager extends EventEmitter {
       this.isConnected = true
       this.reconnectAttempts = 0
       this.emit('connected', { sessionId: this.sessionId })
-      console.log('[RealtimeSync] Conectado', this.sessionId)
+      log.info('[RealtimeSync] Conectado', this.sessionId)
 
       // Iniciar heartbeat
       this.startHeartbeat()
@@ -171,7 +175,7 @@ export class RealtimeSyncManager extends EventEmitter {
     if (this.heartbeatInterval) clearInterval(this.heartbeatInterval)
     if (this.simulationInterval) clearInterval(this.simulationInterval)
     this.emit('disconnected')
-    console.log('[RealtimeSync] Desconectado')
+    log.info('[RealtimeSync] Desconectado')
   }
 
   /**
@@ -194,7 +198,7 @@ export class RealtimeSyncManager extends EventEmitter {
     }
 
     // Simular envio bem-sucedido
-    console.log('[RealtimeSync] Evento enviado', type, data)
+    log.info('[RealtimeSync] Evento enviado', type, data)
     this.emit('event:sent', event)
   }
 
@@ -202,7 +206,7 @@ export class RealtimeSyncManager extends EventEmitter {
    * Lidar com evento recebido do servidor
    */
   private handleIncomingEvent(event: RealtimeEvent): void {
-    console.log('[RealtimeSync] Evento recebido', event.type, event.data)
+    log.info('[RealtimeSync] Evento recebido', event.type, event.data)
     this.emit(event.type, event.data)
     this.emit('event:received', event)
   }
@@ -220,7 +224,7 @@ export class RealtimeSyncManager extends EventEmitter {
     this.reconnectAttempts++
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)
 
-    console.log(
+    log.info(
       `[RealtimeSync] Tentando reconectar em ${delay}ms (tentativa ${this.reconnectAttempts})`
     )
 
@@ -335,7 +339,7 @@ export class RealtimeSyncManager extends EventEmitter {
   async processEventQueue(): Promise<void> {
     if (!this.isConnected) return
 
-    console.log(`[RealtimeSync] Processando ${this.eventQueue.length} eventos da fila`)
+    log.info(`[RealtimeSync] Processando ${this.eventQueue.length} eventos da fila`)
 
     for (const event of this.eventQueue) {
       await this.sendEvent(event.type, event.data)

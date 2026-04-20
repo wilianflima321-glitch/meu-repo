@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('storage-service')
+
+
 /**
  * Storage Service - Aethel Engine
  * 
@@ -57,7 +62,7 @@ async function getStorageClient(): Promise<StorageClient> {
     },
   }) as StorageClient;
 
-  console.log('[Storage] Connected to S3/MinIO storage');
+  log.info('[Storage] Connected to S3/MinIO storage');
   return storageClient;
 }
 

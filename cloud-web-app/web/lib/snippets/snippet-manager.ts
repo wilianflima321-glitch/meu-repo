@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('snippets/snippet-manager')
+
+
 /**
  * Snippet Manager
  * Manages code snippets for different languages
@@ -69,7 +74,7 @@ export class SnippetManager {
     
     this.snippets.get(language)!.set(snippet.id, snippet);
     this.saveUserSnippets();
-    console.log(`[Snippet Manager] Added snippet: ${snippet.id} for ${language}`);
+    log.info(`[Snippet Manager] Added snippet: ${snippet.id} for ${language}`);
   }
 
   /**
@@ -81,7 +86,7 @@ export class SnippetManager {
     
     languageSnippets.delete(id);
     this.saveUserSnippets();
-    console.log(`[Snippet Manager] Removed snippet: ${id} from ${language}`);
+    log.info(`[Snippet Manager] Removed snippet: ${id} from ${language}`);
   }
 
   /**
@@ -96,7 +101,7 @@ export class SnippetManager {
     
     Object.assign(snippet, updates);
     this.saveUserSnippets();
-    console.log(`[Snippet Manager] Updated snippet: ${id}`);
+    log.info(`[Snippet Manager] Updated snippet: ${id}`);
   }
 
   /**
@@ -264,7 +269,7 @@ export class SnippetManager {
       {
         id: 'log',
         prefix: 'log',
-        body: 'console.log($1);',
+        body: 'log.info($1);',
         description: 'Log to console',
       },
       {
@@ -444,7 +449,7 @@ export class SnippetManager {
       },
     ]);
 
-    console.log('[Snippet Manager] Loaded built-in snippets');
+    log.info('[Snippet Manager] Loaded built-in snippets');
   }
 
   /**
@@ -478,7 +483,7 @@ export class SnippetManager {
             languageSnippets.set(snippet.id, snippet);
           }
         }
-        console.log('[Snippet Manager] Loaded user snippets');
+        log.info('[Snippet Manager] Loaded user snippets');
       }
     } catch (error) {
       console.error('[Snippet Manager] Failed to load user snippets:', error);
@@ -537,7 +542,7 @@ export class SnippetManager {
         }
       }
       
-      console.log('[Snippet Manager] Imported snippets');
+      log.info('[Snippet Manager] Imported snippets');
     } catch (error) {
       console.error('[Snippet Manager] Failed to import snippets:', error);
       throw error;

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('plugin-system')
+
+
 /**
  * Plugin System - Sistema de Extensões
  * 
@@ -203,7 +208,7 @@ class PluginManager {
             // if (module.activate) {
             //   instance.exports = await module.activate(context);
             // }
-            console.log(`Plugin ${plugin.id} activated`);
+            log.info(`Plugin ${plugin.id} activated`);
           } catch (error) {
             console.error(`Failed to activate plugin ${plugin.id}:`, error);
             throw error;
@@ -282,7 +287,7 @@ class PluginManager {
     contributions.commands?.forEach(cmd => {
       this.registerCommand(cmd.command, async () => {
         // Command implementation will be provided by plugin
-        console.log(`Command executed: ${cmd.command}`);
+        log.info(`Command executed: ${cmd.command}`);
       });
     });
 
@@ -391,7 +396,7 @@ class PluginManager {
       globalState,
       extensionPath: `/plugins/${plugin.id}`,
       extensionUri: `aethel://plugins/${plugin.id}`,
-      log: (message) => console.log(`[${plugin.id}] ${message}`),
+      log: (message) => log.info(`[${plugin.id}] ${message}`),
       logError: (message, error) => console.error(`[${plugin.id}] ${message}`, error),
     };
   }

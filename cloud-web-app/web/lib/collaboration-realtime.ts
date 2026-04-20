@@ -14,6 +14,10 @@
 
 import { createElement, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('collaboration-realtime')
+
 // ============================================================================
 // TIPOS
 // ============================================================================
@@ -147,7 +151,7 @@ export class CollaborationSocket {
         this.ws = new WebSocket(this.url);
         
         this.ws.onopen = () => {
-          console.log('[Collaboration] Connected');
+          log.info('[Collaboration] Connected');
           this.connected = true;
           this.reconnectAttempts = 0;
           this.startHeartbeat();
@@ -156,7 +160,7 @@ export class CollaborationSocket {
         };
         
         this.ws.onclose = (event) => {
-          console.log('[Collaboration] Disconnected:', event.code);
+          log.info('[Collaboration] Disconnected:', event.code);
           this.connected = false;
           this.stopHeartbeat();
           this.attemptReconnect();
@@ -272,7 +276,7 @@ export class CollaborationSocket {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
     
-    console.log(`[Collaboration] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+    log.info(`[Collaboration] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
     
     setTimeout(() => {
       this.connect().catch(() => {

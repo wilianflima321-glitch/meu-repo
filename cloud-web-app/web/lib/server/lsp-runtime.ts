@@ -3,6 +3,10 @@ import fs from 'node:fs/promises';
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/lsp-runtime')
+
 type JsonRpc = {
   jsonrpc?: '2.0';
   id?: number | string | null;
@@ -268,7 +272,7 @@ export async function getOrCreateLspSession(opts: {
     );
   }
 
-  console.log(`[LSP] Starting ${language} server: ${execPath} ${execArgs.join(' ')}`);
+  log.info(`[LSP] Starting ${language} server: ${execPath} ${execArgs.join(' ')}`);
 
   const child = spawn(execPath, execArgs, {
     cwd: workspaceRootAbs,
@@ -285,7 +289,7 @@ export async function getOrCreateLspSession(opts: {
   });
 
   child.stderr?.on('data', (data: Buffer) => {
-    console.log(`[LSP ${language}] stderr:`, data.toString());
+    log.info(`[LSP ${language}] stderr:`, data.toString());
   });
 
   const rpc = new JsonRpcStdioClient(child);

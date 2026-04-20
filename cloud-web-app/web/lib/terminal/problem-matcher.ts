@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('terminal/problem-matcher')
+
+
 /**
  * Problem Matchers
  * Parse build output to extract errors, warnings, and other problems
@@ -250,7 +255,7 @@ export class ProblemMatcherRegistry {
    */
   register(matcher: ProblemMatcher): void {
     this.matchers.set(matcher.name, matcher);
-    console.log(`[Problem Matcher] Registered: ${matcher.name}`);
+    log.info(`[Problem Matcher] Registered: ${matcher.name}`);
   }
 
   /**

@@ -19,6 +19,10 @@ import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/ai/image/generate/route')
+
 // Rate limit: 20 images per hour
 const IMAGE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 20 };
 
@@ -271,7 +275,7 @@ export async function POST(req: NextRequest) {
     // Generate based on provider
     let images: { url: string; revisedPrompt?: string }[];
 
-    console.log(`[Image API] Generating with ${provider}: "${prompt.substring(0, 50)}..."`);
+    log.info(`[Image API] Generating with ${provider}: "${prompt.substring(0, 50)}..."`);
 
     switch (provider) {
       case 'dalle':
@@ -287,7 +291,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid provider' }, { status: 400 });
     }
 
-    console.log(`[Image API] Generated ${images.length} image(s)`);
+    log.info(`[Image API] Generated ${images.length} image(s)`);
 
     return NextResponse.json({
       success: true,

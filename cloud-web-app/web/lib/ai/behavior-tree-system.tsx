@@ -14,6 +14,10 @@
  */
 import { EventEmitter } from 'events';
 import * as THREE from 'three';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ai/behavior-tree-system')
+
 export type NodeStatus = 'success' | 'failure' | 'running';
 export type NodeType = 'composite' | 'decorator' | 'leaf' | 'root';
 export interface BehaviorContext {
@@ -577,7 +581,7 @@ export class LogNode extends BaseNode {
   }
   tick(context: BehaviorContext): NodeStatus {
     const msg = typeof this.message === 'function' ? this.message(context) : this.message;
-    console.log(`[BT:${context.agent.id}] ${msg}`);
+    log.info(`[BT:${context.agent.id}] ${msg}`);
     return 'success';
   }
 }

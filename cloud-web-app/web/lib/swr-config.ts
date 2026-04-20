@@ -7,6 +7,10 @@
 
 import { SWRConfiguration } from 'swr'
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('swr-config')
+
 /**
  * Configuração padrão para SWR em todo o Studio
  * 
@@ -74,7 +78,7 @@ export function retryWithBackoff(
   // Backoff exponencial: 1s, 2s, 4s, 8s...
   const delay = Math.min(1000 * Math.pow(2, retryCount), 30000)
 
-  console.log(
+  log.info(
     `[SWR] Retry ${retryCount + 1}/${config.errorRetryCount} para ${key} em ${delay}ms`
   )
 

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('extensions/vscode-api/languages')
+
+
 /**
  * VS Code Languages API Implementation
  * Provides language-related functionality (providers, diagnostics)
@@ -134,7 +139,7 @@ class LanguagesAPI {
       this.completionProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered completion provider for:', languages, 'triggers:', triggerCharacters);
+    log.info('[Languages] Registered completion provider for:', languages, 'triggers:', triggerCharacters);
 
     return {
       dispose: () => {
@@ -165,7 +170,7 @@ class LanguagesAPI {
       this.hoverProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered hover provider for:', languages);
+    log.info('[Languages] Registered hover provider for:', languages);
 
     return {
       dispose: () => {
@@ -196,7 +201,7 @@ class LanguagesAPI {
       this.definitionProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered definition provider for:', languages);
+    log.info('[Languages] Registered definition provider for:', languages);
 
     return {
       dispose: () => {
@@ -227,7 +232,7 @@ class LanguagesAPI {
       this.referenceProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered reference provider for:', languages);
+    log.info('[Languages] Registered reference provider for:', languages);
 
     return {
       dispose: () => {
@@ -258,7 +263,7 @@ class LanguagesAPI {
       this.documentSymbolProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered document symbol provider for:', languages);
+    log.info('[Languages] Registered document symbol provider for:', languages);
 
     return {
       dispose: () => {
@@ -280,7 +285,7 @@ class LanguagesAPI {
     provider: WorkspaceSymbolProvider
   ): { dispose: () => void } {
     this.workspaceSymbolProviders.push(provider);
-    console.log('[Languages] Registered workspace symbol provider');
+    log.info('[Languages] Registered workspace symbol provider');
 
     return {
       dispose: () => {
@@ -307,7 +312,7 @@ class LanguagesAPI {
       this.codeActionProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered code action provider for:', languages);
+    log.info('[Languages] Registered code action provider for:', languages);
 
     return {
       dispose: () => {
@@ -338,7 +343,7 @@ class LanguagesAPI {
       this.codeLensProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered code lens provider for:', languages);
+    log.info('[Languages] Registered code lens provider for:', languages);
 
     return {
       dispose: () => {
@@ -369,7 +374,7 @@ class LanguagesAPI {
       this.formattingProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered formatting provider for:', languages);
+    log.info('[Languages] Registered formatting provider for:', languages);
 
     return {
       dispose: () => {
@@ -400,7 +405,7 @@ class LanguagesAPI {
       this.rangeFormattingProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered range formatting provider for:', languages);
+    log.info('[Languages] Registered range formatting provider for:', languages);
 
     return {
       dispose: () => {
@@ -431,7 +436,7 @@ class LanguagesAPI {
       this.renameProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered rename provider for:', languages);
+    log.info('[Languages] Registered rename provider for:', languages);
 
     return {
       dispose: () => {
@@ -463,7 +468,7 @@ class LanguagesAPI {
       this.signatureHelpProviders.get(language)!.push(provider);
     }
 
-    console.log('[Languages] Registered signature help provider for:', languages, 'triggers:', triggerCharacters);
+    log.info('[Languages] Registered signature help provider for:', languages, 'triggers:', triggerCharacters);
 
     return {
       dispose: () => {
@@ -495,15 +500,15 @@ class LanguagesAPI {
             diagnostics.set(uri, diags);
           }
         }
-        console.log('[Languages] Set diagnostics for collection:', collectionName);
+        log.info('[Languages] Set diagnostics for collection:', collectionName);
       },
       delete: (uri: string) => {
         diagnostics.delete(uri);
-        console.log('[Languages] Deleted diagnostics for:', uri);
+        log.info('[Languages] Deleted diagnostics for:', uri);
       },
       clear: () => {
         diagnostics.clear();
-        console.log('[Languages] Cleared diagnostics collection:', collectionName);
+        log.info('[Languages] Cleared diagnostics collection:', collectionName);
       },
       forEach: (callback) => {
         diagnostics.forEach((diags, uri) => {
@@ -515,12 +520,12 @@ class LanguagesAPI {
       dispose: () => {
         diagnostics.clear();
         this.diagnosticCollections.delete(collectionName);
-        console.log('[Languages] Disposed diagnostic collection:', collectionName);
+        log.info('[Languages] Disposed diagnostic collection:', collectionName);
       },
     };
 
     this.diagnosticCollections.set(collectionName, collection);
-    console.log('[Languages] Created diagnostic collection:', collectionName);
+    log.info('[Languages] Created diagnostic collection:', collectionName);
 
     return collection;
   }
@@ -544,11 +549,11 @@ class LanguagesAPI {
     language: string,
     configuration: any
   ): { dispose: () => void } {
-    console.log('[Languages] Set language configuration for:', language);
+    log.info('[Languages] Set language configuration for:', language);
 
     return {
       dispose: () => {
-        console.log('[Languages] Disposed language configuration for:', language);
+        log.info('[Languages] Disposed language configuration for:', language);
       },
     };
   }

@@ -6,6 +6,10 @@ import { assertWorkspacePath } from '@/lib/workspace';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { createTerminalSession } from '@/lib/server/terminal-pty-runtime';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/terminal/create/route')
+
 interface CreateTerminalRequest {
   name: string;
   cwd?: string;
@@ -45,7 +49,7 @@ export async function POST(request: NextRequest) {
       rows,
     });
 
-    console.log(`Terminal PTY session created: ${session.id} (${session.name}) - Shell: ${session.shell}`);
+    log.info(`Terminal PTY session created: ${session.id} (${session.name}) - Shell: ${session.shell}`);
 
     return NextResponse.json({
       success: true,

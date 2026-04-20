@@ -6,6 +6,10 @@
 import { getLSPApiClient } from '../api/lsp-api';
 import { getAIApiClient } from '../api/ai-api';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('integration/editor-integration')
+
 export interface EditorDocument {
   uri: string;
   languageId: string;
@@ -45,7 +49,7 @@ export class EditorIntegration {
       );
     }
 
-    console.log(`[Editor Integration] Opened document: ${document.uri}`);
+    log.info(`[Editor Integration] Opened document: ${document.uri}`);
   }
 
   /**
@@ -91,7 +95,7 @@ export class EditorIntegration {
     }
 
     this.openDocuments.delete(uri);
-    console.log(`[Editor Integration] Closed document: ${uri}`);
+    log.info(`[Editor Integration] Closed document: ${uri}`);
   }
 
   /**

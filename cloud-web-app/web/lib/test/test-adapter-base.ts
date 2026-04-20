@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('test/test-adapter-base')
+
+
 /**
  * Base class for test adapters
  * Provides common functionality for test discovery, execution, and coverage
@@ -193,7 +198,7 @@ export abstract class TestAdapterBase {
    */
   protected async findTestFiles(pattern: RegExp): Promise<string[]> {
     // Mock implementation - will be replaced with real file system access
-    console.log(`[Test Adapter] Finding test files matching: ${pattern}`);
+    log.info(`[Test Adapter] Finding test files matching: ${pattern}`);
     return [];
   }
 
@@ -202,7 +207,7 @@ export abstract class TestAdapterBase {
    */
   protected async readFile(filePath: string): Promise<string> {
     // Mock implementation - will be replaced with real file system access
-    console.log(`[Test Adapter] Reading file: ${filePath}`);
+    log.info(`[Test Adapter] Reading file: ${filePath}`);
     return '';
   }
 
@@ -215,7 +220,7 @@ export abstract class TestAdapterBase {
     options?: { cwd?: string; env?: Record<string, string> }
   ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
     // Mock implementation - will be replaced with real command execution
-    console.log(`[Test Adapter] Executing: ${command} ${args.join(' ')}`);
+    log.info(`[Test Adapter] Executing: ${command} ${args.join(' ')}`);
     return {
       stdout: '',
       stderr: '',

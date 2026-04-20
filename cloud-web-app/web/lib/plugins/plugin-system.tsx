@@ -17,6 +17,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('plugins/plugin-system')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -496,7 +500,7 @@ export class PluginLoader extends EventEmitter {
             console.error(prefix, message);
             break;
           default:
-            console.log(prefix, message);
+            log.info(prefix, message);
         }
       },
       

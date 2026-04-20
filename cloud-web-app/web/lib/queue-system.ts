@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('queue-system')
+
+
 /**
  * Queue System - BullMQ para Jobs Assíncronos
  * 
@@ -62,7 +67,7 @@ async function getRedisConnection(): Promise<any | null> {
     });
     
     redisConnection.on('connect', () => {
-      console.log('[QueueSystem] Redis connected');
+      log.info('[QueueSystem] Redis connected');
     });
   }
   return redisConnection;
@@ -226,7 +231,7 @@ class QueueManager {
       this.events.set(queueName, events);
       
       events.on('completed', ({ jobId }: any) => {
-        console.log(`[Queue:${name}] Job ${jobId} completed`);
+        log.info(`[Queue:${name}] Job ${jobId} completed`);
       });
       
       events.on('failed', ({ jobId, failedReason }: any) => {
@@ -234,7 +239,7 @@ class QueueManager {
       });
     }
     
-    console.log('[QueueManager] All queues initialized');
+    log.info('[QueueManager] All queues initialized');
   }
   
   /**
@@ -276,7 +281,7 @@ class QueueManager {
       }
     );
     
-    console.log(`[QueueManager] Added job ${job.id} to ${queueName}`);
+    log.info(`[QueueManager] Added job ${job.id} to ${queueName}`);
     return job;
   }
   
@@ -301,7 +306,7 @@ class QueueManager {
     const worker = new Worker(
       queueName,
       async (job: any) => {
-        console.log(`[Worker:${queueName}] Processing job ${job.id}: ${job.name}`);
+        log.info(`[Worker:${queueName}] Processing job ${job.id}: ${job.name}`);
         try {
           const result = await processor(job);
           return result;
@@ -314,7 +319,7 @@ class QueueManager {
     );
     
     worker.on('completed', (job: any) => {
-      console.log(`[Worker:${queueName}] Job ${job.id} completed`);
+      log.info(`[Worker:${queueName}] Job ${job.id} completed`);
     });
     
     worker.on('failed', (job: any, err: Error) => {
@@ -322,7 +327,7 @@ class QueueManager {
     });
     
     this.workers.set(queueName, worker);
-    console.log(`[QueueManager] Worker registered for ${queueName} (concurrency: ${concurrency})`);
+    log.info(`[QueueManager] Worker registered for ${queueName} (concurrency: ${concurrency})`);
     
     return worker;
   }
@@ -387,7 +392,7 @@ class QueueManager {
     const queue = this.queues.get(queueName);
     if (queue) {
       await queue.pause();
-      console.log(`[QueueManager] Queue ${queueName} paused`);
+      log.info(`[QueueManager] Queue ${queueName} paused`);
     }
   }
   
@@ -400,7 +405,7 @@ class QueueManager {
     const queue = this.queues.get(queueName);
     if (queue) {
       await queue.resume();
-      console.log(`[QueueManager] Queue ${queueName} resumed`);
+      log.info(`[QueueManager] Queue ${queueName} resumed`);
     }
   }
 
@@ -574,7 +579,7 @@ class QueueManager {
     if (!queue) return 0;
     
     const removed = await queue.clean(grace, limit, type);
-    console.log(`[QueueManager] Cleaned ${removed.length} ${type} jobs from ${queueName}`);
+    log.info(`[QueueManager] Cleaned ${removed.length} ${type} jobs from ${queueName}`);
     return removed.length;
   }
   
@@ -582,12 +587,12 @@ class QueueManager {
    * Fecha todas as conexões
    */
   async shutdown(): Promise<void> {
-    console.log('[QueueManager] Shutting down...');
+    log.info('[QueueManager] Shutting down...');
     
     // Fecha workers
     for (const [name, worker] of this.workers) {
       await worker.close();
-      console.log(`[QueueManager] Worker ${name} closed`);
+      log.info(`[QueueManager] Worker ${name} closed`);
     }
     
     // Fecha event listeners
@@ -598,7 +603,7 @@ class QueueManager {
     // Fecha filas
     for (const [name, queue] of this.queues) {
       await queue.close();
-      console.log(`[QueueManager] Queue ${name} closed`);
+      log.info(`[QueueManager] Queue ${name} closed`);
     }
     
     // Fecha Redis
@@ -608,7 +613,7 @@ class QueueManager {
     }
     
     this.initialized = false;
-    console.log('[QueueManager] Shutdown complete');
+    log.info('[QueueManager] Shutdown complete');
   }
 }
 

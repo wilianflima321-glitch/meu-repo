@@ -15,6 +15,10 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('physics-engine-real')
+
 // ============================================================================
 // SINGLETON INITIALIZER
 // ============================================================================
@@ -28,7 +32,7 @@ export async function initPhysicsEngine(): Promise<void> {
 
   rapierLoadingPromise = RAPIER.init().then(() => {
     rapierLoaded = true;
-    console.log('☢️ RAPIER WASM Physics Engine Initialized');
+    log.info('☢️ RAPIER WASM Physics Engine Initialized');
   });
 
   return rapierLoadingPromise;

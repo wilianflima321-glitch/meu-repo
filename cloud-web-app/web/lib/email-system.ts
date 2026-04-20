@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('email-system')
+
+
 /**
  * Sistema de Email e Comunicação - Aethel Engine
  * 
@@ -811,7 +816,7 @@ export class EmailService {
     email: EmailOptions,
     recipients: string[]
   ): EmailResult {
-    console.log('[Email Mock]', {
+    log.info('[Email Mock]', {
       to: recipients,
       subject: email.subject,
       template: email.template,

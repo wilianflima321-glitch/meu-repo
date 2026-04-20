@@ -12,6 +12,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('visual-script/runtime')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -196,7 +200,7 @@ nodeExecutors.set('action-destroy', async (node, inputs, context, runtime) => {
 nodeExecutors.set('action-print', async (node, inputs, context, runtime) => {
   const message = inputs.get('message') as string || '';
   
-  console.log(`[VisualScript] ${message}`);
+  log.info(`[VisualScript] ${message}`);
   runtime.emit('console:log', { message, timestamp: Date.now() });
   
   return { outputs: new Map(), nextExec: 'exec' };

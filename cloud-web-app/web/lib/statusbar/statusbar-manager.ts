@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('statusbar/statusbar-manager')
+
+
 /**
  * Status Bar Manager
  * Manages status bar items and quick selectors
@@ -76,7 +81,7 @@ export class StatusBarManager {
     this.items.set(id, item);
     this.notifyListeners();
 
-    console.log(`[Status Bar] Created item: ${id}`);
+    log.info(`[Status Bar] Created item: ${id}`);
     return item;
   }
 
@@ -93,7 +98,7 @@ export class StatusBarManager {
   removeItem(id: string): void {
     this.items.delete(id);
     this.notifyListeners();
-    console.log(`[Status Bar] Removed item: ${id}`);
+    log.info(`[Status Bar] Removed item: ${id}`);
   }
 
   /**

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('wasm-runtime')
+
+
 /**
  * ============================================
  * AETHEL WASM RUNTIME: AI Logic Engine
@@ -130,7 +135,7 @@ export class WasmRuntime {
 
     // Aqui, em uma implementação real, compilaríamos o código TypeScript
     // para WASM e o executaríamos. Por enquanto, retornamos um placeholder.
-    console.log(`Executing logic: ${functionName}`, params);
+    log.info(`Executing logic: ${functionName}`, params);
     return null;
   }
 

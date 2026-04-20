@@ -11,6 +11,10 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/terminal-pty-runtime')
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -359,7 +363,7 @@ export class TerminalPtyManager extends EventEmitter {
         
         // Clean up idle sessions
         if (now - session.lastActivity > this.maxIdleTime) {
-          console.log(`Cleaning up idle terminal session: ${id}`);
+          log.info(`Cleaning up idle terminal session: ${id}`);
           this.killSession(id);
         }
       }

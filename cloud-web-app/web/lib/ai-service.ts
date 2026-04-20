@@ -16,6 +16,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { emergencyController, MODEL_CONFIGS } from './emergency-mode';
 import { DEFAULT_OPENROUTER_MODEL_ID, EMERGENCY_FALLBACK_MODEL_ID, OPENROUTER_MODELS } from './ai/openrouter-models';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ai-service')
+
 // ============================================================================
 // TIPOS
 // ============================================================================
@@ -277,7 +281,7 @@ ${context ? `\nContexto adicional:\n${context}` : ''}`;
       // Fallback para outro provider
       const availableProviders = this.getAvailableProviders().filter(p => p !== provider);
       if (availableProviders.length > 0) {
-        console.log(`[AIService] Tentando fallback para ${availableProviders[0]}`);
+        log.info(`[AIService] Tentando fallback para ${availableProviders[0]}`);
         return this.query(userQuery, context, { ...options, provider: availableProviders[0] });
       }
       

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('problems/problems-manager')
+
+
 /**
  * Problems Manager
  * Aggregates and manages diagnostics from LSP and other sources
@@ -77,7 +82,7 @@ export class ProblemsManager {
   addProblems(uri: string, diagnostics: Diagnostic[]): void {
     this.diagnostics.set(uri, diagnostics);
     this.notifyListeners();
-    console.log(`[Problems] Added ${diagnostics.length} problems for ${uri}`);
+    log.info(`[Problems] Added ${diagnostics.length} problems for ${uri}`);
   }
 
   /**
@@ -86,10 +91,10 @@ export class ProblemsManager {
   clearProblems(uri?: string): void {
     if (uri) {
       this.diagnostics.delete(uri);
-      console.log(`[Problems] Cleared problems for ${uri}`);
+      log.info(`[Problems] Cleared problems for ${uri}`);
     } else {
       this.diagnostics.clear();
-      console.log('[Problems] Cleared all problems');
+      log.info('[Problems] Cleared all problems');
     }
     this.notifyListeners();
   }
@@ -227,7 +232,7 @@ export class ProblemsManager {
       await this.executeCommand(fix.command);
     }
 
-    console.log(`[Problems] Applied quick fix: ${fix.title}`);
+    log.info(`[Problems] Applied quick fix: ${fix.title}`);
   }
 
   /**

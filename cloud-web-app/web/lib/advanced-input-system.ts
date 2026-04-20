@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('advanced-input-system')
+
+
 /**
  * ADVANCED INPUT SYSTEM - Aethel Engine
  * 
@@ -97,12 +102,12 @@ export class InputDeviceManager {
   
   private setupGamepadListeners(): void {
     window.addEventListener('gamepadconnected', (e) => {
-      console.log(`Gamepad connected: ${e.gamepad.id}`);
+      log.info(`Gamepad connected: ${e.gamepad.id}`);
       this.gamepads.set(e.gamepad.index, e.gamepad);
     });
     
     window.addEventListener('gamepaddisconnected', (e) => {
-      console.log(`Gamepad disconnected: ${e.gamepad.id}`);
+      log.info(`Gamepad disconnected: ${e.gamepad.id}`);
       this.gamepads.delete(e.gamepad.index);
     });
   }

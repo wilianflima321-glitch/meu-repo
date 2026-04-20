@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('terminal/task-detector')
+
+
 /**
  * Task Auto-detection
  * Automatically detects tasks from various build systems
@@ -630,7 +635,7 @@ export class TaskDetectionManager {
         if (isAvailable) {
           const tasks = await detector.detect(workspaceRoot);
           allTasks.push(...tasks);
-          console.log(`[Task Detection] Found ${tasks.length} ${detector.name} tasks`);
+          log.info(`[Task Detection] Found ${tasks.length} ${detector.name} tasks`);
         }
       } catch (error) {
         console.error(`[Task Detection] Error with ${detector.name} detector:`, error);
@@ -652,7 +657,7 @@ export class TaskDetectionManager {
    */
   addDetector(detector: TaskDetector): void {
     this.detectors.push(detector);
-    console.log(`[Task Detection] Added custom detector: ${detector.name}`);
+    log.info(`[Task Detection] Added custom detector: ${detector.name}`);
   }
 }
 

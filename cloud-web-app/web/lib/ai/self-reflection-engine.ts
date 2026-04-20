@@ -10,6 +10,10 @@
 
 import { aiService } from '../ai-service';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ai/self-reflection-engine')
+
 export interface ProposedAction {
   type: 'create_code' | 'create_asset' | 'modify_story' | 'delete_file';
   content: any;
@@ -29,7 +33,7 @@ export class SelfReflectionEngine {
    * O "Momento de Dúvida". A IA para e pensa: "Isso que eu vou fazer faz sentido?"
    */
   async reflectOnAction(action: ProposedAction, projectContext: any): Promise<ReflectionResult> {
-    console.log(`[SelfReflection] Analisando ação: ${action.type}`);
+    log.info(`[SelfReflection] Analisando ação: ${action.type}`);
 
     // 1. Verificar Leis da Física e Lógica do Mundo
     const physicsCheck = await this.checkPhysicsAndLogic(action, projectContext);

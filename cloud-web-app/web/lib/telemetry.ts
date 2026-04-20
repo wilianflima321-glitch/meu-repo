@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('telemetry')
+
+
 /**
  * Telemetry & Observability - Enterprise Grade Monitoring
  * 
@@ -175,7 +180,7 @@ export class TelemetryManager {
 
     // Log em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Telemetry]', enrichedEvent)
+      log.info('[Telemetry]', enrichedEvent)
     }
   }
 

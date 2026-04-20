@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/ai-api')
+
+
 /**
  * AI API Client
  * Handles communication with backend AI services
@@ -136,7 +141,7 @@ export class AIApiClient {
   setConsent(consent: boolean): void {
     this.consentGiven = consent;
     localStorage.setItem('ai-consent', consent.toString());
-    console.log(`[AI API] Consent ${consent ? 'granted' : 'revoked'}`);
+    log.info(`[AI API] Consent ${consent ? 'granted' : 'revoked'}`);
   }
 
   /**

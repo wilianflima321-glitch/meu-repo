@@ -20,6 +20,10 @@ import * as path from 'path';
 import { EventEmitter } from 'events';
 import { resolveWorkspaceRoot } from './workspace-path';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/search-runtime')
+
 const execAsync = promisify(exec);
 
 // ============================================================================
@@ -119,14 +123,14 @@ export class SearchRuntime extends EventEmitter {
       try {
         await execAsync(`"${candidate}" --version`);
         this.ripgrepPath = candidate;
-        console.log(`[SearchRuntime] Found ripgrep at: ${candidate}`);
+        log.info(`[SearchRuntime] Found ripgrep at: ${candidate}`);
         return true;
       } catch {
         // Continue trying
       }
     }
     
-    console.log('[SearchRuntime] Ripgrep not found, using Node.js fallback');
+    log.info('[SearchRuntime] Ripgrep not found, using Node.js fallback');
     return false;
   }
   

@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('editor/multi-cursor-manager')
+
+
 /**
  * Multi-Cursor Manager
  * Manages multiple cursors and selections in the editor
@@ -44,7 +49,7 @@ export class MultiCursorManager {
       this.primaryCursorId = id;
     }
 
-    console.log(`[Multi-Cursor] Added cursor at ${position.line}:${position.character}`);
+    log.info(`[Multi-Cursor] Added cursor at ${position.line}:${position.character}`);
     return id;
   }
 
@@ -68,7 +73,7 @@ export class MultiCursorManager {
       }
     }
 
-    console.log(`[Multi-Cursor] Removed cursor ${id}`);
+    log.info(`[Multi-Cursor] Removed cursor ${id}`);
   }
 
   /**
@@ -82,7 +87,7 @@ export class MultiCursorManager {
       this.cursors.set(primary.id, primary);
     }
 
-    console.log('[Multi-Cursor] Cleared secondary cursors');
+    log.info('[Multi-Cursor] Cleared secondary cursors');
   }
 
   /**
@@ -158,7 +163,7 @@ export class MultiCursorManager {
       }
     }
 
-    console.log('[Multi-Cursor] Added cursors above');
+    log.info('[Multi-Cursor] Added cursors above');
   }
 
   /**
@@ -174,7 +179,7 @@ export class MultiCursorManager {
       });
     }
 
-    console.log('[Multi-Cursor] Added cursors below');
+    log.info('[Multi-Cursor] Added cursors below');
   }
 
   /**
@@ -201,7 +206,7 @@ export class MultiCursorManager {
       }
     }
 
-    console.log(`[Multi-Cursor] Added cursors at ${this.cursors.size} occurrences`);
+    log.info(`[Multi-Cursor] Added cursors at ${this.cursors.size} occurrences`);
   }
 
   /**
@@ -376,7 +381,7 @@ export class MultiCursorManager {
     }
 
     if (toRemove.length > 0) {
-      console.log(`[Multi-Cursor] Merged ${toRemove.length} overlapping cursors`);
+      log.info(`[Multi-Cursor] Merged ${toRemove.length} overlapping cursors`);
     }
   }
 

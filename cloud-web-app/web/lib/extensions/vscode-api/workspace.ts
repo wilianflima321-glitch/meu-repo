@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('extensions/vscode-api/workspace')
+
+
 /**
  * VS Code Workspace API Implementation
  * Provides workspace-related functionality (files, folders, configuration)
@@ -151,7 +156,7 @@ class WorkspaceAPI {
       });
     });
 
-    console.log('[Workspace] Updated workspace folders:', this._workspaceFolders);
+    log.info('[Workspace] Updated workspace folders:', this._workspaceFolders);
     return true;
   }
 
@@ -173,7 +178,7 @@ class WorkspaceAPI {
     // Notify listeners
     this.onDidOpenTextDocumentListeners.forEach(listener => listener(document));
 
-    console.log('[Workspace] Opened text document:', uriStr);
+    log.info('[Workspace] Opened text document:', uriStr);
     return document;
   }
 
@@ -181,7 +186,7 @@ class WorkspaceAPI {
    * Save text document
    */
   async saveTextDocument(document: TextDocument): Promise<boolean> {
-    console.log('[Workspace] Saving document:', document.uri);
+    log.info('[Workspace] Saving document:', document.uri);
 
     // Mark as not dirty
     (document as any).isDirty = false;
@@ -204,7 +209,7 @@ class WorkspaceAPI {
       await this.saveTextDocument(document);
     }
 
-    console.log('[Workspace] Saved all documents');
+    log.info('[Workspace] Saved all documents');
     return true;
   }
 
@@ -212,7 +217,7 @@ class WorkspaceAPI {
    * Apply edit
    */
   async applyEdit(edit: any): Promise<boolean> {
-    console.log('[Workspace] Applying edit:', edit);
+    log.info('[Workspace] Applying edit:', edit);
 
     // Mock implementation
     return true;
@@ -263,7 +268,7 @@ class WorkspaceAPI {
     };
 
     this.fileWatchers.push(watcher);
-    console.log('[Workspace] Created file system watcher:', globPattern);
+    log.info('[Workspace] Created file system watcher:', globPattern);
 
     return watcher;
   }
@@ -277,7 +282,7 @@ class WorkspaceAPI {
     maxResults?: number,
     token?: any
   ): Promise<string[]> {
-    console.log('[Workspace] Finding files:', { include, exclude, maxResults });
+    log.info('[Workspace] Finding files:', { include, exclude, maxResults });
 
     // Mock implementation
     return [];
@@ -309,7 +314,7 @@ class WorkspaceAPI {
       update: async (key: string, value: any, target?: number) => {
         const fullKey = section ? `${section}.${key}` : key;
         this.configuration.set(fullKey, value);
-        console.log('[Workspace] Updated configuration:', fullKey, value);
+        log.info('[Workspace] Updated configuration:', fullKey, value);
       },
     };
 
@@ -323,11 +328,11 @@ class WorkspaceAPI {
     scheme: string,
     provider: any
   ): { dispose: () => void } {
-    console.log('[Workspace] Registered text document content provider:', scheme);
+    log.info('[Workspace] Registered text document content provider:', scheme);
 
     return {
       dispose: () => {
-        console.log('[Workspace] Disposed text document content provider:', scheme);
+        log.info('[Workspace] Disposed text document content provider:', scheme);
       },
     };
   }
@@ -340,11 +345,11 @@ class WorkspaceAPI {
     provider: any,
     options?: any
   ): { dispose: () => void } {
-    console.log('[Workspace] Registered file system provider:', scheme);
+    log.info('[Workspace] Registered file system provider:', scheme);
 
     return {
       dispose: () => {
-        console.log('[Workspace] Disposed file system provider:', scheme);
+        log.info('[Workspace] Disposed file system provider:', scheme);
       },
     };
   }
@@ -403,10 +408,10 @@ class WorkspaceAPI {
   }
 
   onDidChangeConfiguration(listener: (event: any) => void): { dispose: () => void } {
-    console.log('[Workspace] Registered configuration change listener');
+    log.info('[Workspace] Registered configuration change listener');
     return {
       dispose: () => {
-        console.log('[Workspace] Disposed configuration change listener');
+        log.info('[Workspace] Disposed configuration change listener');
       },
     };
   }
@@ -483,7 +488,7 @@ class WorkspaceAPI {
       ...folder,
       index,
     }));
-    console.log('[Workspace] Initialized with folders:', this._workspaceFolders);
+    log.info('[Workspace] Initialized with folders:', this._workspaceFolders);
   }
 }
 

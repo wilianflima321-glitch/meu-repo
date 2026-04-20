@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('redis-cache')
+
+
 /**
  * Redis Cache Layer - Cache Distribuído
  * 
@@ -188,13 +193,13 @@ class RedisCache {
     this.connectAttempted = true;
     
     if (process.env.SKIP_REDIS === 'true') {
-      console.log('[RedisCache] Redis disabled, using memory fallback');
+      log.info('[RedisCache] Redis disabled, using memory fallback');
       return;
     }
     
     const IORedis = await loadIORedis();
     if (!IORedis) {
-      console.log('[RedisCache] ioredis not available, using memory fallback');
+      log.info('[RedisCache] ioredis not available, using memory fallback');
       return;
     }
     
@@ -206,7 +211,7 @@ class RedisCache {
         keyPrefix: config.keyPrefix,
         retryStrategy: (times: number) => {
           if (times > 3) {
-            console.log('[RedisCache] Max retries reached, using memory fallback');
+            log.info('[RedisCache] Max retries reached, using memory fallback');
             return null;
           }
           return Math.min(times * 200, 2000);
@@ -217,7 +222,7 @@ class RedisCache {
       this.redis.on('connect', () => {
         this.isConnected = true;
         this.stats.isRedisConnected = true;
-        console.log('[RedisCache] Connected to Redis');
+        log.info('[RedisCache] Connected to Redis');
       });
       
       this.redis.on('error', (error: any) => {
@@ -229,7 +234,7 @@ class RedisCache {
       this.redis.on('close', () => {
         this.isConnected = false;
         this.stats.isRedisConnected = false;
-        console.log('[RedisCache] Redis connection closed');
+        log.info('[RedisCache] Redis connection closed');
       });
       
       // Tenta conectar
@@ -529,7 +534,7 @@ class RedisCache {
       }
       await this.fallback.flush();
       
-      console.log('[RedisCache] Cache flushed');
+      log.info('[RedisCache] Cache flushed');
     } catch (error) {
       console.error('[RedisCache] Flush error:', error);
     }

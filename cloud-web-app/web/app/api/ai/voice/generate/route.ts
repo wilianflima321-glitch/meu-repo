@@ -18,6 +18,10 @@ import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
 import OpenAI from 'openai';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/ai/voice/generate/route')
+
 // Rate limit: 50 voice generations per hour
 const VOICE_RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 50 };
 
@@ -254,7 +258,7 @@ export async function POST(req: NextRequest) {
     // Get default voice for provider
     const defaultVoice = voice || providerConfig.voices[0];
 
-    console.log(`[Voice API] Generating with ${provider}: "${text.substring(0, 50)}..."`);
+    log.info(`[Voice API] Generating with ${provider}: "${text.substring(0, 50)}..."`);
 
     // Generate based on provider
     let audioBuffer: ArrayBuffer;
@@ -273,7 +277,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid provider' }, { status: 400 });
     }
 
-    console.log(`[Voice API] Generated ${audioBuffer.byteLength} bytes`);
+    log.info(`[Voice API] Generated ${audioBuffer.byteLength} bytes`);
 
     // Return audio as base64
     const base64 = Buffer.from(audioBuffer).toString('base64');

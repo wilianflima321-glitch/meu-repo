@@ -11,6 +11,10 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { getWebSocketServer } from './websocket-server';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/file-watcher-runtime')
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -208,7 +212,7 @@ export class FileWatcherManager extends EventEmitter {
     // Wait for ready
     await new Promise<void>((resolve) => {
       watcher.on('ready', () => {
-        console.log(`File watcher ready for workspace: ${workspaceId}`);
+        log.info(`File watcher ready for workspace: ${workspaceId}`);
         resolve();
       });
     });
@@ -368,7 +372,7 @@ export class FileWatcherManager extends EventEmitter {
       }
     } catch (error) {
       // WebSocket server might not be running
-      console.debug('WebSocket notification skipped:', error);
+      log.debug('WebSocket notification skipped:', error);
     }
   }
   
@@ -463,7 +467,7 @@ export class FileWatcherManager extends EventEmitter {
   
   private setupProcessHandlers(): void {
     const cleanup = async () => {
-      console.log('Cleaning up file watchers...');
+      log.info('Cleaning up file watchers...');
       await this.unwatchAll();
     };
     

@@ -16,6 +16,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthUser } from '@/lib/auth-server';
 import { checkRateLimit } from '@/lib/rate-limit';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/ai/music/generate/route')
+
 // Rate limit: 30 music generations per hour
 const RATE_LIMIT = { windowMs: 60 * 60 * 1000, maxRequests: 30 };
 
@@ -292,7 +296,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log(`[Music API] Generating with ${provider}: "${prompt.substring(0, 50)}..."`);
+    log.info(`[Music API] Generating with ${provider}: "${prompt.substring(0, 50)}..."`);
 
     // Generate based on provider
     let result: { taskId: string; status: string };
@@ -311,7 +315,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid provider' }, { status: 400 });
     }
 
-    console.log(`[Music API] Task created: ${result.taskId}`);
+    log.info(`[Music API] Task created: ${result.taskId}`);
 
     return NextResponse.json({
       success: true,

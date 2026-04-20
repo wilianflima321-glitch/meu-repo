@@ -4,6 +4,10 @@ import { requireFeatureForUser } from '@/lib/entitlements';
 import { apiErrorToResponse } from '@/lib/api-errors';
 import { dapRequest } from '@/lib/server/dap-runtime';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/dap/request/route')
+
 interface DAPRequest {
   sessionId: string;
   command: string;
@@ -26,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`DAP Request [${sessionId}]: ${command}`);
+    log.info(`DAP Request [${sessionId}]: ${command}`);
 
     const responseBody = await dapRequest(sessionId, seq, command, args);
 

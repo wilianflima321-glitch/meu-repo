@@ -14,6 +14,10 @@ import { prisma } from './db';
 import { EventEmitter } from 'events';
 import { EMERGENCY_FALLBACK_MODEL_ID, OPENROUTER_MODELS } from './ai/openrouter-models';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('emergency-mode')
+
 // ============================================================================
 // TIPOS
 // ============================================================================
@@ -307,7 +311,7 @@ class EmergencyController extends EventEmitter {
     // Envia alertas
     await this.sendAlerts(`🚨 EMERGENCY MODE ACTIVATED: ${level}`, reason);
     
-    console.log(`[EmergencyController] Emergency activated: ${level} by ${activatedBy}`);
+    log.info(`[EmergencyController] Emergency activated: ${level} by ${activatedBy}`);
   }
   
   /**
@@ -334,7 +338,7 @@ class EmergencyController extends EventEmitter {
     
     await this.sendAlerts('✅ Emergency mode deactivated', `Deactivated by ${deactivatedBy}`);
     
-    console.log(`[EmergencyController] Emergency deactivated by ${deactivatedBy}`);
+    log.info(`[EmergencyController] Emergency deactivated by ${deactivatedBy}`);
   }
   
   /**
@@ -533,9 +537,9 @@ class EmergencyController extends EventEmitter {
     // Emails seriam enviados via serviço de email (Resend, SendGrid, etc)
     // Implementação simplificada - em produção usar queue
     if (alertEmails.length > 0) {
-      console.log(`[EmergencyController] Would send email to: ${alertEmails.join(', ')}`);
-      console.log(`  Title: ${title}`);
-      console.log(`  Message: ${message}`);
+      log.info(`[EmergencyController] Would send email to: ${alertEmails.join(', ')}`);
+      log.info(`  Title: ${title}`);
+      log.info(`  Message: ${message}`);
     }
   }
   
@@ -621,7 +625,7 @@ export async function safeAICall<T>(
   
   // Log se houve downgrade
   if (effectiveModel !== requestedModel) {
-    console.log(`[EmergencyController] Model downgraded: ${requestedModel} -> ${effectiveModel}`);
+    log.info(`[EmergencyController] Model downgraded: ${requestedModel} -> ${effectiveModel}`);
   }
   
   return aiFunction(effectiveModel);

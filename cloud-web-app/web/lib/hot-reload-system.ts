@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('hot-reload-system')
+
+
 /**
  * Hot Reload System - Sistema de Recarga ao Vivo
  * 
@@ -84,7 +89,7 @@ export class FileWatcher {
       this.ws = new WebSocket(serverUrl);
       
       this.ws.onopen = () => {
-        console.log('[HotReload] Connected to dev server');
+        log.info('[HotReload] Connected to dev server');
         this.reconnectAttempts = 0;
         
         // Send watch paths
@@ -110,7 +115,7 @@ export class FileWatcher {
       };
       
       this.ws.onclose = () => {
-        console.log('[HotReload] Disconnected from dev server');
+        log.info('[HotReload] Disconnected from dev server');
         this.attemptReconnect(serverUrl);
       };
       
@@ -132,7 +137,7 @@ export class FileWatcher {
     }
     
     this.reconnectAttempts++;
-    console.log(`[HotReload] Attempting to reconnect (${this.reconnectAttempts}/${this.config.maxReconnectAttempts})...`);
+    log.info(`[HotReload] Attempting to reconnect (${this.reconnectAttempts}/${this.config.maxReconnectAttempts})...`);
     
     this.reconnectTimeout = setTimeout(() => {
       this.connect(serverUrl);
@@ -653,7 +658,7 @@ export class ShaderReloader {
         cb(path, source);
       }
       
-      console.log(`[HotReload] Shader reloaded: ${path}`);
+      log.info(`[HotReload] Shader reloaded: ${path}`);
       return true;
     } catch (error) {
       console.error(`[HotReload] Failed to reload shader:`, error);
@@ -726,7 +731,7 @@ export class HotReloadManager {
     this.fileWatcher.watch('**/*.{ts,tsx,js,jsx}', async (change) => {
       if (change.type === 'remove') return;
       
-      console.log(`[HotReload] Script changed: ${change.path}`);
+      log.info(`[HotReload] Script changed: ${change.path}`);
       
       // Save state before reload
       if (this.config.preserveState) {
@@ -746,7 +751,7 @@ export class HotReloadManager {
     this.fileWatcher.watch('**/*.{glsl,vert,frag,vs,fs}', async (change) => {
       if (change.type === 'remove') return;
       
-      console.log(`[HotReload] Shader changed: ${change.path}`);
+      log.info(`[HotReload] Shader changed: ${change.path}`);
       const success = await this.shaderReloader.reloadShader(change.path, change.content);
       
       this.emitEvent({
@@ -760,7 +765,7 @@ export class HotReloadManager {
     this.fileWatcher.watch('**/*.{png,jpg,jpeg,webp,gif}', async (change) => {
       if (change.type === 'remove') return;
       
-      console.log(`[HotReload] Texture changed: ${change.path}`);
+      log.info(`[HotReload] Texture changed: ${change.path}`);
       await this.assetReloader.reloadTexture(change.path);
       
       this.emitEvent({
@@ -774,7 +779,7 @@ export class HotReloadManager {
     this.fileWatcher.watch('**/*.json', async (change) => {
       if (change.type === 'remove') return;
       
-      console.log(`[HotReload] JSON changed: ${change.path}`);
+      log.info(`[HotReload] JSON changed: ${change.path}`);
       await this.assetReloader.reloadJSON(change.path);
       
       this.emitEvent({
@@ -788,7 +793,7 @@ export class HotReloadManager {
     this.fileWatcher.watch('**/*.{mp3,wav,ogg}', async (change) => {
       if (change.type === 'remove') return;
       
-      console.log(`[HotReload] Audio changed: ${change.path}`);
+      log.info(`[HotReload] Audio changed: ${change.path}`);
       await this.assetReloader.reloadAudio(change.path);
       
       this.emitEvent({
@@ -802,7 +807,7 @@ export class HotReloadManager {
     this.fileWatcher.watch('**/*.{gltf,glb,fbx,obj}', async (change) => {
       if (change.type === 'remove') return;
       
-      console.log(`[HotReload] Model changed: ${change.path}`);
+      log.info(`[HotReload] Model changed: ${change.path}`);
       await this.assetReloader.reloadGLTF(change.path);
       
       this.emitEvent({
@@ -815,7 +820,7 @@ export class HotReloadManager {
   
   connect(serverUrl?: string): void {
     if (!this.config.enabled) {
-      console.log('[HotReload] Hot reload is disabled');
+      log.info('[HotReload] Hot reload is disabled');
       return;
     }
     
@@ -1085,7 +1090,7 @@ const wss = new WebSocketServer({ port: 3001 });
 const watchers = new Map();
 
 wss.on('connection', (ws) => {
-  console.log('[HotReload Server] Client connected');
+  log.info('[HotReload Server] Client connected');
   
   ws.on('message', (data) => {
     const msg = JSON.parse(data.toString());
@@ -1122,11 +1127,11 @@ wss.on('connection', (ws) => {
   });
   
   ws.on('close', () => {
-    console.log('[HotReload Server] Client disconnected');
+    log.info('[HotReload Server] Client disconnected');
   });
 });
 
-console.log('[HotReload Server] Running on ws://localhost:3001');
+log.info('[HotReload Server] Running on ws://localhost:3001');
 */
 
 // ============================================================================

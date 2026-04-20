@@ -18,6 +18,10 @@ import {
   TerminalSessionConfig 
 } from './terminal-pty-runtime';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/websocket-server')
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -152,7 +156,7 @@ export class AethelWebSocketServer extends EventEmitter {
       this.wss.on('error', (error) => this.emit('error', error));
       
       this.httpServer.listen(this.port, () => {
-        console.log(`Aethel WebSocket server listening on port ${this.port}`);
+        log.info(`Aethel WebSocket server listening on port ${this.port}`);
         this.startPingInterval();
         this.emit('started', { port: this.port });
         resolve();
@@ -389,7 +393,7 @@ export class AethelWebSocketServer extends EventEmitter {
     client.metadata.role = decoded.role;
     client.metadata.authenticatedAt = Date.now();
     
-    console.log(`[WebSocket] Client ${client.id} authenticated as user ${decoded.userId}`);
+    log.info(`[WebSocket] Client ${client.id} authenticated as user ${decoded.userId}`);
     
     this.sendToClient(client, {
       type: WS_MESSAGE_TYPES.AUTH_SUCCESS,
@@ -680,7 +684,7 @@ export class AethelWebSocketServer extends EventEmitter {
       
       for (const [clientId, client] of this.clients) {
         if (!client.isAlive) {
-          console.log(`Terminating inactive client: ${clientId}`);
+          log.info(`Terminating inactive client: ${clientId}`);
           client.ws.terminate();
           this.handleDisconnect(client);
           continue;
@@ -688,7 +692,7 @@ export class AethelWebSocketServer extends EventEmitter {
         
         // Check for timeout
         if (now - client.lastPing > this.clientTimeout) {
-          console.log(`Client timeout: ${clientId}`);
+          log.info(`Client timeout: ${clientId}`);
           client.ws.terminate();
           this.handleDisconnect(client);
           continue;

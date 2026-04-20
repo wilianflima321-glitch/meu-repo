@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('networking-multiplayer')
+
+
 export interface NetworkConfig {
   serverUrl: string;
   maxPlayers: number;
@@ -737,13 +742,13 @@ export class WebRTCConnection {
   private setupDataChannel(channel: RTCDataChannel): void {
     channel.binaryType = 'arraybuffer';
     channel.onopen = () => {
-      console.log('Data channel opened');
+      log.info('Data channel opened');
     };
     channel.onmessage = (event) => {
       this.onMessageCallback?.(event.data);
     };
     channel.onclose = () => {
-      console.log('Data channel closed');
+      log.info('Data channel closed');
     };
   }
   async createOffer(): Promise<RTCSessionDescriptionInit> {

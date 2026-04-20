@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('explorer/quick-open')
+
+
 /**
  * Quick Open (Ctrl+P)
  * Fuzzy file search and navigation
@@ -117,7 +122,7 @@ export class QuickOpen {
       });
     }
 
-    console.log(`[Quick Open] Cached ${this.fileCache.size} files`);
+    log.info(`[Quick Open] Cached ${this.fileCache.size} files`);
   }
 
   /**

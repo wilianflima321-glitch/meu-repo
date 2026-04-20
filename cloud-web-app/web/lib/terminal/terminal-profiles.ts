@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('terminal/terminal-profiles')
+
+
 /**
  * Terminal Profiles
  * Manages terminal profiles and persistence
@@ -109,7 +114,7 @@ export class TerminalProfileManager {
   addProfile(profile: TerminalProfile): void {
     this.profiles.set(profile.id, profile);
     this.saveProfiles();
-    console.log(`[Terminal Profiles] Added profile: ${profile.name}`);
+    log.info(`[Terminal Profiles] Added profile: ${profile.name}`);
   }
 
   /**
@@ -118,7 +123,7 @@ export class TerminalProfileManager {
   removeProfile(profileId: string): void {
     this.profiles.delete(profileId);
     this.saveProfiles();
-    console.log(`[Terminal Profiles] Removed profile: ${profileId}`);
+    log.info(`[Terminal Profiles] Removed profile: ${profileId}`);
   }
 
   /**
@@ -129,7 +134,7 @@ export class TerminalProfileManager {
     if (profile) {
       this.profiles.set(profileId, { ...profile, ...updates });
       this.saveProfiles();
-      console.log(`[Terminal Profiles] Updated profile: ${profileId}`);
+      log.info(`[Terminal Profiles] Updated profile: ${profileId}`);
     }
   }
 
@@ -168,7 +173,7 @@ export class TerminalProfileManager {
     if (profile) {
       profile.isDefault = true;
       this.saveProfiles();
-      console.log(`[Terminal Profiles] Set default profile: ${profileId}`);
+      log.info(`[Terminal Profiles] Set default profile: ${profileId}`);
     }
   }
 
@@ -193,7 +198,7 @@ export class TerminalProfileManager {
 
     this.sessions.set(session.id, session);
     this.saveSessions();
-    console.log(`[Terminal Profiles] Created session: ${session.id}`);
+    log.info(`[Terminal Profiles] Created session: ${session.id}`);
 
     return session;
   }
@@ -258,7 +263,7 @@ export class TerminalProfileManager {
   closeSession(sessionId: string): void {
     this.sessions.delete(sessionId);
     this.saveSessions();
-    console.log(`[Terminal Profiles] Closed session: ${sessionId}`);
+    log.info(`[Terminal Profiles] Closed session: ${sessionId}`);
   }
 
   /**
@@ -267,7 +272,7 @@ export class TerminalProfileManager {
    */
   restoreSessions(): TerminalSession[] {
     const sessions = this.getAllSessions();
-    console.log(`[Terminal Profiles] Restoring ${sessions.length} sessions`);
+    log.info(`[Terminal Profiles] Restoring ${sessions.length} sessions`);
     return sessions;
   }
 
@@ -288,7 +293,7 @@ export class TerminalProfileManager {
 
     if (cleaned > 0) {
       this.saveSessions();
-      console.log(`[Terminal Profiles] Cleaned ${cleaned} old sessions`);
+      log.info(`[Terminal Profiles] Cleaned ${cleaned} old sessions`);
     }
   }
 
@@ -310,7 +315,7 @@ export class TerminalProfileManager {
         this.profiles.set(profile.id, profile);
       });
       this.saveProfiles();
-      console.log(`[Terminal Profiles] Imported ${profiles.length} profiles`);
+      log.info(`[Terminal Profiles] Imported ${profiles.length} profiles`);
     } catch (error) {
       console.error('[Terminal Profiles] Failed to import profiles:', error);
       throw error;
@@ -328,7 +333,7 @@ export class TerminalProfileManager {
         profiles.forEach(profile => {
           this.profiles.set(profile.id, profile);
         });
-        console.log(`[Terminal Profiles] Loaded ${profiles.length} profiles`);
+        log.info(`[Terminal Profiles] Loaded ${profiles.length} profiles`);
       }
     } catch (error) {
       console.error('[Terminal Profiles] Failed to load profiles:', error);
@@ -358,7 +363,7 @@ export class TerminalProfileManager {
         sessions.forEach(session => {
           this.sessions.set(session.id, session);
         });
-        console.log(`[Terminal Profiles] Loaded ${sessions.length} sessions`);
+        log.info(`[Terminal Profiles] Loaded ${sessions.length} sessions`);
       }
     } catch (error) {
       console.error('[Terminal Profiles] Failed to load sessions:', error);

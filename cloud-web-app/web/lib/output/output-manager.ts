@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('output/output-manager')
+
+
 /**
  * Output Manager
  * Manages multiple output channels for logs and messages
@@ -62,7 +67,7 @@ export class OutputChannelImpl implements OutputChannel {
 
     this.buffer = [];
     this.notifyListeners();
-    console.log(`[Output] Cleared channel: ${this.name}`);
+    log.info(`[Output] Cleared channel: ${this.name}`);
   }
 
   /**
@@ -72,7 +77,7 @@ export class OutputChannelImpl implements OutputChannel {
     if (this.disposed) return;
 
     this.visible = true;
-    console.log(`[Output] Showing channel: ${this.name}`);
+    log.info(`[Output] Showing channel: ${this.name}`);
   }
 
   /**
@@ -82,7 +87,7 @@ export class OutputChannelImpl implements OutputChannel {
     if (this.disposed) return;
 
     this.visible = false;
-    console.log(`[Output] Hiding channel: ${this.name}`);
+    log.info(`[Output] Hiding channel: ${this.name}`);
   }
 
   /**
@@ -94,7 +99,7 @@ export class OutputChannelImpl implements OutputChannel {
     this.disposed = true;
     this.buffer = [];
     this.listeners.clear();
-    console.log(`[Output] Disposed channel: ${this.name}`);
+    log.info(`[Output] Disposed channel: ${this.name}`);
   }
 
   /**
@@ -170,7 +175,7 @@ export class OutputManager {
     // Listen to channel changes
     channel.onChange(() => this.notifyListeners());
 
-    console.log(`[Output Manager] Created channel: ${name}`);
+    log.info(`[Output Manager] Created channel: ${name}`);
     return channel;
   }
 
@@ -217,7 +222,7 @@ export class OutputManager {
     this.activeChannel = name;
     this.notifyListeners();
 
-    console.log(`[Output Manager] Showing channel: ${name}`);
+    log.info(`[Output Manager] Showing channel: ${name}`);
   }
 
   /**
@@ -250,7 +255,7 @@ export class OutputManager {
     }
 
     this.notifyListeners();
-    console.log(`[Output Manager] Deleted channel: ${name}`);
+    log.info(`[Output Manager] Deleted channel: ${name}`);
   }
 
   /**
@@ -260,7 +265,7 @@ export class OutputManager {
     for (const channel of this.channels.values()) {
       channel.clear();
     }
-    console.log('[Output Manager] Cleared all channels');
+    log.info('[Output Manager] Cleared all channels');
   }
 
   /**
@@ -287,7 +292,7 @@ export class OutputManager {
     this.createChannel('Git');
     this.createChannel('Debug Console');
     this.createChannel('Language Server');
-    console.log('[Output Manager] Created standard channels');
+    log.info('[Output Manager] Created standard channels');
   }
 }
 

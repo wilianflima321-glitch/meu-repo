@@ -7,6 +7,10 @@
 
 import * as monaco from 'monaco-editor';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('monaco-lsp-http')
+
 // LSP Message Types
 interface LspResponse<T = unknown> {
   jsonrpc: '2.0';
@@ -488,7 +492,7 @@ export function registerLspProviders(
     monaco.languages.registerReferenceProvider(language, createLspReferencesProvider(language))
   );
 
-  console.log(`[LSP HTTP] Registered providers for language: ${language}`);
+  log.info(`[LSP HTTP] Registered providers for language: ${language}`);
   return disposables;
 }
 

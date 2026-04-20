@@ -7,6 +7,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('websocket/websocket-client')
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -522,7 +526,7 @@ export class AethelWebSocketClient extends EventEmitter {
   
   private log(...args: any[]): void {
     if (this.config.debug) {
-      console.log('[AethelWS]', ...args);
+      log.info('[AethelWS]', ...args);
     }
   }
 }

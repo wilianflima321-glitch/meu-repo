@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ai/deep-context-manager')
+
+
 /**
  * DEEP CONTEXT MANAGER (A "MEMÓRIA INFINITA")
  * 
@@ -18,7 +23,7 @@ export class DeepContextManager {
   private memoryBank: Map<string, ContextChunk> = new Map();
 
   async initialize(projectId: string) {
-    console.log(`[DeepContext] Carregando memória para projeto ${projectId}...`);
+    log.info(`[DeepContext] Carregando memória para projeto ${projectId}...`);
     // Carregaria do banco de dados vetorial (Pinecone/Postgres pgvector)
   }
 
@@ -35,7 +40,7 @@ export class DeepContextManager {
       // embedding: await generateEmbedding(content)
     };
     this.memoryBank.set(id, chunk);
-    console.log(`[DeepContext] Memorizado: [${category}] ${content.substring(0, 50)}...`);
+    log.info(`[DeepContext] Memorizado: [${category}] ${content.substring(0, 50)}...`);
   }
 
   /**

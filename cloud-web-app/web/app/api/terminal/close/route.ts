@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/terminal/close/route')
+
 /**
  * POST /api/terminal/close
  * 
@@ -20,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Em produção, isso enviaria comando para encerrar o processo PTY
     // Por enquanto, apenas logamos e retornamos sucesso
-    console.log(`[terminal/close] Fechando sessão ${sessionId} para usuário ${user.userId}`);
+    log.info(`[terminal/close] Fechando sessão ${sessionId} para usuário ${user.userId}`);
 
     return NextResponse.json({
       success: true,

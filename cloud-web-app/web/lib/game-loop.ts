@@ -14,6 +14,10 @@ import {
 } from './game-engine-core';
 import * as THREE from 'three';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('game-loop')
+
 export interface GameLoopConfig {
   physicsEnabled: boolean;
   sequencerEnabled: boolean;
@@ -166,7 +170,7 @@ export class GameLoop {
          this.physicsSystem.registerEntity(e, this.world);
      });
 
-     console.log("🚀 Game Loop Initialized (WASM Physics Ready)");
+     log.info("🚀 Game Loop Initialized (WASM Physics Ready)");
   }
 
   start() {

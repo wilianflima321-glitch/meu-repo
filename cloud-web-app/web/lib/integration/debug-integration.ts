@@ -6,6 +6,10 @@
 import { getDAPApiClient, DAPAdapterConfig } from '../api/dap-api';
 import { getAIApiClient } from '../api/ai-api';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('integration/debug-integration')
+
 export interface DebugSession {
   id: string;
   name: string;
@@ -74,7 +78,7 @@ export class DebugIntegration {
     await this.dapClient.configurationDone(config.name);
 
     session.status = 'running';
-    console.log(`[Debug Integration] Started session: ${config.name}`);
+    log.info(`[Debug Integration] Started session: ${config.name}`);
 
     return session;
   }
@@ -94,7 +98,7 @@ export class DebugIntegration {
     session.status = 'terminated';
     this.sessions.delete(sessionId);
 
-    console.log(`[Debug Integration] Stopped session: ${session.name}`);
+    log.info(`[Debug Integration] Stopped session: ${session.name}`);
   }
 
   /**
@@ -292,7 +296,7 @@ export class DebugIntegration {
     if (session) {
       session.status = 'stopped';
       session.threadId = threadId;
-      console.log(`[Debug Integration] Session stopped: ${reason}`);
+      log.info(`[Debug Integration] Session stopped: ${reason}`);
     }
   }
 
@@ -303,7 +307,7 @@ export class DebugIntegration {
     const session = this.sessions.get(sessionId);
     if (session) {
       session.status = 'running';
-      console.log(`[Debug Integration] Session continued`);
+      log.info(`[Debug Integration] Session continued`);
     }
   }
 
@@ -314,7 +318,7 @@ export class DebugIntegration {
     const session = this.sessions.get(sessionId);
     if (session) {
       session.status = 'terminated';
-      console.log(`[Debug Integration] Session terminated`);
+      log.info(`[Debug Integration] Session terminated`);
     }
   }
 

@@ -10,6 +10,10 @@
 import * as THREE from 'three';
 import pako from 'pako';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('level-serialization')
+
 // ============================================================================
 // TIPOS
 // ============================================================================
@@ -528,7 +532,7 @@ export class LevelSerializer {
   
   private static migrateLevel(data: SerializedLevel): SerializedLevel {
     // Add migration logic for older versions here
-    console.log(`Migrating level from version ${data.formatVersion} to ${this.FORMAT_VERSION}`);
+    log.info(`Migrating level from version ${data.formatVersion} to ${this.FORMAT_VERSION}`);
     data.formatVersion = this.FORMAT_VERSION;
     return data;
   }

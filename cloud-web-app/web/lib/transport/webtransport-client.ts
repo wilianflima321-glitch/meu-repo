@@ -16,6 +16,10 @@
 
 import { EventEmitter } from 'events';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('transport/webtransport-client')
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -724,7 +728,7 @@ export class UnifiedTransportClient extends EventEmitter {
   
   private log(...args: unknown[]): void {
     if (this.config.debug) {
-      console.log('[UnifiedTransport]', ...args);
+      log.info('[UnifiedTransport]', ...args);
     }
   }
 }

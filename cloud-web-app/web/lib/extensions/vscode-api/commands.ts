@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('extensions/vscode-api/commands')
+
+
 /**
  * VS Code Commands API Implementation
  * Provides command registration and execution
@@ -25,12 +30,12 @@ class CommandsAPI {
     }
 
     this.commands.set(command, callback);
-    console.log(`[Commands] Registered command: ${command}`);
+    log.info(`[Commands] Registered command: ${command}`);
 
     return {
       dispose: () => {
         this.commands.delete(command);
-        console.log(`[Commands] Unregistered command: ${command}`);
+        log.info(`[Commands] Unregistered command: ${command}`);
       },
     };
   }
@@ -210,7 +215,7 @@ class CommandsAPI {
    */
   private async executeBuiltInCommand(command: string, ...args: any[]): Promise<any> {
     // Mock implementation for built-in commands
-    console.log(`[Commands] Executing built-in command: ${command}`, args);
+    log.info(`[Commands] Executing built-in command: ${command}`, args);
 
     switch (command) {
       case 'workbench.action.files.save':

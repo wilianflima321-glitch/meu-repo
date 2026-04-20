@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('analytics')
+
+
 /**
  * Sistema de Analytics e Métricas - Aethel Engine
  * 
@@ -275,7 +280,7 @@ export class AnalyticsTracker {
     
     // Console em dev
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Analytics]', category, action, options);
+      log.info('[Analytics]', category, action, options);
     }
   }
   
@@ -317,7 +322,7 @@ export class AnalyticsTracker {
     this.metrics.push(metric);
     
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Performance]', name, value, unit);
+      log.info('[Performance]', name, value, unit);
     }
   }
   

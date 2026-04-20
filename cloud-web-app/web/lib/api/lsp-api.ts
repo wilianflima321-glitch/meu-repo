@@ -1,3 +1,8 @@
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/lsp-api')
+
+
 /**
  * LSP API Client
  * Handles communication with backend LSP servers
@@ -56,7 +61,7 @@ export class LSPApiClient {
     const sessionId = data.sessionId;
     this.sessions.set(config.language, sessionId);
 
-    console.log(`[LSP API] Started server for ${config.language}: ${sessionId}`);
+    log.info(`[LSP API] Started server for ${config.language}: ${sessionId}`);
     return sessionId;
   }
 
@@ -67,7 +72,7 @@ export class LSPApiClient {
     const sessionId = this.sessions.get(language);
     if (!sessionId) {
       // No active session, nothing to stop
-      console.log(`[LSP API] No active session for ${language}, skipping stop`);
+      log.info(`[LSP API] No active session for ${language}, skipping stop`);
       return;
     }
 
@@ -80,7 +85,7 @@ export class LSPApiClient {
     }
 
     this.sessions.delete(language);
-    console.log(`[LSP API] Stopped server for ${language}`);
+    log.info(`[LSP API] Stopped server for ${language}`);
   }
 
   /**

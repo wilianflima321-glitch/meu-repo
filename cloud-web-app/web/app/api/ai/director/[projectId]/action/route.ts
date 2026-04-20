@@ -11,6 +11,10 @@ import { prisma } from '@/lib/db';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { blockIfSimulationDisabled } from '@/lib/server/simulation-guard';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('api/ai/director/[projectId]/action/route')
+
 export const dynamic = 'force-dynamic';
 
 interface ActionPayload {
@@ -97,5 +101,5 @@ async function logUserFeedback(
   action: string
 ) {
   // Em produção, salvar em analytics para melhorar modelo
-  console.log(`[Director Feedback] User ${userId} ${action} note ${noteId} in project ${projectId}`);
+  log.info(`[Director Feedback] User ${userId} ${action} note ${noteId} in project ${projectId}`);
 }

@@ -20,6 +20,10 @@
 import { EventEmitter } from 'events';
 import { createClient, RedisClientType } from 'redis';
 
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('server/redis-pubsub-adapter')
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -77,7 +81,7 @@ export class RedisPubSubAdapter extends EventEmitter {
       await this.subscriber.connect();
 
       this.isConnected = true;
-      console.log(`[RedisPubSub] Connected to ${this.redisUrl} as ${this.serverId}`);
+      log.info(`[RedisPubSub] Connected to ${this.redisUrl} as ${this.serverId}`);
       this.emit('connected');
     } catch (error) {
       console.error('[RedisPubSub] Connection failed:', error);
@@ -100,7 +104,7 @@ export class RedisPubSubAdapter extends EventEmitter {
     this.subscriber = null;
     this.isConnected = false;
     
-    console.log('[RedisPubSub] Disconnected');
+    log.info('[RedisPubSub] Disconnected');
     this.emit('disconnected');
   }
 
@@ -132,7 +136,7 @@ export class RedisPubSubAdapter extends EventEmitter {
     });
 
     this.subscribedChannels.add(channel);
-    console.log(`[RedisPubSub] Subscribed to channel: ${channel}`);
+    log.info(`[RedisPubSub] Subscribed to channel: ${channel}`);
   }
 
   async unsubscribeFromChannel(channel: string): Promise<void> {
@@ -142,7 +146,7 @@ export class RedisPubSubAdapter extends EventEmitter {
     await this.subscriber.unsubscribe(redisChannel);
     
     this.subscribedChannels.delete(channel);
-    console.log(`[RedisPubSub] Unsubscribed from channel: ${channel}`);
+    log.info(`[RedisPubSub] Unsubscribed from channel: ${channel}`);
   }
 
   // ==========================================================================
