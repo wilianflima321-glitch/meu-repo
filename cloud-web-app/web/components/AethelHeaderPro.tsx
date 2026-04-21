@@ -21,6 +21,7 @@ import {
   Globe,
 } from 'lucide-react'
 import { Avatar, Badge, PlanBadge, Dropdown, type DropdownItem } from './ui'
+import { ThemeToggle } from './ui/ThemeToggle'
 import { authHeaders, isAuthenticated, logout } from '@/lib/auth'
 
 interface UserData {
@@ -279,6 +280,8 @@ export default function AethelHeader() {
 
           {/* Right Section: Search, Notifications, User */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
             {/* Global Search */}
             <button
               type="button"

@@ -93,3 +93,6 @@ export {
   VisuallyHidden,
   IconButton,
 } from './Accessibility'
+
+// Theme
+export { ThemeToggle } from './ThemeToggle'
