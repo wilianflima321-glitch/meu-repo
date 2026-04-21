@@ -172,6 +172,84 @@
   ::selection {
     background: rgba(59, 130, 246, 0.3);
   }
+
+  /*
+   * LIGHT THEME — overrides when the root carries data-theme="light" or the
+   * user's system preference is light AND no explicit override is present.
+   *
+   * Rationale (audit V5 finding #5.1):
+   *   - Dark-only products miss 35-45% of daytime mobile users.
+   *   - The Aethel ThemeContext already emits 'dark' | 'light' | 'hc-*'; this
+   *     block is what gives those preferences visible effect on the global
+   *     chrome (buttons, surfaces, borders, text).
+   *   - Semantic tokens (primary/success/error) stay anchored for brand
+   *     identity; only surface + text + border shift.
+   */
+  :root[data-theme="light"] {
+    --aethel-bg: #f7f9fc;
+    --aethel-panel: rgba(255, 255, 255, 0.86);
+    --aethel-panel-strong: rgba(255, 255, 255, 0.96);
+    --aethel-panel-soft: rgba(248, 250, 252, 0.78);
+
+    --aethel-app-background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(59, 130, 246, 0.10), transparent 70%),
+      radial-gradient(800px 500px at 90% 10%, rgba(139, 92, 246, 0.08), transparent 70%),
+      linear-gradient(180deg, rgba(247, 249, 252, 0) 0%, rgba(247, 249, 252, 0.6) 100%);
+
+    --aethel-shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.08);
+    --aethel-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.10), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
+    --aethel-shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+    --aethel-shadow-xl: 0 25px 50px -12px rgba(15, 23, 42, 0.16);
+    --aethel-shadow-glow: 0 0 0 1px rgba(59, 130, 246, 0.18), 0 0 24px rgba(59, 130, 246, 0.14);
+
+    /* Surfaces flip to near-white with progressively darker depth */
+    --aethel-surface-primary: #ffffff;
+    --aethel-surface-secondary: #f7f9fc;
+    --aethel-surface-tertiary: #eef2f7;
+    --aethel-surface-quaternary: #e2e8f0;
+    /* The QR / print surface deliberately stays pure white */
+    --aethel-surface-contrast: #ffffff;
+
+    /* Text inverts depth — near-black primary, lighter greys for hierarchy */
+    --aethel-text-primary: #0f172a;
+    --aethel-text-secondary: #334155;
+    --aethel-text-tertiary: #64748b;
+    --aethel-text-quaternary: #94a3b8;
+    /* White foreground on saturated buttons still works, so keep it */
+    --aethel-text-inverse: #ffffff;
+
+    --aethel-border-primary: rgba(15, 23, 42, 0.14);
+    --aethel-border-secondary: rgba(15, 23, 42, 0.10);
+    --aethel-border-subtle: rgba(15, 23, 42, 0.06);
+    --aethel-border-focus: rgba(59, 130, 246, 0.55);
+
+    --aethel-text-muted: #475569;
+  }
+
+  /*
+   * System-preference fallback: only applies when the root does NOT have an
+   * explicit data-theme attribute. This respects user choice (ThemeContext
+   * always sets data-theme) while matching OS when unconfigured.
+   */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme]) {
+      color-scheme: light;
+    }
+  }
+
+  /*
+   * Respect prefers-reduced-motion — disable non-essential transitions to
+   * comply with WCAG 2.1 SC 2.3.3. Keeps focus ring and opacity animations
+   * which carry state information.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer utilities {

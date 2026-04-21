@@ -109,7 +109,22 @@ const nextConfig = {
   ...(enableStandalone ? { output: 'standalone' } : {}),
   reactStrictMode: true,
   poweredByHeader: false,
-  images: { unoptimized: true },
+  // Next/Image optimization re-enabled (audit V5 finding #3.1).
+  // `unoptimized: true` used to disable WebP/AVIF, responsive srcset and
+  // Core Web Vitals compliance. `remotePatterns` keeps external avatars
+  // (pravatar.cc, GitHub avatars, etc.) working through the loader.
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      { protocol: 'https', hostname: 'i.pravatar.cc' },
+      { protocol: 'https', hostname: '**.stripe.com' },
+    ],
+    // Sensible defaults for a Next 14 + Tailwind app; tweak if LCP regresses.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
   typescript: { ignoreBuildErrors: false },
   experimental: {
     cpus: 1,
