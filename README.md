@@ -2,22 +2,41 @@
 
 Plataforma web para criação assistida por IA, com foco em Studio (`/dashboard`) e Workbench avançado (`/ide`).
 
-## Estado Atual
+## Rumo Canônico Atual
+- Documento principal de rumo, benchmark e execução: `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md`
+- Guardrail factual anti-fake-success: `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
 - Monorepo ativo com frontend principal em `cloud-web-app/web`
-- Contratos explícitos de capability/deprecation nas rotas e superfícies críticas
 - Documentação canônica centralizada em `docs/master/`
-- Política anti-fake-success aplicada como requisito de produto
-- L4 continua bloqueado por evidência operacional e runtime local incompleto
-- Auditoria definitiva com benchmark competitivo disponível em `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+- Política anti-fake-success aplicada como requisito de produto e engenharia
+
+## Norte Visual da Auditoria V5
+
+<table>
+  <tr>
+    <td><img src="docs/master/assets/auditoria-v5-2026-04-19/cursor-ide-composer-multifile.avif" alt="Cursor IDE" width="280"></td>
+    <td><img src="docs/master/assets/auditoria-v5-2026-04-19/windsurf-cascade-agent-timeline.webp" alt="Windsurf Cascade" width="280"></td>
+    <td><img src="docs/master/assets/auditoria-v5-2026-04-19/figma-design-system-atomic-to-organisms.webp" alt="Figma Design System" width="280"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/master/assets/auditoria-v5-2026-04-19/vercel-dashboard-design-language.webp" alt="Dashboard Vercel" width="280"></td>
+    <td><img src="docs/master/assets/auditoria-v5-2026-04-19/linear-density-keyboard-first.webp" alt="Linear" width="280"></td>
+    <td><img src="docs/master/assets/auditoria-v5-2026-04-19/dashboardapp-vs-linear-gold-standard.webp" alt="DashboardApp vs Linear" width="280"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/master/assets/auditoria-v5-2026-04-19/unreal-viewport-details-inspector-packt.avif" alt="Unreal Viewport + Details" width="280"></td>
+    <td><img src="docs/master/assets/auditoria-v5-2026-04-19/unreal-density-inspector-viewport-outliner-forums.avif" alt="Unreal Density + Outliner" width="280"></td>
+    <td></td>
+  </tr>
+</table>
 
 ## Fonte de Verdade
 Leia nesta ordem:
 1. `docs/master/00_INDEX.md`
 2. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-3. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-4. `docs/master/71_AETHEL_E2E_AUDIT_2026-04-07.md`
-5. `docs/master/72_UX_UI_BENCHMARK_TRIAGE_2026-04-08.md`
-6. `docs/master/73_AUDIT_RECONCILIATION_2026-04-08.md`
+3. `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md`
+4. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
+5. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+6. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
 7. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
 8. `docs/master/DEPRECATED_INDEX.md`
 
@@ -30,7 +49,7 @@ Leia nesta ordem:
 | Onboarding | 4/10 | 8/10 | 10/10 | 9/10 | 9/10 |
 | **Média** | **4.7** | **7.9** | **8.7** | **9.1** | **8.5** |
 
-Detalhes completos: `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+Detalhes completos: `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md`
 
 ## Estrutura Principal
 - `cloud-web-app/web/`: app Next.js, APIs, design system e scripts de QA
@@ -134,7 +153,7 @@ npm run qa:operator-readiness
 4. Decompor AIChatPanelPro em módulos
 5. Admin: migrar para mesma linguagem visual
 
-Ver plano completo: `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md#6-plano-de-acao-priorizado`
+Ver plano completo: `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md`
 
 ## Regras de Execução
 - Sem fake success
