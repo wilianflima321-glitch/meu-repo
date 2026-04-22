@@ -8,7 +8,7 @@ import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
 import type { Diagnostic as MonacoDiagnostic } from "@/components/editor/MonacoEditorPro";
 import type { EditorGroup, EditorTab, SplitDirection } from "@/components/editor/SplitEditor";
 import { TabProvider } from "@/components/editor/TabBar";
-import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
+import CommandPaletteProvider from "@/components/ide/CommandPalette";
 import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
 import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
 import { EditorApplyBridgeProvider } from "@/components/ide/EditorApplyBridgeContext";
@@ -20,10 +20,7 @@ import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 import {
   getAuthHeaders,
-  resolveLanguage,
   normalizePath,
-  pickFirstFilePath,
-  type WorkspaceTreeNode,
 } from '@/components/ide/fullscreen/workbench-helpers';
 import { WorkbenchSidebar } from '@/components/ide/fullscreen/WorkbenchSidebar';
 import { WorkbenchEditorPane } from '@/components/ide/fullscreen/WorkbenchEditorPane';
@@ -33,13 +30,14 @@ import {
   type EntryNotice,
 } from '@/components/ide/fullscreen/WorkbenchEntryNotice';
 import {
-  type ActiveFileState,
   type EditorPane,
   type InlineApplyResult,
   type PreviewMode,
   type SidebarTab,
 } from '@/components/ide/fullscreen/types';
 import { useWorkbenchEntryConvergence } from '@/components/ide/fullscreen/useWorkbenchEntryConvergence';
+import { useWorkbenchChrome } from '@/components/ide/fullscreen/useWorkbenchChrome';
+import { useWorkbenchFiles } from '@/components/ide/fullscreen/useWorkbenchFiles';
 import { useWorkbenchFullAccess } from '@/components/ide/fullscreen/useWorkbenchFullAccess';
 import { useWorkbenchPresence } from '@/components/ide/fullscreen/useWorkbenchPresence';
 
@@ -56,9 +54,7 @@ function IDEContent() {
   const fileParam = searchParams.get("file");
   const projectIdParam = searchParams.get("projectId");
   const entryParam = searchParams.get("entry");
-  const missionParam = searchParams.get("mission");
   const previewUrlParam = searchParams.get("previewUrl");
-  const sourceParam = searchParams.get("source");
 
   const projectId = useMemo(() => {
     if (projectIdParam && projectIdParam.trim()) {
@@ -69,16 +65,10 @@ function IDEContent() {
     return fromStorage?.trim() || "default";
   }, [projectIdParam]);
 
-  const [activeFile, setActiveFile] = useState<ActiveFileState | null>(null);
-  const [secondaryFile, setSecondaryFile] = useState<ActiveFileState | null>(null);
   const [splitEditorOpen, setSplitEditorOpen] = useState(false);
   const [splitDirection, setSplitDirection] = useState<SplitDirection>('horizontal');
   const [splitActivePane, setSplitActivePane] = useState<EditorPane>('primary');
   const [nextOpenTarget, setNextOpenTarget] = useState<EditorPane>('primary');
-  const [isReadingFile, setIsReadingFile] = useState(false);
-  const [isSavingFile, setIsSavingFile] = useState(false);
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
   const [previewEnabled, setPreviewEnabled] = useState(() => {
     if (typeof window === "undefined") return true;
     const stored = window.localStorage.getItem(PREVIEW_ENABLED_STORAGE_KEY);
@@ -117,8 +107,6 @@ function IDEContent() {
   const [showOutline, setShowOutline] = useState(false)
   const [editorDiagnostics, setEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
   const [secondaryEditorDiagnostics, setSecondaryEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
-  const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
-  const [initialFileResolved, setInitialFileResolved] = useState(false);
   const [isCompactViewport, setIsCompactViewport] = useState(false)
   const [rollbackBusy, setRollbackBusy] = useState(false)
   const [hasToken, setHasToken] = useState(false)
@@ -128,17 +116,6 @@ function IDEContent() {
   const secondaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const runtimeSyncTimerRef = useRef<number | null>(null)
   const lastRuntimeSyncAtRef = useRef<number>(0)
-
-  const bridgeActiveFile = splitActivePane === 'secondary' && secondaryFile ? secondaryFile : activeFile
-  const activeDiagnostics = splitActivePane === 'secondary' ? secondaryEditorDiagnostics : editorDiagnostics
-  const outlineSymbols = useMemo<DocumentSymbol[]>(() => {
-    if (!bridgeActiveFile) return []
-    return buildOutlineSymbols(bridgeActiveFile.content, bridgeActiveFile.language)
-  }, [bridgeActiveFile])
-
-  const [workspaceFiles, setWorkspaceFiles] = useState<FileItem[]>([])
-  const [workspaceFilesLoaded, setWorkspaceFilesLoaded] = useState(false)
-
   const {
     previewRuntimeUrl,
     previewRuntimeInput,
@@ -189,17 +166,41 @@ function IDEContent() {
     }, 1500)
   }, [previewSandboxId, isSyncingRuntime, syncRuntime])
 
+  const {
+    activeFile,
+    fileError,
+    isReadingFile,
+    isSavingFile,
+    previewRefreshTick,
+    readFile,
+    secondaryFile,
+    setActiveFile,
+    setFileError,
+    setLastSavedAt,
+    setPreviewRefreshTick,
+    setSecondaryFile,
+    workspaceFiles,
+    workspaceFilesLoaded,
+    writeFile,
+  } = useWorkbenchFiles({
+    projectId,
+    fileParam,
+    previewEnabled,
+    previewSandboxId,
+    scheduleRuntimeSync,
+    syncRuntimeFile,
+  })
+
+  const bridgeActiveFile = splitActivePane === 'secondary' && secondaryFile ? secondaryFile : activeFile
+  const activeDiagnostics = splitActivePane === 'secondary' ? secondaryEditorDiagnostics : editorDiagnostics
+  const outlineSymbols = useMemo<DocumentSymbol[]>(() => {
+    if (!bridgeActiveFile) return []
+    return buildOutlineSymbols(bridgeActiveFile.content, bridgeActiveFile.language)
+  }, [bridgeActiveFile])
+
   const openCommandPalette = useCallback((mode: 'commands' | 'files' = 'commands') => {
     window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode } }))
   }, [])
-
-  const handleBackToDashboard = useCallback(() => {
-    const params = new URLSearchParams()
-    if (projectId && projectId !== 'default') params.set('projectId', projectId)
-    if (missionParam) params.set('mission', missionParam)
-    if (sourceParam) params.set('source', sourceParam)
-    window.location.assign(params.toString() ? `/dashboard?${params.toString()}` : '/dashboard')
-  }, [missionParam, projectId, sourceParam])
 
   const handleOpenSettings = useCallback(() => {
     const params = new URLSearchParams(window.location.search)
@@ -304,398 +305,33 @@ function IDEContent() {
     projectId,
   })
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (projectId && projectId !== "default") {
-      localStorage.setItem(LAST_PROJECT_ID_STORAGE_KEY, projectId);
-    }
-  }, [projectId]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const onToggleSidebar = () => {
-      setModernPanelState((prev) => ({
-        ...prev,
-        sidebar: {
-          ...prev.sidebar,
-          open: !prev.sidebar.open,
-        },
-      }))
-    }
-
-    const onOpenAI = () => {
-      setModernPanelState((prev) => ({
-        ...prev,
-        chat: {
-          ...prev.chat,
-          open: true,
-        },
-      }))
-    }
-
-    const onToggleTerminal = () => {
-      handleSelectPreviewMode('console')
-    }
-
-    const onOpenSidebarTab = (event: Event) => {
-      const detail = (event as CustomEvent<{ tab?: 'explorer' | 'git' }>).detail
-      if (detail?.tab === 'explorer' || detail?.tab === 'git') {
-        handleSelectSidebarTab(detail.tab)
-      }
-    }
-
-    const onOpenBottomTab = (event: Event) => {
-      const detail = (event as CustomEvent<{ tab?: string }>).detail
-      if (detail?.tab === 'terminal') {
-        handleSelectPreviewMode('console')
-        return
-      }
-      if (detail?.tab === 'debug') {
-        setShowDiagnostics(true)
-      }
-    }
-
-    window.addEventListener('aethel.layout.toggleSidebar', onToggleSidebar)
-    window.addEventListener('aethel.layout.openAI', onOpenAI)
-    window.addEventListener('aethel.layout.toggleTerminal', onToggleTerminal)
-    window.addEventListener('aethel.layout.openSidebarTab', onOpenSidebarTab as EventListener)
-    window.addEventListener('aethel.layout.openBottomTab', onOpenBottomTab as EventListener)
-
-    return () => {
-      window.removeEventListener('aethel.layout.toggleSidebar', onToggleSidebar)
-      window.removeEventListener('aethel.layout.openAI', onOpenAI)
-      window.removeEventListener('aethel.layout.toggleTerminal', onToggleTerminal)
-      window.removeEventListener('aethel.layout.openSidebarTab', onOpenSidebarTab as EventListener)
-      window.removeEventListener('aethel.layout.openBottomTab', onOpenBottomTab as EventListener)
-    }
-  }, [handleSelectPreviewMode, handleSelectSidebarTab])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    setHasToken(Boolean(window.localStorage.getItem('token')))
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!projectId) return
-    let cancelled = false
-
-    const flattenTree = (nodes: Array<{ name: string; path: string; type: 'file' | 'directory'; children?: any[] }>): FileItem[] => {
-      const out: FileItem[] = []
-      const walk = (list: any[]) => {
-        for (const node of list) {
-          if (!node || typeof node.path !== 'string' || typeof node.name !== 'string') continue
-          const nodeType = node.type === 'directory' ? 'folder' : 'file'
-          out.push({
-            path: node.path,
-            name: node.name,
-            type: nodeType,
-          })
-          if (Array.isArray(node.children) && node.children.length) {
-            walk(node.children)
-          }
-        }
-      }
-      walk(nodes)
-      return out
-    }
-
-    const load = async () => {
-      try {
-        const res = await fetch('/api/files/tree', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-project-id': projectId,
-          },
-          body: JSON.stringify({ path: '/', maxDepth: 6, projectId }),
-        })
-        if (!res.ok) {
-          if (!cancelled) {
-            setWorkspaceFiles([])
-            setWorkspaceFilesLoaded(true)
-          }
-          return
-        }
-        const data = (await res.json().catch(() => null)) as any
-        const rawTree = Array.isArray(data?.children)
-          ? data.children
-          : Array.isArray(data?.tree)
-            ? data.tree
-            : []
-        const flattened = flattenTree(rawTree)
-        if (!cancelled) {
-          setWorkspaceFiles(flattened)
-          setWorkspaceFilesLoaded(true)
-        }
-      } catch {
-        if (!cancelled) {
-          setWorkspaceFiles([])
-          setWorkspaceFilesLoaded(true)
-        }
-      }
-    }
-
-    void load()
-
-    return () => {
-      cancelled = true
-    }
-  }, [projectId])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const onCommand = (event: Event) => {
-      const detail = (event as CustomEvent<{ command?: string }>).detail
-      const command = detail?.command
-      if (!command) return
-
-      switch (command) {
-        case 'workbench.action.quickOpen':
-          openCommandPalette('files')
-          return
-        case 'workbench.action.showCommands':
-          openCommandPalette('commands')
-          return
-        case 'workbench.action.toggleSidebarVisibility':
-          emitLayoutEvent('aethel.layout.toggleSidebar')
-          return
-        case 'workbench.action.terminal.toggleTerminal':
-          emitLayoutEvent('aethel.layout.toggleTerminal')
-          return
-        case 'undo':
-          handleEditorUndo()
-          return
-        case 'redo':
-          handleEditorRedo()
-          return
-        case 'actions.find':
-          handleEditorFind()
-          return
-        case 'editor.action.startFindReplaceAction':
-          handleEditorReplace()
-          return
-        case 'aethel.ai.inlineChat':
-          handleAIInline()
-          return
-        case 'aethel.ai.openChat':
-          handleAIPanel()
-          return
-        default:
-          return
-      }
-    }
-
-    window.addEventListener('aethel:command', onCommand as EventListener)
-    return () => window.removeEventListener('aethel:command', onCommand as EventListener)
-  }, [emitLayoutEvent, handleAIInline, handleAIPanel, handleEditorFind, handleEditorRedo, handleEditorReplace, handleEditorUndo, openCommandPalette])
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(PREVIEW_ENABLED_STORAGE_KEY, previewEnabled ? "1" : "0");
-  }, [previewEnabled]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(PANEL_STATE_STORAGE_KEY, JSON.stringify(modernPanelState));
-  }, [modernPanelState]);
-
-  useEffect(() => {
-    setModernPanelState((prev) => ({
-      ...prev,
-      preview: {
-        ...prev.preview,
-        open: previewEnabled,
-      },
-    }));
-  }, [previewEnabled]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const update = () => {
-      setIsCompactViewport(window.innerWidth < 1024)
-    }
-    update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [])
-
-  const readFile = useCallback(
-    async (path: string, targetPane: EditorPane = 'primary') => {
-      const normalizedPath = normalizePath(path);
-      setIsReadingFile(true);
-      setFileError(null);
-
-      try {
-        const response = await fetch("/api/files/fs", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-project-id": projectId,
-          },
-          body: JSON.stringify({
-            action: "read",
-            path: normalizedPath,
-            projectId,
-          }),
-        });
-
-        if (!response.ok) {
-          const bodyText = await response.text();
-          throw new Error(bodyText || `Falha ao ler (HTTP ${response.status})`);
-        }
-
-        const payload = await response.json();
-        const content = typeof payload?.content === "string" ? payload.content : "";
-
-        const nextFile = {
-          path: normalizedPath,
-          content,
-          language: resolveLanguage(normalizedPath),
-        };
-
-        if (targetPane === 'secondary') {
-          setSecondaryFile(nextFile);
-          setSplitEditorOpen(true);
-          setSplitActivePane('secondary');
-          setNextOpenTarget('primary');
-        } else {
-          setActiveFile(nextFile);
-          setSplitActivePane('primary');
-        }
-        setLastSavedAt(null);
-      } catch (error) {
-        setFileError(error instanceof Error ? error.message : "Não foi possível ler o arquivo.");
-      } finally {
-        setIsReadingFile(false);
-      }
-    },
-    [projectId]
-  );
-
-  const writeFile = useCallback(
-    async (path: string, content: string) => {
-      const normalizedPath = normalizePath(path);
-      setIsSavingFile(true);
-      setFileError(null);
-      try {
-        const response = await fetch("/api/files/fs", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-project-id": projectId,
-          },
-          body: JSON.stringify({
-            action: "write",
-            path: normalizedPath,
-            content,
-            projectId,
-          }),
-        });
-        if (!response.ok) {
-          const bodyText = await response.text();
-          throw new Error(bodyText || `Falha ao salvar (HTTP ${response.status})`);
-        }
-        setLastSavedAt(new Date());
-        setPreviewRefreshTick((prev) => prev + 1);
-        analytics?.track?.("project", "project_save", {
-          metadata: {
-            source: "ide-editor",
-            projectId,
-            file: normalizedPath,
-          },
-        });
-        window.dispatchEvent(new CustomEvent('aethel.ide.fileMutation', {
-          detail: {
-            projectId,
-            path: normalizedPath,
-            operation: 'write',
-            timestamp: new Date().toISOString(),
-          },
-        }))
-        if (previewEnabled && previewSandboxId) {
-          void syncRuntimeFile(normalizedPath).then((synced) => {
-            if (!synced) scheduleRuntimeSync()
-          })
-        }
-      } catch (error) {
-        setFileError(error instanceof Error ? error.message : "Não foi possível salvar o arquivo.");
-      } finally {
-        setIsSavingFile(false);
-      }
-    },
-    [projectId, previewEnabled, previewSandboxId, scheduleRuntimeSync, syncRuntimeFile]
-  );
+  useWorkbenchChrome({
+    lastProjectIdStorageKey: LAST_PROJECT_ID_STORAGE_KEY,
+    previewEnabledStorageKey: PREVIEW_ENABLED_STORAGE_KEY,
+    panelStateStorageKey: PANEL_STATE_STORAGE_KEY,
+    projectId,
+    previewEnabled,
+    modernPanelState,
+    setModernPanelState,
+    setShowDiagnostics,
+    setHasToken,
+    setIsCompactViewport,
+    handleSelectPreviewMode,
+    handleSelectSidebarTab,
+    openCommandPalette,
+    emitLayoutEvent,
+    handleEditorUndo,
+    handleEditorRedo,
+    handleEditorFind,
+    handleEditorReplace,
+    handleAIInline,
+    handleAIPanel,
+  })
 
   const handleSaveActiveFile = useCallback(() => {
     if (!activeFile) return
     void writeFile(activeFile.path, activeFile.content)
   }, [activeFile, writeFile])
-
-  useEffect(() => {
-    if (!fileParam) return;
-    const normalized = normalizePath(fileParam);
-    if (activeFile?.path === normalized) return;
-    void readFile(normalized);
-    setInitialFileResolved(true);
-  }, [fileParam, activeFile?.path, readFile]);
-
-  useEffect(() => {
-    if (fileParam || initialFileResolved || activeFile || isReadingFile) return;
-    let cancelled = false;
-
-    const resolveInitialFile = async () => {
-      try {
-        const response = await fetch("/api/files/tree", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-project-id": projectId,
-          },
-          body: JSON.stringify({
-            path: "/",
-            maxDepth: 5,
-            projectId,
-          }),
-        });
-
-        if (!response.ok) {
-          setInitialFileResolved(true);
-          return;
-        }
-
-        const payload = await response.json();
-        const treeNodes = Array.isArray(payload?.children)
-          ? (payload.children as WorkspaceTreeNode[])
-          : Array.isArray(payload?.tree)
-            ? (payload.tree as WorkspaceTreeNode[])
-            : [];
-        const firstFile = pickFirstFilePath(treeNodes);
-        if (!firstFile) {
-          setInitialFileResolved(true);
-          return;
-        }
-        if (!cancelled) {
-          analytics?.track?.("project", "project_open", {
-            metadata: {
-              source: "ide-auto-open",
-              projectId,
-              file: firstFile,
-            },
-          });
-          await readFile(firstFile);
-        }
-      } finally {
-        if (!cancelled) setInitialFileResolved(true);
-      }
-    };
-
-    void resolveInitialFile();
-    return () => {
-      cancelled = true;
-    };
-  }, [activeFile, fileParam, initialFileResolved, isReadingFile, projectId, readFile]);
 
   useEffect(() => {
     if (!activeFile?.path) {
