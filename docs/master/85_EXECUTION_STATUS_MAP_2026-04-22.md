@@ -75,7 +75,7 @@ This document fills that gap.
 
 ### P1 — highly visible debt
 1. root hygiene
-   - loose files and dual Playwright configs still communicate ambiguity
+   - loose files still communicate ambiguity, but dual Playwright config naming ambiguity is now resolved
 2. raw visual drift
    - raw hex colors still exist across tracked component code
 3. console migration

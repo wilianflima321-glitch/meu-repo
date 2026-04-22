@@ -149,8 +149,8 @@ jobs:
           set -eo pipefail
           if [ -f playwright.config.ts ]; then
             PLAYWRIGHT_CONFIG=playwright.config.ts
-          elif [ -f playwright.config.js ]; then
-            PLAYWRIGHT_CONFIG=playwright.config.js
+          elif [ -f playwright.legacy.config.js ]; then
+            PLAYWRIGHT_CONFIG=playwright.legacy.config.js
           else
             PLAYWRIGHT_CONFIG=""
           fi

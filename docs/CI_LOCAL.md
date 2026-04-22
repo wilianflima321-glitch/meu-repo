@@ -41,8 +41,10 @@ bash tools/ci/smoke_ci.sh
 Run Playwright locally
 
 ```bash
-# Prefer using a Playwright config when present:
+# Canonical product E2E:
 npx playwright test --config=playwright.config.ts --reporter=html
+# Legacy root-level mock/backend specs:
+npx playwright test --config=playwright.legacy.config.js --reporter=html
 # Or run a single test file directly if you don't have a config with projects:
 npx playwright test playwright/test.spec.ts --reporter=html
 # report will be in playwright-report/
@@ -60,7 +62,7 @@ Generate a Playwright summary text file
 1. Run Playwright with the JSON reporter enabled, for example:
 
 	```bash
-	npx playwright test --config=playwright.config.js --reporter="line,json=test-results/playwright.json,html"
+	npx playwright test --config=playwright.legacy.config.js --reporter="line,json=test-results/playwright.json,html"
 	```
 
 2. Convert the JSON results into the tracked summary file:

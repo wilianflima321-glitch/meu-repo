@@ -93,7 +93,9 @@ Canonical set reference:
 - Broad grep still finds roughly `1305` raw hex matches across tracked component TS/TSX files.
 - tracked `console.*` still returns roughly `426` matches in `lib` and `172` in `components`.
 - Admin remains oversized at `46` page surfaces.
-- Root hygiene still needs a cleanup pass over loose files and duplicate Playwright configs.
+- Root hygiene still needs a cleanup pass over loose files, but the ambiguous dual Playwright config state was resolved:
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\playwright.config.ts` = canonical product E2E
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\playwright.legacy.config.js` = legacy mock/backend suite
 - Current short page wrappers still exist in:
   - `cloud-web-app/web/app/page.tsx`
   - `cloud-web-app/web/app/(auth)/login/page.tsx`

@@ -1,4 +1,5 @@
-// Note: Import from @playwright/test/reporter to avoid double-require issue
+﻿// Legacy Playwright suite for root-level mock/backend specs.
+// Canonical product E2E lives in `playwright.config.ts`.
 const { devices } = require('@playwright/test');
 
 module.exports = {
@@ -7,12 +8,12 @@ module.exports = {
   testIgnore: [
     '**/node_modules/**',
     '**/lib/**',
-    // Subprojetos/forks possuem muitos *.spec.ts que não são Playwright E2E
-    // (ex.: testes unitários com decorators, chai/mocha, etc.).
+    // Subprojetos/forks possuem muitos *.spec.ts que nao sao Playwright E2E
+    // (ex.: testes unitarios com decorators, chai/mocha, etc.).
     '**/cloud-ide-desktop/**',
     '**/cloud-admin-ia/**',
     '**/cloud-web-app/**',
-    // Cópia aninhada do repositório (evita duplicar/rodar specs errados)
+    // Copia aninhada do repositorio (evita duplicar/rodar specs errados)
     '**/meu-repo/meu-repo/**'
   ],
   timeout: 30000,
@@ -22,9 +23,7 @@ module.exports = {
     ['html', { outputFolder: 'playwright-report' }],
     ['json', { outputFile: 'test-results/playwright.json' }]
   ],
-  
-  // Use a webServer to automatically start the mock backend.
-  // This is more reliable than running it as a separate background process.
+
   webServer: {
     command: 'npm run dev:mock-backend',
     url: 'http://localhost:8010',
@@ -35,7 +34,6 @@ module.exports = {
   },
 
   use: {
-    // All requests from the 'request' fixture will be prefixed with this baseURL.
     baseURL: 'http://localhost:8010',
     trace: 'on-first-retry',
   },

@@ -79,10 +79,11 @@ Hoje o root ainda contém arquivos que confundem o papel do monorepo e aumentam 
 - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\executor.spec.ts`
 - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\accessibility.spec.ts`
 - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\integration-test.spec.ts`
-- `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\playwright.config.js`
+- `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\playwright.legacy.config.js`
 - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\playwright.config.ts`
 
 Direção correta: consolidar root e tornar claro o que é runtime, o que é tooling e o que é legado.
+Melhora já aplicada: a ambiguidade entre duas configs com o mesmo papel foi resolvida; agora existe uma config canônica e uma config legada explicitamente nomeada.
 
 ### 2. O overload documental é real
 A crítica continua válida, mesmo depois da hierarquia `81/82/83`.
