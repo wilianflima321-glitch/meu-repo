@@ -51,15 +51,15 @@ Ela reforça e explicita pontos que as auditorias `82` e `83` já tangenciavam, 
 ## Snapshot Reconciliado do Estado Atual
 Este documento não reaproveita cegamente os números do PDF. Abaixo está a leitura reconciliada com o branch atual `632775aa4`.
 
-- tracked repo files: `5480`
+- tracked repo files: `5487`
 - tracked repo size: `~60.14 MB`
-- `docs/master` files: `105`
+- `docs/master` files: `106`
 - `cloud-web-app/web/app/**/page.tsx`: `80`
 - `cloud-web-app/web/app/api/**/route.ts`: `320`
 - `cloud-web-app/web/app/admin/**/page.tsx`: `46`
 - `cloud-web-app/web/components/**/*.tsx`: `311`
 - `cloud-web-app/web/lib/**/*.ts`: `345`
-- tracked test files (`*.test.*` + `*.spec.*`): `53`
+- tracked test files (real `*.test.*` / `*.spec.*`, excluding snapshot assets): `45`
 - current branch is typechecking green again after compatibility repairs
 
 ## Claims da Nova Auditoria Que Continuam Fortes
@@ -140,7 +140,7 @@ Leitura correta:
 O PDF tratou a suíte como quase inexistente.
 Direcionalmente a crítica continua válida, mas o número literal já não representa o estado atual.
 
-Hoje o repositório rastreado contém `53` arquivos `*.test.*` / `*.spec.*`.
+Hoje o repositório rastreado contém `45` arquivos reais `*.test.*` / `*.spec.*`.
 
 Leitura correta:
 - pressão de teste ainda é insuficiente para o tamanho do produto

@@ -16,15 +16,15 @@ Canonical set reference:
 - Este documento é a referência de priorização factual até novo refresh.
 
 ## Factual Snapshot Verified On 2026-04-22
-- Git tracked files: `5465`
-- Git tracked size: `53.02 MB`
+- Git tracked files: `5487`
+- Git tracked size: `60.91 MB`
 - On-disk workspace size after installed dependencies: `2082.77 MB`
 - `cloud-web-app/web/app/**/page.tsx`: `80`
 - `cloud-web-app/web/app/api/**/route.ts`: `320`
-- `cloud-web-app/web/components/**/*.tsx`: `448`
-- `cloud-web-app/web/lib/**/*.ts`: `363`
-- `cloud-web-app/web/app/admin/**/page.tsx`: `45`
-- `docs/master/*`: `103`
+- `cloud-web-app/web/components/**/*.tsx`: `311`
+- `cloud-web-app/web/lib/**/*.ts`: `345`
+- `cloud-web-app/web/app/admin/**/page.tsx`: `46`
+- `docs/master/*`: `106`
 - `AETHEL_INTERFACE_BLUEPRINTS/*`: `17`
 - `cloud-web-app/web/public/locales/en/*.json` top-level keys: `20`
 - `cloud-web-app/web/public/locales/pt-BR/*.json` top-level keys: `12`
@@ -32,6 +32,7 @@ Canonical set reference:
 - `cloud-web-app/web/jest.config.ts`: `collectCoverage: process.env.CI === 'true' || process.env.COVERAGE === '1'`
 - `cloud-web-app/web/lighthouserc.js`: present
 - `cloud-web-app/web/prisma/migrations/`: seeded with `migration_lock.toml` + `MIGRATIONS.md`
+- root orphan candidates still visible: `20`
 
 ## Audit Claims That Still Match Reality
 - The product thesis is coherent: Studio + Workbench + AI + Preview + Billing + Admin under a single shell direction.
@@ -42,7 +43,12 @@ Canonical set reference:
 - The latest refactor wave already extracted bounded responsibilities out of the two monoliths:
   - `cloud-web-app/web/components/ai-chat/useChatContextPreviews.ts`
   - `cloud-web-app/web/components/ide/fullscreen/useWorkbenchFullAccess.ts`
-- Admin is still too large at `45` pages.
+- The current canonical audit set is now explicitly four-part:
+  - `82` = direction
+  - `83` = systems/interfaces
+  - `84` = repository/CI/CD/governance
+  - `81` = factual guardrail
+- Admin is still too large at `46` pages.
 - Tests are still materially insufficient relative to product surface.
 - i18n is still materially insufficient.
 - Collaboration UI primitives now exist and header-level presence is visible in the workbench shell, but the UX is still not fully integrated in the editor canvas itself.
@@ -69,17 +75,19 @@ Canonical set reference:
 ## Current Structural Risks
 ### P0
 - `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is still about `1755` lines.
-- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is still about `954` lines.
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is still about `933` lines.
 - `cloud-web-app/web/tsconfig.json` still has `"noImplicitAny": false`.
 - tracked `: any` usage in web TS/TSX is still around `1059`.
 - coverage pressure exists now, but the suite is still far too small for the surface area.
 - collaboration is still not fully visible inside the primary editor canvas.
 - the branch is typechecking again only after restoring a minimal active compatibility surface for `lib/index.ts` and `lib/sequencer-cinematics.ts`.
+- CI policy-vs-enforcement is now confirmed as a live gap by `84`: `qa:enterprise-gate` exists in policy, but is not the direct CI gate today.
 
 ### P1
 - Broad grep still finds roughly `1305` raw hex matches across tracked component TS/TSX files.
-- tracked `console.*` still returns roughly `285` matches in `lib` and `151` in `components`.
-- Admin remains oversized at `45` page surfaces.
+- tracked `console.*` still returns roughly `426` matches in `lib` and `172` in `components`.
+- Admin remains oversized at `46` page surfaces.
+- Root hygiene still needs a cleanup pass over loose files and duplicate Playwright configs.
 - Current short page wrappers still exist in:
   - `cloud-web-app/web/app/page.tsx`
   - `cloud-web-app/web/app/(auth)/login/page.tsx`
@@ -106,7 +114,7 @@ Canonical set reference:
   - full shared editing loop with visible remote cursors in the primary editing experience
 
 ## Verified Test State
-- Tracked tests currently found: `23`
+- Tracked tests currently found: `45`
 - This is better than older snapshots, but it is still far from acceptable given product scope and `320` API routes.
 
 ## Verified Design-System State
@@ -135,6 +143,7 @@ Canonical set reference:
    - keep Storybook green
    - expand story/test coverage
    - make Lighthouse and coverage gates part of the release pressure, not decoration
+   - close the CI mismatch called out by `84` so policy and branch protection stop overstating enforcement
 3. Turn off implicit drift in TypeScript:
    - move toward `noImplicitAny: true`
    - reduce `: any` from ~`1059`

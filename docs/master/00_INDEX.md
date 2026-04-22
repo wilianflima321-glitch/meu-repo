@@ -26,15 +26,16 @@ Status: CANONICAL ENTRYPOINT
 21. `docs/master/83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md`
 22. `docs/master/84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22.md`
 23. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
-24. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-25. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
-26. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
-27. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
-28. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
-29. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-30. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-31. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-32. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+24. `docs/master/85_EXECUTION_STATUS_MAP_2026-04-22.md`
+25. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+26. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
+27. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+28. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
+29. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
+30. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+31. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+32. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+33. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -101,6 +102,7 @@ Rules:
 | `82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md` | Auditoria V5 principal de rumo, benchmark e qualidade com referÃªncias visuais locais e plano mestre detalhado | ACTIVE (PRIMARY DIRECTIONAL AUDIT) |
 | `83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md` | Auditoria complementar de sistemas e interfaces importada de PDF, reconciliada com o branch atual e preservada com as figuras locais | ACTIVE (PRIMARY COMPLEMENTARY AUDIT) |
 | `84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22.md` | Auditoria complementar de repositório, CI/CD e plano de ação importada de PDF, reconciliada com o branch atual e preservada com previews de páginas-chave | ACTIVE (PRIMARY COMPLEMENTARY AUDIT — REPO/EXECUTION) |
+| `85_EXECUTION_STATUS_MAP_2026-04-22.md` | Mapa executivo do que já foi feito, do que ainda falta e da ordem de execução sem drift entre 81, 82, 83 e 84 | ACTIVE (EXECUTION SNAPSHOT) |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -231,6 +233,7 @@ Rules:
 - Do not use `docs/archive/` as source of truth.
 - Do not claim completion without file-level evidence.
 - Do not treat legacy non-numbered docs in `docs/master/` as canonical if a numbered replacement or blueprint exists.
+
 
 
 
