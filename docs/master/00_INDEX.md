@@ -1,4 +1,4 @@
-# 00_INDEX
+﻿# 00_INDEX
 Date: 2026-03-20
 Status: CANONICAL ENTRYPOINT
 
@@ -24,16 +24,17 @@ Status: CANONICAL ENTRYPOINT
 19. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
 20. `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md`
 21. `docs/master/83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md`
-22. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
-23. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-24. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
-25. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
-26. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
-27. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
-28. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-29. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-30. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-31. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+22. `docs/master/84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22.md`
+23. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
+24. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+25. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
+26. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+27. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
+28. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
+29. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+30. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+31. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+32. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -84,7 +85,7 @@ Rules:
 | `38_L5_EXECUTION_BOARD_2026-03-10.md` | Master tracking board for L4/L5 execution | ACTIVE |
 | `39_STUDIO_UNIFIED_INFORMATION_ARCHITECTURE_2026-03-11.md` | Unified Studio information architecture and navigation contract | ACTIVE |
 | `40_L5_CONSOLIDATED_EXECUTION_PLAN_2026-03-18.md` | Consolidated L5 execution plan and dependency graph | ACTIVE |
-| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificação) | HISTORICAL DRAFT |
+| `41_AUDITORIA_MAXIMA_2026-03-20.md` | Maxima auditoria (draft, precisa verificaÃ§Ã£o) | HISTORICAL DRAFT |
 | `65_STUDIO_PRODUCT_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for navigation, layers, screens and handoffs | ACTIVE |
 | `66_AI_OPERATIONAL_EXPERIENCE_BLUEPRINT_2026-03-24.md` | Figma-ready blueprint for multi-agent UX, status, cost, confidence, approvals, memory and context | ACTIVE |
 | `68_L5_UX_HARDENING_DELTA_2026-04-01.md` | L5 UX hardening sweep summary | ACTIVE |
@@ -97,8 +98,9 @@ Rules:
 | `79_TUDO_QUE_PRECISA_SABER_2026-04-12.md` | Compilacao de thesis, benchmark, gaps e prioridades da plataforma inteira | ACTIVE |
 | `80_CONVERSA_10_10_2026-04-12.md` | Mapa de conversa e critica continua para fechar a plataforma web + IDE + app | ACTIVE |
 | `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` | Backlog validado contra o estado real do repo com correcoes de claims e prioridade executiva | ACTIVE (FACTUAL GUARDRAIL) |
-| `82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md` | Auditoria V5 principal de rumo, benchmark e qualidade com referências visuais locais e plano mestre detalhado | ACTIVE (PRIMARY DIRECTIONAL AUDIT) |
+| `82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md` | Auditoria V5 principal de rumo, benchmark e qualidade com referÃªncias visuais locais e plano mestre detalhado | ACTIVE (PRIMARY DIRECTIONAL AUDIT) |
 | `83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md` | Auditoria complementar de sistemas e interfaces importada de PDF, reconciliada com o branch atual e preservada com as figuras locais | ACTIVE (PRIMARY COMPLEMENTARY AUDIT) |
+| `84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22.md` | Auditoria complementar de repositório, CI/CD e plano de ação importada de PDF, reconciliada com o branch atual e preservada com previews de páginas-chave | ACTIVE (PRIMARY COMPLEMENTARY AUDIT — REPO/EXECUTION) |
 
 ## Core Specs
 | Doc | Scope | Status |
@@ -229,6 +231,8 @@ Rules:
 - Do not use `docs/archive/` as source of truth.
 - Do not claim completion without file-level evidence.
 - Do not treat legacy non-numbered docs in `docs/master/` as canonical if a numbered replacement or blueprint exists.
+
+
 
 
 

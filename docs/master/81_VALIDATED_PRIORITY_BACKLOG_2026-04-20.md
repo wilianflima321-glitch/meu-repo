@@ -4,6 +4,11 @@ Last refreshed: 2026-04-22
 Status: ACTIVE
 Purpose: Registrar, sem deriva e sem inflar claims, o que da auditoria end-to-end realmente confere no repositório atual e qual é a prioridade operacional a partir daqui.
 
+Canonical set reference:
+- `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md` = rumo principal
+- `docs/master/83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md` = sistemas e interfaces
+- `docs/master/84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22.md` = repositório, CI/CD e governança operacional
+
 ## Executive Summary
 - A auditoria de 2026-04-20 está **parcialmente alinhada** com o estado real do repositório.
 - O diagnóstico macro continua correto: design system ainda drifta, os god components ainda são o maior gargalo do produto, colaboração/preview ainda não fecharam o loop end-to-end, testes e i18n continuam muito atrás do necessário.

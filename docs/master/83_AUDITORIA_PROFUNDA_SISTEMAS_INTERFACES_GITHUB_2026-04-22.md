@@ -12,7 +12,9 @@ Use the set together:
    Strategic direction, market benchmark, and quality bar.
 2. `docs/master/83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md`
    Systems + interfaces deep-dive imported from the PDF audit, reconciled against the current GitHub branch.
-3. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
+3. `docs/master/84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22.md`
+   Repository, CI/CD, root hygiene, and execution-plan complementary audit.
+4. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
    Anti-fake-success factual guardrail for counts, claims, and repo reality.
 
 ## Why This Document Exists

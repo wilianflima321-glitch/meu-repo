@@ -5,6 +5,7 @@ Plataforma web para criação assistida por IA, com foco em Studio (`/dashboard`
 ## Rumo Canônico Atual
 - Documento principal de rumo, benchmark e execução: `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md`
 - Auditoria complementar principal de sistemas e interfaces: `docs/master/83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md`
+- Auditoria complementar principal de repositório, CI/CD e plano de ação: `docs/master/84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22.md`
 - Guardrail factual anti-fake-success: `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
 - Monorepo ativo com frontend principal em `cloud-web-app/web`
 - Documentação canônica centralizada em `docs/master/`
@@ -30,17 +31,28 @@ Plataforma web para criação assistida por IA, com foco em Studio (`/dashboard`
   </tr>
 </table>
 
+## Prévia da Auditoria de Repositório + Plano de Ação
+
+<table>
+  <tr>
+    <td><img src="docs/master/assets/auditoria-repositorio-plano-acao-2026-04-22/page-01.png" alt="Auditoria repositório capa" width="280"></td>
+    <td><img src="docs/master/assets/auditoria-repositorio-plano-acao-2026-04-22/page-03.png" alt="Auditoria repositório root hygiene" width="280"></td>
+    <td><img src="docs/master/assets/auditoria-repositorio-plano-acao-2026-04-22/page-05.png" alt="Auditoria repositório CI CD" width="280"></td>
+  </tr>
+</table>
+
 ## Fonte de Verdade
 Leia nesta ordem:
 1. `docs/master/00_INDEX.md`
 2. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
 3. `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md`
 4. `docs/master/83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md`
-5. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
-6. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
-7. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-8. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
-9. `docs/master/DEPRECATED_INDEX.md`
+5. `docs/master/84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22.md`
+6. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
+7. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+8. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+9. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
+10. `docs/master/DEPRECATED_INDEX.md`
 
 ## Benchmark Competitivo (2026-04-11)
 | Dimensão | Aethel | Cursor | Replit | Linear | v0/Vercel |
