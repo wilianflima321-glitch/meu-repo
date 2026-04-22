@@ -23,16 +23,17 @@ Status: CANONICAL ENTRYPOINT
 18. `docs/master/74_GENSPARK_PATCH_REVIEW_2026-04-10.md`
 19. `docs/master/75_DESIGN_SYSTEM_UNIFICATION_GUIDE_2026-04-10.md`
 20. `docs/master/82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md`
-21. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
-22. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-23. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
-24. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
-25. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
-26. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
-27. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-28. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-29. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-30. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+21. `docs/master/83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md`
+22. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
+23. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+24. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
+25. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+26. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
+27. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
+28. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+29. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+30. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+31. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -97,6 +98,7 @@ Rules:
 | `80_CONVERSA_10_10_2026-04-12.md` | Mapa de conversa e critica continua para fechar a plataforma web + IDE + app | ACTIVE |
 | `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` | Backlog validado contra o estado real do repo com correcoes de claims e prioridade executiva | ACTIVE (FACTUAL GUARDRAIL) |
 | `82_AUDITORIA_V5_AETHEL_ENGINE_DEEP_2026-04-19.md` | Auditoria V5 principal de rumo, benchmark e qualidade com referências visuais locais e plano mestre detalhado | ACTIVE (PRIMARY DIRECTIONAL AUDIT) |
+| `83_AUDITORIA_PROFUNDA_SISTEMAS_INTERFACES_GITHUB_2026-04-22.md` | Auditoria complementar de sistemas e interfaces importada de PDF, reconciliada com o branch atual e preservada com as figuras locais | ACTIVE (PRIMARY COMPLEMENTARY AUDIT) |
 
 ## Core Specs
 | Doc | Scope | Status |
