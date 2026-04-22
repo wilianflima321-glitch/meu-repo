@@ -2,87 +2,50 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import useSWR from "swr";
 import type * as monacoEditor from 'monaco-editor'
 import CollaboratorsBar from "@/components/collaboration/CollaboratorsBar";
-import FileExplorerPro from "@/components/ide/FileExplorerPro";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
-import CanonicalPreviewSurface from "@/components/preview/CanonicalPreviewSurface";
-import PreviewRuntimeToolbar from "@/components/ide/PreviewRuntimeToolbar";
-import TabBar, { TabProvider } from "@/components/editor/TabBar";
-import MonacoEditorPro from "@/components/editor/MonacoEditorPro";
 import type { Diagnostic as MonacoDiagnostic } from "@/components/editor/MonacoEditorPro";
-import SplitEditor, { type EditorGroup, type EditorTab, type SplitDirection } from "@/components/editor/SplitEditor";
+import type { EditorGroup, EditorTab, SplitDirection } from "@/components/editor/SplitEditor";
+import { TabProvider } from "@/components/editor/TabBar";
 import CommandPaletteProvider, { type FileItem } from "@/components/ide/CommandPalette";
 import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
 import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
 import { EditorApplyBridgeProvider } from "@/components/ide/EditorApplyBridgeContext";
 import { IdeWorkbenchCommandExtras } from "@/components/ide/IdeWorkbenchCommandExtras";
-import { DevicePreview } from "@/components/ide/DevicePreview";
-import { ConsoleIntegration } from "@/components/ide/ConsoleIntegration";
-import { GitIntegration } from "@/components/ide/GitIntegration";
-import { IntelliSense } from "@/components/ide/IntelliSense";
-import { ErrorHighlighting } from "@/components/ide/ErrorHighlighting";
-import OutlinePanel, { type DocumentSymbol } from "@/components/outline/OutlinePanel";
+import type { DocumentSymbol } from "@/components/outline/OutlinePanel";
 import { buildOutlineSymbols } from "@/components/outline/outline-parser";
 import { analytics } from "@/lib/analytics";
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
-import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 import {
   getAuthHeaders,
   resolveLanguage,
   normalizePath,
-  collaborationColorForUser,
   pickFirstFilePath,
   type WorkspaceTreeNode,
 } from '@/components/ide/fullscreen/workbench-helpers';
+import { WorkbenchSidebar } from '@/components/ide/fullscreen/WorkbenchSidebar';
+import { WorkbenchEditorPane } from '@/components/ide/fullscreen/WorkbenchEditorPane';
+import { WorkbenchPreviewPane } from '@/components/ide/fullscreen/WorkbenchPreviewPane';
 import {
   WorkbenchEntryNotice,
   type EntryNotice,
 } from '@/components/ide/fullscreen/WorkbenchEntryNotice';
+import {
+  type ActiveFileState,
+  type EditorPane,
+  type InlineApplyResult,
+  type PreviewMode,
+  type SidebarTab,
+} from '@/components/ide/fullscreen/types';
+import { useWorkbenchEntryConvergence } from '@/components/ide/fullscreen/useWorkbenchEntryConvergence';
 import { useWorkbenchFullAccess } from '@/components/ide/fullscreen/useWorkbenchFullAccess';
+import { useWorkbenchPresence } from '@/components/ide/fullscreen/useWorkbenchPresence';
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
 const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
 const PANEL_STATE_STORAGE_KEY = "aethel.workbench.panelState";
-
-type ActiveFileState = {
-  path: string;
-  content: string;
-  language: string;
-};
-
-type EditorPane = 'primary' | 'secondary';
-
-type CollaborationRoomParticipant = {
-  userId: string
-  status: 'online' | 'away' | 'offline' | string
-  lastSeen: string
-  user?: {
-    name?: string | null
-    avatar?: string | null
-  } | null
-}
-
-type CollaborationRoomSummary = {
-  id: string
-  name: string
-  updatedAt: string
-  participants: CollaborationRoomParticipant[]
-}
-
-type CollaborationRoomsResponse = {
-  success: boolean
-  rooms: CollaborationRoomSummary[]
-}
-
-type InlineApplyResult = {
-  runId?: string
-  rollbackToken?: string
-  message?: string
-  filePath?: string
-}
 
 // NOTE: Workbench helpers + EntryNotice type + WorkbenchEntryNotice component
 // live in components/ide/fullscreen/{workbench-helpers,WorkbenchEntryNotice}
@@ -146,8 +109,8 @@ function IDEContent() {
       return fallback;
     }
   });
-  const [previewMode, setPreviewMode] = useState<'runtime' | 'device' | 'console' | 'viewport3d'>('runtime')
-  const [sidebarTab, setSidebarTab] = useState<'explorer' | 'git'>('explorer')
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('runtime')
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('explorer')
   const [entryNotice, setEntryNotice] = useState<EntryNotice | null>(null)
   const [showIntelliSense, setShowIntelliSense] = useState(false)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
@@ -211,17 +174,6 @@ function IDEContent() {
     hasToken,
     previewUrlParam,
   })
-
-  const runtimeStateLabel = useMemo(() => {
-    if (runtimeHealth.status === 'reachable') {
-      return typeof runtimeHealth.latencyMs === 'number'
-        ? `pronto ${runtimeHealth.latencyMs}ms`
-        : 'pronto'
-    }
-    if (runtimeHealth.status === 'checking') return 'validando'
-    if (runtimeHealth.status === 'idle') return 'inline'
-    return runtimeHealth.reason || runtimeHealth.status
-  }, [runtimeHealth.latencyMs, runtimeHealth.reason, runtimeHealth.status])
 
   const scheduleRuntimeSync = useCallback(() => {
     if (!previewSandboxId || isSyncingRuntime) return
@@ -341,86 +293,16 @@ function IDEContent() {
 
   const {
     fullAccessActiveGrant,
-    fullAccessBusy,
-    fullAccessExpiryLabel,
     toggleFullAccess: handleToggleFullAccess,
   } = useWorkbenchFullAccess({
     hasToken,
     projectId,
   })
 
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const rawToken = window.localStorage.getItem('token')
-    if (!rawToken) {
-      setCurrentUserId(null)
-      return
-    }
-
-    try {
-      const payload = JSON.parse(window.atob(rawToken.split('.')[1] ?? ''))
-      setCurrentUserId(payload.userId ?? payload.sub ?? payload.id ?? null)
-    } catch {
-      setCurrentUserId(null)
-    }
-  }, [hasToken])
-
-  const { data: collaborationRoomsData } = useSWR<CollaborationRoomsResponse>(
-    hasToken && projectId && projectId !== 'default'
-      ? `/api/collaboration/rooms?projectId=${encodeURIComponent(projectId)}`
-      : null,
-    async (url: string) => {
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-      })
-      const payload = (await response.json().catch(() => ({ success: false, rooms: [] }))) as CollaborationRoomsResponse
-      if (!response.ok) {
-        throw new Error(`Falha ao carregar presença colaborativa: ${response.status}`)
-      }
-      return payload
-    },
-    {
-      refreshInterval: 15000,
-      revalidateOnFocus: true,
-    },
-  )
-
-  const headerCollaborators = useMemo<RemotePeer[]>(() => {
-    const rooms = collaborationRoomsData?.rooms ?? []
-    const collaborators = new Map<string, RemotePeer>()
-
-    for (const room of rooms) {
-      for (const participant of room.participants ?? []) {
-        if (!participant?.userId) continue
-        if (currentUserId && participant.userId === currentUserId) continue
-
-        const candidate: RemotePeer = {
-          clientId: Math.abs(
-            Array.from(participant.userId).reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0),
-          ),
-          id: participant.userId,
-          name: participant.user?.name?.trim() || `Usuário ${participant.userId.slice(0, 6)}`,
-          avatar: participant.user?.avatar ?? undefined,
-          color: collaborationColorForUser(participant.userId),
-          lastActivity: participant.lastSeen ? new Date(participant.lastSeen).getTime() : Date.now(),
-        }
-
-        const existing = collaborators.get(participant.userId)
-        if (!existing || existing.lastActivity < candidate.lastActivity) {
-          collaborators.set(participant.userId, candidate)
-        }
-      }
-    }
-
-    return Array.from(collaborators.values())
-      .sort((a, b) => b.lastActivity - a.lastActivity)
-      .slice(0, 6)
-  }, [collaborationRoomsData?.rooms, currentUserId])
+  const { headerCollaborators } = useWorkbenchPresence({
+    hasToken,
+    projectId,
+  })
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -826,129 +708,14 @@ function IDEContent() {
     setSecondaryFile({ ...activeFile })
   }, [activeFile, secondaryFile, splitEditorOpen])
 
-  useEffect(() => {
-    if (!entryParam) return;
-    const entry = entryParam.toLowerCase();
-    const labNotice = {
-      tone: 'warning' as const,
-      title: 'Surface em modo Labs',
-      description: 'Esta rota foi convergida para o workbench principal. A experiência canônica ainda está no shell de código, prévia e revisão.',
-    }
-
-    clearEntryNotice()
-
-    if (entry === "ai" || entry === "chat" || entry === 'ai-command') {
-      window.dispatchEvent(new Event("aethel.layout.openAI"));
-      if (entry === 'ai-command') {
-        showEntryNotice({
-          tone: 'info',
-          title: 'Comando de IA convergido',
-          description: 'A ação abriu o painel principal de IA dentro do workbench, onde diff, execução e contexto ficam centralizados.',
-        })
-      }
-      return;
-    }
-    if (entry === "explorer") {
-      window.dispatchEvent(
-        new CustomEvent("aethel.layout.openSidebarTab", {
-          detail: { tab: "explorer" },
-        })
-      );
-      return;
-    }
-    if (entry === 'git') {
-      window.dispatchEvent(
-        new CustomEvent("aethel.layout.openSidebarTab", {
-          detail: { tab: "git" },
-        })
-      );
-      showEntryNotice({
-        tone: 'info',
-        title: 'Git aberto no workbench',
-        description: 'A rota dedicada foi convergida para a barra lateral do IDE para manter revisão, arquivos e diff no mesmo fluxo.',
-      })
-      return;
-    }
-    if (entry === "debugger" || entry === "debug") {
-      window.dispatchEvent(
-        new CustomEvent("aethel.layout.openBottomTab", {
-          detail: { tab: "debug" },
-        })
-      );
-      return;
-    }
-    if (entry === "terminal") {
-      window.dispatchEvent(
-        new CustomEvent("aethel.layout.openBottomTab", {
-          detail: { tab: "terminal" },
-        })
-      );
-      return;
-    }
-    if (entry === "live-preview" || entry === "preview") {
-      setPreviewEnabled(true);
-      showEntryNotice({
-        tone: 'info',
-        title: 'Prévia aberta no shell principal',
-        description: 'A prévia canônica agora vive dentro do workbench para manter runtime, console e editor no mesmo contexto.',
-      })
-      return;
-    }
-    if (entry === 'editor-hub') {
-      setPreviewEnabled(true)
-      showEntryNotice({
-        tone: 'info',
-        title: 'Editor Hub convergido',
-        description: 'Você já está no hub principal do editor. A navegação dedicada foi removida para evitar duplicidade de shell.',
-      })
-      return
-    }
-    if (entry === 'search') {
-      openCommandPalette('files')
-      showEntryNotice({
-        tone: 'info',
-        title: 'Busca convergida',
-        description: 'A busca dedicada foi substituída pela command palette e pelo quick open do workbench.',
-      })
-      return
-    }
-    if (entry === "playground") {
-      setPreviewEnabled(true);
-      window.dispatchEvent(new Event("aethel.layout.openAI"));
-      showEntryNotice({
-        tone: 'info',
-        title: 'Playground convergido',
-        description: 'O playground agora usa o shell principal com prévia ativa e copiloto aberto, evitando uma superfície paralela.',
-      })
-      return;
-    }
-    if (entry === "testing") {
-      setPreviewEnabled(true);
-      window.dispatchEvent(
-        new CustomEvent("aethel.layout.openBottomTab", {
-          detail: { tab: "debug" },
-        })
-      );
-      showEntryNotice({
-        tone: 'info',
-        title: 'Testing convergido',
-        description: 'A rota abriu a prévia e os diagnósticos do editor para manter testes e inspeção no mesmo fluxo.',
-      })
-      return
-    }
-    if (
-      entry === 'animation-blueprint' ||
-      entry === 'blueprint-editor' ||
-      entry === 'landscape-editor' ||
-      entry === 'level-editor' ||
-      entry === 'niagara-editor' ||
-      entry === 'vr-preview'
-    ) {
-      handleSelectPreviewMode('viewport3d')
-      window.dispatchEvent(new Event("aethel.layout.openAI"));
-      showEntryNotice(labNotice)
-    }
-  }, [clearEntryNotice, entryParam, handleSelectPreviewMode, openCommandPalette, showEntryNotice]);
+  useWorkbenchEntryConvergence({
+    entryParam,
+    clearEntryNotice,
+    openCommandPalette,
+    showEntryNotice,
+    setPreviewEnabled,
+    handleSelectPreviewMode,
+  })
 
   useEffect(() => {
     const onOpenFileFromContext = (event: Event) => {
@@ -1258,478 +1025,93 @@ function IDEContent() {
           >
             {{
               sidebar: (
-                <div className="h-full flex flex-col">
-                  <div className="flex items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-3 py-3">
-                    <button
-                      type="button"
-                      onClick={() => setSidebarTab('explorer')}
-                      className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
-                        sidebarTab === 'explorer'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                      }`}
-                    >
-                      Arquivos
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSidebarTab('git')}
-                      className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
-                        sidebarTab === 'git'
-                          ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-                          : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                      }`}
-                    >
-                      Git
-                    </button>
-                  </div>
-                  <div className="flex-1 min-h-0">
-                    {sidebarTab === 'explorer' ? (
-                      <FileExplorerPro onFileSelect={handleFileSelect} />
-                    ) : (
-                      <GitIntegration />
-                    )}
-                  </div>
-                </div>
+                <WorkbenchSidebar
+                  sidebarTab={sidebarTab}
+                  onSidebarTabChange={setSidebarTab}
+                  onFileSelect={handleFileSelect}
+                />
               ),
               chat: <AIChatPanelContainer />,
               editor: (
-                <div className="h-full flex flex-col">
-                  {isCompactViewport && (
-                    <div className="border-b border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-4 py-3.5 text-xs leading-6 text-[color-mix(in_srgb,var(--aethel-warning-light)_70%,transparent)]">
-                      Viewport compacto detectado. Para melhor experiência use desktop com {'>='} 1024px.
-                    </div>
-                  )}
-                  <TabBar />
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2.5 text-[11px]">
-                    <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
-                      <span className="font-medium uppercase tracking-[0.12em]">Ferramentas do editor</span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleEditorFind}
-                        className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
-                      >
-                        Buscar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleEditorReplace}
-                        className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
-                      >
-                        Substituir
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleToggleSplitEditor}
-                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                          splitEditorOpen
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
-                      >
-                        {splitEditorOpen ? 'Fechar split' : 'Dividir editor'}
-                      </button>
-                      {splitEditorOpen && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setNextOpenTarget((prev) => (prev === 'secondary' ? 'primary' : 'secondary'))}
-                            className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                              nextOpenTarget === 'secondary'
-                                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]'
-                                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                            }`}
-                          >
-                            {nextOpenTarget === 'secondary' ? 'Próximo arquivo: lateral' : 'Próximo arquivo: principal'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSplitDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))}
-                            className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
-                          >
-                            {splitDirection === 'horizontal' ? 'Empilhar verticalmente' : 'Dividir lado a lado'}
-                          </button>
-                        </>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setShowIntelliSense((prev) => !prev)}
-                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                          showIntelliSense
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
-                      >
-                        IntelliSense
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowOutline((prev) => !prev)}
-                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                          showOutline
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
-                      >
-                        Outline
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowDiagnostics((prev) => !prev)}
-                        className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
-                          showDiagnostics
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
-                      >
-                        Diagnósticos
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-hidden">
-                    {isReadingFile && (
-                      <div className="h-full flex items-center justify-center px-6">
-                        <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-5 py-4 text-sm text-[var(--aethel-text-tertiary)]">
-                          Carregando arquivo...
-                        </div>
-                      </div>
-                    )}
-                    {!isReadingFile && fileError && (
-                      <div className="h-full flex items-center justify-center px-6">
-                        <div className="max-w-xl rounded border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">{fileError}</div>
-                      </div>
-                    )}
-                    {!isReadingFile && !fileError && activeFile && (
-                      <div className="h-full min-h-0">
-                        <div className="h-full min-h-0 flex">
-                          <div className="flex-1 min-w-0">
-                            {splitEditorOpen ? (
-                              <SplitEditor
-                                groups={splitEditorGroups}
-                                activeGroupId={splitActivePane}
-                                splitDirection={splitDirection}
-                                onGroupFocus={(groupId) => {
-                                  const pane = groupId === 'secondary' ? 'secondary' : 'primary'
-                                  setSplitActivePane(pane)
-                                  editorRef.current = pane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
-                                }}
-                                onSplit={() => {}}
-                                onTabClick={(_, groupId) => {
-                                  const pane = groupId === 'secondary' ? 'secondary' : 'primary'
-                                  setSplitActivePane(pane)
-                                  editorRef.current = pane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
-                                  if (pane === 'secondary') {
-                                    secondaryEditorRef.current?.focus()
-                                  } else {
-                                    primaryEditorRef.current?.focus()
-                                  }
-                                }}
-                                onTabClose={(_, groupId) => {
-                                  if (groupId === 'secondary') {
-                                    setSplitEditorOpen(false)
-                                    setSecondaryFile(null)
-                                    setNextOpenTarget('primary')
-                                    setSplitActivePane('primary')
-                                    editorRef.current = primaryEditorRef.current
-                                    return
-                                  }
-                                  setActiveFile(null)
-                                }}
-                                onTabPin={() => {}}
-                                onTabMove={() => {}}
-                                onGroupClose={(groupId) => {
-                                  if (groupId === 'secondary') {
-                                    setSplitEditorOpen(false)
-                                    setSecondaryFile(null)
-                                    setNextOpenTarget('primary')
-                                    setSplitActivePane('primary')
-                                    editorRef.current = primaryEditorRef.current
-                                  }
-                                }}
-                                renderEditor={(groupId, tab) => {
-                                  if (!tab) {
-                                    return (
-                                      <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-                                        Nenhum arquivo aberto neste grupo.
-                                      </div>
-                                    )
-                                  }
-
-                                  const isSecondary = groupId === 'secondary'
-                                  const fileState = isSecondary ? secondaryFile : activeFile
-                                  if (!fileState) return null
-
-                                  return (
-                                    <div
-                                      className="h-full"
-                                      onMouseDown={() => {
-                                        setSplitActivePane(isSecondary ? 'secondary' : 'primary')
-                                        editorRef.current = isSecondary ? secondaryEditorRef.current : primaryEditorRef.current
-                                      }}
-                                    >
-                                      <MonacoEditorPro
-                                        path={fileState.path}
-                                        value={fileState.content}
-                                        language={fileState.language}
-                                        fullAccessActive={Boolean(fullAccessActiveGrant)}
-                                        onMount={(editor) => {
-                                          if (isSecondary) {
-                                            secondaryEditorRef.current = editor
-                                          } else {
-                                            primaryEditorRef.current = editor
-                                          }
-                                          if ((isSecondary && splitActivePane === 'secondary') || (!isSecondary && splitActivePane === 'primary')) {
-                                            editorRef.current = editor
-                                          }
-                                        }}
-                                        onAiApplyResult={handleInlineApplyResult}
-                                        onRequestFullAccess={handleToggleFullAccess}
-                                        onDiagnosticsChange={isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics}
-                                        onChange={(value) => {
-                                          const nextValue = value ?? ""
-                                          if (isSecondary) {
-                                            setSecondaryFile((prev) => (prev ? { ...prev, content: nextValue } : prev))
-                                          } else {
-                                            setActiveFile((prev) => (prev ? { ...prev, content: nextValue } : prev))
-                                          }
-                                        }}
-                                        onSave={(value) => {
-                                          void writeFile(fileState.path, value)
-                                        }}
-                                      />
-                                    </div>
-                                  )
-                                }}
-                              />
-                            ) : (
-                              <MonacoEditorPro
-                                path={activeFile.path}
-                                value={activeFile.content}
-                                language={activeFile.language}
-                                fullAccessActive={Boolean(fullAccessActiveGrant)}
-                                onMount={(editor) => {
-                                  primaryEditorRef.current = editor
-                                  editorRef.current = editor
-                                }}
-                                onAiApplyResult={handleInlineApplyResult}
-                                onRequestFullAccess={handleToggleFullAccess}
-                                onDiagnosticsChange={setEditorDiagnostics}
-                                onChange={(value) => {
-                                  setActiveFile((prev) =>
-                                    prev
-                                      ? {
-                                          ...prev,
-                                          content: value ?? "",
-                                        }
-                                      : prev
-                                  )
-                                }}
-                                onSave={(value) => {
-                                  void writeFile(activeFile.path, value)
-                                }}
-                              />
-                            )}
-                          </div>
-                          {(showIntelliSense || showOutline || showDiagnostics) && (
-                            <div className="w-80 border-l border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] flex flex-col">
-                              {showIntelliSense && (
-                                <div className="flex-1 min-h-0 border-b border-[var(--aethel-border-secondary)]">
-                                  <IntelliSense />
-                                </div>
-                              )}
-                              {showOutline && (
-                                <div className="flex-1 min-h-0 border-b border-[var(--aethel-border-secondary)]">
-                                  <OutlinePanel
-                                    symbols={outlineSymbols}
-                                    activeFilePath={bridgeActiveFile?.path ?? activeFile.path}
-                                    onSymbolClick={handleJumpToOutlineSymbol}
-                                  />
-                                </div>
-                              )}
-                              {showDiagnostics && (
-                                <div className="flex-1 min-h-0">
-                                  <ErrorHighlighting
-                                    errors={activeDiagnostics.map((diagnostic, index) => ({
-                                      id: `${bridgeActiveFile?.path ?? activeFile.path}:${diagnostic.line}:${diagnostic.column}:${index}`,
-                                      type:
-                                        diagnostic.severity === 'error'
-                                          ? 'error'
-                                          : diagnostic.severity === 'warning'
-                                            ? 'warning'
-                                            : 'info',
-                                      severity:
-                                        diagnostic.severity === 'error'
-                                          ? 'major'
-                                          : diagnostic.severity === 'warning'
-                                            ? 'minor'
-                                            : 'suggestion',
-                                      message: diagnostic.message,
-                                      code: diagnostic.code ? String(diagnostic.code) : '',
-                                      line: diagnostic.line,
-                                      column: diagnostic.column,
-                                      file: bridgeActiveFile?.path ?? activeFile.path,
-                                      documentation: diagnostic.source
-                                        ? `Origem: ${diagnostic.source}`
-                                        : '',
-                                      fixable: false,
-                                    }))}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {!isReadingFile && !fileError && !activeFile && (
-                      <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">Selecione um arquivo para iniciar a edi??o.</div>
-                    )}
-                  </div>
-                </div>
+                <WorkbenchEditorPane
+                  activeFile={activeFile}
+                  secondaryFile={secondaryFile}
+                  bridgeActiveFile={bridgeActiveFile}
+                  activeDiagnostics={activeDiagnostics}
+                  splitEditorGroups={splitEditorGroups}
+                  outlineSymbols={outlineSymbols}
+                  splitEditorOpen={splitEditorOpen}
+                  splitActivePane={splitActivePane}
+                  splitDirection={splitDirection}
+                  nextOpenTarget={nextOpenTarget}
+                  isCompactViewport={isCompactViewport}
+                  isReadingFile={isReadingFile}
+                  fileError={fileError}
+                  showIntelliSense={showIntelliSense}
+                  showOutline={showOutline}
+                  showDiagnostics={showDiagnostics}
+                  fullAccessActive={Boolean(fullAccessActiveGrant)}
+                  primaryEditorRef={primaryEditorRef}
+                  secondaryEditorRef={secondaryEditorRef}
+                  editorRef={editorRef}
+                  setSplitActivePane={setSplitActivePane}
+                  setSecondaryFile={setSecondaryFile}
+                  setActiveFile={setActiveFile}
+                  setShowIntelliSense={setShowIntelliSense}
+                  setShowOutline={setShowOutline}
+                  setShowDiagnostics={setShowDiagnostics}
+                  setSplitDirection={setSplitDirection}
+                  setNextOpenTarget={setNextOpenTarget}
+                  setSplitEditorOpen={setSplitEditorOpen}
+                  setEditorDiagnostics={setEditorDiagnostics}
+                  setSecondaryEditorDiagnostics={setSecondaryEditorDiagnostics}
+                  onFind={handleEditorFind}
+                  onReplace={handleEditorReplace}
+                  onToggleSplitEditor={handleToggleSplitEditor}
+                  onJumpToOutlineSymbol={handleJumpToOutlineSymbol}
+                  onInlineApplyResult={handleInlineApplyResult}
+                  onRequestFullAccess={handleToggleFullAccess}
+                  onSaveFile={writeFile}
+                />
               ),
               preview: (
-                <div className="h-full min-h-0 bg-[var(--aethel-surface-primary)] flex flex-col">
-                  {(previewMode === 'runtime' || previewMode === 'device') && (
-                    <PreviewRuntimeToolbar
-                      previewRuntimeUrl={previewRuntimeUrl}
-                      runtimeHealthStatus={runtimeHealth.status}
-                      runtimeHealthLatencyMs={runtimeHealth.latencyMs}
-                      runtimeHealthCheckedAt={runtimeHealthCheckedAt}
-                      runtimeHealthHint={runtimeHealthHint}
-                      runtimeReadiness={runtimeReadiness}
-                      runtimePrimaryAction={
-                        runtimePrimaryAction === 'provision' || runtimePrimaryAction === 'discover'
-                          ? runtimePrimaryAction
-                          : 'inline'
-                      }
-                      runtimePrimaryActionLabel={runtimePrimaryActionLabel}
-                      runtimeStrategyLabel={runtimeStrategyLabel}
-                      runtimeStrategyHint={runtimeStrategyHint}
-                      showRuntimeSettings={showRuntimeSettings}
-                      previewRuntimeInput={previewRuntimeInput}
-                      onToggleSettings={() => setShowRuntimeSettings((prev) => !prev)}
-                      onRuntimeInputChange={setPreviewRuntimeInput}
-                      onApplyRuntime={applyRuntimeUrl}
-                      onUseFallback={handleUseInlineFallback}
-                      isDiscoveringRuntime={isDiscoveringRuntime}
-                      isProvisioningRuntime={isProvisioningRuntime}
-                      isSyncingRuntime={isSyncingRuntime}
-                      canSyncRuntime={Boolean(previewSandboxId)}
-                      runtimeDiscoveryMessage={runtimeDiscoveryMessage}
-                      runtimeDiscoveryTone={runtimeDiscoveryTone}
-                      onRunRecommendedAction={handleRunRecommendedPreviewAction}
-                      onDiscoverRuntime={() => {
-                        void discoverRuntime('manual').then(() => {
-                          void refreshRuntimeReadiness()
-                        })
-                      }}
-                      onProvisionRuntime={() => {
-                        void provisionRuntime('manual').then(() => {
-                          void refreshRuntimeReadiness()
-                        })
-                      }}
-                      onSyncRuntime={() => {
-                        void syncRuntime().then(() => {
-                          void refreshRuntimeReadiness()
-                        })
-                      }}
-                      onRevalidate={() => {
-                        if (!previewRuntimeUrl) return
-                        void checkRuntimeHealth(previewRuntimeUrl)
-                        analytics?.track?.('engine', 'render_time', {
-                          metadata: {
-                            surface: 'ide-preview-runtime-health',
-                            action: 'manual-revalidate',
-                            runtimeUrl: previewRuntimeUrl,
-                          },
-                        })
-                      }}
-                      onOpenRuntime={() => {
-                        if (!previewRuntimeUrl) return
-                        window.open(previewRuntimeUrl, '_blank', 'noopener,noreferrer')
-                      }}
-                    />
-                  )}
-                  <div className="flex flex-wrap items-center gap-2 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] px-3 py-2.5 text-[11px]">
-                    {[
-                      { id: 'runtime' as const, label: 'Prévia' },
-                      { id: 'device' as const, label: 'Dispositivos' },
-                      { id: 'console' as const, label: 'Console' },
-                      { id: 'viewport3d' as const, label: 'Viewport 3D' },
-                    ].map((mode) => (
-                      <button
-                        key={mode.id}
-                        type="button"
-                        onClick={() => setPreviewMode(mode.id)}
-                        className={`rounded-lg px-3 py-1.5 font-medium transition-colors min-h-[36px] ${
-                          previewMode === mode.id
-                            ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                            : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-                        }`}
-                      >
-                        {mode.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex-1 min-h-0">
-                    {previewMode === 'console' && <ConsoleIntegration />}
-                    {previewMode === 'viewport3d' && (
-                      <CanonicalPreviewSurface
-                        variant="scene"
-                        renderMode="draft"
-                      />
-                    )}
-                    {previewMode === 'runtime' && (
-                      activeFile ? (
-                        <div className="h-full min-h-0">
-                          <CanonicalPreviewSurface
-                            key={`${activeFile.path}:${previewRefreshTick}`}
-                            variant="runtime"
-                            title="Prévia ao vivo"
-                            filePath={activeFile.path}
-                            content={activeFile.content}
-                            projectId={projectId}
-                            runtimeUrl={previewRuntimeUrl ?? undefined}
-                            forceInlineFallback={forceInlinePreviewFallback}
-                            runtimeUnavailableReason={runtimeHealth.reason}
-                            isStale={isSavingFile}
-                            onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
-                          />
-                        </div>
-                      ) : (
-                        <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-                          Selecione um arquivo para visualizar a prévia.
-                        </div>
-                      )
-                    )}
-                    {previewMode === 'device' && (
-                      activeFile ? (
-                        <DevicePreview>
-                          <CanonicalPreviewSurface
-                            key={`${activeFile.path}:${previewRefreshTick}:device`}
-                            variant="runtime"
-                            title="Prévia ao vivo"
-                            filePath={activeFile.path}
-                            content={activeFile.content}
-                            projectId={projectId}
-                            runtimeUrl={previewRuntimeUrl ?? undefined}
-                            forceInlineFallback={forceInlinePreviewFallback}
-                            runtimeUnavailableReason={runtimeHealth.reason}
-                            isStale={isSavingFile}
-                            onRefresh={() => setPreviewRefreshTick((prev) => prev + 1)}
-                          />
-                        </DevicePreview>
-                      ) : (
-                        <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-                          Selecione um arquivo para visualizar a prévia.
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )
+                <WorkbenchPreviewPane
+                  activeFile={activeFile}
+                  previewMode={previewMode}
+                  previewRefreshTick={previewRefreshTick}
+                  previewRuntimeUrl={previewRuntimeUrl}
+                  previewRuntimeInput={previewRuntimeInput}
+                  showRuntimeSettings={showRuntimeSettings}
+                  runtimeHealth={runtimeHealth}
+                  runtimeHealthCheckedAt={runtimeHealthCheckedAt}
+                  runtimeHealthHint={runtimeHealthHint}
+                  runtimeReadiness={runtimeReadiness}
+                  runtimePrimaryAction={runtimePrimaryAction}
+                  runtimePrimaryActionLabel={runtimePrimaryActionLabel}
+                  runtimeStrategyLabel={runtimeStrategyLabel}
+                  runtimeStrategyHint={runtimeStrategyHint}
+                  runtimeDiscoveryMessage={runtimeDiscoveryMessage}
+                  runtimeDiscoveryTone={runtimeDiscoveryTone}
+                  isDiscoveringRuntime={isDiscoveringRuntime}
+                  isProvisioningRuntime={isProvisioningRuntime}
+                  isSyncingRuntime={isSyncingRuntime}
+                  previewSandboxId={previewSandboxId}
+                  forceInlinePreviewFallback={forceInlinePreviewFallback}
+                  isSavingFile={isSavingFile}
+                  projectId={projectId}
+                  setPreviewMode={setPreviewMode}
+                  setPreviewRuntimeInput={setPreviewRuntimeInput}
+                  setShowRuntimeSettings={setShowRuntimeSettings}
+                  setPreviewRefreshTick={setPreviewRefreshTick}
+                  applyRuntimeUrl={applyRuntimeUrl}
+                  handleUseInlineFallback={handleUseInlineFallback}
+                  refreshRuntimeReadiness={refreshRuntimeReadiness}
+                  discoverRuntime={discoverRuntime}
+                  provisionRuntime={provisionRuntime}
+                  syncRuntime={syncRuntime}
+                  checkRuntimeHealth={checkRuntimeHealth}
+                />
+              ),
             }}
         </ModernIDEShell>
         </EditorApplyBridgeProvider>
