@@ -36,7 +36,6 @@ import {
   DEFAULT_MODELS,
   type AIChatPanelProps,
   type Attachment,
-  type CodebaseContextPreview,
   type MentionContextPreviewBlock,
   type Message,
 } from './AIChatPanelPro.types'
@@ -67,6 +66,7 @@ import { MessageBubble } from '@/components/ai-chat/MessageBubble'
 import { RunCard } from '@/components/ai-chat/RunCard'
 import { AgentBoard, type AgentInfo } from '@/components/ai-chat/AgentBoard'
 import { LiveConversationPanel } from '@/components/ai-chat/LiveConversationPanel'
+import { useChatContextPreviews } from '@/components/ai-chat/useChatContextPreviews'
 import { useVoiceRecording } from '@/components/ai-chat/useVoiceRecording'
 import { formatCost } from '@/components/ai-chat/chat-utils'
 
@@ -153,22 +153,17 @@ export default function AIChatPanelPro({
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null)
   const mentionState = useMentions('')
   const editorBridge = useEditorApplyBridge()
-  const [localCodebaseContextPreview, setLocalCodebaseContextPreview] = useState<CodebaseContextPreview>({
-    loading: false,
-    results: [],
-  })
-  const [mentionContextPreview, setMentionContextPreview] = useState<{
-    loading: boolean
-    error: string | null
-    blocks: MentionContextPreviewBlock[]
-  }>({
-    loading: false,
-    error: null,
-    blocks: [],
-  })
-  const [codebaseRefreshNonce, setCodebaseRefreshNonce] = useState(0)
   const input = mentionState.text
   const inputRef = mentionState.inputRef
+  const {
+    localCodebaseContextPreview,
+    mentionContextPreview,
+    refreshCodebaseContext: handleRefreshCodebaseContext,
+  } = useChatContextPreviews({
+    input,
+    mentions: mentionState.parsed.mentions,
+    projectId,
+  })
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -264,148 +259,6 @@ export default function AIChatPanelPro({
     }
   }, [onSendMessage])
 
-  useEffect(() => {
-    const normalizedInput = input.trim()
-    const shouldFetch = normalizedInput.toLowerCase().includes('@codebase')
-
-    if (!shouldFetch) {
-      setLocalCodebaseContextPreview((prev) => (
-        prev.loading || prev.results.length > 0 || prev.error ?
-           { loading: false, results: [] }
-          : prev
-      ))
-      return
-    }
-
-    const semanticQuery = normalizedInput
-      .replace(/@codebase/gi, ' ')
-      .replace(/@(docs|file|folder|git):[^\s]+/gi, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-
-    const controller = new AbortController()
-    const timeoutId = window.setTimeout(async () => {
-      setLocalCodebaseContextPreview((prev) => ({ ...prev, loading: true, error: null }))
-      try {
-        const response = await fetch('/api/ai/context/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: semanticQuery || 'project architecture entry points current implementation',
-            projectId,
-            maxResults: 4,
-            invalidateCache: codebaseRefreshNonce > 0,
-          }),
-          signal: controller.signal,
-        })
-
-        const payload = await response.json()
-        if (!response.ok) {
-          throw new Error(typeof payload.error === 'string' ? payload.error : 'CONTEXT_SEARCH_FAILED')
-        }
-
-        setLocalCodebaseContextPreview({
-          loading: false,
-          error: null,
-          results: Array.isArray(payload.results) ? payload.results : [],
-          scope: payload.readiness.scope,
-          source: payload.readiness.source,
-          incrementalReindex: Boolean(payload.readiness.incrementalReindex),
-          blockers: Array.isArray(payload.readiness.blockers) ? payload.readiness.blockers : [],
-          stats: payload.stats ?? undefined,
-        })
-      } catch (error) {
-        if (controller.signal.aborted) return
-        setLocalCodebaseContextPreview({
-          loading: false,
-          results: [],
-          error: error instanceof Error ? error.message : 'CONTEXT_SEARCH_FAILED',
-        })
-      }
-    }, 350)
-
-    return () => {
-      controller.abort()
-      window.clearTimeout(timeoutId)
-    }
-  }, [codebaseRefreshNonce, input, projectId])
-
-  useEffect(() => {
-    const contextualMentions = mentionState.parsed.mentions.filter(
-      (mention) => mention.type === 'docs' || mention.type === 'file' || mention.type === 'folder' || mention.type === 'git'
-    )
-
-    if (contextualMentions.length === 0) {
-    setMentionContextPreview((prev) =>
-      prev.loading || prev.blocks.length > 0 || prev.error
-        ? { loading: false, error: null, blocks: [] }
-        : prev
-    )
-      return
-    }
-
-    const controller = new AbortController()
-    const timeoutId = window.setTimeout(async () => {
-      setMentionContextPreview((prev) => ({ ...prev, loading: true, error: null }))
-      try {
-        const response = await fetch('/api/ai/context/mentions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: input,
-            projectId,
-          }),
-          signal: controller.signal,
-        })
-
-        const payload = await response.json()
-        if (!response.ok) {
-          throw new Error(typeof payload.error === 'string' ? payload.error : 'MENTION_CONTEXT_FAILED')
-        }
-
-        setMentionContextPreview({
-          loading: false,
-          error: null,
-          blocks: Array.isArray(payload.blocks)
-            ? payload.blocks.filter((block: MentionContextPreviewBlock) => block.kind !== 'codebase')
-            : [],
-        })
-      } catch (error) {
-        if (controller.signal.aborted) return
-        setMentionContextPreview({
-          loading: false,
-          blocks: [],
-          error: error instanceof Error ? error.message : 'MENTION_CONTEXT_FAILED',
-        })
-      }
-    }, 250)
-
-    return () => {
-      controller.abort()
-      window.clearTimeout(timeoutId)
-    }
-  }, [input, mentionState.parsed.mentions, projectId])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const onFileMutation = (event: Event) => {
-      const detail = (event as CustomEvent<{ projectId: string; operation: string }>).detail
-      const matchesProject =
-        !projectId ||
-        !detail.projectId ||
-        detail.projectId === projectId
-
-      if (!matchesProject) return
-      if (!input.toLowerCase().includes('@codebase')) return
-      setCodebaseRefreshNonce((prev) => prev + 1)
-    }
-
-    window.addEventListener('aethel.ide.fileMutation', onFileMutation as EventListener)
-    return () => {
-      window.removeEventListener('aethel.ide.fileMutation', onFileMutation as EventListener)
-    }
-  }, [input, projectId])
   const speakMessage = useCallback((text: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel()
@@ -499,9 +352,6 @@ export default function AIChatPanelPro({
   const handleCopy = async (content: string) => {
     await navigator.clipboard.writeText(content)
   }
-  const handleRefreshCodebaseContext = useCallback(() => {
-    setCodebaseRefreshNonce((prev) => prev + 1)
-  }, [])
   const handleOpenCodeContextResult = useCallback((filePath: string, startLine?: number, endLine?: number) => {
     if (typeof window === 'undefined') return
     window.dispatchEvent(new CustomEvent('aethel.ide.openFileFromContext', {

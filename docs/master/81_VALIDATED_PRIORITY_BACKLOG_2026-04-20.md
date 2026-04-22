@@ -1,39 +1,46 @@
 # 81_VALIDATED_PRIORITY_BACKLOG_2026-04-20
 Date: 2026-04-20
+Last refreshed: 2026-04-22
 Status: ACTIVE
 Purpose: Registrar, sem deriva e sem inflar claims, o que da auditoria end-to-end realmente confere no repositório atual e qual é a prioridade operacional a partir daqui.
 
 ## Executive Summary
 - A auditoria de 2026-04-20 está **parcialmente alinhada** com o estado real do repositório.
 - O diagnóstico macro continua correto: design system ainda drifta, os god components ainda são o maior gargalo do produto, colaboração/preview ainda não fecharam o loop end-to-end, testes e i18n continuam muito atrás do necessário.
-- Alguns números e algumas conclusões do texto já estão **desatualizados ou otimistas demais** para o estado atual do código.
+- Alguns números e algumas conclusões dos textos antigos já ficaram **desatualizados** depois do sync com `origin/genspark_ai_developer@5760df694`.
 - Este documento é a referência de priorização factual até novo refresh.
 
-## Factual Snapshot Verified On 2026-04-20
-- Git tracked files: `5453`
-- Git tracked size: `53.01 MB`
+## Factual Snapshot Verified On 2026-04-22
+- Git tracked files: `5465`
+- Git tracked size: `53.02 MB`
 - On-disk workspace size after installed dependencies: `2082.77 MB`
 - `cloud-web-app/web/app/**/page.tsx`: `80`
 - `cloud-web-app/web/app/api/**/route.ts`: `320`
-- `cloud-web-app/web/components/**/*.tsx`: `304`
+- `cloud-web-app/web/components/**/*.tsx`: `448`
 - `cloud-web-app/web/lib/**/*.ts`: `363`
-- `cloud-web-app/web/app/admin/**/page.tsx`: `46`
-- `docs/master/*`: `101`
+- `cloud-web-app/web/app/admin/**/page.tsx`: `45`
+- `docs/master/*`: `103`
 - `AETHEL_INTERFACE_BLUEPRINTS/*`: `17`
 - `cloud-web-app/web/public/locales/en/*.json` top-level keys: `20`
 - `cloud-web-app/web/public/locales/pt-BR/*.json` top-level keys: `12`
 - `cloud-web-app/web/tsconfig.json`: `"strict": true`, `"noImplicitAny": false`
-- `cloud-web-app/web/jest.config.ts`: `collectCoverage: false`
+- `cloud-web-app/web/jest.config.ts`: `collectCoverage: process.env.CI === 'true' || process.env.COVERAGE === '1'`
+- `cloud-web-app/web/lighthouserc.js`: present
+- `cloud-web-app/web/prisma/migrations/`: seeded with `migration_lock.toml` + `MIGRATIONS.md`
 
 ## Audit Claims That Still Match Reality
 - The product thesis is coherent: Studio + Workbench + AI + Preview + Billing + Admin under a single shell direction.
 - The repo is no longer bloated with vendored forks and duplicate component names have been cleaned.
+- The recent GitHub branch sweep removed a large dead-code island from `cloud-web-app/web/lib/**`.
 - `cloud-web-app/web/app/api/**` is a large, real platform surface with advanced families like `mcp`, `agents/stream`, `collaboration/rooms`, `lsp`, `render/jobs`, `feature-flags`, `audit`, `usage/status`.
 - `components/ide/FullscreenIDE.tsx` and `components/ide/AIChatPanelPro.tsx` are still the two main structural risks.
-- Admin is still too large at `46` pages.
+- The latest refactor wave already extracted bounded responsibilities out of the two monoliths:
+  - `cloud-web-app/web/components/ai-chat/useChatContextPreviews.ts`
+  - `cloud-web-app/web/components/ide/fullscreen/useWorkbenchFullAccess.ts`
+- Admin is still too large at `45` pages.
 - Tests are still materially insufficient relative to product surface.
 - i18n is still materially insufficient.
-- Collaboration UI primitives now exist, but the UX is still not fully integrated in the editor shell.
+- Collaboration UI primitives now exist and header-level presence is visible in the workbench shell, but the UX is still not fully integrated in the editor canvas itself.
 - The anti-fake-success policy remains a real differentiator and is enforced by QA scripts.
 
 ## Audit Claims That Need Correction Or Downgrading
@@ -43,29 +50,31 @@ Purpose: Registrar, sem deriva e sem inflar claims, o que da auditoria end-to-en
 - "0 hardcoded hex colours" does **not** match a broad grep of tracked component code.
   - Broad grep still finds many raw hex color usages in tracked TSX files, especially editor/engine-style components.
   - Example family still containing many raw hex values: `cloud-web-app/web/components/audio/SoundCueEditor.tsx`.
-- "Storybook ready" should be treated as **seeded / partially integrated**, not complete.
-  - Storybook is now installed and typechecked.
-  - Static build still fails and needs a builder/runtime compatibility pass.
+- "Storybook seeded but not working" is now stale.
+  - Storybook is installed, typechecked, and `storybook:build` is currently passing after the Vite migration.
+  - The truthful status now is: `working component lab, still early in coverage breadth`.
 - "Collaboration UI shipped" is only **partially true**.
   - `useCollaborationAwareness`, `CollaboratorsBar`, and `RemoteCursorLayer` exist.
-  - They are not yet fully wired into the central workbench/editor experience as a visible default flow.
+  - Workbench header presence is now visible.
+  - Remote cursor rendering in the primary Monaco editing flow is still not the default signature path.
 - "15+ aspirational routes visible" is **stale** as phrased.
   - Current scan shows only `5` `page.tsx` files under `20` lines.
   - However, short entry wrappers still exist and route maturity still needs curation.
 
 ## Current Structural Risks
 ### P0
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is still `1697` lines.
-- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is still `1694` lines.
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is still about `1755` lines.
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is still about `954` lines.
 - `cloud-web-app/web/tsconfig.json` still has `"noImplicitAny": false`.
-- `git grep ': any'` over tracked web TS/TSX still returns `1098` matches.
-- `cloud-web-app/web/jest.config.ts` still has `collectCoverage: false`.
-- Storybook static build is still failing even after dependency integration.
+- tracked `: any` usage in web TS/TSX is still around `1059`.
+- coverage pressure exists now, but the suite is still far too small for the surface area.
+- collaboration is still not fully visible inside the primary editor canvas.
+- the branch is typechecking again only after restoring a minimal active compatibility surface for `lib/index.ts` and `lib/sequencer-cinematics.ts`.
 
 ### P1
-- Broad grep still finds `810` raw hex matches across tracked component TS/TSX files.
-- `git grep 'console\\.'` over tracked files still returns `399` matches in `lib` and `169` in `components`.
-- Admin remains oversized at `46` page surfaces.
+- Broad grep still finds roughly `1305` raw hex matches across tracked component TS/TSX files.
+- tracked `console.*` still returns roughly `285` matches in `lib` and `151` in `components`.
+- Admin remains oversized at `45` page surfaces.
 - Current short page wrappers still exist in:
   - `cloud-web-app/web/app/page.tsx`
   - `cloud-web-app/web/app/(auth)/login/page.tsx`
@@ -84,17 +93,20 @@ Purpose: Registrar, sem deriva e sem inflar claims, o que da auditoria end-to-en
   - `cloud-web-app/web/components/collaboration/CollaboratorsBar.tsx`
   - `cloud-web-app/web/components/collaboration/RemoteCursorLayer.tsx`
   - tests and stories for these primitives
+  - header-level presence integration in:
+    - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`
+    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
 - Not yet verified as complete:
-  - default rendering inside the active workbench/editor shell
   - project-wide presence dots in file tree
   - full shared editing loop with visible remote cursors in the primary editing experience
 
 ## Verified Test State
-- Tracked tests currently found: `16`
-- This is better than older snapshots that cited `12`, but it is still far from acceptable given product scope.
+- Tracked tests currently found: `23`
+- This is better than older snapshots, but it is still far from acceptable given product scope and `320` API routes.
 
 ## Verified Design-System State
 - `qa:design-system-consistency`: currently passing
+- `ThemeToggle` now exists and has tests/stories
 - This does **not** mean the whole product is free of raw visual drift.
 - The design-system gate is useful, but a broad grep still shows raw hex values in tracked components.
 - Therefore the right reading is:
@@ -113,13 +125,14 @@ Purpose: Registrar, sem deriva e sem inflar claims, o que da auditoria end-to-en
 1. Slice the two god components:
    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
    - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
-2. Make Storybook truthful and green:
-   - keep typecheck green
-   - fix static build
-   - only then call it production-ready
+   - keep extracting focused hooks/modules rather than rewriting the shells in one shot
+2. Turn the recent structural wins into fully lived product quality:
+   - keep Storybook green
+   - expand story/test coverage
+   - make Lighthouse and coverage gates part of the release pressure, not decoration
 3. Turn off implicit drift in TypeScript:
    - move toward `noImplicitAny: true`
-   - reduce `: any` from `1098`
+   - reduce `: any` from ~`1059`
 4. Restore observability discipline:
    - continue `console.*` -> structured logger migration
 5. Finish design-system convergence:
@@ -144,4 +157,3 @@ If a future audit conflicts with this file:
 - prefer measured repository state
 - prefer current QA output
 - prefer active canonical docs over narrative summaries
-

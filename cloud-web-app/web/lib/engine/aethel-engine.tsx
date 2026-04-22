@@ -42,7 +42,6 @@ import InventoryDefaults, { Inventory, EquipmentManager, ItemRegistry, useInvent
 // AI & Behavior
 import BehaviorTreeDefaults, { BehaviorTree, AIAgent, useAI } from '../ai/behavior-tree-system';
 import DialogueDefaults, { DialogueManager, DialogueBuilder, useDialogue } from '../dialogue/dialogue-system';
-import AchievementDefaults, { AchievementManager, AchievementBuilder, useAchievements } from '../achievements/achievement-system';
 
 // Rendering & Post-Processing
 import PostProcessingDefaults, { EffectComposer, BloomPass, usePostProcessing } from '../postprocessing/post-processing-system';
@@ -65,7 +64,6 @@ import NetworkDefaults, { NetworkManager } from '../networking/multiplayer-syste
 import DebugDefaults, { DebugConsole, PerformanceMonitor, StatsOverlay } from '../debug/debug-console';
 import ProfilerDefaults, { Profiler, Timeline } from '../debug/profiler-system';
 import InspectorDefaults, { ObjectInspector } from '../debug/object-inspector';
-import ReplayDefaults, { ReplayManager, ReplayRecorder, ReplayPlayer } from '../replay/replay-system';
 
 // Plugins
 import PluginDefaults, { PluginLoader } from '../plugins/plugin-system';
@@ -438,10 +436,6 @@ export { BehaviorTreeDefaults };
 export { DialogueManager, DialogueBuilder, useDialogue };
 export { DialogueDefaults };
 
-// Achievements
-export { AchievementManager, AchievementBuilder, useAchievements };
-export { AchievementDefaults };
-
 // Post-Processing
 export { EffectComposer, BloomPass, usePostProcessing };
 export { PostProcessingDefaults };
@@ -477,10 +471,6 @@ export { Profiler, Timeline };
 export { ProfilerDefaults };
 export { ObjectInspector };
 export { InspectorDefaults };
-
-// Replay
-export { ReplayManager, ReplayRecorder, ReplayPlayer };
-export { ReplayDefaults };
 
 // Plugins
 export { PluginLoader };

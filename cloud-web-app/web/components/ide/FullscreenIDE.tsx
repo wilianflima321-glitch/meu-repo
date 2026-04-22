@@ -41,6 +41,7 @@ import {
   WorkbenchEntryNotice,
   type EntryNotice,
 } from '@/components/ide/fullscreen/WorkbenchEntryNotice';
+import { useWorkbenchFullAccess } from '@/components/ide/fullscreen/useWorkbenchFullAccess';
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
 const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
@@ -53,23 +54,6 @@ type ActiveFileState = {
 };
 
 type EditorPane = 'primary' | 'secondary';
-
-type FullAccessGrant = {
-  id: string
-  userId: string
-  projectId?: string | null
-  scope: string[]
-  expiresAt: string
-  status: 'active' | 'expired' | 'revoked'
-}
-
-type FullAccessResponse = {
-  error?: string
-  message?: string
-  metadata?: {
-    grants?: FullAccessGrant[]
-  }
-}
 
 type CollaborationRoomParticipant = {
   userId: string
@@ -173,7 +157,6 @@ function IDEContent() {
   const [previewRefreshTick, setPreviewRefreshTick] = useState(0);
   const [initialFileResolved, setInitialFileResolved] = useState(false);
   const [isCompactViewport, setIsCompactViewport] = useState(false)
-  const [fullAccessBusy, setFullAccessBusy] = useState(false)
   const [rollbackBusy, setRollbackBusy] = useState(false)
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
@@ -356,25 +339,15 @@ function IDEContent() {
     }
   }, [])
 
-  const { data: fullAccessData, mutate: mutateFullAccess } = useSWR<FullAccessResponse>(
-    hasToken ? '/api/studio/access/full' : null,
-    async (url: string) => {
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
-      })
-      const payload = (await response.json().catch(() => ({}))) as FullAccessResponse
-      if (!response.ok) {
-        throw new Error(payload.error || payload.message || `Falha na requisição: ${response.status}`)
-      }
-      return payload
-    },
-    {
-      refreshInterval: 30000,
-    }
-  )
+  const {
+    fullAccessActiveGrant,
+    fullAccessBusy,
+    fullAccessExpiryLabel,
+    toggleFullAccess: handleToggleFullAccess,
+  } = useWorkbenchFullAccess({
+    hasToken,
+    projectId,
+  })
 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
@@ -1117,65 +1090,6 @@ function IDEContent() {
 
     return groups
   }, [activeFile, secondaryFile, splitEditorOpen])
-
-  const fullAccessActiveGrant = useMemo(() => {
-    const grants = fullAccessData?.metadata?.grants || []
-    return grants.find((grant) => grant.status === 'active') ?? null
-  }, [fullAccessData?.metadata?.grants])
-
-  const fullAccessExpiryLabel = useMemo(() => {
-    if (!fullAccessActiveGrant?.expiresAt) return null
-    return new Date(fullAccessActiveGrant.expiresAt).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }, [fullAccessActiveGrant?.expiresAt])
-
-  const handleToggleFullAccess = useCallback(() => {
-    if (!hasToken || fullAccessBusy) return
-
-    void (async () => {
-      setFullAccessBusy(true)
-      try {
-        if (fullAccessActiveGrant?.id) {
-          const response = await fetch(`/api/studio/access/full/${encodeURIComponent(fullAccessActiveGrant.id)}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              ...getAuthHeaders(),
-            },
-          })
-          const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
-          if (!response.ok) {
-            throw new Error(payload.error || payload.message || `Falha na requisição: ${response.status}`)
-          }
-        } else {
-          const response = await fetch('/api/studio/access/full', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...getAuthHeaders(),
-            },
-            body: JSON.stringify({
-              projectId: projectId || undefined,
-              durationMinutes: 15,
-              reason: `ide_full_access:${projectId || 'workspace'}`,
-              scope: projectId ? [`project:${projectId}`, 'workspace:apply'] : ['workspace:apply'],
-            }),
-          })
-          const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
-          if (!response.ok) {
-            throw new Error(payload.error || payload.message || `Falha na requisição: ${response.status}`)
-          }
-        }
-        await mutateFullAccess()
-      } catch (error) {
-        console.error('[FullscreenIDE] full access toggle failed', error)
-      } finally {
-        setFullAccessBusy(false)
-      }
-    })()
-  }, [fullAccessActiveGrant?.id, fullAccessBusy, hasToken, mutateFullAccess, projectId])
 
   const handleInlineApplyResult = useCallback((result: InlineApplyResult) => {
     setLastAiApply({
