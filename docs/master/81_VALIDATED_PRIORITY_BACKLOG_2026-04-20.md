@@ -76,8 +76,8 @@ Canonical set reference:
 
 ## Current Structural Risks
 ### P0
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is still about `1755` lines.
-- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is still about `933` lines.
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now down to about `720` lines, but it is still a P0 because it remains the main workbench orchestrator.
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is now down to about `508` lines, but it is still a P0 because it still carries too many user-facing flows in one shell.
 - `cloud-web-app/web/tsconfig.json` still has `"noImplicitAny": false`.
 - tracked `: any` usage in web TS/TSX is still around `1059`.
 - coverage pressure exists now, but the suite is still far too small for the surface area.
@@ -121,6 +121,24 @@ Canonical set reference:
   - project-wide presence dots in file tree
   - full shared editing loop with visible remote cursors in the primary editing experience
 
+## Verified Workbench Refactor State
+- `cloud-web-app/web/components/ide/fullscreen/useWorkbenchFullAccess.ts` remains active and is now joined by:
+  - `cloud-web-app/web/components/ide/fullscreen/useWorkbenchChrome.ts`
+  - `cloud-web-app/web/components/ide/fullscreen/useWorkbenchFiles.ts`
+- `cloud-web-app/web/components/ai-chat/useChatContextPreviews.ts` remains active and is now joined by:
+  - `cloud-web-app/web/components/ai-chat/AIChatHeader.tsx`
+  - `cloud-web-app/web/components/ai-chat/AIChatMessagesPane.tsx`
+  - `cloud-web-app/web/components/ai-chat/AIChatActivityDeck.tsx`
+  - `cloud-web-app/web/components/ai-chat/AIChatComposer.tsx`
+  - `cloud-web-app/web/components/ai-chat/AIChatOpsSidebar.tsx`
+  - `cloud-web-app/web/components/ai-chat/presets.ts`
+- This means the god-component problem is no longer static:
+  - `AIChatPanelPro.tsx` has already crossed under the old 1k-line risk band
+  - `FullscreenIDE.tsx` has already shed multiple bounded responsibilities
+  - the next large workbench files to watch are now:
+    - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` at roughly `1051` lines
+    - `cloud-web-app/web/components/terminal/XTerminal.tsx` at roughly `1058` lines
+
 ## Verified Test State
 - Tracked tests currently found: `45`
 - This is better than older snapshots, but it is still far from acceptable given product scope and `320` API routes.
@@ -148,24 +166,31 @@ Canonical set reference:
    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
    - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
    - keep extracting focused hooks/modules rather than rewriting the shells in one shot
-2. Turn the recent structural wins into fully lived product quality:
+   - once these two stabilize, move the same extraction discipline to:
+     - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`
+     - `cloud-web-app/web/components/terminal/XTerminal.tsx`
+2. Make collaboration visible inside the actual editor loop:
+   - header presence is no longer enough
+   - remote cursors, editor awareness, and file-tree presence remain the next real differentiators
+3. Turn preview into a reliable shareable workflow:
+   - public/shareable preview is still not a proven end-to-end path
+   - preview must become something users can trust, not just something we can demo locally
+4. Turn the recent structural wins into fully lived product quality:
    - keep Storybook green
    - expand story/test coverage
    - make Lighthouse and coverage gates part of the release pressure, not decoration
    - keep policy and CI aligned as we tighten more required checks
-3. Turn off implicit drift in TypeScript:
+5. Turn off implicit drift in TypeScript:
    - move toward `noImplicitAny: true`
    - reduce `: any` from ~`1059`
-4. Restore observability discipline:
+6. Restore observability discipline:
    - continue `console.*` -> structured logger migration
-5. Finish design-system convergence:
+7. Finish design-system convergence:
    - remove broad raw hex drift
    - continue replacing legacy visual islands with canonical primitives
-6. Expand test pressure:
+8. Expand test pressure:
    - enable coverage
    - raise component, API, and E2E coverage in that order
-7. Wire collaboration into the real editor loop
-8. Validate preview/deploy as an actually shareable product workflow
 9. Reduce admin sprawl from `46` pages into canonical areas
 10. Upgrade i18n from proof-of-concept to product-grade
 

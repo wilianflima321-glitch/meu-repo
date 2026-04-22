@@ -1,0 +1,105 @@
+'use client'
+
+import dynamic from 'next/dynamic'
+import { ApprovalCard } from '@/components/ide/ApprovalCard'
+import { MemoryPanel } from '@/components/ide/MemoryPanel'
+import { TaskOpsPanel } from '@/components/ide/TaskOpsPanel'
+import { OPS_TABS, type AIChatOpsTab } from './presets'
+
+const MonacoChatDiffPanel = dynamic(
+  () => import('@/components/ide/MonacoChatDiffPanel').then((module) => module.MonacoChatDiffPanel),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 items-center justify-center text-[11px] text-[var(--aethel-text-tertiary)]">
+        A carregar comparador Monaco...
+      </div>
+    ),
+  }
+)
+
+interface PendingDiff {
+  path: string
+  oldContent: string
+  newContent: string
+}
+
+interface AIChatOpsSidebarProps {
+  showAdvancedControls: boolean
+  opsTab: AIChatOpsTab
+  onOpsTabChange: (tab: AIChatOpsTab) => void
+  pendingDiff?: PendingDiff | null
+  onAcceptDiff: (finalModified: string) => void
+  onRejectDiff: () => void
+  projectId?: string
+  defaultGoal: string
+}
+
+export function AIChatOpsSidebar({
+  showAdvancedControls,
+  opsTab,
+  onOpsTabChange,
+  pendingDiff,
+  onAcceptDiff,
+  onRejectDiff,
+  projectId,
+  defaultGoal,
+}: AIChatOpsSidebarProps) {
+  if (!showAdvancedControls) {
+    return null
+  }
+
+  return (
+    <aside className="flex w-80 flex-col border-l border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]">
+      <div className="flex items-center gap-1 border-b border-[var(--aethel-border-secondary)] px-2 py-2">
+        {OPS_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onOpsTabChange(tab.id)}
+            className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+              opsTab === tab.id
+                ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
+                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+            }`}
+          >
+            <span className="inline-flex items-center justify-center gap-1">
+              <tab.icon className="h-3 w-3" />
+              {tab.label}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-hidden">
+        {opsTab === 'memory' && (
+          <MemoryPanel memories={[]} onAdd={() => undefined} onDelete={() => undefined} onUpdate={() => undefined} />
+        )}
+
+        {opsTab === 'approval' && (
+          <ApprovalCard changes={[]} onApprove={() => undefined} onReject={() => undefined} />
+        )}
+
+        {opsTab === 'diff' &&
+          (pendingDiff ? (
+            <MonacoChatDiffPanel
+              filePath={pendingDiff.path}
+              original={pendingDiff.oldContent}
+              modified={pendingDiff.newContent}
+              onAcceptAll={onAcceptDiff}
+              onReject={onRejectDiff}
+            />
+          ) : (
+            <div className="flex h-full min-h-[160px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
+              <p>Nenhum diff pendente.</p>
+              <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
+                Use &quot;Abrir diff&quot; em um bloco de codigo da assistente.
+              </p>
+            </div>
+          ))}
+
+        {opsTab === 'execution' && <TaskOpsPanel projectId={projectId} defaultGoal={defaultGoal} />}
+      </div>
+    </aside>
+  )
+}

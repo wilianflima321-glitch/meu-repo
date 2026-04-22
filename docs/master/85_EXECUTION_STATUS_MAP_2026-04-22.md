@@ -56,9 +56,25 @@ This document fills that gap.
 ### Workbench progress
 - `AIChatPanelPro` already lost one bounded async responsibility to:
   - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\useChatContextPreviews.ts`
+- `AIChatPanelPro` now also delegates UI responsibilities to:
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatHeader.tsx`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatMessagesPane.tsx`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatActivityDeck.tsx`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatComposer.tsx`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatOpsSidebar.tsx`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\presets.ts`
 - `FullscreenIDE` already lost one bounded access-control responsibility to:
   - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchFullAccess.ts`
+- `FullscreenIDE` now also delegates workbench shell responsibilities to:
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchChrome.ts`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchFiles.ts`
 - collaboration presence is visible in the shell header
+- current measured line counts after this extraction round:
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx`: `~508`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx`: `~720`
+  - the next large files in the workbench lane are now:
+    - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\ModernIDEShell.tsx`
+    - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\terminal\XTerminal.tsx`
 
 ## What Is Still Open
 ### P0 — highest leverage, directly tied to product quality
@@ -90,13 +106,13 @@ This document fills that gap.
 
 ## Current Best Execution Order
 1. continue slicing the two god components
-2. clean root ambiguity and duplicate config surfaces
-3. continue `console.* -> logger`
-4. reduce `: any` and push toward `noImplicitAny: true`
-5. expand tests and coverage pressure
-6. wire collaboration into the main editor flow
-7. turn Playwright E2E into a default merge pressure
-8. validate preview/deploy as a true shareable workflow
+2. wire collaboration into the main editor flow
+3. validate preview/deploy as a true shareable workflow
+4. turn Playwright E2E into a default merge pressure
+5. clean root ambiguity and duplicate config surfaces
+6. continue `console.* -> logger`
+7. reduce `: any` and push toward `noImplicitAny: true`
+8. expand tests and coverage pressure
 9. reduce admin sprawl
 10. deepen i18n
 
