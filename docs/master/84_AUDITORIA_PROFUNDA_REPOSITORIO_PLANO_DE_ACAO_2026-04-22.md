@@ -93,14 +93,15 @@ A crítica continua válida, mesmo depois da hierarquia `81/82/83`.
 
 Conclusão: a solução não é apagar docs úteis às cegas; é manter **poucos documentos com papel nítido** e o resto como histórico/referência.
 
-### 3. O gap entre política declarada e enforcement em CI continua importante
-A nova auditoria acerta num ponto estrutural importante:
+### 3. O gap entre política declarada e enforcement em CI melhorou materialmente
+A nova auditoria acertou num ponto estrutural importante, e esse ponto já foi parcialmente resolvido no branch atual:
 
-- `qa:enterprise-gate` existe em `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\package.json`
-- a policy menciona esse gate em `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\BRANCH_PROTECTION_POLICY.md`
-- mas o `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\workflows\ci.yml` não executa esse agregador diretamente hoje
+- `qa:enterprise-gate` continua existindo em `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\package.json`
+- a policy continua mencionando esse gate em `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\BRANCH_PROTECTION_POLICY.md`
+- agora o `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\workflows\ci.yml` executa esse agregador diretamente
+- o agregador passou a incluir `qa:billing-runtime-readiness`, `qa:preview-runtime-readiness`, `lint` e `typecheck`
 
-Isto é exatamente o tipo de desalinhamento que pode corroer a credibilidade do próprio anti-fake-success se a gente deixar passar.
+Conclusão honesta: esse bloco deixou de ser um mismatch central de política-vs-CI. O que sobra aqui é principalmente pressão E2E ainda opcional e qualidade estrutural contínua do root.
 
 ### 4. E2E opcional ainda é uma crítica legítima
 A auditoria também continua correta aqui:
@@ -201,10 +202,10 @@ O `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\next.confi
 Depois de alinhar `81 + 82 + 83 + 84`, a leitura conjunta mais honesta é:
 
 1. o Aethel não está mais no estágio de “repo caótico sem norte”
-2. o Aethel está no estágio de “produto promissor com gargalos grandes e governança parcialmente desalinhada”
+2. o Aethel está no estágio de “produto promissor com gargalos grandes e governança em alinhamento progressivo”
 3. os maiores riscos agora se dividem em quatro blocos:
    - monólitos de workbench/chat
-   - policy-vs-CI mismatch
+   - pressão E2E ainda opcional
    - root/documentation hygiene
    - fechamento real de colaboração/preview/testes
 

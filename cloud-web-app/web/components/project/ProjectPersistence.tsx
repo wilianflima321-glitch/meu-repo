@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
 
+
 // ============================================================================
 // PROJECT PERSISTENCE SYSTEM (Premiere Pro / DaVinci style)
 // ============================================================================
@@ -448,7 +449,7 @@ export function ProjectProvider({
 
     const timer = setInterval(() => {
       saveAutosave(project)
-      console.log('Project autosaved')
+      log.info('Project autosaved')
     }, autosaveInterval)
 
     return () => clearInterval(timer)
@@ -995,3 +996,6 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
 }
 
 export default ProjectProvider
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ProjectPersistence')

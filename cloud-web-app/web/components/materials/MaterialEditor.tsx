@@ -28,6 +28,10 @@ import {
 import '@xyflow/react/dist/style.css';
 import * as THREE from 'three';
 import { useToast } from '@/components/ui/Toast';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('MaterialEditor')
+
 
 // ============================================================================
 // TIPOS
@@ -1035,7 +1039,7 @@ export function MaterialEditor() {
     };
     const compiler = new ShaderCompiler(graph);
     const glsl = compiler.generateGLSL();
-    console.log('Generated GLSL:\n', glsl);
+    log.info('Generated GLSL:\n', glsl);
     toast.success('Shader compiled! Check console for GLSL output.');
   }, [nodes, edges, toast]);
 

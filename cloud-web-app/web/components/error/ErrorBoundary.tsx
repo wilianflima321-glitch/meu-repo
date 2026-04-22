@@ -18,6 +18,7 @@ import React, {
   type ErrorInfo,
 } from 'react';
 import { AlertTriangle, RefreshCw, Bug, Copy, ChevronDown, ChevronRight, X, Home } from 'lucide-react';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 // ============================================================================
 // Types
@@ -62,6 +63,7 @@ export interface ErrorBoundaryState {
 // ============================================================================
 
 const ErrorBoundaryContext = createContext<ErrorBoundaryContextValue | null>(null);
+const errorBoundaryLog = createComponentLogger('ErrorBoundary');
 
 export const useErrorBoundary = () => {
   const context = useContext(ErrorBoundaryContext);
@@ -114,11 +116,18 @@ class ErrorReporterService {
 
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.group('🔴 Error Report');
-      console.error('Error:', error);
-      console.log('Context:', context);
-      console.log('Component Stack:', errorInfo?.componentStack);
-      console.groupEnd();
+      errorBoundaryLog.error('Error boundary captured render failure', error, {
+        action: 'report',
+        errorId: report.id,
+        url: report.url,
+        userId: report.userId,
+      });
+      errorBoundaryLog.debug('Error boundary context snapshot', {
+        action: 'report-context',
+        errorId: report.id,
+        context,
+        componentStack: errorInfo?.componentStack,
+      });
     }
 
     // Send to backend (async, non-blocking)
@@ -246,7 +255,9 @@ User Agent: ${typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'}
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      console.error('Failed to copy to clipboard');
+      errorBoundaryLog.error('Failed to copy error details to clipboard', {
+        action: 'copy-error-details',
+      });
     }
   }, [error, errorInfo]);
 

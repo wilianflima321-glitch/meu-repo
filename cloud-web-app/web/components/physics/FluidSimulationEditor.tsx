@@ -65,6 +65,8 @@ import {
 // ============================================================================
 
 import {
+
+
   FLUID_PRESETS,
   SPHFluidSimulation,
   type FluidEditorState,
@@ -73,6 +75,10 @@ import {
   type FluidPreset,
   type FluidToolType,
 } from './fluid-simulation-core';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('FluidSimulationEditor')
+
 
 export type {
   FluidEditorState,
@@ -679,7 +685,7 @@ export default function FluidSimulationEditor({
 
     // In a real implementation, this would use marching cubes or similar
     // to generate a mesh from the particle positions
-    console.log('Baking fluid to mesh with resolution:', params.meshResolution);
+    log.info('Baking fluid to mesh with resolution:', params.meshResolution);
 
     setIsBaking(false);
   }, [params.meshResolution]);

@@ -40,6 +40,10 @@ import {
   getBlueprintManager,
 } from '@/lib/blueprint-system';
 import { useToast } from '@/components/ui/Toast';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('BlueprintEditor')
+
 
 // ============================================================================
 // TYPES
@@ -661,7 +665,7 @@ export default function BlueprintEditor({ blueprintId, onSave, onClose }: Bluepr
     setBlueprint(updatedBlueprint);
     manager.updateBlueprint(blueprint.id, updatedBlueprint);
 
-    console.log('✅ Blueprint compiled successfully!');
+    log.info('✅ Blueprint compiled successfully!');
     toast.success('Blueprint compiled successfully!');
   }, [blueprint, nodes, edges, manager, toast]);
 

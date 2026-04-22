@@ -44,6 +44,8 @@ This document fills that gap.
 - structured logger exists
 - anti-fake-success gate exists and is passing
 - route contract and canonical document gates exist
+- `qa:enterprise-gate` is now directly enforced in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\workflows\ci.yml`
+- the last blocking browser dialog path was removed from `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\EditorApplyBridgeContext.tsx`
 
 ### Design system progress
 - Storybook is installed and building
@@ -68,8 +70,8 @@ This document fills that gap.
    - still centralizes multiple user flows
 3. `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\tsconfig.json`
    - `noImplicitAny: false` remains active
-4. CI policy-vs-enforcement mismatch
-   - `qa:enterprise-gate` exists in policy but is not the direct CI enforcement path
+4. E2E merge pressure
+   - Playwright is still optional instead of a default required merge gate
 
 ### P1 — highly visible debt
 1. root hygiene
@@ -88,12 +90,12 @@ This document fills that gap.
 
 ## Current Best Execution Order
 1. continue slicing the two god components
-2. close CI policy-vs-reality mismatch
-3. clean root ambiguity and duplicate config surfaces
-4. continue `console.* -> logger`
-5. reduce `: any` and push toward `noImplicitAny: true`
-6. expand tests and coverage pressure
-7. wire collaboration into the main editor flow
+2. clean root ambiguity and duplicate config surfaces
+3. continue `console.* -> logger`
+4. reduce `: any` and push toward `noImplicitAny: true`
+5. expand tests and coverage pressure
+6. wire collaboration into the main editor flow
+7. turn Playwright E2E into a default merge pressure
 8. validate preview/deploy as a true shareable workflow
 9. reduce admin sprawl
 10. deepen i18n

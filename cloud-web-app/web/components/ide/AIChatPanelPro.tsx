@@ -70,6 +70,7 @@ import { useChatContextPreviews } from '@/components/ai-chat/useChatContextPrevi
 import { useVoiceRecording } from '@/components/ai-chat/useVoiceRecording'
 import { formatCost } from '@/components/ai-chat/chat-utils'
 
+
 const QUICK_PROMPTS = [
   { icon: Brain, label: 'Explicar erro', prompt: 'Explique este erro e como corrigir:' },
   { icon: Bug, label: 'Corrigir arquivo', prompt: 'Corrija problemas neste arquivo:' },
@@ -240,7 +241,7 @@ export default function AIChatPanelPro({
   }, [agentCount, isAIWorking])
 
   const handleAgentClick = useCallback((agentId: string) => {
-    console.log('Agent clicked:', agentId)
+    log.info('Agent clicked:', agentId)
     // Would open agent details panel
   }, [])
 
@@ -248,7 +249,7 @@ export default function AIChatPanelPro({
     // Trigger interrupt callback if available
     if (onRegenerateResponse) {
       // This would need to be implemented in the parent component
-      console.log('Live interrupt triggered')
+      log.info('Live interrupt triggered')
     }
     setIsAIWorking(false)
   }, [onRegenerateResponse])
@@ -952,3 +953,6 @@ export default function AIChatPanelPro({
     </div>
   )
 }
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('AIChatPanelPro')

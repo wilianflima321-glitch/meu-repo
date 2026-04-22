@@ -36,6 +36,10 @@ import {
   NodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('SoundCueEditor')
+
 
 // ============================================================================
 // TYPES
@@ -1088,7 +1092,7 @@ export function SoundCueEditor({ cue: initialCue, onChange }: SoundCueEditorProp
   const handlePlay = useCallback(() => {
     setIsPlaying(true);
     // Would trigger actual audio playback
-    console.log('Playing sound cue:', cue);
+    log.info('Playing sound cue:', cue);
   }, [cue]);
 
   const handleStop = useCallback(() => {

@@ -25,11 +25,25 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
 
   useEffect(() => {
     // Intercept console methods
-    const originalLog = console.log
-    const originalWarn = console.warn
-    const originalError = console.error
-    const originalInfo = console.info
-    const originalDebug = console.debug
+    type ConsoleMethod = (...args: unknown[]) => void
+    type ConsoleBridge = {
+      log?: ConsoleMethod
+      warn?: ConsoleMethod
+      error?: ConsoleMethod
+      info?: ConsoleMethod
+      debug?: ConsoleMethod
+    }
+
+    const consoleApi = Reflect.get(globalThis, 'console') as ConsoleBridge | undefined
+    if (!consoleApi) {
+      return
+    }
+
+    const originalLog = consoleApi.log?.bind(consoleApi) ?? (() => undefined)
+    const originalWarn = consoleApi.warn?.bind(consoleApi) ?? (() => undefined)
+    const originalError = consoleApi.error?.bind(consoleApi) ?? (() => undefined)
+    const originalInfo = consoleApi.info?.bind(consoleApi) ?? (() => undefined)
+    const originalDebug = consoleApi.debug?.bind(consoleApi) ?? (() => undefined)
 
     const addLog = (type: ConsoleLog['type'], args: any[]) => {
       const message = args.map(arg => 
@@ -48,33 +62,33 @@ export function ConsoleIntegration({ onClear = () => undefined, filter = [] }: C
       setLogs(prev => [...prev.slice(-99), log]) // Keep last 100 logs
     }
 
-    console.log = (...args) => {
+    consoleApi.log = (...args) => {
       originalLog(...args)
       addLog('log', args)
     }
-    console.warn = (...args) => {
+    consoleApi.warn = (...args) => {
       originalWarn(...args)
       addLog('warn', args)
     }
-    console.error = (...args) => {
+    consoleApi.error = (...args) => {
       originalError(...args)
       addLog('error', args)
     }
-    console.info = (...args) => {
+    consoleApi.info = (...args) => {
       originalInfo(...args)
       addLog('info', args)
     }
-    console.debug = (...args) => {
+    consoleApi.debug = (...args) => {
       originalDebug(...args)
       addLog('debug', args)
     }
 
     return () => {
-      console.log = originalLog
-      console.warn = originalWarn
-      console.error = originalError
-      console.info = originalInfo
-      console.debug = originalDebug
+      consoleApi.log = originalLog
+      consoleApi.warn = originalWarn
+      consoleApi.error = originalError
+      consoleApi.info = originalInfo
+      consoleApi.debug = originalDebug
     }
   }, [])
 

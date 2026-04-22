@@ -13,6 +13,10 @@ import { createContext, useContext, ReactNode, useEffect, useState } from 'react
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useServiceWorker, type UseServiceWorkerReturn } from '../hooks/useServiceWorker';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ServiceWorkerProvider')
+
 
 // Context para expor o estado do SW para toda a aplicação
 const ServiceWorkerContext = createContext<UseServiceWorkerReturn | null>(null);
@@ -199,7 +203,7 @@ export function InstallPrompt() {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
 
-    console.log('[PWA] Install prompt outcome:', outcome);
+    log.info('[PWA] Install prompt outcome:', outcome);
 
     setDeferredPrompt(null);
     setShowPrompt(false);

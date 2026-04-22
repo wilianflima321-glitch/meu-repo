@@ -169,9 +169,12 @@ export class DebugConsole extends EventEmitter {
     // Also log to browser console
     const consoleMethod = level === 'fatal' ? 'error' : level;
     const prefix = source ? `[${source}]` : '';
-    const logFn = console[consoleMethod as 'log' | 'debug' | 'info' | 'warn' | 'error'];
+    const runtimeConsole = Reflect.get(globalThis, 'console') as
+      | Record<'log' | 'debug' | 'info' | 'warn' | 'error', ((...args: unknown[]) => void) | undefined>
+      | undefined;
+    const logFn = runtimeConsole?.[consoleMethod as 'log' | 'debug' | 'info' | 'warn' | 'error'];
     if (typeof logFn === 'function') {
-      logFn.call(console, `${prefix} ${message}`, data ?? '');
+      logFn(`${prefix} ${message}`, data ?? '');
     }
   }
   

@@ -5,11 +5,15 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type MutableRefObject,
   type ReactNode,
 } from 'react'
 import type * as monacoEditor from 'monaco-editor'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Modal } from '@/components/ui/Modal'
 import {
   applySnippetAtCursor,
   buildChatDiffFile,
@@ -46,6 +50,11 @@ type ProviderProps = {
   readFile: (path: string) => Promise<void>
 }
 
+type PendingCreateFileRequest = {
+  code: string
+  resolve: (result: ApplyBridgeResult) => void
+}
+
 export function EditorApplyBridgeProvider({
   children,
   editorRef,
@@ -56,6 +65,11 @@ export function EditorApplyBridgeProvider({
   readFile,
 }: ProviderProps) {
   const [pendingDiff, setPendingDiff] = useState<ChatDiffFile | null>(null)
+  const [createFileModalOpen, setCreateFileModalOpen] = useState(false)
+  const [createFilePath, setCreateFilePath] = useState('/src/untitled.ts')
+  const [createFileError, setCreateFileError] = useState<string | null>(null)
+  const [createFileBusy, setCreateFileBusy] = useState(false)
+  const pendingCreateFileRequestRef = useRef<PendingCreateFileRequest | null>(null)
 
   const clearPendingDiff = useCallback(() => setPendingDiff(null), [])
 
@@ -116,28 +130,63 @@ export function EditorApplyBridgeProvider({
     [editorRef, activeFilePath, persistActiveFileFromModel]
   )
 
+  const resolveCreateFileRequest = useCallback((result: ApplyBridgeResult) => {
+    pendingCreateFileRequestRef.current?.resolve(result)
+    pendingCreateFileRequestRef.current = null
+    setCreateFileBusy(false)
+    setCreateFileError(null)
+    setCreateFileModalOpen(false)
+  }, [])
+
+  const handleCancelCreateFile = useCallback(() => {
+    resolveCreateFileRequest({ ok: false, message: 'Operacao cancelada.' })
+  }, [resolveCreateFileRequest])
+
+  const handleConfirmCreateFile = useCallback(async () => {
+    const request = pendingCreateFileRequestRef.current
+    if (!request) {
+      setCreateFileModalOpen(false)
+      return
+    }
+
+    const rawPath = createFilePath.trim()
+    if (!rawPath) {
+      setCreateFileError('Informe o caminho do novo arquivo.')
+      return
+    }
+
+    const path = normalizePath(rawPath)
+    setCreateFileBusy(true)
+    setCreateFileError(null)
+
+    try {
+      await writeFile(path, request.code)
+      await readFile(path)
+      resolveCreateFileRequest({ ok: true })
+    } catch (error) {
+      setCreateFileBusy(false)
+      setCreateFileError(error instanceof Error ? error.message : 'Falha ao criar arquivo.')
+    }
+  }, [createFilePath, normalizePath, readFile, resolveCreateFileRequest, writeFile])
+
   const createFileFromSnippet = useCallback(
     async (code: string): Promise<ApplyBridgeResult> => {
       if (typeof window === 'undefined') return { ok: false, message: 'Indisponivel no servidor.' }
+      if (createFileBusy) return { ok: false, message: 'Ja existe uma criacao de arquivo em andamento.' }
 
       const suggestedPath = activeFilePath
         ? `${activeFilePath.replace(/\/[^/]+$/, '')}/novo-arquivo.ts`
         : '/src/untitled.ts'
 
-      const rawPath = window.prompt('Caminho do novo arquivo (ex: /src/foo.ts)', suggestedPath)
-      if (!rawPath?.trim()) return { ok: false, message: 'Operacao cancelada.' }
+      setCreateFilePath(suggestedPath)
+      setCreateFileError(null)
+      setCreateFileModalOpen(true)
 
-      const path = normalizePath(rawPath.trim())
-
-      try {
-        await writeFile(path, code)
-        await readFile(path)
-        return { ok: true }
-      } catch (error) {
-        return { ok: false, message: error instanceof Error ? error.message : 'Falha ao criar arquivo.' }
-      }
+      return await new Promise<ApplyBridgeResult>((resolve) => {
+        pendingCreateFileRequestRef.current = { code, resolve }
+      })
     },
-    [activeFilePath, normalizePath, readFile, writeFile]
+    [activeFilePath, createFileBusy]
   )
 
   const value = useMemo<EditorApplyBridgeContextValue>(
@@ -164,6 +213,58 @@ export function EditorApplyBridgeProvider({
   )
 
   return (
-    <EditorApplyBridgeContext.Provider value={value}>{children}</EditorApplyBridgeContext.Provider>
+    <EditorApplyBridgeContext.Provider value={value}>
+      {children}
+      <Modal
+        isOpen={createFileModalOpen}
+        onClose={createFileBusy ? () => undefined : handleCancelCreateFile}
+        title="Criar novo arquivo"
+        description="Escolha onde o snippet deve ser salvo no workspace."
+        size="md"
+        closeOnOverlayClick={!createFileBusy}
+        closeOnEscape={!createFileBusy}
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleCancelCreateFile}
+              disabled={createFileBusy}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void handleConfirmCreateFile()}
+              loading={createFileBusy}
+            >
+              Criar arquivo
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <Input
+            autoFocus
+            label="Caminho do arquivo"
+            value={createFilePath}
+            onChange={(event) => {
+              setCreateFilePath(event.target.value)
+              if (createFileError) setCreateFileError(null)
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                void handleConfirmCreateFile()
+              }
+            }}
+            placeholder="/src/foo.ts"
+            error={createFileError ?? undefined}
+            disabled={createFileBusy}
+            hint="Exemplo: /src/lib/nova-feature.ts"
+          />
+        </div>
+      </Modal>
+    </EditorApplyBridgeContext.Provider>
   )
 }

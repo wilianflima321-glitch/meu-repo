@@ -47,17 +47,9 @@ jobs:
         working-directory: cloud-web-app/web
         run: npm ci
 
-      - name: Type check
+      - name: Enterprise gate
         working-directory: cloud-web-app/web
-        run: npx tsc --noEmit
-
-      - name: Lint
-        working-directory: cloud-web-app/web
-        run: npm run lint
-
-      - name: Anti fake-success contracts
-        working-directory: cloud-web-app/web
-        run: npm run qa:no-fake-success
+        run: npm run qa:enterprise-gate
 
       - name: Security audit
         working-directory: cloud-web-app/web

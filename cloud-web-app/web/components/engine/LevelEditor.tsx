@@ -37,6 +37,8 @@ import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 // ============================================================================
 
 import {
+
+
   defaultEnvironment,
   defaultObjects,
   resolveProjectIdFromClient,
@@ -49,6 +51,10 @@ import {
   type TransformMode,
   type ViewportMode,
 } from './level-editor-core';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('LevelEditor')
+
 
 // ============================================================================
 // 3D SCENE OBJECTS
@@ -1012,13 +1018,13 @@ export default function LevelEditor() {
         })
       });
       if (response.ok) {
-        console.log('Level saved to server:', levelData.name);
+        log.info('Level saved to server:', levelData.name);
       }
     } catch (e) {
-      console.log('Server save failed, using localStorage only');
+      log.info('Server save failed, using localStorage only');
     }
 
-    console.log('Level saved:', levelData);
+    log.info('Level saved:', levelData);
   }, [objects, environment]);
 
   // Load level on mount
@@ -1059,14 +1065,14 @@ export default function LevelEditor() {
           }
         }
       } catch (e) {
-        console.log('No saved level found, using defaults');
+        log.info('No saved level found, using defaults');
       }
     };
     loadLevel();
   }, []);
 
   const handleBuild = useCallback(() => {
-    console.log('Building level...');
+    log.info('Building level...');
     // Build process would go here
   }, []);
 

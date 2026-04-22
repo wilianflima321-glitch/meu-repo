@@ -13,6 +13,10 @@
  */
 
 import { useEffect, useCallback, useState } from 'react';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ThemeSynchronizer')
+
 
 // ============================================================================
 // Types
@@ -101,7 +105,7 @@ export function useThemeBridge() {
       const themeData = data as unknown as ThemeMessage;
       setCurrentTheme(themeData.theme || 'dark');
       applyColors(themeData.colors || {});
-      console.debug('[ThemeBridge] Theme updated:', themeData.theme);
+      log.debug('[ThemeBridge] Theme updated:', themeData.theme);
     }
   }, [applyColors]);
 

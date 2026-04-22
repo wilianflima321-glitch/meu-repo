@@ -20,11 +20,17 @@ import {
 import '@xyflow/react/dist/style.css';
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 import {
+
+
   NODE_CATALOG,
   type NodeCategory,
   type NodeDefinition,
   type VisualNodeData,
 } from './visual-node-catalog';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('VisualScriptEditor')
+
 
 export type { PortDefinition } from './visual-node-catalog';
 
@@ -633,7 +639,7 @@ export function VisualScriptEditor({ script, onChange }: VisualScriptEditorProps
               <button type="button"
                 onClick={() => {
                   const json = JSON.stringify(compileScript(), null, 2);
-                  console.log('Compiled Script:', json);
+                  log.info('Compiled Script:', json);
                   navigator.clipboard.writeText(json);
                 }}
                 aria-label="Salvar script visual e copiar JSON"

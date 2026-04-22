@@ -133,7 +133,7 @@ export function AIViewportAssistant({ onAction = () => undefined, onGenerate = (
                 <div className="text-center">
                   <Brain className="w-12 h-12 mx-auto mb-3 text-[var(--aethel-text-quaternary)]" />
                   <p>Descreva o que você quer criar</p>
-                  <p className="text-xs mt-1">Ex: "Crie um cubo vermelho girando"</p>
+                  <p className="text-xs mt-1">Ex: &quot;Crie um cubo vermelho girando&quot;</p>
                 </div>
               </div>
             ) : (

@@ -33,6 +33,7 @@ Canonical set reference:
 - `cloud-web-app/web/lighthouserc.js`: present
 - `cloud-web-app/web/prisma/migrations/`: seeded with `migration_lock.toml` + `MIGRATIONS.md`
 - root orphan candidates still visible: `20`
+- `cloud-web-app/web/scripts/interface-critical-gate.mjs`: green again with `blocking-browser-dialogs=0`
 
 ## Audit Claims That Still Match Reality
 - The product thesis is coherent: Studio + Workbench + AI + Preview + Billing + Admin under a single shell direction.
@@ -53,6 +54,7 @@ Canonical set reference:
 - i18n is still materially insufficient.
 - Collaboration UI primitives now exist and header-level presence is visible in the workbench shell, but the UX is still not fully integrated in the editor canvas itself.
 - The anti-fake-success policy remains a real differentiator and is enforced by QA scripts.
+- `qa:enterprise-gate` now includes billing readiness, preview readiness, lint, and typecheck, and the main CI workflow executes it directly again.
 
 ## Audit Claims That Need Correction Or Downgrading
 - "503 MB repo" does **not** match the current tracked repository.
@@ -81,7 +83,11 @@ Canonical set reference:
 - coverage pressure exists now, but the suite is still far too small for the surface area.
 - collaboration is still not fully visible inside the primary editor canvas.
 - the branch is typechecking again only after restoring a minimal active compatibility surface for `lib/index.ts` and `lib/sequencer-cinematics.ts`.
-- CI policy-vs-enforcement is now confirmed as a live gap by `84`: `qa:enterprise-gate` exists in policy, but is not the direct CI gate today.
+- CI policy-vs-enforcement improved materially:
+  - `qa:enterprise-gate` is now executed directly in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\workflows\ci.yml`
+  - branch protection wording was updated to match actual enforcement semantics
+- Remaining CI gap:
+  - Playwright E2E is still optional rather than default merge pressure
 
 ### P1
 - Broad grep still finds roughly `1305` raw hex matches across tracked component TS/TSX files.
@@ -119,6 +125,7 @@ Canonical set reference:
 
 ## Verified Design-System State
 - `qa:design-system-consistency`: currently passing
+- `qa:interface-gate`: currently passing again with `blocking-browser-dialogs=0`
 - `ThemeToggle` now exists and has tests/stories
 - This does **not** mean the whole product is free of raw visual drift.
 - The design-system gate is useful, but a broad grep still shows raw hex values in tracked components.
@@ -143,7 +150,7 @@ Canonical set reference:
    - keep Storybook green
    - expand story/test coverage
    - make Lighthouse and coverage gates part of the release pressure, not decoration
-   - close the CI mismatch called out by `84` so policy and branch protection stop overstating enforcement
+   - keep policy and CI aligned as we tighten more required checks
 3. Turn off implicit drift in TypeScript:
    - move toward `noImplicitAny: true`
    - reduce `: any` from ~`1059`

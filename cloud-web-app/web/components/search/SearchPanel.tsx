@@ -5,6 +5,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { getSearchManager, SearchOptions, SearchResult } from '../../lib/search/search-manager';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('SearchPanel')
+
 
 interface SearchPanelProps {
   onClose?: () => void;
@@ -68,7 +72,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({ onClose }) => {
 
     try {
       const count = await searchManager.replaceAll(results, { replacement });
-      console.log(`Replaced ${count} occurrences`);
+      log.info(`Replaced ${count} occurrences`);
       // Refresh search results
       await handleSearch();
     } catch (error) {

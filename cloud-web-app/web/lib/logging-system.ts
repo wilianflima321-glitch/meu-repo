@@ -173,6 +173,15 @@ export interface LoggerConfig {
   datadogApiKey?: string;
 }
 
+type RuntimeConsole = {
+  log?(message?: unknown, ...optionalParams: unknown[]): void;
+  error?(message?: unknown, ...optionalParams: unknown[]): void;
+};
+
+function getRuntimeConsole(): RuntimeConsole | undefined {
+  return Reflect.get(globalThis, 'console') as RuntimeConsole | undefined;
+}
+
 // ============================================================================
 // LOG LEVEL UTILITIES
 // ============================================================================
@@ -332,7 +341,7 @@ export class Logger {
       }
     }
     
-    console.log(output);
+    getRuntimeConsole()?.log?.(output);
   }
   
   // ==========================================================================
@@ -534,7 +543,7 @@ export class Logger {
       });
     } catch (error) {
       // Falha silenciosa - não queremos loops infinitos de erro
-      console.error('[Logger] Failed to send logs:', error);
+      getRuntimeConsole()?.error?.('[Logger] Failed to send logs:', error);
       // Re-adiciona ao buffer para retry
       this.logBuffer = [...logsToSend, ...this.logBuffer].slice(0, 1000);
     }
@@ -556,7 +565,7 @@ export class Logger {
         body: JSON.stringify({ audits: auditsToSend }),
       });
     } catch (error) {
-      console.error('[Logger] Failed to send audits:', error);
+      getRuntimeConsole()?.error?.('[Logger] Failed to send audits:', error);
       this.auditBuffer = [...auditsToSend, ...this.auditBuffer].slice(0, 1000);
     }
   }
@@ -567,7 +576,7 @@ export class Logger {
   private async sendToSentry(error: Error, context?: Record<string, unknown>): Promise<void> {
     // Integração real com Sentry seria aqui
     // Por ora, apenas marca para envio
-    console.log('[Sentry] Would send:', error.message);
+    getRuntimeConsole()?.log?.('[Sentry] Would send:', error.message);
   }
   
   /**

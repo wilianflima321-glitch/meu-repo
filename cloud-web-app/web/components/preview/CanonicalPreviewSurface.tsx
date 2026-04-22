@@ -23,6 +23,10 @@ import TimelineOverlay from '@/components/viewport/TimelineOverlay';
 import type { VisualScript } from '@/components/visual-scripting/VisualScriptEditor';
 import type { VFXGraph } from '@/components/editors/VFXGraphEditor';
 import type { GameplayAbilitySpec } from '@/lib/gameplay-ability-system';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('CanonicalPreviewSurface')
+
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -961,7 +965,7 @@ function RuntimePreview(props: CanonicalRuntimeProps) {
   const { runtime, provision, switchToInline } = usePreviewRuntime(projectId, autoProvision);
   const { magicWandState, openMagicWand, closeMagicWand, handleSendMessage } = useMagicWand((message, context) => {
     // Handle Magic Wand message - could be passed up to parent or sent to AI
-    console.log('Magic Wand message:', message, context);
+    log.info('Magic Wand message:', message, context);
   });
 
   // Determine effective URL

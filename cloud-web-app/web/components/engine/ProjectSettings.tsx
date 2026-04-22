@@ -11,6 +11,10 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useToast } from '@/components/ui/Toast';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ProjectSettings')
+
 
 // ============================================================================
 // TYPES
@@ -741,7 +745,7 @@ export default function ProjectSettings() {
     // Save settings to localStorage or backend
     localStorage.setItem('aethel_project_settings', JSON.stringify(settings));
     setHasChanges(false);
-    console.log('Settings saved:', settings);
+    log.info('Settings saved:', settings);
   }, [settings]);
 
   const handleReset = useCallback(() => {

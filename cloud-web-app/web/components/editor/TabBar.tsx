@@ -26,6 +26,8 @@ import React, {
   type MouseEvent,
 } from 'react';
 import {
+
+
   X,
   MoreHorizontal,
   ChevronDown,
@@ -47,6 +49,10 @@ import {
   Search,
   type LucideIcon,
 } from 'lucide-react';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('TabBar')
+
 
 // ============================================================================
 // Types
@@ -500,7 +506,7 @@ function TabContextMenu({
       icon: ExternalLink,
       action: () => {
         // Trigger reveal in file explorer
-        console.log('Reveal:', tab.path);
+        log.info('Reveal:', tab.path);
       },
     },
   ];

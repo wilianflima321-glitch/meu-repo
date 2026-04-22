@@ -11,6 +11,11 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('TerrainSculptingEditor')
+
+
 export type TerrainToolType =
   | 'sculpt_raise'
   | 'sculpt_lower'
@@ -994,7 +999,7 @@ export function TerrainSculptingEditor({
     }
   };
   const applyErosion = useCallback(() => {
-    console.log('Applying erosion:', erosionSettings);
+    log.info('Applying erosion:', erosionSettings);
   }, [erosionSettings]);
   const addLayer = () => {
     const newLayer: TerrainLayer = {

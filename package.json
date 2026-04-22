@@ -70,6 +70,7 @@
     "qa:button-types": "node tools/check-button-types.mjs",
     "qa:hardcoded-colors": "node tools/check-hardcoded-colors.mjs",
     "qa:enterprise-gate": "npm --prefix cloud-web-app/web run qa:enterprise-gate",
+    "qa:enterprise-release-gate": "npm --prefix cloud-web-app/web run qa:enterprise-release-gate",
     "qa:design-system-consistency": "node tools/check-design-system-consistency.mjs"
   },
   "devDependencies": {

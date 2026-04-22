@@ -38,6 +38,7 @@ import {
 } from 'lucide-react'
 import { DEFAULT_OPENROUTER_MODEL_ID, OPENROUTER_MODEL_OPTIONS } from '@/lib/ai/openrouter-models'
 
+
 // ============= Types =============
 
 interface SettingSection {
@@ -431,7 +432,7 @@ export default function EngineSettingsPage() {
 
   // Save settings
   const handleSave = useCallback(() => {
-    console.log('Saving settings:', settings)
+    log.info('Saving settings:', settings)
     setHasChanges(false)
   }, [settings])
 
@@ -584,4 +585,8 @@ export default function EngineSettingsPage() {
     </div>
   )
 }
+
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('EngineSettingsPage')
 

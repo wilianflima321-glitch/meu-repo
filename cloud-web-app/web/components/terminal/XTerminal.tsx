@@ -22,6 +22,8 @@ import type { WebLinksAddon } from 'xterm-addon-web-links';
 import type { SearchAddon } from 'xterm-addon-search';
 import type { Unicode11Addon } from 'xterm-addon-unicode11';
 import {
+
+
   Terminal as TerminalIcon,
   X,
   Plus,
@@ -36,6 +38,10 @@ import {
   RefreshCw,
   MoreHorizontal,
 } from 'lucide-react';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('XTerminal')
+
 
 // ============================================================================
 // Types
@@ -304,7 +310,7 @@ class TerminalWebSocket {
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
 
     setTimeout(() => {
-      console.log(`[Terminal] Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+      log.info(`[Terminal] Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
       this.connect(sessionId);
     }, delay);
   }

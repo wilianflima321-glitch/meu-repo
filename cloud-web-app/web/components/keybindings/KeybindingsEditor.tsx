@@ -37,6 +37,7 @@ import { getKeybindingManager, Keybinding as ManagerKeybinding } from '@/lib/key
 import { useToast } from '@/components/ui/Toast'
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
 
+
 // ============= Types =============
 
 export interface Keybinding {
@@ -745,9 +746,13 @@ export function useKeybindings(customBindings?: Keybinding[]) {
 
   const executeCommand = useCallback((commandId: string) => {
     // This would dispatch the command to a command system
-    console.log('Execute command:', commandId)
+    log.info('Execute command:', commandId)
   }, [])
 
   return { keybindings, getKeybinding, executeCommand }
 }
+
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('KeybindingsEditor')
 

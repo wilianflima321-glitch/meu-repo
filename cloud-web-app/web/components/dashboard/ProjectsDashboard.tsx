@@ -18,6 +18,8 @@ import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs';
 import {
+
+
   Plus,
   FolderOpen,
   Settings,
@@ -47,6 +49,10 @@ import {
   TrendingUp,
   AlertCircle,
 } from 'lucide-react';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('ProjectsDashboard')
+
 
 // ============================================================================
 // TYPES
@@ -967,8 +973,8 @@ export const ProjectsDashboard: React.FC = () => {
                 onOpen={() => handleOpenProject(project.id)}
                 onToggleFavorite={() => handleToggleFavorite(project.id)}
                 onDelete={() => handleDeleteProject(project.id)}
-                onDuplicate={() => console.log('Duplicate:', project.id)}
-                onShare={() => console.log('Share:', project.id)}
+                onDuplicate={() => log.info('Duplicate:', project.id)}
+                onShare={() => log.info('Share:', project.id)}
               />
             ))}
           </div>
@@ -982,8 +988,8 @@ export const ProjectsDashboard: React.FC = () => {
                 onOpen={() => handleOpenProject(project.id)}
                 onToggleFavorite={() => handleToggleFavorite(project.id)}
                 onDelete={() => handleDeleteProject(project.id)}
-                onDuplicate={() => console.log('Duplicate:', project.id)}
-                onShare={() => console.log('Share:', project.id)}
+                onDuplicate={() => log.info('Duplicate:', project.id)}
+                onShare={() => log.info('Share:', project.id)}
               />
             ))}
           </div>

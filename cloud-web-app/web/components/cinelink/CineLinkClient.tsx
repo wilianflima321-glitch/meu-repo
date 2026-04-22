@@ -15,6 +15,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
+
+
   Camera,
   Smartphone,
   QrCode,
@@ -32,6 +34,10 @@ import {
   RotateCcw,
   Move3d
 } from 'lucide-react';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('CineLinkClient')
+
 
 // ============================================================================
 // TYPES
@@ -239,7 +245,7 @@ export function CineLinkClient({
       const ws = new WebSocket(connectionUrl.replace('http', 'ws'));
 
       ws.onopen = () => {
-        console.log('[CineLink] Connected');
+        log.info('[CineLink] Connected');
         setState(prev => ({ ...prev, isConnected: true }));
         onConnectionChange?.(true);
 
@@ -257,7 +263,7 @@ export function CineLinkClient({
       };
 
       ws.onclose = () => {
-        console.log('[CineLink] Disconnected');
+        log.info('[CineLink] Disconnected');
         setState(prev => ({
           ...prev,
           isConnected: false,

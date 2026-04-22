@@ -4,6 +4,10 @@ import React, { Suspense, useState, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment } from '@react-three/drei';
 import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const log = createComponentLogger('GameViewport')
+
 
 // Rapier physics é opcional - usar fallback quando não disponível
 let Physics: React.ComponentType<any> | null = null;
@@ -23,7 +27,7 @@ async function loadRapier() {
       RigidBody = mod.RigidBody;
     } catch {
       // Rapier não instalado - usar fallback sem física
-      console.log('[GameViewport] @react-three/rapier not available, using fallback');
+      log.info('[GameViewport] @react-three/rapier not available, using fallback');
     }
   }
 }
