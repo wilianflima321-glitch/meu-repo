@@ -29,6 +29,18 @@ import { analytics } from "@/lib/analytics";
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
+import {
+  getAuthHeaders,
+  resolveLanguage,
+  normalizePath,
+  collaborationColorForUser,
+  pickFirstFilePath,
+  type WorkspaceTreeNode,
+} from '@/components/ide/fullscreen/workbench-helpers';
+import {
+  WorkbenchEntryNotice,
+  type EntryNotice,
+} from '@/components/ide/fullscreen/WorkbenchEntryNotice';
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
 const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
@@ -41,12 +53,6 @@ type ActiveFileState = {
 };
 
 type EditorPane = 'primary' | 'secondary';
-
-type WorkspaceTreeNode = {
-  path?: string;
-  type?: "file" | "directory";
-  children?: WorkspaceTreeNode[];
-};
 
 type FullAccessGrant = {
   id: string
@@ -94,76 +100,9 @@ type InlineApplyResult = {
   filePath?: string
 }
 
-type EntryNotice = {
-  tone: 'info' | 'warning'
-  title: string
-  description: string
-}
-
-function getAuthHeaders(): Record<string, string> {
-  if (typeof window === 'undefined') return {}
-  const token = window.localStorage.getItem('token')
-  return token ? { Authorization: `Bearer ${token}` } : {}
-}
-
-function resolveLanguage(path: string): string {
-  const ext = path.split(".").pop()?.toLowerCase() ?? "";
-  if (ext === "ts" || ext === "tsx") return "typescript";
-  if (ext === "js" || ext === "jsx") return "javascript";
-  if (ext === "json") return "json";
-  if (ext === "md") return "markdown";
-  if (ext === "css" || ext === "scss") return "css";
-  if (ext === "html" || ext === "htm") return "html";
-  if (ext === "py") return "python";
-  return "plaintext";
-}
-
-function normalizePath(input: string): string {
-  if (!input) return "/";
-  return input.startsWith("/") ? input : `/${input}`;
-}
-
-function collaborationColorForUser(userId: string): string {
-  let hash = 0
-  for (let index = 0; index < userId.length; index += 1) {
-    hash = (hash << 5) - hash + userId.charCodeAt(index)
-    hash |= 0
-  }
-
-  const hue = Math.abs(hash) % 360
-  return `hsl(${hue}, 72%, 56%)`
-}
-
-function pickFirstFilePath(nodes: WorkspaceTreeNode[]): string | null {
-  const preferred = ["tsx", "ts", "jsx", "js", "html", "htm", "md", "json", "css"];
-
-  const allFiles: string[] = [];
-  const walk = (list: WorkspaceTreeNode[]) => {
-    for (const node of list) {
-      if (!node) continue;
-      if (node.type === "file" && typeof node.path === "string" && node.path.trim()) {
-        allFiles.push(node.path);
-      }
-      if (node.type === "directory" && Array.isArray(node.children)) {
-        walk(node.children);
-      }
-    }
-  };
-  walk(nodes);
-
-  if (allFiles.length === 0) return null;
-  const ranked = [...allFiles].sort((a, b) => {
-    const extA = a.split(".").pop()?.toLowerCase() ?? "";
-    const extB = b.split(".").pop()?.toLowerCase() ?? "";
-    const idxA = preferred.indexOf(extA);
-    const idxB = preferred.indexOf(extB);
-    const scoreA = idxA >= 0 ? idxA : preferred.length + 1;
-    const scoreB = idxB >= 0 ? idxB : preferred.length + 1;
-    if (scoreA !== scoreB) return scoreA - scoreB;
-    return a.localeCompare(b);
-  });
-  return normalizePath(ranked[0]);
-}
+// NOTE: Workbench helpers + EntryNotice type + WorkbenchEntryNotice component
+// live in components/ide/fullscreen/{workbench-helpers,WorkbenchEntryNotice}
+// to keep this orchestrator under the component-budget.
 
 function IDEContent() {
   const searchParams = useSearchParams();
@@ -1883,40 +1822,6 @@ function IDEContent() {
       </TabProvider>
     </CommandPaletteProvider>
   );
-}
-
-function WorkbenchEntryNotice({
-  notice,
-  onDismiss,
-}: {
-  notice: EntryNotice
-  onDismiss: () => void
-}) {
-  const toneClasses =
-    notice.tone === 'warning'
-      ? 'border-[color-mix(in_srgb,var(--aethel-warning)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
-      : 'border-[color-mix(in_srgb,var(--aethel-info)_32%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] text-[var(--aethel-info-light)]'
-
-  return (
-    <div className="flex items-start justify-between gap-4 px-5 py-4">
-      <div className={`flex-1 rounded-xl border px-4 py-3 ${toneClasses}`}>
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em]">
-          {notice.title}
-        </div>
-        <p className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-          {notice.description}
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={onDismiss}
-        className="min-h-[36px] rounded-lg border border-[var(--aethel-border-primary)] px-3 py-2 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-secondary)] hover:text-[var(--aethel-text-secondary)]"
-        aria-label="Fechar aviso do workbench"
-      >
-        Fechar
-      </button>
-    </div>
-  )
 }
 
 export default function FullscreenIDE() {

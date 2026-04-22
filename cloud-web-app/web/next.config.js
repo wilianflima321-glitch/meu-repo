@@ -148,4 +148,22 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// Round 81 — opt-in bundle analyzer.
+// Enable with: ANALYZE=1 npm run build
+// Writes HTML reports to .next/analyze/*.html so reviewers can inspect chunks.
+let finalConfig = nextConfig
+if (process.env.ANALYZE === '1' || process.env.ANALYZE === 'true') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const withBundleAnalyzer = require('@next/bundle-analyzer')({
+      enabled: true,
+      openAnalyzer: false,
+    })
+    finalConfig = withBundleAnalyzer(nextConfig)
+  } catch (err) {
+    // Dependency is optional — fall back to the plain config if missing.
+    console.warn('[next.config] ANALYZE=1 but @next/bundle-analyzer is not installed — skipping analyzer wrap.')
+  }
+}
+
+module.exports = finalConfig

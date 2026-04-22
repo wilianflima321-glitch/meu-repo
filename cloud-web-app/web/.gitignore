@@ -36,8 +36,11 @@ yarn-error.log*
 Thumbs.db
 
 # Prisma
-prisma/migrations/*
-!prisma/migrations/.gitkeep
+# Round 81: migrations ARE versioned (see prisma/migrations/MIGRATIONS.md).
+# Only ignore scratch / dev-shadow databases, never the migrations folder.
+prisma/*.db
+prisma/*.db-journal
+prisma/dev.db*
 
 # Temporary
 *.tmp
