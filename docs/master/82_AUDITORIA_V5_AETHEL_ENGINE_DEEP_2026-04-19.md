@@ -11,9 +11,10 @@
 Este documento continua sendo o norte principal, mas alguns trechos ficaram velhos depois das rodadas de refactor e da pressão E2E mais recente.
 
 - Workbench hotspots:
-  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para cerca de `378` linhas.
-  - o peso estrutural do shell migrou mais para `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`~657` linhas) do que para o arquivo raiz.
-  - `cloud-web-app/web/components/terminal/XTerminal.tsx` já caiu para cerca de `630` linhas.
+  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx` está em `702` linhas.
+  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para `161` linhas.
+  - o shell agora está repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`281` linhas) e `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`378` linhas).
+  - `cloud-web-app/web/components/terminal/XTerminal.tsx` está em `628` linhas.
 - Colaboração:
   - `CollaboratorsBar` e `RemoteCursorLayer` já existem e a presença colaborativa já aparece no editor principal via `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` e `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`.
   - o que continua em aberto não é mais “UI inexistente”, e sim `file-tree presence`, shared-text path canônico e verificação de produção mais ampla.
@@ -22,6 +23,7 @@ Este documento continua sendo o norte principal, mas alguns trechos ficaram velh
   - localmente, a suíte continua com `5 passed`, mas a reprodução “crua” ainda depende de o app já estar no ar em `:3000`.
 - Build parity:
   - o antigo blocker global de `usePathname()` em providers compartilhados foi reduzido pela introdução de `cloud-web-app/web/lib/navigation/use-browser-pathname.ts`.
+  - a árvore pública/auth agora também usa um stack de providers mais leve via `cloud-web-app/web/components/ClientLayout.tsx`, e `cloud-web-app/web/next.config.js` força `experimental.workerThreads=false` como mitigação para builds Windows.
   - a paridade completa de `next build` ainda deve continuar marcada como aberta até termos um build de produção concluído de ponta a ponta.
 
 ## Referências Visuais Locais
@@ -87,10 +89,10 @@ Este documento continua sendo o norte principal, mas alguns trechos ficaram velh
 - 🎛️ **Governança 7.0→8.5**: dependabot.yml com 63 linhas, pull_request_template, branch-protection-policy, templates de comentários automatizados.
 
 **Onde regrediu ou não mexeu:**
-- 📈 **Perf/Bundle 5.5→5.2** ↓: `images: { unoptimized: true }` no next.config.js **desliga** Next Image optimization inteira. Isso é catastrófico para LCP.
+- 📈 **Perf/Bundle 5.5→5.2** ↓: a categoria continua aberta, mas o antigo blocker `images: { unoptimized: true }` já não vale para o branch atual; o gargalo factual hoje está mais em build parity, dynamic imports e prova end-to-end de preview/performance.
 - 🧪 Testes: **ZERO mudança** — Jest coverage ainda `false`, ainda 12 testes unitários.
 - 🎨 Design System: 784 hex hardcoded **intocados**.
-- 🧹 God components: `FullscreenIDE.tsx` e `AIChatPanelPro.tsx` **ainda 1.808 + 1.750 linhas**.
+- 🧹 God components: a categoria continua válida, mas os números antigos envelheceram; hoje os maiores hotspots já são menores e mais concentrados (`FullscreenIDE.tsx` `702`, `AIChatPanelPro.tsx` `549`, `AIChatPanelContainer.tsx` `673`, `XTerminal.tsx` `628`).
 
 ---
 

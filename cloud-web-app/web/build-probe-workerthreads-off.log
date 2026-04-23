@@ -1,0 +1,80 @@
+# build-probe-workerthreads-off
+created_at=2026-04-23T14:19:01.600372
+context=next.config.js uses experimental.workerThreads=false and ClientLayout scopes heavy providers to studio surfaces.
+result=build parity still open
+observation_1=local npm run build probes still did not complete within an extended 15 minute timeout.
+observation_2=latest actionable full failure log remains build-latest.log with prerender errors for /404, /500, /_not-found, /login, /register, /settings, /status, /terms, /verify-email.
+observation_3=latest short debug rerun did not advance beyond the initial optimized-build startup lines before the process had to be stopped.
+
+[build-debug.log]
+  ▲ Next.js 14.2.35 (turbo)
+  - Environments: .env.local, .env
+  - Experiments (use with caution):
+    · cpus
+    · webpackBuildWorker
+
+   Creating an optimized production build ...
+   Linting and checking validity of types ...
+   Collecting page data ...
+
+
+[build-debug.err.log]
+ ⚠ Compiled with warnings
+
+./node_modules/e2b/dist/index.mjs
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/e2b/dist/index.mjs
+./app/api/preview/runtime-provision/route.ts
+
+
+> Build error occurred
+Error: ENOENT: no such file or directory, open 'C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\.next\server\pages-manifest.json'
+    at async open (node:internal/fs/promises:637:25)
+    at async Object.readFile (node:internal/fs/promises:1269:14)
+    at async readManifest (C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\node_modules\next\dist\build\index.js:165:23)
+    at async C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\node_modules\next\dist\build\index.js:1043:35
+    at async Span.traceAsyncFn (C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\node_modules\next\dist\trace\trace.js:154:20)
+    at async build (C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\node_modules\next\dist\build\index.js:368:9) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\Grosarik\\Desktop\\Aethel engine\\meu-repo\\cloud-web-app\\web\\.next\\server\\pages-manifest.json'
+}
+
+
+[build-current.log]
+
+> aethel-portal@0.2.0 build
+> next build
+
+  ▲ Next.js 14.2.35 (turbo)
+  - Environments: .env.local, .env
+  - Experiments (use with caution):
+    · cpus
+    · webpackBuildWorker
+
+   Creating an optimized production build ...
+   Linting and checking validity of types ...
+
+
+[build-current.err.log]
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (139kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ⚠ Compiled with warnings
+
+./node_modules/e2b/dist/index.mjs
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/e2b/dist/index.mjs
+./app/api/preview/runtime-provision/route.ts
+
+
+Failed to compile.
+
+./components/ide/ModernIDEShell.tsx
+124:9  Error: Do not pass children as props. Instead, nest children between the opening and closing tags.  react/no-children-prop
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+

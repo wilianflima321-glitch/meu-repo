@@ -41,7 +41,9 @@ Use the current set like this:
 - Hotspot line counts:
   - `FullscreenIDE.tsx`: `702`
   - `AIChatPanelPro.tsx`: `549`
-  - `ModernIDEShell.tsx`: `378`
+  - `AIChatPanelContainer.tsx`: `673`
+  - `ModernIDEShell.tsx`: `161`
+  - `ModernIDEShellPanels.tsx`: `281`
   - `ModernIDEShellChrome.tsx`: `378`
   - `XTerminal.tsx`: `628`
 
@@ -102,7 +104,11 @@ Do not keep auditing it as an active blocker.
 
 ### Production build parity
 - This remains OPEN.
-- The active evidence is still in `cloud-web-app/web/build-latest.log` and the `build-probe-*.log` files.
+- The active evidence is still in `cloud-web-app/web/build-latest.log`, `cloud-web-app/web/build-probe-workerthreads-off.log`, and the older `build-probe-*.log` files.
+- New mitigation attempts are now part of the repo truth:
+  - `cloud-web-app/web/next.config.js` forces `experimental.workerThreads=false`
+  - `cloud-web-app/web/components/ClientLayout.tsx` scopes the heavier provider stack to studio routes instead of every public/auth surface
+- Current local reruns still did not finish within an extended `15` minute timeout, so the category cannot be promoted.
 - Current failure classes include:
   - `<Html> should not be imported outside of pages/_document` for `/404` and `/500`
   - `useContext` null prerender failures across multiple App Router pages such as `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
@@ -113,6 +119,8 @@ Do not keep auditing it as an active blocker.
   - adding temporary `pages/_document.tsx`, `pages/404.tsx`, and `pages/500.tsx`
 - Current repo-level reading:
   - the simple userland shell-hook leak was mitigated,
+  - provider scoping for public/auth versus studio surfaces is tighter,
+  - worker-thread concurrency was reduced to improve Windows determinism,
   - but production build parity still cannot be marked solved.
 
 ## Repo/Execution Priorities

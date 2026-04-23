@@ -44,7 +44,9 @@ The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
 - `FullscreenIDE.tsx`: `702`
 - `AIChatPanelPro.tsx`: `549`
-- `ModernIDEShell.tsx`: `378`
+- `AIChatPanelContainer.tsx`: `673`
+- `ModernIDEShell.tsx`: `161`
+- `ModernIDEShellPanels.tsx`: `281`
 - `ModernIDEShellChrome.tsx`: `378`
 - `XTerminal.tsx`: `628`
 
@@ -110,6 +112,10 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
 1. the platform is no longer drifting without a map
 2. the remaining work is mostly concentrated, not mysterious
 3. the biggest remaining risks are now execution discipline and build parity, not lack of architectural direction
+4. fresh mitigations already landed for build parity:
+   - `experimental.workerThreads=false` in `next.config.js`
+   - lighter provider scoping in `components/ClientLayout.tsx`
+   but parity is still open because local reruns have not yet completed successfully
 
 ## The Sequence V6 Still Supports
 1. close production build parity

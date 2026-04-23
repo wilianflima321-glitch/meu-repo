@@ -36,7 +36,9 @@ Canonical set reference:
 - Current hotspot line counts:
   - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `702`
   - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `549`
-  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `378`
+  - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `673`
+  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `161`
+  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `281`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `378`
   - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `628`
 
@@ -80,7 +82,13 @@ Canonical set reference:
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
-- The latest evidence remains in `cloud-web-app/web/build-latest.log` plus the `build-probe-*.log` files.
+- The latest evidence remains in `cloud-web-app/web/build-latest.log`, `cloud-web-app/web/build-probe-workerthreads-off.log`, plus the older `build-probe-*.log` files.
+- Additional mitigations landed on `2026-04-23`:
+  - `cloud-web-app/web/next.config.js` now forces `experimental.workerThreads=false`
+  - `cloud-web-app/web/components/ClientLayout.tsx` now keeps public/auth surfaces on a lighter provider stack while studio-only providers stay scoped to studio routes
+- Current reruns still do not justify closure:
+  - repeated local `next build` probes still failed to finish within an extended `15` minute timeout
+  - the last actionable error log still points to prerender failures around `/404`, `/500`, `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
 - The active failure classes are:
   - `Error: <Html> should not be imported outside of pages/_document.` while prerendering `/404` and `/500`
   - `TypeError: Cannot read properties of null (reading 'useContext')` while prerendering routes such as `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
@@ -91,6 +99,8 @@ Canonical set reference:
   - adding temporary `pages/_document.tsx`, `pages/404.tsx`, and `pages/500.tsx`
 - Therefore the current truthful read is:
   - App Router hook leakage was mitigated in shared shell code,
+  - public-vs-studio provider scoping was tightened,
+  - worker-thread concurrency was reduced for Windows build determinism,
   - but full production build parity is still blocked and should not be marked solved.
 
 ## Priority Order (Validated)
@@ -98,6 +108,7 @@ Canonical set reference:
 2. Continue slicing the remaining workbench hotspots:
    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
    - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
+   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`
    - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`
    - `cloud-web-app/web/components/terminal/XTerminal.tsx`
 3. Turn preview + deploy into a trustworthy shareable workflow.

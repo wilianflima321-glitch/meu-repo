@@ -14,12 +14,16 @@ This file is the short scoreboard that answers:
 ## Current Snapshot
 - `AIChatPanelPro.tsx`: `549` lines
 - `FullscreenIDE.tsx`: `702` lines
-- `ModernIDEShell.tsx`: `378` lines
+- `AIChatPanelContainer.tsx`: `673` lines
+- `ModernIDEShell.tsx`: `161` lines
+- `ModernIDEShellPanels.tsx`: `281` lines
 - `ModernIDEShellChrome.tsx`: `378` lines
 - `XTerminal.tsx`: `628` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
-- production build parity is still open because `next build` still fails in the latest local evidence logs
+- production build parity is still open because:
+  - the latest actionable logs still point to prerender failures
+  - fresh local reruns with `workerThreads=false` still did not close within an extended `15` minute timeout
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -89,7 +93,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `ModernIDEShellChrome.tsx`, and `XTerminal.tsx`
+2. keep slicing `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `AIChatPanelContainer.tsx`, `ModernIDEShellChrome.tsx`, and `XTerminal.tsx`
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

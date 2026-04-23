@@ -128,7 +128,10 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: false },
   experimental: {
     cpus: 1,
-    workerThreads: true,
+    // Windows builds were hanging and surfacing unstable prerender failures
+    // with worker threads enabled in this workspace. Keep the build path
+    // deterministic until production parity is proven again.
+    workerThreads: false,
     webpackBuildWorker: false,
   },
   async headers() {

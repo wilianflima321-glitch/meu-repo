@@ -26,6 +26,51 @@ interface ClientLayoutProps {
   children: React.ReactNode;
 }
 
+function BaseProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <I18nextProvider i18n={i18n}>
+      <ErrorBoundaryProvider>
+        <A11yProvider>{children}</A11yProvider>
+      </ErrorBoundaryProvider>
+    </I18nextProvider>
+  );
+}
+
+function StudioProviders({
+  children,
+  isStudioSurface,
+}: {
+  children: React.ReactNode;
+  isStudioSurface: boolean;
+}) {
+  return (
+    <AuthProvider>
+      <SessionTrackerProvider>
+        <CommandRegistryProvider>
+          <DevToolsProvider>
+            <AethelProvider>
+              <OnboardingProvider enabled={isStudioSurface}>
+                {isStudioSurface ? <DefaultCommandsRegistration /> : null}
+                <Suspense fallback={<LoadingFallback />}>
+                  {children}
+                  {isStudioSurface ? (
+                    <>
+                      <WelcomeModal />
+                      <OnboardingChecklist />
+                      <LowBalanceModalAuto />
+                      <AISuggestionBubbleAuto />
+                    </>
+                  ) : null}
+                </Suspense>
+              </OnboardingProvider>
+            </AethelProvider>
+          </DevToolsProvider>
+        </CommandRegistryProvider>
+      </SessionTrackerProvider>
+    </AuthProvider>
+  );
+}
+
 // Loading fallback para componentes assincronos
 function LoadingFallback() {
   return (
@@ -55,37 +100,12 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const isStudioSurface = Boolean(pathname && /^\/(dashboard|ide|admin|billing|settings|profile|nexus|projects|workspace)(\/|$)/.test(pathname));
 
   return (
-    <I18nextProvider i18n={i18n}>
-      <AuthProvider>
-        <ErrorBoundaryProvider>
-          <A11yProvider>
-            <SessionTrackerProvider>
-              <CommandRegistryProvider>
-                <DevToolsProvider>
-                  <AethelProvider>
-                    <OnboardingProvider enabled={isStudioSurface}>
-                      {isStudioSurface ? <DefaultCommandsRegistration /> : null}
-                      <Suspense fallback={<LoadingFallback />}>
-                        {children}
-
-                        {/* Componentes globais de UI */}
-                        {isStudioSurface ? (
-                          <>
-                            <WelcomeModal />
-                            <OnboardingChecklist />
-                            <LowBalanceModalAuto />
-                            <AISuggestionBubbleAuto />
-                          </>
-                        ) : null}
-                      </Suspense>
-                    </OnboardingProvider>
-                  </AethelProvider>
-                </DevToolsProvider>
-              </CommandRegistryProvider>
-            </SessionTrackerProvider>
-          </A11yProvider>
-        </ErrorBoundaryProvider>
-      </AuthProvider>
-    </I18nextProvider>
+    <BaseProviders>
+      {isStudioSurface ? (
+        <StudioProviders isStudioSurface={isStudioSurface}>{children}</StudioProviders>
+      ) : (
+        children
+      )}
+    </BaseProviders>
   );
 }

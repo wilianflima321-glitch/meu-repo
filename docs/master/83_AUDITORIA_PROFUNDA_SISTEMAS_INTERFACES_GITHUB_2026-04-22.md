@@ -87,7 +87,9 @@ The following PDF claims should no longer be treated as current truth without re
 These are the reality points this audit should now be interpreted against:
 
 - `AIChatPanelPro.tsx`: about `549` lines, not the older ~1766-line state
-- `FullscreenIDE.tsx`: about `788` lines and still a top-priority god component
+- `FullscreenIDE.tsx`: about `702` lines and still a top-priority god component
+- `AIChatPanelContainer.tsx`: about `673` lines and now belongs on the remaining hotspot list too
+- `ModernIDEShell.tsx`: now only `161` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`281`) and `ModernIDEShellChrome.tsx` (`378`)
 - tracked tests: `45`
 - tracked `console.*` in `cloud-web-app/web/lib`: around `285`
 - tracked `console.*` in `cloud-web-app/web/components`: around `151`
