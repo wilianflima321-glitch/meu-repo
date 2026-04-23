@@ -92,7 +92,7 @@ Este documento continua sendo o norte principal, mas alguns trechos ficaram velh
 - 📈 **Perf/Bundle 5.5→5.2** ↓: a categoria continua aberta, mas o antigo blocker `images: { unoptimized: true }` já não vale para o branch atual; o gargalo factual hoje está mais em build parity, dynamic imports e prova end-to-end de preview/performance.
 - 🧪 Testes: **ZERO mudança** — Jest coverage ainda `false`, ainda 12 testes unitários.
 - 🎨 Design System: 784 hex hardcoded **intocados**.
-- 🧹 God components: a categoria continua válida, mas os números antigos envelheceram; hoje os maiores hotspots já são menores e mais concentrados (`FullscreenIDE.tsx` `702`, `AIChatPanelPro.tsx` `549`, `AIChatPanelContainer.tsx` `673`, `XTerminal.tsx` `628`).
+- 🧹 God components: a categoria continua válida, mas os números antigos envelheceram; hoje os maiores hotspots já são menores e mais concentrados (`FullscreenIDE.tsx` `702`, `AIChatPanelPro.tsx` `549`, `AIChatPanelContainer.tsx` `116`, `XTerminal.tsx` `628`).
 
 ---
 

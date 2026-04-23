@@ -14,7 +14,7 @@ This file is the short scoreboard that answers:
 ## Current Snapshot
 - `AIChatPanelPro.tsx`: `549` lines
 - `FullscreenIDE.tsx`: `702` lines
-- `AIChatPanelContainer.tsx`: `673` lines
+- `AIChatPanelContainer.tsx`: `116` lines
 - `ModernIDEShell.tsx`: `161` lines
 - `ModernIDEShellPanels.tsx`: `281` lines
 - `ModernIDEShellChrome.tsx`: `378` lines
@@ -54,6 +54,8 @@ This file is the short scoreboard that answers:
 ### Inline AI editing
 - the canonical inline-edit path is wired and user-facing,
 - but still depends on provider/runtime readiness.
+- the former container hotspot was also reduced:
+  - `AIChatPanelContainer.tsx` is now a thin orchestrator backed by extracted session-context, provider-preflight, send-pipeline, and session-banner modules.
 
 ### Deploy from IDE
 - the deploy action and status page exist in the canonical IDE,
@@ -93,7 +95,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `AIChatPanelContainer.tsx`, `ModernIDEShellChrome.tsx`, and `XTerminal.tsx`
+2. keep slicing `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `ModernIDEShellChrome.tsx`, and `XTerminal.tsx`
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

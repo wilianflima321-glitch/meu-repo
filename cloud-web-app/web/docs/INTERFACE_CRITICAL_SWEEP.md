@@ -1,8 +1,8 @@
 # Interface Critical Sweep
 
-- Generated at: `2026-04-23T17:14:47.940Z`
+- Generated at: `2026-04-23T18:02:49.539Z`
 - Scope: `app/`, `components/`
-- Files scanned: `807`
+- Files scanned: `812`
 
 ## Summary
 
@@ -84,3 +84,4 @@
 - High severity metrics must be reduced before release candidates.
 - Medium severity metrics must have owner + ETA in the execution contract.
 - INFO metrics remain explicit but must stay accurate to runtime behavior.
+

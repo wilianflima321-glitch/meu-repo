@@ -36,7 +36,7 @@ Canonical set reference:
 - Current hotspot line counts:
   - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `702`
   - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `549`
-  - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `673`
+  - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `116`
   - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `161`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `281`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `378`
@@ -79,6 +79,7 @@ Canonical set reference:
 - Do not describe deploy as backend-only anymore. The IDE now surfaces deploy and deploy-status UX, but the capability is still readiness gated.
 - Do not describe inline AI editing as a dark feature with no trigger. It is now wired, but still partial because runtime/provider readiness can block it.
 - Do not describe Storybook as seeded-but-broken. It is working, but not broad enough to count as full design-system coverage.
+- Do not describe `AIChatPanelContainer.tsx` as a remaining god component. It is now a thin orchestrator after extracting session context, provider preflight, send pipeline, and session banner modules.
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
@@ -108,7 +109,6 @@ Canonical set reference:
 2. Continue slicing the remaining workbench hotspots:
    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
    - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
-   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`
    - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`
    - `cloud-web-app/web/components/terminal/XTerminal.tsx`
 3. Turn preview + deploy into a trustworthy shareable workflow.

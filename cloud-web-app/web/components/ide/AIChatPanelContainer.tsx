@@ -1,616 +1,66 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
+import AIChatSessionBanner from '@/components/ai-chat/AIChatSessionBanner'
+import type { ChatMessage } from '@/components/ai-chat/ai-chat-container.types'
+import { useAIChatController } from '@/components/ai-chat/useAIChatController'
+import { useAIChatSessionContext } from '@/components/ai-chat/useAIChatSessionContext'
+import { useAIProviderPreflight } from '@/components/ai-chat/useAIProviderPreflight'
 import AIChatPanelPro from '@/components/ide/AIChatPanelPro'
 import AIProviderSetupGuide from '@/components/ai/AIProviderSetupGuide'
-import { analytics } from '@/lib/analytics'
-import {
-  buildAiProviderGateMessage,
-  type AiProviderStatusResponse,
-  fetchAiProviderStatus,
-} from '@/lib/ai-provider-status-client'
-import { buildLocalDemoChatContent, consumeLocalDemoUsage } from '@/lib/ai-chat-local-demo'
-import {
-  AdvancedChatRequestError,
-  type AdvancedProfile,
-  inferAdvancedProfile,
-  isProviderSetupError,
-  requestAdvancedChat,
-} from '@/lib/ai-chat-advanced-client'
-import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
 import { DEFAULT_MODELS } from '@/components/ide/AIChatPanelPro.types'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
-type ChatMessage = {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  timestamp: Date
-  model?: string
-  tokens?: number
-}
-
-type ProviderGateState = {
-  code: string
-  message: string
-  capability?: string
-  setupUrl?: string
-}
-
 const MODELS = DEFAULT_MODELS
-
-function formatAiErrorForUser(err: unknown): string {
-  if (err instanceof AdvancedChatRequestError) {
-    switch (err.code) {
-      case 'AI_PROVIDER_NOT_CONFIGURED':
-        return 'IA nao configurada. Conecte um provedor para continuar.'
-      case 'DEMO_LIMIT_REACHED':
-        return 'Limite da demo atingido. Ative um provedor para continuar.'
-      case 'MENTION_NOT_SUPPORTED':
-        return 'Esse tipo de mention ainda nao e suportado.'
-      case 'MODEL_NOT_AVAILABLE':
-        return 'Modelo indisponivel no momento. Tente outro perfil.'
-      default:
-        return err.message || 'Falha na requisicao de IA.'
-    }
-  }
-  if (err instanceof Error) return err.message
-  return 'Falha na requisicao de IA.'
-}
-
-const IDE_CHAT_INTENTS = [
-  {
-    id: 'implement',
-    label: 'Implementar no editor',
-    description: 'Traduzir a missao atual em passos e alteracoes concretas.',
-    buildPrompt: (mission?: string | null) =>
-      mission
-        ? `${mission}\n\nConverta isso em um plano de implementacao no editor, com arquivos, passos e risco principal.`
-        : 'Converta a tarefa atual em um plano de implementacao no editor, com arquivos, passos e risco principal.',
-  },
-  {
-    id: 'review',
-    label: 'Criticar e revisar',
-    description: 'Fazer review do que ja existe e apontar a proxima melhoria.',
-    buildPrompt: (mission?: string | null) =>
-      mission
-        ? `${mission}\n\nRevise o estado atual, critique as lacunas e proponha a proxima melhoria com maior impacto.`
-        : 'Revise o estado atual, critique as lacunas e proponha a proxima melhoria com maior impacto.',
-  },
-  {
-    id: 'runtime',
-    label: 'Preparar preview/runtime',
-    description: 'Sair com checklist de validacao para preview, runtime e handoff.',
-    buildPrompt: (mission?: string | null) =>
-      mission
-        ? `${mission}\n\nPrepare um checklist de runtime, preview e validacao final para esta missao.`
-        : 'Prepare um checklist de runtime, preview e validacao final para a tarefa atual.',
-  },
-] as const
-
-
-function extractContent(raw: string): string {
-  try {
-    const data = JSON.parse(raw)
-    return (
-      data?.choices?.[0]?.message?.content ||
-      data?.message?.content ||
-      data?.content ||
-      data?.output?.text ||
-      raw
-    )
-  } catch {
-    return raw
-  }
-}
-
-function tryParseJson(raw: string): Record<string, unknown> | null {
-  try {
-    const data = JSON.parse(raw)
-    return typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : null
-  } catch {
-    return null
-  }
-}
-
-function getProjectIdFromLocation(): string | undefined {
-  if (typeof window === 'undefined') return undefined
-  const value = new URLSearchParams(window.location.search).get('projectId')
-  if (!value || !value.trim()) return undefined
-  return value.trim()
-}
-
-function resolveProfileFromMentions(
-  message: string,
-  fallback: AdvancedProfile
-): {
-  message: string
-  profile: AdvancedProfile
-  tags: string[]
-  unsupportedTags: string[]
-  supportedTags: string[]
-} {
-  const tags = (message.match(/@[a-z0-9:_-]+/gi) || []).map((tag) => tag.toLowerCase())
-  const profile: AdvancedProfile = { ...fallback }
-  const profileTagSet = new Set(['@studio', '@delivery', '@fast', '@web'])
-  const contextualTagMatchers = [
-    /^@file:[^\s]+$/,
-    /^@folder:[^\s]+$/,
-    /^@function:[^\s]+$/,
-    /^@symbol:[^\s]+$/,
-    /^@selection$/,
-    /^@diagnostics$/,
-    /^@git:(diff|staged|status)$/,
-    /^@terminal$/,
-    /^@web:[^\s]+$/,
-    /^@docs:[^\s]+$/,
-    /^@codebase$/,
-  ]
-  const supportedTags = tags.filter((tag) =>
-    profileTagSet.has(tag) ||
-    /^@agents:[123]$/.test(tag) ||
-    contextualTagMatchers.some((pattern) => pattern.test(tag))
-  )
-  const unsupportedTags = tags.filter((tag) => !supportedTags.includes(tag))
-
-  if (tags.includes('@studio')) {
-    profile.qualityMode = 'studio'
-    profile.agentCount = 3
-  }
-  if (tags.includes('@delivery')) {
-    profile.qualityMode = 'delivery'
-    if (profile.agentCount < 2) profile.agentCount = 2
-  }
-  if (tags.includes('@fast')) {
-    profile.qualityMode = 'standard'
-    profile.agentCount = 1
-    profile.enableWebResearch = false
-  }
-  if (tags.includes('@web')) {
-    profile.enableWebResearch = true
-    if (profile.agentCount < 2) profile.agentCount = 2
-  }
-
-  const agentTag = tags.find((tag) => /^@agents:[123]$/.test(tag))
-  if (agentTag) {
-    const count = Number(agentTag.split(':')[1])
-    if (count === 1 || count === 2 || count === 3) profile.agentCount = count
-  }
-
-  const cleaned = message
-    .replace(/@(studio|delivery|fast|web)\b/gi, ' ')
-    .replace(/@agents:[123]\b/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-
-  return {
-    message: cleaned || message.trim(),
-    profile,
-    tags,
-    unsupportedTags,
-    supportedTags,
-  }
-}
 
 export default function AIChatPanelContainer() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [currentModel, setCurrentModel] = useState(MODELS[0].id)
   const [isLoading, setIsLoading] = useState(false)
-  const requestAbortRef = useRef<AbortController | null>(null)
   const [projectId, setProjectId] = useState<string | undefined>(undefined)
   const [mission, setMission] = useState<string | null>(null)
   const [source, setSource] = useState<string | null>(null)
-  const [providerGate, setProviderGate] = useState<ProviderGateState | null>(null)
-  const [providerStatus, setProviderStatus] = useState<AiProviderStatusResponse | null>(null)
-  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null)
   const focusClass = `${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
-  const modelOptions = useMemo(() => MODELS, [])
+  useAIChatSessionContext({
+    currentModel,
+    setMessages,
+    setMission,
+    setProjectId,
+    setSource,
+  })
 
-  useEffect(() => {
-    setProjectId(getProjectIdFromLocation())
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      const missionParam = params.get('mission')
-      const sourceParam = params.get('source')
-      setMission(missionParam && missionParam.trim() ? missionParam.trim() : null)
-      setSource(sourceParam && sourceParam.trim() ? sourceParam.trim() : null)
-    }
-  }, [])
-
-  useEffect(() => {
-    const handoff = consumeResearchHandoff()
-    if (!handoff) return
-
-    const contextPrompt = buildResearchPrompt(handoff)
-    setMessages((prev) => {
-      if (prev.length > 0) return prev
-      return [
-        {
-          id: `system-research-${Date.now()}`,
-          role: 'system',
-          content: `Contexto de pesquisa importado do Nexus.\n\n${contextPrompt}`,
-          timestamp: new Date(),
-        },
-        {
-          id: `assistant-research-${Date.now() + 1}`,
-          role: 'assistant',
-          content:
-            'Handoff de pesquisa carregado. Envie sua proxima mensagem para transformar isso em passos de implementacao. Dica: use @studio @web para uma analise multiagente mais profunda.',
-          timestamp: new Date(),
-          model: currentModel,
-        },
-      ]
+  const { providerGate, providerStatus, setProviderGate } = useAIProviderPreflight()
+  const { handleClearChat, handleSendMessage, handleStopGenerating, lastFailedMessage } =
+    useAIChatController({
+      currentModel,
+      isLoading,
+      messages,
+      projectId,
+      providerGate,
+      providerStatus,
+      setIsLoading,
+      setMessages,
+      setProviderGate,
     })
 
-    analytics?.track?.('ai', 'ai_chat', {
-      metadata: {
-        source: 'ide-research-handoff',
-        query: handoff.query,
-        sources: handoff.sources.length,
-      },
-    })
-  }, [currentModel])
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    ;(async () => {
-      try {
-        const status = await fetchAiProviderStatus(controller.signal)
-        setProviderStatus(status)
-        if (status.configured || status.demoModeEnabled) {
-          setProviderGate(null)
-          return
-        }
-
-        const gateMessage = buildAiProviderGateMessage(status)
-        setProviderGate({
-          code: 'AI_PROVIDER_NOT_CONFIGURED',
-          message: gateMessage,
-          capability: status.capability || 'AI_PROVIDER_CONFIG',
-          setupUrl: status.setupUrl,
-        })
-        analytics?.track?.('ai', 'ai_error', {
-          metadata: {
-            source: 'ide-provider-preflight',
-            error: 'AI_PROVIDER_NOT_CONFIGURED',
-            capability: status.capability || 'AI_PROVIDER_CONFIG',
-          },
-        })
-      } catch {
-        setProviderStatus(null)
-        // best-effort preflight; keep panel usable for retries
-      }
-    })()
-
-    return () => controller.abort()
-  }, [])
-
-  const tryServeLocalDemo = useCallback(
-    (input: { message: string; profile: AdvancedProfile; tags?: string[]; reason: string }): boolean => {
-      if (providerStatus?.configured || providerStatus?.demoModeEnabled) return false
-
-      const usage = consumeLocalDemoUsage(providerStatus?.demoDailyLimit)
-      if (!usage.allowed) {
-        const limitMessage = `DEMO_LIMIT_REACHED: limite diario do demo local atingido (${usage.used}/${usage.limit}). Configure um provider em /settings?tab=api ou tente novamente em ${usage.resetAt}.`
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `assistant-${Date.now()}`,
-            role: 'assistant',
-            content: limitMessage,
-            timestamp: new Date(),
-            model: currentModel,
-          },
-        ])
-        analytics?.track?.('ai', 'ai_error', {
-          metadata: {
-            source: 'ide-panel-local-demo',
-            model: currentModel,
-            projectId,
-            error: 'DEMO_LIMIT_REACHED',
-            demoLimit: usage.limit,
-            demoUsed: usage.used,
-            reason: input.reason,
-          },
-        })
-        return true
-      }
-
-      const demoContent = buildLocalDemoChatContent({
-        message: input.message,
-        qualityMode: input.profile.qualityMode,
-        agentCount: input.profile.agentCount,
-        enableWebResearch: input.profile.enableWebResearch,
-        remaining: usage.remaining,
-        limit: usage.limit,
-      })
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          content: demoContent,
-          timestamp: new Date(),
-          model: currentModel,
-        },
-      ])
-
-      analytics?.track?.('ai', 'ai_stream', {
-        metadata: {
-          source: 'ide-panel-local-demo',
-          model: currentModel,
-          projectId,
-          status: 'demo-local',
-          reason: input.reason,
-          qualityMode: input.profile.qualityMode,
-          agentCount: input.profile.agentCount,
-          enableWebResearch: input.profile.enableWebResearch,
-          mentionTags: input.tags ?? [],
-          demoRemaining: usage.remaining,
-          demoLimit: usage.limit,
-          demoUsed: usage.used,
-        },
-      })
-      return true
+  const handleIntent = useCallback(
+    (prompt: string) => {
+      void handleSendMessage(prompt)
     },
-    [currentModel, projectId, providerStatus]
+    [handleSendMessage]
   )
-
-  const handleSendMessage = useCallback(
-    async (message: string, context?: { attachments?: unknown[] }) => {
-      if (!message.trim() || isLoading) return
-      setLastFailedMessage(null)
-
-      const fallbackProfile = inferAdvancedProfile(message)
-      const profileResolution = resolveProfileFromMentions(message, fallbackProfile)
-      const normalizedMessage = profileResolution.message
-      const userMessage: ChatMessage = {
-        id: `user-${Date.now()}`,
-        role: 'user',
-        content: normalizedMessage,
-        timestamp: new Date(),
-      }
-
-      const nextMessages = [...messages, userMessage]
-      setMessages(nextMessages)
-
-      if (profileResolution.unsupportedTags.length > 0) {
-        const uniqueUnsupported = [...new Set(profileResolution.unsupportedTags)]
-        const unsupportedList = uniqueUnsupported.join(', ')
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `assistant-${Date.now()}`,
-            role: 'assistant',
-            content:
-              `${unsupportedList} ainda nao e suportado nesta superficie.\n` +
-              'Disponivel no momento: @studio, @delivery, @fast, @web e @agents:1|2|3.',
-            timestamp: new Date(),
-            model: currentModel,
-          },
-        ])
-
-        analytics?.track?.('ai', 'ai_error', {
-          metadata: {
-            source: 'ide-panel',
-            model: currentModel,
-            projectId,
-            error: 'MENTION_NOT_SUPPORTED',
-            unsupportedTags: uniqueUnsupported,
-          },
-        })
-
-        if (!normalizedMessage.trim()) {
-          return
-        }
-      }
-
-      if (context?.attachments && context.attachments.length > 0) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `assistant-${Date.now()}`,
-            role: 'assistant',
-            content: 'Anexos ainda nao estao disponiveis nesta superficie. Use prompts apenas de texto por enquanto.',
-            timestamp: new Date(),
-            model: currentModel,
-          },
-        ])
-        return
-      }
-
-      if (providerGate && tryServeLocalDemo({ message: normalizedMessage, profile: profileResolution.profile, tags: profileResolution.tags, reason: 'preflight_provider_gate' })) {
-        return
-      }
-
-      setIsLoading(true)
-      const startedAt = typeof performance !== 'undefined' ? performance.now() : Date.now()
-      analytics?.track?.('ai', 'ai_chat', {
-        metadata: {
-          source: 'ide-panel',
-          model: currentModel,
-          projectId,
-        },
-      })
-
-      try {
-        const controller = new AbortController()
-        requestAbortRef.current = controller
-        setProviderGate(null)
-
-        const result = await requestAdvancedChat({
-          message: normalizedMessage,
-          model: currentModel,
-          messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
-          projectId,
-          profileOverride: profileResolution.profile,
-          signal: controller.signal,
-        })
-
-        const parsedResponse = tryParseJson(result.raw)
-        const content = extractContent(result.raw)
-        const tokenCount = typeof parsedResponse?.tokensUsed === 'number' ? parsedResponse.tokensUsed : undefined
-        const latencyMs = Math.max(
-          0,
-          Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
-        )
-        const assistantMessage: ChatMessage = {
-          id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          content: content || 'No response from model.',
-          timestamp: new Date(),
-          model: currentModel,
-          tokens: tokenCount,
-        }
-
-        analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
-          surface: 'ide',
-          status: 'success',
-          model: currentModel,
-        })
-        analytics?.track?.('ai', 'ai_stream', {
-          metadata: {
-            source: 'ide-panel',
-            model: currentModel,
-            projectId,
-            latencyMs,
-            status: 'success',
-            usedFallback: result.usedFallback,
-            qualityMode: profileResolution.profile.qualityMode,
-            agentCount: profileResolution.profile.agentCount,
-            enableWebResearch: profileResolution.profile.enableWebResearch,
-            mentionTags: profileResolution.tags,
-          },
-        })
-
-        setMessages((prev) => [...prev, assistantMessage])
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: `assistant-${Date.now()}`,
-              role: 'assistant',
-              content: 'Solicitacao interrompida pelo usuario.',
-              timestamp: new Date(),
-              model: currentModel,
-            },
-          ])
-          return
-        }
-
-        if (err instanceof AdvancedChatRequestError && isProviderSetupError(err)) {
-          setProviderGate({
-            code: err.code,
-            message: err.message,
-            capability: err.capability,
-            setupUrl: err.setupUrl,
-          })
-          const servedDemo = tryServeLocalDemo({
-            message: normalizedMessage,
-            profile: profileResolution.profile,
-            tags: profileResolution.tags,
-            reason: 'provider_setup_error',
-          })
-          if (servedDemo) {
-            return
-          }
-        }
-
-        const rawErrorMessage =
-          err instanceof AdvancedChatRequestError
-            ? `${err.code}: ${err.message}`.trim()
-            : err instanceof Error
-              ? err.message
-              : 'AI_REQUEST_FAILED: AI request failed.'
-        const errorMessage = formatAiErrorForUser(err)
-        const latencyMs = Math.max(
-          0,
-          Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
-        )
-
-        analytics?.track?.('ai', 'ai_error', {
-          metadata: {
-            source: 'ide-panel',
-            model: currentModel,
-            projectId,
-            error: rawErrorMessage,
-            latencyMs,
-          },
-        })
-        analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
-          surface: 'ide',
-          status: 'error',
-          model: currentModel,
-        })
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `assistant-${Date.now()}`,
-            role: 'assistant',
-            content: errorMessage,
-            timestamp: new Date(),
-            model: currentModel,
-          },
-        ])
-        setLastFailedMessage(normalizedMessage)
-      } finally {
-        requestAbortRef.current = null
-        setIsLoading(false)
-      }
-    },
-    [messages, currentModel, isLoading, projectId, providerGate, tryServeLocalDemo]
-  )
-
-  const handleClearChat = useCallback(() => {
-    setMessages([])
-  }, [])
-
-  const handleStopGenerating = useCallback(() => {
-    requestAbortRef.current?.abort()
-  }, [])
 
   return (
     <div className="flex h-full flex-col">
       {(mission || source || projectId) && (
-        <div className="mx-3 mt-3 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_14%,transparent),color-mix(in_srgb,var(--aethel-info)_10%,transparent),rgba(15,23,42,0.78))] p-4">
-          <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
-              Sessao de trabalho
-            </span>
-            {source ? (
-              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                origem {source}
-              </span>
-            ) : null}
-            {projectId ? (
-              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                projeto {projectId}
-              </span>
-            ) : null}
-          </div>
-          <div className="mt-2 text-sm font-medium text-[var(--aethel-text-primary)]">
-            {mission || 'Continue a partir do contexto do studio sem perder o handoff atual.'}
-          </div>
-          <div className="mt-3 grid gap-2">
-            {IDE_CHAT_INTENTS.map((intent) => (
-              <button
-                key={intent.id}
-                type="button"
-                onClick={() => void handleSendMessage(intent.buildPrompt(mission))}
-                className={`rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_74%,transparent)] px-4 py-3 text-left hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_78%,transparent)] ${focusClass}`}
-                aria-label={`Executar atalho ${intent.label}`}
-              >
-                <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{intent.label}</p>
-                <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{intent.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
+        <AIChatSessionBanner
+          mission={mission}
+          source={source}
+          projectId={projectId}
+          focusClass={focusClass}
+          onIntent={handleIntent}
+        />
       )}
       {providerGate && (
         <div className="mx-3 mt-3 space-y-2">
@@ -662,7 +112,7 @@ export default function AIChatPanelContainer() {
           onClearChat={handleClearChat}
           isLoading={isLoading}
           currentModel={currentModel}
-          models={modelOptions}
+          models={MODELS}
           onModelChange={setCurrentModel}
           allowAttachments={false}
           projectId={projectId}

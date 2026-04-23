@@ -44,7 +44,7 @@ The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
 - `FullscreenIDE.tsx`: `702`
 - `AIChatPanelPro.tsx`: `549`
-- `AIChatPanelContainer.tsx`: `673`
+- `AIChatPanelContainer.tsx`: `116`
 - `ModernIDEShell.tsx`: `161`
 - `ModernIDEShellPanels.tsx`: `281`
 - `ModernIDEShellChrome.tsx`: `378`
@@ -71,6 +71,7 @@ V6 correctly noticed the inline-AI trio.
 Since then, the canonical inline-edit path has been wired through the editor flow.
 Current aligned truth:
 - inline AI editing is PARTIAL, not absent
+- the chat container that brokers this flow is also no longer a giant-file blocker after extraction into session, provider, and send-pipeline helpers
 
 ### `next/image` is no longer disabled in the current branch
 Do not keep the old `images.unoptimized: true` claim as an active current blocker.
