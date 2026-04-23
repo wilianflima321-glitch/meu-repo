@@ -3,6 +3,7 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type * as monacoEditor from 'monaco-editor';
 
+import RemoteCursorLayer from '@/components/collaboration/RemoteCursorLayer';
 import MonacoEditorPro, {
   type Diagnostic as MonacoDiagnostic,
 } from '@/components/editor/MonacoEditorPro';
@@ -20,6 +21,7 @@ import type {
   EditorPane,
   InlineApplyResult,
 } from '@/components/ide/fullscreen/types';
+import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 
 type EditorInstanceRef = MutableRefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
 
@@ -41,6 +43,8 @@ type WorkbenchEditorPaneProps = {
   showOutline: boolean;
   showDiagnostics: boolean;
   fullAccessActive: boolean;
+  collaborationConnected: boolean;
+  collaborationPeers: RemotePeer[];
   primaryEditorRef: EditorInstanceRef;
   secondaryEditorRef: EditorInstanceRef;
   editorRef: EditorInstanceRef;
@@ -62,6 +66,18 @@ type WorkbenchEditorPaneProps = {
   onInlineApplyResult: (result: InlineApplyResult) => void;
   onRequestFullAccess: () => void;
   onSaveFile: (path: string, content: string) => Promise<void> | void;
+  onCursorPresenceChange: (args: {
+    filePath: string;
+    pane: EditorPane;
+    position: { line: number; column: number };
+    editor: monacoEditor.editor.IStandaloneCodeEditor | null;
+  }) => void;
+  onSelectionPresenceChange: (args: {
+    filePath: string;
+    pane: EditorPane;
+    range: monacoEditor.IRange | null;
+    editor: monacoEditor.editor.IStandaloneCodeEditor | null;
+  }) => void;
 };
 
 function diagnosticsToErrors(
@@ -116,6 +132,8 @@ export function WorkbenchEditorPane({
   showOutline,
   showDiagnostics,
   fullAccessActive,
+  collaborationConnected,
+  collaborationPeers,
   primaryEditorRef,
   secondaryEditorRef,
   editorRef,
@@ -137,6 +155,8 @@ export function WorkbenchEditorPane({
   onInlineApplyResult,
   onRequestFullAccess,
   onSaveFile,
+  onCursorPresenceChange,
+  onSelectionPresenceChange,
 }: WorkbenchEditorPaneProps) {
   const currentDiagnosticsFilePath = bridgeActiveFile?.path ?? activeFile?.path ?? '';
 
@@ -153,6 +173,11 @@ export function WorkbenchEditorPane({
           <span className="font-medium uppercase tracking-[0.12em]">Ferramentas do editor</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <div className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+            {collaborationConnected
+              ? `Live ${collaborationPeers.length > 0 ? `· ${collaborationPeers.length} cursor${collaborationPeers.length > 1 ? 's' : ''}` : '· pronto'}`
+              : 'Solo'}
+          </div>
           <button
             type="button"
             onClick={onFind}
@@ -312,7 +337,7 @@ export function WorkbenchEditorPane({
 
                       return (
                         <div
-                          className="h-full"
+                          className="relative h-full"
                           onMouseDown={() => {
                             setSplitActivePane(isSecondary ? 'secondary' : 'primary');
                             editorRef.current = isSecondary ? secondaryEditorRef.current : primaryEditorRef.current;
@@ -339,6 +364,22 @@ export function WorkbenchEditorPane({
                             onAiApplyResult={onInlineApplyResult}
                             onRequestFullAccess={onRequestFullAccess}
                             onDiagnosticsChange={isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics}
+                            onCursorChange={(position) => {
+                              onCursorPresenceChange({
+                                filePath: fileState.path,
+                                pane: isSecondary ? 'secondary' : 'primary',
+                                position,
+                                editor: isSecondary ? secondaryEditorRef.current : primaryEditorRef.current,
+                              });
+                            }}
+                            onSelectionChange={({ range }) => {
+                              onSelectionPresenceChange({
+                                filePath: fileState.path,
+                                pane: isSecondary ? 'secondary' : 'primary',
+                                range,
+                                editor: isSecondary ? secondaryEditorRef.current : primaryEditorRef.current,
+                              });
+                            }}
                             onChange={(value) => {
                               const nextValue = value ?? '';
                               if (isSecondary) {
@@ -351,37 +392,61 @@ export function WorkbenchEditorPane({
                               void onSaveFile(fileState.path, value);
                             }}
                           />
+                          <RemoteCursorLayer
+                            peers={collaborationPeers.filter((peer) => peer.cursor?.filePath === fileState.path)}
+                          />
                         </div>
                       );
                     }}
                   />
                 ) : (
-                  <MonacoEditorPro
-                    path={activeFile.path}
-                    value={activeFile.content}
-                    language={activeFile.language}
-                    fullAccessActive={fullAccessActive}
-                    onMount={(editor) => {
-                      primaryEditorRef.current = editor;
-                      editorRef.current = editor;
-                    }}
-                    onAiApplyResult={onInlineApplyResult}
-                    onRequestFullAccess={onRequestFullAccess}
-                    onDiagnosticsChange={setEditorDiagnostics}
-                    onChange={(value) => {
-                      setActiveFile((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              content: value ?? '',
-                            }
-                          : prev,
-                      );
-                    }}
-                    onSave={(value) => {
-                      void onSaveFile(activeFile.path, value);
-                    }}
-                  />
+                  <div className="relative h-full">
+                    <MonacoEditorPro
+                      path={activeFile.path}
+                      value={activeFile.content}
+                      language={activeFile.language}
+                      fullAccessActive={fullAccessActive}
+                      onMount={(editor) => {
+                        primaryEditorRef.current = editor;
+                        editorRef.current = editor;
+                      }}
+                      onAiApplyResult={onInlineApplyResult}
+                      onRequestFullAccess={onRequestFullAccess}
+                      onDiagnosticsChange={setEditorDiagnostics}
+                      onCursorChange={(position) => {
+                        onCursorPresenceChange({
+                          filePath: activeFile.path,
+                          pane: 'primary',
+                          position,
+                          editor: primaryEditorRef.current,
+                        });
+                      }}
+                      onSelectionChange={({ range }) => {
+                        onSelectionPresenceChange({
+                          filePath: activeFile.path,
+                          pane: 'primary',
+                          range,
+                          editor: primaryEditorRef.current,
+                        });
+                      }}
+                      onChange={(value) => {
+                        setActiveFile((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                content: value ?? '',
+                              }
+                            : prev,
+                        );
+                      }}
+                      onSave={(value) => {
+                        void onSaveFile(activeFile.path, value);
+                      }}
+                    />
+                    <RemoteCursorLayer
+                      peers={collaborationPeers.filter((peer) => peer.cursor?.filePath === activeFile.path)}
+                    />
+                  </div>
                 )}
               </div>
               {(showIntelliSense || showOutline || showDiagnostics) && (

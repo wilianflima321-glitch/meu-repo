@@ -69,9 +69,16 @@ This document fills that gap.
   - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchChrome.ts`
   - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchFiles.ts`
 - collaboration presence is visible in the shell header
+- collaboration is now also visible inside the editor canvas through:
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchRealtimeCollaboration.ts`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\WorkbenchEditorPane.tsx`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lib\yjs-collaboration.ts`
+- the default merge-pressure browser lane was validated locally in a real Chromium run with current result `5 passed`
+- `cloud-web-app/web/lib/sentry.ts` no longer blocks local runtime boot with `browserTracingIntegration is not a function`
+- `cloud-web-app/web/app/contact-sales/page.tsx` now exposes explicit label/input associations for the sales briefing form
 - current measured line counts after this extraction round:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx`: `~508`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx`: `~720`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx`: `~549`
+  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx`: `~788`
   - the next large files in the workbench lane are now:
     - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\ModernIDEShell.tsx`
     - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\terminal\XTerminal.tsx`
@@ -87,7 +94,12 @@ This document fills that gap.
 3. `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\tsconfig.json`
    - `noImplicitAny: false` remains active
 4. E2E merge pressure
-   - Playwright is still optional instead of a default required merge gate
+- default PR browser pressure now exists via `CI / Web App - Merge Pressure E2E`
+- that default browser lane runs `npm run test:e2e:merge` against `tests/e2e/merge-pressure.spec.ts`
+- it is intentionally isolated in `playwright.merge.config.ts` so the default PR gate stays lighter than the full matrix
+- the full Playwright matrix is still manual, which keeps this category partially open rather than fully solved
+5. Production build parity
+- the latest local `next build` attempt still failed on multiple routes with prerender/runtime issues, so production parity should still be treated as open even though the browser merge-pressure lane is now green locally
 
 ### P1 — highly visible debt
 1. root hygiene
@@ -102,19 +114,20 @@ This document fills that gap.
 ### P2 — important, but after the above
 1. i18n still shallow
 2. preview still not a fully proven shareable workflow
-3. collaboration still not the default signature editor experience
+3. collaboration still lacks file-tree presence and a fully proven shared-text path
 
 ## Current Best Execution Order
 1. continue slicing the two god components
-2. wire collaboration into the main editor flow
-3. validate preview/deploy as a true shareable workflow
-4. turn Playwright E2E into a default merge pressure
-5. clean root ambiguity and duplicate config surfaces
-6. continue `console.* -> logger`
-7. reduce `: any` and push toward `noImplicitAny: true`
-8. expand tests and coverage pressure
-9. reduce admin sprawl
-10. deepen i18n
+2. validate preview/deploy as a true shareable workflow
+3. harden collaboration from cursor presence into a fully trusted shared-editing path
+4. harden the new default merge-pressure suite and then graduate more of the Playwright matrix into required CI
+5. close the local production-build parity gap
+6. clean root ambiguity and duplicate config surfaces
+7. continue `console.* -> logger`
+8. reduce `: any` and push toward `noImplicitAny: true`
+9. expand tests and coverage pressure
+10. reduce admin sprawl
+11. deepen i18n
 
 ## Rule For Future Rounds
 Every new round should leave behind four things:

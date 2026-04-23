@@ -73,7 +73,7 @@ The following PDF claims should no longer be treated as current truth without re
 ### Testing and quality pressure
 - PDF described the test story as critically weak.
 - That concern still exists directionally, but current reality improved:
-  - tracked test files are now `23`
+  - tracked test files are now `45`
   - `collectCoverage` is now wired in CI-sensitive form in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\jest.config.ts`
   - Lighthouse configuration now exists in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lighthouserc.js`
   - Prisma migrations are now seeded at `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\prisma\migrations\`
@@ -86,9 +86,9 @@ The following PDF claims should no longer be treated as current truth without re
 ## Current Factual Anchors After Sync
 These are the reality points this audit should now be interpreted against:
 
-- `AIChatPanelPro.tsx`: about `1104` lines, not the older ~1766-line state
-- `FullscreenIDE.tsx`: about `1841` lines and still a top-priority god component
-- tracked tests: `23`
+- `AIChatPanelPro.tsx`: about `549` lines, not the older ~1766-line state
+- `FullscreenIDE.tsx`: about `788` lines and still a top-priority god component
+- tracked tests: `45`
 - tracked `console.*` in `cloud-web-app/web/lib`: around `285`
 - tracked `console.*` in `cloud-web-app/web/components`: around `151`
 - tracked `: any`: around `1059`
@@ -122,6 +122,12 @@ Across `81`, `82`, and this imported systems/interfaces audit, the shared execut
 3. Turn collaboration from infrastructure into visible product UX.
 4. Turn preview into a trust-building, shareable creation surface.
 5. Keep replacing runtime ambiguity with evidence, tests, and structured observability.
+
+Current reconciliation note:
+- collaboration is no longer only infra + header presence;
+- remote cursor overlays are now wired into the Monaco editor flow through the workbench editor pane;
+- the remaining gap is no longer "make collaboration visible at all", but "turn visible cursor presence into a fully trusted shared-editing path".
+- the curated merge-pressure browser lane is also now validated locally end-to-end in a real browser run; what is still not proven is local production-build parity, which currently fails with separate prerender/runtime issues outside the browser-gate lane.
 
 ## Embedded Figures Imported From the PDF
 These assets were extracted from the PDF so the audit remains portable inside the repository.

@@ -30,6 +30,7 @@ export interface UserInfo {
     id: string;
     name: string;
     color: string;
+    avatar?: string;
     cursor?: CursorPosition;
     selection?: SelectionRange;
 }
@@ -38,9 +39,15 @@ export interface CursorPosition {
     x: number;
     y: number;
     z?: number;
+    filePath?: string;
+    pane?: string;
+    line?: number;
+    column?: number;
 }
 
 export interface SelectionRange {
+    filePath?: string;
+    pane?: string;
     start: { index: number; length: number };
     end: { index: number; length: number };
 }
@@ -111,7 +118,7 @@ export class CollaborationSession {
     constructor(config: CollaborationConfig) {
         this.config = {
             ...config,
-            serverUrl: config.serverUrl || 'ws://localhost:4000',
+            serverUrl: config.serverUrl || process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001',
             user: {
                 ...config.user,
                 color: config.user.color || generateUserColor(config.user.id)
@@ -241,9 +248,24 @@ export class CollaborationSession {
         
         if (this.awareness) {
             this.awareness.getStates().forEach((state, clientId) => {
-                if (state.user) {
-                    users.set(clientId, state.user as UserInfo);
+                const rawState = state as {
+                    user?: Partial<UserInfo>;
+                    cursor?: CursorPosition;
+                    selection?: SelectionRange;
+                };
+
+                if (!rawState.user) {
+                    return;
                 }
+
+                users.set(clientId, {
+                    id: String(rawState.user.id ?? clientId),
+                    name: String(rawState.user.name ?? 'Guest'),
+                    color: String(rawState.user.color ?? generateUserColor(String(rawState.user.id ?? clientId))),
+                    avatar: rawState.user.avatar,
+                    cursor: rawState.cursor,
+                    selection: rawState.selection,
+                });
             });
         }
         
@@ -611,6 +633,8 @@ export interface UseCollaborationResult {
     error: Error | null;
     connect: () => Promise<void>;
     disconnect: () => void;
+    updateCursor: (position: CursorPosition) => void;
+    updateSelection: (selection: SelectionRange | null) => void;
 }
 
 export function useYjsCollaboration(options: UseCollaborationOptions): UseCollaborationResult {
@@ -660,6 +684,14 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
         setIsConnected(false);
         setIsSynced(false);
     }, []);
+
+    const updateCursor = useCallback((position: CursorPosition) => {
+        sessionRef.current?.updateCursor(position);
+    }, []);
+
+    const updateSelection = useCallback((selection: SelectionRange | null) => {
+        sessionRef.current?.updateSelection(selection);
+    }, []);
     
     return {
         session: sessionRef.current,
@@ -668,7 +700,9 @@ export function useYjsCollaboration(options: UseCollaborationOptions): UseCollab
         users,
         error,
         connect,
-        disconnect
+        disconnect,
+        updateCursor,
+        updateSelection
     };
 }
 

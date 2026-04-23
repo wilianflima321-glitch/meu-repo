@@ -52,7 +52,7 @@ Canonical set reference:
 - Admin is still too large at `46` pages.
 - Tests are still materially insufficient relative to product surface.
 - i18n is still materially insufficient.
-- Collaboration UI primitives now exist and header-level presence is visible in the workbench shell, but the UX is still not fully integrated in the editor canvas itself.
+- Collaboration UI primitives now exist, header-level presence is visible in the workbench shell, and remote cursor overlays are now wired into the Monaco editing surfaces.
 - The anti-fake-success policy remains a real differentiator and is enforced by QA scripts.
 - `qa:enterprise-gate` now includes billing readiness, preview readiness, lint, and typecheck, and the main CI workflow executes it directly again.
 
@@ -69,25 +69,28 @@ Canonical set reference:
 - "Collaboration UI shipped" is only **partially true**.
   - `useCollaborationAwareness`, `CollaboratorsBar`, and `RemoteCursorLayer` exist.
   - Workbench header presence is now visible.
-  - Remote cursor rendering in the primary Monaco editing flow is still not the default signature path.
+  - Remote cursor rendering is now wired into the primary Monaco editing flow.
+  - What is still missing is the fully shared editing loop: file-tree presence, text-sync confidence, and wider production proving.
 - "15+ aspirational routes visible" is **stale** as phrased.
   - Current scan shows only `5` `page.tsx` files under `20` lines.
   - However, short entry wrappers still exist and route maturity still needs curation.
 
 ## Current Structural Risks
 ### P0
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now down to about `720` lines, but it is still a P0 because it remains the main workbench orchestrator.
-- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is now down to about `508` lines, but it is still a P0 because it still carries too many user-facing flows in one shell.
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now down to about `788` lines, but it is still a P0 because it remains the main workbench orchestrator.
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is now down to about `549` lines, but it is still a P0 because it still carries too many user-facing flows in one shell.
 - `cloud-web-app/web/tsconfig.json` still has `"noImplicitAny": false`.
 - tracked `: any` usage in web TS/TSX is still around `1059`.
 - coverage pressure exists now, but the suite is still far too small for the surface area.
-- collaboration is still not fully visible inside the primary editor canvas.
+- collaboration is now visible inside the primary editor canvas, but it is still not a fully proven shared-editing signature path.
 - the branch is typechecking again only after restoring a minimal active compatibility surface for `lib/index.ts` and `lib/sequencer-cinematics.ts`.
 - CI policy-vs-enforcement improved materially:
   - `qa:enterprise-gate` is now executed directly in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\workflows\ci.yml`
   - branch protection wording was updated to match actual enforcement semantics
-- Remaining CI gap:
-  - Playwright E2E is still optional rather than default merge pressure
+- Remaining CI gap is narrower now:
+  - default PR browser pressure now exists through a curated Chromium merge-pressure suite
+  - that lane is isolated in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\playwright.merge.config.ts`
+  - the full Playwright matrix is still manual rather than required merge pressure
 
 ### P1
 - Broad grep still finds roughly `1305` raw hex matches across tracked component TS/TSX files.
@@ -105,7 +108,7 @@ Canonical set reference:
 
 ### P2
 - i18n key depth is still too shallow to support a premium global-first product.
-- Collaboration presence primitives are present, but not yet a default signature UX.
+- Collaboration presence is now visible in the editor canvas, but it still lacks file-tree presence and a fully proven shared-text path.
 - Preview is still not validated as a reliable public/shareable workflow.
 
 ## Verified Collaboration State
@@ -113,13 +116,18 @@ Canonical set reference:
   - `cloud-web-app/web/hooks/useCollaborationAwareness.ts`
   - `cloud-web-app/web/components/collaboration/CollaboratorsBar.tsx`
   - `cloud-web-app/web/components/collaboration/RemoteCursorLayer.tsx`
+  - `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`
   - tests and stories for these primitives
   - header-level presence integration in:
     - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`
     - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
+  - editor-canvas remote cursor integration in:
+    - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`
+    - `cloud-web-app/web/lib/yjs-collaboration.ts`
 - Not yet verified as complete:
   - project-wide presence dots in file tree
-  - full shared editing loop with visible remote cursors in the primary editing experience
+  - full shared editing loop with conflict-free text sync as the default path
+  - wider production/runtime verification of realtime collaboration connectivity
 
 ## Verified Workbench Refactor State
 - `cloud-web-app/web/components/ide/fullscreen/useWorkbenchFullAccess.ts` remains active and is now joined by:
@@ -142,6 +150,12 @@ Canonical set reference:
 ## Verified Test State
 - Tracked tests currently found: `45`
 - This is better than older snapshots, but it is still far from acceptable given product scope and `320` API routes.
+- The curated merge-pressure suite was also validated locally in a real browser run:
+  - `npx playwright install chromium`
+  - `npm run test:e2e:merge`
+  - current result on the local workstation: `5 passed`
+- The local runtime blocker caused by `browserTracingIntegration is not a function` was closed by hardening `cloud-web-app/web/lib/sentry.ts`.
+- A separate local production-build attempt still failed on multiple routes with prerender/runtime errors (`<Html> outside pages/_document` and `useContext` null stacks), so production-build parity should still be treated as open rather than assumed.
 
 ## Verified Design-System State
 - `qa:design-system-consistency`: currently passing
@@ -169,15 +183,16 @@ Canonical set reference:
    - once these two stabilize, move the same extraction discipline to:
      - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`
      - `cloud-web-app/web/components/terminal/XTerminal.tsx`
-2. Make collaboration visible inside the actual editor loop:
-   - header presence is no longer enough
-   - remote cursors, editor awareness, and file-tree presence remain the next real differentiators
-3. Turn preview into a reliable shareable workflow:
+2. Turn preview into a reliable shareable workflow:
    - public/shareable preview is still not a proven end-to-end path
    - preview must become something users can trust, not just something we can demo locally
+3. Harden collaboration into a true shared-editing path:
+   - remote cursors now exist in the real editor
+   - file-tree presence, richer awareness, and shared-text confidence remain the next differentiators
 4. Turn the recent structural wins into fully lived product quality:
    - keep Storybook green
    - expand story/test coverage
+   - keep the new merge-pressure E2E suite stable enough to remain the default PR browser gate
    - make Lighthouse and coverage gates part of the release pressure, not decoration
    - keep policy and CI aligned as we tighten more required checks
 5. Turn off implicit drift in TypeScript:

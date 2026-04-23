@@ -40,6 +40,7 @@ import { useWorkbenchChrome } from '@/components/ide/fullscreen/useWorkbenchChro
 import { useWorkbenchFiles } from '@/components/ide/fullscreen/useWorkbenchFiles';
 import { useWorkbenchFullAccess } from '@/components/ide/fullscreen/useWorkbenchFullAccess';
 import { useWorkbenchPresence } from '@/components/ide/fullscreen/useWorkbenchPresence';
+import { useWorkbenchRealtimeCollaboration } from '@/components/ide/fullscreen/useWorkbenchRealtimeCollaboration';
 
 const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
 const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
@@ -301,6 +302,16 @@ function IDEContent() {
   })
 
   const { headerCollaborators } = useWorkbenchPresence({
+    hasToken,
+    projectId,
+  })
+
+  const {
+    collaborationConnected,
+    editorPeers,
+    broadcastCursor,
+    broadcastSelection,
+  } = useWorkbenchRealtimeCollaboration({
     hasToken,
     projectId,
   })
@@ -687,6 +698,8 @@ function IDEContent() {
                   showOutline={showOutline}
                   showDiagnostics={showDiagnostics}
                   fullAccessActive={Boolean(fullAccessActiveGrant)}
+                  collaborationConnected={collaborationConnected}
+                  collaborationPeers={editorPeers}
                   primaryEditorRef={primaryEditorRef}
                   secondaryEditorRef={secondaryEditorRef}
                   editorRef={editorRef}
@@ -708,6 +721,8 @@ function IDEContent() {
                   onInlineApplyResult={handleInlineApplyResult}
                   onRequestFullAccess={handleToggleFullAccess}
                   onSaveFile={writeFile}
+                  onCursorPresenceChange={broadcastCursor}
+                  onSelectionPresenceChange={broadcastSelection}
                 />
               ),
               preview: (

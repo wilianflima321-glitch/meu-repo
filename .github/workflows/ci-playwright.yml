@@ -1,14 +1,13 @@
-name: CI — Jest and Playwright
+name: Legacy Playwright Diagnostics
 
 on:
-  pull_request:
-    branches: [ main, master ]
+  workflow_dispatch:
   push:
     branches: [ infra/playwright-ci-ensemble, infra/playwright-ci-ensemble-workflow-fix ]
 
 jobs:
   test:
-    name: Run Jest unit tests and Playwright E2E
+    name: Run legacy Jest and Playwright diagnostics
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo

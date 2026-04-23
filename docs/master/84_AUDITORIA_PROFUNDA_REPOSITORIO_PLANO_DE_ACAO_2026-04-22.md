@@ -102,15 +102,29 @@ A nova auditoria acertou num ponto estrutural importante, e esse ponto jÃ¡ foi
 - agora o `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\workflows\ci.yml` executa esse agregador diretamente
 - o agregador passou a incluir `qa:billing-runtime-readiness`, `qa:preview-runtime-readiness`, `lint` e `typecheck`
 
-ConclusÃ£o honesta: esse bloco deixou de ser um mismatch central de polÃ­tica-vs-CI. O que sobra aqui Ã© principalmente pressÃ£o E2E ainda opcional e qualidade estrutural contÃ­nua do root.
+ConclusÃ£o honesta: esse bloco deixou de ser um mismatch central de polÃ­tica-vs-CI. O que sobra aqui Ã© principalmente o fato de que o **merge-pressure E2E padrÃ£o agora existe, mas o full matrix ainda nÃ£o Ã© obrigatÃ³rio**, alÃ©m da qualidade estrutural contÃ­nua do root.
 
-### 4. E2E opcional ainda Ã© uma crÃ­tica legÃ­tima
-A auditoria tambÃ©m continua correta aqui:
+### 4. E2E deixou de ser totalmente opcional, mas ainda nao chegou ao full-matrix required
+Esse ponto mudou no branch atual:
 
-- o job `Playwright E2E (optional)` existe
-- mas estÃ¡ condicionado por `github.event.inputs.run_e2e == 'true'`
+- o workflow principal agora roda um job canÃ´nico `Web App - Merge Pressure E2E`
+- esse job executa `npm run test:e2e:merge`
+- a suite usa um arquivo dedicado `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\tests\e2e\merge-pressure.spec.ts`
+- a suite usa uma config dedicada `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\playwright.merge.config.ts`
+- a mesma suite ja foi validada localmente em navegador real com resultado atual de `5 passed`
+- a pressÃ£o padrÃ£o de PR agora cobre:
+  - landing e CTAs pÃºblicos
+  - contact-sales via backend submit
+  - entry/login surface
+  - redirects de superfÃ­cies protegidas
+  - health/metrics da runtime API
+- o job `Playwright E2E (full matrix, manual)` continua existindo
+- ele segue condicionado por `github.event.inputs.run_e2e == 'true'`
 
-Isso nÃ£o significa que E2E â€œnÃ£o existeâ€; significa que ele ainda nÃ£o Ã© pressÃ£o padrÃ£o de merge.
+Leitura correta agora:
+- E2E jÃ¡ faz parte da pressÃ£o padrÃ£o de merge
+- o que ainda **nÃ£o** Ã© pressÃ£o padrÃ£o de merge Ã© o full matrix completo do Playwright
+- a browser lane esta comprovada localmente; o que ainda nao esta comprovado e a paridade de build de producao, porque a tentativa local mais recente de `next build` falhou em varias rotas com erros de prerender/runtime
 
 ### 5. `noImplicitAny: false` continua um risco concreto
 Isso segue vÃ¡lido e alinhado com `81`.
@@ -152,8 +166,8 @@ Leitura correta:
 O PDF ainda carrega a leitura de monolitos maiores do que o estado atual do branch.
 
 Estado atual reconciliado:
-- `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx`: `~508` linhas
-- `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx`: `~720` linhas
+- `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx`: `~549` linhas
+- `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx`: `~788` linhas
 
 Extracoes reais ja ativas:
 - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\useChatContextPreviews.ts`
@@ -221,7 +235,7 @@ Depois de alinhar `81 + 82 + 83 + 84`, a leitura conjunta mais honesta Ã©:
 2. o Aethel estÃ¡ no estÃ¡gio de â€œproduto promissor com gargalos grandes e governanÃ§a em alinhamento progressivoâ€
 3. os maiores riscos agora se dividem em quatro blocos:
    - monÃ³litos de workbench/chat
-   - pressÃ£o E2E ainda opcional
+   - full-matrix E2E ainda manual
    - root/documentation hygiene
    - fechamento real de colaboraÃ§Ã£o/preview/testes
 

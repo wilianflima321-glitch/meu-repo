@@ -21,126 +21,154 @@ const ENVIRONMENT = process.env.NODE_ENV || 'development';
 const RELEASE = process.env.NEXT_PUBLIC_APP_VERSION || process.env.VERCEL_GIT_COMMIT_SHA || 'dev';
 const logger = createComponentLogger('sentry');
 
-export const sentryConfig: Sentry.BrowserOptions = {
-  dsn: SENTRY_DSN,
-  environment: ENVIRONMENT,
-  release: `aethel-engine@${RELEASE}`,
-  
-  // Performance Monitoring
-  tracesSampleRate: ENVIRONMENT === 'production' ? 0.1 : 1.0,
-  
-  // Session Replay
-  replaysSessionSampleRate: ENVIRONMENT === 'production' ? 0.1 : 1.0,
-  replaysOnErrorSampleRate: 1.0,
-  
-  // Error filtering
-  ignoreErrors: [
-    // Browser extensions
-    'top.GLOBALS',
-    'originalCreateNotification',
-    'canvas.contentDocument',
-    'MyApp_RemoveAllHighlights',
-    'http://tt.teletrader.com',
-    'jigsaw is not defined',
-    'ComboSearchWidget',
-    'http://tb.teletrader.com/',
-    'atomicFindClose',
-    // Facebook
-    'fb_xd_fragment',
-    // ISP junk
-    'bmi_teletext_content_main',
-    // Random plugins/extensions
-    'conduitPage',
-    // Chrome extensions
-    /extensions\//i,
-    /^chrome:\/\//i,
-    // Network errors
-    'Network request failed',
-    'Failed to fetch',
-    'NetworkError',
-    'Load failed',
-    // AbortController
-    'AbortError',
-    // ResizeObserver
-    'ResizeObserver loop',
-    // Monaco editor noise
-    'Cannot read properties of null (reading \'getModel\')',
-  ],
-  
-  denyUrls: [
-    // Chrome extensions
-    /extensions\//i,
-    /^chrome:\/\//i,
-    /^chrome-extension:\/\//i,
-    // Firefox extensions
-    /^moz-extension:\/\//i,
-    // Safari extensions
-    /^safari-web-extension:\/\//i,
-    // Analytics
-    /google-analytics\.com/i,
-    /googletagmanager\.com/i,
-    /hotjar\.com/i,
-    // Ad networks
-    /doubleclick\.net/i,
-    /googlesyndication\.com/i,
-  ],
-  
-  // Before send hook
-  beforeSend(event, hint) {
-    // Filter out specific errors
-    const error = hint.originalException as Error;
-    
-    if (error?.message) {
-      // Ignore hydration errors in dev
-      if (ENVIRONMENT === 'development' && error.message.includes('Hydration')) {
-        return null;
+type BrowserIntegrationFactory = (options?: unknown) => unknown;
+
+function buildBrowserIntegrations(): NonNullable<Sentry.BrowserOptions['integrations']> {
+  const integrations: unknown[] = [];
+  const browserTracingIntegration = (Sentry as typeof Sentry & {
+    browserTracingIntegration?: BrowserIntegrationFactory;
+  }).browserTracingIntegration;
+  const replayIntegration = (Sentry as typeof Sentry & {
+    replayIntegration?: BrowserIntegrationFactory;
+  }).replayIntegration;
+
+  if (typeof browserTracingIntegration === 'function') {
+    integrations.push(
+      browserTracingIntegration({
+        tracePropagationTargets: [
+          'localhost',
+          /^https:\/\/.*\.aethel\.dev/,
+          /^https:\/\/aethel\.dev/,
+        ],
+      })
+    );
+  } else {
+    logger.warn('[Sentry] browserTracingIntegration unavailable in this runtime; performance tracing disabled');
+  }
+
+  if (typeof replayIntegration === 'function') {
+    integrations.push(
+      replayIntegration({
+        maskAllText: false,
+        blockAllMedia: false,
+        maskAllInputs: true,
+      })
+    );
+  } else {
+    logger.warn('[Sentry] replayIntegration unavailable in this runtime; session replay disabled');
+  }
+
+  return integrations as NonNullable<Sentry.BrowserOptions['integrations']>;
+}
+
+export function getSentryBrowserConfig(): Sentry.BrowserOptions {
+  return {
+    dsn: SENTRY_DSN,
+    environment: ENVIRONMENT,
+    release: `aethel-engine@${RELEASE}`,
+
+    // Performance Monitoring
+    tracesSampleRate: ENVIRONMENT === 'production' ? 0.1 : 1.0,
+
+    // Session Replay
+    replaysSessionSampleRate: ENVIRONMENT === 'production' ? 0.1 : 1.0,
+    replaysOnErrorSampleRate: 1.0,
+
+    // Error filtering
+    ignoreErrors: [
+      // Browser extensions
+      'top.GLOBALS',
+      'originalCreateNotification',
+      'canvas.contentDocument',
+      'MyApp_RemoveAllHighlights',
+      'http://tt.teletrader.com',
+      'jigsaw is not defined',
+      'ComboSearchWidget',
+      'http://tb.teletrader.com/',
+      'atomicFindClose',
+      // Facebook
+      'fb_xd_fragment',
+      // ISP junk
+      'bmi_teletext_content_main',
+      // Random plugins/extensions
+      'conduitPage',
+      // Chrome extensions
+      /extensions\//i,
+      /^chrome:\/\//i,
+      // Network errors
+      'Network request failed',
+      'Failed to fetch',
+      'NetworkError',
+      'Load failed',
+      // AbortController
+      'AbortError',
+      // ResizeObserver
+      'ResizeObserver loop',
+      // Monaco editor noise
+      'Cannot read properties of null (reading \'getModel\')',
+    ],
+
+    denyUrls: [
+      // Chrome extensions
+      /extensions\//i,
+      /^chrome:\/\//i,
+      /^chrome-extension:\/\//i,
+      // Firefox extensions
+      /^moz-extension:\/\//i,
+      // Safari extensions
+      /^safari-web-extension:\/\//i,
+      // Analytics
+      /google-analytics\.com/i,
+      /googletagmanager\.com/i,
+      /hotjar\.com/i,
+      // Ad networks
+      /doubleclick\.net/i,
+      /googlesyndication\.com/i,
+    ],
+
+    // Before send hook
+    beforeSend(event, hint) {
+      // Filter out specific errors
+      const error = hint.originalException as Error;
+
+      if (error?.message) {
+        // Ignore hydration errors in dev
+        if (ENVIRONMENT === 'development' && error.message.includes('Hydration')) {
+          return null;
+        }
+
+        // Ignore cancelled requests
+        if (error.message.includes('cancelled') || error.message.includes('aborted')) {
+          return null;
+        }
       }
-      
-      // Ignore cancelled requests
-      if (error.message.includes('cancelled') || error.message.includes('aborted')) {
-        return null;
+
+      // Sanitize sensitive data
+      if (event.request?.headers) {
+        delete event.request.headers['Authorization'];
+        delete event.request.headers['Cookie'];
       }
-    }
-    
-    // Sanitize sensitive data
-    if (event.request?.headers) {
-      delete event.request.headers['Authorization'];
-      delete event.request.headers['Cookie'];
-    }
-    
-    // Add user context if available
-    if (typeof window !== 'undefined') {
-      const userId = (window as any).__AETHEL_USER_ID__;
-      const userEmail = (window as any).__AETHEL_USER_EMAIL__;
-      
-      if (userId) {
-        event.user = {
-          ...event.user,
-          id: userId,
-          email: userEmail,
-        };
+
+      // Add user context if available
+      if (typeof window !== 'undefined') {
+        const userId = (window as any).__AETHEL_USER_ID__;
+        const userEmail = (window as any).__AETHEL_USER_EMAIL__;
+
+        if (userId) {
+          event.user = {
+            ...event.user,
+            id: userId,
+            email: userEmail,
+          };
+        }
       }
-    }
-    
-    return event;
-  },
-  
-  // Integrations
-  integrations: [
-    Sentry.browserTracingIntegration({
-      tracePropagationTargets: [
-        'localhost',
-        /^https:\/\/.*\.aethel\.dev/,
-        /^https:\/\/aethel\.dev/,
-      ],
-    } as any),
-    Sentry.replayIntegration({
-      maskAllText: false,
-      blockAllMedia: false,
-      maskAllInputs: true,
-    }),
-  ],
-};
+
+      return event;
+    },
+
+    integrations: buildBrowserIntegrations(),
+  };
+}
 
 // ============================================================================
 // SERVER CONFIG
@@ -393,7 +421,7 @@ export function initSentry(): void {
   
   if (typeof window !== 'undefined') {
     // Browser
-    Sentry.init(sentryConfig);
+    Sentry.init(getSentryBrowserConfig());
   } else {
     // Server
     Sentry.init(sentryServerConfig);

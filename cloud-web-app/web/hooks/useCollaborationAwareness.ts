@@ -22,9 +22,15 @@ export interface RemoteCursor {
   x: number
   y: number
   z?: number
+  filePath?: string
+  pane?: string
+  line?: number
+  column?: number
 }
 
 export interface RemoteSelection {
+  filePath?: string
+  pane?: string
   start: { index: number; length: number }
   end: { index: number; length: number }
 }

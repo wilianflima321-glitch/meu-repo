@@ -209,8 +209,9 @@ export default function ContactSalesPage() {
                 )}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Nome *</label>
+                    <label htmlFor="contact-sales-name" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Nome *</label>
                     <input
+                      id="contact-sales-name"
                       type="text"
                       value={formData.name}
                       onChange={(event) => setFormData({ ...formData, name: event.target.value })}
@@ -219,8 +220,9 @@ export default function ContactSalesPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Email corporativo *</label>
+                    <label htmlFor="contact-sales-email" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Email corporativo *</label>
                     <input
+                      id="contact-sales-email"
                       type="email"
                       value={formData.email}
                       onChange={(event) => setFormData({ ...formData, email: event.target.value })}
@@ -231,8 +233,9 @@ export default function ContactSalesPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Empresa *</label>
+                  <label htmlFor="contact-sales-company" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Empresa *</label>
                   <input
+                    id="contact-sales-company"
                     type="text"
                     value={formData.company}
                     onChange={(event) => setFormData({ ...formData, company: event.target.value })}
@@ -243,8 +246,9 @@ export default function ContactSalesPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Cargo</label>
+                    <label htmlFor="contact-sales-role" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Cargo</label>
                     <input
+                      id="contact-sales-role"
                       type="text"
                       value={formData.role}
                       onChange={(event) => setFormData({ ...formData, role: event.target.value })}
@@ -253,8 +257,9 @@ export default function ContactSalesPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Tamanho do time</label>
+                    <label htmlFor="contact-sales-team-size" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Tamanho do time</label>
                     <select
+                      id="contact-sales-team-size"
                       value={formData.teamSize}
                       onChange={(event) => setFormData({ ...formData, teamSize: event.target.value })}
                       className={fieldBase}
@@ -270,8 +275,9 @@ export default function ContactSalesPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Contexto e requisitos</label>
+                  <label htmlFor="contact-sales-message" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Contexto e requisitos</label>
                   <textarea
+                    id="contact-sales-message"
                     rows={5}
                     value={formData.message}
                     onChange={(event) => setFormData({ ...formData, message: event.target.value })}
