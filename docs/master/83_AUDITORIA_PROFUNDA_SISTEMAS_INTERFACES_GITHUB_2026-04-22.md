@@ -87,9 +87,10 @@ The following PDF claims should no longer be treated as current truth without re
 These are the reality points this audit should now be interpreted against:
 
 - `AIChatPanelPro.tsx`: about `508` lines, not the older ~1766-line state
-- `FullscreenIDE.tsx`: about `550` lines and still a top-priority god component
+- `FullscreenIDE.tsx`: about `565` lines and still a top-priority god component
+- `WorkbenchEditorPane.tsx`: about `537` lines and now one of the highest-impact shell hotspots because editor presence, split tooling, and inline controls converge there
 - `AIChatPanelContainer.tsx`: about `116` lines after extraction into session-context, provider-preflight, send-pipeline, and session-banner modules
-- `ModernIDEShell.tsx`: now only `149` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`268`) and `ModernIDEShellChrome.tsx` (`351`)
+- `ModernIDEShell.tsx`: now only `161` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`268`), `ModernIDEShellChrome.tsx` (`211`), and `chromeSecondaryBars.tsx` (`189`)
 - tracked tests: `45`
 - tracked `console.*` in `cloud-web-app/web/lib`: around `285`
 - tracked `console.*` in `cloud-web-app/web/components`: around `151`

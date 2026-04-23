@@ -13,11 +13,13 @@ This file is the short scoreboard that answers:
 
 ## Current Snapshot
 - `AIChatPanelPro.tsx`: `508` lines
-- `FullscreenIDE.tsx`: `550` lines
+- `FullscreenIDE.tsx`: `565` lines
+- `WorkbenchEditorPane.tsx`: `537` lines
 - `AIChatPanelContainer.tsx`: `116` lines
-- `ModernIDEShell.tsx`: `149` lines
+- `ModernIDEShell.tsx`: `161` lines
 - `ModernIDEShellPanels.tsx`: `268` lines
-- `ModernIDEShellChrome.tsx`: `351` lines
+- `ModernIDEShellChrome.tsx`: `211` lines
+- `chromeSecondaryBars.tsx`: `189` lines
 - `XTerminal.tsx`: `506` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
@@ -69,6 +71,7 @@ This file is the short scoreboard that answers:
 - baseline collaboration is shipped in the canonical IDE:
   - collaborator presence
   - header avatars
+  - denser workbench collaboration strips in header and editor toolbar
   - remote cursors
 - still open:
   - file-tree presence
@@ -88,6 +91,7 @@ This file is the short scoreboard that answers:
 2. `console.*` still present in tracked code
 3. admin sprawl at `46` pages
 4. preview not yet proven as a premium public/share workflow
+5. dashboard density is improving, but still not yet at the tighter Linear/Vercel bar across all overview surfaces
 
 ### P2
 1. i18n depth
@@ -96,7 +100,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `ModernIDEShellChrome.tsx`, and `XTerminal.tsx`
+2. keep slicing `FullscreenIDE.tsx`, `WorkbenchEditorPane.tsx`, `AIChatPanelPro.tsx`, and `XTerminal.tsx`
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

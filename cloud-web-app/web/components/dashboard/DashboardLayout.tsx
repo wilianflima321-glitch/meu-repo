@@ -41,7 +41,7 @@ export function DashboardLayout({
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-6 lg:p-8">
+          <div className="p-5 lg:p-6">
             {children}
           </div>
         </main>

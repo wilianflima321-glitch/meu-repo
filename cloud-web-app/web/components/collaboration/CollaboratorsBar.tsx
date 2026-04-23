@@ -42,22 +42,45 @@ export function CollaboratorsBar({
 }: CollaboratorsBarProps) {
   const visible = peers.slice(0, maxVisible)
   const overflow = Math.max(0, peers.length - maxVisible)
+  const activeCursors = peers.filter((peer) => peer.cursor).length
+  const overflowNames = overflow > 0 ? peers.slice(maxVisible).map((peer) => peer.name).join(', ') : ''
+  const summaryLabel =
+    peers.length === 1 ? '1 collaborator active' : `${peers.length} collaborators active`
+  const activityLabel =
+    activeCursors > 0
+      ? `${activeCursors} live cursor${activeCursors === 1 ? '' : 's'}`
+      : 'Presence synced'
 
   return (
     <div
-      className={`flex items-center gap-2 ${className}`}
+      className={`flex min-w-0 items-center gap-2 ${className}`}
       role="group"
-      aria-label={`${peers.length} collaborator${peers.length === 1 ? '' : 's'} connected`}
+      aria-label={`${summaryLabel}${overflowNames ? `. Hidden collaborators: ${overflowNames}` : ''}`}
       data-testid="collaborators-bar"
     >
       {showStatusDot && peers.length > 0 && (
         <span
           aria-hidden="true"
-          className="inline-block w-2 h-2 rounded-full bg-[var(--aethel-success)] animate-pulse"
+          className="inline-block h-2 w-2 flex-shrink-0 rounded-full bg-[var(--aethel-success)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--aethel-success)_16%,transparent)] animate-pulse"
           title="Live collaboration active"
         />
       )}
-      <ul role="list" className="flex items-center -space-x-2">
+      {peers.length > 0 && (
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex min-w-0 flex-col leading-none">
+            <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+              Ao vivo
+            </span>
+            <span className="truncate pt-1 text-[11px] font-semibold text-[var(--aethel-text-secondary)]">
+              {summaryLabel}
+            </span>
+          </div>
+          <span className="hidden rounded-full border border-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent)] px-2 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)] sm:inline-flex">
+            {activityLabel}
+          </span>
+        </div>
+      )}
+      <ul role="list" className="flex items-center -space-x-2.5">
         {visible.map((peer) => (
           <li key={peer.clientId} role="listitem">
             <button
@@ -65,7 +88,7 @@ export function CollaboratorsBar({
               onClick={onExpand}
               aria-label={`Collaborator ${peer.name} connected`}
               title={peer.name}
-              className="relative inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-semibold ring-2 ring-[var(--aethel-surface-primary)] transition-transform hover:scale-110 focus:outline-none focus-visible:ring-[var(--aethel-border-focus)]"
+              className="relative inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-[color-mix(in_srgb,var(--aethel-border-secondary)_76%,transparent)] text-[11px] font-semibold shadow-[0_8px_18px_-14px_rgba(15,23,42,0.9)] ring-2 ring-[var(--aethel-surface-primary)] transition-transform hover:z-10 hover:scale-[1.04] focus:outline-none focus-visible:z-10 focus-visible:ring-[var(--aethel-border-focus)]"
               style={{ background: peer.color, color: '#ffffff' }}
             >
               {peer.avatar ? (
@@ -87,7 +110,8 @@ export function CollaboratorsBar({
               type="button"
               onClick={onExpand}
               aria-label={`${overflow} additional collaborators. Open the full list.`}
-              className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[var(--aethel-surface-tertiary)] text-[11px] font-semibold text-[var(--aethel-text-primary)] ring-2 ring-[var(--aethel-surface-primary)] hover:bg-[var(--aethel-surface-quaternary)] focus:outline-none focus-visible:ring-[var(--aethel-border-focus)]"
+              title={overflowNames || undefined}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] text-[11px] font-semibold text-[var(--aethel-text-primary)] ring-2 ring-[var(--aethel-surface-primary)] transition-colors hover:bg-[var(--aethel-surface-quaternary)] focus:outline-none focus-visible:ring-[var(--aethel-border-focus)]"
             >
               +{overflow}
             </button>

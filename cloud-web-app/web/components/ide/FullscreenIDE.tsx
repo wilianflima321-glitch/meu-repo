@@ -387,22 +387,12 @@ function IDEContent() {
             activeFileName={activeFile?.path}
             headerExtras={
               headerCollaborators.length > 0 ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '4px 8px',
-                    borderRadius: '999px',
-                    border: '1px solid var(--aethel-border-secondary)',
-                    background: 'color-mix(in srgb, var(--aethel-surface-secondary) 68%, transparent)',
-                  }}
-                >
-                  <CollaboratorsBar
-                    peers={headerCollaborators}
-                    maxVisible={4}
-                    showStatusDot
-                  />
-                </div>
+                <CollaboratorsBar
+                  peers={headerCollaborators}
+                  maxVisible={4}
+                  showStatusDot
+                  className="max-w-full"
+                />
               ) : null
             }
             banner={

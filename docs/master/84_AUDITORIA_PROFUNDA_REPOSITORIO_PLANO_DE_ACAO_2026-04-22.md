@@ -39,12 +39,14 @@ Use the current set like this:
 - `cloud-web-app/web/lib/**/*.ts` in the current workspace: `347`
 - Curated tracked executable test/spec files: `49`
 - Hotspot line counts:
-- `FullscreenIDE.tsx`: `550`
+- `FullscreenIDE.tsx`: `565`
+- `WorkbenchEditorPane.tsx`: `537`
 - `AIChatPanelPro.tsx`: `508`
 - `AIChatPanelContainer.tsx`: `116`
-- `ModernIDEShell.tsx`: `149`
+- `ModernIDEShell.tsx`: `161`
 - `ModernIDEShellPanels.tsx`: `268`
-- `ModernIDEShellChrome.tsx`: `351`
+- `ModernIDEShellChrome.tsx`: `211`
+- `chromeSecondaryBars.tsx`: `189`
 - `XTerminal.tsx`: `506`
 
 ## What This Audit Still Gets Right

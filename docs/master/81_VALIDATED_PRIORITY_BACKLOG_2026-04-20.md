@@ -34,12 +34,14 @@ Canonical set reference:
   - `console.*` in `lib`: `269`
   - `console.*` in `components`: `92`
 - Current hotspot line counts:
-  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `550`
+  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `565`
   - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `508`
   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `116`
-  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `149`
+  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `161`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `268`
-  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `351`
+  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `211`
+  - `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx`: `189`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`: `537`
   - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `506`
 
 ## Capability Truth Labels
@@ -59,7 +61,7 @@ Canonical set reference:
 
 ### COMPLETE BASELINE
 - Live collaboration baseline:
-  - presence, collaborator avatars, project-scoped rooms, and remote cursors are wired in the canonical IDE.
+  - presence, collaborator avatars, denser workbench collaboration strips, project-scoped rooms, and remote cursors are wired in the canonical IDE.
   - Treat reliability promotion, reconnect confidence, shared-text proof, and file-tree presence as still open.
 - Enterprise, billing, and operator truth surfaces:
   - billing readiness, operator readiness, and anti-fake-success truth UX are already user-facing and should be audited as shipped.
@@ -86,7 +88,7 @@ Canonical set reference:
 - The latest evidence remains in `cloud-web-app/web/build-latest.log`, `cloud-web-app/web/build-probe-workerthreads-off.log`, plus the older `build-probe-*.log` files.
 - Additional mitigations landed on `2026-04-23`:
   - `cloud-web-app/web/next.config.js` now forces `experimental.workerThreads=false`
-  - `cloud-web-app/web/components/ClientLayout.tsx` now keeps public/auth surfaces on a lighter provider stack while studio-only providers stay scoped to studio routes
+  - `cloud-web-app/web/components/ClientLayout.tsx` now keeps globally stable app providers mounted consistently, while studio-only enhancements stay behind a smaller route gate
 - Current reruns still do not justify closure:
   - repeated local `next build` probes still failed to finish within an extended `15` minute timeout
   - the last fully actionable error log still points to prerender failures around `/404`, `/500`, `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
@@ -115,8 +117,8 @@ Canonical set reference:
 1. Close production build parity without regressing the current browser merge-pressure lane.
 2. Continue slicing the remaining workbench hotspots:
    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
+   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`
    - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
-   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`
    - `cloud-web-app/web/components/terminal/XTerminal.tsx`
 3. Turn preview + deploy into a trustworthy shareable workflow.
 4. Promote collaboration from baseline presence/cursors to full shared-editing confidence and file-tree presence.

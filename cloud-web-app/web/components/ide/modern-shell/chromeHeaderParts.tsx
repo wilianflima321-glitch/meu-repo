@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { PanelState } from './types';
 import {
+  BORDER_SECONDARY,
   HEADER_ACTION_BUTTON,
   TEXT_PRIMARY,
   TEXT_SECONDARY,
@@ -58,6 +59,18 @@ const commandPaletteItems: ReadonlyArray<{
   },
 ];
 
+const floatingClusterStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: tokens.spacing['1.5'],
+  padding: tokens.spacing['1'],
+  border: `1px solid ${BORDER_SECONDARY}`,
+  borderRadius: tokens.radius.full,
+  background: 'color-mix(in srgb, var(--aethel-surface-secondary) 76%, transparent)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+  flexShrink: 0,
+};
+
 interface HeaderIdentityProps {
   projectName: string;
   activeFileName?: string;
@@ -70,23 +83,43 @@ export function HeaderIdentity({
   onToggleSidebar,
 }: HeaderIdentityProps) {
   return (
-    <div style={{ display: 'flex', minWidth: 0, flex: '1 1 auto', alignItems: 'center', gap: tokens.spacing['4'] }}>
+    <div
+      style={{
+        display: 'flex',
+        minWidth: 0,
+        flex: '1 1 0',
+        alignItems: 'center',
+        gap: tokens.spacing['3'],
+      }}
+    >
       <button
         type="button"
         onClick={onToggleSidebar}
         style={{
           ...iconButtonStyle,
+          minWidth: '34px',
+          minHeight: '34px',
           color: TEXT_SECONDARY,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          border: `1px solid ${BORDER_SECONDARY}`,
+          background:
+            'color-mix(in srgb, var(--aethel-surface-secondary) 58%, transparent)',
         }}
         aria-label="Alternar barra lateral"
       >
-        <Layout size={20} />
+        <Layout size={18} />
       </button>
 
-      <div style={{ display: 'flex', minWidth: 0, flexDirection: 'column', gap: tokens.spacing['0.5'] }}>
+      <div
+        style={{
+          display: 'flex',
+          minWidth: 0,
+          flexDirection: 'column',
+          gap: '2px',
+        }}
+      >
         <span
           style={{
             fontSize: tokens.typography.fontSize.sm,
@@ -99,7 +132,7 @@ export function HeaderIdentity({
         >
           {projectName}
         </span>
-        {activeFileName && (
+        {activeFileName ? (
           <span
             style={{
               fontSize: tokens.typography.fontSize.xs,
@@ -111,11 +144,17 @@ export function HeaderIdentity({
             }}
           >
             <Code2 size={12} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {activeFileName}
             </span>
           </span>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -135,31 +174,53 @@ export function HeaderWorkspaceControls({
   onOpenCommandPalette,
 }: HeaderWorkspaceControlsProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexWrap: 'wrap', justifyContent: 'center' }}>
-      {headerExtras}
-      {headerPanelItems.map((item) => (
-        <PanelToggle
-          key={item.panel}
-          icon={item.icon}
-          label={item.label}
-          active={panelState[item.panel].open}
-          onClick={() => onTogglePanel(item.panel)}
-        />
-      ))}
-      {onOpenCommandPalette &&
-        commandPaletteItems.map((item) => (
-          <button
-            key={item.mode}
-            type="button"
-            onClick={() => onOpenCommandPalette(item.mode)}
-            style={HEADER_ACTION_BUTTON}
-            aria-label={item.ariaLabel}
-            title={item.title}
-          >
-            {item.icon}
-            {item.label}
-          </button>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacing['2'],
+        minWidth: 0,
+        flex: '0 1 auto',
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+      }}
+    >
+      {headerExtras ? <div style={floatingClusterStyle}>{headerExtras}</div> : null}
+
+      <div style={floatingClusterStyle}>
+        {headerPanelItems.map((item) => (
+          <PanelToggle
+            key={item.panel}
+            icon={item.icon}
+            label={item.label}
+            active={panelState[item.panel].open}
+            onClick={() => onTogglePanel(item.panel)}
+          />
         ))}
+      </div>
+
+      {onOpenCommandPalette ? (
+        <div style={floatingClusterStyle}>
+          {commandPaletteItems.map((item) => (
+            <button
+              key={item.mode}
+              type="button"
+              onClick={() => onOpenCommandPalette(item.mode)}
+              style={{
+                ...HEADER_ACTION_BUTTON,
+                minHeight: '34px',
+                padding: `${tokens.spacing['1.5']} ${tokens.spacing['2.5']}`,
+                borderRadius: tokens.radius.full,
+              }}
+              aria-label={item.ariaLabel}
+              title={item.title}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -176,14 +237,19 @@ export function HeaderPrimaryActions({
   onOpenSettings,
 }: HeaderPrimaryActionsProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexShrink: 0 }}>
+    <div
+      style={{
+        ...floatingClusterStyle,
+        gap: tokens.spacing['2'],
+      }}
+    >
       <DeployTopbarAction projectName={projectName} />
       <button
         type="button"
         onClick={onRunPrimaryAction}
         disabled={!onRunPrimaryAction}
         style={getPrimaryActionButtonStyle(Boolean(onRunPrimaryAction))}
-        aria-label="Executar ação principal da previa"
+        aria-label="Executar acao principal da previa"
       >
         <Play size={14} />
         Executar
@@ -194,8 +260,13 @@ export function HeaderPrimaryActions({
         disabled={!onOpenSettings}
         style={{
           ...iconButtonStyle,
+          minWidth: '34px',
+          minHeight: '34px',
           color: TEXT_SECONDARY,
           opacity: onOpenSettings ? 1 : 0.65,
+          border: `1px solid ${BORDER_SECONDARY}`,
+          background:
+            'color-mix(in srgb, var(--aethel-surface-secondary) 58%, transparent)',
         }}
         aria-label="Abrir configuracoes"
       >
@@ -214,11 +285,7 @@ interface PanelToggleProps {
 
 function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={getPanelToggleStyle(active)}
-    >
+    <button type="button" onClick={onClick} style={getPanelToggleStyle(active)}>
       {icon}
       {label}
     </button>

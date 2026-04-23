@@ -3,6 +3,7 @@
 import { useMemo, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type * as monacoEditor from 'monaco-editor';
 
+import CollaboratorsBar from '@/components/collaboration/CollaboratorsBar';
 import RemoteCursorLayer from '@/components/collaboration/RemoteCursorLayer';
 import MonacoEditorPro, {
   type Diagnostic as MonacoDiagnostic,
@@ -80,6 +81,11 @@ type WorkbenchEditorPaneProps = {
     editor: monacoEditor.editor.IStandaloneCodeEditor | null;
   }) => void;
 };
+
+const workbenchActionButtonClass =
+  'rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors';
+const workbenchInactiveActionClass =
+  'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]';
 
 function diagnosticsToErrors(
   diagnostics: MonacoDiagnostic[],
@@ -166,6 +172,8 @@ export function WorkbenchEditorPane({
     return normalizedProjectIdParam || undefined;
   }, [search]);
   const currentDiagnosticsFilePath = bridgeActiveFile?.path ?? activeFile?.path ?? '';
+  const liveCursorCount = collaborationPeers.filter((peer) => peer.cursor).length;
+  const showCollaborators = collaborationPeers.length > 0;
 
   return (
     <div className="h-full flex flex-col">
@@ -176,36 +184,66 @@ export function WorkbenchEditorPane({
       )}
       <TabBar />
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--aethel-border-secondary)_70%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] px-3 py-2.5 text-[11px]">
-        <div className="flex items-center gap-2 text-[var(--aethel-text-tertiary)]">
-          <span className="font-medium uppercase tracking-[0.12em]">Ferramentas do editor</span>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+          <div className="flex min-w-0 flex-col text-[var(--aethel-text-tertiary)]">
+            <span className="font-medium uppercase tracking-[0.12em]">Ferramentas do editor</span>
+            <span className="truncate pt-1 text-[11px] text-[var(--aethel-text-secondary)]">
+              {showCollaborators
+                ? liveCursorCount > 0
+                  ? `${liveCursorCount} cursor${liveCursorCount > 1 ? 's' : ''} ativos`
+                  : 'Presenca sincronizada'
+                : collaborationConnected
+                  ? 'Sessao ao vivo pronta'
+                  : 'Modo solo'}
+            </span>
+          </div>
+          <div
+            aria-hidden="true"
+            className="hidden h-7 w-px bg-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] sm:block"
+          />
+          {showCollaborators ? (
+            <CollaboratorsBar
+              peers={collaborationPeers}
+              maxVisible={4}
+              showStatusDot
+              className="max-w-full"
+            />
+          ) : (
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+              <span
+                aria-hidden="true"
+                className={`inline-block h-2 w-2 rounded-full ${
+                  collaborationConnected
+                    ? 'bg-[var(--aethel-success)] shadow-[0_0_0_4px_color-mix(in_srgb,var(--aethel-success)_16%,transparent)]'
+                    : 'bg-[var(--aethel-text-quaternary)]'
+                }`}
+              />
+              {collaborationConnected ? 'Live pronto' : 'Solo'}
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
-            {collaborationConnected
-              ? `Live ${collaborationPeers.length > 0 ? `· ${collaborationPeers.length} cursor${collaborationPeers.length > 1 ? 's' : ''}` : '· pronto'}`
-              : 'Solo'}
-          </div>
           <button
             type="button"
             onClick={onFind}
-            className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+            className={`${workbenchActionButtonClass} ${workbenchInactiveActionClass}`}
           >
             Buscar
           </button>
           <button
             type="button"
             onClick={onReplace}
-            className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+            className={`${workbenchActionButtonClass} ${workbenchInactiveActionClass}`}
           >
             Substituir
           </button>
           <button
             type="button"
             onClick={onToggleSplitEditor}
-            className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+            className={`${workbenchActionButtonClass} ${
               splitEditorOpen
                 ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                : workbenchInactiveActionClass
             }`}
           >
             {splitEditorOpen ? 'Fechar split' : 'Dividir editor'}
@@ -215,18 +253,18 @@ export function WorkbenchEditorPane({
               <button
                 type="button"
                 onClick={() => setNextOpenTarget((prev) => (prev === 'secondary' ? 'primary' : 'secondary'))}
-                className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+                className={`${workbenchActionButtonClass} ${
                   nextOpenTarget === 'secondary'
                     ? 'bg-[color-mix(in_srgb,var(--aethel-success)_18%,transparent)] text-[var(--aethel-success-light)]'
-                    : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                    : workbenchInactiveActionClass
                 }`}
               >
-                {nextOpenTarget === 'secondary' ? 'Próximo arquivo: lateral' : 'Próximo arquivo: principal'}
+                {nextOpenTarget === 'secondary' ? 'Proximo arquivo: lateral' : 'Proximo arquivo: principal'}
               </button>
               <button
                 type="button"
                 onClick={() => setSplitDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'))}
-                className="rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-secondary)]"
+                className={`${workbenchActionButtonClass} ${workbenchInactiveActionClass}`}
               >
                 {splitDirection === 'horizontal' ? 'Empilhar verticalmente' : 'Dividir lado a lado'}
               </button>
@@ -235,10 +273,10 @@ export function WorkbenchEditorPane({
           <button
             type="button"
             onClick={() => setShowIntelliSense((prev) => !prev)}
-            className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+            className={`${workbenchActionButtonClass} ${
               showIntelliSense
                 ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                : workbenchInactiveActionClass
             }`}
           >
             IntelliSense
@@ -246,10 +284,10 @@ export function WorkbenchEditorPane({
           <button
             type="button"
             onClick={() => setShowOutline((prev) => !prev)}
-            className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+            className={`${workbenchActionButtonClass} ${
               showOutline
                 ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                : workbenchInactiveActionClass
             }`}
           >
             Outline
@@ -257,13 +295,13 @@ export function WorkbenchEditorPane({
           <button
             type="button"
             onClick={() => setShowDiagnostics((prev) => !prev)}
-            className={`rounded-lg px-3 py-1.5 min-h-9 text-[11px] font-medium transition-colors ${
+            className={`${workbenchActionButtonClass} ${
               showDiagnostics
                 ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] text-[var(--aethel-warning-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
+                : workbenchInactiveActionClass
             }`}
           >
-            Diagnósticos
+            Diagnosticos
           </button>
         </div>
       </div>

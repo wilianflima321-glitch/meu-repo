@@ -41,8 +41,8 @@ export function DashboardHeader({
 
   return (
     <header className="sticky top-0 z-30 border-b border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(8,12,20,0.96),rgba(11,13,18,0.92))] backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center gap-4">
+      <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-5 lg:px-6">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={onToggleSidebar}
@@ -56,7 +56,7 @@ export function DashboardHeader({
             </svg>
           </button>
 
-          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(18,25,38,0.9),rgba(12,17,28,0.72))] px-3 py-2 shadow-[0_20px_50px_rgba(2,6,23,0.42)]">
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(18,25,38,0.9),rgba(12,17,28,0.72))] px-3 py-1.5 shadow-[0_20px_50px_rgba(2,6,23,0.42)]">
             <Image
               src="/branding/aethel-icon-source.png"
               alt="Aethel"
@@ -81,7 +81,7 @@ export function DashboardHeader({
           </div>
         </div>
 
-        <div className="hidden items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-3 py-2 xl:flex">
+        <div className="hidden items-center gap-2 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-2.5 py-1.5 xl:flex">
           <div
             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
               backendOnline

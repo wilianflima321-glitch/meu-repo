@@ -149,7 +149,7 @@ export function ModernIDEShell({
             activeSidebarTab={activeSidebarTab}
             activePreviewMode={activePreviewMode}
           />
-          <StatusBar projectName={projectName} activeFileName={activeFileName} />
+      <StatusBar activeFileName={activeFileName} />
         </>
       )}
     </div>
