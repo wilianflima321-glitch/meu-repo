@@ -12,18 +12,18 @@ This file is the short scoreboard that answers:
 3. what is still open and should stay on the board
 
 ## Current Snapshot
-- `AIChatPanelPro.tsx`: `549` lines
-- `FullscreenIDE.tsx`: `702` lines
+- `AIChatPanelPro.tsx`: `508` lines
+- `FullscreenIDE.tsx`: `550` lines
 - `AIChatPanelContainer.tsx`: `116` lines
-- `ModernIDEShell.tsx`: `161` lines
-- `ModernIDEShellPanels.tsx`: `281` lines
-- `ModernIDEShellChrome.tsx`: `378` lines
-- `XTerminal.tsx`: `628` lines
+- `ModernIDEShell.tsx`: `149` lines
+- `ModernIDEShellPanels.tsx`: `268` lines
+- `ModernIDEShellChrome.tsx`: `351` lines
+- `XTerminal.tsx`: `506` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
   - the latest actionable logs still point to prerender failures
-  - fresh local reruns with `workerThreads=false` still did not close within an extended `15` minute timeout
+  - a fresh local probe after restoring globally stable app providers stopped reproducing the explicit `<Html>`/`useContext` failures before timing out, but still did not complete within an extended `15` minute timeout
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -78,6 +78,7 @@ This file is the short scoreboard that answers:
 ## Still Open
 ### P0
 1. production build parity
+   - current root suspects: `app/layout.tsx`, `components/ClientLayout.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`
 2. remaining workbench monolith reduction
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure

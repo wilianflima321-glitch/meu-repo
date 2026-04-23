@@ -34,13 +34,13 @@ Canonical set reference:
   - `console.*` in `lib`: `269`
   - `console.*` in `components`: `92`
 - Current hotspot line counts:
-  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `702`
-  - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `549`
+  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `550`
+  - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `508`
   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `116`
-  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `161`
-  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `281`
-  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `378`
-  - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `628`
+  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `149`
+  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `268`
+  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `351`
+  - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `506`
 
 ## Capability Truth Labels
 ### PARTIAL
@@ -89,7 +89,8 @@ Canonical set reference:
   - `cloud-web-app/web/components/ClientLayout.tsx` now keeps public/auth surfaces on a lighter provider stack while studio-only providers stay scoped to studio routes
 - Current reruns still do not justify closure:
   - repeated local `next build` probes still failed to finish within an extended `15` minute timeout
-  - the last actionable error log still points to prerender failures around `/404`, `/500`, `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
+  - the last fully actionable error log still points to prerender failures around `/404`, `/500`, `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
+  - a fresh probe after restoring globally stable app providers no longer reproduced those explicit `<Html>` / `useContext` errors before timing out, which is promising but still not enough to mark parity closed
 - The active failure classes are:
   - `Error: <Html> should not be imported outside of pages/_document.` while prerendering `/404` and `/500`
   - `TypeError: Cannot read properties of null (reading 'useContext')` while prerendering routes such as `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
@@ -100,9 +101,15 @@ Canonical set reference:
   - adding temporary `pages/_document.tsx`, `pages/404.tsx`, and `pages/500.tsx`
 - Therefore the current truthful read is:
   - App Router hook leakage was mitigated in shared shell code,
-  - public-vs-studio provider scoping was tightened,
+  - globally stable app providers were restored in `cloud-web-app/web/components/ClientLayout.tsx` while studio-only UX stayed gated in a smaller enhancement layer,
   - worker-thread concurrency was reduced for Windows build determinism,
   - but full production build parity is still blocked and should not be marked solved.
+- Current highest-value suspects to isolate next:
+  - `cloud-web-app/web/app/layout.tsx`
+  - `cloud-web-app/web/components/ClientLayout.tsx`
+  - `cloud-web-app/web/lib/a11y/accessibility.tsx`
+  - `cloud-web-app/web/contexts/ThemeContext.tsx`
+  - `cloud-web-app/web/components/ui/toast-system.tsx`
 
 ## Priority Order (Validated)
 1. Close production build parity without regressing the current browser merge-pressure lane.

@@ -42,13 +42,13 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
-- `FullscreenIDE.tsx`: `702`
-- `AIChatPanelPro.tsx`: `549`
+- `FullscreenIDE.tsx`: `550`
+- `AIChatPanelPro.tsx`: `508`
 - `AIChatPanelContainer.tsx`: `116`
-- `ModernIDEShell.tsx`: `161`
-- `ModernIDEShellPanels.tsx`: `281`
-- `ModernIDEShellChrome.tsx`: `378`
-- `XTerminal.tsx`: `628`
+- `ModernIDEShell.tsx`: `149`
+- `ModernIDEShellPanels.tsx`: `268`
+- `ModernIDEShellChrome.tsx`: `351`
+- `XTerminal.tsx`: `506`
 
 The category remains valid.
 The literal numbers did age.

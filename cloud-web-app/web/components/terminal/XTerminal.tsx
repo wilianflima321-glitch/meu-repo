@@ -22,12 +22,9 @@ import type { SearchAddon } from 'xterm-addon-search';
 import {
   X,
   Plus,
-  Maximize2,
-  Minimize2,
   Split,
-  Search,
 } from 'lucide-react';
-import { SearchBar, ShellSelector, TerminalTab } from './XTerminalChrome';
+import { SearchBar } from './XTerminalChrome';
 import {
   TERMINAL_THEMES,
   type TerminalSession,
@@ -35,6 +32,7 @@ import {
   type XTerminalRef,
 } from './terminalModels';
 import { TerminalIconButton } from './terminalIconButton';
+import { TerminalSessionHeader } from './terminalSessionHeader';
 import { TerminalWebSocket } from './terminalWebSocket';
 import { createComponentLogger } from '@/lib/observability/logger';
 
@@ -456,67 +454,22 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
         role="application"
         aria-label="Terminal"
       >
-        {/* Header / Tab Bar */}
-        <div className="flex items-center justify-between bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)] min-h-[35px]">
-          {/* Tabs */}
-          <div className="flex items-center overflow-x-auto flex-1" role="tablist">
-            {sessions.map((session) => (
-              <TerminalTab
-                key={session.id}
-                session={session}
-                isActive={session.id === activeSessionId}
-                onSelect={() => switchSession(session.id)}
-                onClose={() => closeSession(session.id)}
-                onRename={(name) => renameSession(session.id, name)}
-              />
-            ))}
-
-            <ShellSelector
-              onSelect={(shell) => createSession(undefined, shell.path)}
-              selectedShell={sessions.find((s) => s.id === activeSessionId)?.shell}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-1 px-2">
-            {/* Connection Status */}
-            <div
-              className={`w-2 h-2 rounded-full mr-2 ${
-                isConnected ? 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]' : 'bg-[color-mix(in_srgb,var(--aethel-error)_10%,transparent)]'
-              }`}
-              title={isConnected ? 'Connected' : 'Disconnected'}
-            />
-
-            {/* Search Toggle */}
-            <TerminalIconButton
-              onClick={toggleSearch}
-              label="Toggle search"
-              aria-pressed={showSearch}
-            >
-              <Search size={14} />
-            </TerminalIconButton>
-
-            {/* Split */}
-            <TerminalIconButton onClick={() => void createSession()} label="Split terminal">
-              <Split size={14} />
-            </TerminalIconButton>
-
-            {/* Maximize */}
-            <TerminalIconButton
-              onClick={toggleMaximized}
-              label={isMaximized ? 'Restore' : 'Maximize'}
-            >
-              {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-            </TerminalIconButton>
-
-            {/* Close */}
-            {onClose && (
-              <TerminalIconButton onClick={onClose} label="Close terminal panel">
-                <X size={14} />
-              </TerminalIconButton>
-            )}
-          </div>
-        </div>
+        <TerminalSessionHeader
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          isConnected={isConnected}
+          showSearch={showSearch}
+          isMaximized={isMaximized}
+          onSelectSession={switchSession}
+          onCloseSession={(sessionId) => {
+            void closeSession(sessionId);
+          }}
+          onRenameSession={renameSession}
+          onCreateSession={(shellPath) => createSession(undefined, shellPath)}
+          onToggleSearch={toggleSearch}
+          onToggleMaximized={toggleMaximized}
+          onClosePanel={onClose}
+        />
 
         {/* Search Bar */}
         {showSearch && (

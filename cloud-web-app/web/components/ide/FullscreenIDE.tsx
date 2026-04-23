@@ -12,12 +12,9 @@ import { EditorApplyBridgeProvider } from "@/components/ide/EditorApplyBridgeCon
 import { IdeWorkbenchCommandExtras } from "@/components/ide/IdeWorkbenchCommandExtras";
 import type { DocumentSymbol } from "@/components/outline/OutlinePanel";
 import { buildOutlineSymbols } from "@/components/outline/outline-parser";
-import { analytics } from "@/lib/analytics";
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
-import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 import {
-  getAuthHeaders,
   normalizePath,
 } from '@/components/ide/fullscreen/workbench-helpers';
 import { WorkbenchSidebar } from '@/components/ide/fullscreen/WorkbenchSidebar';
@@ -31,10 +28,12 @@ import {
 } from '@/components/ide/fullscreen/types';
 import { useWorkbenchEntryConvergence } from '@/components/ide/fullscreen/useWorkbenchEntryConvergence';
 import { useWorkbenchChrome } from '@/components/ide/fullscreen/useWorkbenchChrome';
+import { useWorkbenchIDEEffects } from '@/components/ide/fullscreen/useWorkbenchIDEEffects';
 import { useWorkbenchFiles } from '@/components/ide/fullscreen/useWorkbenchFiles';
 import { useWorkbenchFullAccess } from '@/components/ide/fullscreen/useWorkbenchFullAccess';
 import { useWorkbenchPresence } from '@/components/ide/fullscreen/useWorkbenchPresence';
 import { useWorkbenchRealtimeCollaboration } from '@/components/ide/fullscreen/useWorkbenchRealtimeCollaboration';
+import { useWorkbenchRuntimeSyncScheduler } from '@/components/ide/fullscreen/useWorkbenchRuntimeSyncScheduler';
 import {
   LAST_PROJECT_ID_STORAGE_KEY,
   PREVIEW_ENABLED_STORAGE_KEY,
@@ -56,8 +55,6 @@ function IDEContent() {
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const primaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const secondaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
-  const runtimeSyncTimerRef = useRef<number | null>(null)
-  const lastRuntimeSyncAtRef = useRef<number>(0)
   const {
     projectId,
     splitEditorOpen,
@@ -89,11 +86,8 @@ function IDEContent() {
     setSecondaryEditorDiagnostics,
     isCompactViewport,
     setIsCompactViewport,
-    rollbackBusy,
-    setRollbackBusy,
     hasToken,
     setHasToken,
-    lastAiApply,
     setLastAiApply,
     openCommandPalette,
     handleOpenSettings,
@@ -151,20 +145,11 @@ function IDEContent() {
     hasToken,
     previewUrlParam,
   })
-
-  const scheduleRuntimeSync = useCallback(() => {
-    if (!previewSandboxId || isSyncingRuntime) return
-    if (runtimeSyncTimerRef.current) {
-      window.clearTimeout(runtimeSyncTimerRef.current)
-    }
-    runtimeSyncTimerRef.current = window.setTimeout(() => {
-      runtimeSyncTimerRef.current = null
-      const now = Date.now()
-      if (now - lastRuntimeSyncAtRef.current < 1000) return
-      lastRuntimeSyncAtRef.current = now
-      void syncRuntime()
-    }, 1500)
-  }, [previewSandboxId, isSyncingRuntime, syncRuntime])
+  const { scheduleRuntimeSync } = useWorkbenchRuntimeSyncScheduler({
+    previewSandboxId,
+    isSyncingRuntime,
+    syncRuntime,
+  })
 
   const {
     activeFile,
@@ -175,8 +160,6 @@ function IDEContent() {
     readFile,
     secondaryFile,
     setActiveFile,
-    setFileError,
-    setLastSavedAt,
     setPreviewRefreshTick,
     setSecondaryFile,
     workspaceFiles,
@@ -197,15 +180,6 @@ function IDEContent() {
     if (!bridgeActiveFile) return []
     return buildOutlineSymbols(bridgeActiveFile.content, bridgeActiveFile.language)
   }, [bridgeActiveFile])
-
-  useEffect(() => {
-    return () => {
-      if (runtimeSyncTimerRef.current) {
-        window.clearTimeout(runtimeSyncTimerRef.current)
-        runtimeSyncTimerRef.current = null
-      }
-    }
-  }, [])
 
   const {
     fullAccessActiveGrant,
@@ -277,60 +251,14 @@ function IDEContent() {
     setPreviewEnabled,
     handleSelectPreviewMode,
   })
-
-  useEffect(() => {
-    const onOpenFileFromContext = (event: Event) => {
-      const detail = (event as CustomEvent<{ path?: string; startLine?: number; endLine?: number; source?: string }>).detail
-      const targetPath = typeof detail?.path === 'string' ? normalizePath(detail.path) : null
-      if (!targetPath) return
-      const startLine = typeof detail?.startLine === 'number' ? detail.startLine : null
-      const endLine = typeof detail?.endLine === 'number' ? detail.endLine : startLine
-
-      analytics?.track?.('project', 'project_open', {
-        metadata: {
-          source: detail?.source || 'ai-context',
-          projectId,
-          file: targetPath,
-          startLine,
-          endLine,
-        },
-      })
-
-      void readFile(targetPath).then(() => {
-        if (!editorRef.current || !startLine) return
-        editorRef.current.revealLineInCenter(startLine)
-        editorRef.current.setPosition({ lineNumber: startLine, column: 1 })
-        if (endLine && endLine >= startLine) {
-          editorRef.current.setSelection({
-            startLineNumber: startLine,
-            startColumn: 1,
-            endLineNumber: endLine,
-            endColumn: 1,
-          })
-        }
-        editorRef.current.focus()
-      })
-      window.dispatchEvent(new Event('aethel.layout.openAI'))
-    }
-
-    window.addEventListener('aethel.ide.openFileFromContext', onOpenFileFromContext as EventListener)
-    return () => {
-      window.removeEventListener('aethel.ide.openFileFromContext', onOpenFileFromContext as EventListener)
-    }
-  }, [projectId, readFile]);
-
-  useEffect(() => {
-    analytics?.track("engine", "editor_open", {
-      metadata: {
-        surface: "ide",
-        projectId,
-        file: fileParam ?? null,
-        entry: entryParam ?? null,
-        runtimePreviewUrl: previewRuntimeUrl ?? null,
-      },
-    });
-    analytics?.trackPageLoad?.("ide");
-  }, [entryParam, fileParam, projectId, previewRuntimeUrl]);
+  useWorkbenchIDEEffects({
+    editorRef,
+    entryParam,
+    fileParam,
+    previewRuntimeUrl,
+    projectId,
+    readFile,
+  })
 
   const handleFileSelect = useCallback(
     (file: { path: string; type: "file" | "folder" }) => {
@@ -428,61 +356,6 @@ function IDEContent() {
       appliedAt: new Date().toISOString(),
     })
   }, [setLastAiApply])
-
-  const handleRollbackLastAiApply = useCallback(() => {
-    if (!lastAiApply?.rollbackToken || rollbackBusy || !activeFile) return
-
-    void (async () => {
-      setRollbackBusy(true)
-      setFileError(null)
-      try {
-        const rollbackRunId = lastAiApply.runId
-        const rollbackFilePath = lastAiApply.filePath || activeFile.path
-        const response = await fetch('/api/ai/change/rollback', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify({
-            rollbackToken: lastAiApply.rollbackToken,
-          }),
-        })
-        const payload = (await response.json().catch(() => ({}))) as { error?: string; message?: string }
-        if (!response.ok) {
-          throw new Error(payload.error || payload.message || `Falha ao desfazer (HTTP ${response.status})`)
-        }
-
-        const rollbackPath = rollbackFilePath
-        await readFile(rollbackPath)
-        setPreviewRefreshTick((prev) => prev + 1)
-        setLastSavedAt(new Date())
-        setLastAiApply(null)
-        if (rollbackRunId) {
-          void submitChangeFeedback({
-            runId: rollbackRunId,
-            feedback: 'rejected',
-            reason: 'USER_TRIGGERED_ROLLBACK',
-            notes: 'User triggered rollback from IDE status bar.',
-            filePath: rollbackPath,
-            runSource: 'production',
-          })
-        }
-        analytics?.track?.('project', 'project_save', {
-          metadata: {
-            source: 'ide-inline-rollback',
-            projectId,
-            file: rollbackPath,
-            runId: lastAiApply.runId,
-          },
-        })
-      } catch (error) {
-        setFileError(error instanceof Error ? error.message : 'Não foi possível desfazer a última aplicação de IA.')
-      } finally {
-        setRollbackBusy(false)
-      }
-    })()
-  }, [activeFile, lastAiApply?.filePath, lastAiApply?.rollbackToken, lastAiApply?.runId, projectId, readFile, rollbackBusy, setFileError, setLastAiApply, setLastSavedAt, setPreviewRefreshTick, setRollbackBusy])
 
   return (
     <CommandPaletteProvider

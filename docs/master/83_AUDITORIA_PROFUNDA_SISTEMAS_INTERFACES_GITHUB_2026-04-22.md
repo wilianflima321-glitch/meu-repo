@@ -86,10 +86,10 @@ The following PDF claims should no longer be treated as current truth without re
 ## Current Factual Anchors After Sync
 These are the reality points this audit should now be interpreted against:
 
-- `AIChatPanelPro.tsx`: about `549` lines, not the older ~1766-line state
-- `FullscreenIDE.tsx`: about `702` lines and still a top-priority god component
+- `AIChatPanelPro.tsx`: about `508` lines, not the older ~1766-line state
+- `FullscreenIDE.tsx`: about `550` lines and still a top-priority god component
 - `AIChatPanelContainer.tsx`: about `116` lines after extraction into session-context, provider-preflight, send-pipeline, and session-banner modules
-- `ModernIDEShell.tsx`: now only `161` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`281`) and `ModernIDEShellChrome.tsx` (`378`)
+- `ModernIDEShell.tsx`: now only `149` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`268`) and `ModernIDEShellChrome.tsx` (`351`)
 - tracked tests: `45`
 - tracked `console.*` in `cloud-web-app/web/lib`: around `285`
 - tracked `console.*` in `cloud-web-app/web/components`: around `151`

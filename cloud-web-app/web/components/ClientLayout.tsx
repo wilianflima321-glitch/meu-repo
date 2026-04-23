@@ -36,31 +36,16 @@ function BaseProviders({ children }: { children: React.ReactNode }) {
   );
 }
 
-function StudioProviders({
-  children,
-  isStudioSurface,
-}: {
-  children: React.ReactNode;
-  isStudioSurface: boolean;
-}) {
+function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <SessionTrackerProvider>
         <CommandRegistryProvider>
           <DevToolsProvider>
             <AethelProvider>
-              <OnboardingProvider enabled={isStudioSurface}>
-                {isStudioSurface ? <DefaultCommandsRegistration /> : null}
+              <OnboardingProvider enabled>
                 <Suspense fallback={<LoadingFallback />}>
                   {children}
-                  {isStudioSurface ? (
-                    <>
-                      <WelcomeModal />
-                      <OnboardingChecklist />
-                      <LowBalanceModalAuto />
-                      <AISuggestionBubbleAuto />
-                    </>
-                  ) : null}
                 </Suspense>
               </OnboardingProvider>
             </AethelProvider>
@@ -68,6 +53,22 @@ function StudioProviders({
         </CommandRegistryProvider>
       </SessionTrackerProvider>
     </AuthProvider>
+  );
+}
+
+function StudioEnhancements({ isStudioSurface }: { isStudioSurface: boolean }) {
+  if (!isStudioSurface) {
+    return null;
+  }
+
+  return (
+    <>
+      <DefaultCommandsRegistration />
+      <WelcomeModal />
+      <OnboardingChecklist />
+      <LowBalanceModalAuto />
+      <AISuggestionBubbleAuto />
+    </>
   );
 }
 
@@ -101,11 +102,10 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
 
   return (
     <BaseProviders>
-      {isStudioSurface ? (
-        <StudioProviders isStudioSurface={isStudioSurface}>{children}</StudioProviders>
-      ) : (
-        children
-      )}
+      <AppProviders>
+        <StudioEnhancements isStudioSurface={isStudioSurface} />
+        {children}
+      </AppProviders>
     </BaseProviders>
   );
 }

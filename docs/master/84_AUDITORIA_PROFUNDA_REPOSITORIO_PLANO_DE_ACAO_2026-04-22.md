@@ -39,13 +39,13 @@ Use the current set like this:
 - `cloud-web-app/web/lib/**/*.ts` in the current workspace: `347`
 - Curated tracked executable test/spec files: `49`
 - Hotspot line counts:
-- `FullscreenIDE.tsx`: `702`
-- `AIChatPanelPro.tsx`: `549`
+- `FullscreenIDE.tsx`: `550`
+- `AIChatPanelPro.tsx`: `508`
 - `AIChatPanelContainer.tsx`: `116`
-- `ModernIDEShell.tsx`: `161`
-- `ModernIDEShellPanels.tsx`: `281`
-- `ModernIDEShellChrome.tsx`: `378`
-  - `XTerminal.tsx`: `628`
+- `ModernIDEShell.tsx`: `149`
+- `ModernIDEShellPanels.tsx`: `268`
+- `ModernIDEShellChrome.tsx`: `351`
+- `XTerminal.tsx`: `506`
 
 ## What This Audit Still Gets Right
 ### Root hygiene still matters

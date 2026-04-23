@@ -11,10 +11,10 @@
 Este documento continua sendo o norte principal, mas alguns trechos ficaram velhos depois das rodadas de refactor e da pressão E2E mais recente.
 
 - Workbench hotspots:
-  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx` está em `702` linhas.
-  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para `161` linhas.
-  - o shell agora está repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`281` linhas) e `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`378` linhas).
-  - `cloud-web-app/web/components/terminal/XTerminal.tsx` está em `628` linhas.
+  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx` está em `550` linhas.
+  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para `149` linhas.
+  - o shell agora está repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`268` linhas) e `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`351` linhas).
+  - `cloud-web-app/web/components/terminal/XTerminal.tsx` está em `506` linhas.
 - Colaboração:
   - `CollaboratorsBar` e `RemoteCursorLayer` já existem e a presença colaborativa já aparece no editor principal via `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` e `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`.
   - o que continua em aberto não é mais “UI inexistente”, e sim `file-tree presence`, shared-text path canônico e verificação de produção mais ampla.
@@ -92,7 +92,7 @@ Este documento continua sendo o norte principal, mas alguns trechos ficaram velh
 - 📈 **Perf/Bundle 5.5→5.2** ↓: a categoria continua aberta, mas o antigo blocker `images: { unoptimized: true }` já não vale para o branch atual; o gargalo factual hoje está mais em build parity, dynamic imports e prova end-to-end de preview/performance.
 - 🧪 Testes: **ZERO mudança** — Jest coverage ainda `false`, ainda 12 testes unitários.
 - 🎨 Design System: 784 hex hardcoded **intocados**.
-- 🧹 God components: a categoria continua válida, mas os números antigos envelheceram; hoje os maiores hotspots já são menores e mais concentrados (`FullscreenIDE.tsx` `702`, `AIChatPanelPro.tsx` `549`, `AIChatPanelContainer.tsx` `116`, `XTerminal.tsx` `628`).
+- 🧹 God components: a categoria continua válida, mas os números antigos envelheceram; hoje os maiores hotspots já são menores e mais concentrados (`FullscreenIDE.tsx` `550`, `AIChatPanelPro.tsx` `508`, `AIChatPanelContainer.tsx` `116`, `XTerminal.tsx` `506`).
 
 ---
 
