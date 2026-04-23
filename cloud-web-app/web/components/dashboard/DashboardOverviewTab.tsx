@@ -1,6 +1,6 @@
+import dynamic from 'next/dynamic'
 import { APIError } from '@/lib/api'
 import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
-import CanonicalPreviewSurface from '@/components/preview/CanonicalPreviewSurface'
 import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import type { Project } from './aethel-dashboard-model'
@@ -11,7 +11,16 @@ type Point3 = {
   z: number
 }
 
-type DashboardOverviewTabProps = {
+const CanonicalPreviewSurface = dynamic(() => import('@/components/preview/CanonicalPreviewSurface'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[280px] items-center justify-center rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] px-6 py-8 text-sm text-[var(--aethel-text-secondary)]">
+      Carregando preview do studio...
+    </div>
+  ),
+})
+
+export type DashboardOverviewTabProps = {
   aiActivity: string
   projects: Project[]
   livePreviewSuggestions: string[]

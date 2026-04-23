@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { isNavLinkActive, STUDIO_PRIMARY_LINKS, STUDIO_SECONDARY_LINKS } from '@/lib/navigation/surfaces'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 type StudioGlobalNavProps = {
   title?: string
@@ -19,7 +19,7 @@ function linkClass(active: boolean): string {
 }
 
 export default function StudioGlobalNav({ title, subtitle, rightSlot, className = '' }: StudioGlobalNavProps) {
-  const pathname = usePathname()
+  const pathname = useBrowserPathname()
 
   return (
     <header className={`sticky top-0 z-40 border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${className}`}>

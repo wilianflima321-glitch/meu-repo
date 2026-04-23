@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useCallback, ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname';
 
 // =============================================================================
 // LIVE SESSION TRACKER
@@ -35,7 +35,7 @@ export function useSessionTracker(options: SessionTrackerOptions = {}) {
   } = options;
   
   const { user, token } = useAuth();
-  const pathname = usePathname();
+  const pathname = useBrowserPathname();
   const sessionIdRef = useRef<string>('');
   const lastActionRef = useRef<string>('');
   const currentToolRef = useRef<string>('');

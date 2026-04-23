@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-import { usePathname } from 'next/navigation';
 import { createCSSCustomProperties } from '../lib/design-system';
 import { I18nextProvider } from 'react-i18next'
 import i18n from '../lib/i18n'
@@ -15,6 +14,7 @@ import { LowBalanceModalAuto } from './billing/LowBalanceModal'
 import { AISuggestionBubbleAuto } from './ai/AISuggestionBubble'
 import { CommandRegistryProvider, useDefaultCommands } from '@/lib/commands/command-registry'
 import { DevToolsProvider } from '@/lib/debug/devtools-provider'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 // Hook para registrar comandos padrao no layout
 function DefaultCommandsRegistration() {
@@ -45,7 +45,7 @@ function LoadingFallback() {
 }
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
-  const pathname = usePathname();
+  const pathname = useBrowserPathname();
 
   useEffect(() => {
     // Initialize design system CSS custom properties

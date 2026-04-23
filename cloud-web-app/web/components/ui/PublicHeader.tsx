@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
 import { isNavLinkActive, PUBLIC_NAV_LINKS } from '@/lib/navigation/surfaces'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 const headerGhostLinkClass =
   'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)]'
@@ -15,7 +15,7 @@ const headerPrimaryLinkClass =
 export default function PublicHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const pathname = usePathname()
+  const pathname = useBrowserPathname()
   const isStudioSurface = pathname.startsWith('/dashboard') || pathname.startsWith('/ide') || pathname.startsWith('/nexus')
 
   useEffect(() => {

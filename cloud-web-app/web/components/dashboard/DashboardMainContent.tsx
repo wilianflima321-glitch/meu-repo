@@ -1,14 +1,15 @@
 'use client'
 
 import type { ComponentProps } from 'react'
+import dynamic from 'next/dynamic'
 import { CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
 
 import { FirstValueGuide } from './FirstValueGuide'
-import { DashboardOverviewTab } from './DashboardOverviewTab'
 import { DashboardProjectsTab } from './DashboardProjectsTab'
 import { DashboardAIChatTab } from './DashboardAIChatTab'
 import { DashboardWalletTab } from './DashboardWalletTab'
 import { DashboardConnectivityTab } from './DashboardConnectivityTab'
+import type { DashboardOverviewTabProps } from './DashboardOverviewTab'
 import type { FirstValueSessionSummary } from './useFirstValueTracking'
 import {
   DashboardContentCreationTab,
@@ -23,6 +24,17 @@ import {
 import type { ActiveTab, UseCase, WorkflowTemplate } from './aethel-dashboard-model'
 
 type BillingTabProps = ComponentProps<typeof BillingTab>
+const DashboardOverviewTab = dynamic(
+  () => import('./DashboardOverviewTab').then((mod) => mod.DashboardOverviewTab),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-4 text-sm text-[var(--aethel-text-secondary)]">
+        Preparando overview do studio...
+      </div>
+    ),
+  }
+)
 
 type DashboardMainContentProps = {
   activeTab: ActiveTab
@@ -37,7 +49,7 @@ type DashboardMainContentProps = {
   onFirstValueOpenAIChat: () => void
   onFirstValueOpenIdePreview: () => void
   onFirstValueDismiss: () => void
-  overviewProps: ComponentProps<typeof DashboardOverviewTab>
+  overviewProps: DashboardOverviewTabProps
   projectsProps: ComponentProps<typeof DashboardProjectsTab>
   aiChatProps: ComponentProps<typeof DashboardAIChatTab>
   walletProps: ComponentProps<typeof DashboardWalletTab>

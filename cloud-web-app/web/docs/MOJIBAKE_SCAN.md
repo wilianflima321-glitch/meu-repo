@@ -1,14 +1,10 @@
 # MOJIBAKE_SCAN.md
-Generated: 2026-04-23T01:03:13.744Z
+Generated: 2026-04-23T02:20:24.886Z
 
-- Files scanned: 1192
-- Findings: 45
+- Files scanned: 1198
+- Findings: 41
 
 ## Findings
-- components/ide/ModernIDEShell.tsx:418 -> ariaLabel="Redimensionar prÃ©via"
-- components/ide/ModernIDEShell.tsx:745 -> label="PrÃ©via"
-- components/ide/ModernIDEShell.tsx:810 -> aria-label="Abrir configuraÃ§Ãµes"
-- components/ide/ModernIDEShell.tsx:1056 -> { id: 'preview', icon: <Play size={20} />, label: 'PrÃ©via' },
 - docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md:4 -> **VersÃ£o:** 1.0
 - docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md:5 -> **Autor:** AnÃ¡lise Automatizada
 - docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md:25 -> | **Command Palette (Ctrl+Shift+P)** | [components/ide/CommandPalette.tsx](../components/ide/CommandPalette.tsx) | ImplementaÃ§Ã£o canÃ´nica, comandos categorizados, keybindings |

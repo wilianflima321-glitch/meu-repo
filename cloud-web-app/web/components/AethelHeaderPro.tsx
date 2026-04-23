@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import {
   Bell,
   Search,
@@ -23,6 +23,7 @@ import {
 import { Avatar, Badge, PlanBadge, Dropdown, type DropdownItem } from './ui'
 import { ThemeToggle } from './ui/ThemeToggle'
 import { authHeaders, isAuthenticated, logout } from '@/lib/auth'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 interface UserData {
   name: string
@@ -40,7 +41,7 @@ interface HeaderNotificationItem {
 }
 
 export default function AethelHeader() {
-  const pathname = usePathname()
+  const pathname = useBrowserPathname()
   const router = useRouter()
   const [isAuth, setIsAuth] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

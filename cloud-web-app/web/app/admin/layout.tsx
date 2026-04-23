@@ -3,7 +3,6 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
 import {
   Activity,
@@ -33,6 +32,7 @@ import {
   Zap,
   Database,
 } from 'lucide-react'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import { Badge } from '@/components/ui/Badge'
 
 /* ==========================================================================
@@ -173,7 +173,7 @@ function QuickStatPill({
 /* ---------- Collapsible Sidebar Group ---------- */
 
 function NavGroupSection({ group, isCollapsed }: { group: NavGroup; isCollapsed?: boolean }) {
-  const pathname = usePathname()
+  const pathname = useBrowserPathname()
   const hasActiveChild = group.items.some((item) => pathname === item.href)
   const [open, setOpen] = useState(hasActiveChild)
 

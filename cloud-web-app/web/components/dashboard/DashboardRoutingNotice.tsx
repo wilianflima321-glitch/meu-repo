@@ -1,13 +1,14 @@
 'use client'
 
 import { Suspense, useMemo, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { X } from 'lucide-react'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 function DashboardRoutingNoticeInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const pathname = usePathname()
+  const pathname = useBrowserPathname()
   const [hidden, setHidden] = useState(false)
   const code = searchParams.get('notice')
 

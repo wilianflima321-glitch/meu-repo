@@ -19,6 +19,14 @@ What was still missing was a short operational map that answers:
 
 This document fills that gap.
 
+## Fresh Reconciliation ? 2026-04-23
+
+- `cloud-web-app/web/components/ide/ModernIDEShell.tsx` is now about `378` lines. The next shell hotspot is `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` at about `657` lines.
+- `cloud-web-app/web/components/terminal/XTerminal.tsx` is now about `630` lines and already delegates to `XTerminalChrome`, `terminalModels`, and `terminalWebSocket`.
+- the default merge-pressure lane still exists and remains valuable, but local replay still depends on a running app at `:3000`; CI bootstraps that explicitly.
+- the shared shell no longer uses tracked `usePathname()` consumers; that class of App Router hook leak is now mitigated through `cloud-web-app/web/lib/navigation/use-browser-pathname.ts`.
+- production build parity remains open until a full `next build` completes successfully after this mitigation.
+
 ## What Is Already Closed
 ### Repository and governance
 - vendored mega-forks were removed from the active product path

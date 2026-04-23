@@ -6,6 +6,24 @@
 >
 > Guardrail anti-fake-success: para números e claims já reconciliados com o estado real do repositório, cruzar sempre com docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md.
 
+## Reconciled Delta — 2026-04-23
+
+Este documento continua sendo o norte principal, mas alguns trechos ficaram velhos depois das rodadas de refactor e da pressão E2E mais recente.
+
+- Workbench hotspots:
+  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para cerca de `378` linhas.
+  - o peso estrutural do shell migrou mais para `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`~657` linhas) do que para o arquivo raiz.
+  - `cloud-web-app/web/components/terminal/XTerminal.tsx` já caiu para cerca de `630` linhas.
+- Colaboração:
+  - `CollaboratorsBar` e `RemoteCursorLayer` já existem e a presença colaborativa já aparece no editor principal via `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` e `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`.
+  - o que continua em aberto não é mais “UI inexistente”, e sim `file-tree presence`, shared-text path canônico e verificação de produção mais ampla.
+- Merge-pressure lane:
+  - a lane padrão `Web App - Merge Pressure E2E` já existe no CI.
+  - localmente, a suíte continua com `5 passed`, mas a reprodução “crua” ainda depende de o app já estar no ar em `:3000`.
+- Build parity:
+  - o antigo blocker global de `usePathname()` em providers compartilhados foi reduzido pela introdução de `cloud-web-app/web/lib/navigation/use-browser-pathname.ts`.
+  - a paridade completa de `next build` ainda deve continuar marcada como aberta até termos um build de produção concluído de ponta a ponta.
+
 ## Referências Visuais Locais
 
 | Norte | Referência |

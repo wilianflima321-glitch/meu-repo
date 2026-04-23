@@ -18,598 +18,28 @@ import React, {
 } from 'react';
 import type { Terminal as XTermType, ITerminalOptions } from 'xterm';
 import type { FitAddon } from 'xterm-addon-fit';
-import type { WebLinksAddon } from 'xterm-addon-web-links';
 import type { SearchAddon } from 'xterm-addon-search';
-import type { Unicode11Addon } from 'xterm-addon-unicode11';
 import {
-
-
-  Terminal as TerminalIcon,
   X,
   Plus,
   Maximize2,
   Minimize2,
   Split,
   Search,
-  Settings,
-  ChevronDown,
-  Copy,
-  Trash2,
-  RefreshCw,
-  MoreHorizontal,
 } from 'lucide-react';
-import { createComponentLogger } from '@/lib/observability/logger'
+import { SearchBar, ShellSelector, TerminalTab } from './XTerminalChrome';
+import {
+  TERMINAL_THEMES,
+  type TerminalSession,
+  type TerminalTheme,
+  type XTerminalProps,
+  type XTerminalRef,
+} from './terminalModels';
+import { TerminalWebSocket } from './terminalWebSocket';
+import { createComponentLogger } from '@/lib/observability/logger';
 
-const log = createComponentLogger('XTerminal')
+const log = createComponentLogger('XTerminal');
 
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface TerminalSession {
-  id: string;
-  name: string;
-  shell: string;
-  cwd: string;
-  createdAt: Date;
-  isActive: boolean;
-}
-
-export interface TerminalTheme {
-  name: string;
-  colors: {
-    background: string;
-    foreground: string;
-    cursor: string;
-    cursorAccent: string;
-    selection: string;
-    black: string;
-    red: string;
-    green: string;
-    yellow: string;
-    blue: string;
-    magenta: string;
-    cyan: string;
-    white: string;
-    brightBlack: string;
-    brightRed: string;
-    brightGreen: string;
-    brightYellow: string;
-    brightBlue: string;
-    brightMagenta: string;
-    brightCyan: string;
-    brightWhite: string;
-  };
-}
-
-export interface XTerminalProps {
-  sessionId?: string;
-  initialCwd?: string;
-  initialShell?: string;
-  theme?: TerminalTheme;
-  fontSize?: number;
-  fontFamily?: string;
-  onClose?: () => void;
-  onData?: (data: string) => void;
-  onTitleChange?: (title: string) => void;
-  className?: string;
-}
-
-export interface XTerminalRef {
-  write: (data: string) => void;
-  writeln: (data: string) => void;
-  clear: () => void;
-  focus: () => void;
-  fit: () => void;
-  search: (term: string) => boolean;
-  searchNext: () => boolean;
-  searchPrevious: () => boolean;
-  getSelection: () => string;
-  dispose: () => void;
-}
-
-// ============================================================================
-// Default Themes
-// ============================================================================
-
-const TERMINAL_THEMES: Record<string, TerminalTheme> = {
-  'dark-plus': {
-    name: 'Dark+',
-    colors: {
-      background: '#1e1e1e',
-      foreground: '#cccccc',
-      cursor: '#ffffff',
-      cursorAccent: '#000000',
-      selection: 'rgba(255, 255, 255, 0.3)',
-      black: '#000000',
-      red: '#cd3131',
-      green: '#0dbc79',
-      yellow: '#e5e510',
-      blue: '#2472c8',
-      magenta: '#bc3fbc',
-      cyan: '#11a8cd',
-      white: '#e5e5e5',
-      brightBlack: '#666666',
-      brightRed: '#f14c4c',
-      brightGreen: '#23d18b',
-      brightYellow: '#f5f543',
-      brightBlue: '#3b8eea',
-      brightMagenta: '#d670d6',
-      brightCyan: '#29b8db',
-      brightWhite: '#ffffff',
-    },
-  },
-  'monokai': {
-    name: 'Monokai',
-    colors: {
-      background: '#272822',
-      foreground: '#f8f8f2',
-      cursor: '#f8f8f0',
-      cursorAccent: '#272822',
-      selection: 'rgba(73, 72, 62, 0.75)',
-      black: '#272822',
-      red: '#f92672',
-      green: '#a6e22e',
-      yellow: '#f4bf75',
-      blue: '#66d9ef',
-      magenta: '#ae81ff',
-      cyan: '#a1efe4',
-      white: '#f8f8f2',
-      brightBlack: '#75715e',
-      brightRed: '#f92672',
-      brightGreen: '#a6e22e',
-      brightYellow: '#f4bf75',
-      brightBlue: '#66d9ef',
-      brightMagenta: '#ae81ff',
-      brightCyan: '#a1efe4',
-      brightWhite: '#f9f8f5',
-    },
-  },
-  'dracula': {
-    name: 'Dracula',
-    colors: {
-      background: '#282a36',
-      foreground: '#f8f8f2',
-      cursor: '#f8f8f2',
-      cursorAccent: '#282a36',
-      selection: 'rgba(68, 71, 90, 0.75)',
-      black: '#21222c',
-      red: '#ff5555',
-      green: '#50fa7b',
-      yellow: '#f1fa8c',
-      blue: '#bd93f9',
-      magenta: '#ff79c6',
-      cyan: '#8be9fd',
-      white: '#f8f8f2',
-      brightBlack: '#6272a4',
-      brightRed: '#ff6e6e',
-      brightGreen: '#69ff94',
-      brightYellow: '#ffffa5',
-      brightBlue: '#d6acff',
-      brightMagenta: '#ff92df',
-      brightCyan: '#a4ffff',
-      brightWhite: '#ffffff',
-    },
-  },
-  'nord': {
-    name: 'Nord',
-    colors: {
-      background: '#2e3440',
-      foreground: '#d8dee9',
-      cursor: '#d8dee9',
-      cursorAccent: '#2e3440',
-      selection: 'rgba(67, 76, 94, 0.75)',
-      black: '#3b4252',
-      red: '#bf616a',
-      green: '#a3be8c',
-      yellow: '#ebcb8b',
-      blue: '#81a1c1',
-      magenta: '#b48ead',
-      cyan: '#88c0d0',
-      white: '#e5e9f0',
-      brightBlack: '#4c566a',
-      brightRed: '#bf616a',
-      brightGreen: '#a3be8c',
-      brightYellow: '#ebcb8b',
-      brightBlue: '#81a1c1',
-      brightMagenta: '#b48ead',
-      brightCyan: '#8fbcbb',
-      brightWhite: '#eceff4',
-    },
-  },
-};
-
-// ============================================================================
-// WebSocket Connection Manager
-// ============================================================================
-
-class TerminalWebSocket {
-  private ws: WebSocket | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000;
-  private messageQueue: string[] = [];
-  private isConnected = false;
-  private runtimeUrl: string = '';
-
-  onData: ((data: string) => void) | null = null;
-  onConnect: (() => void) | null = null;
-  onDisconnect: (() => void) | null = null;
-  onError: ((error: Event) => void) | null = null;
-
-  setRuntimeUrl(url: string): void {
-    this.runtimeUrl = url;
-  }
-
-  connect(sessionId: string): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      return;
-    }
-
-    // Use runtime URL if provided, otherwise fallback to env or default
-    const baseUrl = this.runtimeUrl ||
-      process.env.NEXT_PUBLIC_WS_URL ||
-      (typeof window !== 'undefined' ? 'ws://localhost:3001' : '');
-
-    const wsUrl = `${baseUrl}/terminal/${sessionId}`;
-
-    try {
-      this.ws = new WebSocket(wsUrl);
-
-      this.ws.onopen = () => {
-        this.isConnected = true;
-        this.reconnectAttempts = 0;
-
-        // Flush queued messages
-        while (this.messageQueue.length > 0) {
-          const msg = this.messageQueue.shift();
-          if (msg) this.ws?.send(msg);
-        }
-
-        this.onConnect?.();
-      };
-
-      this.ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-
-          if (message.type === 'output' && message.data) {
-            this.onData?.(message.data);
-          } else if (message.type === 'error') {
-            console.error('[Terminal] Server error:', message.message);
-          }
-        } catch {
-          // Raw data
-          this.onData?.(event.data);
-        }
-      };
-
-      this.ws.onclose = () => {
-        this.isConnected = false;
-        this.onDisconnect?.();
-        this.attemptReconnect(sessionId);
-      };
-
-      this.ws.onerror = (error) => {
-        this.onError?.(error);
-      };
-    } catch (error) {
-      console.error('[Terminal] WebSocket connection failed:', error);
-      this.attemptReconnect(sessionId);
-    }
-  }
-
-  private attemptReconnect(sessionId: string): void {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[Terminal] Max reconnection attempts reached');
-      return;
-    }
-
-    this.reconnectAttempts++;
-    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-
-    setTimeout(() => {
-      log.info(`[Terminal] Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-      this.connect(sessionId);
-    }, delay);
-  }
-
-  send(data: string): void {
-    const message = JSON.stringify({ type: 'input', data });
-
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(message);
-    } else {
-      this.messageQueue.push(message);
-    }
-  }
-
-  resize(cols: number, rows: number): void {
-    const message = JSON.stringify({ type: 'resize', cols, rows });
-
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(message);
-    }
-  }
-
-  disconnect(): void {
-    this.ws?.close();
-    this.ws = null;
-    this.isConnected = false;
-    this.messageQueue = [];
-  }
-
-  get connected(): boolean {
-    return this.isConnected;
-  }
-}
-
-// ============================================================================
-// Terminal Tab Component
-// ============================================================================
-
-interface TerminalTabProps {
-  session: TerminalSession;
-  isActive: boolean;
-  onSelect: () => void;
-  onClose: () => void;
-  onRename: (name: string) => void;
-}
-
-const TerminalTab: React.FC<TerminalTabProps> = ({
-  session,
-  isActive,
-  onSelect,
-  onClose,
-  onRename,
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(session.name);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isEditing]);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      onRename(editName.trim() || session.name);
-      setIsEditing(false);
-    } else if (e.key === 'Escape') {
-      setEditName(session.name);
-      setIsEditing(false);
-    }
-  };
-
-  return (
-    <div
-      className={`
-        flex items-center gap-2 px-3 py-1.5 border-r border-[var(--aethel-border-primary)]
-        cursor-pointer select-none min-w-0 max-w-[200px] group
-        ${isActive
-          ? 'bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]'
-          : 'bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-secondary)] hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-        }
-      `}
-      onClick={onSelect}
-      onDoubleClick={() => setIsEditing(true)}
-      role="tab"
-      aria-selected={isActive}
-      tabIndex={0}
-    >
-      <TerminalIcon size={14} className="flex-shrink-0" />
-
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          type="text"
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
-          onBlur={() => {
-            onRename(editName.trim() || session.name);
-            setIsEditing(false);
-          }}
-          onKeyDown={handleKeyDown}
-          className="flex-1 min-w-0 bg-transparent border-none outline-none text-sm"
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        <span className="flex-1 truncate text-sm">{session.name}</span>
-      )}
-
-      <button type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
-        className="flex-shrink-0 p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-[var(--aethel-surface-quaternary)] transition-opacity"
-        aria-label="Close terminal"
-      >
-        <X size={12} />
-      </button>
-    </div>
-  );
-};
-
-// ============================================================================
-// Shell Selector
-// ============================================================================
-
-interface ShellOption {
-  id: string;
-  name: string;
-  path: string;
-  icon?: React.ReactNode;
-}
-
-const SHELL_OPTIONS: ShellOption[] = [
-  { id: 'bash', name: 'Bash', path: '/bin/bash' },
-  { id: 'zsh', name: 'Zsh', path: '/bin/zsh' },
-  { id: 'fish', name: 'Fish', path: '/usr/bin/fish' },
-  { id: 'pwsh', name: 'PowerShell', path: 'pwsh' },
-  { id: 'cmd', name: 'Command Prompt', path: 'cmd.exe' },
-  { id: 'node', name: 'Node.js', path: 'node' },
-  { id: 'python', name: 'Python', path: 'python3' },
-];
-
-interface ShellSelectorProps {
-  onSelect: (shell: ShellOption) => void;
-  selectedShell?: string;
-}
-
-const ShellSelector: React.FC<ShellSelectorProps> = ({ onSelect, selectedShell }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  return (
-    <div className="relative" ref={menuRef}>
-      <button type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 px-2 py-1 text-sm text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-tertiary)] rounded"
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-      >
-        <Plus size={14} />
-        <ChevronDown size={12} />
-      </button>
-
-      {isOpen && (
-        <div
-          className="absolute top-full left-0 mt-1 w-48 bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-xl z-50 py-1"
-          role="listbox"
-        >
-          <div className="px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] uppercase tracking-wide border-b border-[var(--aethel-border-primary)]">
-            New Terminal
-          </div>
-          {SHELL_OPTIONS.map((shell) => (
-            <button type="button"
-              key={shell.id}
-              onClick={() => {
-                onSelect(shell);
-                setIsOpen(false);
-              }}
-              className={`
-                w-full flex items-center gap-2 px-3 py-2 text-sm text-left
-                hover:bg-[var(--aethel-surface-tertiary)] transition-colors
-                ${selectedShell === shell.path ? 'text-[var(--aethel-info-light)]' : 'text-[var(--aethel-text-secondary)]'}
-              `}
-              role="option"
-              aria-selected={selectedShell === shell.path}
-            >
-              <TerminalIcon size={14} />
-              <span>{shell.name}</span>
-              {selectedShell === shell.path && (
-                <span className="ml-auto text-xs text-[var(--aethel-info-light)]">Default</span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ============================================================================
-// Search Bar
-// ============================================================================
-
-interface SearchBarProps {
-  onSearch: (term: string) => void;
-  onSearchNext: () => void;
-  onSearchPrevious: () => void;
-  onClose: () => void;
-  matchCount?: number;
-  currentMatch?: number;
-}
-
-const SearchBar: React.FC<SearchBarProps> = ({
-  onSearch,
-  onSearchNext,
-  onSearchPrevious,
-  onClose,
-  matchCount = 0,
-  currentMatch = 0,
-}) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    const debounce = setTimeout(() => {
-      onSearch(searchTerm);
-    }, 150);
-    return () => clearTimeout(debounce);
-  }, [searchTerm, onSearch]);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.shiftKey ? onSearchPrevious() : onSearchNext();
-    } else if (e.key === 'Escape') {
-      onClose();
-    }
-  };
-
-  return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
-      <Search size={14} className="text-[var(--aethel-text-secondary)]" />
-      <input
-        ref={inputRef}
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Search..."
-        className="flex-1 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-strong)] rounded px-2 py-1 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] outline-none focus:border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)]"
-      />
-      {searchTerm && (
-        <span className="text-xs text-[var(--aethel-text-secondary)]">
-          {matchCount > 0 ? `${currentMatch}/${matchCount}` : 'No results'}
-        </span>
-      )}
-      <button type="button"
-        onClick={onSearchPrevious}
-        className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-        aria-label="Previous match"
-        disabled={matchCount === 0}
-      >
-        <ChevronDown size={14} className="rotate-180" />
-      </button>
-      <button type="button"
-        onClick={onSearchNext}
-        className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-        aria-label="Next match"
-        disabled={matchCount === 0}
-      >
-        <ChevronDown size={14} />
-      </button>
-      <button type="button"
-        onClick={onClose}
-        className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-        aria-label="Close search"
-      >
-        <X size={14} />
-      </button>
-    </div>
-  );
-};
 
 // ============================================================================
 // Main XTerminal Component
@@ -645,7 +75,6 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
     const [isMaximized, setIsMaximized] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
-    const [title, setTitle] = useState('Terminal');
 
     // Memoized terminal options
     const terminalOptions: ITerminalOptions = useMemo(() => ({
@@ -727,7 +156,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
               terminal.unicode.activeVersion = '11';
             }
           } catch {
-            console.warn('[Terminal] Unicode11 addon not available');
+            log.warn('Unicode11 addon not available');
           }
 
           // Store refs
@@ -771,7 +200,6 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
 
           // Handle title changes
           terminal.onTitleChange((newTitle) => {
-            setTitle(newTitle);
             onTitleChange?.(newTitle);
           });
 
@@ -783,7 +211,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
           }
 
         } catch (error) {
-          console.error('[Terminal] Failed to initialize:', error);
+          log.error('Failed to initialize terminal runtime', { error });
         }
       };
 
@@ -837,7 +265,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
 
         return newSession;
       } catch (error) {
-        console.error('[Terminal] Failed to create session:', error);
+        log.error('Failed to create terminal session', { error });
 
         // Write error to terminal
         terminalRef.current?.writeln(
@@ -887,7 +315,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
       };
 
       ws.onError = (error) => {
-        console.error('[Terminal] WebSocket error:', error);
+        log.error('Terminal websocket error', { error });
         terminalRef.current?.writeln(
           '\x1b[31mConnection error. Attempting to reconnect...\x1b[0m'
         );
@@ -920,7 +348,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
           }
         }
       } catch (error) {
-        console.error('[Terminal] Failed to close session:', error);
+        log.error('Failed to close terminal session', { error, sessionId });
       }
     }, [activeSessionId, sessions, connectToSession, createSession]);
 
@@ -1194,3 +622,9 @@ export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
 
 export default XTerminal;
 export { TERMINAL_THEMES };
+export type {
+  TerminalSession,
+  TerminalTheme,
+  XTerminalProps,
+  XTerminalRef,
+} from './terminalModels';

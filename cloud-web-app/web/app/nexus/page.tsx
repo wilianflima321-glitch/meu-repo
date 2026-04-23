@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { usePathname } from 'next/navigation'
 import NexusCanvasV2 from '@/components/nexus/NexusCanvasV2'
 import NexusChatMultimodal from '@/components/nexus/NexusChatMultimodal'
 import AethelResearch from '@/components/nexus/AethelResearch'
 import DirectorMode from '@/components/nexus/DirectorMode'
 import StudioLayout from '@/components/studio/StudioLayout'
 import { isNavLinkActive, STUDIO_PRIMARY_LINKS } from '@/lib/navigation/surfaces'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import {
   Activity,
   Layout,
@@ -22,7 +22,7 @@ function studioLinkClass(active: boolean): string {
 }
 
 export default function NexusPage() {
-  const pathname = usePathname()
+  const pathname = useBrowserPathname()
   const [isAIPainting] = useState(false)
   const [canvasMode] = useState<'3d' | 'ui' | 'code'>('3d')
   const [rightPanelMode, setRightPanelMode] = useState<'chat' | 'research' | 'director'>('chat')

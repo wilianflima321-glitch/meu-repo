@@ -1,4 +1,4 @@
-﻿# 84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22
+# 84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22
 Date: 2026-04-22
 Status: ACTIVE (PRIMARY COMPLEMENTARY AUDIT â€” REPO + CI/CD + EXECUTION)
 Source: imported from `docs/master/assets/auditoria-repositorio-plano-acao-2026-04-22/auditoria-profunda-repositorio-plano-de-acao-2026-04-22.pdf`

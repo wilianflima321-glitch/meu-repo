@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { usePathname } from 'next/navigation'
 import { analytics } from '@/lib/analytics'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 type SupportedMetric = 'FCP' | 'LCP' | 'CLS' | 'TTI'
 
@@ -21,7 +21,7 @@ function safeTrackMetric(metric: SupportedMetric, value: number, route: string) 
 }
 
 export default function WebVitalsReporter() {
-  const pathname = usePathname()
+  const pathname = useBrowserPathname()
   const tracked = useRef<Set<string>>(new Set())
   const lcpValue = useRef<number | null>(null)
   const clsValue = useRef(0)

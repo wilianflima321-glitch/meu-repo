@@ -8,6 +8,7 @@ import WebVitalsReporter from '../components/analytics/WebVitalsReporter'
 import TelemetryBootstrap from '../components/observability/TelemetryBootstrap'
 import CookieConsent from '../components/ui/CookieConsent'
 import { ToastProvider } from '../components/ui/toast-system'
+import { ThemeProvider } from '../contexts/ThemeContext'
 import { initSentry } from '../lib/sentry'
 
 const inter = Inter({
@@ -104,19 +105,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Ir para o conteúdo principal
         </a>
         <ServiceWorkerProvider>
-          <ToastProvider>
-            <TelemetryBootstrap />
-            <WebVitalsReporter />
-            <div
-              id="main-content"
-              className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
-            >
-              <ClientLayout>
-                {children}
-              </ClientLayout>
-            </div>
-            <CookieConsent />
-          </ToastProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <TelemetryBootstrap />
+              <WebVitalsReporter />
+              <div
+                id="main-content"
+                className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
+              >
+                <ClientLayout>
+                  {children}
+                </ClientLayout>
+              </div>
+              <CookieConsent />
+            </ToastProvider>
+          </ThemeProvider>
         </ServiceWorkerProvider>
       </body>
     </html>

@@ -8,7 +8,6 @@
 
 import { useState, useCallback, useEffect, type ReactNode } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import {
   Home,
   Code,
@@ -25,6 +24,7 @@ import {
   Users,
   HelpCircle,
 } from 'lucide-react'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 // ============================================================================
 // MOBILE BOTTOM NAVIGATION
@@ -50,7 +50,7 @@ export function MobileBottomNav({
 }: {
   items?: MobileNavItem[]
 }) {
-  const pathname = usePathname()
+  const pathname = useBrowserPathname()
 
   const isActive = useCallback(
     (item: MobileNavItem) => {

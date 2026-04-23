@@ -11,9 +11,9 @@
 
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
 import { useServiceWorker, type UseServiceWorkerReturn } from '../hooks/useServiceWorker';
 import { createComponentLogger } from '@/lib/observability/logger'
+import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 const log = createComponentLogger('ServiceWorkerProvider')
 
@@ -40,7 +40,7 @@ interface ServiceWorkerProviderProps {
  * Provider que gerencia o Service Worker e exibe UI de atualização/offline
  */
 export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) {
-  const pathname = usePathname();
+  const pathname = useBrowserPathname();
   const isStudioSurface = Boolean(pathname && /^\/(dashboard|ide|admin|billing|settings|profile|nexus|projects|workspace)(\/|$)/.test(pathname));
   const shouldEnableServiceWorker =
     isStudioSurface &&

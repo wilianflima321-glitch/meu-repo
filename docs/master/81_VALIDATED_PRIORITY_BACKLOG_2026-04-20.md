@@ -144,8 +144,13 @@ Canonical set reference:
   - `AIChatPanelPro.tsx` has already crossed under the old 1k-line risk band
   - `FullscreenIDE.tsx` has already shed multiple bounded responsibilities
   - the next large workbench files to watch are now:
-    - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` at roughly `1051` lines
-    - `cloud-web-app/web/components/terminal/XTerminal.tsx` at roughly `1058` lines
+    - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` has already fallen to roughly `378` lines
+    - the real next shell hotspot is now `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` at roughly `657` lines
+    - `cloud-web-app/web/components/terminal/XTerminal.tsx` has already fallen to roughly `630` lines
+    - the next bounded terminal pieces now live in:
+      - `cloud-web-app/web/components/terminal/XTerminalChrome.tsx`
+      - `cloud-web-app/web/components/terminal/terminalModels.ts`
+      - `cloud-web-app/web/components/terminal/terminalWebSocket.ts`
 
 ## Verified Test State
 - Tracked tests currently found: `45`
@@ -154,8 +159,12 @@ Canonical set reference:
   - `npx playwright install chromium`
   - `npm run test:e2e:merge`
   - current result on the local workstation: `5 passed`
+  - important nuance: local replay still depends on the web app already running on `:3000`; the canonical CI lane bootstraps that runtime explicitly before running Playwright
 - The local runtime blocker caused by `browserTracingIntegration is not a function` was closed by hardening `cloud-web-app/web/lib/sentry.ts`.
-- A separate local production-build attempt still failed on multiple routes with prerender/runtime errors (`<Html> outside pages/_document` and `useContext` null stacks), so production-build parity should still be treated as open rather than assumed.
+- The previous `useContext` null build blocker is now partially narrowed:
+  - all tracked `usePathname()` consumers were removed from the shared shell in favor of `cloud-web-app/web/lib/navigation/use-browser-pathname.ts`
+  - this reduces the chance of App Router hook leakage from global providers during prerender
+  - full production-build parity still remains open until a complete `next build` finishes successfully end-to-end
 
 ## Verified Design-System State
 - `qa:design-system-consistency`: currently passing
