@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls, Text, Html } from '@react-three/drei'
+import { OrbitControls, Text, Html as DreiHtml } from '@react-three/drei'
 import * as THREE from 'three'
 import nipplejs from 'nipplejs'
 
@@ -110,11 +110,11 @@ function Scene({ onMagicWandSelect, suggestions, onOpenMiniChat }: { onMagicWand
       )}
 
       {suggestions.map((suggestion, index) => (
-        <Html key={index} position={[2, 2 - index * 0.5, 0]}>
+        <DreiHtml key={index} position={[2, 2 - index * 0.5, 0]}>
           <div className="bg-[var(--aethel-surface-secondary)] text-[var(--aethel-text-primary)] p-2 rounded text-sm max-w-xs">
             {suggestion}
           </div>
-        </Html>
+        </DreiHtml>
       ))}
 
       <OrbitControls />

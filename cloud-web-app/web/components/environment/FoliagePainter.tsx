@@ -25,7 +25,7 @@ import {
   Environment,
   GizmoHelper,
   GizmoViewport,
-  Html,
+  Html as DreiHtml,
   useTexture,
   Plane,
 } from '@react-three/drei';

@@ -32,6 +32,11 @@ The local workspace is already synced with the latest upstream changes from `gen
 - `3edf1eb37` `feat(ux): ship ThemeToggle in header + Storybook coverage + tests`
 - `5760df694` `feat(round-81): slice god components, seed migrations, wire lighthouse + coverage`
 
+Additional local reconciliation on `2026-04-23`:
+- the preview lane is denser and clearer for end users through `cloud-web-app/web/components/ide/PreviewRuntimeToolbar.tsx` and `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`
+- build-risk mitigations now also include browser-gated SWR keys in `cloud-web-app/web/lib/providers/AethelProvider.tsx` plus explicit Drei `Html` aliases across active 3D/editor surfaces
+- production `next build` parity is still open because the latest command-line build probe still timed out before a successful end-to-end completion
+
 ## What From the PDF Still Holds Strongly
 These points still align with the repo and remain strategic priorities:
 

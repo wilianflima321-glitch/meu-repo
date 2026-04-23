@@ -47,7 +47,7 @@ Use the current set like this:
 - `ModernIDEShellPanels.tsx`: `268`
 - `ModernIDEShellChrome.tsx`: `211`
 - `chromeSecondaryBars.tsx`: `189`
-- `XTerminal.tsx`: `506`
+- `XTerminal.tsx`: `581`
 
 ## What This Audit Still Gets Right
 ### Root hygiene still matters
@@ -74,6 +74,7 @@ This area has materially improved:
 What remains open:
 - the full Playwright matrix is still not the default required merge pressure
 - repo hygiene and build parity still keep CI credibility partially open
+- fresh local build mitigations now include browser-only SWR keys inside `cloud-web-app/web/lib/providers/AethelProvider.tsx` and explicit Drei `Html` aliases across the active 3D/editor components, but a full production build still has not completed successfully
 
 ### `noImplicitAny: false` is still a real risk
 This remains unchanged and is still one of the best repo-level indicators that the platform is not yet fully hardened.

@@ -10,7 +10,7 @@ import {
   GizmoHelper,
   GizmoViewport,
   Line,
-  Html,
+  Html as DreiHtml,
   TransformControls,
 } from '@react-three/drei';
 import * as THREE from 'three';
@@ -563,11 +563,11 @@ function WindArrow({ direction, strength, visible }: WindArrowProps) {
         <coneGeometry args={[0.15, 0.4, 8]} />
         <meshBasicMaterial color="#00ff88" />
       </mesh>
-      <Html position={end.clone().add(new THREE.Vector3(0.3, 0.3, 0))}>
+      <DreiHtml position={end.clone().add(new THREE.Vector3(0.3, 0.3, 0))}>
         <div className="text-xs text-[var(--aethel-success)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
           Wind: {strength.toFixed(1)}
         </div>
-      </Html>
+      </DreiHtml>
     </group>
   );
 }

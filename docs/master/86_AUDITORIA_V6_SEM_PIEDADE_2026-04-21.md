@@ -93,7 +93,7 @@ Observability maturity is still incomplete, but the old wording is stale.
 - onboarding funnel
 - inline AI editing
 - deploy from IDE
-- preview runtime orchestration
+- preview runtime orchestration and local preview-lane polish
 - merge-pressure Playwright as default browser pressure
 
 ### OPEN
@@ -118,7 +118,9 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
 4. fresh mitigations already landed for build parity:
    - `experimental.workerThreads=false` in `next.config.js`
    - lighter provider scoping in `components/ClientLayout.tsx`
-   but parity is still open because local reruns have not yet completed successfully
+   - browser-only SWR keys in `lib/providers/AethelProvider.tsx`
+   - explicit Drei `Html` aliases across the active 3D/editor components
+   but parity is still open because local reruns have not yet completed successfully, including a fresh `20` minute command-line build probe that still did not finish
 
 ## The Sequence V6 Still Supports
 1. close production build parity

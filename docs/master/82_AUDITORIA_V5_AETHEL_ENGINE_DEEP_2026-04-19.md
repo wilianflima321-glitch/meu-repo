@@ -15,7 +15,7 @@ Este documento continua sendo o norte principal, mas alguns trechos ficaram velh
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` agora é um hotspot relevante em `537` linhas.
   - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para `161` linhas.
   - o shell agora está repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`268` linhas), `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`211` linhas) e `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx` (`189` linhas).
-  - `cloud-web-app/web/components/terminal/XTerminal.tsx` está em `506` linhas.
+  - `cloud-web-app/web/components/terminal/XTerminal.tsx` está em `581` linhas.
 - Colaboração:
   - `CollaboratorsBar` e `RemoteCursorLayer` já existem e a presença colaborativa já aparece no editor principal via `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` e `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`.
   - a colaboração no topo e na barra do editor ficou mais densa e mais próxima do padrão de cockpit, sem depender só de um pill solto no header.
@@ -26,6 +26,8 @@ Este documento continua sendo o norte principal, mas alguns trechos ficaram velh
 - Build parity:
   - o antigo blocker global de `usePathname()` em providers compartilhados foi reduzido pela introdução de `cloud-web-app/web/lib/navigation/use-browser-pathname.ts`.
   - a árvore pública/auth agora também usa um stack de providers mais leve via `cloud-web-app/web/components/ClientLayout.tsx`, e `cloud-web-app/web/next.config.js` força `experimental.workerThreads=false` como mitigação para builds Windows.
+  - o provider global `cloud-web-app/web/lib/providers/AethelProvider.tsx` agora também limita suas chaves SWR ao browser, reduzindo fetch relativo em trabalho de servidor.
+  - a stack 3D/editor ativa também recebeu alias explícito de Drei `Html` para reduzir ambiguidade com o erro histórico de `<Html>` na fase de prerender.
   - a paridade completa de `next build` ainda deve continuar marcada como aberta até termos um build de produção concluído de ponta a ponta.
 
 ## Referências Visuais Locais

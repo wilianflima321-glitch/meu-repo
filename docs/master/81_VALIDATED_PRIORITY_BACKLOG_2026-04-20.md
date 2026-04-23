@@ -56,8 +56,9 @@ Canonical set reference:
   - the canonical workbench header now surfaces a deploy action and a deploy status page,
   - but the capability remains environment/readiness gated.
 - Preview runtime orchestration:
-  - discovery, provision, sync, health, toolbar controls, and fallback flows are real,
-  - but managed-runtime readiness is still not consistently proven end to end.
+  - discovery, provision, sync, health, toolbar controls, denser mode switching, and a stronger preview empty-state are real,
+  - the local preview lane now reads more like a primary validation surface and less like a loose debug panel,
+  - but managed-runtime readiness and shareable proof are still not consistently proven end to end.
 
 ### COMPLETE BASELINE
 - Live collaboration baseline:
@@ -85,14 +86,16 @@ Canonical set reference:
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
-- The latest evidence remains in `cloud-web-app/web/build-latest.log`, `cloud-web-app/web/build-probe-workerthreads-off.log`, plus the older `build-probe-*.log` files.
+- The latest evidence remains in `cloud-web-app/web/build-latest.log`, `cloud-web-app/web/build-probe-workerthreads-off.log`, `cloud-web-app/web/build-probe-2026-04-23-clientlayout-global.log`, `cloud-web-app/web/build-probe-2026-04-23-drei-html.log`, and `cloud-web-app/web/build-probe-2026-04-23-cmd-current.log`.
 - Additional mitigations landed on `2026-04-23`:
   - `cloud-web-app/web/next.config.js` now forces `experimental.workerThreads=false`
   - `cloud-web-app/web/components/ClientLayout.tsx` now keeps globally stable app providers mounted consistently, while studio-only enhancements stay behind a smaller route gate
+  - `cloud-web-app/web/lib/providers/AethelProvider.tsx` now gates SWR keys to the browser so the global app provider does not try to resolve relative API keys during server work
+  - Drei `Html` usage is now explicitly aliased to `DreiHtml` across the active 3D/editor surfaces, which reduces render-stack ambiguity around the historical `<Html>` prerender error class
 - Current reruns still do not justify closure:
-  - repeated local `next build` probes still failed to finish within an extended `15` minute timeout
+  - repeated local `next build` probes still failed to finish within extended `15` and `20` minute timeouts
   - the last fully actionable error log still points to prerender failures around `/404`, `/500`, `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
-  - a fresh probe after restoring globally stable app providers no longer reproduced those explicit `<Html>` / `useContext` errors before timing out, which is promising but still not enough to mark parity closed
+  - fresh probes after restoring globally stable app providers, browser-gating AethelProvider fetches, and aliasing Drei `Html` usage no longer reproduced those explicit `<Html>` / `useContext` errors before timing out, which is promising but still not enough to mark parity closed
 - The active failure classes are:
   - `Error: <Html> should not be imported outside of pages/_document.` while prerendering `/404` and `/500`
   - `TypeError: Cannot read properties of null (reading 'useContext')` while prerendering routes such as `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
@@ -104,6 +107,8 @@ Canonical set reference:
 - Therefore the current truthful read is:
   - App Router hook leakage was mitigated in shared shell code,
   - globally stable app providers were restored in `cloud-web-app/web/components/ClientLayout.tsx` while studio-only UX stayed gated in a smaller enhancement layer,
+  - browser-only SWR keys reduced SSR/provider fetch risk inside `cloud-web-app/web/lib/providers/AethelProvider.tsx`,
+  - Drei `Html` aliasing reduced naming ambiguity across the active 3D/editor stack,
   - worker-thread concurrency was reduced for Windows build determinism,
   - but full production build parity is still blocked and should not be marked solved.
 - Current highest-value suspects to isolate next:

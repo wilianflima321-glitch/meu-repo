@@ -24,7 +24,7 @@ import {
   Environment,
   GizmoHelper,
   GizmoViewport,
-  Html,
+  Html as DreiHtml,
   Line,
 } from '@react-three/drei';
 import * as THREE from 'three';
@@ -314,11 +314,11 @@ function Bone3D({ bone, worldPosition, worldRotation, isSelected, onSelect, show
 
       {/* Label */}
       {isSelected && (
-        <Html position={[0, 0.05, 0]} center>
+        <DreiHtml position={[0, 0.05, 0]} center>
           <div className="bg-[color-mix(in_srgb,var(--aethel-surface-primary)_85%,transparent)] px-2 py-1 rounded text-xs whitespace-nowrap">
             {bone.name}
           </div>
-        </Html>
+        </DreiHtml>
       )}
     </group>
   );
@@ -373,11 +373,11 @@ function IKEffector({ chain, onPositionChange, isSelected, onSelect }: IKEffecto
         <meshBasicMaterial color="#ffff00" />
       </mesh>
 
-      <Html position={[0, 0.08, 0]} center>
+      <DreiHtml position={[0, 0.08, 0]} center>
         <div className="bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-2 py-0.5 rounded text-[10px] whitespace-nowrap">
           {chain.name}
         </div>
-      </Html>
+      </DreiHtml>
     </group>
   );
 }

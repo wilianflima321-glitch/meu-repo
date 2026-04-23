@@ -25,7 +25,7 @@ import {
   Environment,
   GizmoHelper,
   GizmoViewport,
-  Html,
+  Html as DreiHtml,
   Center,
 } from '@react-three/drei';
 import * as THREE from 'three';
@@ -445,16 +445,16 @@ function DestructibleMesh3D({
               0xff4444,
             ]}
           />
-          <Html position={[0.3, 0.3, 0]}>
+          <DreiHtml position={[0.3, 0.3, 0]}>
             <div className="bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_90%,transparent)] px-2 py-1 rounded text-xs text-[var(--aethel-text-primary)] whitespace-nowrap">
               Impact: {impactPoint.force.toFixed(0)} N
             </div>
-          </Html>
+          </DreiHtml>
         </group>
       )}
 
       {/* Health bar above mesh */}
-      <Html position={[0, 1.8, 0]} center>
+      <DreiHtml position={[0, 1.8, 0]} center>
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-center gap-1 text-xs text-[var(--aethel-text-primary)]">
             <Heart className="w-3 h-3" style={{ color: healthColor }} />
@@ -470,7 +470,7 @@ function DestructibleMesh3D({
             />
           </div>
         </div>
-      </Html>
+      </DreiHtml>
     </group>
   );
 }

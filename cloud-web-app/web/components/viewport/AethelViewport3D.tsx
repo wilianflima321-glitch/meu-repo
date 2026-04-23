@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useMemo, useRef, useState } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { Environment, GizmoHelper, GizmoViewport, Grid, Html, Line, OrbitControls } from '@react-three/drei'
+import { Environment, GizmoHelper, GizmoViewport, Grid, Html as DreiHtml, Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import {
   Box,
@@ -307,11 +307,11 @@ function SceneObjectMesh({
         </mesh>
       ) : null}
       {isSelected ? (
-        <Html position={[0, 0.95, 0]} center>
+        <DreiHtml position={[0, 0.95, 0]} center>
           <div className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[rgba(6,10,18,0.84)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-primary)] shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
             {object.name}
           </div>
-        </Html>
+        </DreiHtml>
       ) : null}
     </group>
   )

@@ -9,7 +9,7 @@ import {
   GizmoViewport,
   Environment,
   PivotControls,
-  Html,
+  Html as DreiHtml,
   useHelper,
 } from '@react-three/drei';
 import * as THREE from 'three';
@@ -279,7 +279,7 @@ function LightObject({ object, isSelected, onSelect }: LightObjectProps) {
       )}
       {/* Selection label */}
       {isSelected && (
-        <Html position={[0, 0.4, 0]}>
+        <DreiHtml position={[0, 0.4, 0]}>
           <div style={{
             background: 'rgba(0,0,0,0.8)',
             color: '#fff',
@@ -291,7 +291,7 @@ function LightObject({ object, isSelected, onSelect }: LightObjectProps) {
           }}>
             💡 {object.name} ({lightType})
           </div>
-        </Html>
+        </DreiHtml>
       )}
     </group>
   );
@@ -313,7 +313,7 @@ function CameraObject({ object, isSelected, onSelect }: CameraObjectProps) {
         />
       </mesh>
       {isSelected && (
-        <Html position={[0, 0.5, 0]}>
+        <DreiHtml position={[0, 0.5, 0]}>
           <div style={{
             background: 'rgba(0,0,0,0.7)',
             color: '#fff',
@@ -324,7 +324,7 @@ function CameraObject({ object, isSelected, onSelect }: CameraObjectProps) {
           }}>
             📷 {object.name}
           </div>
-        </Html>
+        </DreiHtml>
       )}
     </group>
   );

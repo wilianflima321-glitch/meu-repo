@@ -52,6 +52,13 @@ type WorkbenchPreviewPaneProps = {
   checkRuntimeHealth: (url: string) => Promise<void>;
 };
 
+const PREVIEW_MODES: Array<{ id: PreviewMode; label: string; description: string }> = [
+  { id: 'runtime', label: 'Preview', description: 'Live runtime surface' },
+  { id: 'device', label: 'Devices', description: 'Responsive framing' },
+  { id: 'console', label: 'Console', description: 'Logs and runtime output' },
+  { id: 'viewport3d', label: 'Viewport 3D', description: 'Scene-oriented preview' },
+];
+
 export function WorkbenchPreviewPane({
   activeFile,
   previewMode,
@@ -88,11 +95,29 @@ export function WorkbenchPreviewPane({
   syncRuntime,
   checkRuntimeHealth,
 }: WorkbenchPreviewPaneProps) {
+  const activeModeMeta = PREVIEW_MODES.find((mode) => mode.id === previewMode) ?? PREVIEW_MODES[0];
+
   const renderRuntimeSurface = (mode: 'runtime' | 'device') => {
     if (!activeFile) {
       return (
-        <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-          Selecione um arquivo para visualizar a prévia.
+        <div className="flex h-full items-center justify-center px-6">
+          <div className="max-w-md rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] p-5 text-left shadow-[0_18px_48px_rgba(0,0,0,0.24)]">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+              Preview lane
+            </div>
+            <div className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">
+              Choose a file to inspect its live surface.
+            </div>
+            <div className="mt-2 text-sm leading-6 text-[var(--aethel-text-tertiary)]">
+              We keep this lane ready for runtime, devices, console, and 3D checks so the next validation step stays one click away.
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-[var(--aethel-text-secondary)]">
+              <span className="rounded-full border border-[var(--aethel-border-primary)] px-2.5 py-1">Preview</span>
+              <span className="rounded-full border border-[var(--aethel-border-primary)] px-2.5 py-1">Devices</span>
+              <span className="rounded-full border border-[var(--aethel-border-primary)] px-2.5 py-1">Console</span>
+              <span className="rounded-full border border-[var(--aethel-border-primary)] px-2.5 py-1">Viewport 3D</span>
+            </div>
+          </div>
         </div>
       );
     }
@@ -101,7 +126,7 @@ export function WorkbenchPreviewPane({
       <CanonicalPreviewSurface
         key={`${activeFile.path}:${previewRefreshTick}${mode === 'device' ? ':device' : ''}`}
         variant="runtime"
-        title="Prévia ao vivo"
+        title="Previa ao vivo"
         filePath={activeFile.path}
         content={activeFile.content}
         projectId={projectId}
@@ -121,7 +146,7 @@ export function WorkbenchPreviewPane({
   };
 
   return (
-    <div className="h-full min-h-0 bg-[var(--aethel-surface-primary)] flex flex-col">
+    <div className="flex h-full min-h-0 flex-col bg-[var(--aethel-surface-primary)]">
       {(previewMode === 'runtime' || previewMode === 'device') && (
         <PreviewRuntimeToolbar
           previewRuntimeUrl={previewRuntimeUrl}
@@ -197,32 +222,49 @@ export function WorkbenchPreviewPane({
           }}
         />
       )}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] px-3 py-2.5 text-[11px]">
-        {[
-          { id: 'runtime' as const, label: 'Prévia' },
-          { id: 'device' as const, label: 'Dispositivos' },
-          { id: 'console' as const, label: 'Console' },
-          { id: 'viewport3d' as const, label: 'Viewport 3D' },
-        ].map((mode) => (
-          <button
-            key={mode.id}
-            type="button"
-            onClick={() => setPreviewMode(mode.id)}
-            className={`rounded-lg px-3 py-1.5 font-medium transition-colors min-h-[36px] ${
-              previewMode === mode.id
-                ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_20%,transparent)] text-[var(--aethel-primary-light)]'
-                : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
-            }`}
-          >
-            {mode.label}
-          </button>
-        ))}
+
+      <div className="border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent))] px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-[280px] flex-1 flex-wrap items-center gap-2">
+            {PREVIEW_MODES.map((mode) => {
+              const isActive = previewMode === mode.id;
+              return (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => setPreviewMode(mode.id)}
+                  aria-pressed={isActive}
+                  className={`group min-h-[40px] rounded-xl border px-3 py-2 text-left transition-all ${
+                    isActive
+                      ? 'border-[color-mix(in_srgb,var(--aethel-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_14%,transparent)] text-[var(--aethel-text-primary)] shadow-[0_10px_24px_rgba(0,0,0,0.18)]'
+                      : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_45%,transparent)] text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-primary)] hover:text-[var(--aethel-text-secondary)]'
+                  }`}
+                >
+                  <div className="text-[11px] font-semibold leading-none">{mode.label}</div>
+                  <div className={`mt-1 text-[10px] leading-none ${isActive ? 'text-[var(--aethel-text-secondary)]' : 'text-[var(--aethel-text-quaternary)] group-hover:text-[var(--aethel-text-tertiary)]'}`}>
+                    {mode.description}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            <span className="inline-flex min-h-[30px] items-center rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-secondary)]">
+              {activeModeMeta.label} lane
+            </span>
+            {activeFile ? (
+              <span className="inline-flex min-h-[30px] max-w-[260px] items-center truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-tertiary)]">
+                {activeFile.path}
+              </span>
+            ) : null}
+          </div>
+        </div>
       </div>
-      <div className="flex-1 min-h-0">
+
+      <div className="min-h-0 flex-1 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-primary)_100%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent))]">
         {previewMode === 'console' && <ConsoleIntegration />}
-        {previewMode === 'viewport3d' && (
-          <CanonicalPreviewSurface variant="scene" renderMode="draft" />
-        )}
+        {previewMode === 'viewport3d' && <CanonicalPreviewSurface variant="scene" renderMode="draft" />}
         {previewMode === 'runtime' && renderRuntimeSurface('runtime')}
         {previewMode === 'device' && renderRuntimeSurface('device')}
       </div>

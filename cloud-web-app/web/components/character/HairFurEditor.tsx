@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { OrbitControls, Html as DreiHtml } from '@react-three/drei';
 import * as THREE from 'three';
 export interface HairFurEditorProps {
   characterId: string;

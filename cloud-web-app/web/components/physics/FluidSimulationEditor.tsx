@@ -28,7 +28,7 @@ import {
   GizmoHelper,
   GizmoViewport,
   Line,
-  Html,
+  Html as DreiHtml,
   Box as DreiBox,
 } from '@react-three/drei';
 import * as THREE from 'three';
@@ -359,21 +359,21 @@ function BoundaryBox({ params, visible, onResize }: BoundaryBoxProps) {
       </mesh>
 
       {/* Dimension labels */}
-      <Html position={[boundarySize.x / 2 + 0.3, 0, 0]}>
+      <DreiHtml position={[boundarySize.x / 2 + 0.3, 0, 0]}>
         <div className="text-[10px] text-[var(--aethel-info)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
           W: {boundarySize.x.toFixed(1)}m
         </div>
-      </Html>
-      <Html position={[0, boundarySize.y / 2 + 0.3, 0]}>
+      </DreiHtml>
+      <DreiHtml position={[0, boundarySize.y / 2 + 0.3, 0]}>
         <div className="text-[10px] text-[var(--aethel-info)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
           H: {boundarySize.y.toFixed(1)}m
         </div>
-      </Html>
-      <Html position={[0, 0, boundarySize.z / 2 + 0.3]}>
+      </DreiHtml>
+      <DreiHtml position={[0, 0, boundarySize.z / 2 + 0.3]}>
         <div className="text-[10px] text-[var(--aethel-info)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
           D: {boundarySize.z.toFixed(1)}m
         </div>
-      </Html>
+      </DreiHtml>
     </group>
   );
 }
@@ -437,12 +437,12 @@ function FlowArrows({ params, visible }: FlowArrowsProps) {
       ))}
 
       {/* Flow strength indicator */}
-      <Html position={[boundaryPosition.x, boundaryPosition.y + boundarySize.y / 2 + 0.5, boundaryPosition.z]}>
+      <DreiHtml position={[boundaryPosition.x, boundaryPosition.y + boundarySize.y / 2 + 0.5, boundaryPosition.z]}>
         <div className="text-xs text-[var(--aethel-success)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-2 py-1 rounded flex items-center gap-1">
           <Wind className="w-3 h-3" />
           Flow: {flowStrength.toFixed(2)}
         </div>
-      </Html>
+      </DreiHtml>
     </group>
   );
 }

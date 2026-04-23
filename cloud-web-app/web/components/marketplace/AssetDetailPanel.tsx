@@ -22,7 +22,7 @@ import {
     useGLTF,
     PresentationControls,
     Stage,
-    Html,
+    Html as DreiHtml,
     useProgress
 } from '@react-three/drei';
 import {
@@ -117,14 +117,14 @@ interface Review {
 function Loader() {
     const { progress } = useProgress();
     return (
-        <Html center>
+        <DreiHtml center>
             <div className="flex flex-col items-center gap-2">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 <span className="text-sm text-muted-foreground">
                     Carregando {progress.toFixed(0)}%
                 </span>
             </div>
-        </Html>
+        </DreiHtml>
     );
 }
 

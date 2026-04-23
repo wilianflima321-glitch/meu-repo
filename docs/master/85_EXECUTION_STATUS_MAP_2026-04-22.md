@@ -20,12 +20,12 @@ This file is the short scoreboard that answers:
 - `ModernIDEShellPanels.tsx`: `268` lines
 - `ModernIDEShellChrome.tsx`: `211` lines
 - `chromeSecondaryBars.tsx`: `189` lines
-- `XTerminal.tsx`: `506` lines
+- `XTerminal.tsx`: `581` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
   - the latest actionable logs still point to prerender failures
-  - a fresh local probe after restoring globally stable app providers stopped reproducing the explicit `<Html>`/`useContext` failures before timing out, but still did not complete within an extended `15` minute timeout
+  - fresh local probes after restoring globally stable app providers, browser-gating AethelProvider SWR keys, and aliasing Drei `Html` usage stopped reproducing the explicit `<Html>`/`useContext` failures before timing out, but still did not complete within extended `15` and `20` minute timeouts
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -65,7 +65,11 @@ This file is the short scoreboard that answers:
 
 ### Preview runtime orchestration
 - discovery, provision, sync, and health flows exist,
-- but the category is still partial until full shareable proof is stable.
+- the local preview lane is now denser and more product-grade:
+  - stronger toolbar hierarchy
+  - clearer mode tabs
+  - better preview empty-state guidance
+- but the category is still partial until full shareable proof and build-complete runtime confidence are stable.
 
 ### Collaboration
 - baseline collaboration is shipped in the canonical IDE:
@@ -81,7 +85,7 @@ This file is the short scoreboard that answers:
 ## Still Open
 ### P0
 1. production build parity
-   - current root suspects: `app/layout.tsx`, `components/ClientLayout.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`
+   - current highest-probability root suspects remain in the app/provider stack: `app/layout.tsx`, `components/ClientLayout.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`
 2. remaining workbench monolith reduction
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure

@@ -27,7 +27,7 @@ import {
   GizmoHelper,
   GizmoViewport,
   Sky,
-  Html,
+  Html as DreiHtml,
 } from '@react-three/drei';
 import * as THREE from 'three';
 import {

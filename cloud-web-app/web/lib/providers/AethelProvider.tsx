@@ -298,22 +298,23 @@ interface AethelProviderProps {
 export function AethelProvider({ children }: AethelProviderProps) {
   const [state, dispatch] = useReducer(aethelReducer, initialState);
   const wsRef = useRef<WebSocket | null>(null);
+  const isBrowser = typeof window !== 'undefined';
 
   // Fetch authenticated user (JWT-only, no server sessions)
-  const { data: userData } = useSWR('/api/auth/me', fetcher, {
+  const { data: userData } = useSWR(isBrowser ? '/api/auth/me' : null, fetcher, {
     revalidateOnFocus: false,
   });
 
   // Fetch wallet data
   const { data: walletData, mutate: mutateWallet } = useSWR(
-    state.isAuthenticated ? '/api/wallet/summary' : null,
+    isBrowser && state.isAuthenticated ? '/api/wallet/summary' : null,
     fetcher,
     { refreshInterval: 30000 }
   );
 
   // Fetch onboarding status
   const { data: onboardingData } = useSWR(
-    state.isAuthenticated ? '/api/onboarding' : null,
+    isBrowser && state.isAuthenticated ? '/api/onboarding' : null,
     fetcher
   );
 
