@@ -1,15 +1,14 @@
 'use client'
 
 import { Suspense, useMemo, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { X } from 'lucide-react'
-import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
+import { useBrowserPathname, useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
 
 function DashboardRoutingNoticeInner() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
   const pathname = useBrowserPathname()
+  const search = useBrowserSearch()
   const [hidden, setHidden] = useState(false)
+  const searchParams = useMemo(() => new URLSearchParams(search), [search])
   const code = searchParams.get('notice')
 
   const copy = useMemo(() => {
@@ -42,7 +41,11 @@ function DashboardRoutingNoticeInner() {
     const next = new URLSearchParams(searchParams.toString())
     next.delete('notice')
     const query = next.toString()
-    router.replace(query ? `${pathname}?${query}` : pathname)
+    if (typeof window !== 'undefined') {
+      const nextUrl = query ? `${pathname}?${query}` : pathname
+      window.history.replaceState(window.history.state, '', nextUrl)
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
   }
 
   return (

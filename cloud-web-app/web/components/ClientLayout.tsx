@@ -64,7 +64,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
                 <DevToolsProvider>
                   <AethelProvider>
                     <OnboardingProvider enabled={isStudioSurface}>
-                      <DefaultCommandsRegistration />
+                      {isStudioSurface ? <DefaultCommandsRegistration /> : null}
                       <Suspense fallback={<LoadingFallback />}>
                         {children}
 

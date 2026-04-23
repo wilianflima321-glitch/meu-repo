@@ -1,17 +1,19 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { CheckCircle, Loader2, Mail, RefreshCw, XCircle } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
+import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
 
 function VerifyEmailContent() {
   const toast = useToast()
-  const searchParams = useSearchParams()
   const router = useRouter()
+  const search = useBrowserSearch()
+  const searchParams = useMemo(() => new URLSearchParams(search), [search])
 
   const [isLoading, setIsLoading] = useState(true)
   const [isVerified, setIsVerified] = useState(false)

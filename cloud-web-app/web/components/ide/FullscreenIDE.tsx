@@ -1,21 +1,19 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import type * as monacoEditor from 'monaco-editor'
 import CollaboratorsBar from "@/components/collaboration/CollaboratorsBar";
 import AIChatPanelContainer from "@/components/ide/AIChatPanelContainer";
-import type { Diagnostic as MonacoDiagnostic } from "@/components/editor/MonacoEditorPro";
-import type { EditorGroup, EditorTab, SplitDirection } from "@/components/editor/SplitEditor";
+import type { EditorGroup, EditorTab } from "@/components/editor/SplitEditor";
 import { TabProvider } from "@/components/editor/TabBar";
 import CommandPaletteProvider from "@/components/ide/CommandPalette";
 import { ModernIDEShell } from "@/components/ide/ModernIDEShell";
-import type { PanelState as ModernPanelState } from "@/components/ide/ModernIDEShell";
 import { EditorApplyBridgeProvider } from "@/components/ide/EditorApplyBridgeContext";
 import { IdeWorkbenchCommandExtras } from "@/components/ide/IdeWorkbenchCommandExtras";
 import type { DocumentSymbol } from "@/components/outline/OutlinePanel";
 import { buildOutlineSymbols } from "@/components/outline/outline-parser";
 import { analytics } from "@/lib/analytics";
+import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 import { submitChangeFeedback } from '@/lib/ai/change-feedback-client';
 import {
@@ -27,13 +25,9 @@ import { WorkbenchEditorPane } from '@/components/ide/fullscreen/WorkbenchEditor
 import { WorkbenchPreviewPane } from '@/components/ide/fullscreen/WorkbenchPreviewPane';
 import {
   WorkbenchEntryNotice,
-  type EntryNotice,
 } from '@/components/ide/fullscreen/WorkbenchEntryNotice';
 import {
-  type EditorPane,
   type InlineApplyResult,
-  type PreviewMode,
-  type SidebarTab,
 } from '@/components/ide/fullscreen/types';
 import { useWorkbenchEntryConvergence } from '@/components/ide/fullscreen/useWorkbenchEntryConvergence';
 import { useWorkbenchChrome } from '@/components/ide/fullscreen/useWorkbenchChrome';
@@ -41,82 +35,87 @@ import { useWorkbenchFiles } from '@/components/ide/fullscreen/useWorkbenchFiles
 import { useWorkbenchFullAccess } from '@/components/ide/fullscreen/useWorkbenchFullAccess';
 import { useWorkbenchPresence } from '@/components/ide/fullscreen/useWorkbenchPresence';
 import { useWorkbenchRealtimeCollaboration } from '@/components/ide/fullscreen/useWorkbenchRealtimeCollaboration';
-
-const LAST_PROJECT_ID_STORAGE_KEY = "aethel.workbench.lastProjectId";
-const PREVIEW_ENABLED_STORAGE_KEY = "aethel.workbench.preview.enabled";
-const PANEL_STATE_STORAGE_KEY = "aethel.workbench.panelState";
+import {
+  LAST_PROJECT_ID_STORAGE_KEY,
+  PREVIEW_ENABLED_STORAGE_KEY,
+  PANEL_STATE_STORAGE_KEY,
+  useWorkbenchShellState,
+} from '@/components/ide/fullscreen/useWorkbenchShellState';
 
 // NOTE: Workbench helpers + EntryNotice type + WorkbenchEntryNotice component
 // live in components/ide/fullscreen/{workbench-helpers,WorkbenchEntryNotice}
 // to keep this orchestrator under the component-budget.
 
 function IDEContent() {
-  const searchParams = useSearchParams();
+  const search = useBrowserSearch();
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const fileParam = searchParams.get("file");
   const projectIdParam = searchParams.get("projectId");
   const entryParam = searchParams.get("entry");
   const previewUrlParam = searchParams.get("previewUrl");
-
-  const projectId = useMemo(() => {
-    if (projectIdParam && projectIdParam.trim()) {
-      return projectIdParam.trim();
-    }
-    if (typeof window === "undefined") return "default";
-    const fromStorage = localStorage.getItem(LAST_PROJECT_ID_STORAGE_KEY);
-    return fromStorage?.trim() || "default";
-  }, [projectIdParam]);
-
-  const [splitEditorOpen, setSplitEditorOpen] = useState(false);
-  const [splitDirection, setSplitDirection] = useState<SplitDirection>('horizontal');
-  const [splitActivePane, setSplitActivePane] = useState<EditorPane>('primary');
-  const [nextOpenTarget, setNextOpenTarget] = useState<EditorPane>('primary');
-  const [previewEnabled, setPreviewEnabled] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const stored = window.localStorage.getItem(PREVIEW_ENABLED_STORAGE_KEY);
-    if (stored === "1") return true;
-    if (stored === "0") return false;
-    return window.innerWidth >= 1440;
-  });
-  const [modernPanelState, setModernPanelState] = useState<ModernPanelState>(() => {
-    const fallback: ModernPanelState = {
-      sidebar: { open: true, size: 20 },
-      editor: { open: true, size: 45 },
-      preview: { open: true, size: 35 },
-      chat: { open: false, size: 25 },
-    }
-    if (typeof window === "undefined") return fallback;
-
-    try {
-      const stored = window.localStorage.getItem(PANEL_STATE_STORAGE_KEY);
-      if (!stored) return fallback;
-      const parsed = JSON.parse(stored) as Partial<ModernPanelState>;
-      return {
-        sidebar: { ...fallback.sidebar, ...parsed.sidebar },
-        editor: { ...fallback.editor, ...parsed.editor },
-        preview: { ...fallback.preview, ...parsed.preview },
-        chat: { ...fallback.chat, ...parsed.chat },
-      };
-    } catch {
-      return fallback;
-    }
-  });
-  const [previewMode, setPreviewMode] = useState<PreviewMode>('runtime')
-  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('explorer')
-  const [entryNotice, setEntryNotice] = useState<EntryNotice | null>(null)
-  const [showIntelliSense, setShowIntelliSense] = useState(false)
-  const [showDiagnostics, setShowDiagnostics] = useState(false)
-  const [showOutline, setShowOutline] = useState(false)
-  const [editorDiagnostics, setEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
-  const [secondaryEditorDiagnostics, setSecondaryEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
-  const [isCompactViewport, setIsCompactViewport] = useState(false)
-  const [rollbackBusy, setRollbackBusy] = useState(false)
-  const [hasToken, setHasToken] = useState(false)
-  const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const primaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const secondaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null)
   const runtimeSyncTimerRef = useRef<number | null>(null)
   const lastRuntimeSyncAtRef = useRef<number>(0)
+  const {
+    projectId,
+    splitEditorOpen,
+    setSplitEditorOpen,
+    splitDirection,
+    setSplitDirection,
+    splitActivePane,
+    setSplitActivePane,
+    nextOpenTarget,
+    setNextOpenTarget,
+    previewEnabled,
+    setPreviewEnabled,
+    modernPanelState,
+    setModernPanelState,
+    previewMode,
+    setPreviewMode,
+    sidebarTab,
+    setSidebarTab,
+    entryNotice,
+    showIntelliSense,
+    setShowIntelliSense,
+    showDiagnostics,
+    setShowDiagnostics,
+    showOutline,
+    setShowOutline,
+    editorDiagnostics,
+    setEditorDiagnostics,
+    secondaryEditorDiagnostics,
+    setSecondaryEditorDiagnostics,
+    isCompactViewport,
+    setIsCompactViewport,
+    rollbackBusy,
+    setRollbackBusy,
+    hasToken,
+    setHasToken,
+    lastAiApply,
+    setLastAiApply,
+    openCommandPalette,
+    handleOpenSettings,
+    handleEditorUndo,
+    handleEditorRedo,
+    handleEditorFind,
+    handleEditorReplace,
+    emitLayoutEvent,
+    handleAIInline,
+    handleAIPanel,
+    handleSelectSidebarTab,
+    handleSelectPreviewMode,
+    clearEntryNotice,
+    showEntryNotice,
+    handleToggleDiagnosticsPanel,
+    handleJumpToOutlineSymbol,
+  } = useWorkbenchShellState({
+    projectIdParam,
+    editorRef,
+    primaryEditorRef,
+    secondaryEditorRef,
+  })
   const {
     previewRuntimeUrl,
     previewRuntimeInput,
@@ -199,91 +198,6 @@ function IDEContent() {
     return buildOutlineSymbols(bridgeActiveFile.content, bridgeActiveFile.language)
   }, [bridgeActiveFile])
 
-  const openCommandPalette = useCallback((mode: 'commands' | 'files' = 'commands') => {
-    window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode } }))
-  }, [])
-
-  const handleOpenSettings = useCallback(() => {
-    const params = new URLSearchParams(window.location.search)
-    const currentProjectId = params.get('projectId')
-    const next = currentProjectId ? `/settings?projectId=${encodeURIComponent(currentProjectId)}` : '/settings'
-    window.location.assign(next)
-  }, [])
-
-  const handleEditorUndo = useCallback(() => {
-    editorRef.current?.trigger('aethel', 'undo', null)
-  }, [])
-
-  const handleEditorRedo = useCallback(() => {
-    editorRef.current?.trigger('aethel', 'redo', null)
-  }, [])
-
-  const handleEditorFind = useCallback(() => {
-    editorRef.current?.trigger('aethel', 'actions.find', null)
-  }, [])
-
-  const handleEditorReplace = useCallback(() => {
-    editorRef.current?.trigger('aethel', 'editor.action.startFindReplaceAction', null)
-  }, [])
-
-  const emitLayoutEvent = useCallback((eventName: string) => {
-    window.dispatchEvent(new Event(eventName))
-  }, [])
-
-  const handleAIInline = useCallback(() => {
-    editorRef.current?.trigger('aethel', 'aethel.inlineEdit', null)
-  }, [])
-
-  const handleAIPanel = useCallback(() => {
-    emitLayoutEvent('aethel.layout.openAI')
-  }, [emitLayoutEvent])
-
-  const handleSelectSidebarTab = useCallback((tab: 'explorer' | 'git') => {
-    setSidebarTab(tab)
-    setModernPanelState((prev) => ({
-      ...prev,
-      sidebar: {
-        ...prev.sidebar,
-        open: true,
-      },
-    }))
-  }, [])
-
-  const handleSelectPreviewMode = useCallback((mode: 'runtime' | 'device' | 'console' | 'viewport3d') => {
-    setPreviewEnabled(true)
-    setPreviewMode(mode)
-    setModernPanelState((prev) => ({
-      ...prev,
-      preview: {
-        ...prev.preview,
-        open: true,
-      },
-    }))
-  }, [])
-
-  const clearEntryNotice = useCallback(() => {
-    setEntryNotice(null)
-  }, [])
-
-  const showEntryNotice = useCallback((notice: EntryNotice) => {
-    setEntryNotice(notice)
-  }, [])
-
-  const handleToggleDiagnosticsPanel = useCallback(() => {
-    setShowDiagnostics((prev) => !prev)
-  }, [])
-
-  const handleJumpToOutlineSymbol = useCallback((symbol: DocumentSymbol) => {
-    const editor = splitActivePane === 'secondary' ? secondaryEditorRef.current : primaryEditorRef.current
-    if (!editor) return
-    editor.revealLineInCenter(symbol.selectionRange.startLine)
-    editor.setPosition({
-      lineNumber: symbol.selectionRange.startLine,
-      column: symbol.selectionRange.startColumn,
-    })
-    editor.focus()
-  }, [splitActivePane])
-
   useEffect(() => {
     return () => {
       if (runtimeSyncTimerRef.current) {
@@ -348,12 +262,12 @@ function IDEContent() {
     if (!activeFile?.path) {
       setEditorDiagnostics([])
     }
-  }, [activeFile?.path])
+  }, [activeFile?.path, setEditorDiagnostics])
 
   useEffect(() => {
     if (!splitEditorOpen || secondaryFile || !activeFile) return
     setSecondaryFile({ ...activeFile })
-  }, [activeFile, secondaryFile, splitEditorOpen])
+  }, [activeFile, secondaryFile, setSecondaryFile, splitEditorOpen])
 
   useWorkbenchEntryConvergence({
     entryParam,
@@ -464,7 +378,7 @@ function IDEContent() {
       }
       return next
     })
-  }, [activeFile])
+  }, [activeFile, setNextOpenTarget, setSecondaryFile, setSplitActivePane, setSplitEditorOpen])
 
   const splitEditorGroups = useMemo<EditorGroup[]>(() => {
     const groups: EditorGroup[] = []
@@ -513,7 +427,7 @@ function IDEContent() {
       filePath: result.filePath,
       appliedAt: new Date().toISOString(),
     })
-  }, [])
+  }, [setLastAiApply])
 
   const handleRollbackLastAiApply = useCallback(() => {
     if (!lastAiApply?.rollbackToken || rollbackBusy || !activeFile) return
@@ -568,7 +482,7 @@ function IDEContent() {
         setRollbackBusy(false)
       }
     })()
-  }, [activeFile, lastAiApply?.filePath, lastAiApply?.rollbackToken, lastAiApply?.runId, projectId, readFile, rollbackBusy])
+  }, [activeFile, lastAiApply?.filePath, lastAiApply?.rollbackToken, lastAiApply?.runId, projectId, readFile, rollbackBusy, setFileError, setLastAiApply, setLastSavedAt, setPreviewRefreshTick, setRollbackBusy])
 
   return (
     <CommandPaletteProvider

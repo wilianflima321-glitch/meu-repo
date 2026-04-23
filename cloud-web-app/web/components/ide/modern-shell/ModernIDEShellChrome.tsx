@@ -1,69 +1,53 @@
 'use client';
 
 import React from 'react';
-import { tokens, gradients } from '@/lib/design-tokens';
+import { gradients, tokens } from '@/lib/design-tokens';
+import { GripVertical } from 'lucide-react';
 import {
-  Layout,
-  Code2,
-  Play,
-  MessageSquare,
-  FolderTree,
-  Settings,
-  GripVertical,
-  GitBranch,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Terminal,
-  Search,
-  Sparkles,
-} from 'lucide-react';
+  ActiveFileStatus,
+  BOTTOM_DOCK_ITEMS,
+  BottomDockItemButton,
+  MOBILE_BOTTOM_BAR_ITEMS,
+  MobileBottomBarItemButton,
+  STATUS_BAR_LEADING_ITEMS,
+  STATUS_BAR_TRAILING_ITEMS,
+  StatusMetric,
+  handleBottomDockItemClick,
+  isBottomDockItemActive,
+} from './chromeDockParts';
+import {
+  HeaderIdentity,
+  HeaderPrimaryActions,
+  HeaderWorkspaceControls,
+} from './chromeHeaderParts';
+import {
+  ACCENT_CYAN,
+  BORDER_PRIMARY,
+  BORDER_SECONDARY,
+  SURFACE_PRIMARY,
+  SURFACE_SECONDARY,
+  TEXT_SECONDARY,
+  TEXT_TERTIARY,
+} from './chromeStyles';
 import type { PanelState, PreviewMode, SidebarTab } from './types';
 
-export const chromeBarPadding = `${tokens.spacing['2']} ${tokens.spacing['4']}`;
-export const chromeBarHeight = '48px';
-export const SURFACE_PRIMARY = 'var(--aethel-surface-primary)';
-export const SURFACE_SECONDARY = 'var(--aethel-surface-secondary)';
-export const TEXT_PRIMARY = 'var(--aethel-text-primary)';
-export const TEXT_SECONDARY = 'var(--aethel-text-secondary)';
-export const TEXT_TERTIARY = 'var(--aethel-text-tertiary)';
-export const BORDER_PRIMARY = 'var(--aethel-border-primary)';
-export const BORDER_SECONDARY = 'var(--aethel-border-secondary)';
-export const STATUS_SUCCESS = 'var(--aethel-success)';
-export const STATUS_WARNING = 'var(--aethel-warning)';
-export const STATUS_ERROR = 'var(--aethel-error)';
-export const ACCENT_CYAN = 'var(--aethel-info)';
-
-export const HEADER_ACTION_BUTTON: React.CSSProperties = {
-  minHeight: '36px',
-  padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
-  background: 'color-mix(in srgb, var(--aethel-surface-secondary) 52%, transparent)',
-  border: `1px solid ${BORDER_SECONDARY}`,
-  borderRadius: tokens.radius.md,
-  color: TEXT_SECONDARY,
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  gap: tokens.spacing['2'],
-  fontSize: tokens.typography.fontSize.xs,
-  fontWeight: tokens.typography.fontWeight.medium,
-  transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
-};
-
-export const iconButtonStyle: React.CSSProperties = {
-  minWidth: '36px',
-  minHeight: '36px',
-  padding: tokens.spacing['2'],
-  background: 'transparent',
-  border: 'none',
-  borderRadius: tokens.radius.md,
-  color: TEXT_TERTIARY,
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
-};
+export {
+  ACCENT_CYAN,
+  BORDER_PRIMARY,
+  BORDER_SECONDARY,
+  HEADER_ACTION_BUTTON,
+  STATUS_ERROR,
+  STATUS_SUCCESS,
+  STATUS_WARNING,
+  SURFACE_PRIMARY,
+  SURFACE_SECONDARY,
+  TEXT_PRIMARY,
+  TEXT_SECONDARY,
+  TEXT_TERTIARY,
+  chromeBarHeight,
+  chromeBarPadding,
+  iconButtonStyle,
+} from './chromeStyles';
 
 interface ResizeHandleProps {
   ariaLabel: string;
@@ -211,178 +195,27 @@ export function IDEHeader({
 
   return (
     <header style={headerStyle}>
-      <div style={{ display: 'flex', minWidth: 0, flex: '1 1 auto', alignItems: 'center', gap: tokens.spacing['4'] }}>
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          style={{
-            ...iconButtonStyle,
-            color: TEXT_SECONDARY,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          aria-label="Alternar barra lateral"
-        >
-          <Layout size={20} />
-        </button>
-
-        <div style={{ display: 'flex', minWidth: 0, flexDirection: 'column', gap: tokens.spacing['0.5'] }}>
-          <span
-            style={{
-              fontSize: tokens.typography.fontSize.sm,
-              fontWeight: tokens.typography.fontWeight.semibold,
-              color: TEXT_PRIMARY,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {projectName}
-          </span>
-          {activeFileName && (
-            <span
-              style={{
-                fontSize: tokens.typography.fontSize.xs,
-                color: TEXT_TERTIARY,
-                display: 'flex',
-                alignItems: 'center',
-                gap: tokens.spacing['1'],
-                minWidth: 0,
-              }}
-            >
-              <Code2 size={12} />
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {activeFileName}
-              </span>
-            </span>
-          )}
-        </div>
-      </div>
+      <HeaderIdentity
+        projectName={projectName}
+        activeFileName={activeFileName}
+        onToggleSidebar={onToggleSidebar}
+      />
 
       {!isCompact && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexWrap: 'wrap', justifyContent: 'center' }}>
-          {headerExtras}
-          <PanelToggle
-            icon={<FolderTree size={16} />}
-            label="Arquivos"
-            active={panelState.sidebar.open}
-            onClick={() => onTogglePanel('sidebar')}
-          />
-          <PanelToggle
-            icon={<MessageSquare size={16} />}
-            label="Copiloto"
-            active={panelState.chat.open}
-            onClick={() => onTogglePanel('chat')}
-          />
-          <PanelToggle
-            icon={<Play size={16} />}
-            label="Previa"
-            active={panelState.preview.open}
-            onClick={() => onTogglePanel('preview')}
-          />
-          {onOpenCommandPalette && (
-            <>
-              <button
-                type="button"
-                onClick={() => onOpenCommandPalette('commands')}
-                style={HEADER_ACTION_BUTTON}
-                aria-label="Abrir paleta de comandos"
-                title="Cmd+K"
-              >
-                <Sparkles size={14} />
-                Cmd+K
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenCommandPalette('files')}
-                style={HEADER_ACTION_BUTTON}
-                aria-label="Abrir paleta de arquivos"
-                title="Cmd+P"
-              >
-                <Search size={14} />
-                Cmd+P
-              </button>
-            </>
-          )}
-        </div>
+        <HeaderWorkspaceControls
+          headerExtras={headerExtras}
+          panelState={panelState}
+          onTogglePanel={onTogglePanel}
+          onOpenCommandPalette={onOpenCommandPalette}
+        />
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexShrink: 0 }}>
-        <button
-          type="button"
-          onClick={onRunPrimaryAction}
-          disabled={!onRunPrimaryAction}
-          style={{
-            minHeight: '40px',
-            padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
-            background: gradients.brand,
-            border: 'none',
-            borderRadius: tokens.radius.md,
-            color: TEXT_PRIMARY,
-            fontSize: tokens.typography.fontSize.xs,
-            fontWeight: tokens.typography.fontWeight.semibold,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: tokens.spacing['2'],
-            opacity: onRunPrimaryAction ? 1 : 0.65,
-          }}
-          aria-label="Executar ação principal da previa"
-        >
-          <Play size={14} />
-          Executar
-        </button>
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          disabled={!onOpenSettings}
-          style={{
-            ...iconButtonStyle,
-            color: TEXT_SECONDARY,
-            opacity: onOpenSettings ? 1 : 0.65,
-          }}
-          aria-label="Abrir configuracoes"
-        >
-          <Settings size={18} />
-        </button>
-      </div>
+      <HeaderPrimaryActions
+        projectName={projectName}
+        onRunPrimaryAction={onRunPrimaryAction}
+        onOpenSettings={onOpenSettings}
+      />
     </header>
-  );
-}
-
-interface PanelToggleProps {
-  icon: React.ReactNode;
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}
-
-function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: tokens.spacing['2'],
-        minHeight: '36px',
-        padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
-        background: active ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-        border: `1px solid ${active ? BORDER_PRIMARY : 'transparent'}`,
-        borderRadius: tokens.radius.md,
-        color: active ? TEXT_PRIMARY : TEXT_SECONDARY,
-        fontSize: tokens.typography.fontSize.xs,
-        fontWeight: tokens.typography.fontWeight.medium,
-        whiteSpace: 'nowrap',
-        cursor: 'pointer',
-        transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
-      }}
-    >
-      {icon}
-      {label}
-    </button>
   );
 }
 
@@ -418,86 +251,25 @@ export function BottomDock({
     overflowX: 'auto',
   };
 
-  const dockItems = [
-    { id: 'explorer', icon: <FolderTree size={16} />, label: 'Arquivos', shortcut: 'Ctrl+Shift+E' },
-    { id: 'search', icon: <Search size={16} />, label: 'Buscar', shortcut: 'Ctrl+Shift+F' },
-    { id: 'git', icon: <GitBranch size={16} />, label: 'Git', shortcut: 'Ctrl+Shift+G' },
-    { id: 'viewport', icon: <Play size={16} />, label: 'Viewport', shortcut: 'Ctrl+Shift+V' },
-    { id: 'console', icon: <Terminal size={16} />, label: 'Console', shortcut: 'Ctrl+J' },
-    { id: 'diagnostics', icon: <AlertCircle size={16} />, label: 'Erros', shortcut: 'Ctrl+Shift+M' },
-    { id: 'chat', icon: <Sparkles size={16} />, label: 'IA', shortcut: 'Ctrl+I' },
-  ] as const;
-
   return (
     <div style={dockStyle}>
-      {dockItems.map((item) => {
-        const isActive =
-          (item.id === 'explorer' && panelState.sidebar.open && activeSidebarTab === 'explorer') ||
-          (item.id === 'git' && panelState.sidebar.open && activeSidebarTab === 'git') ||
-          (item.id === 'viewport' && panelState.preview.open && activePreviewMode === 'viewport3d') ||
-          (item.id === 'console' && panelState.preview.open && activePreviewMode === 'console') ||
-          (item.id === 'chat' && panelState.chat.open);
-
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => {
-              if (item.id === 'explorer') {
-                if (!panelState.sidebar.open) onTogglePanel('sidebar');
-                onSelectSidebarTab?.('explorer');
-                return;
-              }
-              if (item.id === 'git') {
-                if (!panelState.sidebar.open) onTogglePanel('sidebar');
-                onSelectSidebarTab?.('git');
-                return;
-              }
-              if (item.id === 'search') {
-                onOpenCommandPalette?.('files');
-                return;
-              }
-              if (item.id === 'viewport') {
-                if (!panelState.preview.open) onTogglePanel('preview');
-                onSelectPreviewMode?.('viewport3d');
-                return;
-              }
-              if (item.id === 'console') {
-                if (!panelState.preview.open) onTogglePanel('preview');
-                onSelectPreviewMode?.('console');
-                return;
-              }
-              if (item.id === 'diagnostics') {
-                onToggleDiagnostics?.();
-                return;
-              }
-              if (item.id === 'chat') {
-                onTogglePanel('chat');
-              }
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: tokens.spacing['2'],
-              minHeight: '36px',
-              padding: `${tokens.spacing['1.5']} ${tokens.spacing['2.5']}`,
-              background: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-              border: `1px solid ${isActive ? BORDER_PRIMARY : 'transparent'}`,
-              borderRadius: tokens.radius.sm,
-              color: isActive ? TEXT_PRIMARY : TEXT_TERTIARY,
-              fontSize: tokens.typography.fontSize.xs,
-              cursor: 'pointer',
-              flexShrink: 0,
-              transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
-              whiteSpace: 'nowrap',
-            }}
-            title={`${item.label} (${item.shortcut})`}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </button>
-        );
-      })}
+      {BOTTOM_DOCK_ITEMS.map((item) => (
+        <BottomDockItemButton
+          key={item.id}
+          item={item}
+          active={isBottomDockItemActive(item.id, panelState, activeSidebarTab, activePreviewMode)}
+          onClick={() =>
+            handleBottomDockItemClick(item.id, {
+              panelState,
+              onTogglePanel,
+              onOpenCommandPalette,
+              onSelectSidebarTab,
+              onSelectPreviewMode,
+              onToggleDiagnostics,
+            })
+          }
+        />
+      ))}
     </div>
   );
 }
@@ -507,7 +279,7 @@ interface StatusBarProps {
   activeFileName?: string;
 }
 
-export function StatusBar({ projectName, activeFileName }: StatusBarProps) {
+export function StatusBar({ activeFileName }: StatusBarProps) {
   const statusBarStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -520,48 +292,20 @@ export function StatusBar({ projectName, activeFileName }: StatusBarProps) {
     color: TEXT_SECONDARY,
     gap: tokens.spacing['4'],
   };
-
   return (
     <div style={statusBarStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'], minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <GitBranch size={12} />
-          <span>main</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <AlertCircle size={12} style={{ color: STATUS_WARNING }} />
-          <span>0</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <AlertCircle size={12} style={{ color: STATUS_ERROR }} />
-          <span>0</span>
-        </div>
+        {STATUS_BAR_LEADING_ITEMS.map((item, index) => (
+          <StatusMetric key={`${item.label}-${index}`} icon={item.icon} label={item.label} />
+        ))}
       </div>
 
-      {activeFileName && (
-        <div style={{ display: 'flex', minWidth: 0, alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <Code2 size={12} />
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeFileName}</span>
-        </div>
-      )}
+      {activeFileName && <ActiveFileStatus activeFileName={activeFileName} />}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['4'], flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <CheckCircle size={12} style={{ color: STATUS_SUCCESS }} />
-          <span>Prettier</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <Terminal size={12} />
-          <span>UTF-8</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <Clock size={12} />
-          <span>Ln 1, Col 1</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
-          <Sparkles size={12} />
-          <span>AI Ready</span>
-        </div>
+        {STATUS_BAR_TRAILING_ITEMS.map((item, index) => (
+          <StatusMetric key={`${item.label}-${index}`} icon={item.icon} label={item.label} />
+        ))}
       </div>
     </div>
   );
@@ -572,7 +316,10 @@ interface MobileBottomBarProps {
   onTogglePanel: (panel: keyof PanelState) => void;
 }
 
-export function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarProps) {
+export function MobileBottomBar({
+  panelState,
+  onTogglePanel,
+}: MobileBottomBarProps) {
   const barStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -584,42 +331,16 @@ export function MobileBottomBar({ panelState, onTogglePanel }: MobileBottomBarPr
     gap: tokens.spacing['1'],
   };
 
-  const items = [
-    { id: 'sidebar', icon: <FolderTree size={20} />, label: 'Arquivos' },
-    { id: 'editor', icon: <Code2 size={20} />, label: 'Editor' },
-    { id: 'chat', icon: <MessageSquare size={20} />, label: 'Copiloto' },
-    { id: 'preview', icon: <Play size={20} />, label: 'Previa' },
-  ] as const;
-
   return (
     <nav style={barStyle}>
-      {items.map((item) => {
-        const isActive = panelState[item.id as keyof PanelState].open;
-        return (
-          <button
-            type="button"
-            key={item.id}
-            onClick={() => onTogglePanel(item.id as keyof PanelState)}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: tokens.spacing['1'],
-              minWidth: '64px',
-              minHeight: '44px',
-              padding: `${tokens.spacing['1.5']} ${tokens.spacing['3']}`,
-              background: 'transparent',
-              border: 'none',
-              color: isActive ? ACCENT_CYAN : TEXT_TERTIARY,
-              fontSize: tokens.typography.fontSize.xs,
-              cursor: 'pointer',
-            }}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </button>
-        );
-      })}
+      {MOBILE_BOTTOM_BAR_ITEMS.map((item) => (
+        <MobileBottomBarItemButton
+          key={item.id}
+          item={item}
+          active={panelState[item.id].open}
+          onClick={() => onTogglePanel(item.id)}
+        />
+      ))}
     </nav>
   );
 }

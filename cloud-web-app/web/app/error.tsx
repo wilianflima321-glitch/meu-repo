@@ -2,8 +2,10 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
-import * as Sentry from '@sentry/nextjs'
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react'
+import { createComponentLogger } from '@/lib/observability/logger'
+
+const logger = createComponentLogger('app-error-boundary')
 
 export default function Error({
   error,
@@ -13,8 +15,20 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    Sentry.captureException(error)
-    console.error('[Aethel Error Boundary]', error)
+    logger.error('[Aethel Error Boundary] Runtime error captured', { error })
+
+    import('@/lib/sentry-browser')
+      .then(({ captureBrowserException }) => {
+        captureBrowserException(error, {
+          surface: 'app-error-boundary',
+        })
+      })
+      .catch((captureError) => {
+        logger.warn('[Aethel Error Boundary] Failed to send error to Sentry', {
+          captureError,
+          originalError: error,
+        })
+      })
   }, [error])
 
   return (

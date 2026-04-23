@@ -508,12 +508,12 @@ export default function UserLibrary() {
 
     const handleRemove = useCallback((assetId: string) => {
         toast.success('Removido da biblioteca.');
-    }, []);
+    }, [toast]);
 
     const handleAddToCollection = useCallback((assetId: string) => {
         // Open collection picker dialog
         toast.info('Selecione uma colecao.');
-    }, []);
+    }, [toast]);
 
     const handleCreateCollection = useCallback(() => {
         if (!newCollectionName.trim()) return;
@@ -523,7 +523,7 @@ export default function UserLibrary() {
         setNewCollectionName('');
         setIsCreateDialogOpen(false);
         queryClient.invalidateQueries({ queryKey: ['collections'] });
-    }, [newCollectionName, queryClient]);
+    }, [newCollectionName, queryClient, toast]);
 
     // Filter assets by search
     const filterAssets = (assets: LibraryAsset[] | undefined) => {

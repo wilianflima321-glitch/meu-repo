@@ -1,5 +1,20 @@
+import { Suspense } from 'react';
 import LoginPageV2 from './login-v2';
 
+function LoginPageFallback() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] px-4 py-10 text-[var(--aethel-text-primary)]">
+      <div className="w-full max-w-md rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] p-6 shadow-2xl shadow-[0_24px_70px_rgba(2,8,23,0.35)]">
+        <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando autenticacao...</p>
+      </div>
+    </main>
+  );
+}
+
 export default function LoginPage() {
-  return <LoginPageV2 />;
+  return (
+    <Suspense fallback={<LoginPageFallback />}>
+      <LoginPageV2 />
+    </Suspense>
+  );
 }

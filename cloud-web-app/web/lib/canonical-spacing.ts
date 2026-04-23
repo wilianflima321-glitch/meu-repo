@@ -94,10 +94,12 @@ export const CANONICAL_FOCUS =
  */
 export const CANONICAL_MOTION = 'motion-safe:transition-all motion-safe:duration-200';
 
-export default {
+const canonicalSpacing = {
   spacing: CANONICAL_SPACING,
   typography: CANONICAL_TYPOGRAPHY,
   colors: CANONICAL_COLORS,
   focus: CANONICAL_FOCUS,
   motion: CANONICAL_MOTION,
 };
+
+export default canonicalSpacing;

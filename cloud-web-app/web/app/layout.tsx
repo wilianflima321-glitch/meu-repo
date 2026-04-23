@@ -9,7 +9,6 @@ import TelemetryBootstrap from '../components/observability/TelemetryBootstrap'
 import CookieConsent from '../components/ui/CookieConsent'
 import { ToastProvider } from '../components/ui/toast-system'
 import { ThemeProvider } from '../contexts/ThemeContext'
-import { initSentry } from '../lib/sentry'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -86,8 +85,6 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  initSentry()
-
   return (
     <html lang="pt-BR" className={`dark ${inter.variable} ${jetbrains.variable}`}>
       <head>

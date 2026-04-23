@@ -31,14 +31,17 @@ import { SearchBar, ShellSelector, TerminalTab } from './XTerminalChrome';
 import {
   TERMINAL_THEMES,
   type TerminalSession,
-  type TerminalTheme,
   type XTerminalProps,
   type XTerminalRef,
 } from './terminalModels';
+import { TerminalIconButton } from './terminalIconButton';
 import { TerminalWebSocket } from './terminalWebSocket';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const log = createComponentLogger('XTerminal');
+const SEARCH_DECORATIONS = {
+  decorations: { matchOverviewRuler: '#FF0' },
+};
 
 
 // ============================================================================
@@ -75,6 +78,53 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
     const [isMaximized, setIsMaximized] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
+
+    const writeTerminalError = useCallback((message: string) => {
+      terminalRef.current?.writeln(`\x1b[31m${message}\x1b[0m`);
+    }, []);
+
+    const fitTerminal = useCallback((socket?: TerminalWebSocket | null) => {
+      if (!fitAddonRef.current || !terminalRef.current) {
+        return;
+      }
+
+      fitAddonRef.current.fit();
+
+      const activeSocket = socket ?? wsRef.current;
+      if (activeSocket?.connected) {
+        activeSocket.resize(terminalRef.current.cols, terminalRef.current.rows);
+      }
+    }, []);
+
+    const search = useCallback(
+      (term: string) => searchAddonRef.current?.findNext(term, SEARCH_DECORATIONS) || false,
+      []
+    );
+    const searchNext = useCallback(
+      () => searchAddonRef.current?.findNext('') || false,
+      []
+    );
+    const searchPrevious = useCallback(
+      () => searchAddonRef.current?.findPrevious('') || false,
+      []
+    );
+    const toggleSearch = useCallback(() => {
+      setShowSearch((prev) => !prev);
+    }, []);
+    const toggleMaximized = useCallback(() => {
+      setIsMaximized((prev) => !prev);
+    }, []);
+    const copySelection = useCallback(() => {
+      const selection = terminalRef.current?.getSelection();
+      if (selection) {
+        void navigator.clipboard.writeText(selection);
+      }
+    }, []);
+    const pasteClipboard = useCallback(() => {
+      void navigator.clipboard.readText().then((text) => {
+        wsRef.current?.send(text);
+      });
+    }, []);
 
     // Memoized terminal options
     const terminalOptions: ITerminalOptions = useMemo(() => ({
@@ -169,24 +219,12 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
 
           // Initial fit
           requestAnimationFrame(() => {
-            if (fitAddonRef.current) {
-              fitAddonRef.current.fit();
-            }
+            fitTerminal();
           });
 
           // Setup resize observer
           const resizeObserver = new ResizeObserver(() => {
-            if (fitAddonRef.current) {
-              fitAddonRef.current.fit();
-
-              // Notify server of resize
-              if (terminalRef.current && wsRef.current?.connected) {
-                wsRef.current.resize(
-                  terminalRef.current.cols,
-                  terminalRef.current.rows
-                );
-              }
-            }
+            fitTerminal();
           });
 
           resizeObserver.observe(containerRef.current);
@@ -266,11 +304,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
         return newSession;
       } catch (error) {
         log.error('Failed to create terminal session', { error });
-
-        // Write error to terminal
-        terminalRef.current?.writeln(
-          '\x1b[31mFailed to create terminal session. Please try again.\x1b[0m'
-        );
+        writeTerminalError('Failed to create terminal session. Please try again.');
 
         return null;
       }
@@ -302,12 +336,7 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
       ws.onConnect = () => {
         setIsConnected(true);
         terminalRef.current?.focus();
-
-        // Send initial resize
-        if (fitAddonRef.current && terminalRef.current) {
-          fitAddonRef.current.fit();
-          ws.resize(terminalRef.current.cols, terminalRef.current.rows);
-        }
+        fitTerminal(ws);
       };
 
       ws.onDisconnect = () => {
@@ -316,14 +345,12 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
 
       ws.onError = (error) => {
         log.error('Terminal websocket error', { error });
-        terminalRef.current?.writeln(
-          '\x1b[31mConnection error. Attempting to reconnect...\x1b[0m'
-        );
+        writeTerminalError('Connection error. Attempting to reconnect...');
       };
 
       wsRef.current = ws;
       ws.connect(sessionId);
-    }, []);
+    }, [fitTerminal, writeTerminalError]);
 
     // Close session
     const closeSession = useCallback(async (sessionId: string) => {
@@ -376,57 +403,48 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
       clear: () => terminalRef.current?.clear(),
       focus: () => terminalRef.current?.focus(),
       fit: () => fitAddonRef.current?.fit(),
-      search: (term: string) => {
-        const result = searchAddonRef.current?.findNext(term, {
-          decorations: { matchOverviewRuler: '#FF0' }
-        });
-        return result || false;
-      },
-      searchNext: () => searchAddonRef.current?.findNext('') || false,
-      searchPrevious: () => searchAddonRef.current?.findPrevious('') || false,
+      search,
+      searchNext,
+      searchPrevious,
       getSelection: () => terminalRef.current?.getSelection() || '',
       dispose: () => {
         wsRef.current?.disconnect();
         terminalRef.current?.dispose();
       },
-    }), []);
+    }), [search, searchNext, searchPrevious]);
 
     // Keyboard shortcuts
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
-        // Ctrl+Shift+F - Search
-        if (e.ctrlKey && e.shiftKey && e.key === 'F') {
-          e.preventDefault();
-          setShowSearch((prev) => !prev);
+        if (!(e.ctrlKey && e.shiftKey)) {
+          return;
         }
 
-        // Ctrl+Shift+C - Copy
-        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-          e.preventDefault();
-          const selection = terminalRef.current?.getSelection();
-          if (selection) {
-            navigator.clipboard.writeText(selection);
-          }
-        }
-
-        // Ctrl+Shift+V - Paste
-        if (e.ctrlKey && e.shiftKey && e.key === 'V') {
-          e.preventDefault();
-          navigator.clipboard.readText().then((text) => {
-            wsRef.current?.send(text);
-          });
-        }
-
-        // Ctrl+Shift+` - New terminal
-        if (e.ctrlKey && e.shiftKey && e.key === '`') {
-          e.preventDefault();
-          createSession();
+        switch (e.key) {
+          case 'F':
+            e.preventDefault();
+            toggleSearch();
+            break;
+          case 'C':
+            e.preventDefault();
+            copySelection();
+            break;
+          case 'V':
+            e.preventDefault();
+            pasteClipboard();
+            break;
+          case '`':
+            e.preventDefault();
+            void createSession();
+            break;
+          default:
+            break;
         }
       };
 
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [createSession]);
+    }, [copySelection, createSession, pasteClipboard, toggleSearch]);
 
     return (
       <div
@@ -470,42 +488,32 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
             />
 
             {/* Search Toggle */}
-            <button type="button"
-              onClick={() => setShowSearch((prev) => !prev)}
-              className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-              aria-label="Toggle search"
+            <TerminalIconButton
+              onClick={toggleSearch}
+              label="Toggle search"
               aria-pressed={showSearch}
             >
               <Search size={14} />
-            </button>
+            </TerminalIconButton>
 
             {/* Split */}
-            <button type="button"
-              onClick={() => createSession()}
-              className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-              aria-label="Split terminal"
-            >
+            <TerminalIconButton onClick={() => void createSession()} label="Split terminal">
               <Split size={14} />
-            </button>
+            </TerminalIconButton>
 
             {/* Maximize */}
-            <button type="button"
-              onClick={() => setIsMaximized((prev) => !prev)}
-              className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-              aria-label={isMaximized ? 'Restore' : 'Maximize'}
+            <TerminalIconButton
+              onClick={toggleMaximized}
+              label={isMaximized ? 'Restore' : 'Maximize'}
             >
               {isMaximized ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-            </button>
+            </TerminalIconButton>
 
             {/* Close */}
             {onClose && (
-              <button type="button"
-                onClick={onClose}
-                className="p-1.5 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-                aria-label="Close terminal panel"
-              >
+              <TerminalIconButton onClick={onClose} label="Close terminal panel">
                 <X size={14} />
-              </button>
+              </TerminalIconButton>
             )}
           </div>
         </div>
@@ -513,9 +521,9 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
         {/* Search Bar */}
         {showSearch && (
           <SearchBar
-            onSearch={(term) => searchAddonRef.current?.findNext(term)}
-            onSearchNext={() => searchAddonRef.current?.findNext('')}
-            onSearchPrevious={() => searchAddonRef.current?.findPrevious('')}
+            onSearch={search}
+            onSearchNext={searchNext}
+            onSearchPrevious={searchPrevious}
             onClose={() => setShowSearch(false)}
           />
         )}
@@ -549,20 +557,18 @@ export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
   const [terminals, setTerminals] = useState<string[]>(() =>
     Array.from({ length: initialSessions }, () => crypto.randomUUID())
   );
-  const [activeTerminal, setActiveTerminal] = useState(0);
   const [splitDirection, setSplitDirection] = useState<'horizontal' | 'vertical'>('horizontal');
 
   const addTerminal = useCallback(() => {
     setTerminals((prev) => [...prev, crypto.randomUUID()]);
-    setActiveTerminal(terminals.length);
-  }, [terminals.length]);
+  }, []);
 
   const removeTerminal = useCallback((index: number) => {
     setTerminals((prev) => prev.filter((_, i) => i !== index));
-    if (activeTerminal >= terminals.length - 1) {
-      setActiveTerminal(Math.max(0, terminals.length - 2));
-    }
-  }, [activeTerminal, terminals.length]);
+  }, []);
+  const toggleSplitDirection = useCallback(() => {
+    setSplitDirection((prev) => (prev === 'horizontal' ? 'vertical' : 'horizontal'));
+  }, []);
 
   if (terminals.length === 0) {
     return null;
@@ -573,31 +579,23 @@ export const MultiTerminalPanel: React.FC<MultiTerminalPanelProps> = ({
       {/* Toolbar */}
       <div className="flex items-center justify-between px-2 py-1 bg-[var(--aethel-surface-secondary)] border-b border-[var(--aethel-border-primary)]">
         <div className="flex items-center gap-2">
-          <button type="button"
-            onClick={addTerminal}
-            className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-            aria-label="New terminal"
-          >
+          <TerminalIconButton compact onClick={addTerminal} label="New terminal">
             <Plus size={14} />
-          </button>
+          </TerminalIconButton>
 
-          <button type="button"
-            onClick={() => setSplitDirection(splitDirection === 'horizontal' ? 'vertical' : 'horizontal')}
-            className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-            aria-label="Toggle split direction"
+          <TerminalIconButton
+            compact
+            onClick={toggleSplitDirection}
+            label="Toggle split direction"
           >
             <Split size={14} className={splitDirection === 'vertical' ? 'rotate-90' : ''} />
-          </button>
+          </TerminalIconButton>
         </div>
 
         {onClose && (
-          <button type="button"
-            onClick={onClose}
-            className="p-1 hover:bg-[var(--aethel-surface-tertiary)] rounded text-[var(--aethel-text-secondary)] hover:text-[var(--aethel-text-primary)]"
-            aria-label="Close terminal panel"
-          >
+          <TerminalIconButton compact onClick={onClose} label="Close terminal panel">
             <X size={14} />
-          </button>
+          </TerminalIconButton>
         )}
       </div>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Grid, List, Search, Filter, Star, Folder, Image as ImageIcon, Box, Layers, Lightbulb, Camera } from 'lucide-react'
 
 interface Asset {
@@ -158,9 +159,16 @@ export function AssetBrowser3D({ assets = defaultAssets, onAssetSelect, onAssetD
                     : 'border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] hover:border-[var(--aethel-border-primary)]'
                 }`}
               >
-                <div className="aspect-square mb-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] flex items-center justify-center">
+                <div className="relative aspect-square mb-2 rounded bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_70%,transparent)] flex items-center justify-center overflow-hidden">
                   {asset.thumbnail ? (
-                    <img src={asset.thumbnail} alt={asset.name} className="w-full h-full object-cover rounded" />
+                    <Image
+                      src={asset.thumbnail}
+                      alt={asset.name}
+                      fill
+                      unoptimized
+                      sizes="96px"
+                      className="object-cover rounded"
+                    />
                   ) : (
                     <div className={`${getTypeColor(asset.type)}`}>
                       {getAssetIcon(asset.type)}

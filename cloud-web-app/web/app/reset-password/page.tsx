@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle, Loader2, XCircle } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
+import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
 
 function ResetPasswordForm() {
-  const searchParams = useSearchParams()
   const router = useRouter()
+  const search = useBrowserSearch()
+  const searchParams = useMemo(() => new URLSearchParams(search), [search])
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')

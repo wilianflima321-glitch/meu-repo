@@ -33,6 +33,7 @@ export interface MonacoEditorProps {
   defaultValue?: string;
   language?: string;
   path?: string;
+  projectId?: string;
 
   // Callbacks
   onChange?: (value: string | undefined, event: monacoEditor.editor.IModelContentChangedEvent) => void;
@@ -164,6 +165,7 @@ export function MonacoEditorPro({
   defaultValue,
   language = 'typescript',
   path,
+  projectId,
   onChange,
   onSave,
   onAiApplyResult,
@@ -899,6 +901,7 @@ export function MonacoEditorPro({
           onApply={handleInlineEditApply}
           language={language}
           filePath={path}
+          projectId={projectId}
           cursorPosition={selection.position}
         />
       )}

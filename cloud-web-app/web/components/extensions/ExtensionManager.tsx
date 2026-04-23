@@ -16,7 +16,7 @@ import { ptBR } from '@/lib/locales/pt-BR'
  * - Categorias e filtros
  */
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import Image from 'next/image'
 import {
   Search,
@@ -280,7 +280,7 @@ export default function ExtensionManager({
     } finally {
       setIsLoading(null)
     }
-  }, [propOnUninstall, apiUninstall])
+  }, [propOnUninstall, apiUninstall, t, tc])
 
   // Handle toggle
   const handleToggle = useCallback((ext: Extension) => {

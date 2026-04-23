@@ -19,6 +19,14 @@ function getPathnameSnapshot() {
   return window.location.pathname
 }
 
+function getSearchSnapshot() {
+  if (typeof window === 'undefined') {
+    return ''
+  }
+
+  return window.location.search
+}
+
 function patchHistoryOnce() {
   if (historyPatched || typeof window === 'undefined') {
     return
@@ -60,6 +68,10 @@ function subscribe(listener: Listener) {
 
 export function useBrowserPathname() {
   return useSyncExternalStore(subscribe, getPathnameSnapshot, () => '/')
+}
+
+export function useBrowserSearch() {
+  return useSyncExternalStore(subscribe, getSearchSnapshot, () => '')
 }
 
 export default useBrowserPathname

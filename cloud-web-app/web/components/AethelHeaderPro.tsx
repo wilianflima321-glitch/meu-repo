@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import {
   Bell,
   Search,
@@ -42,7 +41,6 @@ interface HeaderNotificationItem {
 
 export default function AethelHeader() {
   const pathname = useBrowserPathname()
-  const router = useRouter()
   const [isAuth, setIsAuth] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
@@ -119,7 +117,9 @@ export default function AethelHeader() {
   }, [fetchNotificationCount, fetchUser])
 
   const handleOpenSearch = () => {
-    router.push('/ide?entry=search')
+    if (typeof window !== 'undefined') {
+      window.location.assign('/ide?entry=search')
+    }
   }
 
   const handleToggleNotifications = async () => {

@@ -3,10 +3,11 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Codicon from '@/components/ide/Codicon'
 import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import { analytics } from '@/lib/analytics'
+import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
 
 type AuthResponse = {
   access_token?: string
@@ -35,7 +36,8 @@ const LOGIN_STATS = [
 
 export default function LoginPageV2() {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const search = useBrowserSearch()
+  const searchParams = useMemo(() => new URLSearchParams(search), [search])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)

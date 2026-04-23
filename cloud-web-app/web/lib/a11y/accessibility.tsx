@@ -5,6 +5,8 @@
  * keyboard navigation, and screen reader support.
  */
 
+'use client'
+
 import {
   createContext,
   useContext,

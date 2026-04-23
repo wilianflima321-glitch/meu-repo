@@ -1,6 +1,6 @@
 'use client';
 
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
+import { useMemo, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type * as monacoEditor from 'monaco-editor';
 
 import RemoteCursorLayer from '@/components/collaboration/RemoteCursorLayer';
@@ -15,6 +15,7 @@ import TabBar from '@/components/editor/TabBar';
 import { ErrorHighlighting } from '@/components/ide/ErrorHighlighting';
 import { IntelliSense } from '@/components/ide/IntelliSense';
 import OutlinePanel, { type DocumentSymbol } from '@/components/outline/OutlinePanel';
+import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 
 import type {
   ActiveFileState,
@@ -158,6 +159,12 @@ export function WorkbenchEditorPane({
   onCursorPresenceChange,
   onSelectionPresenceChange,
 }: WorkbenchEditorPaneProps) {
+  const search = useBrowserSearch();
+  const inlineEditProjectId = useMemo(() => {
+    const projectIdParam = new URLSearchParams(search).get('projectId');
+    const normalizedProjectIdParam = projectIdParam?.trim();
+    return normalizedProjectIdParam || undefined;
+  }, [search]);
   const currentDiagnosticsFilePath = bridgeActiveFile?.path ?? activeFile?.path ?? '';
 
   return (
@@ -344,6 +351,7 @@ export function WorkbenchEditorPane({
                           }}
                         >
                           <MonacoEditorPro
+                            projectId={inlineEditProjectId}
                             path={fileState.path}
                             value={fileState.content}
                             language={fileState.language}
@@ -402,6 +410,7 @@ export function WorkbenchEditorPane({
                 ) : (
                   <div className="relative h-full">
                     <MonacoEditorPro
+                      projectId={inlineEditProjectId}
                       path={activeFile.path}
                       value={activeFile.content}
                       language={activeFile.language}

@@ -1,150 +1,101 @@
 # 85_EXECUTION_STATUS_MAP_2026-04-22
 Date: 2026-04-22
+Last refreshed: 2026-04-23
 Status: ACTIVE
-Role: execution snapshot and no-drift scoreboard across the canonical audit set
+Role: short execution snapshot and no-drift scoreboard across the canonical audit set
 
 ## Why This Exists
-The project now has a strong audit stack:
+The project already has strong audits.
+This file is the short scoreboard that answers:
+1. what is truly closed
+2. what is partially shipped but not yet proven end to end
+3. what is still open and should stay on the board
 
-- `82` = direction and benchmark
-- `83` = systems and interfaces
-- `84` = repository, CI/CD, and governance
-- `81` = factual guardrail
+## Current Snapshot
+- `AIChatPanelPro.tsx`: `549` lines
+- `FullscreenIDE.tsx`: `702` lines
+- `ModernIDEShell.tsx`: `378` lines
+- `ModernIDEShellChrome.tsx`: `378` lines
+- `XTerminal.tsx`: `628` lines
+- default PR browser pressure exists through `playwright.merge.config.ts`
+- last documented local Chromium replay for the merge-pressure suite: `5 passed`
+- production build parity is still open because `next build` still fails in the latest local evidence logs
 
-What was still missing was a short operational map that answers:
+## Closed Or Materially Stabilized
+### Governance baseline
+- `CODEOWNERS`
+- Dependabot
+- PR templates
+- branch protection policy
+- canonical audit hierarchy in `README.md` and `docs/master/00_INDEX.md`
 
-1. what has already been done
-2. what is still missing
-3. what order we should execute next without drifting
+### Core truth infrastructure
+- anti-fake-success gate
+- route contracts gate
+- canonical-doc alignment gate
+- `qa:enterprise-gate` directly enforced in CI
+- blocking browser dialog path removed from `EditorApplyBridgeContext.tsx`
 
-This document fills that gap.
-
-## Fresh Reconciliation ? 2026-04-23
-
-- `cloud-web-app/web/components/ide/ModernIDEShell.tsx` is now about `378` lines. The next shell hotspot is `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` at about `657` lines.
-- `cloud-web-app/web/components/terminal/XTerminal.tsx` is now about `630` lines and already delegates to `XTerminalChrome`, `terminalModels`, and `terminalWebSocket`.
-- the default merge-pressure lane still exists and remains valuable, but local replay still depends on a running app at `:3000`; CI bootstraps that explicitly.
-- the shared shell no longer uses tracked `usePathname()` consumers; that class of App Router hook leak is now mitigated through `cloud-web-app/web/lib/navigation/use-browser-pathname.ts`.
-- production build parity remains open until a full `next build` completes successfully after this mitigation.
-
-## What Is Already Closed
-### Repository and governance
-- vendored mega-forks were removed from the active product path
-- duplicate component names were eliminated
-- `tailwind.config.js` conflict was removed
-- `.env.template` conflict was removed
-- `CODEOWNERS` exists
-- Dependabot exists
-- PR templates exist
-- branch protection policy exists
-
-### Documentation and canonical set
-- `82` is the primary directional audit
-- `83` is the primary complementary audit for systems/interfaces
-- `84` is the primary complementary audit for repo/CI/governance
-- `81` remains the anti-fake-success factual guardrail
-- all four are linked from:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\README.md`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\docs\master\00_INDEX.md`
-
-### Observability and safety
-- Sentry is explicitly initialized
-- structured logger exists
-- anti-fake-success gate exists and is passing
-- route contract and canonical document gates exist
-- `qa:enterprise-gate` is now directly enforced in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.github\workflows\ci.yml`
-- the last blocking browser dialog path was removed from `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\EditorApplyBridgeContext.tsx`
-
-### Design system progress
-- Storybook is installed and building
+### Design-system/tooling baseline
+- Storybook works
 - ThemeToggle exists
 - design-system consistency gate is green
-- canonical component duplication gate is green
+- canonical component gate is green
 
-### Workbench progress
-- `AIChatPanelPro` already lost one bounded async responsibility to:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\useChatContextPreviews.ts`
-- `AIChatPanelPro` now also delegates UI responsibilities to:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatHeader.tsx`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatMessagesPane.tsx`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatActivityDeck.tsx`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatComposer.tsx`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\AIChatOpsSidebar.tsx`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ai-chat\presets.ts`
-- `FullscreenIDE` already lost one bounded access-control responsibility to:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchFullAccess.ts`
-- `FullscreenIDE` now also delegates workbench shell responsibilities to:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchChrome.ts`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchFiles.ts`
-- collaboration presence is visible in the shell header
-- collaboration is now also visible inside the editor canvas through:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\useWorkbenchRealtimeCollaboration.ts`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\fullscreen\WorkbenchEditorPane.tsx`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lib\yjs-collaboration.ts`
-- the default merge-pressure browser lane was validated locally in a real Chromium run with current result `5 passed`
-- `cloud-web-app/web/lib/sentry.ts` no longer blocks local runtime boot with `browserTracingIntegration is not a function`
-- `cloud-web-app/web/app/contact-sales/page.tsx` now exposes explicit label/input associations for the sales briefing form
-- current measured line counts after this extraction round:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx`: `~549`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx`: `~788`
-  - the next large files in the workbench lane are now:
-    - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\ModernIDEShell.tsx`
-    - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\terminal\XTerminal.tsx`
+## Shipped But Still Partial
+### Onboarding
+- the funnel exists and is instrumented,
+- but durable onboarding state and stronger first-run continuity are still open.
 
-## What Is Still Open
-### P0 — highest leverage, directly tied to product quality
-1. `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx`
-   - still too large
-   - still mixes orchestration with feature behavior
-2. `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx`
-   - still too large
-   - still centralizes multiple user flows
-3. `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\tsconfig.json`
-   - `noImplicitAny: false` remains active
-4. E2E merge pressure
-- default PR browser pressure now exists via `CI / Web App - Merge Pressure E2E`
-- that default browser lane runs `npm run test:e2e:merge` against `tests/e2e/merge-pressure.spec.ts`
-- it is intentionally isolated in `playwright.merge.config.ts` so the default PR gate stays lighter than the full matrix
-- the full Playwright matrix is still manual, which keeps this category partially open rather than fully solved
-5. Production build parity
-- the latest local `next build` attempt still failed on multiple routes with prerender/runtime issues, so production parity should still be treated as open even though the browser merge-pressure lane is now green locally
+### Inline AI editing
+- the canonical inline-edit path is wired and user-facing,
+- but still depends on provider/runtime readiness.
 
-### P1 — highly visible debt
-1. root hygiene
-   - loose files still communicate ambiguity, but dual Playwright config naming ambiguity is now resolved
-2. raw visual drift
-   - raw hex colors still exist across tracked component code
-3. console migration
-   - a large amount of `console.*` remains in tracked code
-4. admin surface
-   - still too wide for a polished product story
+### Deploy from IDE
+- the deploy action and status page exist in the canonical IDE,
+- but still depend on readiness/environment truth.
 
-### P2 — important, but after the above
-1. i18n still shallow
-2. preview still not a fully proven shareable workflow
-3. collaboration still lacks file-tree presence and a fully proven shared-text path
+### Preview runtime orchestration
+- discovery, provision, sync, and health flows exist,
+- but the category is still partial until full shareable proof is stable.
 
-## Current Best Execution Order
-1. continue slicing the two god components
-2. validate preview/deploy as a true shareable workflow
-3. harden collaboration from cursor presence into a fully trusted shared-editing path
-4. harden the new default merge-pressure suite and then graduate more of the Playwright matrix into required CI
-5. close the local production-build parity gap
-6. clean root ambiguity and duplicate config surfaces
-7. continue `console.* -> logger`
-8. reduce `: any` and push toward `noImplicitAny: true`
-9. expand tests and coverage pressure
-10. reduce admin sprawl
-11. deepen i18n
+### Collaboration
+- baseline collaboration is shipped in the canonical IDE:
+  - collaborator presence
+  - header avatars
+  - remote cursors
+- still open:
+  - file-tree presence
+  - broader shared-text proof
+  - stronger reconnect/reliability evidence
 
-## Rule For Future Rounds
-Every new round should leave behind four things:
+## Still Open
+### P0
+1. production build parity
+2. remaining workbench monolith reduction
+3. `noImplicitAny: false`
+4. full-matrix Playwright not yet default required pressure
 
-1. code change or structural cleanup
-2. validation output
-3. factual refresh in `81` if numbers changed
-4. no contradiction against `82`, `83`, or `84`
+### P1
+1. raw visual drift from tracked raw-hex usage
+2. `console.*` still present in tracked code
+3. admin sprawl at `46` pages
+4. preview not yet proven as a premium public/share workflow
+
+### P2
+1. i18n depth
+2. broader coverage pressure
+3. further root hygiene cleanup
+
+## Best Next Order
+1. close `next build`
+2. keep slicing `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `ModernIDEShellChrome.tsx`, and `XTerminal.tsx`
+3. harden preview + deploy into a reliable shareable loop
+4. promote collaboration from baseline UX into proven shared-editing confidence
+5. continue `console.* -> logger`
+6. continue `: any` reduction and move toward `noImplicitAny: true`
+7. deepen tests, coverage, admin consolidation, and i18n
 
 ## One-Line Truth
-The Aethel path is no longer “discover what to do.”
-The path now is “execute the known sequence without drift.”
+The work now is not discovering what to do.
+The work is executing the already-known sequence without drift.

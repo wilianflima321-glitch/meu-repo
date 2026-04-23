@@ -1,0 +1,226 @@
+import React from 'react';
+import { tokens } from '@/lib/design-tokens';
+import {
+  Code2,
+  FolderTree,
+  Layout,
+  MessageSquare,
+  Play,
+  Search,
+  Settings,
+  Sparkles,
+} from 'lucide-react';
+import type { PanelState } from './types';
+import {
+  HEADER_ACTION_BUTTON,
+  TEXT_PRIMARY,
+  TEXT_SECONDARY,
+  TEXT_TERTIARY,
+  getPanelToggleStyle,
+  getPrimaryActionButtonStyle,
+  iconButtonStyle,
+} from './chromeStyles';
+import { DeployTopbarAction } from './deployTopbarAction';
+
+type HeaderPanelKey = 'sidebar' | 'chat' | 'preview';
+type CommandPaletteMode = 'commands' | 'files';
+
+const headerPanelItems: ReadonlyArray<{
+  panel: HeaderPanelKey;
+  icon: React.ReactNode;
+  label: string;
+}> = [
+  { panel: 'sidebar', icon: <FolderTree size={16} />, label: 'Arquivos' },
+  { panel: 'chat', icon: <MessageSquare size={16} />, label: 'Copiloto' },
+  { panel: 'preview', icon: <Play size={16} />, label: 'Previa' },
+];
+
+const commandPaletteItems: ReadonlyArray<{
+  mode: CommandPaletteMode;
+  icon: React.ReactNode;
+  label: string;
+  ariaLabel: string;
+  title: string;
+}> = [
+  {
+    mode: 'commands',
+    icon: <Sparkles size={14} />,
+    label: 'Cmd+K',
+    ariaLabel: 'Abrir paleta de comandos',
+    title: 'Cmd+K',
+  },
+  {
+    mode: 'files',
+    icon: <Search size={14} />,
+    label: 'Cmd+P',
+    ariaLabel: 'Abrir paleta de arquivos',
+    title: 'Cmd+P',
+  },
+];
+
+interface HeaderIdentityProps {
+  projectName: string;
+  activeFileName?: string;
+  onToggleSidebar?: () => void;
+}
+
+export function HeaderIdentity({
+  projectName,
+  activeFileName,
+  onToggleSidebar,
+}: HeaderIdentityProps) {
+  return (
+    <div style={{ display: 'flex', minWidth: 0, flex: '1 1 auto', alignItems: 'center', gap: tokens.spacing['4'] }}>
+      <button
+        type="button"
+        onClick={onToggleSidebar}
+        style={{
+          ...iconButtonStyle,
+          color: TEXT_SECONDARY,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        aria-label="Alternar barra lateral"
+      >
+        <Layout size={20} />
+      </button>
+
+      <div style={{ display: 'flex', minWidth: 0, flexDirection: 'column', gap: tokens.spacing['0.5'] }}>
+        <span
+          style={{
+            fontSize: tokens.typography.fontSize.sm,
+            fontWeight: tokens.typography.fontWeight.semibold,
+            color: TEXT_PRIMARY,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {projectName}
+        </span>
+        {activeFileName && (
+          <span
+            style={{
+              fontSize: tokens.typography.fontSize.xs,
+              color: TEXT_TERTIARY,
+              display: 'flex',
+              alignItems: 'center',
+              gap: tokens.spacing['1'],
+              minWidth: 0,
+            }}
+          >
+            <Code2 size={12} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {activeFileName}
+            </span>
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface HeaderWorkspaceControlsProps {
+  headerExtras?: React.ReactNode;
+  panelState: PanelState;
+  onTogglePanel: (panel: keyof PanelState) => void;
+  onOpenCommandPalette?: (mode: CommandPaletteMode) => void;
+}
+
+export function HeaderWorkspaceControls({
+  headerExtras,
+  panelState,
+  onTogglePanel,
+  onOpenCommandPalette,
+}: HeaderWorkspaceControlsProps) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexWrap: 'wrap', justifyContent: 'center' }}>
+      {headerExtras}
+      {headerPanelItems.map((item) => (
+        <PanelToggle
+          key={item.panel}
+          icon={item.icon}
+          label={item.label}
+          active={panelState[item.panel].open}
+          onClick={() => onTogglePanel(item.panel)}
+        />
+      ))}
+      {onOpenCommandPalette &&
+        commandPaletteItems.map((item) => (
+          <button
+            key={item.mode}
+            type="button"
+            onClick={() => onOpenCommandPalette(item.mode)}
+            style={HEADER_ACTION_BUTTON}
+            aria-label={item.ariaLabel}
+            title={item.title}
+          >
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
+    </div>
+  );
+}
+
+interface HeaderPrimaryActionsProps {
+  projectName: string;
+  onRunPrimaryAction?: () => void;
+  onOpenSettings?: () => void;
+}
+
+export function HeaderPrimaryActions({
+  projectName,
+  onRunPrimaryAction,
+  onOpenSettings,
+}: HeaderPrimaryActionsProps) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['2'], flexShrink: 0 }}>
+      <DeployTopbarAction projectName={projectName} />
+      <button
+        type="button"
+        onClick={onRunPrimaryAction}
+        disabled={!onRunPrimaryAction}
+        style={getPrimaryActionButtonStyle(Boolean(onRunPrimaryAction))}
+        aria-label="Executar ação principal da previa"
+      >
+        <Play size={14} />
+        Executar
+      </button>
+      <button
+        type="button"
+        onClick={onOpenSettings}
+        disabled={!onOpenSettings}
+        style={{
+          ...iconButtonStyle,
+          color: TEXT_SECONDARY,
+          opacity: onOpenSettings ? 1 : 0.65,
+        }}
+        aria-label="Abrir configuracoes"
+      >
+        <Settings size={18} />
+      </button>
+    </div>
+  );
+}
+
+interface PanelToggleProps {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}
+
+function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={getPanelToggleStyle(active)}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}

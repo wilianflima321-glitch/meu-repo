@@ -36,6 +36,7 @@ interface InlineEditModalProps {
   onApply: (newCode: string) => boolean | Promise<boolean>;
   language?: string;
   filePath?: string;
+  projectId?: string;
   cursorPosition?: { line: number; column: number };
 }
 
@@ -60,6 +61,7 @@ export function InlineEditModal({
   onApply,
   language = 'typescript',
   filePath,
+  projectId,
   cursorPosition,
 }: InlineEditModalProps) {
   const [instruction, setInstruction] = useState('');
@@ -126,6 +128,7 @@ export function InlineEditModal({
           instruction: instruction.trim(),
           language,
           filePath,
+          projectId,
           context: {
             cursorPosition,
           },
@@ -149,7 +152,7 @@ export function InlineEditModal({
     } finally {
       setIsProcessing(false);
     }
-  }, [instruction, selectedCode, language, filePath, cursorPosition]);
+  }, [instruction, selectedCode, language, filePath, projectId, cursorPosition]);
 
   const handleQuickAction = (prompt: string) => {
     setInstruction(prompt);
