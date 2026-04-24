@@ -140,15 +140,15 @@ Do not keep auditing it as an active blocker.
 
 ### Production build parity
 - This remains OPEN.
-- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`, and `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, with older `build-probe-*.log` files retained as historical context.
+- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, `cloud-web-app/web/build-probe-2026-04-24-admin-billing-light-runtime.log`, and `cloud-web-app/web/build-probe-2026-04-24-studio-route-layout-browser-shells.log`, with older `build-probe-*.log` files retained as historical context.
 - New mitigation attempts are now part of the repo truth:
   - `cloud-web-app/web/next.config.js` forces `experimental.workerThreads=false`
   - `cloud-web-app/web/package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and `.env.example`, `.env.local.example`, and `.env.web.example` no longer pin `NODE_ENV=development`
-  - `cloud-web-app/web/components/ClientLayout.tsx` is now only the CSS bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` carries route-scoped studio runtime, `cloud-web-app/web/app/(auth)/layout.tsx`, `cloud-web-app/web/app/verify-email/layout.tsx`, and `cloud-web-app/web/app/design-system-demo/layout.tsx` are now pass-through shells, verify/reset/forgot/demo plus billing checkout/success now load browser-only content under `force-dynamic` + `ssr: false`, and `cloud-web-app/web/app/admin/layout.tsx` now mounts the full studio runtime
+  - `cloud-web-app/web/components/ClientLayout.tsx` is now only the CSS bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` route surfaces, `cloud-web-app/web/components/providers/StudioRuntimeRouteLayout.tsx` now provides browser-only studio route shells, `cloud-web-app/web/app/(auth)/layout.tsx`, `cloud-web-app/web/app/verify-email/layout.tsx`, and `cloud-web-app/web/app/design-system-demo/layout.tsx` are pass-through shells, verify/reset/forgot/demo plus billing checkout/success now load browser-only content under `force-dynamic` + `ssr: false`, and `cloud-web-app/web/app/admin/layout.tsx` / `cloud-web-app/web/app/billing/layout.tsx` now browser-load light-runtime shells instead of mounting the full studio runtime directly
 - Current local reruns still did not finish within extended `15+` minute timeouts, so the category cannot be promoted.
 - Current failure classes include:
   - `<Html> should not be imported outside of pages/_document` for `/404` and `/500`
-  - `useContext` null prerender failures across public, docs, studio, profile/settings/project surfaces, billing, many `/admin/*`, and `/_not-found`; the newer public/auth/browser isolation pass removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list without clearing the broader App Router failure class
+  - `useContext` null prerender failures across public, docs, selected studio/profile/settings/project surfaces, and `/_not-found`; the newer runtime/browser passes removed `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, `/billing/invoices`, `/billing/checkout`, and `/billing/success` from the final export list, but `/dashboard`, `/ide`, `/marketplace`, `/nexus`, `/profile`, `/project-settings`, and `/settings` still remained after route-shell browser isolation
 - Probe history already shows that this was not fixed by:
   - a bare root layout
   - removing `app/error.tsx`
@@ -157,10 +157,10 @@ Do not keep auditing it as an active blocker.
 - Current repo-level reading:
   - the simple userland shell-hook leak was mitigated,
   - the root shell is lighter and the heavier product runtime is now route-scoped via `StudioRuntimeProviders.tsx`,
-  - admin now mounts the full studio runtime explicitly, while auth now uses a pass-through shell plus browser-only `CoreUiProviders` inside the login/register clients,
+  - admin and billing now run through browser-only light-runtime shells, while dashboard/ide/settings/profile/project-settings/nexus/marketplace now route through browser-only studio shells and auth still uses the pass-through plus browser-only `CoreUiProviders` pattern,
   - worker-thread concurrency was reduced to improve Windows determinism,
   - the newer root-boundary bisect probe did not reprint the explicit old errors before timeout,
-  - the newest `build-probe-2026-04-24-public-auth-browser-isolation.log` still reproduces the same explicit failure class even after broader public/auth/browser isolation, while removing `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list,
+  - the newest `build-probe-2026-04-24-studio-route-layout-browser-shells.log` still reproduces the same explicit failure class even after broader public/auth/browser isolation and studio-route browser shells, while the admin/billing light-runtime pass removed `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, `/billing/invoices`, `/billing/checkout`, and `/billing/success` from the final export list,
   - but production build parity still cannot be marked solved.
 
 ## Repo/Execution Priorities

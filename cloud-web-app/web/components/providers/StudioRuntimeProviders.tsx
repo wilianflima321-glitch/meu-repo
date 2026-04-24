@@ -17,6 +17,13 @@ import WebVitalsReporter from '@/components/analytics/WebVitalsReporter'
 import CookieConsent from '@/components/ui/CookieConsent'
 import CoreUiProviders from '@/components/providers/CoreUiProviders'
 
+export type StudioRuntimeSurface = 'full' | 'light'
+
+interface StudioRuntimeProvidersProps {
+  children: React.ReactNode
+  surface?: StudioRuntimeSurface
+}
+
 function DefaultCommandsRegistration() {
   useDefaultCommands()
   return null
@@ -39,7 +46,19 @@ function LoadingFallback() {
   )
 }
 
-export default function StudioRuntimeProviders({ children }: { children: React.ReactNode }) {
+function LightweightStudioRuntime({ children }: { children: React.ReactNode }) {
+  return (
+    <CoreUiProviders>
+      <ErrorBoundaryProvider>
+        <A11yProvider>
+          <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+        </A11yProvider>
+      </ErrorBoundaryProvider>
+    </CoreUiProviders>
+  )
+}
+
+function FullStudioRuntime({ children }: { children: React.ReactNode }) {
   return (
     <CoreUiProviders>
       <ErrorBoundaryProvider>
@@ -71,4 +90,15 @@ export default function StudioRuntimeProviders({ children }: { children: React.R
       </ErrorBoundaryProvider>
     </CoreUiProviders>
   )
+}
+
+export default function StudioRuntimeProviders({
+  children,
+  surface = 'full',
+}: StudioRuntimeProvidersProps) {
+  if (surface === 'light') {
+    return <LightweightStudioRuntime>{children}</LightweightStudioRuntime>
+  }
+
+  return <FullStudioRuntime>{children}</FullStudioRuntime>
 }

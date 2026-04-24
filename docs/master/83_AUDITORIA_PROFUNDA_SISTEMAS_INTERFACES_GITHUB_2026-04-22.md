@@ -62,6 +62,13 @@ The following PDF claims should no longer be treated as current truth without re
 - Current tracked repo reality: `5512 tracked files / 60.97 MB` in the validated local workspace snapshot
 - Meaning: the imported PDF is valuable directionally, but not as a raw numeric snapshot of the current repo.
 
+### Build parity and runtime isolation
+- Build parity is still OPEN and should not be described as solved.
+- The newest route-isolation passes materially improved the failing export set:
+  - `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` were already removed from the final export list by browser-only auth/public-edge isolation
+  - `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, and `/billing/invoices` then dropped from the final export list after the admin/billing light-runtime pass
+- The broader App Router failure class still remains across public/docs and selected studio surfaces, so the correct read is `mitigated`, not `resolved`.
+
 ### Dead engine libs
 - PDF framed a large set of dead engine libraries as still present.
 - Current branch already removed a major dead-code island, including files like:

@@ -149,14 +149,15 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
    - `experimental.workerThreads=false` in `next.config.js`
    - `components/ClientLayout.tsx` is now only a lightweight CSS bootstrap
    - `components/providers/CoreUiProviders.tsx` now owns theme/toast context
-   - `components/providers/StudioRuntimeProviders.tsx` now mounts the heavier product runtime per route
-   - `app/(auth)/layout.tsx`, `app/verify-email/layout.tsx`, and `app/design-system-demo/layout.tsx` are now pass-through shells, while the login/register/verify/reset/forgot/demo surfaces mount browser-only `CoreUiProviders` content under `force-dynamic` + `ssr: false`
-   - `app/admin/layout.tsx` now mounts the full studio runtime for admin
+   - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces per route
+   - `components/providers/StudioRuntimeRouteLayout.tsx` now provides browser-only route shells for dashboard/ide/settings/profile/project-settings/nexus/marketplace
+   - `app/(auth)/layout.tsx`, `app/verify-email/layout.tsx`, and `app/design-system-demo/layout.tsx` are pass-through shells, while the login/register/verify/reset/forgot/demo surfaces mount browser-only `CoreUiProviders` content under `force-dynamic` + `ssr: false`
+   - `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells instead of mounting the full studio runtime directly
    - `package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and the `.env*.example` templates no longer pin `NODE_ENV=development`
    - browser-only SWR keys in `lib/providers/AethelProvider.tsx`
    - explicit Drei `Html` aliases across the active 3D/editor components
    - simpler `app/error.tsx` and `app/not-found.tsx` were introduced as a root-boundary bisect
-   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-admin-auth-runtime.log`, `build-probe-2026-04-24-auth-refined-pages-fallback.log`, and `build-probe-2026-04-24-public-auth-browser-isolation.log` still contain explicit `<Html>` / `useContext` prerender failures, even after the core UI split, auth-route isolation, fallback-page experiment, runtime/provider follow-up, and broader public/auth browser-only route isolation; the newer pass removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list, but the broader App Router failure class remained
+   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-public-auth-browser-isolation.log`, `build-probe-2026-04-24-admin-billing-light-runtime.log`, and `build-probe-2026-04-24-studio-route-layout-browser-shells.log` still contain explicit `<Html>` / `useContext` prerender failures, even after the core UI split, auth-route isolation, fallback-page experiment, runtime/provider follow-up, the admin/billing light-runtime pass, and broader studio-route browser-only shells; the newer passes removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, `/billing/success`, `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, and `/billing/invoices` from the final export list, but the broader App Router failure class remained
 
 ## The Sequence V6 Still Supports
 1. close production build parity
