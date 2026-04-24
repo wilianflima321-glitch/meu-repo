@@ -11,13 +11,13 @@
 Este documento continua sendo o norte principal, mas alguns trechos ficaram velhos depois das rodadas de refactor e da pressão E2E mais recente.
 
 - Workbench hotspots:
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` esta em `437` linhas.
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` esta em `414` linhas.
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` agora caiu para `193` linhas depois da extracao da lane de editor.
-- a lane principal do editor foi repartida em `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx` (`326` linhas), `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx` (`191` linhas) e `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSidecar.tsx` (`85` linhas).
-- a lane de preview tambem foi aberta em seams reais: `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` esta em `459` linhas, com runtime e chrome extraidos para `RuntimePreviewSurface.tsx` (`186`), `PreviewLifecycleChrome.tsx` (`146`), `usePreviewRuntime.ts` (`191`) e `sceneViewportDerivations.ts` (`89`).
+- a lane principal do editor agora esta repartida em `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx` (`197` linhas), `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorCanvas.tsx` (`122` linhas), `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx` (`191` linhas) e `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSidecar.tsx` (`85` linhas).
+- a lane de preview foi aberta mais uma vez em seams reais: `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` agora e um roteador de `74` linhas, enquanto a densidade de viewport ficou em `SceneViewportSurface.tsx` (`333`), com `CanvasViewportSurface.tsx` (`24`), `RuntimePreviewSurface.tsx` (`186`), `PreviewLifecycleChrome.tsx` (`146`), `usePreviewRuntime.ts` (`191`) e `sceneViewportDerivations.ts` (`89`).
 - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` ja caiu para `149` linhas.
 - o shell agora esta repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`268` linhas), `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`196` linhas) e `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx` (`172` linhas).
-- `cloud-web-app/web/components/terminal/XTerminal.tsx` agora e um barrel de `13` linhas; a implementacao principal ficou em `cloud-web-app/web/components/terminal/BaseXTerminal.tsx` (`441`) e o grid em `cloud-web-app/web/components/terminal/MultiTerminalPanel.tsx` (`82`).
+- `cloud-web-app/web/components/terminal/XTerminal.tsx` agora e um barrel de `11` linhas; a implementacao principal ficou em `cloud-web-app/web/components/terminal/BaseXTerminal.tsx` (`305`), apoiada por `useTerminalSessions.ts` (`134`) e `MultiTerminalPanel.tsx` (`70`).
 - Colaboracao:
   - `CollaboratorsBar` e `RemoteCursorLayer` ja existem e a presenca colaborativa ja aparece no editor principal via `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`, `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx` e `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`.
   - a colaboracao no topo e na barra do editor ficou mais densa e mais proxima do padrao de cockpit, sem depender so de um pill solto no header.
@@ -98,7 +98,7 @@ Este documento continua sendo o norte principal, mas alguns trechos ficaram velh
 - 📈 **Perf/Bundle 5.5→5.2** ↓: a categoria continua aberta, mas o antigo blocker `images: { unoptimized: true }` já não vale para o branch atual; o gargalo factual hoje está mais em build parity, dynamic imports e prova end-to-end de preview/performance.
 - 🧪 Testes: **ZERO mudança** — Jest coverage ainda `false`, ainda 12 testes unitários.
 - 🎨 Design System: 784 hex hardcoded **intocados**.
-- 🧹 God components: a categoria continua válida, mas os números antigos envelheceram; hoje os maiores hotspots centrais já são menores e mais concentrados (`CanonicalPreviewSurface.tsx` `459`, `BaseXTerminal.tsx` `441`, `FullscreenIDE.tsx` `437`, `WorkbenchEditorSurface.tsx` `326`, `AIChatPanelPro.tsx` `274`).
+- 🧹 God components: a categoria continua válida, mas os números antigos envelheceram; hoje os maiores hotspots centrais já são menores e mais concentrados (`FullscreenIDE.tsx` `414`, `SceneViewportSurface.tsx` `333`, `BaseXTerminal.tsx` `305`, `ModernIDEShellPanels.tsx` `268`, `AIChatPanelPro.tsx` `260`).
 
 ---
 

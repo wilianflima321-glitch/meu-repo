@@ -3,14 +3,11 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type * as monacoEditor from 'monaco-editor';
 
-import MonacoEditorPro, {
-  type Diagnostic as MonacoDiagnostic,
-} from '@/components/editor/MonacoEditorPro';
+import { type Diagnostic as MonacoDiagnostic } from '@/components/editor/MonacoEditorPro';
 import SplitEditor, {
   type EditorGroup,
   type SplitDirection,
 } from '@/components/editor/SplitEditor';
-import RemoteCursorLayer from '@/components/collaboration/RemoteCursorLayer';
 
 import type {
   ActiveFileState,
@@ -18,6 +15,13 @@ import type {
   InlineApplyResult,
 } from '@/components/ide/fullscreen/types';
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
+import WorkbenchEditorCanvas from '@/components/ide/fullscreen/WorkbenchEditorCanvas';
+import {
+  WorkbenchEditorEmptyState,
+  WorkbenchEditorErrorState,
+  WorkbenchEditorLoadingState,
+  WorkbenchEmptyEditorGroupState,
+} from '@/components/ide/fullscreen/WorkbenchEditorStates';
 
 type EditorInstanceRef = MutableRefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
 
@@ -60,107 +64,6 @@ type WorkbenchEditorSurfaceProps = {
   }) => void;
 };
 
-type EditorCanvasProps = {
-  fileState: ActiveFileState;
-  pane: EditorPane;
-  projectId?: string;
-  fullAccessActive: boolean;
-  collaborationPeers: RemotePeer[];
-  primaryEditorRef: EditorInstanceRef;
-  secondaryEditorRef: EditorInstanceRef;
-  editorRef: EditorInstanceRef;
-  setActiveFile: Dispatch<SetStateAction<ActiveFileState | null>>;
-  setSecondaryFile: Dispatch<SetStateAction<ActiveFileState | null>>;
-  setEditorDiagnostics: Dispatch<SetStateAction<MonacoDiagnostic[]>>;
-  setSecondaryEditorDiagnostics: Dispatch<SetStateAction<MonacoDiagnostic[]>>;
-  setSplitActivePane: Dispatch<SetStateAction<EditorPane>>;
-  onInlineApplyResult: (result: InlineApplyResult) => void;
-  onRequestFullAccess: () => void;
-  onSaveFile: (path: string, content: string) => Promise<void> | void;
-  onCursorPresenceChange: WorkbenchEditorSurfaceProps['onCursorPresenceChange'];
-  onSelectionPresenceChange: WorkbenchEditorSurfaceProps['onSelectionPresenceChange'];
-};
-
-function EditorCanvas({
-  fileState,
-  pane,
-  projectId,
-  fullAccessActive,
-  collaborationPeers,
-  primaryEditorRef,
-  secondaryEditorRef,
-  editorRef,
-  setActiveFile,
-  setSecondaryFile,
-  setEditorDiagnostics,
-  setSecondaryEditorDiagnostics,
-  setSplitActivePane,
-  onInlineApplyResult,
-  onRequestFullAccess,
-  onSaveFile,
-  onCursorPresenceChange,
-  onSelectionPresenceChange,
-}: EditorCanvasProps) {
-  const isSecondary = pane === 'secondary';
-  const activeRef = isSecondary ? secondaryEditorRef : primaryEditorRef;
-  const setDiagnostics = isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics;
-
-  return (
-    <div
-      className="relative h-full"
-      onMouseDown={() => {
-        setSplitActivePane(pane);
-        editorRef.current = activeRef.current;
-      }}
-    >
-      <MonacoEditorPro
-        projectId={projectId}
-        path={fileState.path}
-        value={fileState.content}
-        language={fileState.language}
-        fullAccessActive={fullAccessActive}
-        onMount={(editor) => {
-          activeRef.current = editor;
-          editorRef.current = editor;
-        }}
-        onAiApplyResult={onInlineApplyResult}
-        onRequestFullAccess={onRequestFullAccess}
-        onDiagnosticsChange={setDiagnostics}
-        onCursorChange={(position) => {
-          onCursorPresenceChange({
-            filePath: fileState.path,
-            pane,
-            position,
-            editor: activeRef.current,
-          });
-        }}
-        onSelectionChange={({ range }) => {
-          onSelectionPresenceChange({
-            filePath: fileState.path,
-            pane,
-            range,
-            editor: activeRef.current,
-          });
-        }}
-        onChange={(value) => {
-          const nextValue = value ?? '';
-          if (isSecondary) {
-            setSecondaryFile((prev) => (prev ? { ...prev, content: nextValue } : prev));
-            return;
-          }
-          setActiveFile((prev) => (prev ? { ...prev, content: nextValue } : prev));
-        }}
-        onSave={(value) => {
-          void onSaveFile(fileState.path, value);
-        }}
-      />
-      <RemoteCursorLayer
-        peers={collaborationPeers.filter((peer) => peer.cursor?.filePath === fileState.path)}
-      />
-    </div>
-  );
-}
-
 export default function WorkbenchEditorSurface({
   activeFile,
   secondaryFile,
@@ -190,36 +93,20 @@ export default function WorkbenchEditorSurface({
   onSelectionPresenceChange,
 }: WorkbenchEditorSurfaceProps) {
   if (isReadingFile) {
-    return (
-      <div className="h-full flex items-center justify-center px-6">
-        <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-border-secondary)_72%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_38%,transparent)] px-5 py-4 text-sm text-[var(--aethel-text-tertiary)]">
-          Carregando arquivo...
-        </div>
-      </div>
-    );
+    return <WorkbenchEditorLoadingState />;
   }
 
   if (fileError) {
-    return (
-      <div className="h-full flex items-center justify-center px-6">
-        <div className="max-w-xl rounded border border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error)]">
-          {fileError}
-        </div>
-      </div>
-    );
+    return <WorkbenchEditorErrorState error={fileError} />;
   }
 
   if (!activeFile) {
-    return (
-      <div className="flex h-full items-center justify-center px-6 text-center text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-        Selecione um arquivo para iniciar a edicao.
-      </div>
-    );
+    return <WorkbenchEditorEmptyState />;
   }
 
   if (!splitEditorOpen) {
     return (
-      <EditorCanvas
+      <WorkbenchEditorCanvas
         fileState={activeFile}
         pane="primary"
         projectId={inlineEditProjectId}
@@ -287,11 +174,7 @@ export default function WorkbenchEditorSurface({
       }}
       renderEditor={(groupId, tab) => {
         if (!tab) {
-          return (
-            <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[var(--aethel-text-tertiary)]">
-              Nenhum arquivo aberto neste grupo.
-            </div>
-          );
+          return <WorkbenchEmptyEditorGroupState />;
         }
 
         const pane = groupId === 'secondary' ? 'secondary' : 'primary';
@@ -299,7 +182,7 @@ export default function WorkbenchEditorSurface({
         if (!fileState) return null;
 
         return (
-          <EditorCanvas
+          <WorkbenchEditorCanvas
             fileState={fileState}
             pane={pane}
             projectId={inlineEditProjectId}

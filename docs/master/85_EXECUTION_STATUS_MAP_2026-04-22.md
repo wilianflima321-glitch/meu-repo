@@ -12,26 +12,29 @@ This file is the short scoreboard that answers:
 3. what is still open and should stay on the board
 
 ## Current Snapshot
-- `CanonicalPreviewSurface.tsx`: `459` lines
-- `BaseXTerminal.tsx`: `441` lines
-- `FullscreenIDE.tsx`: `437` lines
-- `WorkbenchEditorSurface.tsx`: `326` lines
-- `AIChatPanelPro.tsx`: `274` lines
-- `WorkbenchPreviewPane.tsx`: `263` lines
+- `FullscreenIDE.tsx`: `414` lines
+- `SceneViewportSurface.tsx`: `333` lines
+- `BaseXTerminal.tsx`: `305` lines
+- `ModernIDEShellPanels.tsx`: `268` lines
+- `AIChatPanelPro.tsx`: `260` lines
+- `WorkbenchPreviewPane.tsx`: `249` lines
+- `WorkbenchEditorSurface.tsx`: `197` lines
 - `RuntimePreviewSurface.tsx`: `186` lines
 - `PreviewLifecycleChrome.tsx`: `146` lines
 - `usePreviewRuntime.ts`: `191` lines
 - `sceneViewportDerivations.ts`: `89` lines
 - `WorkbenchEditorPane.tsx`: `193` lines
 - `WorkbenchEditorToolbar.tsx`: `191` lines
+- `WorkbenchEditorCanvas.tsx`: `122` lines
 - `WorkbenchEditorSidecar.tsx`: `85` lines
 - `AIChatPanelContainer.tsx`: `116` lines
 - `ModernIDEShell.tsx`: `149` lines
-- `ModernIDEShellPanels.tsx`: `268` lines
 - `ModernIDEShellChrome.tsx`: `196` lines
 - `chromeSecondaryBars.tsx`: `172` lines
-- `XTerminal.tsx`: `13` lines (barrel)
-- `MultiTerminalPanel.tsx`: `82` lines
+- `CanonicalPreviewSurface.tsx`: `74` lines (router)
+- `XTerminal.tsx`: `11` lines (barrel)
+- `MultiTerminalPanel.tsx`: `70` lines
+- `useTerminalSessions.ts`: `134` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
@@ -81,12 +84,13 @@ This file is the short scoreboard that answers:
   - clearer mode tabs
   - better preview empty-state guidance
 - the former preview hotspot was also reduced:
-  - `CanonicalPreviewSurface.tsx` now acts more like a variant router over extracted runtime, lifecycle, and derivation modules
+  - `CanonicalPreviewSurface.tsx` now acts like a thin variant router over extracted runtime, scene, canvas, lifecycle, and derivation modules
+  - `SceneViewportSurface.tsx` is now the denser preview seam carrying the viewport workflow, inspector, outliner, and export loop
 - but the category is still partial until full shareable proof and build-complete runtime confidence are stable.
 
 ### Collaboration
 - the workbench editor lane was further decomposed this round:
-  - `WorkbenchEditorPane.tsx` now acts as a thin coordinator over `WorkbenchEditorSurface.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
+  - `WorkbenchEditorPane.tsx` now acts as a thin coordinator over `WorkbenchEditorSurface.tsx`, `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
 - baseline collaboration is shipped in the canonical IDE:
   - collaborator presence
   - header avatars
@@ -101,7 +105,7 @@ This file is the short scoreboard that answers:
 ### P0
 1. production build parity
    - current highest-probability root suspects remain in the app/provider stack: `app/layout.tsx`, `components/ClientLayout.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`, `app/error.tsx`, and `app/not-found.tsx`
-2. remaining workbench, preview, and terminal implementation hotspot reduction
+2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `SceneViewportSurface.tsx`, `BaseXTerminal.tsx`, and `ModernIDEShellPanels.tsx`
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure
 
@@ -119,7 +123,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `CanonicalPreviewSurface.tsx`, `BaseXTerminal.tsx`, `FullscreenIDE.tsx`, and `WorkbenchEditorSurface.tsx`, while stabilizing the new `AIChatPanelPro.tsx` seams
+2. keep slicing `SceneViewportSurface.tsx`, `BaseXTerminal.tsx`, `FullscreenIDE.tsx`, and `ModernIDEShellPanels.tsx`, while stabilizing the new `AIChatPanelPro.tsx` seams
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

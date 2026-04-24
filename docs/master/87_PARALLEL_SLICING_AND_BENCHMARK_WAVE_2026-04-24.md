@@ -36,19 +36,20 @@ These references should keep driving spacing, density, cockpit hierarchy, and pr
 This round kept cutting the core creation loop and materially reduced the chat, shell, and terminal hotspots:
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` moved from the old hotspot bucket into a thin coordinator at `193` lines
 - the editor lane is now split into:
-  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx` (`311`)
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx` (`197`)
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorCanvas.tsx` (`122`)
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx` (`191`)
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSidecar.tsx` (`85`)
-- `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` remains materially smaller than its old four-digit state and now sits at `459`
+- `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` is now a thin `74`-line variant router, and the dense preview lane now lives in `SceneViewportSurface.tsx` (`333`) plus `CanvasViewportSurface.tsx` (`24`)
 - the preview runtime lane is now split into:
   - `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx` (`186`)
   - `cloud-web-app/web/components/preview/PreviewLifecycleChrome.tsx` (`146`)
   - `cloud-web-app/web/components/preview/usePreviewRuntime.ts` (`191`)
   - `cloud-web-app/web/components/preview/sceneViewportDerivations.ts` (`89`)
 
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now `437` after pushing orchestration glue into `FullscreenIDEWorkspace.tsx`, `useWorkbenchEditorModel.ts`, `useWorkbenchRuntimeActions.ts`, and `useWorkbenchPanelCallbacks.ts`
-- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is now `274` after extracting composer, run-state, ops-state, context-action, speech-playback, and quick-prompt seams into `components/ai-chat/*`
-- `cloud-web-app/web/components/terminal/XTerminal.tsx` is now a `13`-line barrel over `BaseXTerminal.tsx` (`441`) and `MultiTerminalPanel.tsx` (`82`)
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now `414` after pushing orchestration glue into `FullscreenIDEWorkspace.tsx`, `useWorkbenchEditorModel.ts`, `useWorkbenchRuntimeActions.ts`, and `useWorkbenchPanelCallbacks.ts`
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` is now `260` after extracting composer, run-state, ops-state, context-action, speech-playback, and quick-prompt seams into `components/ai-chat/*`
+- `cloud-web-app/web/components/terminal/XTerminal.tsx` is now an `11`-line barrel over `BaseXTerminal.tsx` (`305`), `useTerminalSessions.ts` (`134`), and `MultiTerminalPanel.tsx` (`70`)
 
 This is real progress.
 It does **not** mean the workbench is solved.
@@ -76,11 +77,14 @@ It means the next cuts are now safer and more localized.
 
 ## Current Measured User-Facing Hotspots
 ### Wave A - highest leverage for user perception
-- `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `459`
-- `cloud-web-app/web/components/terminal/BaseXTerminal.tsx`: `441`
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `437`
-- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `326`
-- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `274`
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `414`
+- `cloud-web-app/web/components/preview/SceneViewportSurface.tsx`: `333`
+- `cloud-web-app/web/components/terminal/BaseXTerminal.tsx`: `305`
+- `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `268`
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `260`
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`: `249`
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `197`
+- `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `74`
 
 ### Wave B - dense product surfaces next in line
 - `cloud-web-app/web/app/admin/ai-monitor/page.tsx`: `1249`
@@ -100,17 +104,16 @@ It means the next cuts are now safer and more localized.
 - `cloud-web-app/web/components/video/VideoTimelineEditor.tsx`: `1194`
 
 ## Best Next Slicing Seams
-### 1. `CanonicalPreviewSurface.tsx`
+### 1. `SceneViewportSurface.tsx`
 Why still matters:
-- it still carries the variant router for the entire preview trust story, which the audits repeatedly flag as a market gap
-- the runtime lane is now smaller, so the next cuts can focus on viewport and scene responsibilities with less risk
+- it now carries the densest preview trust story: viewport, outliner, inspector, contextual workflow drawer, mini timeline, and export grammar
+- the variant router is already thin, so the next cuts can focus directly on the user-facing viewport cockpit without reintroducing indirection
 
 Recommended seams:
-- `components/preview/PreviewSurfaceHeader.tsx`
-- `components/preview/PreviewSurfaceViewport.tsx`
-- `components/preview/PreviewSurfaceStatePanel.tsx`
-- `components/preview/PreviewSurfaceDeviceRail.tsx`
-- `components/preview/usePreviewSurfaceState.ts`
+- `components/preview/useSceneViewportSession.ts`
+- `components/preview/SceneViewportWorkflowDrawer.tsx`
+- `components/preview/useViewportExport.ts`
+- `components/preview/SceneViewportChrome.tsx`
 
 User-facing quality target:
 - preview should feel like a primary validation cockpit with clearer trust, device, share, deploy, and runtime health grammar
@@ -122,8 +125,8 @@ Why next:
 
 Recommended seams:
 - `components/terminal/useXTermRuntime.ts`
-- `components/terminal/useTerminalSessionController.ts`
 - `components/terminal/TerminalViewport.tsx`
+- `components/terminal/useTerminalShortcuts.ts`
 - `components/terminal/TerminalSessionRail.tsx`
 
 User-facing quality target:
@@ -143,18 +146,18 @@ Recommended seams:
 User-facing quality target:
 - the workbench should read more like a cockpit and less like one component deciding everything
 
-### 4. `WorkbenchEditorSurface.tsx`
+### 4. `ModernIDEShellPanels.tsx`
 Why now:
-- the latest split turned the old pane monolith into a cleaner set of seams
-- this is now the correct follow-up target for editor surface density and clarity
+- the workbench shell still needs one denser pass to feel benchmark-grade instead of merely modular
+- panel composition, mode switching, and layout density still live close enough together to justify a clearer split
 
 Recommended seams:
-- `components/ide/fullscreen/EditorCanvas.tsx`
-- `components/ide/fullscreen/SplitEditorCanvas.tsx`
-- `components/ide/fullscreen/useEditorPresenceBridge.ts`
+- `components/ide/modern-shell/WorkbenchCenterStack.tsx`
+- `components/ide/modern-shell/WorkbenchSideRails.tsx`
+- `components/ide/modern-shell/useWorkbenchPanelDensity.ts`
 
 User-facing quality target:
-- keep split editing, cursor presence, and inline AI responsive while shrinking editor-surface complexity further
+- keep navigation, panel density, and active-context grammar compact and cockpit-like while shrinking shell complexity further
 
 ### 5. `AIChatPanelPro.tsx`
 Why now:
@@ -173,10 +176,10 @@ User-facing quality target:
 ## Parallel Execution Waves
 ### Wave 1 - core creation loop
 Run in parallel where write scopes do not overlap:
-1. `CanonicalPreviewSurface.tsx`
+1. `SceneViewportSurface.tsx`
 2. `BaseXTerminal.tsx`
 3. `FullscreenIDE.tsx`
-4. `WorkbenchEditorSurface.tsx`
+4. `ModernIDEShellPanels.tsx`
 5. stabilize `AIChatPanelPro.tsx`
 
 ### Wave 2 - dense product surfaces
@@ -205,10 +208,10 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep production build parity open until `next build` proves end-to-end success
-2. keep reducing `CanonicalPreviewSurface.tsx` by extracting scene and viewport seams
-3. continue shrinking `BaseXTerminal.tsx` and stabilizing the new terminal barrel split
+2. keep reducing `SceneViewportSurface.tsx` by extracting workflow drawer, session, and export seams
+3. continue shrinking `BaseXTerminal.tsx` and stabilizing the new terminal session/runtime split
 4. continue shrinking `FullscreenIDE.tsx`
-5. keep reducing `WorkbenchEditorSurface.tsx`
+5. keep reducing `ModernIDEShellPanels.tsx`
 6. stabilize `AIChatPanelPro.tsx` and turn the smaller shell into a benchmark-grade artifact lane
 7. promote preview, collaboration, and deploy from present to trusted
 

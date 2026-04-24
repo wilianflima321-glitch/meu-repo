@@ -15,12 +15,12 @@ import type { SearchAddon } from 'xterm-addon-search';
 import { SearchBar } from './XTerminalChrome';
 import {
   TERMINAL_THEMES,
-  type TerminalSession,
   type XTerminalProps,
   type XTerminalRef,
 } from './terminalModels';
 import { TerminalSessionHeader } from './terminalSessionHeader';
 import { TerminalWebSocket } from './terminalWebSocket';
+import { useTerminalSessions } from './useTerminalSessions';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 const log = createComponentLogger('XTerminal');
@@ -51,11 +51,8 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
     const wsRef = useRef<TerminalWebSocket | null>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
-    const [sessions, setSessions] = useState<TerminalSession[]>([]);
-    const [activeSessionId, setActiveSessionId] = useState<string | null>(initialSessionId || null);
     const [isMaximized, setIsMaximized] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
-    const [isConnected, setIsConnected] = useState(false);
 
     const writeTerminalError = useCallback((message: string) => {
       terminalRef.current?.writeln(`\x1b[31m${message}\x1b[0m`);
@@ -91,6 +88,11 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
     }, []);
     const toggleMaximized = useCallback(() => {
       setIsMaximized((prev) => !prev);
+    }, []);
+    const disconnectTerminalRuntime = useCallback(() => {
+      resizeObserverRef.current?.disconnect();
+      wsRef.current?.disconnect();
+      terminalRef.current?.dispose();
     }, []);
     const copySelection = useCallback(() => {
       const selection = terminalRef.current?.getSelection();
@@ -139,6 +141,25 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
         brightWhite: theme.colors.brightWhite,
       },
     }), [fontSize, fontFamily, theme]);
+
+    const {
+      activeSessionId,
+      connectToSession,
+      createSession,
+      closeSession,
+      isConnected,
+      renameSession,
+      sessions,
+      switchSession,
+    } = useTerminalSessions({
+      initialSessionId,
+      initialCwd,
+      initialShell,
+      terminalRef,
+      websocketRef: wsRef,
+      fitTerminal,
+      writeTerminalError,
+    });
 
     useEffect(() => {
       if (!containerRef.current || terminalRef.current) return;
@@ -222,127 +243,10 @@ export const XTerminal = forwardRef<XTerminalRef, XTerminalProps>(
 
       return () => {
         isMounted = false;
-        resizeObserverRef.current?.disconnect();
-        wsRef.current?.disconnect();
-        terminalRef.current?.dispose();
+        disconnectTerminalRuntime();
       };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- terminal runtime is initialized once and lifecycle-managed manually
-    }, []);
-
-    const createSession = useCallback(async (cwd?: string, shell?: string) => {
-      try {
-        const response = await fetch('/api/terminal/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: `Terminal ${sessions.length + 1}`,
-            cwd: cwd || initialCwd,
-            shellPath: shell || initialShell,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to create terminal session');
-        }
-
-        const data = await response.json();
-
-        const newSession: TerminalSession = {
-          id: data.sessionId,
-          name: data.name || `Terminal ${sessions.length + 1}`,
-          shell: data.shell || 'bash',
-          cwd: data.cwd || cwd || '~',
-          createdAt: new Date(),
-          isActive: true,
-        };
-
-        setSessions((prev) => [...prev, newSession]);
-        setActiveSessionId(newSession.id);
-        connectToSession(newSession.id, data.websocketUrl);
-
-        return newSession;
-      } catch (error) {
-        log.error('Failed to create terminal session', { error });
-        writeTerminalError('Failed to create terminal session. Please try again.');
-
-        return null;
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- connectToSession is stable in runtime flow and invoked after terminal init
-    }, [sessions, initialCwd, initialShell]);
-
-    const connectToSession = useCallback((sessionId: string, websocketUrl?: string) => {
-      if (!terminalRef.current) return;
-
-      wsRef.current?.disconnect();
-      terminalRef.current.clear();
-
-      const ws = new TerminalWebSocket();
-
-      if (websocketUrl) {
-        ws.setRuntimeUrl(websocketUrl);
-      }
-
-      ws.onData = (data) => {
-        terminalRef.current?.write(data);
-      };
-
-      ws.onConnect = () => {
-        setIsConnected(true);
-        terminalRef.current?.focus();
-        fitTerminal(ws);
-      };
-
-      ws.onDisconnect = () => {
-        setIsConnected(false);
-      };
-
-      ws.onError = (error) => {
-        log.error('Terminal websocket error', { error });
-        writeTerminalError('Connection error. Attempting to reconnect...');
-      };
-
-      wsRef.current = ws;
-      ws.connect(sessionId);
-    }, [fitTerminal, writeTerminalError]);
-
-    const closeSession = useCallback(async (sessionId: string) => {
-      try {
-        await fetch('/api/terminal/close', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
-        });
-
-        setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-
-        if (sessionId === activeSessionId) {
-          const remaining = sessions.filter((s) => s.id !== sessionId);
-          if (remaining.length > 0) {
-            setActiveSessionId(remaining[0].id);
-            connectToSession(remaining[0].id);
-          } else {
-            createSession();
-          }
-        }
-      } catch (error) {
-        log.error('Failed to close terminal session', { error, sessionId });
-      }
-    }, [activeSessionId, sessions, connectToSession, createSession]);
-
-    const renameSession = useCallback((sessionId: string, newName: string) => {
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === sessionId ? { ...s, name: newName } : s
-        )
-      );
-    }, []);
-
-    const switchSession = useCallback((sessionId: string) => {
-      if (sessionId === activeSessionId) return;
-
-      setActiveSessionId(sessionId);
-      connectToSession(sessionId);
-    }, [activeSessionId, connectToSession]);
+    }, [disconnectTerminalRuntime]);
 
     useImperativeHandle(ref, () => ({
       write: (data: string) => terminalRef.current?.write(data),

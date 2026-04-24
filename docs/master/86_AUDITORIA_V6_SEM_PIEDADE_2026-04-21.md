@@ -42,26 +42,29 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
-- `CanonicalPreviewSurface.tsx`: `459`
-- `BaseXTerminal.tsx`: `441`
-- `FullscreenIDE.tsx`: `437`
-- `WorkbenchEditorSurface.tsx`: `326`
-- `AIChatPanelPro.tsx`: `274`
-- `WorkbenchPreviewPane.tsx`: `263`
+- `FullscreenIDE.tsx`: `414`
+- `SceneViewportSurface.tsx`: `333`
+- `BaseXTerminal.tsx`: `305`
+- `ModernIDEShellPanels.tsx`: `268`
+- `AIChatPanelPro.tsx`: `260`
+- `WorkbenchPreviewPane.tsx`: `249`
+- `WorkbenchEditorSurface.tsx`: `197`
 - `RuntimePreviewSurface.tsx`: `186`
 - `PreviewLifecycleChrome.tsx`: `146`
 - `usePreviewRuntime.ts`: `191`
 - `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorToolbar.tsx`: `191`
+- `WorkbenchEditorCanvas.tsx`: `122`
 - `WorkbenchEditorSidecar.tsx`: `85`
 - `AIChatPanelContainer.tsx`: `116`
 - `ModernIDEShell.tsx`: `149`
-- `ModernIDEShellPanels.tsx`: `268`
 - `ModernIDEShellChrome.tsx`: `196`
 - `chromeSecondaryBars.tsx`: `172`
-- `XTerminal.tsx`: `13` (barrel)
-- `MultiTerminalPanel.tsx`: `82`
+- `CanonicalPreviewSurface.tsx`: `74` (router)
+- `XTerminal.tsx`: `11` (barrel)
+- `MultiTerminalPanel.tsx`: `70`
+- `useTerminalSessions.ts`: `134`
 
 The category remains valid.
 The literal numbers did age, and both the editor lane and preview runtime lane are now split across smaller files instead of one oversized surface.

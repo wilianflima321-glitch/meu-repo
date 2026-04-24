@@ -34,8 +34,8 @@ The local workspace is already synced with the latest upstream changes from `gen
 
 Additional local reconciliation on `2026-04-24`:
 - the preview lane is denser and clearer for end users through `cloud-web-app/web/components/ide/PreviewRuntimeToolbar.tsx` and `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`
-- the workbench editor lane is no longer concentrated in one file: `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` is now `193` lines and delegates the dense editor experience to `WorkbenchEditorSurface.tsx` (`326`), `WorkbenchEditorToolbar.tsx` (`191`), and `WorkbenchEditorSidecar.tsx` (`85`)
-- the preview authority is no longer concentrated in one four-digit file: `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` is now `459` lines after extracting `RuntimePreviewSurface.tsx`, `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, and `sceneViewportDerivations.ts`
+- the workbench editor lane is no longer concentrated in one file: `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` is now `193` lines and delegates the dense editor experience to `WorkbenchEditorSurface.tsx` (`197`), `WorkbenchEditorCanvas.tsx` (`122`), `WorkbenchEditorToolbar.tsx` (`191`), and `WorkbenchEditorSidecar.tsx` (`85`)
+- the preview authority is no longer concentrated in one four-digit file: `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` is now a `74`-line variant router after extracting `SceneViewportSurface.tsx` (`333`), `CanvasViewportSurface.tsx` (`24`), `RuntimePreviewSurface.tsx`, `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, and `sceneViewportDerivations.ts`
 - build-risk mitigations now also include browser-gated SWR keys in `cloud-web-app/web/lib/providers/AethelProvider.tsx`, explicit Drei `Html` aliases across active 3D/editor surfaces, and a root/studio runtime split where `cloud-web-app/web/components/ClientLayout.tsx` keeps only the lightweight root shell while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` mounts richer product runtime per route
 - production `next build` parity is still open because the latest command-line probes still timed out before a successful end-to-end completion; the newest probe no longer reprinted the explicit old errors before timeout, but the latest fully actionable error evidence remains in `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log`
 
@@ -93,15 +93,16 @@ The following PDF claims should no longer be treated as current truth without re
 ## Current Factual Anchors After Sync
 These are the reality points this audit should now be interpreted against:
 
-- `AIChatPanelPro.tsx`: about `274` lines, now backed by extracted composer, run-state, ops-state, context-action, speech-playback, and quick-prompt modules
-- `FullscreenIDE.tsx`: about `437` lines and still a top-priority orchestration hotspot
-- `WorkbenchEditorPane.tsx`: about `193` lines after extraction into `WorkbenchEditorSurface.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
-- `WorkbenchEditorSurface.tsx`: about `326` lines and now the denser editor-surface follow-up target for the workbench lane
-- `CanonicalPreviewSurface.tsx`: about `459` lines after extraction into dedicated preview runtime and chrome modules
+- `AIChatPanelPro.tsx`: about `260` lines, now backed by extracted composer, run-state, ops-state, context-action, speech-playback, and quick-prompt modules
+- `FullscreenIDE.tsx`: about `414` lines and still a top-priority orchestration hotspot
+- `WorkbenchEditorPane.tsx`: about `193` lines after extraction into `WorkbenchEditorSurface.tsx`, `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
+- `WorkbenchEditorSurface.tsx`: about `197` lines and now much closer to a stable surface/orchestrator seam
+- `SceneViewportSurface.tsx`: about `333` lines and now the denser preview follow-up target for the workbench lane
+- `CanonicalPreviewSurface.tsx`: about `74` lines as the thin variant router over preview runtime and viewport seams
 - `RuntimePreviewSurface.tsx`: about `186` lines and now the clearest place to keep improving preview trust, fallback, and Magic Wand UX without re-growing the canonical preview shell
 - `AIChatPanelContainer.tsx`: about `116` lines after extraction into session-context, provider-preflight, send-pipeline, and session-banner modules
 - `ModernIDEShell.tsx`: now only `149` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`268`), `ModernIDEShellChrome.tsx` (`196`), and `chromeSecondaryBars.tsx` (`172`)
-- `XTerminal.tsx`: now a `13`-line barrel; terminal density should be read in `BaseXTerminal.tsx` (`441`) and `MultiTerminalPanel.tsx` (`82`)
+- `XTerminal.tsx`: now an `11`-line barrel; terminal density should be read in `BaseXTerminal.tsx` (`305`), `useTerminalSessions.ts` (`134`), and `MultiTerminalPanel.tsx` (`70`)
 - volatile test, console, `: any`, and raw-hex inventories should defer to `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` instead of this imported audit
 - admin pages: see `81` for the current measured count
 - API routes: see `81` for the current measured count
@@ -128,7 +129,7 @@ For those, always pair it with `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` and
 Across `81`, `82`, and this imported systems/interfaces audit, the shared execution order remains:
 
 1. Keep the design system converging toward one visual language.
-2. Continue slicing the remaining workbench and preview hotspots (`FullscreenIDE`, `AIChatPanelPro`, `XTerminal`, `CanonicalPreviewSurface`, `WorkbenchEditorSurface`).
+2. Continue slicing the remaining workbench and preview hotspots (`FullscreenIDE`, `SceneViewportSurface`, `BaseXTerminal`, `ModernIDEShellPanels`, and then stabilize `AIChatPanelPro`).
 3. Turn collaboration from infrastructure into visible product UX.
 4. Turn preview into a trust-building, shareable creation surface.
 5. Keep replacing runtime ambiguity with evidence, tests, and structured observability.
