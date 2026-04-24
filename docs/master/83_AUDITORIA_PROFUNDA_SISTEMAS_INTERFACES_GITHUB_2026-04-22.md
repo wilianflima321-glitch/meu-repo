@@ -34,8 +34,8 @@ The local workspace is already synced with the latest upstream changes from `gen
 
 Additional local reconciliation on `2026-04-23`:
 - the preview lane is denser and clearer for end users through `cloud-web-app/web/components/ide/PreviewRuntimeToolbar.tsx` and `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`
-- build-risk mitigations now also include browser-gated SWR keys in `cloud-web-app/web/lib/providers/AethelProvider.tsx` plus explicit Drei `Html` aliases across active 3D/editor surfaces
-- production `next build` parity is still open because the latest command-line build probe still timed out before a successful end-to-end completion
+- build-risk mitigations now also include browser-gated SWR keys in `cloud-web-app/web/lib/providers/AethelProvider.tsx`, explicit Drei `Html` aliases across active 3D/editor surfaces, and a root/studio runtime split where `cloud-web-app/web/components/ClientLayout.tsx` keeps only the lightweight root shell while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` mounts richer product runtime per route
+- production `next build` parity is still open because the latest command-line probes still timed out before a successful end-to-end completion; the newest probe no longer reprinted the explicit old errors before timeout, but the latest fully actionable error evidence remains in `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log`
 
 ## What From the PDF Still Holds Strongly
 These points still align with the repo and remain strategic priorities:
@@ -92,10 +92,10 @@ The following PDF claims should no longer be treated as current truth without re
 These are the reality points this audit should now be interpreted against:
 
 - `AIChatPanelPro.tsx`: about `508` lines, not the older ~1766-line state
-- `FullscreenIDE.tsx`: about `565` lines and still a top-priority god component
-- `WorkbenchEditorPane.tsx`: about `537` lines and now one of the highest-impact shell hotspots because editor presence, split tooling, and inline controls converge there
+- `FullscreenIDE.tsx`: about `540` lines and still a top-priority god component
+- `WorkbenchEditorPane.tsx`: about `523` lines and now one of the highest-impact shell hotspots because editor presence, split tooling, and inline controls converge there
 - `AIChatPanelContainer.tsx`: about `116` lines after extraction into session-context, provider-preflight, send-pipeline, and session-banner modules
-- `ModernIDEShell.tsx`: now only `161` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`268`), `ModernIDEShellChrome.tsx` (`211`), and `chromeSecondaryBars.tsx` (`189`)
+- `ModernIDEShell.tsx`: now only `149` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`268`), `ModernIDEShellChrome.tsx` (`196`), and `chromeSecondaryBars.tsx` (`172`)
 - tracked tests: `45`
 - tracked `console.*` in `cloud-web-app/web/lib`: around `285`
 - tracked `console.*` in `cloud-web-app/web/components`: around `151`

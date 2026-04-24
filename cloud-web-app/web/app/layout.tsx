@@ -3,12 +3,6 @@ import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import ClientLayout from '../components/ClientLayout'
-import { ServiceWorkerProvider } from '../components/ServiceWorkerProvider'
-import WebVitalsReporter from '../components/analytics/WebVitalsReporter'
-import TelemetryBootstrap from '../components/observability/TelemetryBootstrap'
-import CookieConsent from '../components/ui/CookieConsent'
-import { ToastProvider } from '../components/ui/toast-system'
-import { ThemeProvider } from '../contexts/ThemeContext'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -101,23 +95,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           Ir para o conteúdo principal
         </a>
-        <ServiceWorkerProvider>
-          <ThemeProvider>
-            <ToastProvider>
-              <TelemetryBootstrap />
-              <WebVitalsReporter />
-              <div
-                id="main-content"
-                className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
-              >
-                <ClientLayout>
-                  {children}
-                </ClientLayout>
-              </div>
-              <CookieConsent />
-            </ToastProvider>
-          </ThemeProvider>
-        </ServiceWorkerProvider>
+        <div
+          id="main-content"
+          className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
+        >
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </div>
       </body>
     </html>
   )

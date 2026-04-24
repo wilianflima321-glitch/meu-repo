@@ -13,19 +13,19 @@ This file is the short scoreboard that answers:
 
 ## Current Snapshot
 - `AIChatPanelPro.tsx`: `508` lines
-- `FullscreenIDE.tsx`: `565` lines
-- `WorkbenchEditorPane.tsx`: `537` lines
+- `FullscreenIDE.tsx`: `540` lines
+- `WorkbenchEditorPane.tsx`: `523` lines
 - `AIChatPanelContainer.tsx`: `116` lines
-- `ModernIDEShell.tsx`: `161` lines
+- `ModernIDEShell.tsx`: `149` lines
 - `ModernIDEShellPanels.tsx`: `268` lines
-- `ModernIDEShellChrome.tsx`: `211` lines
-- `chromeSecondaryBars.tsx`: `189` lines
-- `XTerminal.tsx`: `581` lines
+- `ModernIDEShellChrome.tsx`: `196` lines
+- `chromeSecondaryBars.tsx`: `172` lines
+- `XTerminal.tsx`: `506` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
-  - the latest actionable logs still point to prerender failures
-  - fresh local probes after restoring globally stable app providers, browser-gating AethelProvider SWR keys, and aliasing Drei `Html` usage stopped reproducing the explicit `<Html>`/`useContext` failures before timing out, but still did not complete within extended `15` and `20` minute timeouts
+  - `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log` is still the latest fully actionable explicit-failure log and points to prerender failures
+  - the newer `cloud-web-app/web/build-probe-2026-04-23-root-boundary-bisect.log` moved the root boundary further toward a pass-through shell and did not reprint those explicit `<Html>`/`useContext` traces before timing out, but it still never completed successfully
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -85,7 +85,7 @@ This file is the short scoreboard that answers:
 ## Still Open
 ### P0
 1. production build parity
-   - current highest-probability root suspects remain in the app/provider stack: `app/layout.tsx`, `components/ClientLayout.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`
+   - current highest-probability root suspects remain in the app/provider stack: `app/layout.tsx`, `components/ClientLayout.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`, `app/error.tsx`, and `app/not-found.tsx`
 2. remaining workbench monolith reduction
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure

@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import Link from 'next/link'
-import { AlertTriangle, Home, RefreshCw } from 'lucide-react'
 import { createComponentLogger } from '@/lib/observability/logger'
 
 const logger = createComponentLogger('app-error-boundary')
@@ -15,63 +13,49 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    logger.error('[Aethel Error Boundary] Runtime error captured', { error })
-
-    import('@/lib/sentry-browser')
-      .then(({ captureBrowserException }) => {
-        captureBrowserException(error, {
-          surface: 'app-error-boundary',
-        })
-      })
-      .catch((captureError) => {
-        logger.warn('[Aethel Error Boundary] Failed to send error to Sentry', {
-          captureError,
-          originalError: error,
-        })
-      })
+    logger.error('App router error boundary captured runtime failure', {
+      digest: error.digest,
+      message: error.message,
+      stack: error.stack,
+    })
   }, [error])
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] px-6 text-[var(--aethel-text-primary)]">
-      <div className="w-full max-w-md rounded-3xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] p-8 text-center shadow-[0_24px_80px_rgba(2,6,23,0.34)]">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]">
-          <AlertTriangle className="h-8 w-8" />
-        </div>
-
-        <h1 className="text-2xl font-semibold tracking-tight">Algo deu errado</h1>
-        <p className="mt-3 text-sm leading-relaxed text-[var(--aethel-text-secondary)]">
-          Ocorreu um erro inesperado nesta superfície. Vamos manter a experiência honesta:
-          tente novamente ou volte ao Studio enquanto investigamos a causa real.
+    <main className="flex min-h-screen items-center justify-center bg-[var(--aethel-surface-primary)] px-6 py-16 text-[var(--aethel-text-primary)]">
+      <section className="w-full max-w-xl rounded-3xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_84%,transparent)] p-8 shadow-[0_24px_80px_rgba(2,6,23,0.34)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Runtime error</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight">Algo deu errado</h1>
+        <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+          A superfície encontrou um erro inesperado. Estamos mantendo a leitura honesta: a falha ainda está aberta e o
+          melhor próximo passo é tentar novamente ou voltar para uma área estável do produto.
         </p>
-
         {error.digest ? (
-          <p className="mt-3 text-xs text-[var(--aethel-text-tertiary)]">
+          <p className="mt-4 text-xs text-[var(--aethel-text-tertiary)]">
             Referência: <span className="font-mono">{error.digest}</span>
           </p>
         ) : null}
-
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[linear-gradient(90deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-inverse)] transition-all hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
+            className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(90deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-inverse)] transition-all hover:brightness-110"
           >
-            <RefreshCw className="h-4 w-4" />
             Tentar novamente
           </button>
-          <Link
+          <a
             href="/dashboard"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--aethel-border-primary)] px-5 py-3 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus-ring)]"
+            className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] px-5 py-3 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)]"
           >
-            <Home className="h-4 w-4" />
             Ir ao Studio
-          </Link>
+          </a>
+          <a
+            href="/status"
+            className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] px-5 py-3 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]"
+          >
+            Ver status
+          </a>
         </div>
-
-        <p className="mt-6 text-xs text-[var(--aethel-text-tertiary)]">
-          Se o problema persistir, confira a documentação ou abra um fluxo de suporte.
-        </p>
-      </div>
-    </div>
+      </section>
+    </main>
   )
 }

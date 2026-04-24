@@ -39,15 +39,15 @@ Use the current set like this:
 - `cloud-web-app/web/lib/**/*.ts` in the current workspace: `347`
 - Curated tracked executable test/spec files: `49`
 - Hotspot line counts:
-- `FullscreenIDE.tsx`: `565`
-- `WorkbenchEditorPane.tsx`: `537`
+- `FullscreenIDE.tsx`: `540`
+- `WorkbenchEditorPane.tsx`: `523`
 - `AIChatPanelPro.tsx`: `508`
 - `AIChatPanelContainer.tsx`: `116`
-- `ModernIDEShell.tsx`: `161`
+- `ModernIDEShell.tsx`: `149`
 - `ModernIDEShellPanels.tsx`: `268`
-- `ModernIDEShellChrome.tsx`: `211`
-- `chromeSecondaryBars.tsx`: `189`
-- `XTerminal.tsx`: `581`
+- `ModernIDEShellChrome.tsx`: `196`
+- `chromeSecondaryBars.tsx`: `172`
+- `XTerminal.tsx`: `506`
 
 ## What This Audit Still Gets Right
 ### Root hygiene still matters
@@ -107,24 +107,25 @@ Do not keep auditing it as an active blocker.
 
 ### Production build parity
 - This remains OPEN.
-- The active evidence is still in `cloud-web-app/web/build-latest.log`, `cloud-web-app/web/build-probe-workerthreads-off.log`, and the older `build-probe-*.log` files.
+- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log` and `cloud-web-app/web/build-probe-2026-04-23-root-boundary-bisect.log`, with older `build-probe-*.log` files retained as historical context.
 - New mitigation attempts are now part of the repo truth:
   - `cloud-web-app/web/next.config.js` forces `experimental.workerThreads=false`
-  - `cloud-web-app/web/components/ClientLayout.tsx` scopes the heavier provider stack to studio routes instead of every public/auth surface
+- `cloud-web-app/web/components/ClientLayout.tsx` now mounts only the lightweight root shell, while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` carries route-scoped studio runtime
 - Current local reruns still did not finish within an extended `15` minute timeout, so the category cannot be promoted.
 - Current failure classes include:
   - `<Html> should not be imported outside of pages/_document` for `/404` and `/500`
-  - `useContext` null prerender failures across multiple App Router pages such as `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
+- `useContext` null prerender failures across auth, public, docs, studio, profile/settings/project surfaces, and many `/admin/*` routes
 - Probe history already shows that this was not fixed by:
   - a bare root layout
   - removing `app/error.tsx`
   - removing `app/not-found.tsx`
   - adding temporary `pages/_document.tsx`, `pages/404.tsx`, and `pages/500.tsx`
 - Current repo-level reading:
-  - the simple userland shell-hook leak was mitigated,
-  - provider scoping for public/auth versus studio surfaces is tighter,
-  - worker-thread concurrency was reduced to improve Windows determinism,
-  - but production build parity still cannot be marked solved.
+- the simple userland shell-hook leak was mitigated,
+- the root shell is lighter and the heavier product runtime is now route-scoped via `StudioRuntimeProviders.tsx`,
+- worker-thread concurrency was reduced to improve Windows determinism,
+- the newer root-boundary bisect probe did not reprint the explicit old errors before timeout,
+- but production build parity still cannot be marked solved.
 
 ## Repo/Execution Priorities
 1. Close the `next build` parity gap.

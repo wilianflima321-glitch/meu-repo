@@ -42,14 +42,14 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
-- `FullscreenIDE.tsx`: `565`
-- `WorkbenchEditorPane.tsx`: `537`
+- `FullscreenIDE.tsx`: `540`
+- `WorkbenchEditorPane.tsx`: `523`
 - `AIChatPanelPro.tsx`: `508`
 - `AIChatPanelContainer.tsx`: `116`
-- `ModernIDEShell.tsx`: `161`
+- `ModernIDEShell.tsx`: `149`
 - `ModernIDEShellPanels.tsx`: `268`
-- `ModernIDEShellChrome.tsx`: `211`
-- `chromeSecondaryBars.tsx`: `189`
+- `ModernIDEShellChrome.tsx`: `196`
+- `chromeSecondaryBars.tsx`: `172`
 - `XTerminal.tsx`: `506`
 
 The category remains valid.
@@ -117,10 +117,12 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
 3. the biggest remaining risks are now execution discipline and build parity, not lack of architectural direction
 4. fresh mitigations already landed for build parity:
    - `experimental.workerThreads=false` in `next.config.js`
-   - lighter provider scoping in `components/ClientLayout.tsx`
+   - `components/ClientLayout.tsx` is now only a lightweight root shell
+   - `components/providers/StudioRuntimeProviders.tsx` now mounts the heavier product runtime per route
    - browser-only SWR keys in `lib/providers/AethelProvider.tsx`
    - explicit Drei `Html` aliases across the active 3D/editor components
-   but parity is still open because local reruns have not yet completed successfully, including a fresh `20` minute command-line build probe that still did not finish
+   - simpler `app/error.tsx` and `app/not-found.tsx` were introduced as a root-boundary bisect
+   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-23-studio-runtime-split-v3.log` still contains explicit `<Html>` and `useContext` prerender failures, while the newer `build-probe-2026-04-23-root-boundary-bisect.log` stopped before successful completion without reprinting those explicit traces
 
 ## The Sequence V6 Still Supports
 1. close production build parity

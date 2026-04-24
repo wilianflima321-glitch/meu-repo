@@ -11,11 +11,11 @@
 Este documento continua sendo o norte principal, mas alguns trechos ficaram velhos depois das rodadas de refactor e da pressão E2E mais recente.
 
 - Workbench hotspots:
-  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx` está em `565` linhas.
-  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` agora é um hotspot relevante em `537` linhas.
-  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para `161` linhas.
-  - o shell agora está repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`268` linhas), `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`211` linhas) e `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx` (`189` linhas).
-  - `cloud-web-app/web/components/terminal/XTerminal.tsx` está em `581` linhas.
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` está em `540` linhas.
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` agora é um hotspot relevante em `523` linhas.
+- `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para `149` linhas.
+- o shell agora está repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`268` linhas), `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`196` linhas) e `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx` (`172` linhas).
+- `cloud-web-app/web/components/terminal/XTerminal.tsx` está em `506` linhas.
 - Colaboração:
   - `CollaboratorsBar` e `RemoteCursorLayer` já existem e a presença colaborativa já aparece no editor principal via `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` e `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`.
   - a colaboração no topo e na barra do editor ficou mais densa e mais próxima do padrão de cockpit, sem depender só de um pill solto no header.
@@ -25,7 +25,7 @@ Este documento continua sendo o norte principal, mas alguns trechos ficaram velh
   - localmente, a suíte continua com `5 passed`, mas a reprodução “crua” ainda depende de o app já estar no ar em `:3000`.
 - Build parity:
   - o antigo blocker global de `usePathname()` em providers compartilhados foi reduzido pela introdução de `cloud-web-app/web/lib/navigation/use-browser-pathname.ts`.
-  - a árvore pública/auth agora também usa um stack de providers mais leve via `cloud-web-app/web/components/ClientLayout.tsx`, e `cloud-web-app/web/next.config.js` força `experimental.workerThreads=false` como mitigação para builds Windows.
+- a árvore pública/auth agora passa por um root shell muito mais leve em `cloud-web-app/web/components/ClientLayout.tsx`, enquanto o runtime pesado de produto sobe via `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx`; além disso, `cloud-web-app/web/next.config.js` força `experimental.workerThreads=false` como mitigação para builds Windows.
   - o provider global `cloud-web-app/web/lib/providers/AethelProvider.tsx` agora também limita suas chaves SWR ao browser, reduzindo fetch relativo em trabalho de servidor.
   - a stack 3D/editor ativa também recebeu alias explícito de Drei `Html` para reduzir ambiguidade com o erro histórico de `<Html>` na fase de prerender.
   - a paridade completa de `next build` ainda deve continuar marcada como aberta até termos um build de produção concluído de ponta a ponta.
@@ -391,7 +391,7 @@ provider-status, query, stream, suggestions, thinking, trace, voice
 
 ### 5.2 💻 Workbench/IDE (7.6/10)
 
-**Top-3 componentes:**
+**Top-3 componentes (snapshot histórico da V5 em 2026-04-19):**
 - `FullscreenIDE.tsx` — **1.808 linhas** (god)
 - `AIChatPanelPro.tsx` — **1.750 linhas** (god)
 - `ModernIDEShell.tsx` — 1.121 linhas (acima do limite saudável mas menor)
@@ -1167,7 +1167,7 @@ Estruturado em 4 épicos de 3 semanas cada.
 
 #### Semana 4: Quebrar god components
 
-**S4.1 — `FullscreenIDE.tsx` (1.808 → 7 arquivos ≤ 300 lin):**
+**S4.1 — `FullscreenIDE.tsx` (baseline histórico de 1.808 → 7 arquivos ≤ 300 lin):**
 ```
 components/workbench/
   ├── WorkbenchShell.tsx            ← orquestra estado (~300 lin)
@@ -1185,7 +1185,7 @@ hooks/
   └── useProjectTree.ts
 ```
 
-**S4.2 — `AIChatPanelPro.tsx` (1.750 → 6 arquivos):**
+**S4.2 — `AIChatPanelPro.tsx` (baseline histórico de 1.750 → 6 arquivos):**
 ```
 components/ai/
   ├── ChatShell.tsx                 ← orquestra estado (~250 lin)

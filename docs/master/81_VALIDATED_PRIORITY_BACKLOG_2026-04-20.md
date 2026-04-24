@@ -34,14 +34,14 @@ Canonical set reference:
   - `console.*` in `lib`: `269`
   - `console.*` in `components`: `92`
 - Current hotspot line counts:
-  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `565`
+  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `540`
   - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `508`
   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `116`
-  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `161`
+  - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `149`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `268`
-  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `211`
-  - `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx`: `189`
-  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`: `537`
+  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `196`
+  - `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx`: `172`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`: `523`
   - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `506`
 
 ## Capability Truth Labels
@@ -86,19 +86,19 @@ Canonical set reference:
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
-- The latest evidence remains in `cloud-web-app/web/build-latest.log`, `cloud-web-app/web/build-probe-workerthreads-off.log`, `cloud-web-app/web/build-probe-2026-04-23-clientlayout-global.log`, `cloud-web-app/web/build-probe-2026-04-23-drei-html.log`, and `cloud-web-app/web/build-probe-2026-04-23-cmd-current.log`.
+- The latest canonical evidence now spans `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log` and `cloud-web-app/web/build-probe-2026-04-23-root-boundary-bisect.log`, with older `build-probe-*.log` files retained as historical context.
 - Additional mitigations landed on `2026-04-23`:
   - `cloud-web-app/web/next.config.js` now forces `experimental.workerThreads=false`
-  - `cloud-web-app/web/components/ClientLayout.tsx` now keeps globally stable app providers mounted consistently, while studio-only enhancements stay behind a smaller route gate
+  - `cloud-web-app/web/components/ClientLayout.tsx` now mounts only the lightweight root shell (`ThemeProvider`, `ToastProvider`, and CSS custom-property bootstrap), while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` owns route-scoped studio runtime for dashboard, IDE, billing, settings, profile, nexus, marketplace, and project-settings surfaces
   - `cloud-web-app/web/lib/providers/AethelProvider.tsx` now gates SWR keys to the browser so the global app provider does not try to resolve relative API keys during server work
   - Drei `Html` usage is now explicitly aliased to `DreiHtml` across the active 3D/editor surfaces, which reduces render-stack ambiguity around the historical `<Html>` prerender error class
 - Current reruns still do not justify closure:
-  - repeated local `next build` probes still failed to finish within extended `15` and `20` minute timeouts
-  - the last fully actionable error log still points to prerender failures around `/404`, `/500`, `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
-  - fresh probes after restoring globally stable app providers, browser-gating AethelProvider fetches, and aliasing Drei `Html` usage no longer reproduced those explicit `<Html>` / `useContext` errors before timing out, which is promising but still not enough to mark parity closed
+- repeated local `next build` probes still failed to finish within extended `15`, `20`, and `15+` minute timeouts
+- `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log` is still the latest fully actionable explicit failure log and reproduces prerender errors around `/404`, `/500`, `/_not-found`, `/login`, `/register`, multiple `/docs/*`, many `/admin/*`, and several public/studio/profile/settings surfaces
+- the newer `cloud-web-app/web/build-probe-2026-04-23-root-boundary-bisect.log` moved the root shell closer to a pass-through boundary and stayed alive through compile plus type validation without reprinting those explicit `<Html>` / `useContext` traces before timing out, which is promising but still not enough to mark parity closed
 - The active failure classes are:
   - `Error: <Html> should not be imported outside of pages/_document.` while prerendering `/404` and `/500`
-  - `TypeError: Cannot read properties of null (reading 'useContext')` while prerendering routes such as `/_not-found`, `/login`, `/register`, `/settings`, `/status`, `/terms`, and `/verify-email`
+- `TypeError: Cannot read properties of null (reading 'useContext')` while prerendering auth, public, docs, studio, profile/settings/project surfaces, and many `/admin/*` routes
 - Multiple probes already ruled out simple userland explanations:
   - bare `app/layout.tsx`
   - removing `app/error.tsx`
@@ -106,7 +106,7 @@ Canonical set reference:
   - adding temporary `pages/_document.tsx`, `pages/404.tsx`, and `pages/500.tsx`
 - Therefore the current truthful read is:
   - App Router hook leakage was mitigated in shared shell code,
-  - globally stable app providers were restored in `cloud-web-app/web/components/ClientLayout.tsx` while studio-only UX stayed gated in a smaller enhancement layer,
+- the heavy studio runtime is no longer global: `cloud-web-app/web/components/ClientLayout.tsx` now keeps only the lightweight root shell, while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` mounts the richer product runtime per route,
   - browser-only SWR keys reduced SSR/provider fetch risk inside `cloud-web-app/web/lib/providers/AethelProvider.tsx`,
   - Drei `Html` aliasing reduced naming ambiguity across the active 3D/editor stack,
   - worker-thread concurrency was reduced for Windows build determinism,
