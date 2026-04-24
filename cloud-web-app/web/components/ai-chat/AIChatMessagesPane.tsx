@@ -4,7 +4,7 @@ import type { Ref } from 'react'
 import { Bot, Radio } from 'lucide-react'
 import { MessageBubble } from '@/components/ai-chat/MessageBubble'
 import type { Message } from '@/components/ide/AIChatPanelPro.types'
-import { QUICK_PROMPTS } from './presets'
+import type { AIChatModePreset } from './presets'
 
 interface AIChatMessagesPaneProps {
   messages: Message[]
@@ -12,6 +12,7 @@ interface AIChatMessagesPaneProps {
   isLoading: boolean
   showAdvancedControls: boolean
   supportsVoice: boolean
+  modePreset: AIChatModePreset
   onQuickPrompt: (prompt: string) => void
   onEnableAdvancedControls: () => void
   onCopy: (content: string) => Promise<void>
@@ -26,6 +27,7 @@ export function AIChatMessagesPane({
   isLoading,
   showAdvancedControls,
   supportsVoice,
+  modePreset,
   onQuickPrompt,
   onEnableAdvancedControls,
   onCopy,
@@ -41,11 +43,10 @@ export function AIChatMessagesPane({
             <Bot className="h-8 w-8 text-[var(--aethel-text-primary)]" />
           </div>
           <h3 className="mb-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
-            Assistente de IA
+            {modePreset.emptyStateTitle}
           </h3>
           <p className="mb-6 max-w-sm text-sm text-[var(--aethel-text-tertiary)]">
-            Selecione um arquivo, cole um erro ou use @codebase para iniciar. Eu explico,
-            depuro e gero trechos sob demanda.
+            {modePreset.emptyStateDescription}
           </p>
           {supportsVoice && (
             <p className="mb-4 flex items-center gap-1 text-xs text-[var(--aethel-info-light)]">
@@ -55,7 +56,7 @@ export function AIChatMessagesPane({
           )}
           {showAdvancedControls ? (
             <div className="flex flex-wrap justify-center gap-2">
-              {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
+              {modePreset.quickPrompts.map(({ icon: Icon, label, prompt }) => (
                 <button
                   type="button"
                   aria-label={`Usar prompt rapido ${label}`}

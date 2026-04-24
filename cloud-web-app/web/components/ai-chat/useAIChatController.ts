@@ -12,6 +12,8 @@ import {
 } from '@/lib/ai-chat-advanced-client'
 import type { AiProviderStatusResponse } from '@/lib/ai-provider-status-client'
 import type { ChatMessage, ProviderGateState } from '@/components/ai-chat/ai-chat-container.types'
+import type { AIChatConsoleMode } from '@/components/ai-chat/presets'
+import type { MessageContext } from '@/components/ide/AIChatPanelPro.types'
 
 type UseAIChatControllerArgs = {
   currentModel: string
@@ -67,6 +69,19 @@ function tryParseJson(raw: string): Record<string, unknown> | null {
   } catch {
     return null
   }
+}
+
+function applyConsoleModeBias(message: string, consoleMode: AIChatConsoleMode | undefined) {
+  if (!consoleMode || consoleMode === 'ask') return message
+
+  const prefixes: Record<Exclude<AIChatConsoleMode, 'ask'>, string> = {
+    plan: 'Modo planejar: estruture a resposta em etapas, riscos e proximos passos.',
+    execute: 'Modo executar: priorize passos acionaveis, diff/apply e ordem de execucao.',
+    review: 'Modo revisar: procure riscos, regressao, testes faltando e pontos frageis.',
+    live: 'Modo ao vivo: responda de forma curta, orientada ao estado atual e ao proximo movimento.',
+  }
+
+  return `${prefixes[consoleMode]}\n\n${message}`
 }
 
 function resolveProfileFromMentions(
@@ -226,7 +241,7 @@ export function useAIChatController({
   )
 
   const handleSendMessage = useCallback(
-    async (message: string, context?: { attachments?: unknown[] }) => {
+    async (message: string, context?: MessageContext) => {
       if (!message.trim() || isLoading) return
       setLastFailedMessage(null)
 
@@ -241,6 +256,12 @@ export function useAIChatController({
       }
 
       const nextMessages = [...messages, userMessage]
+      const requestMessage = applyConsoleModeBias(normalizedMessage, context?.consoleMode)
+      const requestMessages = nextMessages.map((entry, index) => ({
+        role: entry.role,
+        content:
+          index === nextMessages.length - 1 && entry.role === 'user' ? requestMessage : entry.content,
+      }))
       setMessages(nextMessages)
 
       if (profileResolution.unsupportedTags.length > 0) {
@@ -289,7 +310,7 @@ export function useAIChatController({
       if (
         providerGate &&
         tryServeLocalDemo({
-          message: normalizedMessage,
+          message: requestMessage,
           profile: profileResolution.profile,
           tags: profileResolution.tags,
           reason: 'preflight_provider_gate',
@@ -305,6 +326,7 @@ export function useAIChatController({
           source: 'ide-panel',
           model: currentModel,
           projectId,
+          consoleMode: context?.consoleMode ?? 'ask',
         },
       })
 
@@ -314,9 +336,9 @@ export function useAIChatController({
         setProviderGate(null)
 
         const result = await requestAdvancedChat({
-          message: normalizedMessage,
+          message: requestMessage,
           model: currentModel,
-          messages: nextMessages.map((entry) => ({ role: entry.role, content: entry.content })),
+          messages: requestMessages,
           projectId,
           profileOverride: profileResolution.profile,
           signal: controller.signal,
@@ -354,6 +376,7 @@ export function useAIChatController({
             qualityMode: profileResolution.profile.qualityMode,
             agentCount: profileResolution.profile.agentCount,
             enableWebResearch: profileResolution.profile.enableWebResearch,
+            consoleMode: context?.consoleMode ?? 'ask',
             mentionTags: profileResolution.tags,
           },
         })
@@ -382,7 +405,7 @@ export function useAIChatController({
             setupUrl: err.setupUrl,
           })
           const servedDemo = tryServeLocalDemo({
-            message: normalizedMessage,
+            message: requestMessage,
             profile: profileResolution.profile,
             tags: profileResolution.tags,
             reason: 'provider_setup_error',
@@ -407,6 +430,7 @@ export function useAIChatController({
             source: 'ide-panel',
             model: currentModel,
             projectId,
+            consoleMode: context?.consoleMode ?? 'ask',
             error: rawErrorMessage,
             latencyMs,
           },

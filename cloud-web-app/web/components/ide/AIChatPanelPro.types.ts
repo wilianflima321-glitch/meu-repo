@@ -1,3 +1,4 @@
+import type { AIChatConsoleMode } from '@/components/ai-chat/presets'
 import {
   OPENROUTER_BEST_MODELS_SORTED,
   OPENROUTER_BUDGET_MODELS_SORTED,
@@ -91,6 +92,7 @@ export interface MessageContext {
   selection?: string
   image?: string
   attachments?: Attachment[]
+  consoleMode?: AIChatConsoleMode
 }
 
 export interface ModelOption {

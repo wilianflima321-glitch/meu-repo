@@ -15,6 +15,7 @@ import type {
   Attachment,
   CodebaseContextPreview,
 } from '@/components/ide/AIChatPanelPro.types'
+import type { AIChatConsoleMode } from './presets'
 import { useChatContextPreviews } from './useChatContextPreviews'
 import { useVoiceRecording } from './useVoiceRecording'
 
@@ -22,6 +23,7 @@ interface UseAIChatComposerStateParams {
   allowAttachments: boolean
   agentCount: number
   codebaseContextPreview?: CodebaseContextPreview
+  consoleMode: AIChatConsoleMode
   isLoading: boolean
   onSendMessage?: AIChatPanelProps['onSendMessage']
   projectId?: string
@@ -31,6 +33,7 @@ export function useAIChatComposerState({
   allowAttachments,
   agentCount,
   codebaseContextPreview,
+  consoleMode,
   isLoading,
   onSendMessage,
   projectId,
@@ -88,13 +91,14 @@ export function useAIChatComposerState({
 
       onSendMessage?.(messageWithAgents, {
         attachments: allowAttachments && attachments.length > 0 ? attachments : undefined,
+        consoleMode,
       })
 
       mentionState.replaceText('')
       setAttachments([])
       clearRecording()
     },
-    [agentCount, allowAttachments, attachments, clearRecording, input, isLoading, mentionState, onSendMessage]
+    [agentCount, allowAttachments, attachments, clearRecording, consoleMode, input, isLoading, mentionState, onSendMessage]
   )
 
   const handleComposerKeyDown = useCallback(

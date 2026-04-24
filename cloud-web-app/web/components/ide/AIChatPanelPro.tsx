@@ -10,10 +10,12 @@ import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models'
 import { useEditorApplyBridge } from './EditorApplyBridgeContext'
 import { AIChatBenchmarkTelemetry } from '@/components/ai-chat/AIChatBenchmarkTelemetry'
 import { AIChatComposer } from '@/components/ai-chat/AIChatComposer'
+import { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
 import { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
 import { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRail'
 import { AIChatMessagesPane } from '@/components/ai-chat/AIChatMessagesPane'
 import { AIChatOpsSidebar } from '@/components/ai-chat/AIChatOpsSidebar'
+import { MODE_PRESETS } from '@/components/ai-chat/presets'
 import { useAIChatComposerState } from '@/components/ai-chat/useAIChatComposerState'
 import { useAIChatContextActions } from '@/components/ai-chat/useAIChatContextActions'
 import { useAIChatOpsState } from '@/components/ai-chat/useAIChatOpsState'
@@ -85,6 +87,7 @@ export default function AIChatPanelPro({
     messages,
     showHistory,
   })
+  const modePreset = MODE_PRESETS[consoleMode]
   const {
     attachments,
     clearVoiceError,
@@ -113,6 +116,7 @@ export default function AIChatPanelPro({
     allowAttachments,
     agentCount,
     codebaseContextPreview,
+    consoleMode,
     isLoading,
     onSendMessage,
     projectId,
@@ -190,12 +194,22 @@ export default function AIChatPanelPro({
           onToggleAdvancedControls={toggleAdvancedControls}
         />
 
+        <AIChatContextStrip
+          consoleMode={consoleMode}
+          modePreset={modePreset}
+          lastUserGoal={lastUserGoal}
+          selectedModelName={resolvedModel.name}
+          agentCount={agentCount}
+          isAIWorking={isAIWorking}
+        />
+
         <AIChatMessagesPane
           messages={messages}
           streamingContent={streamingContent}
           isLoading={isLoading}
           showAdvancedControls={showAdvancedControls}
           supportsVoice={Boolean(resolvedModel.supportsVoice)}
+          modePreset={modePreset}
           onQuickPrompt={handleQuickPrompt}
           onEnableAdvancedControls={enableAdvancedControls}
           onCopy={handleCopy}
@@ -215,6 +229,7 @@ export default function AIChatPanelPro({
           agentCount={agentCount}
           agents={agents}
           onAgentClick={handleAgentClick}
+          quickPrompts={modePreset.quickPrompts}
           showAdvancedControls={showAdvancedControls}
           onQuickPrompt={handleQuickPrompt}
         />
@@ -225,6 +240,7 @@ export default function AIChatPanelPro({
           isLoading={isLoading}
           onSubmit={handleSend}
           onInterrupt={onInterrupt}
+          modePreset={modePreset}
           onInputChange={mentionState.setText}
           onKeyDown={handleComposerKeyDown}
           mentionState={{

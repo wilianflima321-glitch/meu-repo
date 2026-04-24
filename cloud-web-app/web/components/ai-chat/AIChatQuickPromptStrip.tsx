@@ -1,16 +1,17 @@
 'use client'
 
-import { QUICK_PROMPTS } from './presets'
+import type { QuickPromptDefinition } from './presets'
 
 interface AIChatQuickPromptStripProps {
   onQuickPrompt: (prompt: string) => void
+  prompts: QuickPromptDefinition[]
 }
 
-export function AIChatQuickPromptStrip({ onQuickPrompt }: AIChatQuickPromptStripProps) {
+export function AIChatQuickPromptStrip({ onQuickPrompt, prompts }: AIChatQuickPromptStripProps) {
   return (
     <div className="border-t border-[var(--aethel-border-secondary)] px-3 py-2">
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {QUICK_PROMPTS.map(({ icon: Icon, label, prompt }) => (
+        {prompts.map(({ icon: Icon, label, prompt }) => (
           <button
             type="button"
             aria-label={`Usar prompt rapido ${label}`}

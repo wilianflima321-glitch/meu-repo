@@ -13,7 +13,9 @@ This file is the short scoreboard that answers:
 
 ## Current Snapshot
 - `FullscreenIDE.tsx`: `379` lines
-- `AIChatPanelPro.tsx`: `273` lines
+- `AIChatPanelPro.tsx`: `292` lines
+- `AIChatComposer.tsx`: `282` lines
+- `useAIChatComposerState.ts`: `235` lines
 - `useFullscreenIDEBridgeSections.ts`: `141` lines
 - `WorkbenchPreviewPane.tsx`: `44` lines
 - `SceneViewportSurface.tsx`: `98` lines
@@ -93,14 +95,18 @@ This file is the short scoreboard that answers:
 
 ### Chat interaction polish
 - the chat shell is thinner and no longer needs emergency decomposition:
-  - `AIChatPanelPro.tsx` is `273` lines
+  - `AIChatPanelPro.tsx` is `292` lines
+  - `AIChatComposer.tsx` is `282` lines
+  - `useAIChatComposerState.ts` is `235` lines
   - `MessageBubble.tsx` is now a `110`-line orchestrator over `MessageBubbleContent.tsx`, `MessageBubbleActionBar.tsx`, `MessageBubbleCodeActions.tsx`, and `useMessageBubbleCopyActions.ts`
 - message copy/apply actions now share calmer feedback grammar, with toast-backed confirmation instead of blocking dialog behavior in the code-action rail
 - the composer and live/benchmark lane now route stop/interrupt to the real abort path in `useAIChatController.ts`
+- ask/plan/execute/review/live now materially shape the composer, empty state, quick prompts, quick mentions, and a compact `AIChatContextStrip.tsx`, so the operator surface is no longer a single generic prompt box
 - still open:
   - richer timeline/artifact context
   - semantic history search
   - shareable threads / stronger conversation information architecture
+  - separate backend execution semantics per mode
 
 ### Deploy from IDE
 - the deploy action and status page exist in the canonical IDE,
@@ -157,7 +163,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`, while stabilizing the new `AIChatPanelPro.tsx` seams and evolving the thinner preview cockpit modules
+2. keep slicing `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`, while stabilizing the new chat seams in `AIChatComposer.tsx` / `useAIChatComposerState.ts` and evolving the thinner preview cockpit modules
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

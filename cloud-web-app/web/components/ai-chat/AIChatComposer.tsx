@@ -16,7 +16,7 @@ import {
   type Mention,
   type MentionSuggestion,
 } from '@/lib/copilot/mention-parser'
-import { QUICK_MENTIONS } from './presets'
+import type { AIChatModePreset } from './presets'
 
 interface AIChatComposerProps {
   input: string
@@ -24,6 +24,7 @@ interface AIChatComposerProps {
   isLoading: boolean
   onSubmit: (event?: FormEvent) => void
   onInterrupt?: () => void
+  modePreset: AIChatModePreset
   onInputChange: (value: string, cursor: number) => void
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void
   mentionState: {
@@ -65,6 +66,7 @@ export function AIChatComposer({
   isLoading,
   onSubmit,
   onInterrupt,
+  modePreset,
   onInputChange,
   onKeyDown,
   mentionState,
@@ -201,7 +203,7 @@ export function AIChatComposer({
             value={input}
             onChange={(event) => onInputChange(event.target.value, event.target.selectionStart ?? event.target.value.length)}
             onKeyDown={onKeyDown}
-            placeholder={isRecording ? 'Ouvindo...' : 'Pergunte para a IA sobre o seu codigo...'}
+            placeholder={isRecording ? 'Ouvindo...' : modePreset.placeholder}
             disabled={isLoading}
             aria-controls="mention-suggestions-list"
             aria-label="Mensagem do chat"
@@ -218,17 +220,19 @@ export function AIChatComposer({
                 ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110'
                 : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
             }`}
-            aria-label={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
-            title={isLoading ? 'Parar resposta' : 'Enviar mensagem'}
+            aria-label={isLoading ? 'Parar resposta' : modePreset.submitLabel}
+            title={isLoading ? 'Parar resposta' : modePreset.submitLabel}
           >
             {isLoading ? <StopCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
+      <div className="mt-2 text-[11px] text-[var(--aethel-text-quaternary)]">{modePreset.helper}</div>
+
       {showAdvancedControls && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {QUICK_MENTIONS.map((mention) => (
+          {modePreset.quickMentions.map((mention) => (
             <button
               key={mention.label}
               type="button"

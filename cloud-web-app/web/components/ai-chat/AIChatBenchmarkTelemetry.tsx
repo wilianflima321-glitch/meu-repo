@@ -3,7 +3,7 @@
 import { AIChatActivityDeck } from '@/components/ai-chat/AIChatActivityDeck'
 import { AIChatQuickPromptStrip } from '@/components/ai-chat/AIChatQuickPromptStrip'
 import type { AgentInfo } from '@/components/ai-chat/AgentBoard'
-import type { AIChatConsoleMode } from '@/components/ai-chat/presets'
+import type { AIChatConsoleMode, QuickPromptDefinition } from '@/components/ai-chat/presets'
 
 interface AIChatBenchmarkTelemetryProps {
   agents: AgentInfo[]
@@ -15,6 +15,7 @@ interface AIChatBenchmarkTelemetryProps {
   onInterrupt: () => void
   onQuickPrompt: (prompt: string) => void
   onSendLiveMessage: (message: string) => void
+  quickPrompts: QuickPromptDefinition[]
   runDuration?: number
   selectedModelName: string
   showAdvancedControls: boolean
@@ -30,6 +31,7 @@ export function AIChatBenchmarkTelemetry({
   onInterrupt,
   onQuickPrompt,
   onSendLiveMessage,
+  quickPrompts,
   runDuration,
   selectedModelName,
   showAdvancedControls,
@@ -49,7 +51,7 @@ export function AIChatBenchmarkTelemetry({
         onAgentClick={onAgentClick}
       />
 
-      {showAdvancedControls && <AIChatQuickPromptStrip onQuickPrompt={onQuickPrompt} />}
+      {showAdvancedControls && <AIChatQuickPromptStrip onQuickPrompt={onQuickPrompt} prompts={quickPrompts} />}
     </>
   )
 }

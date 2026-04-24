@@ -35,7 +35,7 @@ Canonical set reference:
   - `console.*` in `components`: `92`
 - Current hotspot line counts:
   - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `379`
-  - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `273`
+  - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `292`
   - `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `107`
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `99`
   - `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx`: `198`
@@ -67,7 +67,10 @@ Canonical set reference:
   - `cloud-web-app/web/components/ai-chat/AIChatHistoryModeRail.tsx`: `57`
   - `cloud-web-app/web/components/terminal/useTerminalSelection.ts`: `57`
   - `cloud-web-app/web/components/ide/fullscreen/workbenchPreviewPaneModels.ts`: `56`
-  - `cloud-web-app/web/components/ai-chat/AIChatBenchmarkTelemetry.tsx`: `51`
+  - `cloud-web-app/web/components/ai-chat/AIChatComposer.tsx`: `282`
+  - `cloud-web-app/web/components/ai-chat/useAIChatComposerState.ts`: `235`
+  - `cloud-web-app/web/components/ai-chat/AIChatContextStrip.tsx`: `78`
+  - `cloud-web-app/web/components/ai-chat/AIChatBenchmarkTelemetry.tsx`: `57`
   - `cloud-web-app/web/components/terminal/useTerminalViewport.ts`: `52`
   - `cloud-web-app/web/components/terminal/terminalSessionConnection.ts`: `61`
   - `cloud-web-app/web/components/terminal/useTerminalShortcuts.ts`: `45`
@@ -96,6 +99,10 @@ Canonical set reference:
   - discovery, provision, sync, health, toolbar controls, denser mode switching, and a stronger preview empty-state are real,
   - the local preview lane now reads more like a primary validation surface and less like a loose debug panel,
   - but managed-runtime readiness and shareable proof are still not consistently proven end to end.
+- Chat operator UX:
+  - ask/plan/execute/review/live now drive mode-specific composer copy, quick prompts, quick mentions, contextual empty-state guidance, and a compact context strip,
+  - non-ask sends are now biased with explicit plan/execute/review/live framing before the shared controller path,
+  - but execution remains shared underneath, so mode-specific backend behavior should still be treated as partial.
 
 ### COMPLETE BASELINE
 - Live collaboration baseline:
@@ -126,7 +133,8 @@ Canonical set reference:
 - Do not describe `WorkbenchPreviewPane.tsx` as the remaining preview cockpit hotspot. It is now a `44`-line orchestrator backed by `WorkbenchPreviewRuntimeControls.tsx`, `WorkbenchPreviewRuntimeSurface.tsx`, `WorkbenchPreviewModeHeader.tsx`, and `workbenchPreviewPaneModels.ts`.
 - Do not describe `XTerminal.tsx` as the remaining terminal hotspot. It is now a thin barrel, `BaseXTerminal.tsx` is now only a `105`-line shell, and the runtime density now lives in `useTerminalRuntime.ts`, `useTerminalTransport.ts`, `useTerminalSessions.ts`, `terminalSessionApi.ts`, `terminalSessionConnection.ts`, `useTerminalSelection.ts`, `useTerminalShortcuts.ts`, `useTerminalViewport.ts`, `useTerminalOptions.ts`, and `useTerminalImperativeHandle.ts`.
 - Do not describe `ModernIDEShellChrome.tsx` or `ModernIDEShellSideColumns.tsx` as shell hotspots anymore. They are now thin barrels over dedicated chrome and side-column parts.
-- Do not describe `AIChatPanelPro.tsx` as a five-hundred-line emergency monolith anymore. It now sits below `300` lines and delegates composer, run-state, ops-state, context actions, speech playback, and quick-prompt chrome into dedicated `components/ai-chat/*` modules.
+- Do not describe `AIChatPanelPro.tsx` as a five-hundred-line emergency monolith anymore. It now sits below `300` lines and delegates composer, run-state, ops-state, context actions, speech playback, mode presets, and quick-prompt chrome into dedicated `components/ai-chat/*` modules.
+- Do not describe the chat shell as a generic prompt box anymore. The composer, empty state, benchmark strip, and context summary now change by ask/plan/execute/review/live mode, but the shared controller path means backend behavior is still only PARTIAL by mode.
 - Do not describe `FullscreenIDEWorkspaceBridge.tsx` as the remaining route-shell hotspot. It is now a `89`-line orchestrator backed by `FullscreenIDEWorkspaceBridge.types.ts` and `useFullscreenIDEBridgeProps.ts`.
 - Do not describe `useFullscreenIDEBridgeProps.ts` as the remaining dense bridge seam anymore. It is now a `19`-line orchestrator over `useFullscreenIDEBridgeProps.types.ts` and `useFullscreenIDEBridgeSections.ts`.
 - Do not describe `FullscreenIDE.tsx` as the only remaining workbench hotspot. It now shares orchestration density with `useFullscreenIDEBridgeSections.ts`, so follow-up slicing needs to treat the shell and the bridge sections separately.

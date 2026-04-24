@@ -43,7 +43,9 @@ V6 is still directionally correct on the most important debt families:
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
 - `FullscreenIDE.tsx`: `379`
-- `AIChatPanelPro.tsx`: `273`
+- `AIChatPanelPro.tsx`: `292`
+- `AIChatComposer.tsx`: `282`
+- `useAIChatComposerState.ts`: `235`
 - `useFullscreenIDEBridgeSections.ts`: `141`
 - `WorkbenchPreviewPane.tsx`: `44`
 - `SceneViewportSurface.tsx`: `98`
@@ -105,7 +107,8 @@ Current aligned truth:
 - inline AI editing is PARTIAL, not absent
 - the chat container that brokers this flow is also no longer a giant-file blocker after extraction into session, provider, and send-pipeline helpers
 - the message lane itself is calmer too: bubble grammar is more legible and stop/interrupt is now wired to the real abort path during active runs
-- that improves control and readability, but it still does **not** justify calling the full chat/artifact lane complete
+- the chat shell is also no longer mode-neutral: ask/plan/execute/review/live now drive composer copy, quick prompts, quick mentions, empty-state guidance, and a compact context strip
+- that improves control, readability, and prompt quality, but it still does **not** justify calling the full chat/artifact lane complete or mode-isolated end to end
 
 ### `next/image` is no longer disabled in the current branch
 Do not keep the old `images.unoptimized: true` claim as an active current blocker.
@@ -124,7 +127,7 @@ Observability maturity is still incomplete, but the old wording is stale.
 ### PARTIAL
 - onboarding funnel
 - inline AI editing
-- chat interaction polish and operator control
+- chat interaction polish and operator control with preset-driven mode grammar
 - deploy from IDE
 - preview runtime orchestration and local preview-lane polish
 - merge-pressure Playwright as default browser pressure
