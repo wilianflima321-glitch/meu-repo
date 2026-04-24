@@ -34,31 +34,44 @@ Canonical set reference:
   - `console.*` in `lib`: `269`
   - `console.*` in `components`: `92`
 - Current hotspot line counts:
-  - `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspaceBridge.tsx`: `373`
-  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `356`
-  - `cloud-web-app/web/components/terminal/useTerminalRuntime.ts`: `290`
-  - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `260`
-  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`: `249`
+  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `359`
+  - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `262`
+  - `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeProps.ts`: `227`
   - `cloud-web-app/web/components/preview/SceneViewportSurface.tsx`: `219`
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `197`
-  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `196`
   - `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `191`
+  - `cloud-web-app/web/components/terminal/useTerminalRuntime.ts`: `188`
   - `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx`: `186`
-  - `cloud-web-app/web/components/preview/SceneViewportWorkflowDrawer.tsx`: `151`
-  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellSideColumns.tsx`: `149`
   - `cloud-web-app/web/components/preview/PreviewLifecycleChrome.tsx`: `146`
-  - `cloud-web-app/web/components/terminal/useTerminalSessions.ts`: `134`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewRuntimeControls.tsx`: `128`
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorCanvas.tsx`: `122`
+  - `cloud-web-app/web/components/terminal/useTerminalTransport.ts`: `121`
   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `116`
-  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `114`
-  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellCenterStack.tsx`: `109`
+  - `cloud-web-app/web/components/ide/modern-shell/chromeResizeHandle.tsx`: `106`
   - `cloud-web-app/web/components/preview/useViewportExport.ts`: `106`
   - `cloud-web-app/web/components/terminal/BaseXTerminal.tsx`: `99`
+  - `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspaceBridge.tsx`: `89`
   - `cloud-web-app/web/components/preview/sceneViewportDerivations.ts`: `89`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewRuntimeSurface.tsx`: `79`
   - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `74`
+  - `cloud-web-app/web/components/ide/modern-shell/sideColumnChromeParts.tsx`: `69`
+  - `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspaceBridge.types.ts`: `67`
+  - `cloud-web-app/web/components/ide/modern-shell/chromeHeader.tsx`: `67`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewModeHeader.tsx`: `63`
   - `cloud-web-app/web/components/terminal/MultiTerminalPanel.tsx`: `70`
+  - `cloud-web-app/web/components/ai-chat/AIChatHistoryModeRail.tsx`: `57`
+  - `cloud-web-app/web/components/terminal/useTerminalSelection.ts`: `57`
+  - `cloud-web-app/web/components/ide/fullscreen/workbenchPreviewPaneModels.ts`: `56`
+  - `cloud-web-app/web/components/ai-chat/AIChatBenchmarkTelemetry.tsx`: `51`
+  - `cloud-web-app/web/components/terminal/useTerminalViewport.ts`: `52`
+  - `cloud-web-app/web/components/terminal/useTerminalShortcuts.ts`: `45`
   - `cloud-web-app/web/components/preview/CanvasViewportSurface.tsx`: `24`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`: `39`
+  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `29`
+  - `cloud-web-app/web/components/ai-chat/useAIChatPanelUiState.ts`: `33`
   - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `11`
+  - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellSideColumns.tsx`: `8`
+  - `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx`: `8`
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSidecar.tsx`: `85`
 
 ## Capability Truth Labels
@@ -103,10 +116,12 @@ Canonical set reference:
 - Do not describe `WorkbenchEditorPane.tsx` as a remaining workbench monolith. It is now a thin coordinator backed by `WorkbenchEditorSurface.tsx`, `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`.
 - Do not describe `CanonicalPreviewSurface.tsx` as the remaining preview hotspot anymore. It is now a thin variant router over `RuntimePreviewSurface.tsx`, `SceneViewportSurface.tsx`, `CanvasViewportSurface.tsx`, `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, and `sceneViewportDerivations.ts`.
 - Do not describe `SceneViewportSurface.tsx` as a three-hundred-line preview monolith anymore. It now sits at `219` lines and delegates workflow/export density into `SceneViewportWorkflowDrawer.tsx` and `useViewportExport.ts`.
-- Do not describe `XTerminal.tsx` as the remaining terminal hotspot. It is now a thin barrel, and `BaseXTerminal.tsx` is now only a `99`-line shell; terminal density should be tracked against `useTerminalRuntime.ts`, `useTerminalSessions.ts`, and `MultiTerminalPanel.tsx` instead.
-- Do not describe `ModernIDEShellPanels.tsx` as the remaining shell hotspot. It is now a `114`-line coordinator backed by `ModernIDEShellCenterStack.tsx` and `ModernIDEShellSideColumns.tsx`.
+- Do not describe `WorkbenchPreviewPane.tsx` as the remaining preview cockpit hotspot. It is now a `39`-line orchestrator backed by `WorkbenchPreviewRuntimeControls.tsx`, `WorkbenchPreviewRuntimeSurface.tsx`, `WorkbenchPreviewModeHeader.tsx`, and `workbenchPreviewPaneModels.ts`.
+- Do not describe `XTerminal.tsx` as the remaining terminal hotspot. It is now a thin barrel, `BaseXTerminal.tsx` is now only a `99`-line shell, and the runtime density now lives in `useTerminalRuntime.ts`, `useTerminalTransport.ts`, `useTerminalSelection.ts`, `useTerminalShortcuts.ts`, and `useTerminalViewport.ts`.
+- Do not describe `ModernIDEShellChrome.tsx` or `ModernIDEShellSideColumns.tsx` as shell hotspots anymore. They are now thin barrels over dedicated chrome and side-column parts.
 - Do not describe `AIChatPanelPro.tsx` as a five-hundred-line emergency monolith anymore. It now sits below `300` lines and delegates composer, run-state, ops-state, context actions, speech playback, and quick-prompt chrome into dedicated `components/ai-chat/*` modules.
-- Do not describe `FullscreenIDE.tsx` as the only remaining workbench hotspot. It now shares orchestration density with `FullscreenIDEWorkspaceBridge.tsx`, so follow-up slicing needs to treat the route/workspace bridge and the shell separately.
+- Do not describe `FullscreenIDEWorkspaceBridge.tsx` as the remaining route-shell hotspot. It is now a `89`-line orchestrator backed by `FullscreenIDEWorkspaceBridge.types.ts` and `useFullscreenIDEBridgeProps.ts`.
+- Do not describe `FullscreenIDE.tsx` as the only remaining workbench hotspot. It now shares orchestration density with `useFullscreenIDEBridgeProps.ts`, so follow-up slicing needs to treat the shell and the bridge-prop builder separately.
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
@@ -136,21 +151,26 @@ Canonical set reference:
   - worker-thread concurrency was reduced for Windows build determinism,
   - but full production build parity is still blocked and should not be marked solved.
 - Current highest-value suspects to isolate next:
-  - `cloud-web-app/web/app/layout.tsx`
-  - `cloud-web-app/web/components/ClientLayout.tsx`
-  - `cloud-web-app/web/lib/a11y/accessibility.tsx`
-  - `cloud-web-app/web/contexts/ThemeContext.tsx`
-  - `cloud-web-app/web/components/ui/toast-system.tsx`
+  - primary next isolates:
+    - `cloud-web-app/web/components/ClientLayout.tsx`
+    - `cloud-web-app/web/contexts/ThemeContext.tsx`
+    - `cloud-web-app/web/components/ui/toast-system.tsx`
+  - secondary or already-bisected suspects:
+    - `cloud-web-app/web/app/layout.tsx`
+    - `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx`
+    - `cloud-web-app/web/lib/a11y/accessibility.tsx`
+    - `cloud-web-app/web/app/error.tsx`
+    - `cloud-web-app/web/app/not-found.tsx`
 
 ## Priority Order (Validated)
 1. Close production build parity without regressing the current browser merge-pressure lane.
 2. Continue slicing the remaining workbench/runtime seams:
-   - `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspaceBridge.tsx`
    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
+   - `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeProps.ts`
+   - `cloud-web-app/web/components/preview/SceneViewportSurface.tsx`
    - `cloud-web-app/web/components/terminal/useTerminalRuntime.ts`
-   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`
    - stabilize `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
-   - keep polishing `cloud-web-app/web/components/preview/SceneViewportSurface.tsx` through its extracted workflow/export seams
+   - keep evolving the preview cockpit through `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewRuntimeControls.tsx` and `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewRuntimeSurface.tsx`
 3. Turn preview + deploy into a trustworthy shareable workflow.
 4. Promote collaboration from baseline presence/cursors to full shared-editing confidence and file-tree presence.
 5. Keep moving `console.*` to structured logging.

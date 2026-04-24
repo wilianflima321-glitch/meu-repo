@@ -12,19 +12,20 @@ This file is the short scoreboard that answers:
 3. what is still open and should stay on the board
 
 ## Current Snapshot
-- `FullscreenIDEWorkspaceBridge.tsx`: `373` lines
-- `FullscreenIDE.tsx`: `356` lines
-- `useTerminalRuntime.ts`: `290` lines
-- `AIChatPanelPro.tsx`: `260` lines
-- `WorkbenchPreviewPane.tsx`: `249` lines
+- `FullscreenIDE.tsx`: `359` lines
+- `AIChatPanelPro.tsx`: `262` lines
+- `useFullscreenIDEBridgeProps.ts`: `227` lines
+- `WorkbenchPreviewPane.tsx`: `39` lines
 - `SceneViewportSurface.tsx`: `219` lines
 - `WorkbenchEditorSurface.tsx`: `197` lines
-- `ModernIDEShellChrome.tsx`: `196` lines
+- `useTerminalRuntime.ts`: `188` lines
 - `PreviewLifecycleChrome.tsx`: `146` lines
 - `usePreviewRuntime.ts`: `191` lines
 - `RuntimePreviewSurface.tsx`: `186` lines
 - `SceneViewportWorkflowDrawer.tsx`: `151` lines
-- `ModernIDEShellSideColumns.tsx`: `149` lines
+- `WorkbenchPreviewRuntimeControls.tsx`: `128` lines
+- `useTerminalTransport.ts`: `121` lines
+- `chromeResizeHandle.tsx`: `106` lines
 - `sceneViewportDerivations.ts`: `89` lines
 - `WorkbenchEditorPane.tsx`: `193` lines
 - `WorkbenchEditorToolbar.tsx`: `191` lines
@@ -34,9 +35,13 @@ This file is the short scoreboard that answers:
 - `ModernIDEShell.tsx`: `149` lines
 - `ModernIDEShellPanels.tsx`: `114` lines
 - `ModernIDEShellCenterStack.tsx`: `109` lines
+- `FullscreenIDEWorkspaceBridge.tsx`: `89` lines
+- `FullscreenIDEWorkspaceBridge.types.ts`: `67` lines
+- `WorkbenchPreviewModeHeader.tsx`: `63` lines
 - `useViewportExport.ts`: `106` lines
 - `BaseXTerminal.tsx`: `99` lines
-- `chromeSecondaryBars.tsx`: `172` lines
+- `ModernIDEShellChrome.tsx`: `29` lines
+- `chromeSecondaryBars.tsx`: `8` lines
 - `CanonicalPreviewSurface.tsx`: `74` lines (router)
 - `XTerminal.tsx`: `11` lines (barrel)
 - `MultiTerminalPanel.tsx`: `70` lines
@@ -92,6 +97,7 @@ This file is the short scoreboard that answers:
 - the former preview hotspot was also reduced:
   - `CanonicalPreviewSurface.tsx` now acts like a thin variant router over extracted runtime, scene, canvas, lifecycle, and derivation modules
   - `SceneViewportSurface.tsx` is now a smaller viewport seam at `219` lines, with workflow/export density pushed into `SceneViewportWorkflowDrawer.tsx` and `useViewportExport.ts`
+  - `WorkbenchPreviewPane.tsx` is now a thin orchestrator, with trust/share/status density moved into `WorkbenchPreviewRuntimeControls.tsx`, `WorkbenchPreviewRuntimeSurface.tsx`, and `WorkbenchPreviewModeHeader.tsx`
 - but the category is still partial until full shareable proof and build-complete runtime confidence are stable.
 
 ### Collaboration
@@ -110,8 +116,9 @@ This file is the short scoreboard that answers:
 ## Still Open
 ### P0
 1. production build parity
-   - current highest-probability root suspects remain in the app/provider stack: `app/layout.tsx`, `components/ClientLayout.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`, `app/error.tsx`, and `app/not-found.tsx`
-2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDEWorkspaceBridge.tsx`, `FullscreenIDE.tsx`, `useTerminalRuntime.ts`, and `WorkbenchPreviewPane.tsx`
+   - primary next isolates now look most likely in root-global providers: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
+   - secondary or already-bisected suspects remain: `app/layout.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `app/error.tsx`, and `app/not-found.tsx`
+2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeProps.ts`, `SceneViewportSurface.tsx`, and `useTerminalRuntime.ts`
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure
 
@@ -129,7 +136,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDEWorkspaceBridge.tsx`, `FullscreenIDE.tsx`, `useTerminalRuntime.ts`, and `WorkbenchPreviewPane.tsx`, while stabilizing the new `AIChatPanelPro.tsx` seams and polishing `SceneViewportSurface.tsx` through its extracted workflow/export modules
+2. keep slicing `FullscreenIDE.tsx`, `useFullscreenIDEBridgeProps.ts`, `SceneViewportSurface.tsx`, and `useTerminalRuntime.ts`, while stabilizing the new `AIChatPanelPro.tsx` seams and evolving the thinner preview cockpit modules
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

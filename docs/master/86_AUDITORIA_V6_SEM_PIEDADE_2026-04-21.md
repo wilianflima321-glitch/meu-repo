@@ -42,19 +42,19 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
-- `FullscreenIDEWorkspaceBridge.tsx`: `373`
-- `FullscreenIDE.tsx`: `356`
-- `useTerminalRuntime.ts`: `290`
-- `AIChatPanelPro.tsx`: `260`
-- `WorkbenchPreviewPane.tsx`: `249`
+- `FullscreenIDE.tsx`: `359`
+- `AIChatPanelPro.tsx`: `262`
+- `useFullscreenIDEBridgeProps.ts`: `227`
+- `WorkbenchPreviewPane.tsx`: `39`
 - `SceneViewportSurface.tsx`: `219`
 - `WorkbenchEditorSurface.tsx`: `197`
-- `ModernIDEShellChrome.tsx`: `196`
+- `useTerminalRuntime.ts`: `188`
 - `PreviewLifecycleChrome.tsx`: `146`
 - `usePreviewRuntime.ts`: `191`
 - `RuntimePreviewSurface.tsx`: `186`
 - `SceneViewportWorkflowDrawer.tsx`: `151`
-- `ModernIDEShellSideColumns.tsx`: `149`
+- `WorkbenchPreviewRuntimeControls.tsx`: `128`
+- `useTerminalTransport.ts`: `121`
 - `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorToolbar.tsx`: `191`
@@ -64,9 +64,12 @@ Current workspace counts are materially lower:
 - `ModernIDEShell.tsx`: `149`
 - `ModernIDEShellPanels.tsx`: `114`
 - `ModernIDEShellCenterStack.tsx`: `109`
+- `FullscreenIDEWorkspaceBridge.tsx`: `89`
+- `FullscreenIDEWorkspaceBridge.types.ts`: `67`
 - `useViewportExport.ts`: `106`
 - `BaseXTerminal.tsx`: `99`
-- `chromeSecondaryBars.tsx`: `172`
+- `ModernIDEShellChrome.tsx`: `29`
+- `chromeSecondaryBars.tsx`: `8`
 - `CanonicalPreviewSurface.tsx`: `74` (router)
 - `XTerminal.tsx`: `11` (barrel)
 - `MultiTerminalPanel.tsx`: `70`
@@ -146,7 +149,7 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
 
 ## The Sequence V6 Still Supports
 1. close production build parity
-2. continue shrinking the remaining workbench/runtime seams led by `FullscreenIDEWorkspaceBridge.tsx`, `FullscreenIDE.tsx`, `useTerminalRuntime.ts`, and `WorkbenchPreviewPane.tsx`
+2. continue shrinking the remaining workbench/runtime seams led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeProps.ts`, `SceneViewportSurface.tsx`, and `useTerminalRuntime.ts`
 3. harden preview + deploy into a trustworthy shareable loop
 4. harden collaboration from baseline UX into proven shared editing
 5. keep reducing `console.*`, `: any`, and raw-hex drift

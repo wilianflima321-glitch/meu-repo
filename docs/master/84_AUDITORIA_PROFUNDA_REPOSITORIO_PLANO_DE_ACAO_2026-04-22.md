@@ -39,34 +39,41 @@ Use the current set like this:
 - `cloud-web-app/web/lib/**/*.ts` in the current workspace: `347`
 - Curated tracked executable test/spec files: `49`
 - Hotspot line counts:
-- `FullscreenIDEWorkspaceBridge.tsx`: `373`
-- `FullscreenIDE.tsx`: `356`
-- `useTerminalRuntime.ts`: `290`
-- `AIChatPanelPro.tsx`: `260`
-- `WorkbenchPreviewPane.tsx`: `249`
+- `FullscreenIDE.tsx`: `359`
+- `AIChatPanelPro.tsx`: `262`
+- `useFullscreenIDEBridgeProps.ts`: `227`
 - `SceneViewportSurface.tsx`: `219`
 - `WorkbenchEditorSurface.tsx`: `197`
-- `ModernIDEShellChrome.tsx`: `196`
-- `PreviewLifecycleChrome.tsx`: `146`
 - `usePreviewRuntime.ts`: `191`
+- `useTerminalRuntime.ts`: `188`
 - `RuntimePreviewSurface.tsx`: `186`
-- `SceneViewportWorkflowDrawer.tsx`: `151`
-- `ModernIDEShellSideColumns.tsx`: `149`
-- `sceneViewportDerivations.ts`: `89`
-- `WorkbenchEditorPane.tsx`: `193`
-- `WorkbenchEditorToolbar.tsx`: `191`
+- `PreviewLifecycleChrome.tsx`: `146`
+- `WorkbenchPreviewRuntimeControls.tsx`: `128`
+- `useTerminalTransport.ts`: `121`
 - `WorkbenchEditorCanvas.tsx`: `122`
-- `WorkbenchEditorSidecar.tsx`: `85`
 - `AIChatPanelContainer.tsx`: `116`
-- `ModernIDEShell.tsx`: `149`
 - `ModernIDEShellPanels.tsx`: `114`
 - `ModernIDEShellCenterStack.tsx`: `109`
+- `chromeResizeHandle.tsx`: `106`
 - `useViewportExport.ts`: `106`
 - `BaseXTerminal.tsx`: `99`
-- `chromeSecondaryBars.tsx`: `172`
+- `FullscreenIDEWorkspaceBridge.tsx`: `89`
+- `sceneViewportDerivations.ts`: `89`
+- `WorkbenchPreviewRuntimeSurface.tsx`: `79`
 - `CanonicalPreviewSurface.tsx`: `74`
-- `XTerminal.tsx`: `11`
 - `MultiTerminalPanel.tsx`: `70`
+- `FullscreenIDEWorkspaceBridge.types.ts`: `67`
+- `WorkbenchPreviewModeHeader.tsx`: `63`
+- `XTerminal.tsx`: `11`
+- `WorkbenchPreviewPane.tsx`: `39`
+- `ModernIDEShellChrome.tsx`: `29`
+- `chromeSecondaryBars.tsx`: `8`
+- `ModernIDEShellSideColumns.tsx`: `8`
+- `SceneViewportWorkflowDrawer.tsx`: `151`
+- `WorkbenchEditorPane.tsx`: `193`
+- `WorkbenchEditorToolbar.tsx`: `191`
+- `WorkbenchEditorSidecar.tsx`: `85`
+- `ModernIDEShell.tsx`: `149`
 - `useTerminalSessions.ts`: `134`
 
 ## What This Audit Still Gets Right
@@ -149,7 +156,7 @@ Do not keep auditing it as an active blocker.
 
 ## Repo/Execution Priorities
 1. Close the `next build` parity gap.
-2. Keep shrinking the remaining workbench/runtime monoliths, with the core priority order now led by `FullscreenIDEWorkspaceBridge.tsx`, `FullscreenIDE.tsx`, `useTerminalRuntime.ts`, and `WorkbenchPreviewPane.tsx`; `AIChatPanelPro.tsx` has moved into stabilization-and-polish territory and `SceneViewportSurface.tsx` is now a smaller preview-polish seam rather than a top-size monolith.
+2. Keep shrinking the remaining workbench/runtime monoliths, with the core priority order now led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeProps.ts`, `useTerminalRuntime.ts`, and `SceneViewportSurface.tsx`; `AIChatPanelPro.tsx` has moved into stabilization-and-polish territory, `WorkbenchPreviewPane.tsx` is now a thin orchestrator, and preview cockpit follow-up moved into the extracted fullscreen preview modules.
 3. Reduce root ambiguity and legacy-file drag.
 4. Move more Playwright pressure from optional/full-matrix to required/default CI.
 5. Continue `console.* -> logger` and `: any` reduction.

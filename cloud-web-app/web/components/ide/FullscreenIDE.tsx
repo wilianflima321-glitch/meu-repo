@@ -4,6 +4,7 @@ import { Suspense, useMemo, useRef } from "react";
 import type * as monacoEditor from 'monaco-editor';
 
 import FullscreenIDEWorkspaceBridge from '@/components/ide/fullscreen/FullscreenIDEWorkspaceBridge';
+import type { FullscreenIDEWorkspaceBridgeProps } from '@/components/ide/fullscreen/FullscreenIDEWorkspaceBridge.types';
 import { useWorkbenchChrome } from '@/components/ide/fullscreen/useWorkbenchChrome';
 import { useWorkbenchEditorModel } from '@/components/ide/fullscreen/useWorkbenchEditorModel';
 import { useWorkbenchEntryConvergence } from '@/components/ide/fullscreen/useWorkbenchEntryConvergence';
@@ -14,6 +15,7 @@ import { useWorkbenchPanelCallbacks } from '@/components/ide/fullscreen/useWorkb
 import { useWorkbenchPresence } from '@/components/ide/fullscreen/useWorkbenchPresence';
 import { useWorkbenchRealtimeCollaboration } from '@/components/ide/fullscreen/useWorkbenchRealtimeCollaboration';
 import { useWorkbenchRuntimeActions } from '@/components/ide/fullscreen/useWorkbenchRuntimeActions';
+import { useFullscreenIDEBridgeProps } from '@/components/ide/fullscreen/useFullscreenIDEBridgeProps';
 import { useWorkbenchRuntimeSyncScheduler } from '@/components/ide/fullscreen/useWorkbenchRuntimeSyncScheduler';
 import {
   LAST_PROJECT_ID_STORAGE_KEY,
@@ -257,106 +259,108 @@ function IDEContent() {
     readFile,
   });
 
+  const bridgeProps: FullscreenIDEWorkspaceBridgeProps = useFullscreenIDEBridgeProps({
+    projectId,
+    activeFile,
+    bridgeActiveFile,
+    secondaryFile,
+    editorRef,
+    primaryEditorRef,
+    secondaryEditorRef,
+    headerCollaborators,
+    entryNotice,
+    clearEntryNotice,
+    workspaceFilesLoaded,
+    workspaceFiles,
+    sidebarTab,
+    modernPanelState,
+    previewMode,
+    onResizePanel,
+    onToggleSidebar,
+    onTogglePanel,
+    onRunPrimaryAction: handleRunRecommendedPreviewAction,
+    handleOpenSettings,
+    openCommandPalette,
+    handleSelectSidebarTab,
+    handleSelectPreviewMode,
+    handleToggleDiagnosticsPanel,
+    setSidebarTab,
+    nextOpenTarget,
+    readFile,
+    writeFile,
+    setLastAiApply,
+    emitLayoutEvent,
+    activeDiagnostics,
+    splitEditorGroups,
+    outlineSymbols,
+    splitEditorOpen,
+    splitActivePane,
+    splitDirection,
+    isCompactViewport,
+    isReadingFile,
+    fileError,
+    showIntelliSense,
+    showOutline,
+    showDiagnostics,
+    fullAccessActiveGrant,
+    collaborationConnected,
+    editorPeers,
+    setSplitActivePane,
+    setSecondaryFile,
+    setActiveFile,
+    setShowIntelliSense,
+    setShowOutline,
+    setShowDiagnostics,
+    setSplitDirection,
+    setNextOpenTarget,
+    setSplitEditorOpen,
+    setEditorDiagnostics,
+    setSecondaryEditorDiagnostics,
+    handleEditorUndo,
+    handleEditorRedo,
+    handleEditorFind,
+    handleEditorReplace,
+    handleAIPanel,
+    handleToggleSplitEditor,
+    handleJumpToOutlineSymbol,
+    handleToggleFullAccess,
+    broadcastCursor,
+    broadcastSelection,
+    previewRefreshTick,
+    previewRuntimeUrl,
+    previewRuntimeInput,
+    showRuntimeSettings,
+    runtimeHealth,
+    runtimeHealthCheckedAt,
+    runtimeHealthHint,
+    runtimeReadiness,
+    runtimePrimaryAction,
+    runtimePrimaryActionLabel,
+    runtimeStrategyLabel,
+    runtimeStrategyHint,
+    runtimeDiscoveryMessage,
+    runtimeDiscoveryTone,
+    isDiscoveringRuntime,
+    isProvisioningRuntime,
+    isSyncingRuntime,
+    previewSandboxId,
+    forceInlinePreviewFallback,
+    isSavingFile,
+    setPreviewMode,
+    setPreviewRuntimeInput,
+    setShowRuntimeSettings,
+    setPreviewRefreshTick,
+    applyRuntimeUrl,
+    handleUseInlineFallback,
+    refreshRuntimeReadiness,
+    discoverRuntime,
+    provisionRuntime,
+    syncRuntime,
+    checkRuntimeHealth,
+  });
+
   return (
-    <FullscreenIDEWorkspaceBridge
-      projectId={projectId}
-      activeFile={activeFile}
-      bridgeActiveFile={bridgeActiveFile}
-      editorRef={editorRef}
-      primaryEditorRef={primaryEditorRef}
-      secondaryEditorRef={secondaryEditorRef}
-      headerCollaborators={headerCollaborators}
-      entryNotice={entryNotice}
-      clearEntryNotice={clearEntryNotice}
-      workspaceFilesLoaded={workspaceFilesLoaded}
-      workspaceFiles={workspaceFiles}
-      sidebarTab={sidebarTab}
-      modernPanelState={modernPanelState}
-      previewMode={previewMode}
-      onResizePanel={onResizePanel}
-      onToggleSidebar={onToggleSidebar}
-      onTogglePanel={onTogglePanel}
-      onRunPrimaryAction={handleRunRecommendedPreviewAction}
-      handleOpenSettings={handleOpenSettings}
-      openCommandPalette={openCommandPalette}
-      handleSelectSidebarTab={handleSelectSidebarTab}
-      handleSelectPreviewMode={handleSelectPreviewMode}
-      handleToggleDiagnosticsPanel={handleToggleDiagnosticsPanel}
-      setSidebarTab={setSidebarTab}
-      nextOpenTarget={nextOpenTarget}
-      readFile={readFile}
-      writeFile={writeFile}
-      setLastAiApply={setLastAiApply}
-      emitLayoutEvent={emitLayoutEvent}
-      handleEditorUndo={handleEditorUndo}
-      handleEditorRedo={handleEditorRedo}
-      handleEditorFind={handleEditorFind}
-      handleEditorReplace={handleEditorReplace}
-      handleAIPanel={handleAIPanel}
-      secondaryFile={secondaryFile}
-      activeDiagnostics={activeDiagnostics}
-      splitEditorGroups={splitEditorGroups}
-      outlineSymbols={outlineSymbols}
-      splitEditorOpen={splitEditorOpen}
-      splitActivePane={splitActivePane}
-      splitDirection={splitDirection}
-      isCompactViewport={isCompactViewport}
-      isReadingFile={isReadingFile}
-      fileError={fileError}
-      showIntelliSense={showIntelliSense}
-      showOutline={showOutline}
-      showDiagnostics={showDiagnostics}
-      fullAccessActiveGrant={fullAccessActiveGrant}
-      collaborationConnected={collaborationConnected}
-      editorPeers={editorPeers}
-      setSplitActivePane={setSplitActivePane}
-      setSecondaryFile={setSecondaryFile}
-      setActiveFile={setActiveFile}
-      setShowIntelliSense={setShowIntelliSense}
-      setShowOutline={setShowOutline}
-      setShowDiagnostics={setShowDiagnostics}
-      setSplitDirection={setSplitDirection}
-      setNextOpenTarget={setNextOpenTarget}
-      setSplitEditorOpen={setSplitEditorOpen}
-      setEditorDiagnostics={setEditorDiagnostics}
-      setSecondaryEditorDiagnostics={setSecondaryEditorDiagnostics}
-      handleToggleSplitEditor={handleToggleSplitEditor}
-      handleJumpToOutlineSymbol={handleJumpToOutlineSymbol}
-      handleToggleFullAccess={handleToggleFullAccess}
-      broadcastCursor={broadcastCursor}
-      broadcastSelection={broadcastSelection}
-      previewRefreshTick={previewRefreshTick}
-      previewRuntimeUrl={previewRuntimeUrl}
-      previewRuntimeInput={previewRuntimeInput}
-      showRuntimeSettings={showRuntimeSettings}
-      runtimeHealth={runtimeHealth}
-      runtimeHealthCheckedAt={runtimeHealthCheckedAt}
-      runtimeHealthHint={runtimeHealthHint}
-      runtimeReadiness={runtimeReadiness}
-      runtimePrimaryAction={runtimePrimaryAction}
-      runtimePrimaryActionLabel={runtimePrimaryActionLabel}
-      runtimeStrategyLabel={runtimeStrategyLabel}
-      runtimeStrategyHint={runtimeStrategyHint}
-      runtimeDiscoveryMessage={runtimeDiscoveryMessage}
-      runtimeDiscoveryTone={runtimeDiscoveryTone}
-      isDiscoveringRuntime={isDiscoveringRuntime}
-      isProvisioningRuntime={isProvisioningRuntime}
-      isSyncingRuntime={isSyncingRuntime}
-      previewSandboxId={previewSandboxId}
-      forceInlinePreviewFallback={forceInlinePreviewFallback}
-      isSavingFile={isSavingFile}
-      setPreviewMode={setPreviewMode}
-      setPreviewRuntimeInput={setPreviewRuntimeInput}
-      setShowRuntimeSettings={setShowRuntimeSettings}
-      setPreviewRefreshTick={setPreviewRefreshTick}
-      applyRuntimeUrl={applyRuntimeUrl}
-      handleUseInlineFallback={handleUseInlineFallback}
-      refreshRuntimeReadiness={refreshRuntimeReadiness}
-      discoverRuntime={discoverRuntime}
-      provisionRuntime={provisionRuntime}
-      syncRuntime={syncRuntime}
-      checkRuntimeHealth={checkRuntimeHealth}
-    />
+    <FullscreenIDEWorkspaceBridge {...bridgeProps} />
   );
 }
 
