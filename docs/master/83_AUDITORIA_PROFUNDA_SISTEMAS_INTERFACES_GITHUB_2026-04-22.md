@@ -35,6 +35,7 @@ The local workspace is already synced with the latest upstream changes from `gen
 Additional local reconciliation on `2026-04-24`:
 - the preview lane is denser and clearer for end users through `cloud-web-app/web/components/ide/PreviewRuntimeToolbar.tsx` and `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`
 - the workbench editor lane is no longer concentrated in one file: `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` is now `193` lines and delegates the dense editor experience to `WorkbenchEditorSurface.tsx` (`311`), `WorkbenchEditorToolbar.tsx` (`191`), and `WorkbenchEditorSidecar.tsx` (`85`)
+- the preview authority is no longer concentrated in one four-digit file: `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` is now `422` lines after extracting `RuntimePreviewSurface.tsx`, `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, and `sceneViewportDerivations.ts`
 - build-risk mitigations now also include browser-gated SWR keys in `cloud-web-app/web/lib/providers/AethelProvider.tsx`, explicit Drei `Html` aliases across active 3D/editor surfaces, and a root/studio runtime split where `cloud-web-app/web/components/ClientLayout.tsx` keeps only the lightweight root shell while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` mounts richer product runtime per route
 - production `next build` parity is still open because the latest command-line probes still timed out before a successful end-to-end completion; the newest probe no longer reprinted the explicit old errors before timeout, but the latest fully actionable error evidence remains in `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log`
 
@@ -54,7 +55,7 @@ The following PDF claims should no longer be treated as current truth without re
 
 ### Repo scale
 - PDF snapshot: `23.653 files · 503 MB`
-- Current tracked repo reality: approximately `5,465 tracked files · 53.02 MB`
+- Current tracked repo reality: `5512 tracked files / 60.97 MB` in the validated local workspace snapshot
 - Meaning: the imported PDF is valuable directionally, but not as a raw numeric snapshot of the current repo.
 
 ### Dead engine libs
@@ -96,7 +97,8 @@ These are the reality points this audit should now be interpreted against:
 - `FullscreenIDE.tsx`: about `540` lines and still a top-priority god component
 - `WorkbenchEditorPane.tsx`: about `193` lines after extraction into `WorkbenchEditorSurface.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
 - `WorkbenchEditorSurface.tsx`: about `311` lines and now the denser editor-surface follow-up target for the workbench lane
-- `CanonicalPreviewSurface.tsx`: about `1016` lines and now the largest user-facing hotspot in the workbench/preview tier
+- `CanonicalPreviewSurface.tsx`: about `422` lines after extraction into dedicated preview runtime and chrome modules
+- `RuntimePreviewSurface.tsx`: about `186` lines and now the clearest place to keep improving preview trust, fallback, and Magic Wand UX without re-growing the canonical preview shell
 - `AIChatPanelContainer.tsx`: about `116` lines after extraction into session-context, provider-preflight, send-pipeline, and session-banner modules
 - `ModernIDEShell.tsx`: now only `149` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`268`), `ModernIDEShellChrome.tsx` (`196`), and `chromeSecondaryBars.tsx` (`172`)
 - volatile test, console, `: any`, and raw-hex inventories should defer to `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` instead of this imported audit
@@ -125,7 +127,7 @@ For those, always pair it with `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` and
 Across `81`, `82`, and this imported systems/interfaces audit, the shared execution order remains:
 
 1. Keep the design system converging toward one visual language.
-2. Continue slicing the remaining workbench and preview hotspots (`CanonicalPreviewSurface`, `FullscreenIDE`, `WorkbenchEditorSurface`, `AIChatPanelPro`, `XTerminal`).
+2. Continue slicing the remaining workbench and preview hotspots (`FullscreenIDE`, `AIChatPanelPro`, `XTerminal`, `CanonicalPreviewSurface`, `WorkbenchEditorSurface`).
 3. Turn collaboration from infrastructure into visible product UX.
 4. Turn preview into a trust-building, shareable creation surface.
 5. Keep replacing runtime ambiguity with evidence, tests, and structured observability.

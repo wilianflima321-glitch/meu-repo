@@ -42,10 +42,14 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
-- `CanonicalPreviewSurface.tsx`: `1016`
 - `FullscreenIDE.tsx`: `540`
 - `AIChatPanelPro.tsx`: `508`
 - `XTerminal.tsx`: `506`
+- `CanonicalPreviewSurface.tsx`: `422`
+- `RuntimePreviewSurface.tsx`: `186`
+- `PreviewLifecycleChrome.tsx`: `146`
+- `usePreviewRuntime.ts`: `191`
+- `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorSurface.tsx`: `311`
 - `WorkbenchEditorToolbar.tsx`: `191`
@@ -57,7 +61,7 @@ Current workspace counts are materially lower:
 - `chromeSecondaryBars.tsx`: `172`
 
 The category remains valid.
-The literal numbers did age, and the editor lane specifically is now split across smaller files instead of one workbench-pane monolith.
+The literal numbers did age, and both the editor lane and preview runtime lane are now split across smaller files instead of one oversized surface.
 
 ### Collaboration is not zero anymore
 V6 described collaboration as effectively invisible.

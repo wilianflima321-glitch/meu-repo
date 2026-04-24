@@ -33,12 +33,18 @@ Use this document together with:
 These references should keep driving spacing, density, cockpit hierarchy, and preview-first composition while files are being sliced.
 
 ## Round Delta On 2026-04-24
-This round closed one of the previously documented editor hotspots:
+This round closed one of the previously documented editor hotspots and materially reduced the preview hotspot:
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` moved from the old hotspot bucket into a thin coordinator at `193` lines
 - the editor lane is now split into:
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx` (`311`)
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx` (`191`)
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSidecar.tsx` (`85`)
+- `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` moved from `1016` lines to `422`
+- the preview runtime lane is now split into:
+  - `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx` (`186`)
+  - `cloud-web-app/web/components/preview/PreviewLifecycleChrome.tsx` (`146`)
+  - `cloud-web-app/web/components/preview/usePreviewRuntime.ts` (`191`)
+  - `cloud-web-app/web/components/preview/sceneViewportDerivations.ts` (`89`)
 
 This is real progress.
 It does **not** mean the workbench is solved.
@@ -66,10 +72,10 @@ It means the next cuts are now safer and more localized.
 
 ## Current Measured User-Facing Hotspots
 ### Wave A - highest leverage for user perception
-- `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `1016`
 - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `540`
 - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `508`
 - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `506`
+- `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `422`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `311`
 
 ### Wave B - dense product surfaces next in line
@@ -91,9 +97,9 @@ It means the next cuts are now safer and more localized.
 
 ## Best Next Slicing Seams
 ### 1. `CanonicalPreviewSurface.tsx`
-Why first:
-- it is now the largest visible hotspot in the core creation loop
-- it carries too much of the preview trust story, which the audits repeatedly flag as a market gap
+Why still matters:
+- it still carries the variant router for the entire preview trust story, which the audits repeatedly flag as a market gap
+- the runtime lane is now smaller, so the next cuts can focus on viewport and scene responsibilities with less risk
 
 Recommended seams:
 - `components/preview/PreviewSurfaceHeader.tsx`
@@ -163,10 +169,10 @@ User-facing quality target:
 ## Parallel Execution Waves
 ### Wave 1 - core creation loop
 Run in parallel where write scopes do not overlap:
-1. `CanonicalPreviewSurface.tsx`
-2. `FullscreenIDE.tsx`
-3. `AIChatPanelPro.tsx`
-4. `XTerminal.tsx`
+1. `FullscreenIDE.tsx`
+2. `AIChatPanelPro.tsx`
+3. `XTerminal.tsx`
+4. `CanonicalPreviewSurface.tsx`
 
 ### Wave 2 - dense product surfaces
 After Wave 1 stabilizes:
@@ -194,10 +200,10 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep production build parity open until `next build` proves end-to-end success
-2. slice `CanonicalPreviewSurface.tsx`
-3. continue shrinking `FullscreenIDE.tsx`
-4. continue shrinking `AIChatPanelPro.tsx`
-5. continue shrinking `XTerminal.tsx`
+2. continue shrinking `FullscreenIDE.tsx`
+3. continue shrinking `AIChatPanelPro.tsx`
+4. continue shrinking `XTerminal.tsx`
+5. keep reducing `CanonicalPreviewSurface.tsx` by extracting scene and viewport seams
 6. promote preview, collaboration, and deploy from present to trusted
 
 ## One-Line Reading

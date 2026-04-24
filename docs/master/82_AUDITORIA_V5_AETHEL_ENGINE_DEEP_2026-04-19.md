@@ -6,20 +6,22 @@
 >
 > Guardrail anti-fake-success: para números e claims já reconciliados com o estado real do repositório, cruzar sempre com docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md.
 
-## Reconciled Delta — 2026-04-23
+## Reconciled Delta - 2026-04-24
 
 Este documento continua sendo o norte principal, mas alguns trechos ficaram velhos depois das rodadas de refactor e da pressão E2E mais recente.
 
 - Workbench hotspots:
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` está em `540` linhas.
-- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` agora é um hotspot relevante em `523` linhas.
-- `cloud-web-app/web/components/ide/ModernIDEShell.tsx` já caiu para `149` linhas.
-- o shell agora está repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`268` linhas), `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`196` linhas) e `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx` (`172` linhas).
-- `cloud-web-app/web/components/terminal/XTerminal.tsx` está em `506` linhas.
-- Colaboração:
-  - `CollaboratorsBar` e `RemoteCursorLayer` já existem e a presença colaborativa já aparece no editor principal via `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` e `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`.
-  - a colaboração no topo e na barra do editor ficou mais densa e mais próxima do padrão de cockpit, sem depender só de um pill solto no header.
-  - o que continua em aberto não é mais “UI inexistente”, e sim `file-tree presence`, shared-text path canônico e verificação de produção mais ampla.
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` esta em `540` linhas.
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` agora caiu para `193` linhas depois da extracao da lane de editor.
+- a lane principal do editor foi repartida em `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx` (`311` linhas), `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx` (`191` linhas) e `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSidecar.tsx` (`85` linhas).
+- a lane de preview tambem foi aberta em seams reais: `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` caiu para `422` linhas, com runtime e chrome extraidos para `RuntimePreviewSurface.tsx` (`186`), `PreviewLifecycleChrome.tsx` (`146`), `usePreviewRuntime.ts` (`191`) e `sceneViewportDerivations.ts` (`89`).
+- `cloud-web-app/web/components/ide/ModernIDEShell.tsx` ja caiu para `149` linhas.
+- o shell agora esta repartido entre `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` (`268` linhas), `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx` (`196` linhas) e `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx` (`172` linhas).
+- `cloud-web-app/web/components/terminal/XTerminal.tsx` esta em `506` linhas.
+- Colaboracao:
+  - `CollaboratorsBar` e `RemoteCursorLayer` ja existem e a presenca colaborativa ja aparece no editor principal via `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`, `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx` e `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRealtimeCollaboration.ts`.
+  - a colaboracao no topo e na barra do editor ficou mais densa e mais proxima do padrao de cockpit, sem depender so de um pill solto no header.
+  - o que continua em aberto nao e mais "UI inexistente", e sim `file-tree presence`, `shared-text` path canonico e verificacao de producao mais ampla.
 - Merge-pressure lane:
   - a lane padrão `Web App - Merge Pressure E2E` já existe no CI.
   - localmente, a suíte continua com `5 passed`, mas a reprodução “crua” ainda depende de o app já estar no ar em `:3000`.

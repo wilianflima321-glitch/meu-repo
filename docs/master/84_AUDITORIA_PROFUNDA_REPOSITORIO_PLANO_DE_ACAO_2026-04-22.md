@@ -39,10 +39,14 @@ Use the current set like this:
 - `cloud-web-app/web/lib/**/*.ts` in the current workspace: `347`
 - Curated tracked executable test/spec files: `49`
 - Hotspot line counts:
-- `CanonicalPreviewSurface.tsx`: `1016`
 - `FullscreenIDE.tsx`: `540`
 - `AIChatPanelPro.tsx`: `508`
 - `XTerminal.tsx`: `506`
+- `CanonicalPreviewSurface.tsx`: `422`
+- `RuntimePreviewSurface.tsx`: `186`
+- `PreviewLifecycleChrome.tsx`: `146`
+- `usePreviewRuntime.ts`: `191`
+- `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorSurface.tsx`: `311`
 - `WorkbenchEditorToolbar.tsx`: `191`
@@ -133,7 +137,7 @@ Do not keep auditing it as an active blocker.
 
 ## Repo/Execution Priorities
 1. Close the `next build` parity gap.
-2. Keep shrinking the remaining workbench and preview monoliths, with `CanonicalPreviewSurface.tsx` now the largest visible product hotspot.
+2. Keep shrinking the remaining workbench and preview monoliths, with the core priority order now led by `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `XTerminal.tsx`, and the remaining preview shell surface.
 3. Reduce root ambiguity and legacy-file drag.
 4. Move more Playwright pressure from optional/full-matrix to required/default CI.
 5. Continue `console.* -> logger` and `: any` reduction.

@@ -34,10 +34,14 @@ Canonical set reference:
   - `console.*` in `lib`: `269`
   - `console.*` in `components`: `92`
 - Current hotspot line counts:
-  - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `1016`
   - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `540`
   - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `508`
   - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `506`
+  - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `422`
+  - `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx`: `186`
+  - `cloud-web-app/web/components/preview/PreviewLifecycleChrome.tsx`: `146`
+  - `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `191`
+  - `cloud-web-app/web/components/preview/sceneViewportDerivations.ts`: `89`
   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `116`
   - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `149`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `268`
@@ -88,6 +92,7 @@ Canonical set reference:
 - Do not describe Storybook as seeded-but-broken. It is working, but not broad enough to count as full design-system coverage.
 - Do not describe `AIChatPanelContainer.tsx` as a remaining god component. It is now a thin orchestrator after extracting session context, provider preflight, send pipeline, and session banner modules.
 - Do not describe `WorkbenchEditorPane.tsx` as a remaining workbench monolith. It is now a thin coordinator backed by `WorkbenchEditorSurface.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`.
+- Do not describe `CanonicalPreviewSurface.tsx` as a four-digit preview monolith anymore. The runtime lane was extracted into `RuntimePreviewSurface.tsx`, `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, and `sceneViewportDerivations.ts`, even though preview still remains a high-leverage product surface.
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
@@ -126,11 +131,11 @@ Canonical set reference:
 ## Priority Order (Validated)
 1. Close production build parity without regressing the current browser merge-pressure lane.
 2. Continue slicing the remaining workbench and preview hotspots:
-   - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`
    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
-   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`
    - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
    - `cloud-web-app/web/components/terminal/XTerminal.tsx`
+   - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`
+   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`
 3. Turn preview + deploy into a trustworthy shareable workflow.
 4. Promote collaboration from baseline presence/cursors to full shared-editing confidence and file-tree presence.
 5. Keep moving `console.*` to structured logging.

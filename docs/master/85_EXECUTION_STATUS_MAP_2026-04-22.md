@@ -12,10 +12,14 @@ This file is the short scoreboard that answers:
 3. what is still open and should stay on the board
 
 ## Current Snapshot
-- `CanonicalPreviewSurface.tsx`: `1016` lines
 - `AIChatPanelPro.tsx`: `508` lines
 - `FullscreenIDE.tsx`: `540` lines
 - `XTerminal.tsx`: `506` lines
+- `CanonicalPreviewSurface.tsx`: `422` lines
+- `RuntimePreviewSurface.tsx`: `186` lines
+- `PreviewLifecycleChrome.tsx`: `146` lines
+- `usePreviewRuntime.ts`: `191` lines
+- `sceneViewportDerivations.ts`: `89` lines
 - `WorkbenchEditorPane.tsx`: `193` lines
 - `WorkbenchEditorSurface.tsx`: `311` lines
 - `WorkbenchEditorToolbar.tsx`: `191` lines
@@ -73,6 +77,8 @@ This file is the short scoreboard that answers:
   - stronger toolbar hierarchy
   - clearer mode tabs
   - better preview empty-state guidance
+- the former preview hotspot was also reduced:
+  - `CanonicalPreviewSurface.tsx` now acts more like a variant router over extracted runtime, lifecycle, and derivation modules
 - but the category is still partial until full shareable proof and build-complete runtime confidence are stable.
 
 ### Collaboration
@@ -110,7 +116,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `CanonicalPreviewSurface.tsx`, `FullscreenIDE.tsx`, `WorkbenchEditorSurface.tsx`, `AIChatPanelPro.tsx`, and `XTerminal.tsx`
+2. keep slicing `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `XTerminal.tsx`, `CanonicalPreviewSurface.tsx`, and `WorkbenchEditorSurface.tsx`
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`
