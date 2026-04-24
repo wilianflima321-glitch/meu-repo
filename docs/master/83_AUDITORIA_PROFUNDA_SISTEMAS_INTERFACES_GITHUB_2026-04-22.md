@@ -34,13 +34,14 @@ The local workspace is already synced with the latest upstream changes from `gen
 
 Additional local reconciliation on `2026-04-24`:
 - the preview lane is denser and clearer for end users through `cloud-web-app/web/components/ide/PreviewRuntimeToolbar.tsx` and `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`
-- the workbench route shell is no longer concentrated in one file: `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now `359` lines, while route/workspace orchestration was pushed out of `FullscreenIDEWorkspaceBridge.tsx` and now lives mainly in `useFullscreenIDEBridgeProps.ts` (`227`)
+- the workbench route shell is no longer concentrated in one file: `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now `379` lines, while route/workspace orchestration was pushed out of `FullscreenIDEWorkspaceBridge.tsx` and now lives mainly in `useFullscreenIDEBridgeSections.ts` (`141`) plus `useFullscreenIDEBridgeProps.types.ts` (`117`), with `useFullscreenIDEBridgeProps.ts` now only `19` lines
 - the workbench editor lane is no longer concentrated in one file: `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` is now `193` lines and delegates the dense editor experience to `WorkbenchEditorSurface.tsx` (`197`), `WorkbenchEditorCanvas.tsx` (`122`), `WorkbenchEditorToolbar.tsx` (`191`), and `WorkbenchEditorSidecar.tsx` (`85`)
 - the shell-panel lane is no longer a four-file tangle: `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` is now `114` lines after extraction into `ModernIDEShellCenterStack.tsx` (`109`), while `ModernIDEShellChrome.tsx` and `ModernIDEShellSideColumns.tsx` are now thin barrels over dedicated chrome/side-column parts
-- the preview authority is no longer concentrated in one four-digit file: `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` is now a `74`-line variant router, and `SceneViewportSurface.tsx` is down to `219` after extracting `SceneViewportWorkflowDrawer.tsx` (`151`) and `useViewportExport.ts` (`106`)
-- terminal density no longer lives in `XTerminal.tsx` or even `BaseXTerminal.tsx`; the barrel remains `11` lines, the shell is now `99`, and the runtime density sits in `cloud-web-app/web/components/terminal/useTerminalRuntime.ts` (`188`) plus extracted transport/selection/shortcuts/viewport hooks
-- build-risk mitigations now also include browser-gated SWR keys in `cloud-web-app/web/lib/providers/AethelProvider.tsx`, explicit Drei `Html` aliases across active 3D/editor surfaces, and a root/studio runtime split where `cloud-web-app/web/components/ClientLayout.tsx` keeps only the lightweight root shell while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` mounts richer product runtime per route
-- production `next build` parity is still open because the latest command-line probes still timed out before a successful end-to-end completion; the newest probe no longer reprinted the explicit old errors before timeout, but the latest fully actionable error evidence remains in `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log`
+- the preview authority is no longer concentrated in one four-digit file: `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx` is now a `74`-line variant router, and `SceneViewportSurface.tsx` is down to `98` after extracting `SceneViewportStage.tsx` (`117`), `useSceneViewportSurfaceState.ts` (`149`), and `useSceneViewportPlayback.ts` (`53`)
+- terminal density no longer lives in `XTerminal.tsx` or even `BaseXTerminal.tsx`; the barrel remains `11` lines, the shell is now `99`, and the runtime density sits in `cloud-web-app/web/components/terminal/useTerminalRuntime.ts` (`150`) plus extracted transport/sessions/selection/shortcuts/viewport/options/imperative-handle hooks, with session API/connection seams now split into `terminalSessionApi.ts` (`71`) and `terminalSessionConnection.ts` (`61`)
+- build-risk mitigations now also include browser-gated SWR keys in `cloud-web-app/web/lib/providers/AethelProvider.tsx`, explicit Drei `Html` aliases across active 3D/editor surfaces, and a root/studio runtime split where `cloud-web-app/web/components/ClientLayout.tsx` is only a `17`-line bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/app/(auth)/layout.tsx` mounts core UI for login/register, and `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` mounts richer product runtime per route including admin
+- production `next build` parity is still open because the latest command-line probes still fail after the core UI split and the admin/auth provider follow-up; the newest explicit evidence now includes `cloud-web-app/web/build-probe-2026-04-24-root-refresh.log`, `cloud-web-app/web/build-probe-2026-04-24-core-ui-split.log`, and `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`
+- the current best reading of the `useContext` crash is no longer “missing app provider” alone; the active failure still maps to Next internal `usePathname()` / App Router error-boundary code in `.next/server/chunks/66406.js`
 
 ## What From the PDF Still Holds Strongly
 These points still align with the repo and remain strategic priorities:
@@ -96,18 +97,18 @@ The following PDF claims should no longer be treated as current truth without re
 ## Current Factual Anchors After Sync
 These are the reality points this audit should now be interpreted against:
 
-- `FullscreenIDE.tsx`: about `359` lines and still a top-priority cockpit orchestrator
-- `useFullscreenIDEBridgeProps.ts`: about `227` lines and now the densest route/workspace bridge seam backing the fullscreen shell
-- `AIChatPanelPro.tsx`: about `262` lines, now backed by extracted composer, run-state, ops-state, context-action, speech-playback, quick-prompt, history-rail, benchmark-telemetry, and panel-ui-state modules
+- `FullscreenIDE.tsx`: about `379` lines and still a top-priority cockpit orchestrator
+- `useFullscreenIDEBridgeSections.ts`: about `141` lines and now the densest route/workspace bridge seam backing the fullscreen shell
+- `AIChatPanelPro.tsx`: about `273` lines, now backed by extracted composer, run-state, ops-state, context-action, speech-playback, quick-prompt, history-rail, benchmark-telemetry, and panel-ui-state modules
 - `WorkbenchEditorPane.tsx`: about `193` lines after extraction into `WorkbenchEditorSurface.tsx`, `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
 - `WorkbenchEditorSurface.tsx`: about `197` lines and now much closer to a stable surface/orchestrator seam
 - `WorkbenchPreviewPane.tsx`: about `39` lines and now a thin preview orchestrator over `WorkbenchPreviewRuntimeControls.tsx`, `WorkbenchPreviewRuntimeSurface.tsx`, `WorkbenchPreviewModeHeader.tsx`, and `workbenchPreviewPaneModels.ts`
-- `SceneViewportSurface.tsx`: about `219` lines and no longer a three-hundred-line hotspot after workflow/export extraction into `SceneViewportWorkflowDrawer.tsx` and `useViewportExport.ts`
+- `SceneViewportSurface.tsx`: about `98` lines and no longer a three-hundred-line hotspot after stage/state/playback extraction into `SceneViewportStage.tsx`, `useSceneViewportSurfaceState.ts`, and `useSceneViewportPlayback.ts`
 - `CanonicalPreviewSurface.tsx`: about `74` lines as the thin variant router over preview runtime and viewport seams
-- `RuntimePreviewSurface.tsx`: about `186` lines and now the clearest place to keep improving preview trust, fallback, and Magic Wand UX without re-growing the canonical preview shell
+- `RuntimePreviewSurface.tsx`: about `198` lines and now the clearest place to keep improving preview trust, fallback, and Magic Wand UX without re-growing the canonical preview shell
 - `AIChatPanelContainer.tsx`: about `116` lines after extraction into session-context, provider-preflight, send-pipeline, and session-banner modules
 - `ModernIDEShell.tsx`: now only `149` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`114`), `ModernIDEShellCenterStack.tsx` (`109`), and thin chrome/side-column barrels backed by `chromeHeader.tsx`, `chromeResizeHandle.tsx`, `chromeBottomDock.tsx`, `chromeStatusBar.tsx`, and `sideColumnChromeParts.tsx`
-- `XTerminal.tsx`: now an `11`-line barrel; terminal density should be read in `useTerminalRuntime.ts` (`188`), `useTerminalTransport.ts` (`121`), `useTerminalSessions.ts` (`134`), `useTerminalSelection.ts` (`57`), `useTerminalShortcuts.ts` (`45`), `useTerminalViewport.ts` (`52`), `BaseXTerminal.tsx` (`99`), and `MultiTerminalPanel.tsx` (`70`)
+- `XTerminal.tsx`: now an `11`-line barrel; terminal density should be read in `useTerminalRuntime.ts` (`150`), `useTerminalTransport.ts` (`145`), `useTerminalSessions.ts` (`120`), `terminalSessionApi.ts` (`71`), `terminalSessionConnection.ts` (`61`), `useTerminalSelection.ts` (`64`), `useTerminalShortcuts.ts` (`51`), `useTerminalViewport.ts` (`66`), `useTerminalOptions.ts` (`58`), `useTerminalImperativeHandle.ts` (`51`), `BaseXTerminal.tsx` (`99`), and `MultiTerminalPanel.tsx` (`70`)
 - volatile test, console, `: any`, and raw-hex inventories should defer to `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` instead of this imported audit
 - admin pages: see `81` for the current measured count
 - API routes: see `81` for the current measured count
@@ -134,7 +135,7 @@ For those, always pair it with `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` and
 Across `81`, `82`, and this imported systems/interfaces audit, the shared execution order remains:
 
 1. Keep the design system converging toward one visual language.
-2. Continue slicing the remaining workbench/runtime seams (`FullscreenIDE`, `useFullscreenIDEBridgeProps`, `SceneViewportSurface`, `useTerminalRuntime`, and then stabilize `AIChatPanelPro` while evolving the thinner preview cockpit modules).
+2. Continue slicing the remaining workbench/runtime seams (`FullscreenIDE`, `useFullscreenIDEBridgeSections`, `usePreviewRuntime`, `RuntimePreviewSurface`, `useTerminalRuntime`, and then stabilize `AIChatPanelPro` while evolving the thinner preview cockpit modules).
 3. Turn collaboration from infrastructure into visible product UX.
 4. Turn preview into a trust-building, shareable creation surface.
 5. Keep replacing runtime ambiguity with evidence, tests, and structured observability.

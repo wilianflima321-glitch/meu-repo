@@ -42,19 +42,19 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
-- `FullscreenIDE.tsx`: `359`
-- `AIChatPanelPro.tsx`: `262`
-- `useFullscreenIDEBridgeProps.ts`: `227`
+- `FullscreenIDE.tsx`: `379`
+- `AIChatPanelPro.tsx`: `273`
+- `useFullscreenIDEBridgeSections.ts`: `141`
 - `WorkbenchPreviewPane.tsx`: `39`
-- `SceneViewportSurface.tsx`: `219`
-- `WorkbenchEditorSurface.tsx`: `197`
-- `useTerminalRuntime.ts`: `188`
-- `PreviewLifecycleChrome.tsx`: `146`
-- `usePreviewRuntime.ts`: `191`
-- `RuntimePreviewSurface.tsx`: `186`
-- `SceneViewportWorkflowDrawer.tsx`: `151`
-- `WorkbenchPreviewRuntimeControls.tsx`: `128`
-- `useTerminalTransport.ts`: `121`
+- `SceneViewportSurface.tsx`: `98`
+- `WorkbenchEditorSurface.tsx`: `209`
+- `useTerminalRuntime.ts`: `150`
+- `PreviewLifecycleChrome.tsx`: `151`
+- `usePreviewRuntime.ts`: `213`
+- `RuntimePreviewSurface.tsx`: `198`
+- `SceneViewportWorkflowDrawer.tsx`: `163`
+- `WorkbenchPreviewRuntimeControls.tsx`: `134`
+- `useTerminalTransport.ts`: `145`
 - `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorToolbar.tsx`: `191`
@@ -66,6 +66,7 @@ Current workspace counts are materially lower:
 - `ModernIDEShellCenterStack.tsx`: `109`
 - `FullscreenIDEWorkspaceBridge.tsx`: `89`
 - `FullscreenIDEWorkspaceBridge.types.ts`: `67`
+- `useFullscreenIDEBridgeProps.types.ts`: `117`
 - `useViewportExport.ts`: `106`
 - `BaseXTerminal.tsx`: `99`
 - `ModernIDEShellChrome.tsx`: `29`
@@ -73,7 +74,13 @@ Current workspace counts are materially lower:
 - `CanonicalPreviewSurface.tsx`: `74` (router)
 - `XTerminal.tsx`: `11` (barrel)
 - `MultiTerminalPanel.tsx`: `70`
-- `useTerminalSessions.ts`: `134`
+- `useTerminalSessions.ts`: `120`
+- `terminalSessionApi.ts`: `71`
+- `terminalSessionConnection.ts`: `61`
+- `useSceneViewportSurfaceState.ts`: `149`
+- `SceneViewportStage.tsx`: `117`
+- `useTerminalOptions.ts`: `58`
+- `useTerminalImperativeHandle.ts`: `51`
 
 The category remains valid.
 The literal numbers did age, and both the editor lane and preview runtime lane are now split across smaller files instead of one oversized surface.
@@ -140,16 +147,19 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
 3. the biggest remaining risks are now execution discipline and build parity, not lack of architectural direction
 4. fresh mitigations already landed for build parity:
    - `experimental.workerThreads=false` in `next.config.js`
-   - `components/ClientLayout.tsx` is now only a lightweight root shell
+   - `components/ClientLayout.tsx` is now only a lightweight CSS bootstrap
+   - `components/providers/CoreUiProviders.tsx` now owns theme/toast context
    - `components/providers/StudioRuntimeProviders.tsx` now mounts the heavier product runtime per route
+   - `app/(auth)/layout.tsx` now mounts core UI for login/register
+   - `app/admin/layout.tsx` now mounts the full studio runtime for admin
    - browser-only SWR keys in `lib/providers/AethelProvider.tsx`
    - explicit Drei `Html` aliases across the active 3D/editor components
    - simpler `app/error.tsx` and `app/not-found.tsx` were introduced as a root-boundary bisect
-   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-23-studio-runtime-split-v3.log` still contains explicit `<Html>` and `useContext` prerender failures, while the newer `build-probe-2026-04-23-root-boundary-bisect.log` stopped before successful completion without reprinting those explicit traces
+   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-root-refresh.log`, `build-probe-2026-04-24-core-ui-split.log`, and `build-probe-2026-04-24-admin-auth-runtime.log` still contain explicit `<Html>` and `useContext` prerender failures, even after the core UI/provider layout follow-up
 
 ## The Sequence V6 Still Supports
 1. close production build parity
-2. continue shrinking the remaining workbench/runtime seams led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeProps.ts`, `SceneViewportSurface.tsx`, and `useTerminalRuntime.ts`
+2. continue shrinking the remaining workbench/runtime seams led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`
 3. harden preview + deploy into a trustworthy shareable loop
 4. harden collaboration from baseline UX into proven shared editing
 5. keep reducing `console.*`, `: any`, and raw-hex drift

@@ -4,6 +4,8 @@ import { useCallback, useState } from 'react';
 import type { MutableRefObject } from 'react';
 import type { Terminal as XTermType } from 'xterm';
 import type { TerminalSession } from './terminalModels';
+import { createTerminalSessionRequest, closeTerminalSessionRequest } from './terminalSessionApi';
+import { connectTerminalSessionSocket } from './terminalSessionConnection';
 import { TerminalWebSocket } from './terminalWebSocket';
 import { createComponentLogger } from '@/lib/observability/logger';
 
@@ -33,70 +35,30 @@ export function useTerminalSessions({
   const [isConnected, setIsConnected] = useState(false);
 
   const connectToSession = useCallback((sessionId: string, websocketUrl?: string) => {
-    if (!terminalRef.current) return;
-
-    websocketRef.current?.disconnect();
-    terminalRef.current.clear();
-
-    const ws = new TerminalWebSocket();
-
-    if (websocketUrl) {
-      ws.setRuntimeUrl(websocketUrl);
-    }
-
-    ws.onData = (data) => {
-      terminalRef.current?.write(data);
-    };
-
-    ws.onConnect = () => {
-      setIsConnected(true);
-      terminalRef.current?.focus();
-      fitTerminal(ws);
-    };
-
-    ws.onDisconnect = () => {
-      setIsConnected(false);
-    };
-
-    ws.onError = (error) => {
-      log.error('Terminal websocket error', { error });
-      writeTerminalError('Connection error. Attempting to reconnect...');
-    };
-
-    websocketRef.current = ws;
-    ws.connect(sessionId);
+    connectTerminalSessionSocket({
+      sessionId,
+      websocketUrl,
+      terminalRef,
+      websocketRef,
+      fitTerminal,
+      setIsConnected,
+      writeTerminalError,
+    });
   }, [fitTerminal, terminalRef, websocketRef, writeTerminalError]);
 
   const createSession = useCallback(async (cwd?: string, shell?: string) => {
     try {
-      const response = await fetch('/api/terminal/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `Terminal ${sessions.length + 1}`,
-          cwd: cwd || initialCwd,
-          shellPath: shell || initialShell,
-        }),
+      const { session: newSession, websocketUrl } = await createTerminalSessionRequest({
+        sessionCount: sessions.length,
+        initialCwd,
+        initialShell,
+        cwd,
+        shell,
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to create terminal session');
-      }
-
-      const data = await response.json();
-
-      const newSession: TerminalSession = {
-        id: data.sessionId,
-        name: data.name || `Terminal ${sessions.length + 1}`,
-        shell: data.shell || 'bash',
-        cwd: data.cwd || cwd || '~',
-        createdAt: new Date(),
-        isActive: true,
-      };
 
       setSessions((prev) => [...prev, newSession]);
       setActiveSessionId(newSession.id);
-      connectToSession(newSession.id, data.websocketUrl);
+      connectToSession(newSession.id, websocketUrl);
 
       return newSession;
     } catch (error) {
@@ -109,12 +71,7 @@ export function useTerminalSessions({
 
   const closeSession = useCallback(async (sessionId: string) => {
     try {
-      await fetch('/api/terminal/close', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
-      });
-
+      await closeTerminalSessionRequest(sessionId);
       const remaining = sessions.filter((session) => session.id !== sessionId);
       setSessions(remaining);
 

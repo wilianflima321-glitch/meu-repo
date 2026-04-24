@@ -1,14 +1,10 @@
 'use client';
 
-import {
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  type ForwardedRef,
-} from 'react';
-import type { Terminal as XTermType, ITerminalOptions } from 'xterm';
+import { useCallback, useRef, type ForwardedRef } from 'react';
+import type { Terminal as XTermType } from 'xterm';
 import type { TerminalTheme, XTerminalRef } from './terminalModels';
+import { useTerminalImperativeHandle } from './useTerminalImperativeHandle';
+import { useTerminalOptions } from './useTerminalOptions';
 import { TerminalWebSocket } from './terminalWebSocket';
 import { useTerminalSelection } from './useTerminalSelection';
 import { useTerminalSessions } from './useTerminalSessions';
@@ -70,45 +66,11 @@ export function useTerminalRuntime({
   const writeTerminalError = useCallback((message: string) => {
     terminalRef.current?.writeln(`\x1b[31m${message}\x1b[0m`);
   }, []);
-
-  const terminalOptions: ITerminalOptions = useMemo(
-    () => ({
-      fontSize,
-      fontFamily,
-      cursorBlink: true,
-      cursorStyle: 'block',
-      cursorWidth: 2,
-      scrollback: 10000,
-      tabStopWidth: 4,
-      allowProposedApi: true,
-      allowTransparency: true,
-      convertEol: true,
-      theme: {
-        background: theme.colors.background,
-        foreground: theme.colors.foreground,
-        cursor: theme.colors.cursor,
-        cursorAccent: theme.colors.cursorAccent,
-        selectionBackground: theme.colors.selection,
-        black: theme.colors.black,
-        red: theme.colors.red,
-        green: theme.colors.green,
-        yellow: theme.colors.yellow,
-        blue: theme.colors.blue,
-        magenta: theme.colors.magenta,
-        cyan: theme.colors.cyan,
-        white: theme.colors.white,
-        brightBlack: theme.colors.brightBlack,
-        brightRed: theme.colors.brightRed,
-        brightGreen: theme.colors.brightGreen,
-        brightYellow: theme.colors.brightYellow,
-        brightBlue: theme.colors.brightBlue,
-        brightMagenta: theme.colors.brightMagenta,
-        brightCyan: theme.colors.brightCyan,
-        brightWhite: theme.colors.brightWhite,
-      },
-    }),
-    [fontFamily, fontSize, theme]
-  );
+  const terminalOptions = useTerminalOptions({
+    fontFamily,
+    fontSize,
+    theme,
+  });
 
   const {
     activeSessionId,
@@ -148,25 +110,16 @@ export function useTerminalRuntime({
     websocketRef,
   });
 
-  useImperativeHandle(
+  useTerminalImperativeHandle({
+    fitAddonRef,
+    focusTerminal,
     ref,
-    () => ({
-      write: (data: string) => terminalRef.current?.write(data),
-      writeln: (data: string) => terminalRef.current?.writeln(data),
-      clear: () => terminalRef.current?.clear(),
-      focus: focusTerminal,
-      fit: () => fitAddonRef.current?.fit(),
-      search,
-      searchNext,
-      searchPrevious,
-      getSelection: () => terminalRef.current?.getSelection() || '',
-      dispose: () => {
-        websocketRef.current?.disconnect();
-        terminalRef.current?.dispose();
-      },
-    }),
-    [fitAddonRef, focusTerminal, search, searchNext, searchPrevious]
-  );
+    search,
+    searchNext,
+    searchPrevious,
+    terminalRef,
+    websocketRef,
+  });
 
   useTerminalShortcuts({
     copySelection,

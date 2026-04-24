@@ -15,6 +15,7 @@ import { DevToolsProvider } from '@/lib/debug/devtools-provider'
 import TelemetryBootstrap from '@/components/observability/TelemetryBootstrap'
 import WebVitalsReporter from '@/components/analytics/WebVitalsReporter'
 import CookieConsent from '@/components/ui/CookieConsent'
+import CoreUiProviders from '@/components/providers/CoreUiProviders'
 
 function DefaultCommandsRegistration() {
   useDefaultCommands()
@@ -40,32 +41,34 @@ function LoadingFallback() {
 
 export default function StudioRuntimeProviders({ children }: { children: React.ReactNode }) {
   return (
-    <ErrorBoundaryProvider>
-      <A11yProvider>
-        <ServiceWorkerProvider>
-          <TelemetryBootstrap />
-          <WebVitalsReporter />
-          <AuthProvider>
-            <SessionTrackerProvider>
-              <CommandRegistryProvider>
-                <DevToolsProvider>
-                  <AethelProvider>
-                    <OnboardingProvider enabled>
-                      <DefaultCommandsRegistration />
-                      <WelcomeModal />
-                      <OnboardingChecklist />
-                      <LowBalanceModalAuto />
-                      <AISuggestionBubbleAuto />
-                      <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
-                      <CookieConsent />
-                    </OnboardingProvider>
-                  </AethelProvider>
-                </DevToolsProvider>
-              </CommandRegistryProvider>
-            </SessionTrackerProvider>
-          </AuthProvider>
-        </ServiceWorkerProvider>
-      </A11yProvider>
-    </ErrorBoundaryProvider>
+    <CoreUiProviders>
+      <ErrorBoundaryProvider>
+        <A11yProvider>
+          <ServiceWorkerProvider>
+            <TelemetryBootstrap />
+            <WebVitalsReporter />
+            <AuthProvider>
+              <SessionTrackerProvider>
+                <CommandRegistryProvider>
+                  <DevToolsProvider>
+                    <AethelProvider>
+                      <OnboardingProvider enabled>
+                        <DefaultCommandsRegistration />
+                        <WelcomeModal />
+                        <OnboardingChecklist />
+                        <LowBalanceModalAuto />
+                        <AISuggestionBubbleAuto />
+                        <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+                        <CookieConsent />
+                      </OnboardingProvider>
+                    </AethelProvider>
+                  </DevToolsProvider>
+                </CommandRegistryProvider>
+              </SessionTrackerProvider>
+            </AuthProvider>
+          </ServiceWorkerProvider>
+        </A11yProvider>
+      </ErrorBoundaryProvider>
+    </CoreUiProviders>
   )
 }

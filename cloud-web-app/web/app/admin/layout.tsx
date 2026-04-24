@@ -34,6 +34,7 @@ import {
 } from 'lucide-react'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 import { Badge } from '@/components/ui/Badge'
+import StudioRuntimeProviders from '@/components/providers/StudioRuntimeProviders'
 
 /* ==========================================================================
  * Admin Ops Layout — Unified with Studio Design Language
@@ -388,23 +389,25 @@ export default function AdminOpsLayout({ children }: { children: React.ReactNode
   const quickStats = statsData?.stats || null
 
   return (
-    <div className="flex min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex min-h-screen flex-1 flex-col">
-        <Header
-          onMenuClick={() => setSidebarOpen(true)}
-          systemStatus={systemStatus}
-          quickStats={quickStats}
-        />
-        <main className="flex-1 overflow-auto p-6">{children}</main>
-        <footer className="flex h-8 shrink-0 items-center justify-between border-t border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] px-4 text-[11px] text-[var(--aethel-text-tertiary)]">
-          <span>Aethel Admin v2.1</span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            Última sincronização: {new Date().toLocaleTimeString('pt-BR')}
-          </span>
-        </footer>
+    <StudioRuntimeProviders>
+      <div className="flex min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className="flex min-h-screen flex-1 flex-col">
+          <Header
+            onMenuClick={() => setSidebarOpen(true)}
+            systemStatus={systemStatus}
+            quickStats={quickStats}
+          />
+          <main className="flex-1 overflow-auto p-6">{children}</main>
+          <footer className="flex h-8 shrink-0 items-center justify-between border-t border-[var(--aethel-border-subtle)] bg-[var(--aethel-surface-primary)] px-4 text-[11px] text-[var(--aethel-text-tertiary)]">
+            <span>Aethel Admin v2.1</span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Última sincronização: {new Date().toLocaleTimeString('pt-BR')}
+            </span>
+          </footer>
+        </div>
       </div>
-    </div>
+    </StudioRuntimeProviders>
   )
 }

@@ -12,19 +12,19 @@ This file is the short scoreboard that answers:
 3. what is still open and should stay on the board
 
 ## Current Snapshot
-- `FullscreenIDE.tsx`: `359` lines
-- `AIChatPanelPro.tsx`: `262` lines
-- `useFullscreenIDEBridgeProps.ts`: `227` lines
+- `FullscreenIDE.tsx`: `379` lines
+- `AIChatPanelPro.tsx`: `273` lines
+- `useFullscreenIDEBridgeSections.ts`: `141` lines
 - `WorkbenchPreviewPane.tsx`: `39` lines
-- `SceneViewportSurface.tsx`: `219` lines
-- `WorkbenchEditorSurface.tsx`: `197` lines
-- `useTerminalRuntime.ts`: `188` lines
-- `PreviewLifecycleChrome.tsx`: `146` lines
-- `usePreviewRuntime.ts`: `191` lines
-- `RuntimePreviewSurface.tsx`: `186` lines
-- `SceneViewportWorkflowDrawer.tsx`: `151` lines
-- `WorkbenchPreviewRuntimeControls.tsx`: `128` lines
-- `useTerminalTransport.ts`: `121` lines
+- `SceneViewportSurface.tsx`: `98` lines
+- `WorkbenchEditorSurface.tsx`: `209` lines
+- `useTerminalRuntime.ts`: `150` lines
+- `PreviewLifecycleChrome.tsx`: `151` lines
+- `usePreviewRuntime.ts`: `213` lines
+- `RuntimePreviewSurface.tsx`: `198` lines
+- `SceneViewportWorkflowDrawer.tsx`: `163` lines
+- `WorkbenchPreviewRuntimeControls.tsx`: `134` lines
+- `useTerminalTransport.ts`: `145` lines
 - `chromeResizeHandle.tsx`: `106` lines
 - `sceneViewportDerivations.ts`: `89` lines
 - `WorkbenchEditorPane.tsx`: `193` lines
@@ -37,6 +37,7 @@ This file is the short scoreboard that answers:
 - `ModernIDEShellCenterStack.tsx`: `109` lines
 - `FullscreenIDEWorkspaceBridge.tsx`: `89` lines
 - `FullscreenIDEWorkspaceBridge.types.ts`: `67` lines
+- `useFullscreenIDEBridgeProps.types.ts`: `117` lines
 - `WorkbenchPreviewModeHeader.tsx`: `63` lines
 - `useViewportExport.ts`: `106` lines
 - `BaseXTerminal.tsx`: `99` lines
@@ -45,12 +46,18 @@ This file is the short scoreboard that answers:
 - `CanonicalPreviewSurface.tsx`: `74` lines (router)
 - `XTerminal.tsx`: `11` lines (barrel)
 - `MultiTerminalPanel.tsx`: `70` lines
-- `useTerminalSessions.ts`: `134` lines
+- `useTerminalSessions.ts`: `120` lines
+- `terminalSessionApi.ts`: `71` lines
+- `terminalSessionConnection.ts`: `61` lines
+- `useSceneViewportSurfaceState.ts`: `149` lines
+- `SceneViewportStage.tsx`: `117` lines
+- `useTerminalOptions.ts`: `58` lines
+- `useTerminalImperativeHandle.ts`: `51` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
-  - `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log` is still the latest fully actionable explicit-failure log and points to prerender failures
-  - the newer `cloud-web-app/web/build-probe-2026-04-23-root-boundary-bisect.log` moved the root boundary further toward a pass-through shell and did not reprint those explicit `<Html>`/`useContext` traces before timing out, but it still never completed successfully
+  - `cloud-web-app/web/build-probe-2026-04-24-root-refresh.log`, `cloud-web-app/web/build-probe-2026-04-24-core-ui-split.log`, and `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log` still point to prerender failures
+  - the newer provider/layout experiments clarified the root/runtime split and admin/auth coverage, but they still never completed successfully
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -96,7 +103,7 @@ This file is the short scoreboard that answers:
   - better preview empty-state guidance
 - the former preview hotspot was also reduced:
   - `CanonicalPreviewSurface.tsx` now acts like a thin variant router over extracted runtime, scene, canvas, lifecycle, and derivation modules
-  - `SceneViewportSurface.tsx` is now a smaller viewport seam at `219` lines, with workflow/export density pushed into `SceneViewportWorkflowDrawer.tsx` and `useViewportExport.ts`
+  - `SceneViewportSurface.tsx` is now a smaller viewport seam at `98` lines, with stage/state/playback density pushed into `SceneViewportStage.tsx`, `useSceneViewportSurfaceState.ts`, and `useSceneViewportPlayback.ts`
   - `WorkbenchPreviewPane.tsx` is now a thin orchestrator, with trust/share/status density moved into `WorkbenchPreviewRuntimeControls.tsx`, `WorkbenchPreviewRuntimeSurface.tsx`, and `WorkbenchPreviewModeHeader.tsx`
 - but the category is still partial until full shareable proof and build-complete runtime confidence are stable.
 
@@ -116,9 +123,12 @@ This file is the short scoreboard that answers:
 ## Still Open
 ### P0
 1. production build parity
-   - primary next isolates now look most likely in root-global providers: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
-   - secondary or already-bisected suspects remain: `app/layout.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `app/error.tsx`, and `app/not-found.tsx`
-2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeProps.ts`, `SceneViewportSurface.tsx`, and `useTerminalRuntime.ts`
+   - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
+   - `app/(auth)/layout.tsx` and `app/admin/layout.tsx` now mount the missing provider layers, but the blocker remained
+   - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
+   - highest-confidence studio/admin cluster now includes: `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `components/ServiceWorkerProvider.tsx`, `contexts/AuthContext.tsx`, and `lib/providers/AethelProvider.tsx`
+   - separate public/auth cluster still includes: `components/ui/PublicHeader.tsx`, `components/ui/PublicFooter.tsx`, `app/(auth)/login/login-v2.tsx`, `app/(auth)/register/register-v2.tsx`, and `lib/navigation/use-browser-pathname.ts`
+2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure
 
@@ -136,7 +146,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDE.tsx`, `useFullscreenIDEBridgeProps.ts`, `SceneViewportSurface.tsx`, and `useTerminalRuntime.ts`, while stabilizing the new `AIChatPanelPro.tsx` seams and evolving the thinner preview cockpit modules
+2. keep slicing `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`, while stabilizing the new `AIChatPanelPro.tsx` seams and evolving the thinner preview cockpit modules
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

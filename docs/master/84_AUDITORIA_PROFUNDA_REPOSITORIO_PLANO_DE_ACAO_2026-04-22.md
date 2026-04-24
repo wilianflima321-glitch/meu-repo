@@ -39,18 +39,22 @@ Use the current set like this:
 - `cloud-web-app/web/lib/**/*.ts` in the current workspace: `347`
 - Curated tracked executable test/spec files: `49`
 - Hotspot line counts:
-- `FullscreenIDE.tsx`: `359`
-- `AIChatPanelPro.tsx`: `262`
-- `useFullscreenIDEBridgeProps.ts`: `227`
-- `SceneViewportSurface.tsx`: `219`
-- `WorkbenchEditorSurface.tsx`: `197`
-- `usePreviewRuntime.ts`: `191`
-- `useTerminalRuntime.ts`: `188`
-- `RuntimePreviewSurface.tsx`: `186`
-- `PreviewLifecycleChrome.tsx`: `146`
-- `WorkbenchPreviewRuntimeControls.tsx`: `128`
-- `useTerminalTransport.ts`: `121`
+- `FullscreenIDE.tsx`: `379`
+- `AIChatPanelPro.tsx`: `273`
+- `useFullscreenIDEBridgeSections.ts`: `141`
+- `usePreviewRuntime.ts`: `213`
+- `WorkbenchEditorSurface.tsx`: `209`
+- `RuntimePreviewSurface.tsx`: `198`
+- `SceneViewportWorkflowDrawer.tsx`: `163`
+- `useTerminalSessions.ts`: `120`
+- `PreviewLifecycleChrome.tsx`: `151`
+- `useTerminalRuntime.ts`: `150`
+- `useSceneViewportSurfaceState.ts`: `149`
+- `useTerminalTransport.ts`: `145`
+- `useFullscreenIDEBridgeProps.types.ts`: `117`
 - `WorkbenchEditorCanvas.tsx`: `122`
+- `SceneViewportStage.tsx`: `117`
+- `SceneViewportSurface.tsx`: `98`
 - `AIChatPanelContainer.tsx`: `116`
 - `ModernIDEShellPanels.tsx`: `114`
 - `ModernIDEShellCenterStack.tsx`: `109`
@@ -62,6 +66,8 @@ Use the current set like this:
 - `WorkbenchPreviewRuntimeSurface.tsx`: `79`
 - `CanonicalPreviewSurface.tsx`: `74`
 - `MultiTerminalPanel.tsx`: `70`
+- `terminalSessionApi.ts`: `71`
+- `terminalSessionConnection.ts`: `61`
 - `FullscreenIDEWorkspaceBridge.types.ts`: `67`
 - `WorkbenchPreviewModeHeader.tsx`: `63`
 - `XTerminal.tsx`: `11`
@@ -69,12 +75,12 @@ Use the current set like this:
 - `ModernIDEShellChrome.tsx`: `29`
 - `chromeSecondaryBars.tsx`: `8`
 - `ModernIDEShellSideColumns.tsx`: `8`
-- `SceneViewportWorkflowDrawer.tsx`: `151`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorToolbar.tsx`: `191`
 - `WorkbenchEditorSidecar.tsx`: `85`
 - `ModernIDEShell.tsx`: `149`
-- `useTerminalSessions.ts`: `134`
+- `useTerminalOptions.ts`: `58`
+- `useTerminalImperativeHandle.ts`: `51`
 
 ## What This Audit Still Gets Right
 ### Root hygiene still matters
@@ -134,11 +140,11 @@ Do not keep auditing it as an active blocker.
 
 ### Production build parity
 - This remains OPEN.
-- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log` and `cloud-web-app/web/build-probe-2026-04-23-root-boundary-bisect.log`, with older `build-probe-*.log` files retained as historical context.
+- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-24-root-refresh.log`, `cloud-web-app/web/build-probe-2026-04-24-core-ui-split.log`, and `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, with older `build-probe-*.log` files retained as historical context.
 - New mitigation attempts are now part of the repo truth:
   - `cloud-web-app/web/next.config.js` forces `experimental.workerThreads=false`
-- `cloud-web-app/web/components/ClientLayout.tsx` now mounts only the lightweight root shell, while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` carries route-scoped studio runtime
-- Current local reruns still did not finish within an extended `15` minute timeout, so the category cannot be promoted.
+- `cloud-web-app/web/components/ClientLayout.tsx` is now only the CSS bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` carries route-scoped studio runtime, `cloud-web-app/web/app/(auth)/layout.tsx` mounts core UI for auth pages, and `cloud-web-app/web/app/admin/layout.tsx` now mounts the full studio runtime
+- Current local reruns still did not finish within extended `15+` minute timeouts, so the category cannot be promoted.
 - Current failure classes include:
   - `<Html> should not be imported outside of pages/_document` for `/404` and `/500`
 - `useContext` null prerender failures across auth, public, docs, studio, profile/settings/project surfaces, and many `/admin/*` routes
@@ -150,13 +156,15 @@ Do not keep auditing it as an active blocker.
 - Current repo-level reading:
 - the simple userland shell-hook leak was mitigated,
 - the root shell is lighter and the heavier product runtime is now route-scoped via `StudioRuntimeProviders.tsx`,
+- auth and admin now mount their missing provider layers explicitly,
 - worker-thread concurrency was reduced to improve Windows determinism,
 - the newer root-boundary bisect probe did not reprint the explicit old errors before timeout,
+- the newest `build-probe-2026-04-24-admin-auth-runtime.log` still reproduces the same explicit failure class,
 - but production build parity still cannot be marked solved.
 
 ## Repo/Execution Priorities
 1. Close the `next build` parity gap.
-2. Keep shrinking the remaining workbench/runtime monoliths, with the core priority order now led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeProps.ts`, `useTerminalRuntime.ts`, and `SceneViewportSurface.tsx`; `AIChatPanelPro.tsx` has moved into stabilization-and-polish territory, `WorkbenchPreviewPane.tsx` is now a thin orchestrator, and preview cockpit follow-up moved into the extracted fullscreen preview modules.
+2. Keep shrinking the remaining workbench/runtime monoliths, with the core priority order now led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`; `AIChatPanelPro.tsx` has moved into stabilization-and-polish territory, `WorkbenchPreviewPane.tsx` is now a thin orchestrator, and preview cockpit follow-up moved into the extracted fullscreen preview modules.
 3. Reduce root ambiguity and legacy-file drag.
 4. Move more Playwright pressure from optional/full-matrix to required/default CI.
 5. Continue `console.* -> logger` and `: any` reduction.
