@@ -42,16 +42,17 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
-- `FullscreenIDE.tsx`: `540`
-- `AIChatPanelPro.tsx`: `508`
-- `XTerminal.tsx`: `506`
-- `CanonicalPreviewSurface.tsx`: `422`
+- `CanonicalPreviewSurface.tsx`: `459`
+- `BaseXTerminal.tsx`: `441`
+- `FullscreenIDE.tsx`: `437`
+- `WorkbenchEditorSurface.tsx`: `326`
+- `AIChatPanelPro.tsx`: `274`
+- `WorkbenchPreviewPane.tsx`: `263`
 - `RuntimePreviewSurface.tsx`: `186`
 - `PreviewLifecycleChrome.tsx`: `146`
 - `usePreviewRuntime.ts`: `191`
 - `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
-- `WorkbenchEditorSurface.tsx`: `311`
 - `WorkbenchEditorToolbar.tsx`: `191`
 - `WorkbenchEditorSidecar.tsx`: `85`
 - `AIChatPanelContainer.tsx`: `116`
@@ -59,6 +60,8 @@ Current workspace counts are materially lower:
 - `ModernIDEShellPanels.tsx`: `268`
 - `ModernIDEShellChrome.tsx`: `196`
 - `chromeSecondaryBars.tsx`: `172`
+- `XTerminal.tsx`: `13` (barrel)
+- `MultiTerminalPanel.tsx`: `82`
 
 The category remains valid.
 The literal numbers did age, and both the editor lane and preview runtime lane are now split across smaller files instead of one oversized surface.

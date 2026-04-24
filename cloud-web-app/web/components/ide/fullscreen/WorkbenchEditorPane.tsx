@@ -21,7 +21,7 @@ import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 
 type EditorInstanceRef = MutableRefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
 
-type WorkbenchEditorPaneProps = {
+export type WorkbenchEditorPaneProps = {
   activeFile: ActiveFileState | null;
   secondaryFile: ActiveFileState | null;
   bridgeActiveFile: ActiveFileState | null;

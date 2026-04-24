@@ -34,21 +34,24 @@ Canonical set reference:
   - `console.*` in `lib`: `269`
   - `console.*` in `components`: `92`
 - Current hotspot line counts:
-  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `540`
-  - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `508`
-  - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `506`
-  - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `422`
+  - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `459`
+  - `cloud-web-app/web/components/terminal/BaseXTerminal.tsx`: `441`
+  - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `437`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `326`
+  - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `274`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`: `263`
   - `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx`: `186`
   - `cloud-web-app/web/components/preview/PreviewLifecycleChrome.tsx`: `146`
   - `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `191`
   - `cloud-web-app/web/components/preview/sceneViewportDerivations.ts`: `89`
+  - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `13`
+  - `cloud-web-app/web/components/terminal/MultiTerminalPanel.tsx`: `82`
   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `116`
   - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `149`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `268`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `196`
   - `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx`: `172`
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`: `193`
-  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `311`
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx`: `191`
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSidecar.tsx`: `85`
 
@@ -93,6 +96,8 @@ Canonical set reference:
 - Do not describe `AIChatPanelContainer.tsx` as a remaining god component. It is now a thin orchestrator after extracting session context, provider preflight, send pipeline, and session banner modules.
 - Do not describe `WorkbenchEditorPane.tsx` as a remaining workbench monolith. It is now a thin coordinator backed by `WorkbenchEditorSurface.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`.
 - Do not describe `CanonicalPreviewSurface.tsx` as a four-digit preview monolith anymore. The runtime lane was extracted into `RuntimePreviewSurface.tsx`, `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, and `sceneViewportDerivations.ts`, even though preview still remains a high-leverage product surface.
+- Do not describe `XTerminal.tsx` as the remaining terminal hotspot. It is now a thin barrel over `BaseXTerminal.tsx` and `MultiTerminalPanel.tsx`, so terminal density should be tracked against those implementation seams instead.
+- Do not describe `AIChatPanelPro.tsx` as a five-hundred-line emergency monolith anymore. It now sits below `300` lines and delegates composer, run-state, ops-state, context actions, speech playback, and quick-prompt chrome into dedicated `components/ai-chat/*` modules.
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
@@ -131,11 +136,11 @@ Canonical set reference:
 ## Priority Order (Validated)
 1. Close production build parity without regressing the current browser merge-pressure lane.
 2. Continue slicing the remaining workbench and preview hotspots:
-   - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
-   - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
-   - `cloud-web-app/web/components/terminal/XTerminal.tsx`
    - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`
+   - `cloud-web-app/web/components/terminal/BaseXTerminal.tsx`
+   - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
    - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`
+   - stabilize `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` instead of treating it as an emergency monolith
 3. Turn preview + deploy into a trustworthy shareable workflow.
 4. Promote collaboration from baseline presence/cursors to full shared-editing confidence and file-tree presence.
 5. Keep moving `console.*` to structured logging.

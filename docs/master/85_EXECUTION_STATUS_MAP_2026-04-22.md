@@ -12,16 +12,17 @@ This file is the short scoreboard that answers:
 3. what is still open and should stay on the board
 
 ## Current Snapshot
-- `AIChatPanelPro.tsx`: `508` lines
-- `FullscreenIDE.tsx`: `540` lines
-- `XTerminal.tsx`: `506` lines
-- `CanonicalPreviewSurface.tsx`: `422` lines
+- `CanonicalPreviewSurface.tsx`: `459` lines
+- `BaseXTerminal.tsx`: `441` lines
+- `FullscreenIDE.tsx`: `437` lines
+- `WorkbenchEditorSurface.tsx`: `326` lines
+- `AIChatPanelPro.tsx`: `274` lines
+- `WorkbenchPreviewPane.tsx`: `263` lines
 - `RuntimePreviewSurface.tsx`: `186` lines
 - `PreviewLifecycleChrome.tsx`: `146` lines
 - `usePreviewRuntime.ts`: `191` lines
 - `sceneViewportDerivations.ts`: `89` lines
 - `WorkbenchEditorPane.tsx`: `193` lines
-- `WorkbenchEditorSurface.tsx`: `311` lines
 - `WorkbenchEditorToolbar.tsx`: `191` lines
 - `WorkbenchEditorSidecar.tsx`: `85` lines
 - `AIChatPanelContainer.tsx`: `116` lines
@@ -29,6 +30,8 @@ This file is the short scoreboard that answers:
 - `ModernIDEShellPanels.tsx`: `268` lines
 - `ModernIDEShellChrome.tsx`: `196` lines
 - `chromeSecondaryBars.tsx`: `172` lines
+- `XTerminal.tsx`: `13` lines (barrel)
+- `MultiTerminalPanel.tsx`: `82` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
@@ -98,7 +101,7 @@ This file is the short scoreboard that answers:
 ### P0
 1. production build parity
    - current highest-probability root suspects remain in the app/provider stack: `app/layout.tsx`, `components/ClientLayout.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`, `app/error.tsx`, and `app/not-found.tsx`
-2. remaining workbench and preview monolith reduction
+2. remaining workbench, preview, and terminal implementation hotspot reduction
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure
 
@@ -116,7 +119,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDE.tsx`, `AIChatPanelPro.tsx`, `XTerminal.tsx`, `CanonicalPreviewSurface.tsx`, and `WorkbenchEditorSurface.tsx`
+2. keep slicing `CanonicalPreviewSurface.tsx`, `BaseXTerminal.tsx`, `FullscreenIDE.tsx`, and `WorkbenchEditorSurface.tsx`, while stabilizing the new `AIChatPanelPro.tsx` seams
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

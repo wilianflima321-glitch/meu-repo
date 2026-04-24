@@ -4,6 +4,7 @@ import CanonicalPreviewSurface from '@/components/preview/CanonicalPreviewSurfac
 import PreviewRuntimeToolbar from '@/components/ide/PreviewRuntimeToolbar';
 import { DevicePreview } from '@/components/ide/DevicePreview';
 import { ConsoleIntegration } from '@/components/ide/ConsoleIntegration';
+import { useWorkbenchRuntimeActions } from '@/components/ide/fullscreen/useWorkbenchRuntimeActions';
 import { analytics } from '@/lib/analytics';
 import type {
   PreviewRuntimeHealthState,
@@ -15,7 +16,7 @@ import type {
   PreviewMode,
 } from '@/components/ide/fullscreen/types';
 
-type WorkbenchPreviewPaneProps = {
+export type WorkbenchPreviewPaneProps = {
   activeFile: ActiveFileState | null;
   previewMode: PreviewMode;
   previewRefreshTick: number;
@@ -96,6 +97,32 @@ export function WorkbenchPreviewPane({
   checkRuntimeHealth,
 }: WorkbenchPreviewPaneProps) {
   const activeModeMeta = PREVIEW_MODES.find((mode) => mode.id === previewMode) ?? PREVIEW_MODES[0];
+  const {
+    runRecommendedAction,
+    discoverAndRefresh,
+    provisionAndRefresh,
+    syncAndRefresh,
+    revalidateRuntimeHealth,
+    openRuntime,
+  } = useWorkbenchRuntimeActions({
+    runtimePrimaryAction,
+    previewRuntimeUrl,
+    refreshRuntimeReadiness,
+    discoverRuntime,
+    provisionRuntime,
+    syncRuntime,
+    handleUseInlineFallback,
+    checkRuntimeHealth,
+    onRevalidateTracked: (runtimeUrl) => {
+      analytics?.track?.('engine', 'render_time', {
+        metadata: {
+          surface: 'ide-preview-runtime-health',
+          action: 'manual-revalidate',
+          runtimeUrl,
+        },
+      });
+    },
+  });
 
   const renderRuntimeSurface = (mode: 'runtime' | 'device') => {
     if (!activeFile) {
@@ -175,51 +202,12 @@ export function WorkbenchPreviewPane({
           canSyncRuntime={Boolean(previewSandboxId)}
           runtimeDiscoveryMessage={runtimeDiscoveryMessage}
           runtimeDiscoveryTone={runtimeDiscoveryTone}
-          onRunRecommendedAction={() => {
-            if (runtimePrimaryAction === 'provision') {
-              void provisionRuntime('manual').then(() => {
-                void refreshRuntimeReadiness();
-              });
-              return;
-            }
-            if (runtimePrimaryAction === 'discover') {
-              void discoverRuntime('manual').then(() => {
-                void refreshRuntimeReadiness();
-              });
-              return;
-            }
-            handleUseInlineFallback();
-          }}
-          onDiscoverRuntime={() => {
-            void discoverRuntime('manual').then(() => {
-              void refreshRuntimeReadiness();
-            });
-          }}
-          onProvisionRuntime={() => {
-            void provisionRuntime('manual').then(() => {
-              void refreshRuntimeReadiness();
-            });
-          }}
-          onSyncRuntime={() => {
-            void syncRuntime().then(() => {
-              void refreshRuntimeReadiness();
-            });
-          }}
-          onRevalidate={() => {
-            if (!previewRuntimeUrl) return;
-            void checkRuntimeHealth(previewRuntimeUrl);
-            analytics?.track?.('engine', 'render_time', {
-              metadata: {
-                surface: 'ide-preview-runtime-health',
-                action: 'manual-revalidate',
-                runtimeUrl: previewRuntimeUrl,
-              },
-            });
-          }}
-          onOpenRuntime={() => {
-            if (!previewRuntimeUrl) return;
-            window.open(previewRuntimeUrl, '_blank', 'noopener,noreferrer');
-          }}
+          onRunRecommendedAction={runRecommendedAction}
+          onDiscoverRuntime={discoverAndRefresh}
+          onProvisionRuntime={provisionAndRefresh}
+          onSyncRuntime={syncAndRefresh}
+          onRevalidate={revalidateRuntimeHealth}
+          onOpenRuntime={openRuntime}
         />
       )}
 

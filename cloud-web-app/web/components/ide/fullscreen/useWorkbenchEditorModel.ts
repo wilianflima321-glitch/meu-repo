@@ -1,0 +1,119 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, type Dispatch, type SetStateAction } from 'react';
+
+import type { Diagnostic as MonacoDiagnostic } from '@/components/editor/MonacoEditorPro';
+import type { EditorGroup, EditorTab } from '@/components/editor/SplitEditor';
+import type { DocumentSymbol } from '@/components/outline/OutlinePanel';
+import { buildOutlineSymbols } from '@/components/outline/outline-parser';
+
+import type { ActiveFileState, EditorPane } from '@/components/ide/fullscreen/types';
+
+type UseWorkbenchEditorModelParams = {
+  activeFile: ActiveFileState | null;
+  secondaryFile: ActiveFileState | null;
+  splitEditorOpen: boolean;
+  splitActivePane: EditorPane;
+  editorDiagnostics: MonacoDiagnostic[];
+  secondaryEditorDiagnostics: MonacoDiagnostic[];
+  setSplitEditorOpen: Dispatch<SetStateAction<boolean>>;
+  setSplitActivePane: Dispatch<SetStateAction<EditorPane>>;
+  setSecondaryFile: Dispatch<SetStateAction<ActiveFileState | null>>;
+  setNextOpenTarget: Dispatch<SetStateAction<EditorPane>>;
+  setEditorDiagnostics: Dispatch<SetStateAction<MonacoDiagnostic[]>>;
+};
+
+export function useWorkbenchEditorModel({
+  activeFile,
+  secondaryFile,
+  splitEditorOpen,
+  splitActivePane,
+  editorDiagnostics,
+  secondaryEditorDiagnostics,
+  setSplitEditorOpen,
+  setSplitActivePane,
+  setSecondaryFile,
+  setNextOpenTarget,
+  setEditorDiagnostics,
+}: UseWorkbenchEditorModelParams) {
+  const bridgeActiveFile = splitActivePane === 'secondary' && secondaryFile ? secondaryFile : activeFile;
+  const activeDiagnostics =
+    splitActivePane === 'secondary' ? secondaryEditorDiagnostics : editorDiagnostics;
+
+  const outlineSymbols = useMemo<DocumentSymbol[]>(() => {
+    if (!bridgeActiveFile) return [];
+    return buildOutlineSymbols(bridgeActiveFile.content, bridgeActiveFile.language);
+  }, [bridgeActiveFile]);
+
+  useEffect(() => {
+    if (!activeFile?.path) {
+      setEditorDiagnostics([]);
+    }
+  }, [activeFile?.path, setEditorDiagnostics]);
+
+  useEffect(() => {
+    if (!splitEditorOpen || secondaryFile || !activeFile) return;
+    setSecondaryFile({ ...activeFile });
+  }, [activeFile, secondaryFile, setSecondaryFile, splitEditorOpen]);
+
+  const handleToggleSplitEditor = useCallback(() => {
+    setSplitEditorOpen((prev) => {
+      const next = !prev;
+      if (!next) {
+        setSecondaryFile(null);
+        setNextOpenTarget('primary');
+        setSplitActivePane('primary');
+      } else if (activeFile) {
+        setSecondaryFile((current) => current ?? { ...activeFile });
+      }
+      return next;
+    });
+  }, [activeFile, setNextOpenTarget, setSecondaryFile, setSplitActivePane, setSplitEditorOpen]);
+
+  const splitEditorGroups = useMemo<EditorGroup[]>(() => {
+    const groups: EditorGroup[] = [];
+    if (activeFile) {
+      const primaryTab: EditorTab = {
+        id: `primary:${activeFile.path}`,
+        title: activeFile.path.split('/').pop() || activeFile.path,
+        path: activeFile.path,
+        language: activeFile.language,
+        dirty: false,
+        pinned: true,
+        preview: false,
+      };
+      groups.push({
+        id: 'primary',
+        tabs: [primaryTab],
+        activeTabId: primaryTab.id,
+      });
+    }
+
+    if (splitEditorOpen && secondaryFile) {
+      const secondaryTab: EditorTab = {
+        id: `secondary:${secondaryFile.path}`,
+        title: secondaryFile.path.split('/').pop() || secondaryFile.path,
+        path: secondaryFile.path,
+        language: secondaryFile.language,
+        dirty: false,
+        pinned: false,
+        preview: false,
+      };
+      groups.push({
+        id: 'secondary',
+        tabs: [secondaryTab],
+        activeTabId: secondaryTab.id,
+      });
+    }
+
+    return groups;
+  }, [activeFile, secondaryFile, splitEditorOpen]);
+
+  return {
+    bridgeActiveFile,
+    activeDiagnostics,
+    outlineSymbols,
+    splitEditorGroups,
+    handleToggleSplitEditor,
+  };
+}
