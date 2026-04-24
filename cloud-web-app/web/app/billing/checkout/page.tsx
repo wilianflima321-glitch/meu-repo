@@ -1,5 +1,6 @@
-import { Suspense } from 'react';
-import BillingCheckoutContent from './checkout-content';
+import nextDynamic from 'next/dynamic';
+
+export const dynamic = 'force-dynamic'
 
 function BillingCheckoutFallback() {
   return (
@@ -12,10 +13,11 @@ function BillingCheckoutFallback() {
   );
 }
 
+const BillingCheckoutContent = nextDynamic(() => import('./checkout-content'), {
+  ssr: false,
+  loading: () => <BillingCheckoutFallback />,
+})
+
 export default function BillingCheckoutPage() {
-  return (
-    <Suspense fallback={<BillingCheckoutFallback />}>
-      <BillingCheckoutContent />
-    </Suspense>
-  );
+  return <BillingCheckoutContent />
 }

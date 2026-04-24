@@ -150,13 +150,13 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
    - `components/ClientLayout.tsx` is now only a lightweight CSS bootstrap
    - `components/providers/CoreUiProviders.tsx` now owns theme/toast context
    - `components/providers/StudioRuntimeProviders.tsx` now mounts the heavier product runtime per route
-   - `app/(auth)/layout.tsx` is now a pass-through shell, while `app/(auth)/login/login-v2.tsx` and `app/(auth)/register/register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`
+   - `app/(auth)/layout.tsx`, `app/verify-email/layout.tsx`, and `app/design-system-demo/layout.tsx` are now pass-through shells, while the login/register/verify/reset/forgot/demo surfaces mount browser-only `CoreUiProviders` content under `force-dynamic` + `ssr: false`
    - `app/admin/layout.tsx` now mounts the full studio runtime for admin
    - `package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and the `.env*.example` templates no longer pin `NODE_ENV=development`
    - browser-only SWR keys in `lib/providers/AethelProvider.tsx`
    - explicit Drei `Html` aliases across the active 3D/editor components
    - simpler `app/error.tsx` and `app/not-found.tsx` were introduced as a root-boundary bisect
-   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-admin-auth-runtime.log`, `build-probe-2026-04-24-post-clientlayout-revert.log`, and `build-probe-2026-04-24-auth-refined-pages-fallback.log` still contain explicit `<Html>` / `useContext` prerender failures, even after the core UI split, auth-route isolation, fallback-page experiment, and runtime/provider follow-up; the refined auth pass removed `/login` and `/register` from the final export list, but the broader App Router failure class remained
+   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-admin-auth-runtime.log`, `build-probe-2026-04-24-auth-refined-pages-fallback.log`, and `build-probe-2026-04-24-public-auth-browser-isolation.log` still contain explicit `<Html>` / `useContext` prerender failures, even after the core UI split, auth-route isolation, fallback-page experiment, runtime/provider follow-up, and broader public/auth browser-only route isolation; the newer pass removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list, but the broader App Router failure class remained
 
 ## The Sequence V6 Still Supports
 1. close production build parity

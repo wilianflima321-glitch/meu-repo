@@ -140,15 +140,15 @@ Do not keep auditing it as an active blocker.
 
 ### Production build parity
 - This remains OPEN.
-- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-post-clientlayout-revert.log`, and `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`, with older `build-probe-*.log` files retained as historical context.
+- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`, and `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, with older `build-probe-*.log` files retained as historical context.
 - New mitigation attempts are now part of the repo truth:
   - `cloud-web-app/web/next.config.js` forces `experimental.workerThreads=false`
   - `cloud-web-app/web/package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and `.env.example`, `.env.local.example`, and `.env.web.example` no longer pin `NODE_ENV=development`
-  - `cloud-web-app/web/components/ClientLayout.tsx` is now only the CSS bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` carries route-scoped studio runtime, `cloud-web-app/web/app/(auth)/layout.tsx` is now a pass-through shell, `login-v2.tsx` / `register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`, and `cloud-web-app/web/app/admin/layout.tsx` now mounts the full studio runtime
+  - `cloud-web-app/web/components/ClientLayout.tsx` is now only the CSS bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` carries route-scoped studio runtime, `cloud-web-app/web/app/(auth)/layout.tsx`, `cloud-web-app/web/app/verify-email/layout.tsx`, and `cloud-web-app/web/app/design-system-demo/layout.tsx` are now pass-through shells, verify/reset/forgot/demo plus billing checkout/success now load browser-only content under `force-dynamic` + `ssr: false`, and `cloud-web-app/web/app/admin/layout.tsx` now mounts the full studio runtime
 - Current local reruns still did not finish within extended `15+` minute timeouts, so the category cannot be promoted.
 - Current failure classes include:
   - `<Html> should not be imported outside of pages/_document` for `/404` and `/500`
-  - `useContext` null prerender failures across public, docs, studio, profile/settings/project surfaces, billing, many `/admin/*`, and `/_not-found`; the refined auth isolation pass removed `/login` and `/register` from the final export list without clearing the broader App Router failure class
+  - `useContext` null prerender failures across public, docs, studio, profile/settings/project surfaces, billing, many `/admin/*`, and `/_not-found`; the newer public/auth/browser isolation pass removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list without clearing the broader App Router failure class
 - Probe history already shows that this was not fixed by:
   - a bare root layout
   - removing `app/error.tsx`
@@ -160,7 +160,7 @@ Do not keep auditing it as an active blocker.
   - admin now mounts the full studio runtime explicitly, while auth now uses a pass-through shell plus browser-only `CoreUiProviders` inside the login/register clients,
   - worker-thread concurrency was reduced to improve Windows determinism,
   - the newer root-boundary bisect probe did not reprint the explicit old errors before timeout,
-  - the newest `build-probe-2026-04-24-auth-refined-pages-fallback.log` still reproduces the same explicit failure class even after auth-route isolation, while removing `/login` and `/register` from the final export list,
+  - the newest `build-probe-2026-04-24-public-auth-browser-isolation.log` still reproduces the same explicit failure class even after broader public/auth/browser isolation, while removing `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list,
   - but production build parity still cannot be marked solved.
 
 ## Repo/Execution Priorities

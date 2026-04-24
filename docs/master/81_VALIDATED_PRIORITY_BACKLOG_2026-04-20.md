@@ -133,16 +133,17 @@ Canonical set reference:
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
-- The latest canonical evidence now spans `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-post-clientlayout-revert.log`, and `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`, with the older `build-probe-*.log` files retained as historical context.
+- The latest canonical evidence now spans `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`, and `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, with the older `build-probe-*.log` files retained as historical context.
 - Additional mitigations landed on `2026-04-23`:
   - `cloud-web-app/web/next.config.js` now forces `experimental.workerThreads=false`
   - `cloud-web-app/web/package.json` now forces `NODE_ENV=production` for `build` and `build:analyze`, and the canonical env templates (`.env.example`, `.env.local.example`, `.env.web.example`) no longer pin `NODE_ENV=development`
   - `cloud-web-app/web/components/ClientLayout.tsx` remains a `17`-line CSS custom-property bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns `ThemeProvider` and `ToastProvider`, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` owns the route-scoped studio runtime, `app/admin/layout.tsx` mounts the full studio runtime, `app/(auth)/layout.tsx` is now a pass-through route shell, and `login-v2.tsx` / `register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false` wrappers to keep auth surfaces isolated while build parity stays open
+  - `app/verify-email/layout.tsx` and `app/design-system-demo/layout.tsx` are now pass-through shells, while `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` now load browser-only route content under `force-dynamic` + `ssr: false` wrappers
   - `cloud-web-app/web/lib/providers/AethelProvider.tsx` now gates SWR keys to the browser so the global app provider does not try to resolve relative API keys during server work
   - Drei `Html` usage is now explicitly aliased to `DreiHtml` across the active 3D/editor surfaces, which reduces render-stack ambiguity around the historical `<Html>` prerender error class
 - Current reruns still do not justify closure:
   - repeated local `next build` probes still failed to finish within extended `15`, `20`, and `15+` minute timeouts
-  - the latest reruns still reproduce explicit export failures across `/404`, `/500`, `/_not-found`, many `/admin/*`, billing, docs, public, and studio surfaces; the refined auth isolation probe removed `/login` and `/register` from the final export list, but the broader App Router failure class remained
+  - the latest reruns still reproduce explicit export failures across `/404`, `/500`, `/_not-found`, many `/admin/*`, billing, docs, public, and studio surfaces; the newest public/auth/browser isolation probe removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list, but the broader App Router failure class remained
   - the newer runtime/provider experiments improved shell clarity but still did not justify closure because the failure class remained anchored in Next internal App Router code rather than moving to a clean success state
 - The active failure classes are:
   - `Error: <Html> should not be imported outside of pages/_document.` while prerendering `/404` and `/500`
@@ -158,7 +159,7 @@ Canonical set reference:
   - browser-only SWR keys reduced SSR/provider fetch risk inside `cloud-web-app/web/lib/providers/AethelProvider.tsx`,
   - Drei `Html` aliasing reduced naming ambiguity across the active 3D/editor stack,
   - worker-thread concurrency was reduced for Windows build determinism,
-  - admin now mounts its missing runtime provider layer explicitly, while auth now uses a pass-through route layout plus browser-only `CoreUiProviders` inside the login/register clients,
+  - admin now mounts its missing runtime provider layer explicitly, while auth/public-edge routes now use pass-through layouts plus browser-only `CoreUiProviders` on the login/register/verify/reset/demo surfaces and browser-only checkout/success billing flows,
   - but the current `useContext` null now maps most strongly to Next internal `usePathname()` usage inside the App Router error-boundary chunk (`.next/server/chunks/66406.js`), so userland provider nulls are no longer the only plausible explanation,
   - but full production build parity is still blocked and should not be marked solved.
 - Current highest-value suspects to isolate next:
@@ -166,8 +167,10 @@ Canonical set reference:
     - `cloud-web-app/web/components/ClientLayout.tsx`
     - `cloud-web-app/web/contexts/ThemeContext.tsx`
     - `cloud-web-app/web/components/ui/toast-system.tsx`
+    - `cloud-web-app/web/pages/_document.tsx`
   - highest-confidence studio/admin cluster now under watch:
     - `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx`
+    - `cloud-web-app/web/app/admin/layout.tsx`
     - `cloud-web-app/web/lib/a11y/accessibility.tsx`
     - `cloud-web-app/web/components/ServiceWorkerProvider.tsx`
     - `cloud-web-app/web/contexts/AuthContext.tsx`
@@ -175,9 +178,10 @@ Canonical set reference:
   - separate public/auth cluster still under watch:
     - `cloud-web-app/web/components/ui/PublicHeader.tsx`
     - `cloud-web-app/web/components/ui/PublicFooter.tsx`
-    - `cloud-web-app/web/app/(auth)/login/login-v2.tsx`
-    - `cloud-web-app/web/app/(auth)/register/register-v2.tsx`
     - `cloud-web-app/web/lib/navigation/use-browser-pathname.ts`
+    - `cloud-web-app/web/pages/404.tsx`
+    - `cloud-web-app/web/pages/500.tsx`
+    - `cloud-web-app/web/pages/_error.tsx`
 
 ## Priority Order (Validated)
 1. Close production build parity without regressing the current browser merge-pressure lane.

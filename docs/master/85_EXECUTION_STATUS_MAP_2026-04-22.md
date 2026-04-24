@@ -56,8 +56,8 @@ This file is the short scoreboard that answers:
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
-  - the latest canonical evidence is now `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-post-clientlayout-revert.log`, and `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`
-  - the newer provider/layout experiments clarified the root/runtime split, moved build scripts to `NODE_ENV=production`, removed `NODE_ENV=development` from the env templates, and isolated auth routes enough to drop `/login` and `/register` from the final export list, but they still never completed successfully end-to-end
+  - the latest canonical evidence is now `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`, and `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`
+  - the newer provider/layout experiments clarified the root/runtime split, moved build scripts to `NODE_ENV=production`, removed `NODE_ENV=development` from the env templates, and isolated auth/public-edge routes enough to drop `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list, but they still never completed successfully end-to-end
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -124,10 +124,10 @@ This file is the short scoreboard that answers:
 ### P0
 1. production build parity
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
-   - `app/admin/layout.tsx` now mounts the full studio runtime, while `app/(auth)/layout.tsx` is a pass-through shell and `app/(auth)/login/login-v2.tsx` / `app/(auth)/register/register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`, but the broader blocker remained
+   - `app/admin/layout.tsx` now mounts the full studio runtime, while `app/(auth)/layout.tsx`, `app/verify-email/layout.tsx`, and `app/design-system-demo/layout.tsx` are pass-through shells and the login/register/verify/reset/forgot/demo plus billing checkout/success surfaces now mount browser-only content under `force-dynamic` + `ssr: false`, but the broader blocker remained
    - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
    - highest-confidence studio/admin cluster now includes: `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `components/ServiceWorkerProvider.tsx`, `contexts/AuthContext.tsx`, and `lib/providers/AethelProvider.tsx`
-   - separate public/auth cluster still includes: `components/ui/PublicHeader.tsx`, `components/ui/PublicFooter.tsx`, and `lib/navigation/use-browser-pathname.ts`; the refined auth isolation probe removed `/login` and `/register` from the final export list without clearing the broader App Router failure class
+   - separate public/auth cluster still includes: `components/ui/PublicHeader.tsx`, `components/ui/PublicFooter.tsx`, `lib/navigation/use-browser-pathname.ts`, and the legacy `pages/404.tsx` / `pages/500.tsx` / `pages/_error.tsx` / `pages/_document.tsx` fallback chain; the broader public/auth/browser isolation probe removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` from the final export list without clearing the broader App Router failure class
 2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure

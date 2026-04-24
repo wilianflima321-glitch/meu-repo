@@ -1,5 +1,6 @@
-import { Suspense } from 'react'
-import BillingSuccessContent from './success-content'
+import nextDynamic from 'next/dynamic'
+
+export const dynamic = 'force-dynamic'
 
 function BillingSuccessFallback() {
   return (
@@ -12,10 +13,11 @@ function BillingSuccessFallback() {
   )
 }
 
+const BillingSuccessContent = nextDynamic(() => import('./success-content'), {
+  ssr: false,
+  loading: () => <BillingSuccessFallback />,
+})
+
 export default function BillingSuccessPage() {
-  return (
-    <Suspense fallback={<BillingSuccessFallback />}>
-      <BillingSuccessContent />
-    </Suspense>
-  )
+  return <BillingSuccessContent />
 }
