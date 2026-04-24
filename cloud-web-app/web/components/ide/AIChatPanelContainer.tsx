@@ -93,22 +93,11 @@ export default function AIChatPanelContainer() {
           </button>
         </div>
       )}
-      {isLoading && (
-        <div className="mx-3 mt-3 flex justify-end">
-          <button
-            type="button"
-            onClick={handleStopGenerating}
-            aria-label="Parar resposta atual da IA"
-            className={`rounded-xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-error)] hover:bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] ${focusClass}`}
-          >
-            Parar resposta
-          </button>
-        </div>
-      )}
       <div className="min-h-0 flex-1">
         <AIChatPanelPro
           messages={messages}
           onSendMessage={handleSendMessage}
+          onInterrupt={handleStopGenerating}
           onClearChat={handleClearChat}
           isLoading={isLoading}
           currentModel={currentModel}

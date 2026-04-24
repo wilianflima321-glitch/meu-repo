@@ -50,6 +50,7 @@ These points still align with the repo and remain strategic priorities:
 - the workbench remains the core product and still needs deeper shell convergence;
 - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx` is still too large for a cockpit-grade shell;
 - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx` was reduced below `300` lines, so the next work is stabilization and interaction polish rather than emergency decomposition;
+- the chat lane is no longer only “smaller”; it also gained calmer message-bubble hierarchy plus a real stop/interrupt affordance during active runs, which improves operator confidence without closing the larger artifact-lane gaps;
 - preview and collaboration still lag behind the benchmark set by Cursor, Replit, Windsurf, and Unreal-style workflows;
 - admin surface area is still larger than ideal and should continue converging toward fewer canonical areas;
 - documentation is a strength, but only when paired with explicit hierarchy and factual reconciliation.

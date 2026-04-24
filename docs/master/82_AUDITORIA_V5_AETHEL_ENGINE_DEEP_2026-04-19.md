@@ -443,6 +443,11 @@ O `.aethelrules` + loader + chat routes = **fundação competitiva**. O que falt
 4. **Chat history search semântica** — pgvector sobre `ChatMessage.content`.
 5. **Thread share via URL** (like Claude.ai share).
 
+Ao mesmo tempo, o branch atual já melhorou a leitura operacional do chat sem inflar a categoria:
+- a grammar de `MessageBubble.tsx` ficou mais calma e mais legível depois da extração para `MessageBubbleContent.tsx`, `MessageBubbleActionBar.tsx`, `MessageBubbleCodeActions.tsx` e `useMessageBubbleCopyActions.ts`;
+- a affordance de `stop`/`interrupt` agora é real tanto no composer quanto na lane de benchmark/live, reduzindo sensação de caixa-preta durante runs ativos;
+- isso melhora scanning, clareza e controle percebido, mas **não** fecha os gaps maiores de timeline rica, history search semântica, thread share ou consumo direto de `.aethelrules` pelo próprio chat.
+
 ### 5.4 👁️ Preview (5.7/10)
 
 **Problemas críticos:**

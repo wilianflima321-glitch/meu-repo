@@ -23,6 +23,7 @@ interface AIChatComposerProps {
   inputRef: Ref<HTMLTextAreaElement>
   isLoading: boolean
   onSubmit: (event?: FormEvent) => void
+  onInterrupt?: () => void
   onInputChange: (value: string, cursor: number) => void
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void
   mentionState: {
@@ -63,6 +64,7 @@ export function AIChatComposer({
   inputRef,
   isLoading,
   onSubmit,
+  onInterrupt,
   onInputChange,
   onKeyDown,
   mentionState,
@@ -208,10 +210,11 @@ export function AIChatComposer({
           />
 
           <button
-            type="submit"
-            disabled={!input.trim() || isLoading}
+            type={isLoading ? 'button' : 'submit'}
+            disabled={isLoading ? !onInterrupt : !input.trim()}
+            onClick={isLoading ? onInterrupt : undefined}
             className={`absolute bottom-2 right-2 rounded-lg p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] ${
-              input.trim() && !isLoading
+              (isLoading && onInterrupt) || (input.trim() && !isLoading)
                 ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-primary)] hover:brightness-110'
                 : 'cursor-not-allowed bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)] text-[var(--aethel-text-quaternary)]'
             }`}

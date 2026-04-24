@@ -41,6 +41,7 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` is now `114`, while `ModernIDEShellChrome.tsx` (`29`) and `ModernIDEShellSideColumns.tsx` (`8`) are thin barrels over dedicated chrome/side-column parts
 - `cloud-web-app/web/components/terminal/BaseXTerminal.tsx` is now `105`, with terminal runtime density moved into `useTerminalRuntime.ts` (`150`), `useTerminalTransport.ts` (`145`), `useTerminalSessions.ts` (`120`), `terminalSessionApi.ts` (`71`), `terminalSessionConnection.ts` (`61`), `useTerminalSelection.ts` (`64`), `useTerminalShortcuts.ts` (`51`), `useTerminalViewport.ts` (`66`), `useTerminalOptions.ts` (`58`), and `useTerminalImperativeHandle.ts` (`51`)
 - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` remains `273`, with calmer seams now split into `AIChatHistoryModeRail.tsx`, `AIChatBenchmarkTelemetry.tsx`, and `useAIChatPanelUiState.ts`
+- the chat artifact lane also picked up interaction polish: `MessageBubble.tsx` is now `110`, with message/code actions split into `MessageBubbleContent.tsx` (`82`), `MessageBubbleActionBar.tsx` (`93`), `MessageBubbleCodeActions.tsx` (`208`), and `useMessageBubbleCopyActions.ts` (`56`), while composer + live interrupt now route to the real abort path instead of reading as decorative affordance
 - the root UI provider stack was also isolated: `cloud-web-app/web/components/ClientLayout.tsx` is now a `17`-line bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` route surfaces, `cloud-web-app/web/components/providers/StudioRuntimeRouteLayout.tsx` now provides browser-only route shells for dashboard/ide/settings/profile/project-settings/nexus/marketplace, `cloud-web-app/web/app/(auth)/layout.tsx` is now a pass-through shell, `login-v2.tsx` / `register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`, and `cloud-web-app/web/app/admin/layout.tsx` plus `cloud-web-app/web/app/billing/layout.tsx` now browser-load light-runtime shells
 - build hygiene also tightened: `cloud-web-app/web/package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and the canonical env templates no longer pin `NODE_ENV=development`
 - public/auth edge surfaces were isolated one wave further: `app/verify-email/layout.tsx` and `app/design-system-demo/layout.tsx` are now pass-through, while `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` now render browser-only content under `force-dynamic` + `ssr: false`
@@ -167,7 +168,7 @@ User-facing quality target:
 ### 5. `AIChatPanelPro.tsx`
 Why now:
 - it is no longer an emergency monolith, which means the next step can be calmer and more benchmark-driven
-- the remaining leverage is in context grammar, artifact attachment, and clearer advanced-controls discoverability
+- the remaining leverage is in context grammar, artifact attachment, clearer advanced-controls discoverability, and a richer timeline than the current stop/copy/action polish pass
 
 Recommended seams:
 - `components/ai-chat/AIChatTimeline.tsx`
@@ -177,6 +178,7 @@ Recommended seams:
 
 User-facing quality target:
 - preserve the feeling of AI glued to the current artifact, while making the smaller shell easier to test and easier to scan
+- keep the calmer bubble/action grammar and real interrupt affordance, but avoid claiming benchmark parity until timeline/context/history depth catches up
 
 ### 6. `WorkbenchPreviewRuntimeControls.tsx` and `WorkbenchPreviewRuntimeSurface.tsx`
 Why now:

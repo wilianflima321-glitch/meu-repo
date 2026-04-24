@@ -35,6 +35,7 @@ const DEMO_MESSAGES: Message[] = [
 export default function AIChatPanelPro({
   messages = DEMO_MESSAGES,
   onSendMessage,
+  onInterrupt,
   onRegenerateResponse,
   onRateResponse,
   onClearChat,
@@ -121,6 +122,7 @@ export default function AIChatPanelPro({
     currentModel,
     isLoading,
     models,
+    onInterrupt,
     onRegenerateResponse,
     onSendMessage,
     streamingContent,
@@ -222,6 +224,7 @@ export default function AIChatPanelPro({
           inputRef={inputRef}
           isLoading={isLoading}
           onSubmit={handleSend}
+          onInterrupt={onInterrupt}
           onInputChange={mentionState.setText}
           onKeyDown={handleComposerKeyDown}
           mentionState={{

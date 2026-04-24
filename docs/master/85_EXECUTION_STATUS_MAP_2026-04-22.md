@@ -91,6 +91,17 @@ This file is the short scoreboard that answers:
 - the former container hotspot was also reduced:
   - `AIChatPanelContainer.tsx` is now a thin orchestrator backed by extracted session-context, provider-preflight, send-pipeline, and session-banner modules.
 
+### Chat interaction polish
+- the chat shell is thinner and no longer needs emergency decomposition:
+  - `AIChatPanelPro.tsx` is `273` lines
+  - `MessageBubble.tsx` is now a `110`-line orchestrator over `MessageBubbleContent.tsx`, `MessageBubbleActionBar.tsx`, `MessageBubbleCodeActions.tsx`, and `useMessageBubbleCopyActions.ts`
+- message copy/apply actions now share calmer feedback grammar, with toast-backed confirmation instead of blocking dialog behavior in the code-action rail
+- the composer and live/benchmark lane now route stop/interrupt to the real abort path in `useAIChatController.ts`
+- still open:
+  - richer timeline/artifact context
+  - semantic history search
+  - shareable threads / stronger conversation information architecture
+
 ### Deploy from IDE
 - the deploy action and status page exist in the canonical IDE,
 - but still depend on readiness/environment truth.

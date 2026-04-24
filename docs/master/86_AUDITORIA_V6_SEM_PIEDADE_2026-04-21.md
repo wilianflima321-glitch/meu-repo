@@ -104,6 +104,8 @@ Since then, the canonical inline-edit path has been wired through the editor flo
 Current aligned truth:
 - inline AI editing is PARTIAL, not absent
 - the chat container that brokers this flow is also no longer a giant-file blocker after extraction into session, provider, and send-pipeline helpers
+- the message lane itself is calmer too: bubble grammar is more legible and stop/interrupt is now wired to the real abort path during active runs
+- that improves control and readability, but it still does **not** justify calling the full chat/artifact lane complete
 
 ### `next/image` is no longer disabled in the current branch
 Do not keep the old `images.unoptimized: true` claim as an active current blocker.
@@ -122,6 +124,7 @@ Observability maturity is still incomplete, but the old wording is stale.
 ### PARTIAL
 - onboarding funnel
 - inline AI editing
+- chat interaction polish and operator control
 - deploy from IDE
 - preview runtime orchestration and local preview-lane polish
 - merge-pressure Playwright as default browser pressure

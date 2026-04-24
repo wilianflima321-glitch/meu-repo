@@ -142,6 +142,7 @@ export interface MentionContextPreviewBlock {
 export interface AIChatPanelProps {
   messages?: Message[]
   onSendMessage?: (message: string, context?: MessageContext) => void
+  onInterrupt?: () => void
   onRegenerateResponse?: (messageId: string) => void
   onRateResponse?: (messageId: string, rating: 'up' | 'down') => void
   onClearChat?: () => void
