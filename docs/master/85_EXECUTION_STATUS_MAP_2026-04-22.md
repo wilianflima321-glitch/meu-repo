@@ -1,6 +1,6 @@
 # 85_EXECUTION_STATUS_MAP_2026-04-22
 Date: 2026-04-22
-Last refreshed: 2026-04-23
+Last refreshed: 2026-04-24
 Status: ACTIVE
 Role: short execution snapshot and no-drift scoreboard across the canonical audit set
 
@@ -12,15 +12,19 @@ This file is the short scoreboard that answers:
 3. what is still open and should stay on the board
 
 ## Current Snapshot
+- `CanonicalPreviewSurface.tsx`: `1016` lines
 - `AIChatPanelPro.tsx`: `508` lines
 - `FullscreenIDE.tsx`: `540` lines
-- `WorkbenchEditorPane.tsx`: `523` lines
+- `XTerminal.tsx`: `506` lines
+- `WorkbenchEditorPane.tsx`: `193` lines
+- `WorkbenchEditorSurface.tsx`: `311` lines
+- `WorkbenchEditorToolbar.tsx`: `191` lines
+- `WorkbenchEditorSidecar.tsx`: `85` lines
 - `AIChatPanelContainer.tsx`: `116` lines
 - `ModernIDEShell.tsx`: `149` lines
 - `ModernIDEShellPanels.tsx`: `268` lines
 - `ModernIDEShellChrome.tsx`: `196` lines
 - `chromeSecondaryBars.tsx`: `172` lines
-- `XTerminal.tsx`: `506` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
@@ -72,6 +76,8 @@ This file is the short scoreboard that answers:
 - but the category is still partial until full shareable proof and build-complete runtime confidence are stable.
 
 ### Collaboration
+- the workbench editor lane was further decomposed this round:
+  - `WorkbenchEditorPane.tsx` now acts as a thin coordinator over `WorkbenchEditorSurface.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
 - baseline collaboration is shipped in the canonical IDE:
   - collaborator presence
   - header avatars
@@ -86,7 +92,7 @@ This file is the short scoreboard that answers:
 ### P0
 1. production build parity
    - current highest-probability root suspects remain in the app/provider stack: `app/layout.tsx`, `components/ClientLayout.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `contexts/ThemeContext.tsx`, `components/ui/toast-system.tsx`, `app/error.tsx`, and `app/not-found.tsx`
-2. remaining workbench monolith reduction
+2. remaining workbench and preview monolith reduction
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure
 
@@ -104,7 +110,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDE.tsx`, `WorkbenchEditorPane.tsx`, `AIChatPanelPro.tsx`, and `XTerminal.tsx`
+2. keep slicing `CanonicalPreviewSurface.tsx`, `FullscreenIDE.tsx`, `WorkbenchEditorSurface.tsx`, `AIChatPanelPro.tsx`, and `XTerminal.tsx`
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

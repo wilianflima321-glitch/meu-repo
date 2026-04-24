@@ -1,6 +1,6 @@
 # 84_AUDITORIA_PROFUNDA_REPOSITORIO_PLANO_DE_ACAO_2026-04-22
 Date: 2026-04-22
-Last refreshed: 2026-04-23
+Last refreshed: 2026-04-24
 Status: ACTIVE (PRIMARY COMPLEMENTARY AUDIT - REPO + CI/CD + EXECUTION)
 Source: preserved from `docs/master/assets/auditoria-repositorio-plano-acao-2026-04-22/auditoria-profunda-repositorio-plano-de-acao-2026-04-22.pdf`
 Synced against current workspace state on `genspark_ai_developer`
@@ -27,7 +27,7 @@ Use the current set like this:
   - `docs/master/assets/auditoria-repositorio-plano-acao-2026-04-22/page-04.png`
   - `docs/master/assets/auditoria-repositorio-plano-acao-2026-04-22/page-05.png`
 
-## Reconciled Snapshot On 2026-04-23
+## Reconciled Snapshot On 2026-04-24
 - Git tracked files: `5512`
 - Git tracked size: `60.97 MB`
 - `docs/master` direct files: `107`
@@ -39,15 +39,19 @@ Use the current set like this:
 - `cloud-web-app/web/lib/**/*.ts` in the current workspace: `347`
 - Curated tracked executable test/spec files: `49`
 - Hotspot line counts:
+- `CanonicalPreviewSurface.tsx`: `1016`
 - `FullscreenIDE.tsx`: `540`
-- `WorkbenchEditorPane.tsx`: `523`
 - `AIChatPanelPro.tsx`: `508`
+- `XTerminal.tsx`: `506`
+- `WorkbenchEditorPane.tsx`: `193`
+- `WorkbenchEditorSurface.tsx`: `311`
+- `WorkbenchEditorToolbar.tsx`: `191`
+- `WorkbenchEditorSidecar.tsx`: `85`
 - `AIChatPanelContainer.tsx`: `116`
 - `ModernIDEShell.tsx`: `149`
 - `ModernIDEShellPanels.tsx`: `268`
 - `ModernIDEShellChrome.tsx`: `196`
 - `chromeSecondaryBars.tsx`: `172`
-- `XTerminal.tsx`: `506`
 
 ## What This Audit Still Gets Right
 ### Root hygiene still matters
@@ -129,7 +133,7 @@ Do not keep auditing it as an active blocker.
 
 ## Repo/Execution Priorities
 1. Close the `next build` parity gap.
-2. Keep shrinking the remaining workbench monoliths.
+2. Keep shrinking the remaining workbench and preview monoliths, with `CanonicalPreviewSurface.tsx` now the largest visible product hotspot.
 3. Reduce root ambiguity and legacy-file drag.
 4. Move more Playwright pressure from optional/full-matrix to required/default CI.
 5. Continue `console.* -> logger` and `: any` reduction.

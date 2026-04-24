@@ -1,6 +1,6 @@
 # 86_AUDITORIA_V6_SEM_PIEDADE_2026-04-21
 Date: 2026-04-21
-Last reconciled: 2026-04-23
+Last reconciled: 2026-04-24
 Status: ACTIVE (PRIMARY COMPLEMENTARY AUDIT - ACCOUNTABILITY + EXECUTION GAP)
 Source: V6 audit provided in-thread on 2026-04-23 and reconciled against the current workspace
 Audited baseline in source text: `35d61b4`
@@ -42,18 +42,22 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
+- `CanonicalPreviewSurface.tsx`: `1016`
 - `FullscreenIDE.tsx`: `540`
-- `WorkbenchEditorPane.tsx`: `523`
 - `AIChatPanelPro.tsx`: `508`
+- `XTerminal.tsx`: `506`
+- `WorkbenchEditorPane.tsx`: `193`
+- `WorkbenchEditorSurface.tsx`: `311`
+- `WorkbenchEditorToolbar.tsx`: `191`
+- `WorkbenchEditorSidecar.tsx`: `85`
 - `AIChatPanelContainer.tsx`: `116`
 - `ModernIDEShell.tsx`: `149`
 - `ModernIDEShellPanels.tsx`: `268`
 - `ModernIDEShellChrome.tsx`: `196`
 - `chromeSecondaryBars.tsx`: `172`
-- `XTerminal.tsx`: `506`
 
 The category remains valid.
-The literal numbers did age.
+The literal numbers did age, and the editor lane specifically is now split across smaller files instead of one workbench-pane monolith.
 
 ### Collaboration is not zero anymore
 V6 described collaboration as effectively invisible.

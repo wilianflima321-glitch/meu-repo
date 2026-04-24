@@ -32,8 +32,9 @@ The local workspace is already synced with the latest upstream changes from `gen
 - `3edf1eb37` `feat(ux): ship ThemeToggle in header + Storybook coverage + tests`
 - `5760df694` `feat(round-81): slice god components, seed migrations, wire lighthouse + coverage`
 
-Additional local reconciliation on `2026-04-23`:
+Additional local reconciliation on `2026-04-24`:
 - the preview lane is denser and clearer for end users through `cloud-web-app/web/components/ide/PreviewRuntimeToolbar.tsx` and `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx`
+- the workbench editor lane is no longer concentrated in one file: `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` is now `193` lines and delegates the dense editor experience to `WorkbenchEditorSurface.tsx` (`311`), `WorkbenchEditorToolbar.tsx` (`191`), and `WorkbenchEditorSidecar.tsx` (`85`)
 - build-risk mitigations now also include browser-gated SWR keys in `cloud-web-app/web/lib/providers/AethelProvider.tsx`, explicit Drei `Html` aliases across active 3D/editor surfaces, and a root/studio runtime split where `cloud-web-app/web/components/ClientLayout.tsx` keeps only the lightweight root shell while `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` mounts richer product runtime per route
 - production `next build` parity is still open because the latest command-line probes still timed out before a successful end-to-end completion; the newest probe no longer reprinted the explicit old errors before timeout, but the latest fully actionable error evidence remains in `cloud-web-app/web/build-probe-2026-04-23-studio-runtime-split-v3.log`
 
@@ -78,14 +79,14 @@ The following PDF claims should no longer be treated as current truth without re
 ### Testing and quality pressure
 - PDF described the test story as critically weak.
 - That concern still exists directionally, but current reality improved:
-  - tracked test files are now `45`
+  - tracked test files are now `49`
   - `collectCoverage` is now wired in CI-sensitive form in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\jest.config.ts`
   - Lighthouse configuration now exists in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lighthouserc.js`
   - Prisma migrations are now seeded at `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\prisma\migrations\`
 
 ### Admin page count
 - PDF cites `47` admin pages.
-- Current tracked repo count is `45` admin `page.tsx` routes.
+- Current tracked repo count is `46` admin `page.tsx` routes.
 - Still too high, but not the same number.
 
 ## Current Factual Anchors After Sync
@@ -93,16 +94,14 @@ These are the reality points this audit should now be interpreted against:
 
 - `AIChatPanelPro.tsx`: about `508` lines, not the older ~1766-line state
 - `FullscreenIDE.tsx`: about `540` lines and still a top-priority god component
-- `WorkbenchEditorPane.tsx`: about `523` lines and now one of the highest-impact shell hotspots because editor presence, split tooling, and inline controls converge there
+- `WorkbenchEditorPane.tsx`: about `193` lines after extraction into `WorkbenchEditorSurface.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
+- `WorkbenchEditorSurface.tsx`: about `311` lines and now the denser editor-surface follow-up target for the workbench lane
+- `CanonicalPreviewSurface.tsx`: about `1016` lines and now the largest user-facing hotspot in the workbench/preview tier
 - `AIChatPanelContainer.tsx`: about `116` lines after extraction into session-context, provider-preflight, send-pipeline, and session-banner modules
 - `ModernIDEShell.tsx`: now only `149` lines, with shell structure split into `ModernIDEShellPanels.tsx` (`268`), `ModernIDEShellChrome.tsx` (`196`), and `chromeSecondaryBars.tsx` (`172`)
-- tracked tests: `45`
-- tracked `console.*` in `cloud-web-app/web/lib`: around `285`
-- tracked `console.*` in `cloud-web-app/web/components`: around `151`
-- tracked `: any`: around `1059`
-- tracked hardcoded hex matches in TSX: around `1305`
-- admin pages: `45`
-- API routes: `320`
+- volatile test, console, `: any`, and raw-hex inventories should defer to `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` instead of this imported audit
+- admin pages: see `81` for the current measured count
+- API routes: see `81` for the current measured count
 
 If these numbers change, `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` should be refreshed again instead of silently mutating the meaning of this imported audit.
 
@@ -126,7 +125,7 @@ For those, always pair it with `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` and
 Across `81`, `82`, and this imported systems/interfaces audit, the shared execution order remains:
 
 1. Keep the design system converging toward one visual language.
-2. Continue slicing the workbench god components.
+2. Continue slicing the remaining workbench and preview hotspots (`CanonicalPreviewSurface`, `FullscreenIDE`, `WorkbenchEditorSurface`, `AIChatPanelPro`, `XTerminal`).
 3. Turn collaboration from infrastructure into visible product UX.
 4. Turn preview into a trust-building, shareable creation surface.
 5. Keep replacing runtime ambiguity with evidence, tests, and structured observability.

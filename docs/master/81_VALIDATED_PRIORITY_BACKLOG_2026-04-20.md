@@ -1,6 +1,6 @@
 # 81_VALIDATED_PRIORITY_BACKLOG_2026-04-20
 Date: 2026-04-20
-Last refreshed: 2026-04-23
+Last refreshed: 2026-04-24
 Status: ACTIVE
 Purpose: factual anti-fake-success guardrail for the current branch state.
 
@@ -16,7 +16,7 @@ Canonical set reference:
 - Several literal numbers inside older audits are now stale because the branch has moved: workbench monoliths are smaller, deploy-from-IDE is surfaced, inline AI is wired, and collaboration is visible in the canonical IDE.
 - This file is the place where measured repository state wins over narrative summaries.
 
-## Factual Snapshot Verified On 2026-04-23
+## Factual Snapshot Verified On 2026-04-24
 - Git tracked files: `5512`
 - Git tracked size: `60.97 MB`
 - `cloud-web-app/web/app/**/page.tsx` in the current workspace: `81`
@@ -34,15 +34,19 @@ Canonical set reference:
   - `console.*` in `lib`: `269`
   - `console.*` in `components`: `92`
 - Current hotspot line counts:
+  - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`: `1016`
   - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `540`
   - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `508`
+  - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `506`
   - `cloud-web-app/web/components/ide/AIChatPanelContainer.tsx`: `116`
   - `cloud-web-app/web/components/ide/ModernIDEShell.tsx`: `149`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx`: `268`
   - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellChrome.tsx`: `196`
   - `cloud-web-app/web/components/ide/modern-shell/chromeSecondaryBars.tsx`: `172`
-  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`: `523`
-  - `cloud-web-app/web/components/terminal/XTerminal.tsx`: `506`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`: `193`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `311`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorToolbar.tsx`: `191`
+  - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSidecar.tsx`: `85`
 
 ## Capability Truth Labels
 ### PARTIAL
@@ -83,6 +87,7 @@ Canonical set reference:
 - Do not describe inline AI editing as a dark feature with no trigger. It is now wired, but still partial because runtime/provider readiness can block it.
 - Do not describe Storybook as seeded-but-broken. It is working, but not broad enough to count as full design-system coverage.
 - Do not describe `AIChatPanelContainer.tsx` as a remaining god component. It is now a thin orchestrator after extracting session context, provider preflight, send pipeline, and session banner modules.
+- Do not describe `WorkbenchEditorPane.tsx` as a remaining workbench monolith. It is now a thin coordinator backed by `WorkbenchEditorSurface.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`.
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
@@ -120,9 +125,10 @@ Canonical set reference:
 
 ## Priority Order (Validated)
 1. Close production build parity without regressing the current browser merge-pressure lane.
-2. Continue slicing the remaining workbench hotspots:
+2. Continue slicing the remaining workbench and preview hotspots:
+   - `cloud-web-app/web/components/preview/CanonicalPreviewSurface.tsx`
    - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`
-   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`
+   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`
    - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`
    - `cloud-web-app/web/components/terminal/XTerminal.tsx`
 3. Turn preview + deploy into a trustworthy shareable workflow.
