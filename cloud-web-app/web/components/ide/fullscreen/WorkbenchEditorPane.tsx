@@ -164,7 +164,7 @@ export function WorkbenchEditorPane({
               fileError={fileError}
               fullAccessActive={fullAccessActive}
               collaborationPeers={collaborationPeers}
-              inlineEditProjectId={inlineEditProjectId}
+              projectId={inlineEditProjectId}
               primaryEditorRef={primaryEditorRef}
               secondaryEditorRef={secondaryEditorRef}
               editorRef={editorRef}

@@ -1,5 +1,6 @@
-import { Suspense } from 'react';
-import LoginPageV2 from './login-v2';
+import nextDynamic from 'next/dynamic';
+
+export const dynamic = 'force-dynamic'
 
 function LoginPageFallback() {
   return (
@@ -11,10 +12,11 @@ function LoginPageFallback() {
   );
 }
 
+const LoginPageV2 = nextDynamic(() => import('./login-v2'), {
+  ssr: false,
+  loading: () => <LoginPageFallback />,
+})
+
 export default function LoginPage() {
-  return (
-    <Suspense fallback={<LoginPageFallback />}>
-      <LoginPageV2 />
-    </Suspense>
-  );
+  return <LoginPageV2 />
 }

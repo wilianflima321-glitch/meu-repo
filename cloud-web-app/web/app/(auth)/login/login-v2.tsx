@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import Codicon from '@/components/ide/Codicon'
+import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import { analytics } from '@/lib/analytics'
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
@@ -35,7 +35,6 @@ const LOGIN_STATS = [
 ]
 
 export default function LoginPageV2() {
-  const router = useRouter()
   const search = useBrowserSearch()
   const searchParams = useMemo(() => new URLSearchParams(search), [search])
   const [email, setEmail] = useState('')
@@ -93,7 +92,7 @@ export default function LoginPageV2() {
         },
       })
 
-      router.push(nextTarget)
+      window.location.assign(nextTarget)
     } catch {
       setFormError('Falha de rede ao autenticar. Tente novamente.')
       analytics?.track?.('error', 'error_api', {
@@ -105,7 +104,8 @@ export default function LoginPageV2() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-10 sm:px-6">
+    <CoreUiProviders>
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-10 sm:px-6">
       <a
         href="#login-form"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm focus:text-[var(--aethel-text-primary)]"
@@ -271,6 +271,7 @@ export default function LoginPageV2() {
           />
         </div>
       </div>
-    </main>
+      </main>
+    </CoreUiProviders>
   )
 }

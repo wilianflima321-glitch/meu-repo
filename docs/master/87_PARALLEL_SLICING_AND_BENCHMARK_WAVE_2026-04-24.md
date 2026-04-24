@@ -36,17 +36,18 @@ These references should keep driving spacing, density, cockpit hierarchy, and pr
 This follow-up round kept cutting the core creation loop and materially reduced the route shell, preview cockpit, shell panels, terminal runtime, and AI sidecar seams:
 - `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now `379`, while route/workspace orchestration moved out of `FullscreenIDEWorkspaceBridge.tsx` and into `useFullscreenIDEBridgeSections.ts` (`141`) plus `useFullscreenIDEBridgeProps.types.ts` (`117`), with `useFullscreenIDEBridgeProps.ts` now only `19`
 - `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspaceBridge.tsx` is now only `89`
-- `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx` is now only `39`, with preview cockpit density moved into `WorkbenchPreviewRuntimeControls.tsx` (`134`), `WorkbenchPreviewRuntimeSurface.tsx` (`87`), `WorkbenchPreviewModeHeader.tsx` (`70`), and `workbenchPreviewPaneModels.ts` (`56`)
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx` is now only `44`, with preview cockpit density moved into `WorkbenchPreviewRuntimeControls.tsx` (`134`), `WorkbenchPreviewRuntimeSurface.tsx` (`87`), `WorkbenchPreviewModeHeader.tsx` (`70`), and `workbenchPreviewPaneModels.ts` (`56`)
 - `cloud-web-app/web/components/preview/SceneViewportSurface.tsx` is now `98` after extracting `SceneViewportStage.tsx` (`117`), `useSceneViewportSurfaceState.ts` (`149`), and `useSceneViewportPlayback.ts` (`53`)
 - `cloud-web-app/web/components/ide/modern-shell/ModernIDEShellPanels.tsx` is now `114`, while `ModernIDEShellChrome.tsx` (`29`) and `ModernIDEShellSideColumns.tsx` (`8`) are thin barrels over dedicated chrome/side-column parts
-- `cloud-web-app/web/components/terminal/BaseXTerminal.tsx` is now `99`, with terminal runtime density moved into `useTerminalRuntime.ts` (`150`), `useTerminalTransport.ts` (`145`), `useTerminalSessions.ts` (`120`), `terminalSessionApi.ts` (`71`), `terminalSessionConnection.ts` (`61`), `useTerminalSelection.ts` (`64`), `useTerminalShortcuts.ts` (`51`), `useTerminalViewport.ts` (`66`), `useTerminalOptions.ts` (`58`), and `useTerminalImperativeHandle.ts` (`51`)
+- `cloud-web-app/web/components/terminal/BaseXTerminal.tsx` is now `105`, with terminal runtime density moved into `useTerminalRuntime.ts` (`150`), `useTerminalTransport.ts` (`145`), `useTerminalSessions.ts` (`120`), `terminalSessionApi.ts` (`71`), `terminalSessionConnection.ts` (`61`), `useTerminalSelection.ts` (`64`), `useTerminalShortcuts.ts` (`51`), `useTerminalViewport.ts` (`66`), `useTerminalOptions.ts` (`58`), and `useTerminalImperativeHandle.ts` (`51`)
 - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` remains `273`, with calmer seams now split into `AIChatHistoryModeRail.tsx`, `AIChatBenchmarkTelemetry.tsx`, and `useAIChatPanelUiState.ts`
-- the root UI provider stack was also isolated: `cloud-web-app/web/components/ClientLayout.tsx` is now a `17`-line bootstrap, while `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/app/(auth)/layout.tsx` mounts core UI for auth surfaces, and route-level layouts mount the full studio runtime where required, including `cloud-web-app/web/app/admin/layout.tsx`
+- the root UI provider stack was also isolated: `cloud-web-app/web/components/ClientLayout.tsx` is now a `17`-line bootstrap, while `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/app/(auth)/layout.tsx` is now a pass-through shell, `login-v2.tsx` / `register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`, and route-level layouts mount the full studio runtime where required, including `cloud-web-app/web/app/admin/layout.tsx`
+- build hygiene also tightened: `cloud-web-app/web/package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and the canonical env templates no longer pin `NODE_ENV=development`
 
 This is real progress.
 It does **not** mean the workbench is solved.
 It means the next cuts are now safer and more localized.
-It also does **not** mean production build parity is closed: `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log` still reproduces the same `<Html>` / `useContext` prerender failure class after the auth/admin provider follow-up.
+It also does **not** mean production build parity is closed: the latest evidence across `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-post-clientlayout-revert.log`, and `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log` still reproduces the same `<Html>` / `useContext` prerender failure class after the root split, auth-route isolation, and fallback-page experiment; the refined auth probe removed `/login` and `/register` from the final export list, but the broader App Router failure remained.
 
 ## Benchmark Rules We Must Preserve While Slicing
 ### Cursor and Windsurf
@@ -73,8 +74,13 @@ It also does **not** mean production build parity is closed: `cloud-web-app/web/
 - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `379`
 - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `273`
 - `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeSections.ts`: `141`
-- `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `213`
-- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `209`
+- `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `107`
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `99`
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.types.ts`: `62`
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchSplitEditorSurface.tsx`: `121`
+- `cloud-web-app/web/components/preview/previewRuntimeState.ts`: `38`
+- `cloud-web-app/web/components/preview/usePreviewRuntimeHealthMonitor.ts`: `57`
+- `cloud-web-app/web/components/preview/usePreviewRuntimeHmrBridge.ts`: `78`
 - `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx`: `198`
 - `cloud-web-app/web/components/preview/SceneViewportWorkflowDrawer.tsx`: `163`
 - `cloud-web-app/web/components/terminal/useTerminalSessions.ts`: `120`

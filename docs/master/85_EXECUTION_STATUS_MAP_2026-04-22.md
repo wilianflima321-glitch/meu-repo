@@ -15,12 +15,12 @@ This file is the short scoreboard that answers:
 - `FullscreenIDE.tsx`: `379` lines
 - `AIChatPanelPro.tsx`: `273` lines
 - `useFullscreenIDEBridgeSections.ts`: `141` lines
-- `WorkbenchPreviewPane.tsx`: `39` lines
+- `WorkbenchPreviewPane.tsx`: `44` lines
 - `SceneViewportSurface.tsx`: `98` lines
-- `WorkbenchEditorSurface.tsx`: `209` lines
+- `WorkbenchEditorSurface.tsx`: `99` lines
 - `useTerminalRuntime.ts`: `150` lines
 - `PreviewLifecycleChrome.tsx`: `151` lines
-- `usePreviewRuntime.ts`: `213` lines
+- `usePreviewRuntime.ts`: `107` lines
 - `RuntimePreviewSurface.tsx`: `198` lines
 - `SceneViewportWorkflowDrawer.tsx`: `163` lines
 - `WorkbenchPreviewRuntimeControls.tsx`: `134` lines
@@ -29,9 +29,9 @@ This file is the short scoreboard that answers:
 - `sceneViewportDerivations.ts`: `89` lines
 - `WorkbenchEditorPane.tsx`: `193` lines
 - `WorkbenchEditorToolbar.tsx`: `191` lines
-- `WorkbenchEditorCanvas.tsx`: `122` lines
+- `WorkbenchEditorCanvas.tsx`: `96` lines
 - `WorkbenchEditorSidecar.tsx`: `85` lines
-- `AIChatPanelContainer.tsx`: `116` lines
+- `AIChatPanelContainer.tsx`: `123` lines
 - `ModernIDEShell.tsx`: `149` lines
 - `ModernIDEShellPanels.tsx`: `114` lines
 - `ModernIDEShellCenterStack.tsx`: `109` lines
@@ -40,11 +40,11 @@ This file is the short scoreboard that answers:
 - `useFullscreenIDEBridgeProps.types.ts`: `117` lines
 - `WorkbenchPreviewModeHeader.tsx`: `63` lines
 - `useViewportExport.ts`: `106` lines
-- `BaseXTerminal.tsx`: `99` lines
+- `BaseXTerminal.tsx`: `105` lines
 - `ModernIDEShellChrome.tsx`: `29` lines
 - `chromeSecondaryBars.tsx`: `8` lines
-- `CanonicalPreviewSurface.tsx`: `74` lines (router)
-- `XTerminal.tsx`: `11` lines (barrel)
+- `CanonicalPreviewSurface.tsx`: `89` lines (router)
+- `XTerminal.tsx`: `12` lines (barrel)
 - `MultiTerminalPanel.tsx`: `70` lines
 - `useTerminalSessions.ts`: `120` lines
 - `terminalSessionApi.ts`: `71` lines
@@ -56,8 +56,8 @@ This file is the short scoreboard that answers:
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
-  - `cloud-web-app/web/build-probe-2026-04-24-root-refresh.log`, `cloud-web-app/web/build-probe-2026-04-24-core-ui-split.log`, and `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log` still point to prerender failures
-  - the newer provider/layout experiments clarified the root/runtime split and admin/auth coverage, but they still never completed successfully
+  - the latest canonical evidence is now `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-post-clientlayout-revert.log`, and `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`
+  - the newer provider/layout experiments clarified the root/runtime split, moved build scripts to `NODE_ENV=production`, removed `NODE_ENV=development` from the env templates, and isolated auth routes enough to drop `/login` and `/register` from the final export list, but they still never completed successfully end-to-end
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -124,10 +124,10 @@ This file is the short scoreboard that answers:
 ### P0
 1. production build parity
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
-   - `app/(auth)/layout.tsx` and `app/admin/layout.tsx` now mount the missing provider layers, but the blocker remained
+   - `app/admin/layout.tsx` now mounts the full studio runtime, while `app/(auth)/layout.tsx` is a pass-through shell and `app/(auth)/login/login-v2.tsx` / `app/(auth)/register/register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`, but the broader blocker remained
    - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
    - highest-confidence studio/admin cluster now includes: `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `components/ServiceWorkerProvider.tsx`, `contexts/AuthContext.tsx`, and `lib/providers/AethelProvider.tsx`
-   - separate public/auth cluster still includes: `components/ui/PublicHeader.tsx`, `components/ui/PublicFooter.tsx`, `app/(auth)/login/login-v2.tsx`, `app/(auth)/register/register-v2.tsx`, and `lib/navigation/use-browser-pathname.ts`
+   - separate public/auth cluster still includes: `components/ui/PublicHeader.tsx`, `components/ui/PublicFooter.tsx`, and `lib/navigation/use-browser-pathname.ts`; the refined auth isolation probe removed `/login` and `/register` from the final export list without clearing the broader App Router failure class
 2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure

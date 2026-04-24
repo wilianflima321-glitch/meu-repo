@@ -42,8 +42,8 @@ Use the current set like this:
 - `FullscreenIDE.tsx`: `379`
 - `AIChatPanelPro.tsx`: `273`
 - `useFullscreenIDEBridgeSections.ts`: `141`
-- `usePreviewRuntime.ts`: `213`
-- `WorkbenchEditorSurface.tsx`: `209`
+- `usePreviewRuntime.ts`: `107`
+- `WorkbenchEditorSurface.tsx`: `99`
 - `RuntimePreviewSurface.tsx`: `198`
 - `SceneViewportWorkflowDrawer.tsx`: `163`
 - `useTerminalSessions.ts`: `120`
@@ -52,26 +52,26 @@ Use the current set like this:
 - `useSceneViewportSurfaceState.ts`: `149`
 - `useTerminalTransport.ts`: `145`
 - `useFullscreenIDEBridgeProps.types.ts`: `117`
-- `WorkbenchEditorCanvas.tsx`: `122`
+- `WorkbenchEditorCanvas.tsx`: `96`
 - `SceneViewportStage.tsx`: `117`
 - `SceneViewportSurface.tsx`: `98`
-- `AIChatPanelContainer.tsx`: `116`
+- `AIChatPanelContainer.tsx`: `123`
 - `ModernIDEShellPanels.tsx`: `114`
 - `ModernIDEShellCenterStack.tsx`: `109`
 - `chromeResizeHandle.tsx`: `106`
 - `useViewportExport.ts`: `106`
-- `BaseXTerminal.tsx`: `99`
+- `BaseXTerminal.tsx`: `105`
 - `FullscreenIDEWorkspaceBridge.tsx`: `89`
 - `sceneViewportDerivations.ts`: `89`
 - `WorkbenchPreviewRuntimeSurface.tsx`: `79`
-- `CanonicalPreviewSurface.tsx`: `74`
+- `CanonicalPreviewSurface.tsx`: `89`
 - `MultiTerminalPanel.tsx`: `70`
 - `terminalSessionApi.ts`: `71`
 - `terminalSessionConnection.ts`: `61`
 - `FullscreenIDEWorkspaceBridge.types.ts`: `67`
 - `WorkbenchPreviewModeHeader.tsx`: `63`
-- `XTerminal.tsx`: `11`
-- `WorkbenchPreviewPane.tsx`: `39`
+- `XTerminal.tsx`: `12`
+- `WorkbenchPreviewPane.tsx`: `44`
 - `ModernIDEShellChrome.tsx`: `29`
 - `chromeSecondaryBars.tsx`: `8`
 - `ModernIDEShellSideColumns.tsx`: `8`
@@ -140,27 +140,28 @@ Do not keep auditing it as an active blocker.
 
 ### Production build parity
 - This remains OPEN.
-- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-24-root-refresh.log`, `cloud-web-app/web/build-probe-2026-04-24-core-ui-split.log`, and `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, with older `build-probe-*.log` files retained as historical context.
+- The active evidence now spans `cloud-web-app/web/build-probe-2026-04-24-admin-auth-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-post-clientlayout-revert.log`, and `cloud-web-app/web/build-probe-2026-04-24-auth-refined-pages-fallback.log`, with older `build-probe-*.log` files retained as historical context.
 - New mitigation attempts are now part of the repo truth:
   - `cloud-web-app/web/next.config.js` forces `experimental.workerThreads=false`
-- `cloud-web-app/web/components/ClientLayout.tsx` is now only the CSS bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` carries route-scoped studio runtime, `cloud-web-app/web/app/(auth)/layout.tsx` mounts core UI for auth pages, and `cloud-web-app/web/app/admin/layout.tsx` now mounts the full studio runtime
+  - `cloud-web-app/web/package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and `.env.example`, `.env.local.example`, and `.env.web.example` no longer pin `NODE_ENV=development`
+  - `cloud-web-app/web/components/ClientLayout.tsx` is now only the CSS bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` carries route-scoped studio runtime, `cloud-web-app/web/app/(auth)/layout.tsx` is now a pass-through shell, `login-v2.tsx` / `register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`, and `cloud-web-app/web/app/admin/layout.tsx` now mounts the full studio runtime
 - Current local reruns still did not finish within extended `15+` minute timeouts, so the category cannot be promoted.
 - Current failure classes include:
   - `<Html> should not be imported outside of pages/_document` for `/404` and `/500`
-- `useContext` null prerender failures across auth, public, docs, studio, profile/settings/project surfaces, and many `/admin/*` routes
+  - `useContext` null prerender failures across public, docs, studio, profile/settings/project surfaces, billing, many `/admin/*`, and `/_not-found`; the refined auth isolation pass removed `/login` and `/register` from the final export list without clearing the broader App Router failure class
 - Probe history already shows that this was not fixed by:
   - a bare root layout
   - removing `app/error.tsx`
   - removing `app/not-found.tsx`
-  - adding temporary `pages/_document.tsx`, `pages/404.tsx`, and `pages/500.tsx`
+  - adding temporary `pages/_app.tsx`, `pages/_document.tsx`, `pages/_error.tsx`, `pages/404.tsx`, and `pages/500.tsx`
 - Current repo-level reading:
-- the simple userland shell-hook leak was mitigated,
-- the root shell is lighter and the heavier product runtime is now route-scoped via `StudioRuntimeProviders.tsx`,
-- auth and admin now mount their missing provider layers explicitly,
-- worker-thread concurrency was reduced to improve Windows determinism,
-- the newer root-boundary bisect probe did not reprint the explicit old errors before timeout,
-- the newest `build-probe-2026-04-24-admin-auth-runtime.log` still reproduces the same explicit failure class,
-- but production build parity still cannot be marked solved.
+  - the simple userland shell-hook leak was mitigated,
+  - the root shell is lighter and the heavier product runtime is now route-scoped via `StudioRuntimeProviders.tsx`,
+  - admin now mounts the full studio runtime explicitly, while auth now uses a pass-through shell plus browser-only `CoreUiProviders` inside the login/register clients,
+  - worker-thread concurrency was reduced to improve Windows determinism,
+  - the newer root-boundary bisect probe did not reprint the explicit old errors before timeout,
+  - the newest `build-probe-2026-04-24-auth-refined-pages-fallback.log` still reproduces the same explicit failure class even after auth-route isolation, while removing `/login` and `/register` from the final export list,
+  - but production build parity still cannot be marked solved.
 
 ## Repo/Execution Priorities
 1. Close the `next build` parity gap.

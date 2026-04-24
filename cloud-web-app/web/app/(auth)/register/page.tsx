@@ -1,5 +1,6 @@
-import { Suspense } from 'react';
-import RegisterPageV2 from './register-v2';
+import nextDynamic from 'next/dynamic';
+
+export const dynamic = 'force-dynamic'
 
 function RegisterPageFallback() {
   return (
@@ -11,10 +12,11 @@ function RegisterPageFallback() {
   );
 }
 
+const RegisterPageV2 = nextDynamic(() => import('./register-v2'), {
+  ssr: false,
+  loading: () => <RegisterPageFallback />,
+})
+
 export default function RegisterPage() {
-  return (
-    <Suspense fallback={<RegisterPageFallback />}>
-      <RegisterPageV2 />
-    </Suspense>
-  );
+  return <RegisterPageV2 />
 }

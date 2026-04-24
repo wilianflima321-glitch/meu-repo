@@ -3,8 +3,8 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import Codicon from '@/components/ide/Codicon'
+import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import AuthExperiencePanel from '@/components/auth/AuthExperiencePanel'
 import { analytics } from '@/lib/analytics'
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname'
@@ -38,7 +38,6 @@ const SOCIAL_AUTH_MESSAGE =
   'OAuth social entra quando GitHub e Google estiverem configurados no runtime real. Ate la, o acesso principal continua sendo email e senha.'
 
 export default function RegisterPageV2() {
-  const router = useRouter()
   const search = useBrowserSearch()
   const searchParams = useMemo(() => new URLSearchParams(search), [search])
   const [name, setName] = useState('')
@@ -101,7 +100,7 @@ export default function RegisterPageV2() {
       })
 
       const mission = encodeURIComponent(DEFAULT_MISSION)
-      router.push(`/dashboard?onboarding=1&source=register&mission=${mission}`)
+      window.location.assign(`/dashboard?onboarding=1&source=register&mission=${mission}`)
     } catch {
       setFormError('Falha de rede ao criar conta. Tente novamente.')
       analytics?.track?.('error', 'error_api', {
@@ -113,7 +112,8 @@ export default function RegisterPageV2() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-10 sm:px-6">
+    <CoreUiProviders>
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aethel-surface-primary)] px-4 py-10 sm:px-6">
       <a
         href="#register-form"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-[var(--aethel-surface-secondary)] focus:px-3 focus:py-2 focus:text-sm focus:text-[var(--aethel-text-primary)]"
@@ -309,7 +309,8 @@ export default function RegisterPageV2() {
           />
         </div>
       </div>
-    </main>
+      </main>
+    </CoreUiProviders>
   )
 }
 

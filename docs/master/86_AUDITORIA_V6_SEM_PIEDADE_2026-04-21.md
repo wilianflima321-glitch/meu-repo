@@ -45,12 +45,12 @@ Current workspace counts are materially lower:
 - `FullscreenIDE.tsx`: `379`
 - `AIChatPanelPro.tsx`: `273`
 - `useFullscreenIDEBridgeSections.ts`: `141`
-- `WorkbenchPreviewPane.tsx`: `39`
+- `WorkbenchPreviewPane.tsx`: `44`
 - `SceneViewportSurface.tsx`: `98`
-- `WorkbenchEditorSurface.tsx`: `209`
+- `WorkbenchEditorSurface.tsx`: `99`
 - `useTerminalRuntime.ts`: `150`
 - `PreviewLifecycleChrome.tsx`: `151`
-- `usePreviewRuntime.ts`: `213`
+- `usePreviewRuntime.ts`: `107`
 - `RuntimePreviewSurface.tsx`: `198`
 - `SceneViewportWorkflowDrawer.tsx`: `163`
 - `WorkbenchPreviewRuntimeControls.tsx`: `134`
@@ -58,9 +58,9 @@ Current workspace counts are materially lower:
 - `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorToolbar.tsx`: `191`
-- `WorkbenchEditorCanvas.tsx`: `122`
+- `WorkbenchEditorCanvas.tsx`: `96`
 - `WorkbenchEditorSidecar.tsx`: `85`
-- `AIChatPanelContainer.tsx`: `116`
+- `AIChatPanelContainer.tsx`: `123`
 - `ModernIDEShell.tsx`: `149`
 - `ModernIDEShellPanels.tsx`: `114`
 - `ModernIDEShellCenterStack.tsx`: `109`
@@ -68,11 +68,11 @@ Current workspace counts are materially lower:
 - `FullscreenIDEWorkspaceBridge.types.ts`: `67`
 - `useFullscreenIDEBridgeProps.types.ts`: `117`
 - `useViewportExport.ts`: `106`
-- `BaseXTerminal.tsx`: `99`
+- `BaseXTerminal.tsx`: `105`
 - `ModernIDEShellChrome.tsx`: `29`
 - `chromeSecondaryBars.tsx`: `8`
-- `CanonicalPreviewSurface.tsx`: `74` (router)
-- `XTerminal.tsx`: `11` (barrel)
+- `CanonicalPreviewSurface.tsx`: `89` (router)
+- `XTerminal.tsx`: `12` (barrel)
 - `MultiTerminalPanel.tsx`: `70`
 - `useTerminalSessions.ts`: `120`
 - `terminalSessionApi.ts`: `71`
@@ -150,12 +150,13 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
    - `components/ClientLayout.tsx` is now only a lightweight CSS bootstrap
    - `components/providers/CoreUiProviders.tsx` now owns theme/toast context
    - `components/providers/StudioRuntimeProviders.tsx` now mounts the heavier product runtime per route
-   - `app/(auth)/layout.tsx` now mounts core UI for login/register
+   - `app/(auth)/layout.tsx` is now a pass-through shell, while `app/(auth)/login/login-v2.tsx` and `app/(auth)/register/register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`
    - `app/admin/layout.tsx` now mounts the full studio runtime for admin
+   - `package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and the `.env*.example` templates no longer pin `NODE_ENV=development`
    - browser-only SWR keys in `lib/providers/AethelProvider.tsx`
    - explicit Drei `Html` aliases across the active 3D/editor components
    - simpler `app/error.tsx` and `app/not-found.tsx` were introduced as a root-boundary bisect
-   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-root-refresh.log`, `build-probe-2026-04-24-core-ui-split.log`, and `build-probe-2026-04-24-admin-auth-runtime.log` still contain explicit `<Html>` and `useContext` prerender failures, even after the core UI/provider layout follow-up
+   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-admin-auth-runtime.log`, `build-probe-2026-04-24-post-clientlayout-revert.log`, and `build-probe-2026-04-24-auth-refined-pages-fallback.log` still contain explicit `<Html>` / `useContext` prerender failures, even after the core UI split, auth-route isolation, fallback-page experiment, and runtime/provider follow-up; the refined auth pass removed `/login` and `/register` from the final export list, but the broader App Router failure class remained
 
 ## The Sequence V6 Still Supports
 1. close production build parity
