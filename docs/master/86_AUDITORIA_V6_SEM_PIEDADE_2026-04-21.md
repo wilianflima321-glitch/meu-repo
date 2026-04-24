@@ -42,16 +42,19 @@ V6 is still directionally correct on the most important debt families:
 ### Giant-file numbers
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
-- `FullscreenIDE.tsx`: `414`
-- `SceneViewportSurface.tsx`: `333`
-- `BaseXTerminal.tsx`: `305`
-- `ModernIDEShellPanels.tsx`: `268`
+- `FullscreenIDEWorkspaceBridge.tsx`: `373`
+- `FullscreenIDE.tsx`: `356`
+- `useTerminalRuntime.ts`: `290`
 - `AIChatPanelPro.tsx`: `260`
 - `WorkbenchPreviewPane.tsx`: `249`
+- `SceneViewportSurface.tsx`: `219`
 - `WorkbenchEditorSurface.tsx`: `197`
-- `RuntimePreviewSurface.tsx`: `186`
+- `ModernIDEShellChrome.tsx`: `196`
 - `PreviewLifecycleChrome.tsx`: `146`
 - `usePreviewRuntime.ts`: `191`
+- `RuntimePreviewSurface.tsx`: `186`
+- `SceneViewportWorkflowDrawer.tsx`: `151`
+- `ModernIDEShellSideColumns.tsx`: `149`
 - `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorToolbar.tsx`: `191`
@@ -59,7 +62,10 @@ Current workspace counts are materially lower:
 - `WorkbenchEditorSidecar.tsx`: `85`
 - `AIChatPanelContainer.tsx`: `116`
 - `ModernIDEShell.tsx`: `149`
-- `ModernIDEShellChrome.tsx`: `196`
+- `ModernIDEShellPanels.tsx`: `114`
+- `ModernIDEShellCenterStack.tsx`: `109`
+- `useViewportExport.ts`: `106`
+- `BaseXTerminal.tsx`: `99`
 - `chromeSecondaryBars.tsx`: `172`
 - `CanonicalPreviewSurface.tsx`: `74` (router)
 - `XTerminal.tsx`: `11` (barrel)
@@ -140,7 +146,7 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
 
 ## The Sequence V6 Still Supports
 1. close production build parity
-2. continue shrinking the remaining workbench hotspots
+2. continue shrinking the remaining workbench/runtime seams led by `FullscreenIDEWorkspaceBridge.tsx`, `FullscreenIDE.tsx`, `useTerminalRuntime.ts`, and `WorkbenchPreviewPane.tsx`
 3. harden preview + deploy into a trustworthy shareable loop
 4. harden collaboration from baseline UX into proven shared editing
 5. keep reducing `console.*`, `: any`, and raw-hex drift

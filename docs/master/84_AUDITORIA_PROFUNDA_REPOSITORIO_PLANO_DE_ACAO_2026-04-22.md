@@ -39,16 +39,19 @@ Use the current set like this:
 - `cloud-web-app/web/lib/**/*.ts` in the current workspace: `347`
 - Curated tracked executable test/spec files: `49`
 - Hotspot line counts:
-- `FullscreenIDE.tsx`: `414`
-- `SceneViewportSurface.tsx`: `333`
-- `BaseXTerminal.tsx`: `305`
-- `ModernIDEShellPanels.tsx`: `268`
+- `FullscreenIDEWorkspaceBridge.tsx`: `373`
+- `FullscreenIDE.tsx`: `356`
+- `useTerminalRuntime.ts`: `290`
 - `AIChatPanelPro.tsx`: `260`
 - `WorkbenchPreviewPane.tsx`: `249`
+- `SceneViewportSurface.tsx`: `219`
 - `WorkbenchEditorSurface.tsx`: `197`
-- `RuntimePreviewSurface.tsx`: `186`
+- `ModernIDEShellChrome.tsx`: `196`
 - `PreviewLifecycleChrome.tsx`: `146`
 - `usePreviewRuntime.ts`: `191`
+- `RuntimePreviewSurface.tsx`: `186`
+- `SceneViewportWorkflowDrawer.tsx`: `151`
+- `ModernIDEShellSideColumns.tsx`: `149`
 - `sceneViewportDerivations.ts`: `89`
 - `WorkbenchEditorPane.tsx`: `193`
 - `WorkbenchEditorToolbar.tsx`: `191`
@@ -56,13 +59,15 @@ Use the current set like this:
 - `WorkbenchEditorSidecar.tsx`: `85`
 - `AIChatPanelContainer.tsx`: `116`
 - `ModernIDEShell.tsx`: `149`
-- `ModernIDEShellChrome.tsx`: `196`
+- `ModernIDEShellPanels.tsx`: `114`
+- `ModernIDEShellCenterStack.tsx`: `109`
+- `useViewportExport.ts`: `106`
+- `BaseXTerminal.tsx`: `99`
 - `chromeSecondaryBars.tsx`: `172`
 - `CanonicalPreviewSurface.tsx`: `74`
 - `XTerminal.tsx`: `11`
 - `MultiTerminalPanel.tsx`: `70`
 - `useTerminalSessions.ts`: `134`
-- `MultiTerminalPanel.tsx`: `82`
 
 ## What This Audit Still Gets Right
 ### Root hygiene still matters
@@ -144,7 +149,7 @@ Do not keep auditing it as an active blocker.
 
 ## Repo/Execution Priorities
 1. Close the `next build` parity gap.
-2. Keep shrinking the remaining workbench and preview monoliths, with the core priority order now led by `FullscreenIDE.tsx`, `SceneViewportSurface.tsx`, `BaseXTerminal.tsx`, and `ModernIDEShellPanels.tsx`; `AIChatPanelPro.tsx` has moved into stabilization-and-polish territory.
+2. Keep shrinking the remaining workbench/runtime monoliths, with the core priority order now led by `FullscreenIDEWorkspaceBridge.tsx`, `FullscreenIDE.tsx`, `useTerminalRuntime.ts`, and `WorkbenchPreviewPane.tsx`; `AIChatPanelPro.tsx` has moved into stabilization-and-polish territory and `SceneViewportSurface.tsx` is now a smaller preview-polish seam rather than a top-size monolith.
 3. Reduce root ambiguity and legacy-file drag.
 4. Move more Playwright pressure from optional/full-matrix to required/default CI.
 5. Continue `console.* -> logger` and `: any` reduction.

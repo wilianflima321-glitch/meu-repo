@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import dynamic from 'next/dynamic';
 import type { VisualScript } from '@/components/visual-scripting/VisualScriptEditor';
 import type { VFXGraph } from '@/components/editors/VFXGraphEditor';
 import type { GameplayAbilitySpec } from '@/lib/gameplay-ability-system';
@@ -19,41 +18,16 @@ import {
 import {
   cloneViewportObject,
   deriveAbilityAccent,
-  deriveFacialExpressionIntensity,
-  deriveHairPreviewSignature,
   deriveVfxGlowIntensity,
   deriveVisualScriptPreviewPatch,
   INITIAL_VIEWPORT_VISUAL_SCRIPT,
 } from '@/components/preview/sceneViewportDerivations';
-import { PreviewSkeleton } from '@/components/preview/PreviewLifecycleChrome';
 import { ViewportWorkbenchShell } from './ViewportWorkbenchShell';
-
-const FacialAnimationEditor = dynamic(
-  () => import('@/components/character/FacialAnimationEditor'),
-  { ssr: false, loading: () => <PreviewSkeleton /> }
-);
-
-const HairFurEditor = dynamic(
-  () => import('@/components/character/HairFurEditor'),
-  { ssr: false, loading: () => <PreviewSkeleton /> }
-);
-
-const VisualScriptEditor = dynamic(
-  () => import('@/components/visual-scripting/VisualScriptEditor'),
-  { ssr: false, loading: () => <PreviewSkeleton /> }
-);
-
-const VFXGraphEditor = dynamic(
-  () => import('@/components/editors/VFXGraphEditor'),
-  { ssr: false, loading: () => <PreviewSkeleton /> }
-);
-
-const AbilityEditor = dynamic(
-  () => import('@/components/engine/AbilityEditor'),
-  { ssr: false, loading: () => <PreviewSkeleton /> }
-);
-
-type ViewportWorkflowTool = 'facial' | 'hair' | 'visual-script' | 'vfx' | 'ability';
+import SceneViewportWorkflowDrawer, {
+  getViewportWorkflowLabel,
+  type ViewportWorkflowTool,
+} from './SceneViewportWorkflowDrawer';
+import { useViewportExport } from './useViewportExport';
 
 export default function SceneViewportSurface({ renderMode }: { renderMode: 'draft' | 'cinematic' }) {
   const [objects, setObjects] = useState<ViewportSceneObject[]>(viewportSeedObjects);
@@ -72,7 +46,6 @@ export default function SceneViewportSurface({ renderMode }: { renderMode: 'draf
   const [visualScript, setVisualScript] = useState<VisualScript>(INITIAL_VIEWPORT_VISUAL_SCRIPT);
   const [timelineTime, setTimelineTime] = useState(0);
   const [timelineDuration] = useState(12);
-  const [exportStatus, setExportStatus] = useState('Viewport ready');
   const [vfxGraph, setVfxGraph] = useState<VFXGraph | null>(null);
   const [selectedAbility, setSelectedAbility] = useState<GameplayAbilitySpec | null>(null);
   const visualScriptAnchorRef = useRef<ViewportSceneObject | null>(cloneViewportObject(viewportSeedObjects[0]));
@@ -132,58 +105,8 @@ export default function SceneViewportSurface({ renderMode }: { renderMode: 'draf
     );
   }, []);
 
-  const activeWorkflowLabel =
-    workflowTool === 'visual-script'
-      ? 'Visual Script'
-      : workflowTool === 'vfx'
-        ? 'VFX Graph'
-        : workflowTool === 'ability'
-          ? 'Ability'
-          : workflowTool === 'facial'
-            ? 'Facial'
-            : workflowTool === 'hair'
-              ? 'Hair'
-              : 'Nenhum';
-
-  const handleExportViewport = useCallback(() => {
-    const payload = {
-      mode: creativeMode,
-      exportedAt: new Date().toISOString(),
-      selectedObjectId: selectedObject?.id ?? null,
-      selectedObjectName: selectedObject?.name ?? null,
-      timeline: {
-        currentTime: timelineTime,
-        duration: timelineDuration,
-        isPlaying,
-      },
-      workflow: {
-        active: activeWorkflowLabel,
-        visualScriptNodes: visualScript.nodes.length,
-        visualScriptEdges: visualScript.edges.length,
-        vfxNodes: vfxGraph?.nodes.length ?? 0,
-        vfxConnections: vfxGraph?.connections.length ?? 0,
-        selectedAbility: selectedAbility?.name ?? null,
-      },
-      character: {
-        facialBlendShapeCount,
-        facialExpressionIntensity,
-        hairPresetLabel,
-        hairHighlightColor,
-        hairVolumeIntensity,
-      },
-      objects,
-    };
-
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `aethel-${creativeMode}-viewport-export.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    setExportStatus(creativeMode === 'film' ? 'Film export downloaded' : 'Game clip manifest downloaded');
-  }, [
+  const activeWorkflowLabel = getViewportWorkflowLabel(workflowTool);
+  const { exportStatus, handleExportViewport } = useViewportExport({
     activeWorkflowLabel,
     creativeMode,
     facialBlendShapeCount,
@@ -193,15 +116,16 @@ export default function SceneViewportSurface({ renderMode }: { renderMode: 'draf
     hairVolumeIntensity,
     isPlaying,
     objects,
-    selectedAbility?.name,
-    selectedObject?.id,
-    selectedObject?.name,
+    selectedAbilityName: selectedAbility?.name ?? null,
+    selectedObject: selectedObject
+      ? { id: selectedObject.id, name: selectedObject.name }
+      : null,
     timelineDuration,
     timelineTime,
     vfxGraph,
-    visualScript.edges.length,
-    visualScript.nodes.length,
-  ]);
+    visualScriptEdgeCount: visualScript.edges.length,
+    visualScriptNodeCount: visualScript.nodes.length,
+  });
 
   return (
     <ViewportWorkbenchShell
@@ -244,71 +168,24 @@ export default function SceneViewportSurface({ renderMode }: { renderMode: 'draf
             onAIAction={() => undefined}
           />
           {workflowTool && (
-            <div className="absolute inset-0 z-30 bg-[rgba(4,8,16,0.82)] backdrop-blur-sm">
-              <div className="flex h-full flex-col overflow-hidden border-l border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]">
-                <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">Viewport Workflow</p>
-                    <h3 className="mt-1 text-sm font-semibold text-[var(--aethel-text-primary)]">
-                      {workflowTool === 'facial'
-                        ? 'Facial Animation Editor'
-                        : workflowTool === 'hair'
-                          ? 'Hair & Fur Editor'
-                          : workflowTool === 'visual-script'
-                            ? 'Visual Script Editor'
-                            : workflowTool === 'vfx'
-                              ? 'VFX Graph Editor'
-                              : 'Ability Editor'}
-                    </h3>
-                    <p className="mt-1 text-xs text-[var(--aethel-text-quaternary)]">
-                      {workflowTool === 'visual-script'
-                        ? 'Os nos Move, Rotate e Add Force refletem no objeto selecionado em tempo real.'
-                        : workflowTool === 'vfx'
-                          ? 'Emitter, module e renderer agora alimentam glow e leitura cinematica no objeto ativo.'
-                          : workflowTool === 'ability'
-                            ? 'Abilities e preview agora podem colorir e orientar o play test do objeto ativo.'
-                            : 'Ferramenta contextual de personagem conectada ao mesmo objeto 3D.'}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setWorkflowTool(null)}
-                    aria-label="Fechar ferramenta contextual do viewport"
-                    className="rounded-lg border border-[var(--aethel-border-subtle)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
-                  >
-                    Fechar
-                  </button>
-                </div>
-                <div className="min-h-0 flex-1 overflow-auto">
-                  {workflowTool === 'facial' ? (
-                    <FacialAnimationEditor
-                      characterId={selectedObject?.id ?? 'viewport-character'}
-                      onBlendShapeUpdate={(blendShapes) => {
-                        const activeCount = Object.values(blendShapes).filter((value) => value > 0.01).length;
-                        setFacialBlendShapeCount(activeCount);
-                        setFacialExpressionIntensity(deriveFacialExpressionIntensity(blendShapes));
-                      }}
-                    />
-                  ) : workflowTool === 'hair' ? (
-                    <HairFurEditor
-                      characterId={selectedObject?.id ?? 'viewport-character'}
-                      onHairUpdate={(hairData) => {
-                        const signature = deriveHairPreviewSignature(hairData);
-                        setHairPresetLabel(signature.label);
-                        setHairHighlightColor(signature.color);
-                        setHairVolumeIntensity(signature.density);
-                      }}
-                    />
-                  ) : workflowTool === 'visual-script' ? (
-                    <VisualScriptEditor script={visualScript} onChange={handleVisualScriptChange} />
-                  ) : workflowTool === 'vfx' ? (
-                    <VFXGraphEditor onGraphChange={setVfxGraph} />
-                  ) : (
-                    <AbilityEditor entityId={selectedObject?.id ?? 'viewport-entity'} onAbilityChange={setSelectedAbility} />
-                  )}
-                </div>
-              </div>
-            </div>
+            <SceneViewportWorkflowDrawer
+              workflowTool={workflowTool}
+              selectedObjectId={selectedObject?.id}
+              visualScript={visualScript}
+              onClose={() => setWorkflowTool(null)}
+              onAbilityChange={setSelectedAbility}
+              onFacialMetricsChange={(blendShapeCount, expressionIntensity) => {
+                setFacialBlendShapeCount(blendShapeCount);
+                setFacialExpressionIntensity(expressionIntensity);
+              }}
+              onHairSignatureChange={(label, color, density) => {
+                setHairPresetLabel(label);
+                setHairHighlightColor(color);
+                setHairVolumeIntensity(density);
+              }}
+              onVfxGraphChange={setVfxGraph}
+              onVisualScriptChange={handleVisualScriptChange}
+            />
           )}
         </div>
       }

@@ -1,12 +1,9 @@
 "use client";
 
-import { Suspense, useCallback, useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import type * as monacoEditor from 'monaco-editor';
 
-import CollaboratorsBar from "@/components/collaboration/CollaboratorsBar";
-import { FullscreenIDEWorkspace } from '@/components/ide/fullscreen/FullscreenIDEWorkspace';
-import { WorkbenchEntryNotice } from '@/components/ide/fullscreen/WorkbenchEntryNotice';
-import type { InlineApplyResult } from '@/components/ide/fullscreen/types';
+import FullscreenIDEWorkspaceBridge from '@/components/ide/fullscreen/FullscreenIDEWorkspaceBridge';
 import { useWorkbenchChrome } from '@/components/ide/fullscreen/useWorkbenchChrome';
 import { useWorkbenchEditorModel } from '@/components/ide/fullscreen/useWorkbenchEditorModel';
 import { useWorkbenchEntryConvergence } from '@/components/ide/fullscreen/useWorkbenchEntryConvergence';
@@ -260,164 +257,105 @@ function IDEContent() {
     readFile,
   });
 
-  const handleSaveActiveFile = useCallback(() => {
-    if (!activeFile) return;
-    void writeFile(activeFile.path, activeFile.content);
-  }, [activeFile, writeFile]);
-
-  const handleFileSelect = useCallback(
-    (file: { path: string; type: 'file' | 'folder' }) => {
-      if (file.type !== 'file') return;
-      void readFile(file.path, nextOpenTarget);
-    },
-    [nextOpenTarget, readFile]
-  );
-
-  const handlePaletteOpenFile = useCallback(
-    (path: string) => {
-      void readFile(path, nextOpenTarget);
-    },
-    [nextOpenTarget, readFile]
-  );
-
-  const handleInlineApplyResult = useCallback(
-    (result: InlineApplyResult) => {
-      setLastAiApply({
-        runId: result.runId,
-        rollbackToken: result.rollbackToken,
-        message: result.message,
-        filePath: result.filePath,
-        appliedAt: new Date().toISOString(),
-      });
-    },
-    [setLastAiApply]
-  );
-
   return (
-    <FullscreenIDEWorkspace
+    <FullscreenIDEWorkspaceBridge
       projectId={projectId}
       activeFile={activeFile}
       bridgeActiveFile={bridgeActiveFile}
       editorRef={editorRef}
-      headerExtras={
-        headerCollaborators.length > 0 ? (
-          <CollaboratorsBar
-            peers={headerCollaborators}
-            maxVisible={4}
-            showStatusDot
-            className="max-w-full"
-          />
-        ) : null
-      }
-      banner={
-        entryNotice ? <WorkbenchEntryNotice notice={entryNotice} onDismiss={clearEntryNotice} /> : null
-      }
+      primaryEditorRef={primaryEditorRef}
+      secondaryEditorRef={secondaryEditorRef}
+      headerCollaborators={headerCollaborators}
+      entryNotice={entryNotice}
+      clearEntryNotice={clearEntryNotice}
       workspaceFilesLoaded={workspaceFilesLoaded}
       workspaceFiles={workspaceFiles}
       sidebarTab={sidebarTab}
-      panelState={modernPanelState}
+      modernPanelState={modernPanelState}
       previewMode={previewMode}
       onResizePanel={onResizePanel}
       onToggleSidebar={onToggleSidebar}
       onTogglePanel={onTogglePanel}
       onRunPrimaryAction={handleRunRecommendedPreviewAction}
-      onOpenSettings={handleOpenSettings}
-      onOpenCommandPalette={openCommandPalette}
-      onSelectSidebarTab={handleSelectSidebarTab}
-      onSelectPreviewMode={handleSelectPreviewMode}
-      onToggleDiagnostics={handleToggleDiagnosticsPanel}
-      onSidebarTabChange={setSidebarTab}
-      onFileSelect={handleFileSelect}
-      onPaletteOpenFile={handlePaletteOpenFile}
-      onSaveActiveFile={handleSaveActiveFile}
-      onEditorUndo={handleEditorUndo}
-      onEditorRedo={handleEditorRedo}
-      onEditorFind={handleEditorFind}
-      onEditorReplace={handleEditorReplace}
-      onAIChat={handleAIPanel}
+      handleOpenSettings={handleOpenSettings}
+      openCommandPalette={openCommandPalette}
+      handleSelectSidebarTab={handleSelectSidebarTab}
+      handleSelectPreviewMode={handleSelectPreviewMode}
+      handleToggleDiagnosticsPanel={handleToggleDiagnosticsPanel}
+      setSidebarTab={setSidebarTab}
+      nextOpenTarget={nextOpenTarget}
+      readFile={readFile}
+      writeFile={writeFile}
+      setLastAiApply={setLastAiApply}
       emitLayoutEvent={emitLayoutEvent}
-      writeFile={(path, content) => Promise.resolve(writeFile(path, content))}
-      readFile={(path) => Promise.resolve(readFile(path))}
-      editorPaneProps={{
-        activeFile,
-        secondaryFile,
-        bridgeActiveFile,
-        activeDiagnostics,
-        splitEditorGroups,
-        outlineSymbols,
-        splitEditorOpen,
-        splitActivePane,
-        splitDirection,
-        nextOpenTarget,
-        isCompactViewport,
-        isReadingFile,
-        fileError,
-        showIntelliSense,
-        showOutline,
-        showDiagnostics,
-        fullAccessActive: Boolean(fullAccessActiveGrant),
-        collaborationConnected,
-        collaborationPeers: editorPeers,
-        primaryEditorRef,
-        secondaryEditorRef,
-        editorRef,
-        setSplitActivePane,
-        setSecondaryFile,
-        setActiveFile,
-        setShowIntelliSense,
-        setShowOutline,
-        setShowDiagnostics,
-        setSplitDirection,
-        setNextOpenTarget,
-        setSplitEditorOpen,
-        setEditorDiagnostics,
-        setSecondaryEditorDiagnostics,
-        onFind: handleEditorFind,
-        onReplace: handleEditorReplace,
-        onToggleSplitEditor: handleToggleSplitEditor,
-        onJumpToOutlineSymbol: handleJumpToOutlineSymbol,
-        onInlineApplyResult: handleInlineApplyResult,
-        onRequestFullAccess: handleToggleFullAccess,
-        onSaveFile: writeFile,
-        onCursorPresenceChange: broadcastCursor,
-        onSelectionPresenceChange: broadcastSelection,
-      }}
-      previewPaneProps={{
-        activeFile,
-        previewMode,
-        previewRefreshTick,
-        previewRuntimeUrl,
-        previewRuntimeInput,
-        showRuntimeSettings,
-        runtimeHealth,
-        runtimeHealthCheckedAt,
-        runtimeHealthHint,
-        runtimeReadiness,
-        runtimePrimaryAction,
-        runtimePrimaryActionLabel,
-        runtimeStrategyLabel,
-        runtimeStrategyHint,
-        runtimeDiscoveryMessage,
-        runtimeDiscoveryTone,
-        isDiscoveringRuntime,
-        isProvisioningRuntime,
-        isSyncingRuntime,
-        previewSandboxId,
-        forceInlinePreviewFallback,
-        isSavingFile,
-        projectId,
-        setPreviewMode,
-        setPreviewRuntimeInput,
-        setShowRuntimeSettings,
-        setPreviewRefreshTick,
-        applyRuntimeUrl,
-        handleUseInlineFallback,
-        refreshRuntimeReadiness,
-        discoverRuntime,
-        provisionRuntime,
-        syncRuntime,
-        checkRuntimeHealth,
-      }}
+      handleEditorUndo={handleEditorUndo}
+      handleEditorRedo={handleEditorRedo}
+      handleEditorFind={handleEditorFind}
+      handleEditorReplace={handleEditorReplace}
+      handleAIPanel={handleAIPanel}
+      secondaryFile={secondaryFile}
+      activeDiagnostics={activeDiagnostics}
+      splitEditorGroups={splitEditorGroups}
+      outlineSymbols={outlineSymbols}
+      splitEditorOpen={splitEditorOpen}
+      splitActivePane={splitActivePane}
+      splitDirection={splitDirection}
+      isCompactViewport={isCompactViewport}
+      isReadingFile={isReadingFile}
+      fileError={fileError}
+      showIntelliSense={showIntelliSense}
+      showOutline={showOutline}
+      showDiagnostics={showDiagnostics}
+      fullAccessActiveGrant={fullAccessActiveGrant}
+      collaborationConnected={collaborationConnected}
+      editorPeers={editorPeers}
+      setSplitActivePane={setSplitActivePane}
+      setSecondaryFile={setSecondaryFile}
+      setActiveFile={setActiveFile}
+      setShowIntelliSense={setShowIntelliSense}
+      setShowOutline={setShowOutline}
+      setShowDiagnostics={setShowDiagnostics}
+      setSplitDirection={setSplitDirection}
+      setNextOpenTarget={setNextOpenTarget}
+      setSplitEditorOpen={setSplitEditorOpen}
+      setEditorDiagnostics={setEditorDiagnostics}
+      setSecondaryEditorDiagnostics={setSecondaryEditorDiagnostics}
+      handleToggleSplitEditor={handleToggleSplitEditor}
+      handleJumpToOutlineSymbol={handleJumpToOutlineSymbol}
+      handleToggleFullAccess={handleToggleFullAccess}
+      broadcastCursor={broadcastCursor}
+      broadcastSelection={broadcastSelection}
+      previewRefreshTick={previewRefreshTick}
+      previewRuntimeUrl={previewRuntimeUrl}
+      previewRuntimeInput={previewRuntimeInput}
+      showRuntimeSettings={showRuntimeSettings}
+      runtimeHealth={runtimeHealth}
+      runtimeHealthCheckedAt={runtimeHealthCheckedAt}
+      runtimeHealthHint={runtimeHealthHint}
+      runtimeReadiness={runtimeReadiness}
+      runtimePrimaryAction={runtimePrimaryAction}
+      runtimePrimaryActionLabel={runtimePrimaryActionLabel}
+      runtimeStrategyLabel={runtimeStrategyLabel}
+      runtimeStrategyHint={runtimeStrategyHint}
+      runtimeDiscoveryMessage={runtimeDiscoveryMessage}
+      runtimeDiscoveryTone={runtimeDiscoveryTone}
+      isDiscoveringRuntime={isDiscoveringRuntime}
+      isProvisioningRuntime={isProvisioningRuntime}
+      isSyncingRuntime={isSyncingRuntime}
+      previewSandboxId={previewSandboxId}
+      forceInlinePreviewFallback={forceInlinePreviewFallback}
+      isSavingFile={isSavingFile}
+      setPreviewMode={setPreviewMode}
+      setPreviewRuntimeInput={setPreviewRuntimeInput}
+      setShowRuntimeSettings={setShowRuntimeSettings}
+      setPreviewRefreshTick={setPreviewRefreshTick}
+      applyRuntimeUrl={applyRuntimeUrl}
+      handleUseInlineFallback={handleUseInlineFallback}
+      refreshRuntimeReadiness={refreshRuntimeReadiness}
+      discoverRuntime={discoverRuntime}
+      provisionRuntime={provisionRuntime}
+      syncRuntime={syncRuntime}
+      checkRuntimeHealth={checkRuntimeHealth}
     />
   );
 }
