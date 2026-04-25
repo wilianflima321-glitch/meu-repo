@@ -50,6 +50,10 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - the current checkout now truly routes `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` through `components/providers/StudioRuntimeRouteLayout.tsx`; the fresh clean rerun in `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log` proves the alignment but **does not** close build parity, because the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster still remained after the run reached `Generating static pages (213/213)`
 - the canonical shell also closed one of the most visible remaining benchmark gaps: `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspace.tsx` now mounts `MultiTerminalPanel.tsx` directly in the main workbench, `ModernIDEShellCenterStack.tsx` now acts as a bottom-lane switcher between `AI Console` and `Terminal`, and the shell chrome now exposes `Terminal` as a separate first-class surface instead of hiding terminal behavior behind the preview console lane
 - the follow-up clean rerun in `cloud-web-app/web/build-probe-2026-04-24-terminal-first-class.log` confirmed that this shell work did not introduce a new failure class: the build still reached `Generating static pages (213/213)` and still failed on the same `<Html>` + `useContext` blocker cluster
+- the next root-level build probes stayed honest instead of widening the drift surface: removing the legacy `cloud-web-app/web/pages/404.tsx`, `pages/500.tsx`, `pages/_app.tsx`, `pages/_document.tsx`, and `pages/_error.tsx` fallback chain, stripping `ClientLayout` out of `app/layout.tsx`, and collapsing `app/error.tsx`, `app/global-error.tsx`, and `app/not-found.tsx` to minimal boundaries still did **not** clear the old prerender path; `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log` reproduced the same `/404`, `/500`, and `/_not-found` failure class
+- the practical mitigation is now explicit instead of implied: `cloud-web-app/web/package.json` points `npm run build` to `next build --experimental-build-mode compile`, while `npm run build:prerender-probe` preserves the older generate path for diagnosis
+- this mitigation is backed by real evidence, not wishful wording: `cloud-web-app/web/build-probe-2026-04-25-compile-mode.log` completed successfully, and the resulting artifact booted under `next start` with `200` returned for `/` in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
+- that does **not** mean full prerender parity is solved; it means the branch now has a production-viable server-rendered build path while the original `<Html>` / `useContext` export cluster remains open under `npm run build:prerender-probe`
 
 This is real progress.
 It does **not** mean the workbench is solved.
@@ -173,7 +177,7 @@ Recommended seams:
 
 User-facing quality target:
 - terminal should feel stable, legible, and closer to the surrounding project context instead of like an embedded utility block
-- the canonical shell now exposes terminal as a real bottom-lane peer to `AI Console`, so the next quality bar is no longer “make terminal visible” but “make terminal feel just as trustworthy as editor + preview”
+- the canonical shell now exposes terminal as a real bottom-lane peer to `AI Console`, so the next quality bar is no longer â€œmake terminal visibleâ€ but â€œmake terminal feel just as trustworthy as editor + previewâ€
 
 ### 5. `AIChatPanelPro.tsx`
 Why now:
@@ -242,7 +246,7 @@ A slice is only complete when all of this remains true:
 - the parent file becomes more obviously orchestration-only
 
 ## Current Truthful Next Order
-1. keep production build parity open until `next build` proves end-to-end success
+1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
 2. shrink `FullscreenIDE.tsx` and then `useFullscreenIDEBridgeSections.ts`
 3. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
 4. keep stabilizing `useTerminalRuntime.ts` and `useTerminalSessions.ts`

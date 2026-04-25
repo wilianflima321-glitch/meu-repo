@@ -1,6 +1,6 @@
 # 85_EXECUTION_STATUS_MAP_2026-04-22
 Date: 2026-04-22
-Last refreshed: 2026-04-24
+Last refreshed: 2026-04-25
 Status: ACTIVE
 Role: short execution snapshot and no-drift scoreboard across the canonical audit set
 
@@ -60,9 +60,9 @@ This file is the short scoreboard that answers:
 - `useTerminalImperativeHandle.ts`: `51` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
-- production build parity is still open because:
-  - the latest canonical evidence is now `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, `cloud-web-app/web/build-probe-2026-04-24-admin-billing-light-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-studio-route-layout-browser-shells.log`, `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log`, and `cloud-web-app/web/build-probe-2026-04-24-terminal-first-class.log`
-  - the newer provider/layout experiments clarified the root/runtime split, moved build scripts to `NODE_ENV=production`, removed `NODE_ENV=development` from the env templates, dropped `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, `/billing/invoices`, `/billing/checkout`, and `/billing/success` from the final export list, and the current checkout now truly routes `/dashboard`, `/ide`, `/settings`, `/profile`, `/project-settings`, `/nexus`, and `/marketplace` through `StudioRuntimeRouteLayout.tsx`, but the latest clean rerun still failed with the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster after reaching `Generating static pages (213/213)`
+- production build parity is now split into two explicit tracks:
+  - `npm run build` now uses `next build --experimental-build-mode compile` and completed successfully in `cloud-web-app/web/build-probe-2026-04-25-compile-mode.log`; the resulting server build was also smoke-tested with `next start` and returned `200` for `/` in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
+  - the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the latest canonical evidence is `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`, which still fail with the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster even after removing the legacy `pages/*` fallback chain and simplifying the root App Router boundaries
 
 ## Closed Or Materially Stabilized
 ### Governance baseline

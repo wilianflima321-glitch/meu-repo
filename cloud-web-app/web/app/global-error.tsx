@@ -1,44 +1,22 @@
-'use client'
-
-import { useEffect } from 'react'
-import { createComponentLogger } from '@/lib/observability/logger'
-
-const logger = createComponentLogger('app-global-error-boundary')
+﻿'use client'
 
 export default function GlobalError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  useEffect(() => {
-    logger.error('Global app boundary captured a root-level runtime failure', {
-      digest: error.digest,
-      message: error.message,
-      stack: error.stack,
-    })
-  }, [error])
-
   return (
     <html lang="pt-BR" className="dark">
       <body className="bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
         <main className="flex min-h-screen items-center justify-center px-6 py-16">
-          <section className="w-full max-w-xl rounded-3xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_84%,transparent)] p-8 shadow-[0_24px_80px_rgba(2,6,23,0.34)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
-              Global runtime error
-            </p>
+          <section className="w-full max-w-lg rounded-3xl border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-8 text-center shadow-[0_24px_80px_rgba(2,6,23,0.34)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Global runtime error</p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight">Algo deu errado</h1>
             <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-              A falha atingiu a camada mais alta da aplicacao. Mantivemos um fallback explicito para evitar o colapso da
-              superficie inteira enquanto investigamos a causa raiz.
+              O fallback de mais alto nivel entrou em acao para manter a superficie responsiva enquanto seguimos depurando a raiz do problema.
             </p>
-            {error.digest ? (
-              <p className="mt-4 text-xs text-[var(--aethel-text-tertiary)]">
-                Referencia: <span className="font-mono">{error.digest}</span>
-              </p>
-            ) : null}
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <button
                 type="button"
                 onClick={reset}
@@ -47,16 +25,10 @@ export default function GlobalError({
                 Tentar novamente
               </button>
               <a
-                href="/dashboard"
+                href="/"
                 className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] px-5 py-3 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)]"
               >
-                Ir ao Studio
-              </a>
-              <a
-                href="/status"
-                className="inline-flex items-center justify-center rounded-xl border border-[var(--aethel-border-primary)] px-5 py-3 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] hover:text-[var(--aethel-text-primary)]"
-              >
-                Ver status
+                Voltar ao inicio
               </a>
             </div>
           </section>

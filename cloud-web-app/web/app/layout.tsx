@@ -1,8 +1,7 @@
-import './globals.css'
+﻿import './globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
-import ClientLayout from '../components/ClientLayout'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,8 +26,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Aethel Engine - estúdio multiagente de software',
-  description: 'Estúdio multiagente para apps, pesquisa e construção assistida por IA com operação explícita.',
+  title: 'Aethel Engine - estudio multiagente de software',
+  description: 'Estudio multiagente para apps, pesquisa e construcao assistida por IA com operacao explicita.',
   metadataBase: new URL('https://aethel.dev'),
   keywords: ['multi-agent IDE', 'AI software studio', 'research to code', 'apps IDE', 'Aethel Engine', 'anti-fake-success'],
   authors: [{ name: 'Aethel Engine Team' }],
@@ -48,8 +47,8 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     url: 'https://aethel.dev',
     siteName: 'Aethel Engine',
-    title: 'Aethel Engine - estúdio multiagente de software',
-    description: 'Pesquisa, planejamento, código, preview e prontidão em um único estúdio assistido por IA.',
+    title: 'Aethel Engine - estudio multiagente de software',
+    description: 'Pesquisa, planejamento, codigo, preview e prontidao em um unico estudio assistido por IA.',
     images: [
       {
         url: '/og-image.png',
@@ -62,7 +61,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Aethel Engine',
-    description: 'Estúdio multiagente para apps e pesquisa',
+    description: 'Estudio multiagente para apps e pesquisa',
     images: ['/twitter-image.png'],
   },
   icons: {
@@ -81,34 +80,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR" className={`dark ${inter.variable} ${jetbrains.variable}`}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      </head>
-      <body className="antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-[var(--aethel-primary-dark)] focus:px-4 focus:py-2 focus:text-[var(--aethel-text-primary)] focus:outline-none"
-        >
-          Ir para o conteúdo principal
-        </a>
-        <div
-          id="main-content"
-          className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)] [background-image:var(--aethel-app-background)]"
-        >
-          <ClientLayout>
-            {children}
-          </ClientLayout>
-        </div>
+      <body className="min-h-screen antialiased bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
+        {children}
       </body>
     </html>
   )
 }
-
-
-
-
 
