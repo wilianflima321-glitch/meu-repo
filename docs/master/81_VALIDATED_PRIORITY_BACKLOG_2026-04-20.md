@@ -36,6 +36,7 @@ Canonical set reference:
 - Current hotspot line counts:
   - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `379`
   - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `313`
+  - `cloud-web-app/web/components/settings/SettingsUI.tsx`: `159`
   - `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `107`
   - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `99`
   - `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx`: `198`
@@ -137,13 +138,14 @@ Canonical set reference:
 - Do not describe `ModernIDEShellChrome.tsx` or `ModernIDEShellSideColumns.tsx` as shell hotspots anymore. They are now thin barrels over dedicated chrome and side-column parts.
 - Do not describe `AIChatPanelPro.tsx` as a five-hundred-line emergency monolith anymore. It now sits just above `300` lines and delegates composer, timeline, history-mode, run-state, ops-state, context actions, speech playback, mode presets, and quick-prompt chrome into dedicated `components/ai-chat/*` modules.
 - Do not describe the chat shell as a generic prompt box anymore. The composer, empty state, benchmark strip, timeline, and context summary now change by ask/plan/execute/review/live mode, but the shared controller path means backend behavior is still only PARTIAL by mode.
+- Do not describe `components/settings/SettingsUI.tsx` as a thousand-line Wave B monolith anymore. It is now a `159`-line shell over `components/settings/ui/default-settings.ts`, `components/settings/ui/settings-provider.tsx`, `components/settings/ui/SettingsField.tsx`, `components/settings/ui/useSettingsUiState.ts`, `components/settings/ui/SettingsCategorySidebar.tsx`, `components/settings/ui/SettingsSummaryBar.tsx`, `components/settings/ui/SettingsResultsPane.tsx`, and `components/settings/ui/QuickSettingsPopup.tsx`.
 - Do not describe `FullscreenIDEWorkspaceBridge.tsx` as the remaining route-shell hotspot. It is now a `89`-line orchestrator backed by `FullscreenIDEWorkspaceBridge.types.ts` and `useFullscreenIDEBridgeProps.ts`.
 - Do not describe `useFullscreenIDEBridgeProps.ts` as the remaining dense bridge seam anymore. It is now a `19`-line orchestrator over `useFullscreenIDEBridgeProps.types.ts` and `useFullscreenIDEBridgeSections.ts`.
 - Do not describe `FullscreenIDE.tsx` as the only remaining workbench hotspot. It now shares orchestration density with `useFullscreenIDEBridgeSections.ts`, so follow-up slicing needs to treat the shell and the bridge sections separately.
 
 ## Production Build Parity Status
 - `next build` is still OPEN.
-- The latest canonical evidence now spans `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, `cloud-web-app/web/build-probe-2026-04-24-admin-billing-light-runtime.log`, and `cloud-web-app/web/build-probe-2026-04-24-studio-route-layout-browser-shells.log`, with the older `build-probe-*.log` files retained as historical context.
+- The latest canonical evidence now spans `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, `cloud-web-app/web/build-probe-2026-04-24-admin-billing-light-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-studio-route-layout-browser-shells.log`, and `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log`, with the older `build-probe-*.log` files retained as historical context.
 - Additional mitigations landed on `2026-04-23`:
   - `cloud-web-app/web/next.config.js` now forces `experimental.workerThreads=false`
   - `cloud-web-app/web/package.json` now forces `NODE_ENV=production` for `build` and `build:analyze`, and the canonical env templates (`.env.example`, `.env.local.example`, `.env.web.example`) no longer pin `NODE_ENV=development`
@@ -153,8 +155,9 @@ Canonical set reference:
   - `cloud-web-app/web/lib/providers/AethelProvider.tsx` now gates SWR keys to the browser so the global app provider does not try to resolve relative API keys during server work
   - Drei `Html` usage is now explicitly aliased to `DreiHtml` across the active 3D/editor surfaces, which reduces render-stack ambiguity around the historical `<Html>` prerender error class
 - Current reruns still do not justify closure:
-  - repeated local `next build` probes still failed to finish within extended `15`, `20`, and `15+` minute timeouts
-  - the latest reruns still reproduce explicit export failures across `/404`, `/500`, `/_not-found`, docs, public, and selected studio surfaces; the newer runtime probes removed `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, `/billing/invoices`, `/billing/checkout`, and `/billing/success` from the final export list, but `/dashboard`, `/ide`, `/marketplace`, `/nexus`, `/profile`, `/project-settings`, and `/settings` still remained after the broader route-shell browser isolation pass
+  - repeated local `next build` probes still fail before clean export closure
+  - the latest clean rerun reached `Generating static pages (213/213)` before failing export, which is better signal, but not success
+  - the latest reruns still reproduce explicit export failures across `/404`, `/500`, `/_not-found`, docs, public, and selected studio surfaces; the newer runtime probes removed `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, `/billing/invoices`, `/billing/checkout`, and `/billing/success` from the final export list, and the route-shell alignment pass now truly mounts `/dashboard`, `/ide`, `/settings`, `/profile`, `/project-settings`, `/nexus`, and `/marketplace` through `StudioRuntimeRouteLayout.tsx`, but those seven studio routes still remain in the failing export cluster
   - the newer runtime/provider experiments improved shell clarity but still did not justify closure because the failure class remained anchored in Next internal App Router code rather than moving to a clean success state
 - The active failure classes are:
   - `Error: <Html> should not be imported outside of pages/_document.` while prerendering `/404` and `/500`

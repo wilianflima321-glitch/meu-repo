@@ -45,6 +45,9 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - the root UI provider stack was also isolated: `cloud-web-app/web/components/ClientLayout.tsx` is now a `17`-line bootstrap, `cloud-web-app/web/components/providers/CoreUiProviders.tsx` owns theme/toast, `cloud-web-app/web/components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` route surfaces, `cloud-web-app/web/components/providers/StudioRuntimeRouteLayout.tsx` now provides browser-only route shells for dashboard/ide/settings/profile/project-settings/nexus/marketplace, `cloud-web-app/web/app/(auth)/layout.tsx` is now a pass-through shell, `login-v2.tsx` / `register-v2.tsx` mount `CoreUiProviders` browser-side under `force-dynamic` + `ssr: false`, and `cloud-web-app/web/app/admin/layout.tsx` plus `cloud-web-app/web/app/billing/layout.tsx` now browser-load light-runtime shells
 - build hygiene also tightened: `cloud-web-app/web/package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and the canonical env templates no longer pin `NODE_ENV=development`
 - public/auth edge surfaces were isolated one wave further: `app/verify-email/layout.tsx` and `app/design-system-demo/layout.tsx` are now pass-through, while `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, and `/billing/success` now render browser-only content under `force-dynamic` + `ssr: false`
+- the dense settings surface was also reduced this wave: `cloud-web-app/web/components/settings/SettingsUI.tsx` is now `159` lines after extracting the catalog into `components/settings/ui/default-settings.ts` (`364`), the provider/store into `components/settings/ui/settings-provider.tsx` (`121`), field renderers into `components/settings/ui/SettingsField.tsx` (`245`), search/category derivation into `components/settings/ui/useSettingsUiState.ts` (`86`), and the denser summary/sidebar/results/popup chrome into `components/settings/ui/SettingsSummaryBar.tsx`, `SettingsCategorySidebar.tsx`, `SettingsResultsPane.tsx`, and `QuickSettingsPopup.tsx`
+- the settings shell also picked up benchmark-grade density polish instead of just file-size cleanup: clearer English copy, explicit visible/modified counts, and stronger keyboard-search guidance
+- the current checkout now truly routes `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` through `components/providers/StudioRuntimeRouteLayout.tsx`; the fresh clean rerun in `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log` proves the alignment but **does not** close build parity, because the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster still remained after the run reached `Generating static pages (213/213)`
 
 This is real progress.
 It does **not** mean the workbench is solved.
@@ -97,13 +100,13 @@ It also does **not** mean production build parity is closed: the latest evidence
 
 ### Wave B - dense product surfaces next in line
 - `cloud-web-app/web/app/admin/ai-monitor/page.tsx`: `1249`
-- `cloud-web-app/web/components/settings/SettingsUI.tsx`: `1184`
 - `cloud-web-app/web/components/scene-editor/SceneEditor.tsx`: `1193`
 - `cloud-web-app/web/components/engine/DetailsPanel.tsx`: `1173`
-- `cloud-web-app/web/components/assets/ContentBrowser.tsx`: `1051`
-- `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx`: `1060`
-- `cloud-web-app/web/components/settings/SettingsPage.tsx`: `1039`
-- `cloud-web-app/web/components/dashboard/ProjectsDashboard.tsx`: `1006`
+- `cloud-web-app/web/components/assets/ContentBrowser.tsx`: `1128`
+- `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx`: `1120`
+- `cloud-web-app/web/components/settings/SettingsPage.tsx`: `1086`
+- `cloud-web-app/web/components/dashboard/ProjectsDashboard.tsx`: `1076`
+- `cloud-web-app/web/components/engine/ProjectSettings.tsx`: `1054`
 
 ### Wave C - specialist editors and lower-priority breadth
 - `cloud-web-app/web/components/audio/SoundCueEditor.tsx`: `1247`
@@ -214,10 +217,10 @@ Run sequentially because the write scope is shared:
 ### Wave 2 - dense product surfaces
 After Wave 1 stabilizes:
 1. `ProjectsDashboard.tsx`
-2. `SettingsUI.tsx`
-3. `SettingsPage.tsx`
-4. `CreatorDashboard.tsx`
-5. `app/admin/ai-monitor/page.tsx`
+2. `SettingsPage.tsx`
+3. `CreatorDashboard.tsx`
+4. `app/admin/ai-monitor/page.tsx`
+5. `SceneEditor.tsx`
 
 ### Wave 3 - domain editors
 After the workbench/studio shell is calmer:
@@ -243,7 +246,8 @@ A slice is only complete when all of this remains true:
 5. turn the thinner fullscreen preview modules into the trust/share cockpit the benchmark set expects
 6. stabilize `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, and `useAIChatHistoryMode.ts` and turn the smaller shell into a benchmark-grade artifact lane
 7. keep shell-density passes in `ModernIDEShellChrome.tsx` and the extracted chrome/side-column parts
-8. promote preview, collaboration, and deploy from present to trusted
+8. move the next Wave B density pass to `ProjectsDashboard.tsx`, `SettingsPage.tsx`, `CreatorDashboard.tsx`, and `app/admin/ai-monitor/page.tsx` now that `SettingsUI.tsx` is out of the thousand-line set
+9. promote preview, collaboration, and deploy from present to trusted
 
 ## One-Line Reading
 The audits no longer leave us with ambiguity.

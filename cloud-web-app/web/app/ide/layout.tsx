@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import StudioRuntimeProviders from '@/components/providers/StudioRuntimeProviders'
+import StudioRuntimeRouteLayout from '@/components/providers/StudioRuntimeRouteLayout'
 
-export default function IDELayout({ children }: { children: ReactNode }) {
-  return <StudioRuntimeProviders>{children}</StudioRuntimeProviders>
+export default function RouteLayout({ children }: { children: ReactNode }) {
+  return <StudioRuntimeRouteLayout>{children}</StudioRuntimeRouteLayout>
 }

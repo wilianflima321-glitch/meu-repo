@@ -26,6 +26,7 @@ This file is the short scoreboard that answers:
 - `PreviewLifecycleChrome.tsx`: `151` lines
 - `usePreviewRuntime.ts`: `107` lines
 - `RuntimePreviewSurface.tsx`: `198` lines
+- `SettingsUI.tsx`: `159` lines
 - `SceneViewportWorkflowDrawer.tsx`: `163` lines
 - `WorkbenchPreviewRuntimeControls.tsx`: `134` lines
 - `useTerminalTransport.ts`: `145` lines
@@ -60,8 +61,8 @@ This file is the short scoreboard that answers:
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
-  - the latest canonical evidence is now `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, `cloud-web-app/web/build-probe-2026-04-24-admin-billing-light-runtime.log`, and `cloud-web-app/web/build-probe-2026-04-24-studio-route-layout-browser-shells.log`
-  - the newer provider/layout experiments clarified the root/runtime split, moved build scripts to `NODE_ENV=production`, removed `NODE_ENV=development` from the env templates, dropped `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, `/billing/invoices`, `/billing/checkout`, and `/billing/success` from the final export list, but still never completed successfully end-to-end because public/docs plus `/dashboard`, `/ide`, `/marketplace`, `/nexus`, `/profile`, `/project-settings`, and `/settings` kept failing export
+  - the latest canonical evidence is now `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, `cloud-web-app/web/build-probe-2026-04-24-admin-billing-light-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-studio-route-layout-browser-shells.log`, and `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log`
+  - the newer provider/layout experiments clarified the root/runtime split, moved build scripts to `NODE_ENV=production`, removed `NODE_ENV=development` from the env templates, dropped `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, `/billing/invoices`, `/billing/checkout`, and `/billing/success` from the final export list, and the current checkout now truly routes `/dashboard`, `/ide`, `/settings`, `/profile`, `/project-settings`, `/nexus`, and `/marketplace` through `StudioRuntimeRouteLayout.tsx`, but the latest clean rerun still failed with the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster after reaching `Generating static pages (213/213)`
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -97,9 +98,9 @@ This file is the short scoreboard that answers:
 
 ### Chat interaction polish
 - the chat shell is thinner and no longer needs emergency decomposition:
-  - `AIChatPanelPro.tsx` is `292` lines
+  - `AIChatPanelPro.tsx` is `313` lines
   - `AIChatComposer.tsx` is `282` lines
-  - `useAIChatComposerState.ts` is `235` lines
+  - `useAIChatComposerState.ts` is `220` lines
   - `MessageBubble.tsx` is now a `110`-line orchestrator over `MessageBubbleContent.tsx`, `MessageBubbleActionBar.tsx`, `MessageBubbleCodeActions.tsx`, and `useMessageBubbleCopyActions.ts`
 - message copy/apply actions now share calmer feedback grammar, with toast-backed confirmation instead of blocking dialog behavior in the code-action rail
 - the composer and live/benchmark lane now route stop/interrupt to the real abort path in `useAIChatController.ts`
@@ -126,6 +127,14 @@ This file is the short scoreboard that answers:
   - `SceneViewportSurface.tsx` is now a smaller viewport seam at `98` lines, with stage/state/playback density pushed into `SceneViewportStage.tsx`, `useSceneViewportSurfaceState.ts`, and `useSceneViewportPlayback.ts`
   - `WorkbenchPreviewPane.tsx` is now a thin orchestrator, with trust/share/status density moved into `WorkbenchPreviewRuntimeControls.tsx`, `WorkbenchPreviewRuntimeSurface.tsx`, and `WorkbenchPreviewModeHeader.tsx`
 - but the category is still partial until full shareable proof and build-complete runtime confidence are stable.
+
+### Settings surface polish
+- `SettingsUI.tsx` is now a `159`-line shell instead of a `1184`-line dense surface
+- the catalog, provider/store, field renderers, UI-state/search derivation, summary bar, category sidebar, results pane, and quick-settings popup now live in dedicated `components/settings/ui/*` seams
+- the top bar also got denser benchmark-style guidance with clearer English copy plus explicit visible/modified counts, which makes the surface easier to scan without growing more chrome
+- still open:
+  - `SettingsPage.tsx` remains a separate thousand-line settings surface
+  - persistence/i18n depth is still broader than this slice
 
 ### Collaboration
 - the workbench editor lane was further decomposed this round:

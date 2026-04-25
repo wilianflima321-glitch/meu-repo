@@ -56,6 +56,7 @@ Current workspace counts are materially lower:
 - `PreviewLifecycleChrome.tsx`: `151`
 - `usePreviewRuntime.ts`: `107`
 - `RuntimePreviewSurface.tsx`: `198`
+- `SettingsUI.tsx`: `159`
 - `SceneViewportWorkflowDrawer.tsx`: `163`
 - `WorkbenchPreviewRuntimeControls.tsx`: `134`
 - `useTerminalTransport.ts`: `145`
@@ -88,6 +89,14 @@ Current workspace counts are materially lower:
 
 The category remains valid.
 The literal numbers did age, and both the editor lane and preview runtime lane are now split across smaller files instead of one oversized surface.
+
+### Dense settings surface is no longer a Wave B giant
+This was not a named V6 callout, but it is now part of the reconciled branch truth.
+Current aligned state:
+- `components/settings/SettingsUI.tsx` is now `159` lines instead of `1184`
+- the dense settings surface is now split into dedicated catalog, provider/store, field-renderer, search/state, summary-bar, sidebar, results, and quick-popup seams under `components/settings/ui/*`
+- the user-facing shell also reads better against the benchmark set: calmer header copy, visible counts, and stronger keyboard-search grammar
+- this improves a broad user-facing surface without claiming the larger settings domain is done, because `SettingsPage.tsx` still remains above `1000` lines
 
 ### Collaboration is not zero anymore
 V6 described collaboration as effectively invisible.
@@ -158,14 +167,14 @@ The current best reading across `81 + 82 + 83 + 84 + 85 + 86` is:
    - `components/ClientLayout.tsx` is now only a lightweight CSS bootstrap
    - `components/providers/CoreUiProviders.tsx` now owns theme/toast context
    - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces per route
-   - `components/providers/StudioRuntimeRouteLayout.tsx` now provides browser-only route shells for dashboard/ide/settings/profile/project-settings/nexus/marketplace
+   - `components/providers/StudioRuntimeRouteLayout.tsx` now provides browser-only route shells for dashboard/ide/settings/profile/project-settings/nexus/marketplace, and the current checkout now actually mounts those seven layouts through that shell
    - `app/(auth)/layout.tsx`, `app/verify-email/layout.tsx`, and `app/design-system-demo/layout.tsx` are pass-through shells, while the login/register/verify/reset/forgot/demo surfaces mount browser-only `CoreUiProviders` content under `force-dynamic` + `ssr: false`
    - `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells instead of mounting the full studio runtime directly
    - `package.json` now forces `NODE_ENV=production` for `build` / `build:analyze`, and the `.env*.example` templates no longer pin `NODE_ENV=development`
    - browser-only SWR keys in `lib/providers/AethelProvider.tsx`
    - explicit Drei `Html` aliases across the active 3D/editor components
    - simpler `app/error.tsx` and `app/not-found.tsx` were introduced as a root-boundary bisect
-   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-public-auth-browser-isolation.log`, `build-probe-2026-04-24-admin-billing-light-runtime.log`, and `build-probe-2026-04-24-studio-route-layout-browser-shells.log` still contain explicit `<Html>` / `useContext` prerender failures, even after the core UI split, auth-route isolation, fallback-page experiment, runtime/provider follow-up, the admin/billing light-runtime pass, and broader studio-route browser-only shells; the newer passes removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, `/billing/success`, `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, and `/billing/invoices` from the final export list, but the broader App Router failure class remained
+   but parity is still open because local reruns have not yet completed successfully: `build-probe-2026-04-24-public-auth-browser-isolation.log`, `build-probe-2026-04-24-admin-billing-light-runtime.log`, `build-probe-2026-04-24-studio-route-layout-browser-shells.log`, and `build-probe-2026-04-24-settings-wave-route-layout.log` still contain explicit `<Html>` / `useContext` prerender failures, even after the core UI split, auth-route isolation, fallback-page experiment, runtime/provider follow-up, the admin/billing light-runtime pass, the real studio-route-shell alignment, and broader browser-only shells; the newer passes removed `/login`, `/register`, `/verify-email`, `/reset-password`, `/forgot-password`, `/design-system-demo`, `/billing/checkout`, `/billing/success`, `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, and `/billing/invoices` from the final export list, but the broader App Router failure class remained and the latest clean rerun still failed on `/404`, `/500`, `/_not-found`, the public/docs set, and the seven studio routes after reaching `Generating static pages (213/213)`
 
 ## The Sequence V6 Still Supports
 1. close production build parity
