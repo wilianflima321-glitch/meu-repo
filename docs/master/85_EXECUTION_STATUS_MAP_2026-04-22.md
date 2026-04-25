@@ -13,9 +13,11 @@ This file is the short scoreboard that answers:
 
 ## Current Snapshot
 - `FullscreenIDE.tsx`: `379` lines
-- `AIChatPanelPro.tsx`: `292` lines
+- `AIChatPanelPro.tsx`: `313` lines
 - `AIChatComposer.tsx`: `282` lines
-- `useAIChatComposerState.ts`: `235` lines
+- `useAIChatComposerState.ts`: `220` lines
+- `useAIChatHistoryMode.ts`: `107` lines
+- `AIChatTimeline.tsx`: `90` lines
 - `useFullscreenIDEBridgeSections.ts`: `141` lines
 - `WorkbenchPreviewPane.tsx`: `44` lines
 - `SceneViewportSurface.tsx`: `98` lines
@@ -102,6 +104,7 @@ This file is the short scoreboard that answers:
 - message copy/apply actions now share calmer feedback grammar, with toast-backed confirmation instead of blocking dialog behavior in the code-action rail
 - the composer and live/benchmark lane now route stop/interrupt to the real abort path in `useAIChatController.ts`
 - ask/plan/execute/review/live now materially shape the composer, empty state, quick prompts, quick mentions, and a compact `AIChatContextStrip.tsx`, so the operator surface is no longer a single generic prompt box
+- the shell also gained `AIChatTimeline.tsx` plus `useAIChatHistoryMode.ts`, which gives users a compact recency rail and cleaner history-sidebar ownership without claiming semantic history search is solved
 - still open:
   - richer timeline/artifact context
   - semantic history search
@@ -163,7 +166,7 @@ This file is the short scoreboard that answers:
 
 ## Best Next Order
 1. close `next build`
-2. keep slicing `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`, while stabilizing the new chat seams in `AIChatComposer.tsx` / `useAIChatComposerState.ts` and evolving the thinner preview cockpit modules
+2. keep slicing `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`, while stabilizing the new chat seams in `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, and `useAIChatHistoryMode.ts` and evolving the thinner preview cockpit modules
 3. harden preview + deploy into a reliable shareable loop
 4. promote collaboration from baseline UX into proven shared-editing confidence
 5. continue `console.* -> logger`

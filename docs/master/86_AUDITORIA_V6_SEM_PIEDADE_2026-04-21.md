@@ -43,9 +43,11 @@ V6 is still directionally correct on the most important debt families:
 The older V6 counts are no longer current branch truth.
 Current workspace counts are materially lower:
 - `FullscreenIDE.tsx`: `379`
-- `AIChatPanelPro.tsx`: `292`
+- `AIChatPanelPro.tsx`: `313`
 - `AIChatComposer.tsx`: `282`
-- `useAIChatComposerState.ts`: `235`
+- `useAIChatComposerState.ts`: `220`
+- `useAIChatHistoryMode.ts`: `107`
+- `AIChatTimeline.tsx`: `90`
 - `useFullscreenIDEBridgeSections.ts`: `141`
 - `WorkbenchPreviewPane.tsx`: `44`
 - `SceneViewportSurface.tsx`: `98`
@@ -107,7 +109,7 @@ Current aligned truth:
 - inline AI editing is PARTIAL, not absent
 - the chat container that brokers this flow is also no longer a giant-file blocker after extraction into session, provider, and send-pipeline helpers
 - the message lane itself is calmer too: bubble grammar is more legible and stop/interrupt is now wired to the real abort path during active runs
-- the chat shell is also no longer mode-neutral: ask/plan/execute/review/live now drive composer copy, quick prompts, quick mentions, empty-state guidance, and a compact context strip
+- the chat shell is also no longer mode-neutral: ask/plan/execute/review/live now drive composer copy, quick prompts, quick mentions, empty-state guidance, a compact context strip, and a recency timeline
 - that improves control, readability, and prompt quality, but it still does **not** justify calling the full chat/artifact lane complete or mode-isolated end to end
 
 ### `next/image` is no longer disabled in the current branch

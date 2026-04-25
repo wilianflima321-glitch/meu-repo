@@ -107,9 +107,11 @@ These are the reality points this audit should now be interpreted against:
 
 - `FullscreenIDE.tsx`: about `379` lines and still a top-priority cockpit orchestrator
 - `useFullscreenIDEBridgeSections.ts`: about `141` lines and now the densest route/workspace bridge seam backing the fullscreen shell
-- `AIChatPanelPro.tsx`: about `292` lines, now backed by extracted composer, context-strip, run-state, ops-state, context-action, speech-playback, quick-prompt, history-rail, benchmark-telemetry, and panel-ui-state modules
+- `AIChatPanelPro.tsx`: about `313` lines, now backed by extracted composer, timeline, context-strip, history-mode, run-state, ops-state, context-action, speech-playback, quick-prompt, history-rail, benchmark-telemetry, and panel-ui-state modules
 - `AIChatComposer.tsx`: about `282` lines, now mode-aware and no longer a generic prompt box
-- `useAIChatComposerState.ts`: about `235` lines, now the densest remaining chat-input seam where send, mentions, attachments, voice, and mode handoff still meet
+- `useAIChatComposerState.ts`: about `220` lines, still a dense remaining chat-input seam where send, mentions, attachments, voice, and mode handoff meet
+- `AIChatTimeline.tsx`: about `90` lines and now gives the user a compact recency rail instead of forcing full history-sidebar jumps for every reorientation
+- `useAIChatHistoryMode.ts`: about `107` lines and now owns thread/timeline derivation separately from the shell
 - `WorkbenchEditorPane.tsx`: about `193` lines after extraction into `WorkbenchEditorSurface.tsx`, `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
 - `WorkbenchEditorSurface.tsx`: about `99` lines and now much closer to a stable surface/orchestrator seam, with split-aware seams now explicit in `WorkbenchEditorSurface.types.ts` (`62`) and `WorkbenchSplitEditorSurface.tsx` (`121`)
 - `WorkbenchPreviewPane.tsx`: about `44` lines and now a thin preview orchestrator over `WorkbenchPreviewRuntimeControls.tsx`, `WorkbenchPreviewRuntimeSurface.tsx`, `WorkbenchPreviewModeHeader.tsx`, and `workbenchPreviewPaneModels.ts`
@@ -145,7 +147,7 @@ For those, always pair it with `81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md` and
 Across `81`, `82`, and this imported systems/interfaces audit, the shared execution order remains:
 
 1. Keep the design system converging toward one visual language.
-2. Continue slicing the remaining workbench/runtime seams (`FullscreenIDE`, `useFullscreenIDEBridgeSections`, `usePreviewRuntime`, `RuntimePreviewSurface`, `useTerminalRuntime`, and then stabilize the thinner chat shell around `AIChatComposer.tsx` / `useAIChatComposerState.ts` while evolving the preview cockpit modules).
+2. Continue slicing the remaining workbench/runtime seams (`FullscreenIDE`, `useFullscreenIDEBridgeSections`, `usePreviewRuntime`, `RuntimePreviewSurface`, `useTerminalRuntime`, and then stabilize the thinner chat shell around `AIChatComposer.tsx`, `useAIChatComposerState.ts`, and the new `AIChatTimeline.tsx` / `useAIChatHistoryMode.ts` seams while evolving the preview cockpit modules).
 3. Turn collaboration from infrastructure into visible product UX.
 4. Turn preview into a trust-building, shareable creation surface.
 5. Keep replacing runtime ambiguity with evidence, tests, and structured observability.

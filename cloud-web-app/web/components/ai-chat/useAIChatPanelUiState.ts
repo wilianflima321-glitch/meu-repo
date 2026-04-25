@@ -6,16 +6,11 @@ import type { AIChatConsoleMode } from './presets'
 
 type UseAIChatPanelUiStateParams = {
   messages?: Message[]
-  showHistory?: boolean
 }
 
-export function useAIChatPanelUiState({
-  messages,
-  showHistory = false,
-}: UseAIChatPanelUiStateParams) {
+export function useAIChatPanelUiState({ messages }: UseAIChatPanelUiStateParams) {
   const [showModelSelector, setShowModelSelector] = useState(false)
   const [consoleMode, setConsoleMode] = useState<AIChatConsoleMode>('ask')
-  const [showHistorySidebar, setShowHistorySidebar] = useState(showHistory)
   const [agentCount, setAgentCount] = useState(1)
 
   const lastUserGoal = useMemo(() => {
@@ -30,9 +25,7 @@ export function useAIChatPanelUiState({
     lastUserGoal,
     setAgentCount,
     setConsoleMode,
-    setShowHistorySidebar,
     setShowModelSelector,
-    showHistorySidebar,
     showModelSelector,
   }
 }

@@ -12,6 +12,7 @@ import { AIChatBenchmarkTelemetry } from '@/components/ai-chat/AIChatBenchmarkTe
 import { AIChatComposer } from '@/components/ai-chat/AIChatComposer'
 import { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
 import { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
+import { AIChatTimeline } from '@/components/ai-chat/AIChatTimeline'
 import { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRail'
 import { AIChatMessagesPane } from '@/components/ai-chat/AIChatMessagesPane'
 import { AIChatOpsSidebar } from '@/components/ai-chat/AIChatOpsSidebar'
@@ -21,6 +22,7 @@ import { useAIChatContextActions } from '@/components/ai-chat/useAIChatContextAc
 import { useAIChatOpsState } from '@/components/ai-chat/useAIChatOpsState'
 import { useAIChatPanelUiState } from '@/components/ai-chat/useAIChatPanelUiState'
 import { useAIChatRunState } from '@/components/ai-chat/useAIChatRunState'
+import { useAIChatHistoryMode } from '@/components/ai-chat/useAIChatHistoryMode'
 import { useAIChatSpeechPlayback } from '@/components/ai-chat/useAIChatSpeechPlayback'
 
 const DEMO_MESSAGES: Message[] = [
@@ -79,13 +81,26 @@ export default function AIChatPanelPro({
     lastUserGoal,
     setAgentCount,
     setConsoleMode,
-    setShowHistorySidebar,
     setShowModelSelector,
-    showHistorySidebar,
     showModelSelector,
   } = useAIChatPanelUiState({
     messages,
+  })
+  const {
+    activeThread,
+    closeHistorySidebar,
+    hasHistory,
+    showHistorySidebar,
+    timelineItems,
+    toggleHistorySidebar,
+  } = useAIChatHistoryMode({
+    activeThreadId,
+    isLiveMode,
+    liveStatus,
+    messages,
+    onToggleHistory,
     showHistory,
+    threads,
   })
   const modePreset = MODE_PRESETS[consoleMode]
   const {
@@ -146,7 +161,6 @@ export default function AIChatPanelPro({
     useAIChatContextActions()
   const { handleToggleSpeaking, isSpeaking } = useAIChatSpeechPlayback({ messages })
 
-  void onToggleHistory
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -162,7 +176,7 @@ export default function AIChatPanelPro({
         onArchiveThread={onArchiveThread}
         onDeleteThread={onDeleteThread}
         showHistorySidebar={showHistorySidebar}
-        onCloseHistorySidebar={() => setShowHistorySidebar(false)}
+        onCloseHistorySidebar={closeHistorySidebar}
         isLiveMode={isLiveMode}
         onToggleLiveMode={onToggleLiveMode}
         liveStatus={liveStatus}
@@ -172,9 +186,9 @@ export default function AIChatPanelPro({
         <AIChatHeader
           consoleMode={consoleMode}
           onConsoleModeChange={setConsoleMode}
-          hasHistory={threads.length > 0}
+          hasHistory={hasHistory}
           showHistorySidebar={showHistorySidebar}
-          onToggleHistorySidebar={() => setShowHistorySidebar((previous) => !previous)}
+          onToggleHistorySidebar={toggleHistorySidebar}
           selectedModel={resolvedModel}
           currentModel={currentModel}
           models={models}
@@ -201,6 +215,13 @@ export default function AIChatPanelPro({
           selectedModelName={resolvedModel.name}
           agentCount={agentCount}
           isAIWorking={isAIWorking}
+        />
+
+        <AIChatTimeline
+          activeThreadTitle={activeThread?.title ?? null}
+          hasHistory={hasHistory}
+          items={timelineItems}
+          onOpenHistory={toggleHistorySidebar}
         />
 
         <AIChatMessagesPane
