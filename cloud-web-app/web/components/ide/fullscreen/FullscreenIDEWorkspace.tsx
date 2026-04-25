@@ -12,7 +12,8 @@ import { WorkbenchEditorPane, type WorkbenchEditorPaneProps } from '@/components
 import { WorkbenchPreviewPane, type WorkbenchPreviewPaneProps } from '@/components/ide/fullscreen/WorkbenchPreviewPane';
 import { WorkbenchSidebar } from '@/components/ide/fullscreen/WorkbenchSidebar';
 import { normalizePath } from '@/components/ide/fullscreen/workbench-helpers';
-import type { PanelState } from '@/components/ide/modern-shell/types';
+import type { BottomPanelMode, PanelState } from '@/components/ide/modern-shell/types';
+import { MultiTerminalPanel } from '@/components/terminal/XTerminal';
 import { TabProvider } from '@/components/editor/TabBar';
 
 import type { ActiveFileState, PreviewMode, SidebarTab } from '@/components/ide/fullscreen/types';
@@ -33,10 +34,12 @@ type FullscreenIDEWorkspaceProps = {
   workspaceFiles: FileItem[];
   sidebarTab: SidebarTab;
   panelState: PanelState;
+  activeBottomPanel: BottomPanelMode;
   previewMode: PreviewMode;
   onResizePanel: (panel: keyof PanelState, size: number) => void;
   onToggleSidebar: () => void;
   onTogglePanel: (panel: keyof PanelState) => void;
+  onSelectBottomPanel: (panel: BottomPanelMode) => void;
   onRunPrimaryAction: () => void;
   onOpenSettings: () => void;
   onOpenCommandPalette: (mode: 'commands' | 'files') => void;
@@ -70,10 +73,12 @@ export function FullscreenIDEWorkspace({
   workspaceFiles,
   sidebarTab,
   panelState,
+  activeBottomPanel,
   previewMode,
   onResizePanel,
   onToggleSidebar,
   onTogglePanel,
+  onSelectBottomPanel,
   onRunPrimaryAction,
   onOpenSettings,
   onOpenCommandPalette,
@@ -126,6 +131,7 @@ export function FullscreenIDEWorkspace({
             headerExtras={headerExtras}
             banner={banner}
             panelState={panelState}
+            activeBottomPanel={activeBottomPanel}
             onResizePanel={onResizePanel}
             onToggleSidebar={onToggleSidebar}
             onTogglePanel={onTogglePanel}
@@ -134,6 +140,7 @@ export function FullscreenIDEWorkspace({
             onOpenCommandPalette={onOpenCommandPalette}
             onSelectSidebarTab={onSelectSidebarTab}
             onSelectPreviewMode={onSelectPreviewMode}
+            onSelectBottomPanel={onSelectBottomPanel}
             onToggleDiagnostics={onToggleDiagnostics}
             activeSidebarTab={sidebarTab}
             activePreviewMode={previewMode}
@@ -147,6 +154,7 @@ export function FullscreenIDEWorkspace({
                 />
               ),
               chat: <AIChatPanelContainer />,
+              terminal: <MultiTerminalPanel className="h-full" />,
               editor: <WorkbenchEditorPane {...editorPaneProps} />,
               preview: <WorkbenchPreviewPane {...previewPaneProps} />,
             }}

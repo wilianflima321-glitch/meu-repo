@@ -39,7 +39,7 @@ This file is the short scoreboard that answers:
 - `AIChatPanelContainer.tsx`: `123` lines
 - `ModernIDEShell.tsx`: `149` lines
 - `ModernIDEShellPanels.tsx`: `114` lines
-- `ModernIDEShellCenterStack.tsx`: `109` lines
+- `ModernIDEShellCenterStack.tsx`: `218` lines
 - `FullscreenIDEWorkspaceBridge.tsx`: `89` lines
 - `FullscreenIDEWorkspaceBridge.types.ts`: `67` lines
 - `useFullscreenIDEBridgeProps.types.ts`: `117` lines
@@ -61,7 +61,7 @@ This file is the short scoreboard that answers:
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is still open because:
-  - the latest canonical evidence is now `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, `cloud-web-app/web/build-probe-2026-04-24-admin-billing-light-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-studio-route-layout-browser-shells.log`, and `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log`
+  - the latest canonical evidence is now `cloud-web-app/web/build-probe-2026-04-24-public-auth-browser-isolation.log`, `cloud-web-app/web/build-probe-2026-04-24-admin-billing-light-runtime.log`, `cloud-web-app/web/build-probe-2026-04-24-studio-route-layout-browser-shells.log`, `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log`, and `cloud-web-app/web/build-probe-2026-04-24-terminal-first-class.log`
   - the newer provider/layout experiments clarified the root/runtime split, moved build scripts to `NODE_ENV=production`, removed `NODE_ENV=development` from the env templates, dropped `/admin`, `/admin/*`, `/billing`, `/billing/cancel`, `/billing/invoices`, `/billing/checkout`, and `/billing/success` from the final export list, and the current checkout now truly routes `/dashboard`, `/ide`, `/settings`, `/profile`, `/project-settings`, `/nexus`, and `/marketplace` through `StudioRuntimeRouteLayout.tsx`, but the latest clean rerun still failed with the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster after reaching `Generating static pages (213/213)`
 
 ## Closed Or Materially Stabilized
@@ -127,6 +127,16 @@ This file is the short scoreboard that answers:
   - `SceneViewportSurface.tsx` is now a smaller viewport seam at `98` lines, with stage/state/playback density pushed into `SceneViewportStage.tsx`, `useSceneViewportSurfaceState.ts`, and `useSceneViewportPlayback.ts`
   - `WorkbenchPreviewPane.tsx` is now a thin orchestrator, with trust/share/status density moved into `WorkbenchPreviewRuntimeControls.tsx`, `WorkbenchPreviewRuntimeSurface.tsx`, and `WorkbenchPreviewModeHeader.tsx`
 - but the category is still partial until full shareable proof and build-complete runtime confidence are stable.
+
+### Terminal lane
+- the canonical workbench now mounts terminal as a first-class bottom surface instead of leaving terminal credibility trapped in legacy layout references or only in preview-console mode
+- `FullscreenIDEWorkspace.tsx` now wires `MultiTerminalPanel.tsx` directly into the main shell, while `ModernIDEShellCenterStack.tsx` now acts as a calmer bottom-lane switcher between `AI Console` and `Terminal`
+- the dock/header grammar now makes `AI Console`, `Terminal`, `Visual (3D)`, `Visual (UI)`, and `Console` read as separate operational surfaces instead of one overloaded preview bucket
+- the follow-up clean build rerun in `cloud-web-app/web/build-probe-2026-04-24-terminal-first-class.log` reached `Generating static pages (213/213)` and reproduced the same failure class, which is the correct anti-fake-success read: terminal UX improved without changing the unrelated root build blocker
+- still open:
+  - live status-bar truth for terminal sessions
+  - deeper clipboard/viewport/runtime polish in the terminal stack
+  - broader proof that the terminal lane is as trustworthy as the editor/preview path end to end
 
 ### Settings surface polish
 - `SettingsUI.tsx` is now a `159`-line shell instead of a `1184`-line dense surface

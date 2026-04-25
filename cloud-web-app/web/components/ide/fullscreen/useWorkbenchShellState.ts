@@ -8,10 +8,12 @@ import type { PanelState as ModernPanelState } from '@/components/ide/ModernIDES
 import type { DocumentSymbol } from '@/components/outline/OutlinePanel'
 import type { EntryNotice } from '@/components/ide/fullscreen/WorkbenchEntryNotice'
 import type { EditorPane, InlineApplyResult, PreviewMode, SidebarTab } from './types'
+import type { BottomPanelMode } from '@/components/ide/modern-shell/types'
 
 export const LAST_PROJECT_ID_STORAGE_KEY = 'aethel.workbench.lastProjectId'
 export const PREVIEW_ENABLED_STORAGE_KEY = 'aethel.workbench.preview.enabled'
 export const PANEL_STATE_STORAGE_KEY = 'aethel.workbench.panelState'
+export const BOTTOM_PANEL_MODE_STORAGE_KEY = 'aethel.workbench.bottomPanelMode'
 
 type UseWorkbenchShellStateOptions = {
   projectIdParam: string | null
@@ -69,6 +71,11 @@ export function useWorkbenchShellState({
     } catch {
       return fallback
     }
+  })
+  const [activeBottomPanel, setActiveBottomPanel] = useState<BottomPanelMode>(() => {
+    if (typeof window === 'undefined') return 'chat'
+    const stored = window.localStorage.getItem(BOTTOM_PANEL_MODE_STORAGE_KEY)
+    return stored === 'terminal' ? 'terminal' : 'chat'
   })
   const [previewMode, setPreviewMode] = useState<PreviewMode>('runtime')
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('explorer')
@@ -182,6 +189,8 @@ export function useWorkbenchShellState({
     setPreviewEnabled,
     modernPanelState,
     setModernPanelState,
+    activeBottomPanel,
+    setActiveBottomPanel,
     previewMode,
     setPreviewMode,
     sidebarTab,

@@ -9,7 +9,7 @@ import {
   isBottomDockItemActive,
 } from './chromeDockParts';
 import { BORDER_SECONDARY } from './chromeStyles';
-import type { PanelState, PreviewMode, SidebarTab } from './types';
+import type { BottomPanelMode, PanelState, PreviewMode, SidebarTab } from './types';
 
 export interface BottomDockProps {
   panelState: PanelState;
@@ -17,9 +17,11 @@ export interface BottomDockProps {
   onOpenCommandPalette?: (mode: 'commands' | 'files') => void;
   onSelectSidebarTab?: (tab: SidebarTab) => void;
   onSelectPreviewMode?: (mode: PreviewMode) => void;
+  onSelectBottomPanel?: (panel: BottomPanelMode) => void;
   onToggleDiagnostics?: () => void;
   activeSidebarTab?: SidebarTab;
   activePreviewMode?: PreviewMode;
+  activeBottomPanel?: BottomPanelMode;
 }
 
 export function BottomDock({
@@ -28,9 +30,11 @@ export function BottomDock({
   onOpenCommandPalette,
   onSelectSidebarTab,
   onSelectPreviewMode,
+  onSelectBottomPanel,
   onToggleDiagnostics,
   activeSidebarTab = 'explorer',
   activePreviewMode = 'runtime',
+  activeBottomPanel = 'chat',
 }: BottomDockProps) {
   const dockStyle: React.CSSProperties = {
     display: 'flex',
@@ -49,14 +53,16 @@ export function BottomDock({
         <BottomDockItemButton
           key={item.id}
           item={item}
-          active={isBottomDockItemActive(item.id, panelState, activeSidebarTab, activePreviewMode)}
+          active={isBottomDockItemActive(item.id, panelState, activeSidebarTab, activePreviewMode, activeBottomPanel)}
           onClick={() =>
             handleBottomDockItemClick(item.id, {
               panelState,
+              activeBottomPanel,
               onTogglePanel,
               onOpenCommandPalette,
               onSelectSidebarTab,
               onSelectPreviewMode,
+              onSelectBottomPanel,
               onToggleDiagnostics,
             })
           }

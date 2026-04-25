@@ -9,8 +9,9 @@ import {
   Search,
   Settings,
   Sparkles,
+  TerminalSquare,
 } from 'lucide-react';
-import type { PanelState } from './types';
+import type { BottomPanelMode, PanelState } from './types';
 import {
   BORDER_SECONDARY,
   HEADER_ACTION_BUTTON,
@@ -23,7 +24,7 @@ import {
 } from './chromeStyles';
 import { DeployTopbarAction } from './deployTopbarAction';
 
-type HeaderPanelKey = 'sidebar' | 'chat' | 'preview';
+type HeaderPanelKey = 'sidebar' | 'chat' | 'terminal' | 'preview';
 type CommandPaletteMode = 'commands' | 'files';
 
 const headerPanelItems: ReadonlyArray<{
@@ -33,6 +34,7 @@ const headerPanelItems: ReadonlyArray<{
 }> = [
   { panel: 'sidebar', icon: <FolderTree size={16} />, label: 'Arquivos' },
   { panel: 'chat', icon: <MessageSquare size={16} />, label: 'AI Console' },
+  { panel: 'terminal', icon: <TerminalSquare size={16} />, label: 'Terminal' },
   { panel: 'preview', icon: <Play size={16} />, label: 'Visual' },
 ];
 
@@ -163,14 +165,18 @@ export function HeaderIdentity({
 interface HeaderWorkspaceControlsProps {
   headerExtras?: React.ReactNode;
   panelState: PanelState;
+  activeBottomPanel: BottomPanelMode;
   onTogglePanel: (panel: keyof PanelState) => void;
+  onSelectBottomPanel?: (panel: BottomPanelMode) => void;
   onOpenCommandPalette?: (mode: CommandPaletteMode) => void;
 }
 
 export function HeaderWorkspaceControls({
   headerExtras,
   panelState,
+  activeBottomPanel,
   onTogglePanel,
+  onSelectBottomPanel,
   onOpenCommandPalette,
 }: HeaderWorkspaceControlsProps) {
   return (
@@ -193,8 +199,32 @@ export function HeaderWorkspaceControls({
             key={item.panel}
             icon={item.icon}
             label={item.label}
-            active={panelState[item.panel].open}
-            onClick={() => onTogglePanel(item.panel)}
+            active={
+              item.panel === 'terminal'
+                ? panelState.chat.open && activeBottomPanel === 'terminal'
+                : item.panel === 'chat'
+                  ? panelState.chat.open && activeBottomPanel === 'chat'
+                  : panelState[item.panel].open
+            }
+            onClick={() => {
+              if (item.panel === 'terminal') {
+                onSelectBottomPanel?.('terminal');
+                if (!(panelState.chat.open && activeBottomPanel !== 'terminal')) {
+                  onTogglePanel('chat');
+                }
+                return;
+              }
+
+              if (item.panel === 'chat') {
+                onSelectBottomPanel?.('chat');
+                if (!(panelState.chat.open && activeBottomPanel !== 'chat')) {
+                  onTogglePanel('chat');
+                }
+                return;
+              }
+
+              onTogglePanel(item.panel);
+            }}
           />
         ))}
       </div>

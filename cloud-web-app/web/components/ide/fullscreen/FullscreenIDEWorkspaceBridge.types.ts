@@ -13,7 +13,7 @@ import type {
   PreviewMode,
   SidebarTab,
 } from '@/components/ide/fullscreen/types';
-import type { PanelState } from '@/components/ide/modern-shell/types';
+import type { BottomPanelMode, PanelState } from '@/components/ide/modern-shell/types';
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 
 export type EditorRef = RefObject<monacoEditor.editor.IStandaloneCodeEditor | null>;
@@ -27,10 +27,12 @@ export type FullscreenIDEWorkspaceBridgeChromeProps = {
   workspaceFiles: FileItem[];
   sidebarTab: SidebarTab;
   modernPanelState: PanelState;
+  activeBottomPanel: BottomPanelMode;
   previewMode: PreviewMode;
   onResizePanel: (panel: keyof PanelState, size: number) => void;
   onToggleSidebar: () => void;
   onTogglePanel: (panel: keyof PanelState) => void;
+  onSelectBottomPanel: Dispatch<SetStateAction<BottomPanelMode>>;
   onRunPrimaryAction: () => void;
   handleOpenSettings: () => void;
   openCommandPalette: (mode: 'commands' | 'files') => void;

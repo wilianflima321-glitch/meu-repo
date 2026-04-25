@@ -13,7 +13,12 @@ import {
   TEXT_PRIMARY,
 } from './modern-shell/ModernIDEShellChrome';
 import { ModernIDEShellPanels } from './modern-shell/ModernIDEShellPanels';
-import type { PanelState, PreviewMode, SidebarTab } from './modern-shell/types';
+import type {
+  BottomPanelMode,
+  PanelState,
+  PreviewMode,
+  SidebarTab,
+} from './modern-shell/types';
 import { useModernIDEPanels } from './modern-shell/useModernIDEPanels';
 
 interface ModernIDEShellProps {
@@ -24,6 +29,7 @@ interface ModernIDEShellProps {
     editor: React.ReactNode;
     preview: React.ReactNode;
     chat: React.ReactNode;
+    terminal: React.ReactNode;
   };
   projectName?: string;
   activeFileName?: string;
@@ -37,9 +43,11 @@ interface ModernIDEShellProps {
   onOpenCommandPalette?: (mode: 'commands' | 'files') => void;
   onSelectSidebarTab?: (tab: SidebarTab) => void;
   onSelectPreviewMode?: (mode: PreviewMode) => void;
+  onSelectBottomPanel?: (panel: BottomPanelMode) => void;
   onToggleDiagnostics?: () => void;
   activeSidebarTab?: SidebarTab;
   activePreviewMode?: PreviewMode;
+  activeBottomPanel?: BottomPanelMode;
 }
 
 export type { PanelState } from './modern-shell/types';
@@ -60,9 +68,11 @@ export function ModernIDEShell({
   onOpenCommandPalette,
   onSelectSidebarTab,
   onSelectPreviewMode,
+  onSelectBottomPanel,
   onToggleDiagnostics,
   activeSidebarTab = 'explorer',
   activePreviewMode = 'runtime',
+  activeBottomPanel = 'chat',
 }: ModernIDEShellProps) {
   const {
     panelState,
@@ -99,8 +109,10 @@ export function ModernIDEShell({
         projectName={projectName}
         activeFileName={activeFileName}
         panelState={panelState}
+        activeBottomPanel={activeBottomPanel}
         headerExtras={headerExtras}
         onTogglePanel={togglePanel}
+        onSelectBottomPanel={onSelectBottomPanel}
         onToggleSidebar={onToggleSidebar}
         isCompact={isCompact}
         onRunPrimaryAction={onRunPrimaryAction}
@@ -125,12 +137,14 @@ export function ModernIDEShell({
         panelState={panelState}
         isCompact={isCompact}
         activePreviewMode={activePreviewMode}
+        activeBottomPanel={activeBottomPanel}
         sidebarOpen={sidebarOpen}
         mainAreaRef={mainAreaRef}
         contentRowRef={contentRowRef}
         editorColumnRef={editorColumnRef}
         setPanelSize={setPanelSize}
         togglePanel={togglePanel}
+        onSelectBottomPanel={onSelectBottomPanel}
         startHorizontalResize={startHorizontalResize}
         startVerticalResize={startVerticalResize}
       />
@@ -145,9 +159,11 @@ export function ModernIDEShell({
             onOpenCommandPalette={onOpenCommandPalette}
             onSelectSidebarTab={onSelectSidebarTab}
             onSelectPreviewMode={onSelectPreviewMode}
+            onSelectBottomPanel={onSelectBottomPanel}
             onToggleDiagnostics={onToggleDiagnostics}
             activeSidebarTab={activeSidebarTab}
             activePreviewMode={activePreviewMode}
+            activeBottomPanel={activeBottomPanel}
           />
       <StatusBar activeFileName={activeFileName} />
         </>

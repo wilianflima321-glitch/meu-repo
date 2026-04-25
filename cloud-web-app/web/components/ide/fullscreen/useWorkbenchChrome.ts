@@ -4,20 +4,23 @@ import { useEffect } from 'react';
 
 import type { Dispatch, SetStateAction } from 'react';
 import type { PanelState as ModernPanelState } from '@/components/ide/ModernIDEShell';
-import type { PreviewMode, SidebarTab } from '@/components/ide/fullscreen/types';
+import type { BottomPanelMode } from '@/components/ide/modern-shell/types';
+import type { SidebarTab } from '@/components/ide/fullscreen/types';
 
 type UseWorkbenchChromeParams = {
   lastProjectIdStorageKey: string;
   previewEnabledStorageKey: string;
   panelStateStorageKey: string;
+  bottomPanelModeStorageKey: string;
   projectId: string;
   previewEnabled: boolean;
   modernPanelState: ModernPanelState;
   setModernPanelState: Dispatch<SetStateAction<ModernPanelState>>;
+  activeBottomPanel: BottomPanelMode;
+  setActiveBottomPanel: Dispatch<SetStateAction<BottomPanelMode>>;
   setShowDiagnostics: Dispatch<SetStateAction<boolean>>;
   setHasToken: Dispatch<SetStateAction<boolean>>;
   setIsCompactViewport: Dispatch<SetStateAction<boolean>>;
-  handleSelectPreviewMode: (mode: PreviewMode) => void;
   handleSelectSidebarTab: (tab: SidebarTab) => void;
   openCommandPalette: (mode?: 'commands' | 'files') => void;
   emitLayoutEvent: (eventName: string) => void;
@@ -33,14 +36,16 @@ export function useWorkbenchChrome({
   lastProjectIdStorageKey,
   previewEnabledStorageKey,
   panelStateStorageKey,
+  bottomPanelModeStorageKey,
   projectId,
   previewEnabled,
   modernPanelState,
   setModernPanelState,
+  activeBottomPanel,
+  setActiveBottomPanel,
   setShowDiagnostics,
   setHasToken,
   setIsCompactViewport,
-  handleSelectPreviewMode,
   handleSelectSidebarTab,
   openCommandPalette,
   emitLayoutEvent,
@@ -72,6 +77,7 @@ export function useWorkbenchChrome({
     };
 
     const onOpenAI = () => {
+      setActiveBottomPanel('chat');
       setModernPanelState((prev) => ({
         ...prev,
         chat: {
@@ -82,7 +88,14 @@ export function useWorkbenchChrome({
     };
 
     const onToggleTerminal = () => {
-      handleSelectPreviewMode('console');
+      setActiveBottomPanel('terminal');
+      setModernPanelState((prev) => ({
+        ...prev,
+        chat: {
+          ...prev.chat,
+          open: activeBottomPanel === 'terminal' ? !prev.chat.open : true,
+        },
+      }));
     };
 
     const onOpenSidebarTab = (event: Event) => {
@@ -95,7 +108,14 @@ export function useWorkbenchChrome({
     const onOpenBottomTab = (event: Event) => {
       const detail = (event as CustomEvent<{ tab?: string }>).detail;
       if (detail?.tab === 'terminal') {
-        handleSelectPreviewMode('console');
+        setActiveBottomPanel('terminal');
+        setModernPanelState((prev) => ({
+          ...prev,
+          chat: {
+            ...prev.chat,
+            open: true,
+          },
+        }));
         return;
       }
       if (detail?.tab === 'debug') {
@@ -116,7 +136,7 @@ export function useWorkbenchChrome({
       window.removeEventListener('aethel.layout.openSidebarTab', onOpenSidebarTab as EventListener);
       window.removeEventListener('aethel.layout.openBottomTab', onOpenBottomTab as EventListener);
     };
-  }, [handleSelectPreviewMode, handleSelectSidebarTab, setModernPanelState, setShowDiagnostics]);
+  }, [activeBottomPanel, handleSelectSidebarTab, modernPanelState.chat.open, setActiveBottomPanel, setModernPanelState, setShowDiagnostics]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -188,6 +208,11 @@ export function useWorkbenchChrome({
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(panelStateStorageKey, JSON.stringify(modernPanelState));
   }, [modernPanelState, panelStateStorageKey]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(bottomPanelModeStorageKey, activeBottomPanel);
+  }, [activeBottomPanel, bottomPanelModeStorageKey]);
 
   useEffect(() => {
     setModernPanelState((prev) => ({

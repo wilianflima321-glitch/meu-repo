@@ -8,7 +8,7 @@ import {
   ModernIDEShellPreviewReveal,
   ModernIDEShellSidebarColumn,
 } from './ModernIDEShellSideColumns';
-import type { PanelState, PreviewMode } from './types';
+import type { BottomPanelMode, PanelState, PreviewMode } from './types';
 
 interface ModernIDEShellPanelsProps {
   slots: {
@@ -16,16 +16,19 @@ interface ModernIDEShellPanelsProps {
     editor: React.ReactNode;
     preview: React.ReactNode;
     chat: React.ReactNode;
+    terminal: React.ReactNode;
   };
   panelState: PanelState;
   isCompact: boolean;
   activePreviewMode: PreviewMode;
+  activeBottomPanel: BottomPanelMode;
   sidebarOpen: boolean;
   mainAreaRef: React.RefObject<HTMLDivElement>;
   contentRowRef: React.RefObject<HTMLDivElement>;
   editorColumnRef: React.RefObject<HTMLDivElement>;
   setPanelSize: (panel: keyof PanelState, size: number) => void;
   togglePanel: (panel: keyof PanelState) => void;
+  onSelectBottomPanel?: (panel: BottomPanelMode) => void;
   startHorizontalResize: (panel: 'sidebar' | 'preview', event: React.MouseEvent<HTMLDivElement>) => void;
   startVerticalResize: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
@@ -50,12 +53,14 @@ export function ModernIDEShellPanels({
   panelState,
   isCompact,
   activePreviewMode,
+  activeBottomPanel,
   sidebarOpen,
   mainAreaRef,
   contentRowRef,
   editorColumnRef,
   setPanelSize,
   togglePanel,
+  onSelectBottomPanel,
   startHorizontalResize,
   startVerticalResize,
 }: ModernIDEShellPanelsProps) {
@@ -83,12 +88,15 @@ export function ModernIDEShellPanels({
         <ModernIDEShellCenterStack
           editor={slots.editor}
           chat={slots.chat}
+          terminal={slots.terminal}
           chatOpen={panelState.chat.open}
           chatSize={panelState.chat.size}
+          activeBottomPanel={activeBottomPanel}
           isCompact={isCompact}
           editorColumnRef={editorColumnRef}
           setChatSize={(size) => setPanelSize('chat', size)}
           toggleChat={() => togglePanel('chat')}
+          onSelectBottomPanel={onSelectBottomPanel}
           startVerticalResize={startVerticalResize}
         />
 

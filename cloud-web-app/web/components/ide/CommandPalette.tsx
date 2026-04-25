@@ -217,7 +217,7 @@ function createDefaultCommands(handlers: {
       label: 'Alternar terminal',
       description: 'Mostrar ou ocultar o terminal inferior',
       category: 'view',
-      shortcut: 'Ctrl+J',
+      shortcut: 'Ctrl+`',
       action: handlers.toggleTerminal || (() => {}),
       keywords: ['terminal', 'panel', 'painel'],
     },

@@ -18,6 +18,7 @@ import { useWorkbenchRuntimeActions } from '@/components/ide/fullscreen/useWorkb
 import { useFullscreenIDEBridgeProps } from '@/components/ide/fullscreen/useFullscreenIDEBridgeProps';
 import { useWorkbenchRuntimeSyncScheduler } from '@/components/ide/fullscreen/useWorkbenchRuntimeSyncScheduler';
 import {
+  BOTTOM_PANEL_MODE_STORAGE_KEY,
   LAST_PROJECT_ID_STORAGE_KEY,
   PANEL_STATE_STORAGE_KEY,
   PREVIEW_ENABLED_STORAGE_KEY,
@@ -54,6 +55,8 @@ function IDEContent() {
     setPreviewEnabled,
     modernPanelState,
     setModernPanelState,
+    activeBottomPanel,
+    setActiveBottomPanel,
     previewMode,
     setPreviewMode,
     sidebarTab,
@@ -206,8 +209,8 @@ function IDEContent() {
 
   const { onResizePanel, onToggleSidebar, onTogglePanel } = useWorkbenchPanelCallbacks({
     setModernPanelState,
+    setActiveBottomPanel,
     setPreviewEnabled,
-    handleAIPanel,
   });
 
   const { runRecommendedAction: handleRunRecommendedPreviewAction } = useWorkbenchRuntimeActions({
@@ -222,14 +225,16 @@ function IDEContent() {
     lastProjectIdStorageKey: LAST_PROJECT_ID_STORAGE_KEY,
     previewEnabledStorageKey: PREVIEW_ENABLED_STORAGE_KEY,
     panelStateStorageKey: PANEL_STATE_STORAGE_KEY,
+    bottomPanelModeStorageKey: BOTTOM_PANEL_MODE_STORAGE_KEY,
     projectId,
     previewEnabled,
     modernPanelState,
     setModernPanelState,
+    activeBottomPanel,
+    setActiveBottomPanel,
     setShowDiagnostics,
     setHasToken,
     setIsCompactViewport,
-    handleSelectPreviewMode,
     handleSelectSidebarTab,
     openCommandPalette,
     emitLayoutEvent,
@@ -274,10 +279,12 @@ function IDEContent() {
     workspaceFiles,
     sidebarTab,
     modernPanelState,
+    activeBottomPanel,
     previewMode,
     onResizePanel,
     onToggleSidebar,
     onTogglePanel,
+    setActiveBottomPanel,
     onRunPrimaryAction: handleRunRecommendedPreviewAction,
     handleOpenSettings,
     openCommandPalette,

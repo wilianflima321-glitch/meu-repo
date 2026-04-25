@@ -12,8 +12,9 @@ import {
   Search,
   Sparkles,
   Terminal,
+  TerminalSquare,
 } from 'lucide-react';
-import type { PanelState, PreviewMode, SidebarTab } from './types';
+import type { BottomPanelMode, PanelState, PreviewMode, SidebarTab } from './types';
 import {
   STATUS_ERROR,
   STATUS_SUCCESS,
@@ -28,6 +29,7 @@ export type BottomDockItemId =
   | 'git'
   | 'viewport'
   | 'canvas'
+  | 'terminal'
   | 'console'
   | 'diagnostics'
   | 'chat';
@@ -45,6 +47,7 @@ export const BOTTOM_DOCK_ITEMS: ReadonlyArray<BottomDockItemDescriptor> = [
   { id: 'git', icon: <GitBranch size={16} />, label: 'Git', shortcut: 'Ctrl+Shift+G' },
   { id: 'viewport', icon: <Play size={16} />, label: 'Visual 3D', shortcut: 'Ctrl+Shift+V' },
   { id: 'canvas', icon: <Code2 size={16} />, label: 'Visual UI', shortcut: 'Ctrl+Shift+U' },
+  { id: 'terminal', icon: <TerminalSquare size={16} />, label: 'Terminal', shortcut: 'Ctrl+`' },
   { id: 'console', icon: <Terminal size={16} />, label: 'Console', shortcut: 'Ctrl+J' },
   { id: 'diagnostics', icon: <AlertCircle size={16} />, label: 'Erros', shortcut: 'Ctrl+Shift+M' },
   { id: 'chat', icon: <Sparkles size={16} />, label: 'AI Console', shortcut: 'Ctrl+I' },
@@ -52,10 +55,12 @@ export const BOTTOM_DOCK_ITEMS: ReadonlyArray<BottomDockItemDescriptor> = [
 
 interface BottomDockHandlers {
   panelState: PanelState;
+  activeBottomPanel?: BottomPanelMode;
   onTogglePanel: (panel: keyof PanelState) => void;
   onOpenCommandPalette?: (mode: 'commands' | 'files') => void;
   onSelectSidebarTab?: (tab: SidebarTab) => void;
   onSelectPreviewMode?: (mode: PreviewMode) => void;
+  onSelectBottomPanel?: (panel: BottomPanelMode) => void;
   onToggleDiagnostics?: () => void;
 }
 
@@ -64,6 +69,7 @@ export function isBottomDockItemActive(
   panelState: PanelState,
   activeSidebarTab: SidebarTab,
   activePreviewMode: PreviewMode,
+  activeBottomPanel: BottomPanelMode,
 ) {
   return (
     (itemId === 'explorer' && panelState.sidebar.open && activeSidebarTab === 'explorer') ||
@@ -71,7 +77,8 @@ export function isBottomDockItemActive(
     (itemId === 'viewport' && panelState.preview.open && activePreviewMode === 'viewport3d') ||
     (itemId === 'canvas' && panelState.preview.open && activePreviewMode === 'canvas') ||
     (itemId === 'console' && panelState.preview.open && activePreviewMode === 'console') ||
-    (itemId === 'chat' && panelState.chat.open)
+    (itemId === 'terminal' && panelState.chat.open && activeBottomPanel === 'terminal') ||
+    (itemId === 'chat' && panelState.chat.open && activeBottomPanel === 'chat')
   );
 }
 
@@ -79,10 +86,12 @@ export function handleBottomDockItemClick(
   itemId: BottomDockItemId,
   {
     panelState,
+    activeBottomPanel,
     onTogglePanel,
     onOpenCommandPalette,
     onSelectSidebarTab,
     onSelectPreviewMode,
+    onSelectBottomPanel,
     onToggleDiagnostics,
   }: BottomDockHandlers,
 ) {
@@ -121,12 +130,29 @@ export function handleBottomDockItemClick(
     return;
   }
 
+  if (itemId === 'terminal') {
+    onSelectBottomPanel?.('terminal');
+    if (panelState.chat.open && activeBottomPanel === 'terminal') {
+      onTogglePanel('chat');
+      return;
+    }
+    if (!panelState.chat.open) {
+      onTogglePanel('chat');
+    }
+    return;
+  }
+
   if (itemId === 'diagnostics') {
     onToggleDiagnostics?.();
     return;
   }
 
   if (itemId === 'chat') {
+    onSelectBottomPanel?.('chat');
+    if (panelState.chat.open && activeBottomPanel === 'chat') {
+      onTogglePanel('chat');
+      return;
+    }
     onTogglePanel('chat');
   }
 }

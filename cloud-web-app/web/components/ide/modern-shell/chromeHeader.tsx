@@ -8,14 +8,16 @@ import {
   HeaderWorkspaceControls,
 } from './chromeHeaderParts';
 import { BORDER_SECONDARY } from './chromeStyles';
-import type { PanelState } from './types';
+import type { BottomPanelMode, PanelState } from './types';
 
 export interface IDEHeaderProps {
   projectName: string;
   activeFileName?: string;
   panelState: PanelState;
+  activeBottomPanel: BottomPanelMode;
   headerExtras?: React.ReactNode;
   onTogglePanel: (panel: keyof PanelState) => void;
+  onSelectBottomPanel?: (panel: BottomPanelMode) => void;
   onToggleSidebar?: () => void;
   isCompact: boolean;
   onRunPrimaryAction?: () => void;
@@ -27,8 +29,10 @@ export function IDEHeader({
   projectName,
   activeFileName,
   panelState,
+  activeBottomPanel,
   headerExtras,
   onTogglePanel,
+  onSelectBottomPanel,
   onToggleSidebar,
   isCompact,
   onRunPrimaryAction,
@@ -58,7 +62,9 @@ export function IDEHeader({
         <HeaderWorkspaceControls
           headerExtras={headerExtras}
           panelState={panelState}
+          activeBottomPanel={activeBottomPanel}
           onTogglePanel={onTogglePanel}
+          onSelectBottomPanel={onSelectBottomPanel}
           onOpenCommandPalette={onOpenCommandPalette}
         />
       )}

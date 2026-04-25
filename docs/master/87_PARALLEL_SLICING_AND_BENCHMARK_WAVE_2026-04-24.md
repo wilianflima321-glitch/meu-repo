@@ -48,6 +48,8 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - the dense settings surface was also reduced this wave: `cloud-web-app/web/components/settings/SettingsUI.tsx` is now `159` lines after extracting the catalog into `components/settings/ui/default-settings.ts` (`364`), the provider/store into `components/settings/ui/settings-provider.tsx` (`121`), field renderers into `components/settings/ui/SettingsField.tsx` (`245`), search/category derivation into `components/settings/ui/useSettingsUiState.ts` (`86`), and the denser summary/sidebar/results/popup chrome into `components/settings/ui/SettingsSummaryBar.tsx`, `SettingsCategorySidebar.tsx`, `SettingsResultsPane.tsx`, and `QuickSettingsPopup.tsx`
 - the settings shell also picked up benchmark-grade density polish instead of just file-size cleanup: clearer English copy, explicit visible/modified counts, and stronger keyboard-search guidance
 - the current checkout now truly routes `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` through `components/providers/StudioRuntimeRouteLayout.tsx`; the fresh clean rerun in `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log` proves the alignment but **does not** close build parity, because the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster still remained after the run reached `Generating static pages (213/213)`
+- the canonical shell also closed one of the most visible remaining benchmark gaps: `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspace.tsx` now mounts `MultiTerminalPanel.tsx` directly in the main workbench, `ModernIDEShellCenterStack.tsx` now acts as a bottom-lane switcher between `AI Console` and `Terminal`, and the shell chrome now exposes `Terminal` as a separate first-class surface instead of hiding terminal behavior behind the preview console lane
+- the follow-up clean rerun in `cloud-web-app/web/build-probe-2026-04-24-terminal-first-class.log` confirmed that this shell work did not introduce a new failure class: the build still reached `Generating static pages (213/213)` and still failed on the same `<Html>` + `useContext` blocker cluster
 
 This is real progress.
 It does **not** mean the workbench is solved.
@@ -171,6 +173,7 @@ Recommended seams:
 
 User-facing quality target:
 - terminal should feel stable, legible, and closer to the surrounding project context instead of like an embedded utility block
+- the canonical shell now exposes terminal as a real bottom-lane peer to `AI Console`, so the next quality bar is no longer “make terminal visible” but “make terminal feel just as trustworthy as editor + preview”
 
 ### 5. `AIChatPanelPro.tsx`
 Why now:

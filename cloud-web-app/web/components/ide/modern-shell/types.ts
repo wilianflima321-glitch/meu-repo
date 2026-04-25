@@ -7,4 +7,6 @@ export interface PanelState {
 
 export type SidebarTab = 'explorer' | 'git';
 
+export type BottomPanelMode = 'chat' | 'terminal';
+
 export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d' | 'canvas';

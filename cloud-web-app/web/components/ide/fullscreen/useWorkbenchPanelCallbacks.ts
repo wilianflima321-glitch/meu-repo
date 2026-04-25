@@ -2,18 +2,18 @@
 
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
 
-import type { PanelState } from '@/components/ide/modern-shell/types';
+import type { BottomPanelMode, PanelState } from '@/components/ide/modern-shell/types';
 
 type UseWorkbenchPanelCallbacksParams = {
   setModernPanelState: Dispatch<SetStateAction<PanelState>>;
+  setActiveBottomPanel: Dispatch<SetStateAction<BottomPanelMode>>;
   setPreviewEnabled: Dispatch<SetStateAction<boolean>>;
-  handleAIPanel: () => void;
 };
 
 export function useWorkbenchPanelCallbacks({
   setModernPanelState,
+  setActiveBottomPanel,
   setPreviewEnabled,
-  handleAIPanel,
 }: UseWorkbenchPanelCallbacksParams) {
   const onResizePanel = useCallback((panel: keyof PanelState, size: number) => {
     setModernPanelState((prev) => ({
@@ -41,7 +41,7 @@ export function useWorkbenchPanelCallbacks({
       return;
     }
     if (panel === 'chat') {
-      handleAIPanel();
+      setActiveBottomPanel('chat');
     }
     setModernPanelState((prev) => ({
       ...prev,
@@ -50,7 +50,7 @@ export function useWorkbenchPanelCallbacks({
         open: !prev[panel].open,
       },
     }));
-  }, [handleAIPanel, setModernPanelState, setPreviewEnabled]);
+  }, [setActiveBottomPanel, setModernPanelState, setPreviewEnabled]);
 
   return {
     onResizePanel,
