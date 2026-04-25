@@ -3,6 +3,7 @@
 import { useMemo, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type * as monacoEditor from 'monaco-editor';
 
+import Breadcrumbs from '@/components/editor/Breadcrumbs';
 import type { Diagnostic as MonacoDiagnostic } from '@/components/editor/MonacoEditorPro';
 import type { EditorGroup, SplitDirection } from '@/components/editor/SplitEditor';
 import TabBar from '@/components/editor/TabBar';
@@ -78,6 +79,7 @@ export type WorkbenchEditorPaneProps = {
   }) => void;
   onCursorStatusChange?: (status: EditorCursorStatus) => void;
   onSelectionStatusChange?: (status: EditorSelectionStatus) => void;
+  editorCursorStatus: EditorCursorStatus | null;
 };
 
 export function WorkbenchEditorPane({
@@ -125,6 +127,7 @@ export function WorkbenchEditorPane({
   onSelectionPresenceChange,
   onCursorStatusChange,
   onSelectionStatusChange,
+  editorCursorStatus,
 }: WorkbenchEditorPaneProps) {
   const search = useBrowserSearch();
   const inlineEditProjectId = useMemo(() => {
@@ -133,10 +136,25 @@ export function WorkbenchEditorPane({
     return normalizedProjectIdParam || undefined;
   }, [search]);
   const currentDiagnosticsFilePath = bridgeActiveFile?.path ?? activeFile?.path ?? '';
+  const breadcrumbFile = bridgeActiveFile ?? activeFile;
+  const breadcrumbLine =
+    !editorCursorStatus
+      ? 1
+      : !splitEditorOpen || editorCursorStatus.pane === splitActivePane
+        ? editorCursorStatus.line
+        : 1;
 
   return (
     <div className="h-full flex flex-col">
       <TabBar />
+      {breadcrumbFile ? (
+        <Breadcrumbs
+          filePath={breadcrumbFile.path}
+          symbols={outlineSymbols}
+          currentLine={breadcrumbLine}
+          onNavigateSymbol={onJumpToOutlineSymbol}
+        />
+      ) : null}
       <WorkbenchEditorToolbar
         isCompactViewport={isCompactViewport}
         collaborationConnected={collaborationConnected}

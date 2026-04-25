@@ -50,6 +50,10 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - the current checkout now truly routes `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` through `components/providers/StudioRuntimeRouteLayout.tsx`; the fresh clean rerun in `cloud-web-app/web/build-probe-2026-04-24-settings-wave-route-layout.log` proves the alignment but **does not** close build parity, because the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster still remained after the run reached `Generating static pages (213/213)`
 - the canonical shell also closed one of the most visible remaining benchmark gaps: `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspace.tsx` now mounts `MultiTerminalPanel.tsx` directly in the main workbench, `ModernIDEShellCenterStack.tsx` now acts as a bottom-lane switcher between `AI Console` and `Terminal`, and the shell chrome now exposes `Terminal` as a separate first-class surface instead of hiding terminal behavior behind the preview console lane
 - the shell chrome also stopped bluffing: `cloud-web-app/web/components/ide/modern-shell/chromeStatusBar.tsx` now reads real shell/editor/preview state instead of the old `main / 0 / 0 / Prettier / UTF-8 / Ln 1, Col 1 / AI Ready` placeholder grammar, while `useWorkbenchShellState.ts`, `WorkbenchEditorCanvas.tsx`, and `MonacoEditorPro.tsx` now publish live cursor/selection state so the footer can reflect active file/language, split-pane ownership, diagnostics, collaboration, current lanes, and preview-runtime health honestly
+- the canonical editor lane also closed another stale benchmark gap: `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` now mounts `Breadcrumbs.tsx` above the editor toolbar and feeds it with the live cursor line plus current outline symbols, so file-path and symbol breadcrumbs are now part of the real workbench instead of sitting as latent editor capability outside the main shell
+- this also corrects part of the historical V6 drift: on the current branch `cloud-web-app/web/components/editor/MonacoEditorPro.tsx` is `867` lines and already binds `Cmd/Ctrl+K` to `InlineEditModal`; the real remaining inline-AI gap is `InlineAIChat.tsx`, which still exists more as latent capability than as a productized canonical editor-lane surface
+- the keyboard layer is now more honest too: `cloud-web-app/web/lib/keybindings/keybindings-service.ts` no longer pretends `Ctrl+I` opens a productized inline-chat lane; it routes to the canonical `AI Console` instead, while inline chat remains an explicit open gap rather than fake-complete behavior
+- the dashboard also closed one of the ugliest hidden-gold gaps from the old audits: `cloud-web-app/web/components/useAethelDashboardRuntime.tsx` now opens `OnboardingWizard` from the persisted `/api/onboarding` welcome state instead of the looser first-value-guide toggle, and `cloud-web-app/web/components/dashboard/useDashboardActions.ts` now syncs wizard complete/skip outcomes back to `/api/onboarding` instead of leaving the wizard as an effectively orphaned surface
 - the follow-up clean rerun in `cloud-web-app/web/build-probe-2026-04-24-terminal-first-class.log` confirmed that this shell work did not introduce a new failure class: the build still reached `Generating static pages (213/213)` and still failed on the same `<Html>` + `useContext` blocker cluster
 - the next root-level build probes stayed honest instead of widening the drift surface: removing the legacy `cloud-web-app/web/pages/404.tsx`, `pages/500.tsx`, `pages/_app.tsx`, `pages/_document.tsx`, and `pages/_error.tsx` fallback chain, stripping `ClientLayout` out of `app/layout.tsx`, and collapsing `app/error.tsx`, `app/global-error.tsx`, and `app/not-found.tsx` to minimal boundaries still did **not** clear the old prerender path; `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log` reproduced the same `/404`, `/500`, and `/_not-found` failure class
 - the practical mitigation is now explicit instead of implied: `cloud-web-app/web/package.json` points `npm run build` to `next build --experimental-build-mode compile`, while `npm run build:prerender-probe` preserves the older generate path for diagnosis
@@ -90,8 +94,9 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/ai-chat/useAIChatComposerState.ts`: `220`
 - `cloud-web-app/web/components/ai-chat/useAIChatHistoryMode.ts`: `107`
 - `cloud-web-app/web/components/ai-chat/AIChatTimeline.tsx`: `90`
-- `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeSections.ts`: `141`
+- `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeSections.ts`: `158`
 - `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `107`
+- `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`: `219`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `99`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.types.ts`: `62`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchSplitEditorSurface.tsx`: `121`
@@ -105,6 +110,7 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/preview/useSceneViewportSurfaceState.ts`: `149`
 - `cloud-web-app/web/components/terminal/useTerminalTransport.ts`: `145`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewRuntimeControls.tsx`: `134`
+- `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`: `867`
 
 ### Wave B - dense product surfaces next in line
 - `cloud-web-app/web/app/admin/ai-monitor/page.tsx`: `1249`

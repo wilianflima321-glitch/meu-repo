@@ -51,6 +51,14 @@ import { ONBOARDING_WIZARD_DISMISSED_KEY } from './dashboard/aethel-dashboard-co
 import { useDashboardActions } from './dashboard/useDashboardActions'
 import { useDashboardDerivedState } from './dashboard/useDashboardDerivedState'
 
+type DashboardOnboardingResponse = {
+  onboarding?: {
+    currentStep?: string
+    completedSteps?: string[]
+    progressPercent?: number
+  }
+}
+
 export function useAethelDashboardRuntime() {
   const { mutate } = useSWRConfig()
   const { mission: entryMission, source: entrySource, dismissEntryIntent } = useDashboardEntryIntent()
@@ -194,6 +202,35 @@ export function useAethelDashboardRuntime() {
       refreshInterval: 30000,
     }
   )
+
+  const { data: onboardingData, mutate: mutateOnboarding } = useSWR<DashboardOnboardingResponse>(
+    hasToken ? '/api/onboarding' : null,
+    async (url: string) => {
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+      })
+      const payload = (await response.json().catch(() => ({}))) as DashboardOnboardingResponse & {
+        error?: string
+        message?: string
+      }
+      if (!response.ok) {
+        throw new Error(payload.error || payload.message || `Request failed: ${response.status}`)
+      }
+      return payload
+    },
+    {
+      revalidateOnFocus: false,
+    }
+  )
+
+  const onboardingState = onboardingData?.onboarding
+  const shouldShowFirstRunOnboarding =
+    onboardingState?.currentStep === 'welcome' &&
+    !onboardingState.completedSteps?.includes('welcome') &&
+    (onboardingState.progressPercent ?? 0) === 0
 
   const {
     walletTransactions,
@@ -341,6 +378,7 @@ export function useAethelDashboardRuntime() {
     mutateCredits,
     mutateConnectivity,
     mutateFullAccess,
+    mutateOnboarding,
     formatCurrencyLabel,
     setActiveTab,
     setChatMode,
@@ -397,10 +435,10 @@ export function useAethelDashboardRuntime() {
     const params = new URLSearchParams(window.location.search)
     const forced = params.get('onboarding') === '1'
     const dismissed = window.localStorage.getItem(ONBOARDING_WIZARD_DISMISSED_KEY) === '1'
-    if (forced || (!dismissed && showFirstValueGuide)) {
+    if (forced || (!dismissed && shouldShowFirstRunOnboarding)) {
       setShowOnboardingWizard(true)
     }
-  }, [authReady, hasToken, setShowOnboardingWizard, showFirstValueGuide])
+  }, [authReady, hasToken, setShowOnboardingWizard, shouldShowFirstRunOnboarding])
 
   useEffect(() => {
     setAuthReady(true)

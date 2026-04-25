@@ -86,7 +86,6 @@ function IDEContent() {
     handleEditorFind,
     handleEditorReplace,
     emitLayoutEvent,
-    handleAIInline,
     handleAIPanel,
     handleSelectSidebarTab,
     handleSelectPreviewMode,
@@ -246,7 +245,6 @@ function IDEContent() {
     handleEditorRedo,
     handleEditorFind,
     handleEditorReplace,
-    handleAIInline,
     handleAIPanel,
   });
 

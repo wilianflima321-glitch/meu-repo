@@ -134,7 +134,7 @@ export const DEFAULT_KEYBINDINGS: Keybinding[] = [
   { key: 'ctrl+shift+v', command: 'workbench.action.terminal.paste', when: 'terminalFocus' },
   
   // AI Features
-  { key: 'ctrl+i', command: 'aethel.ai.inlineChat', when: 'editorTextFocus' },
+  { key: 'ctrl+i', command: 'aethel.ai.openChat', when: 'editorTextFocus' },
   { key: 'ctrl+shift+i', command: 'aethel.ai.openChat' },
   { key: 'ctrl+k ctrl+i', command: 'aethel.ai.explain', when: 'editorTextFocus' },
   { key: 'tab', command: 'aethel.ai.acceptGhostText', when: 'editorTextFocus && ghostTextVisible' },

@@ -117,6 +117,7 @@ export function buildFullscreenIDEBridgeEditorProps(
     onSelectionPresenceChange: args.broadcastSelection,
     onCursorStatusChange: args.handleEditorCursorStatus,
     onSelectionStatusChange: args.handleEditorSelectionStatus,
+    editorCursorStatus: args.editorCursorStatus,
   };
 }
 

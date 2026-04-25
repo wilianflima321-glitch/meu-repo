@@ -95,6 +95,7 @@ export type DashboardActionsInput = {
   mutateCredits: () => Promise<any>
   mutateConnectivity: () => Promise<any>
   mutateFullAccess: () => Promise<any>
+  mutateOnboarding: () => Promise<any>
   formatCurrencyLabel: (currency?: string | null) => string
   setActiveTab: SetState<ActiveTab>
   setChatMode: SetState<'chat' | 'agent' | 'canvas'>
@@ -162,6 +163,7 @@ export function useDashboardActions({
   mutateCredits,
   mutateConnectivity,
   mutateFullAccess,
+  mutateOnboarding,
   formatCurrencyLabel,
   setActiveTab,
   setChatMode,
@@ -546,6 +548,35 @@ export function useDashboardActions({
     showToastMessage(`Template "${template.name}" carregado no chat.`, 'success')
   }, [workflowTemplates, setChatMessage, setActiveTab, showToastMessage])
 
+  const persistOnboardingProgress = useCallback((action: 'complete_step' | 'skip', step?: string) => {
+    if (!hasToken) return
+
+    void (async () => {
+      try {
+        const response = await fetch('/api/onboarding', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify(step ? { action, step } : { action }),
+        })
+
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`)
+        }
+
+        await mutateOnboarding()
+      } catch (error) {
+        trackEvent('onboarding', 'wizard_sync_error', {
+          action,
+          step: step || null,
+          error: error instanceof Error ? error.message : 'unknown',
+        })
+      }
+    })()
+  }, [hasToken, mutateOnboarding, trackEvent])
+
   const handleDismissOnboardingWizard = useCallback((reason: 'skip' | 'complete') => {
     setShowOnboardingWizard(false)
     if (typeof window !== 'undefined') {
@@ -556,17 +587,19 @@ export function useDashboardActions({
 
   const handleOnboardingComplete = useCallback((data: { template: string; name: string; description: string }) => {
     handleDismissOnboardingWizard('complete')
+    persistOnboardingProgress('complete_step', 'welcome')
     if (data?.name?.trim()) {
       setNewProjectName(data.name.trim())
     }
     if (data?.template) {
       handleTemplateSelect(data.template)
     }
-  }, [handleDismissOnboardingWizard, handleTemplateSelect, setNewProjectName])
+  }, [handleDismissOnboardingWizard, handleTemplateSelect, persistOnboardingProgress, setNewProjectName])
 
   const handleOnboardingSkip = useCallback(() => {
     handleDismissOnboardingWizard('skip')
-  }, [handleDismissOnboardingWizard])
+    persistOnboardingProgress('skip')
+  }, [handleDismissOnboardingWizard, persistOnboardingProgress])
 
   const handleUseCaseSelect = useCallback((useCaseId: string) => {
     const selected = useCases.find((item) => item.id === useCaseId)

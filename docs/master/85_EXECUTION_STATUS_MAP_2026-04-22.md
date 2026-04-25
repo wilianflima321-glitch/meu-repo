@@ -18,7 +18,7 @@ This file is the short scoreboard that answers:
 - `useAIChatComposerState.ts`: `220` lines
 - `useAIChatHistoryMode.ts`: `107` lines
 - `AIChatTimeline.tsx`: `90` lines
-- `useFullscreenIDEBridgeSections.ts`: `141` lines
+- `useFullscreenIDEBridgeSections.ts`: `158` lines
 - `WorkbenchPreviewPane.tsx`: `44` lines
 - `SceneViewportSurface.tsx`: `98` lines
 - `WorkbenchEditorSurface.tsx`: `99` lines
@@ -32,7 +32,7 @@ This file is the short scoreboard that answers:
 - `useTerminalTransport.ts`: `145` lines
 - `chromeResizeHandle.tsx`: `106` lines
 - `sceneViewportDerivations.ts`: `89` lines
-- `WorkbenchEditorPane.tsx`: `193` lines
+- `WorkbenchEditorPane.tsx`: `219` lines
 - `WorkbenchEditorToolbar.tsx`: `191` lines
 - `WorkbenchEditorCanvas.tsx`: `108` lines
 - `WorkbenchEditorSidecar.tsx`: `85` lines
@@ -60,7 +60,7 @@ This file is the short scoreboard that answers:
 - `useTerminalOptions.ts`: `58` lines
 - `useTerminalImperativeHandle.ts`: `51` lines
 - `useWorkbenchShellState.ts`: `257` lines
-- `MonacoEditorPro.tsx`: `955` lines
+- `MonacoEditorPro.tsx`: `867` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
@@ -91,11 +91,19 @@ This file is the short scoreboard that answers:
 ## Shipped But Still Partial
 ### Onboarding
 - the funnel exists and is instrumented,
+- the dashboard now opens `OnboardingWizard` from the real `/api/onboarding` welcome-state signal instead of the looser first-value-guide toggle, and `?onboarding=1` remains as an explicit manual override for walkthrough/debug runs
 - but durable onboarding state and stronger first-run continuity are still open.
+- the next honest gap is persistence quality:
+  - the server onboarding route still keeps state in memory, so the UX is now more visible but not yet enterprise-durable across full backend restarts
 
 ### Inline AI editing
 - the canonical inline-edit path is wired and user-facing,
 - but still depends on provider/runtime readiness.
+- historical audit claims that `Cmd+K` is still unwired are now stale on this branch:
+  - `MonacoEditorPro.tsx` already binds `Cmd/Ctrl+K` to `InlineEditModal`
+  - the real remaining gap is that `InlineAIChat.tsx` still exists more as latent capability than as a canonical editor-lane surface
+- the shell keybinding grammar is also more honest now:
+  - `Ctrl+I` routes to the canonical `AI Console` instead of pretending an inline-chat surface is already productized in the editor lane
 - the former container hotspot was also reduced:
   - `AIChatPanelContainer.tsx` is now a thin orchestrator backed by extracted session-context, provider-preflight, send-pipeline, and session-banner modules.
 
@@ -162,6 +170,8 @@ This file is the short scoreboard that answers:
 ### Collaboration
 - the workbench editor lane was further decomposed this round:
   - `WorkbenchEditorPane.tsx` now acts as a thin coordinator over `WorkbenchEditorSurface.tsx`, `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
+- the canonical editor context lane is now stronger too:
+  - `WorkbenchEditorPane.tsx` mounts `Breadcrumbs.tsx` with live cursor line + current outline symbols, so the path/symbol breadcrumb system is no longer a latent editor capability outside the main workbench flow
 - baseline collaboration is shipped in the canonical IDE:
   - collaborator presence
   - header avatars

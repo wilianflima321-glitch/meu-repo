@@ -28,7 +28,6 @@ type UseWorkbenchChromeParams = {
   handleEditorRedo: () => void;
   handleEditorFind: () => void;
   handleEditorReplace: () => void;
-  handleAIInline: () => void;
   handleAIPanel: () => void;
 };
 
@@ -53,7 +52,6 @@ export function useWorkbenchChrome({
   handleEditorRedo,
   handleEditorFind,
   handleEditorReplace,
-  handleAIInline,
   handleAIPanel,
 }: UseWorkbenchChromeParams) {
   useEffect(() => {
@@ -175,9 +173,6 @@ export function useWorkbenchChrome({
         case 'editor.action.startFindReplaceAction':
           handleEditorReplace();
           return;
-        case 'aethel.ai.inlineChat':
-          handleAIInline();
-          return;
         case 'aethel.ai.openChat':
           handleAIPanel();
           return;
@@ -190,7 +185,6 @@ export function useWorkbenchChrome({
     return () => window.removeEventListener('aethel:command', onCommand as EventListener);
   }, [
     emitLayoutEvent,
-    handleAIInline,
     handleAIPanel,
     handleEditorFind,
     handleEditorRedo,
