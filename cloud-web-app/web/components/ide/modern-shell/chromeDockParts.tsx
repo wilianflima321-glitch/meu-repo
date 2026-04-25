@@ -27,6 +27,7 @@ export type BottomDockItemId =
   | 'search'
   | 'git'
   | 'viewport'
+  | 'canvas'
   | 'console'
   | 'diagnostics'
   | 'chat';
@@ -42,10 +43,11 @@ export const BOTTOM_DOCK_ITEMS: ReadonlyArray<BottomDockItemDescriptor> = [
   { id: 'explorer', icon: <FolderTree size={16} />, label: 'Arquivos', shortcut: 'Ctrl+Shift+E' },
   { id: 'search', icon: <Search size={16} />, label: 'Buscar', shortcut: 'Ctrl+Shift+F' },
   { id: 'git', icon: <GitBranch size={16} />, label: 'Git', shortcut: 'Ctrl+Shift+G' },
-  { id: 'viewport', icon: <Play size={16} />, label: 'Viewport', shortcut: 'Ctrl+Shift+V' },
+  { id: 'viewport', icon: <Play size={16} />, label: 'Visual 3D', shortcut: 'Ctrl+Shift+V' },
+  { id: 'canvas', icon: <Code2 size={16} />, label: 'Visual UI', shortcut: 'Ctrl+Shift+U' },
   { id: 'console', icon: <Terminal size={16} />, label: 'Console', shortcut: 'Ctrl+J' },
   { id: 'diagnostics', icon: <AlertCircle size={16} />, label: 'Erros', shortcut: 'Ctrl+Shift+M' },
-  { id: 'chat', icon: <Sparkles size={16} />, label: 'IA', shortcut: 'Ctrl+I' },
+  { id: 'chat', icon: <Sparkles size={16} />, label: 'AI Console', shortcut: 'Ctrl+I' },
 ];
 
 interface BottomDockHandlers {
@@ -67,6 +69,7 @@ export function isBottomDockItemActive(
     (itemId === 'explorer' && panelState.sidebar.open && activeSidebarTab === 'explorer') ||
     (itemId === 'git' && panelState.sidebar.open && activeSidebarTab === 'git') ||
     (itemId === 'viewport' && panelState.preview.open && activePreviewMode === 'viewport3d') ||
+    (itemId === 'canvas' && panelState.preview.open && activePreviewMode === 'canvas') ||
     (itemId === 'console' && panelState.preview.open && activePreviewMode === 'console') ||
     (itemId === 'chat' && panelState.chat.open)
   );
@@ -103,6 +106,12 @@ export function handleBottomDockItemClick(
   if (itemId === 'viewport') {
     if (!panelState.preview.open) onTogglePanel('preview');
     onSelectPreviewMode?.('viewport3d');
+    return;
+  }
+
+  if (itemId === 'canvas') {
+    if (!panelState.preview.open) onTogglePanel('preview');
+    onSelectPreviewMode?.('canvas');
     return;
   }
 
@@ -204,8 +213,8 @@ interface MobileBottomBarItemDescriptor {
 export const MOBILE_BOTTOM_BAR_ITEMS: ReadonlyArray<MobileBottomBarItemDescriptor> = [
   { id: 'sidebar', icon: <FolderTree size={20} />, label: 'Arquivos' },
   { id: 'editor', icon: <Code2 size={20} />, label: 'Editor' },
-  { id: 'chat', icon: <MessageSquare size={20} />, label: 'Copiloto' },
-  { id: 'preview', icon: <Play size={20} />, label: 'Previa' },
+  { id: 'chat', icon: <MessageSquare size={20} />, label: 'AI Console' },
+  { id: 'preview', icon: <Play size={20} />, label: 'Visual' },
 ];
 
 interface MobileBottomBarItemButtonProps {

@@ -33,13 +33,15 @@ interface ModernIDEShellPanelsProps {
 function getPreviewPanelLabel(activePreviewMode: PreviewMode) {
   switch (activePreviewMode) {
     case 'viewport3d':
-      return 'Viewport';
+      return 'Visual (3D)';
+    case 'canvas':
+      return 'Visual (UI)';
     case 'console':
       return 'Console';
     case 'device':
-      return 'Device Preview';
+      return 'Devices';
     default:
-      return 'Preview';
+      return 'App Preview';
   }
 }
 

@@ -56,7 +56,7 @@ export function WorkbenchPreviewModeHeader({
 
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
           <span className="inline-flex min-h-[30px] items-center rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-secondary)]">
-            {activeModeMeta.label} lane
+            Surface: {activeModeMeta.label}
           </span>
           {activeFile ? (
             <span className="inline-flex min-h-[30px] max-w-[260px] items-center truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-tertiary)]">

@@ -24,14 +24,13 @@ function WorkbenchPreviewEmptyState() {
     <div className="flex h-full items-center justify-center px-6">
       <div className="max-w-md rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_55%,transparent)] p-5 text-left shadow-[0_18px_48px_rgba(0,0,0,0.24)]">
         <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
-          Preview lane
+          Visual workspace
         </div>
         <div className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">
-          Choose a file to inspect its live surface.
+          Selecione um arquivo para abrir a superficie visual certa.
         </div>
         <div className="mt-2 text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-          We keep this lane ready for runtime, devices, console, and 3D checks so the next
-          validation step stays one click away.
+          Mantemos runtime, devices, console e visual 3D na mesma lane para que a proxima validacao fique a um clique de distancia.
         </div>
         <div className="mt-4 flex flex-wrap gap-2 text-[11px] text-[var(--aethel-text-secondary)]">
           {PREVIEW_MODES.map((mode) => (

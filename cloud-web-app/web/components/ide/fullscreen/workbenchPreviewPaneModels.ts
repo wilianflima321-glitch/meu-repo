@@ -17,10 +17,11 @@ export type WorkbenchPreviewModeOption = {
 };
 
 export const PREVIEW_MODES: WorkbenchPreviewModeOption[] = [
-  { id: 'runtime', label: 'Preview', description: 'Live runtime surface' },
+  { id: 'runtime', label: 'App Preview', description: 'Live runtime surface' },
   { id: 'device', label: 'Devices', description: 'Responsive framing' },
   { id: 'console', label: 'Console', description: 'Logs and runtime output' },
-  { id: 'viewport3d', label: 'Viewport 3D', description: 'Scene-oriented preview' },
+  { id: 'viewport3d', label: 'Visual (3D)', description: 'Scene-oriented preview' },
+  { id: 'canvas', label: 'Visual (UI)', description: 'Canvas-oriented artifact view' },
 ];
 
 export type WorkbenchPreviewPaneProps = {

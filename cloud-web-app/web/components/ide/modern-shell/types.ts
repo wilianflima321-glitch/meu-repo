@@ -7,4 +7,4 @@ export interface PanelState {
 
 export type SidebarTab = 'explorer' | 'git';
 
-export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d';
+export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d' | 'canvas';

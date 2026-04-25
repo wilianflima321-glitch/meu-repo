@@ -32,8 +32,8 @@ const headerPanelItems: ReadonlyArray<{
   label: string;
 }> = [
   { panel: 'sidebar', icon: <FolderTree size={16} />, label: 'Arquivos' },
-  { panel: 'chat', icon: <MessageSquare size={16} />, label: 'Copiloto' },
-  { panel: 'preview', icon: <Play size={16} />, label: 'Previa' },
+  { panel: 'chat', icon: <MessageSquare size={16} />, label: 'AI Console' },
+  { panel: 'preview', icon: <Play size={16} />, label: 'Visual' },
 ];
 
 const commandPaletteItems: ReadonlyArray<{

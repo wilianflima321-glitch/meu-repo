@@ -55,7 +55,7 @@ export function AgentBoard({ agents, onAgentClick }: AgentBoardProps) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-[var(--aethel-info-light)]" />
-          <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Agent Board</span>
+          <span className="text-xs font-semibold text-[var(--aethel-text-primary)]">Operacao multiagente</span>
           <span className="text-xs text-[var(--aethel-text-tertiary)]">{agents.length} agentes</span>
         </div>
       </div>

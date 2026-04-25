@@ -28,6 +28,7 @@ export function WorkbenchPreviewPane({
       <div className="min-h-0 flex-1 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-primary)_100%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent))]">
         {previewMode === 'console' && <ConsoleIntegration />}
         {previewMode === 'viewport3d' && <CanonicalPreviewSurface variant="scene" renderMode="draft" />}
+        {previewMode === 'canvas' && <CanonicalPreviewSurface variant="canvas" renderMode="draft" />}
         {(previewMode === 'runtime' || previewMode === 'device') && (
           <WorkbenchPreviewRuntimeSurface
             {...runtimeSurfaceProps}

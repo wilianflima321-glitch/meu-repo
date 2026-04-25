@@ -61,7 +61,7 @@ export function ModernIDEShellCenterStack({
       {chatOpen && !isCompact && (
         <>
           <ResizeHandle
-            ariaLabel="Redimensionar copiloto"
+            ariaLabel="Redimensionar AI Console"
             orientation="horizontal"
             onMouseDown={startVerticalResize}
             onAdjust={(delta) => setChatSize(chatSize + delta)}
@@ -93,12 +93,12 @@ export function ModernIDEShellCenterStack({
                 background: 'rgba(255, 255, 255, 0.02)',
               }}
             >
-              <PanelTitle icon={<MessageSquare size={14} />} label="Copiloto" />
+              <PanelTitle icon={<MessageSquare size={14} />} label="AI Console" />
               <button
                 type="button"
                 onClick={toggleChat}
                 style={iconButtonStyle}
-                aria-label="Fechar copiloto"
+                aria-label="Fechar AI Console"
               >
                 ×
               </button>

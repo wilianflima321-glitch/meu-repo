@@ -10,7 +10,7 @@ export type EditorPane = 'primary' | 'secondary';
 
 export type SidebarTab = 'explorer' | 'git';
 
-export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d';
+export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d' | 'canvas';
 
 export type CollaborationRoomParticipant = {
   userId: string;

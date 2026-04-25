@@ -41,12 +41,12 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
-            Linha do tempo recente
+            Timeline operacional
           </div>
           {activeThreadTitle ? (
-            <div className="mt-1 text-xs text-[var(--aethel-text-secondary)]">Thread ativa: {activeThreadTitle}</div>
+            <div className="mt-1 text-xs text-[var(--aethel-text-secondary)]">Thread em foco: {activeThreadTitle}</div>
           ) : (
-            <div className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Continue do ponto certo sem recontar tudo.</div>
+            <div className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Retome o fluxo certo sem recontar o contexto inteiro.</div>
           )}
         </div>
 
