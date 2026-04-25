@@ -16,6 +16,7 @@ import { normalizePath } from '@/components/ide/fullscreen/workbench-helpers';
 import type { BottomPanelMode, PanelState } from '@/components/ide/modern-shell/types';
 import { MultiTerminalPanel } from '@/components/terminal/XTerminal';
 import { TabProvider } from '@/components/editor/TabBar';
+import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 
 import type { ActiveFileState, PreviewMode, SidebarTab } from '@/components/ide/fullscreen/types';
 
@@ -33,6 +34,7 @@ type FullscreenIDEWorkspaceProps = {
   banner?: ReactNode;
   workspaceFilesLoaded: boolean;
   workspaceFiles: FileItem[];
+  sidebarCollaborationPeers: RemotePeer[];
   sidebarTab: SidebarTab;
   panelState: PanelState;
   activeBottomPanel: BottomPanelMode;
@@ -73,6 +75,7 @@ export function FullscreenIDEWorkspace({
   banner,
   workspaceFilesLoaded,
   workspaceFiles,
+  sidebarCollaborationPeers,
   sidebarTab,
   panelState,
   activeBottomPanel,
@@ -153,6 +156,7 @@ export function FullscreenIDEWorkspace({
               sidebar: (
                 <WorkbenchSidebar
                   sidebarTab={sidebarTab}
+                  collaborationPeers={sidebarCollaborationPeers}
                   onSidebarTabChange={onSidebarTabChange}
                   onFileSelect={onFileSelect}
                 />

@@ -2,6 +2,11 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Loader2, Rocket } from 'lucide-react';
+import {
+  buildDeployStatusHref,
+  normalizeDeployProjectName,
+  persistPreviewDeploy,
+} from '@/components/preview/previewDeployTrust';
 import { tokens } from '@/lib/design-tokens';
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 import {
@@ -29,6 +34,8 @@ type DeployReadiness = {
 
 type DeployResponse = {
   id?: string;
+  url?: string;
+  inspectorUrl?: string;
   status?: DeployStatus;
   error?: string;
   message?: string;
@@ -124,6 +131,13 @@ export function DeployTopbarAction({ projectName }: DeployTopbarActionProps) {
         projectIdParam
       );
 
+      persistPreviewDeploy(deployProjectName, {
+        id: payload.id,
+        url: payload.url || '',
+        inspectorUrl: payload.inspectorUrl || '',
+        status: payload.status || 'idle',
+        createdAt: new Date().toISOString(),
+      });
       setStatusHref(nextStatusHref);
       setFeedback(getDeployStartedLabel(payload.status));
       window.open(nextStatusHref, '_blank', 'noopener,noreferrer');
@@ -211,31 +225,6 @@ export function DeployTopbarAction({ projectName }: DeployTopbarActionProps) {
       ) : null}
     </div>
   );
-}
-
-function normalizeDeployProjectName(input: string): string {
-  const slug = input
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-');
-
-  return (slug || 'aethel-deploy').slice(0, 100);
-}
-
-function buildDeployStatusHref(
-  deploymentId: string,
-  projectName: string,
-  projectId?: string
-): string {
-  const params = new URLSearchParams();
-  params.set('project', projectName);
-  if (projectId) {
-    params.set('projectId', projectId);
-  }
-
-  return `/deploy/${encodeURIComponent(deploymentId)}?${params.toString()}`;
 }
 
 function getDeployStartedLabel(status: DeployStatus | undefined): string {

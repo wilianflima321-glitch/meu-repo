@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 
+import type { PreviewDeployReadiness, PreviewDeployStatus } from '@/components/preview/previewDeployTrust'
 import type { PreviewRuntimeHealthStatus, PreviewRuntimeReadinessResponse } from '@/lib/preview/runtime-manager'
 
 import { ptBR } from '@/lib/locales/pt-BR'
@@ -35,6 +36,19 @@ type Props = {
   canSyncRuntime: boolean
   runtimeDiscoveryMessage?: string | null
   runtimeDiscoveryTone?: 'info' | 'success' | 'warning'
+  deployReadiness: PreviewDeployReadiness | null
+  deployStatus: PreviewDeployStatus | null
+  deployStatusHref: string | null
+  deployUrl: string | null
+  deployFeedback: string | null
+  shareTargetLabel: string | null
+  isDeploySubmitting: boolean
+  isDeployRefreshing: boolean
+  onStartDeploy: () => void
+  onRefreshDeploy: () => void
+  onCopyShareLink: () => void
+  onOpenDeployStatus: () => void
+  onOpenDeploySite: () => void
 }
 
 function CompactMetric({
@@ -98,6 +112,19 @@ export default function PreviewRuntimeToolbar({
   canSyncRuntime,
   runtimeDiscoveryMessage,
   runtimeDiscoveryTone = 'info',
+  deployReadiness,
+  deployStatus,
+  deployStatusHref,
+  deployUrl,
+  deployFeedback,
+  shareTargetLabel,
+  isDeploySubmitting,
+  isDeployRefreshing,
+  onStartDeploy,
+  onRefreshDeploy,
+  onCopyShareLink,
+  onOpenDeployStatus,
+  onOpenDeploySite,
 }: Props) {
   const t = ptBR.ide.preview
   const tc = ptBR.common
@@ -179,6 +206,23 @@ export default function PreviewRuntimeToolbar({
   const checkedAtLabel = runtimeHealthCheckedAt
     ? runtimeHealthCheckedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : null
+  const deployStatusLabel = getDeployStatusLabel(deployStatus)
+  const deployStateClass =
+    deployStatus === 'ready'
+      ? 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
+      : deployStatus === 'building' || deployStatus === 'preparing' || deployStatus === 'uploading'
+        ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
+        : deployStatus === 'error'
+          ? 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
+          : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'
+  const deployHint =
+    deployReadiness?.canDeploy === false && deployReadiness.missing?.length
+      ? `Configure ${deployReadiness.missing.join(', ')} para publicar.`
+      : deployStatus === 'ready'
+        ? 'Deploy publico pronto para compartilhar.'
+        : deployStatusHref
+          ? 'Status do deploy acompanhado na mesma lane.'
+          : 'Publique quando precisar validar share e parity fora do runtime local.'
 
   const quickFacts = [
     { label: t.health, value: runtimeStateLabel, hint: runtimeHealthHint },
@@ -239,6 +283,95 @@ export default function PreviewRuntimeToolbar({
             {quickFacts.map((item) => (
               <CompactMetric key={item.label} label={item.label} value={item.value} hint={item.hint} />
             ))}
+          </div>
+
+          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-3 py-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-[220px] flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+                    Deploy trust
+                  </span>
+                  <ToolbarChip toneClass={deployStateClass}>
+                    {deployStatusLabel}
+                  </ToolbarChip>
+                  <ToolbarChip
+                    toneClass={
+                      deployReadiness?.canDeploy === false
+                        ? 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]'
+                        : 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]'
+                    }
+                  >
+                    {deployReadiness?.canDeploy === false ? 'Deploy blocked' : 'Deploy ready'}
+                  </ToolbarChip>
+                  {shareTargetLabel ? (
+                    <ToolbarChip toneClass="border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]">
+                      Share via {shareTargetLabel}
+                    </ToolbarChip>
+                  ) : null}
+                </div>
+                <div className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                  {deployHint}
+                </div>
+                {deployFeedback ? (
+                  <div className="mt-2 text-[11px] text-[var(--aethel-text-secondary)]">
+                    {deployFeedback}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onStartDeploy}
+                  disabled={isDeploySubmitting || deployReadiness?.canDeploy === false}
+                  aria-label="Create deploy from preview lane"
+                  className="min-h-[34px] rounded-xl border border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-success-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-success)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isDeploySubmitting ? 'Publishing...' : 'Deploy now'}
+                </button>
+                {deployStatusHref ? (
+                  <button
+                    type="button"
+                    onClick={onOpenDeployStatus}
+                    aria-label="Open deploy status page"
+                    className="min-h-[34px] rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                  >
+                    Status
+                  </button>
+                ) : null}
+                {deployUrl ? (
+                  <button
+                    type="button"
+                    onClick={onOpenDeploySite}
+                    aria-label="Open deployed site"
+                    className="min-h-[34px] rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)]"
+                  >
+                    Open deploy
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={onCopyShareLink}
+                  disabled={!shareTargetLabel}
+                  aria-label="Copy best available share link"
+                  className="min-h-[34px] rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  Copy share link
+                </button>
+                {deployStatusHref ? (
+                  <button
+                    type="button"
+                    onClick={onRefreshDeploy}
+                    disabled={isDeployRefreshing}
+                    aria-label="Refresh deploy status"
+                    className="min-h-[34px] rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] px-3 py-1.5 text-[11px] text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isDeployRefreshing ? 'Refreshing...' : 'Refresh deploy'}
+                  </button>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -441,4 +574,25 @@ export default function PreviewRuntimeToolbar({
       ) : null}
     </div>
   )
+}
+
+function getDeployStatusLabel(status: PreviewDeployStatus | null) {
+  switch (status) {
+    case 'preparing':
+      return 'Queued';
+    case 'uploading':
+      return 'Uploading';
+    case 'building':
+      return 'Building';
+    case 'ready':
+      return 'Ready';
+    case 'error':
+      return 'Error';
+    case 'canceled':
+      return 'Canceled';
+    case 'idle':
+      return 'Idle';
+    default:
+      return 'Not started';
+  }
 }

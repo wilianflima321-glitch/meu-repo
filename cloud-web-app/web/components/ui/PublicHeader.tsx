@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { isNavLinkActive, PUBLIC_NAV_LINKS } from '@/lib/navigation/surfaces'
-import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 const headerGhostLinkClass =
   'inline-flex items-center justify-center rounded-lg border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)]'
@@ -15,18 +14,28 @@ const headerPrimaryLinkClass =
 export default function PublicHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const pathname = useBrowserPathname()
+  const [pathname, setPathname] = useState('')
   const isStudioSurface = pathname.startsWith('/dashboard') || pathname.startsWith('/ide') || pathname.startsWith('/nexus')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
+    const syncPathname = () => setPathname(window.location.pathname)
+
+    syncPathname()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener('popstate', syncPathname)
+    window.addEventListener('hashchange', syncPathname)
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('popstate', syncPathname)
+      window.removeEventListener('hashchange', syncPathname)
+    }
   }, [])
 
-  useEffect(() => {
+  const handleNavigate = () => {
     setMobileOpen(false)
-  }, [pathname])
+  }
 
   return (
     <>
@@ -70,6 +79,7 @@ export default function PublicHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  onClick={handleNavigate}
                   className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)]'
@@ -85,18 +95,21 @@ export default function PublicHeader() {
           <div className="hidden items-center gap-3 md:flex">
             <Link
               href="/contact-sales"
+              onClick={handleNavigate}
               className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3.5 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)]"
             >
               Falar com vendas
             </Link>
             <Link
               href="/login"
+              onClick={handleNavigate}
               className={headerGhostLinkClass}
             >
               Entrar
             </Link>
             <Link
               href="/dashboard?onboarding=1&source=header"
+              onClick={handleNavigate}
               className={headerPrimaryLinkClass}
             >
               Comecar gratis
@@ -136,6 +149,7 @@ export default function PublicHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  onClick={handleNavigate}
                   className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] text-[var(--aethel-text-primary)]'
@@ -149,18 +163,21 @@ export default function PublicHeader() {
             <div className="my-3 h-px bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)]" />
             <Link
               href="/contact-sales"
+              onClick={handleNavigate}
               className="block rounded-lg px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
             >
               Falar com vendas
             </Link>
             <Link
               href="/login"
+              onClick={handleNavigate}
               className={`${headerGhostLinkClass} block px-4 py-3`}
             >
               Entrar
             </Link>
             <Link
               href="/dashboard?onboarding=1&source=header-mobile"
+              onClick={handleNavigate}
               className={`${headerPrimaryLinkClass} mt-2 block px-4 py-3 text-center`}
             >
               Comecar gratis

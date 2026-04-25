@@ -2,17 +2,20 @@
 
 import FileExplorerPro from '@/components/ide/FileExplorerPro';
 import { GitIntegration } from '@/components/ide/GitIntegration';
+import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 
 import type { SidebarTab } from '@/components/ide/fullscreen/types';
 
 type WorkbenchSidebarProps = {
   sidebarTab: SidebarTab;
+  collaborationPeers?: RemotePeer[];
   onSidebarTabChange: (tab: SidebarTab) => void;
   onFileSelect: (file: { path: string; type: 'file' | 'folder' }) => void;
 };
 
 export function WorkbenchSidebar({
   sidebarTab,
+  collaborationPeers = [],
   onSidebarTabChange,
   onFileSelect,
 }: WorkbenchSidebarProps) {
@@ -44,7 +47,7 @@ export function WorkbenchSidebar({
       </div>
       <div className="flex-1 min-h-0">
         {sidebarTab === 'explorer' ? (
-          <FileExplorerPro onFileSelect={onFileSelect} />
+          <FileExplorerPro onFileSelect={onFileSelect} collaborationPeers={collaborationPeers} />
         ) : (
           <GitIntegration />
         )}

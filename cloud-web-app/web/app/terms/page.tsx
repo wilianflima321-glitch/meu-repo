@@ -2,6 +2,8 @@ import Link from 'next/link'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 
+const LAST_UPDATED_LABEL = '25/04/2026'
+
 export const metadata = {
   title: 'Termos de Uso | Aethel Studio',
   description: 'Politicas e termos de uso vigentes para a plataforma Aethel.',
@@ -63,7 +65,7 @@ export default function TermsPage() {
           </article>
 
           <footer className="space-y-3 border-t border-[var(--aethel-border-subtle)] pt-4">
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">Ultima atualizacao: {new Date().toLocaleDateString('pt-BR')}</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Ultima atualizacao: {LAST_UPDATED_LABEL}</p>
             <div className="flex flex-wrap gap-3">
               <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] rounded-xl px-4 py-2 text-sm">
                 Voltar ao painel

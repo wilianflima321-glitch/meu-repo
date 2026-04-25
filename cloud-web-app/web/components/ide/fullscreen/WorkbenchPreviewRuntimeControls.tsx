@@ -2,6 +2,7 @@
 
 import PreviewRuntimeToolbar from '@/components/ide/PreviewRuntimeToolbar';
 import { useWorkbenchRuntimeActions } from '@/components/ide/fullscreen/useWorkbenchRuntimeActions';
+import { usePreviewDeployTrust } from '@/components/preview/usePreviewDeployTrust';
 import { analytics } from '@/lib/analytics';
 
 import type { WorkbenchPreviewPaneProps } from './workbenchPreviewPaneModels';
@@ -25,6 +26,7 @@ type WorkbenchPreviewRuntimeControlsProps = Pick<
   | 'isProvisioningRuntime'
   | 'isSyncingRuntime'
   | 'previewSandboxId'
+  | 'projectId'
   | 'setPreviewRuntimeInput'
   | 'setShowRuntimeSettings'
   | 'applyRuntimeUrl'
@@ -62,6 +64,7 @@ export function WorkbenchPreviewRuntimeControls({
   isProvisioningRuntime,
   isSyncingRuntime,
   previewSandboxId,
+  projectId,
   setPreviewRuntimeInput,
   setShowRuntimeSettings,
   applyRuntimeUrl,
@@ -99,6 +102,24 @@ export function WorkbenchPreviewRuntimeControls({
     },
   });
 
+  const {
+    readiness: deployReadiness,
+    deployment,
+    deployStatusHref,
+    shareTarget,
+    feedback: deployFeedback,
+    isSubmittingDeploy,
+    isRefreshingDeploy,
+    startDeploy,
+    refreshDeployment,
+    copyShareLink,
+    openDeployStatus,
+    openDeploySite,
+  } = usePreviewDeployTrust({
+    projectId,
+    previewRuntimeUrl,
+  });
+
   return (
     <PreviewRuntimeToolbar
       previewRuntimeUrl={previewRuntimeUrl}
@@ -123,12 +144,25 @@ export function WorkbenchPreviewRuntimeControls({
       canSyncRuntime={Boolean(previewSandboxId)}
       runtimeDiscoveryMessage={runtimeDiscoveryMessage}
       runtimeDiscoveryTone={runtimeDiscoveryTone}
+      deployReadiness={deployReadiness}
+      deployStatus={deployment?.status ?? null}
+      deployStatusHref={deployStatusHref}
+      deployUrl={deployment?.url ?? null}
+      deployFeedback={deployFeedback}
+      shareTargetLabel={shareTarget?.label ?? null}
+      isDeploySubmitting={isSubmittingDeploy}
+      isDeployRefreshing={isRefreshingDeploy}
       onRunRecommendedAction={runRecommendedAction}
       onDiscoverRuntime={discoverAndRefresh}
       onProvisionRuntime={provisionAndRefresh}
       onSyncRuntime={syncAndRefresh}
       onRevalidate={revalidateRuntimeHealth}
       onOpenRuntime={openRuntime}
+      onStartDeploy={startDeploy}
+      onRefreshDeploy={() => void refreshDeployment()}
+      onCopyShareLink={() => void copyShareLink()}
+      onOpenDeployStatus={openDeployStatus}
+      onOpenDeploySite={openDeploySite}
     />
   );
 }

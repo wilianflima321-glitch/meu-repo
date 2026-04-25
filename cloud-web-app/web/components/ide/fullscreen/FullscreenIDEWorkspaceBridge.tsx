@@ -61,6 +61,7 @@ export default function FullscreenIDEWorkspaceBridge({
       banner={chrome.entryNotice ? <WorkbenchEntryNotice notice={chrome.entryNotice} onDismiss={chrome.clearEntryNotice} /> : null}
       workspaceFilesLoaded={chrome.workspaceFilesLoaded}
       workspaceFiles={chrome.workspaceFiles}
+      sidebarCollaborationPeers={editor.collaborationPeers}
       sidebarTab={chrome.sidebarTab}
       panelState={chrome.modernPanelState}
       activeBottomPanel={chrome.activeBottomPanel}

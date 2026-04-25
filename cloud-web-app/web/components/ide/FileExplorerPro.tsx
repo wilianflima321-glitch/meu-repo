@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import FilePresenceDot from '@/components/collaboration/FilePresenceDot'
+import type { RemotePeer } from '@/hooks/useCollaborationAwareness'
 import Codicon, { type CodiconName } from './Codicon'
-import { Search, X, Filter } from 'lucide-react'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 // ============= Types =============
@@ -20,6 +21,7 @@ interface FileNode {
 
 interface FileExplorerProps {
   files?: FileNode[]
+  collaborationPeers?: RemotePeer[]
   isLoading?: boolean
   error?: string | null
   onFileSelect?: (file: FileNode) => void
@@ -91,6 +93,26 @@ function mapWorkspaceNode(node: WorkspaceTreeNode): FileNode {
   }
 }
 
+type ExplorerPresenceSummary = {
+  peers: RemotePeer[]
+  label: string
+}
+
+function normalizeExplorerPath(path: string): string {
+  if (!path) return '/'
+  return path.startsWith('/') ? path : `/${path}`
+}
+
+function describePresence(peers: RemotePeer[], nodeName: string): string {
+  if (peers.length === 0) return ''
+  const peerNames = peers.map((peer) => peer.name)
+  const leading =
+    peerNames.length === 1
+      ? `${peerNames[0]} esta ativo em ${nodeName}`
+      : `${peerNames.length} colaboradores estao ativos em ${nodeName}`
+  return `${leading}: ${peerNames.join(', ')}`
+}
+
 // ============= File Tree Node Component =============
 
 interface FileTreeNodeProps {
@@ -101,6 +123,8 @@ interface FileTreeNodeProps {
   onSelect: (file: FileNode) => void
   onToggle: (folderId: string) => void
   onContextMenu: (e: React.MouseEvent, file: FileNode) => void
+  getPresence: (node: FileNode) => ExplorerPresenceSummary | null
+  presence?: ExplorerPresenceSummary | null
 }
 
 function FileTreeNode({
@@ -111,6 +135,8 @@ function FileTreeNode({
   onSelect,
   onToggle,
   onContextMenu,
+  getPresence,
+  presence,
 }: FileTreeNodeProps) {
   const isFolder = node.type === 'folder'
   const isExpanded = expandedFolders.has(node.id)
@@ -119,10 +145,13 @@ function FileTreeNode({
   const nodeIcon = isFolder
     ? (isExpanded ? 'folder-opened' : 'folder')
     : fileIcon.icon
+  const buttonLabel = isFolder
+    ? `${isExpanded ? 'Recolher' : 'Expandir'} pasta ${node.name}${presence ? `. ${presence.label}` : ''}`
+    : `Abrir arquivo ${node.name}${presence ? `. ${presence.label}` : ''}`
 
   return (
     <>
-      <button type="button" aria-label={isFolder ? `${isExpanded ? 'Recolher' : 'Expandir'} pasta ${node.name}` : `Abrir arquivo ${node.name}`}
+      <button type="button" aria-label={buttonLabel}
         onClick={() => isFolder ? onToggle(node.id) : onSelect(node)}
         onContextMenu={(e) => onContextMenu(e, node)}
         onKeyDown={(event) => {
@@ -165,6 +194,10 @@ function FileTreeNode({
         {/* Name */}
         <span className="flex-1 truncate">{node.name}</span>
 
+        {presence ? (
+          <FilePresenceDot peers={presence.peers} className="mr-1 flex-shrink-0" />
+        ) : null}
+
         {/* Modified indicator */}
         {node.modified && (
           <span className="h-2 w-2 rounded-full bg-[var(--aethel-warning-light)]" title="Modificado" aria-label="Arquivo modificado" />
@@ -184,6 +217,8 @@ function FileTreeNode({
               onSelect={onSelect}
               onToggle={onToggle}
               onContextMenu={onContextMenu}
+              getPresence={getPresence}
+              presence={getPresence(child)}
             />
           ))}
         </div>
@@ -329,6 +364,7 @@ function ContextMenu({ x, y, file, onClose, onAction }: ContextMenuProps) {
 
 export default function FileExplorerPro({
   files,
+  collaborationPeers = [],
   isLoading: externalLoading = false,
   error: externalError = null,
   onFileSelect,
@@ -358,6 +394,66 @@ export default function FileExplorerPro({
   const effectiveLoading = usingExternalFiles ? externalLoading : isLoading
   const effectiveError = usingExternalFiles ? externalError : loadError
   const iconButtonClass = `p-1 rounded text-[var(--aethel-text-tertiary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_78%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
+
+  const activeCollaborationEntries = useMemo(() => {
+    return collaborationPeers.flatMap((peer) => {
+      const filePath = peer.cursor?.filePath ?? peer.selection?.filePath
+      if (!filePath) return []
+
+      return [{
+        peer,
+        filePath: normalizeExplorerPath(filePath),
+      }]
+    })
+  }, [collaborationPeers])
+
+  const filePresenceMap = useMemo(() => {
+    const presence = new Map<string, RemotePeer[]>()
+
+    for (const entry of activeCollaborationEntries) {
+      const existing = presence.get(entry.filePath) ?? []
+      if (!existing.some((peer) => peer.id === entry.peer.id)) {
+        existing.push(entry.peer)
+        presence.set(entry.filePath, existing)
+      }
+    }
+
+    return presence
+  }, [activeCollaborationEntries])
+
+  const folderPresenceMap = useMemo(() => {
+    const presence = new Map<string, RemotePeer[]>()
+
+    for (const entry of activeCollaborationEntries) {
+      const segments = entry.filePath.split('/').filter(Boolean)
+      let currentPath = ''
+
+      for (let index = 0; index < segments.length - 1; index += 1) {
+        currentPath = `${currentPath}/${segments[index]}`
+        const existing = presence.get(currentPath) ?? []
+        if (!existing.some((peer) => peer.id === entry.peer.id)) {
+          existing.push(entry.peer)
+          presence.set(currentPath, existing)
+        }
+      }
+    }
+
+    return presence
+  }, [activeCollaborationEntries])
+
+  const describeNodePresence = useCallback((node: FileNode): ExplorerPresenceSummary | null => {
+    const normalizedPath = normalizeExplorerPath(node.path)
+    const peers = node.type === 'folder'
+      ? folderPresenceMap.get(normalizedPath) ?? []
+      : filePresenceMap.get(normalizedPath) ?? []
+
+    if (peers.length === 0) return null
+
+    return {
+      peers,
+      label: describePresence(peers, node.name),
+    }
+  }, [filePresenceMap, folderPresenceMap])
 
   const fetchWorkspaceTree = useCallback(async () => {
     try {
@@ -589,6 +685,8 @@ export default function FileExplorerPro({
             onSelect={handleSelect}
             onToggle={toggleFolder}
             onContextMenu={handleContextMenu}
+            getPresence={describeNodePresence}
+            presence={describeNodePresence(node)}
           />
         ))}
 

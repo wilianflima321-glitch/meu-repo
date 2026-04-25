@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Rocket,
 } from 'lucide-react';
+import { persistPreviewDeploy } from '@/components/preview/previewDeployTrust';
 import { gradients, tokens } from '@/lib/design-tokens';
 import { useBrowserPathname, useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 
@@ -132,6 +133,11 @@ export default function DeployStatusPage() {
       window.clearInterval(intervalId);
     };
   }, [loadDeployment, state.deployment]);
+
+  useEffect(() => {
+    if (!state.deployment) return;
+    persistPreviewDeploy(projectName, state.deployment);
+  }, [projectName, state.deployment]);
 
   const statusMeta = useMemo(
     () => getStatusMeta(state.deployment?.status),
