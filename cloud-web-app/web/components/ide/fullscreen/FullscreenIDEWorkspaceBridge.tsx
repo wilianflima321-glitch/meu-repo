@@ -65,6 +65,7 @@ export default function FullscreenIDEWorkspaceBridge({
       panelState={chrome.modernPanelState}
       activeBottomPanel={chrome.activeBottomPanel}
       previewMode={chrome.previewMode}
+      statusBarProps={chrome.statusBar}
       onResizePanel={chrome.onResizePanel}
       onToggleSidebar={chrome.onToggleSidebar}
       onTogglePanel={chrome.onTogglePanel}

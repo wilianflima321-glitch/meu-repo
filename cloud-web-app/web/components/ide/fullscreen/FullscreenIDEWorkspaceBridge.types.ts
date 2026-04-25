@@ -4,6 +4,7 @@ import type { Dispatch, RefObject, SetStateAction } from 'react';
 import type * as monacoEditor from 'monaco-editor';
 
 import type { FileItem } from '@/components/ide/CommandPalette';
+import type { StatusBarProps } from '@/components/ide/modern-shell/chromeStatusBar';
 import type { WorkbenchEditorPaneProps } from '@/components/ide/fullscreen/WorkbenchEditorPane';
 import type { WorkbenchEntryNoticeProps } from '@/components/ide/fullscreen/WorkbenchEntryNotice';
 import type { WorkbenchPreviewPaneProps } from '@/components/ide/fullscreen/WorkbenchPreviewPane';
@@ -29,6 +30,7 @@ export type FullscreenIDEWorkspaceBridgeChromeProps = {
   modernPanelState: PanelState;
   activeBottomPanel: BottomPanelMode;
   previewMode: PreviewMode;
+  statusBar: StatusBarProps;
   onResizePanel: (panel: keyof PanelState, size: number) => void;
   onToggleSidebar: () => void;
   onTogglePanel: (panel: keyof PanelState) => void;

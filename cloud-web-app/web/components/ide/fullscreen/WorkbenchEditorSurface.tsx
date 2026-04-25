@@ -36,6 +36,8 @@ export default function WorkbenchEditorSurface({
   onSaveFile,
   onCursorPresenceChange,
   onSelectionPresenceChange,
+  onCursorStatusChange,
+  onSelectionStatusChange,
 }: WorkbenchEditorSurfaceProps) {
   if (isReadingFile) {
     return <WorkbenchEditorLoadingState />;
@@ -66,6 +68,8 @@ export default function WorkbenchEditorSurface({
     onSaveFile,
     onCursorPresenceChange,
     onSelectionPresenceChange,
+    onCursorStatusChange,
+    onSelectionStatusChange,
   };
 
   if (!splitEditorOpen) {

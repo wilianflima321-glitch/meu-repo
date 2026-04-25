@@ -8,6 +8,7 @@ import CommandPaletteProvider, { type FileItem } from '@/components/ide/CommandP
 import { EditorApplyBridgeProvider } from '@/components/ide/EditorApplyBridgeContext';
 import { IdeWorkbenchCommandExtras } from '@/components/ide/IdeWorkbenchCommandExtras';
 import { ModernIDEShell } from '@/components/ide/ModernIDEShell';
+import type { StatusBarProps } from '@/components/ide/modern-shell/chromeStatusBar';
 import { WorkbenchEditorPane, type WorkbenchEditorPaneProps } from '@/components/ide/fullscreen/WorkbenchEditorPane';
 import { WorkbenchPreviewPane, type WorkbenchPreviewPaneProps } from '@/components/ide/fullscreen/WorkbenchPreviewPane';
 import { WorkbenchSidebar } from '@/components/ide/fullscreen/WorkbenchSidebar';
@@ -36,6 +37,7 @@ type FullscreenIDEWorkspaceProps = {
   panelState: PanelState;
   activeBottomPanel: BottomPanelMode;
   previewMode: PreviewMode;
+  statusBarProps: StatusBarProps;
   onResizePanel: (panel: keyof PanelState, size: number) => void;
   onToggleSidebar: () => void;
   onTogglePanel: (panel: keyof PanelState) => void;
@@ -75,6 +77,7 @@ export function FullscreenIDEWorkspace({
   panelState,
   activeBottomPanel,
   previewMode,
+  statusBarProps,
   onResizePanel,
   onToggleSidebar,
   onTogglePanel,
@@ -128,6 +131,7 @@ export function FullscreenIDEWorkspace({
           <ModernIDEShell
             projectName={`Projeto ${projectId}`}
             activeFileName={activeFile?.path}
+            statusBarProps={statusBarProps}
             headerExtras={headerExtras}
             banner={banner}
             panelState={panelState}

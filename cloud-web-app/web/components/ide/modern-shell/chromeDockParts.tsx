@@ -2,8 +2,6 @@ import React from 'react';
 import { tokens } from '@/lib/design-tokens';
 import {
   AlertCircle,
-  CheckCircle,
-  Clock,
   Code2,
   FolderTree,
   GitBranch,
@@ -181,24 +179,6 @@ export function BottomDockItemButton({
   );
 }
 
-interface StatusMetricDescriptor {
-  icon: React.ReactNode;
-  label: string;
-}
-
-export const STATUS_BAR_LEADING_ITEMS: ReadonlyArray<StatusMetricDescriptor> = [
-  { icon: <GitBranch size={12} />, label: 'main' },
-  { icon: <AlertCircle size={12} style={{ color: STATUS_WARNING }} />, label: '0' },
-  { icon: <AlertCircle size={12} style={{ color: STATUS_ERROR }} />, label: '0' },
-];
-
-export const STATUS_BAR_TRAILING_ITEMS: ReadonlyArray<StatusMetricDescriptor> = [
-  { icon: <CheckCircle size={12} style={{ color: STATUS_SUCCESS }} />, label: 'Prettier' },
-  { icon: <Terminal size={12} />, label: 'UTF-8' },
-  { icon: <Clock size={12} />, label: 'Ln 1, Col 1' },
-  { icon: <Sparkles size={12} />, label: 'AI Ready' },
-];
-
 interface StatusMetricProps {
   icon: React.ReactNode;
   label: string;
@@ -209,21 +189,6 @@ export function StatusMetric({ icon, label }: StatusMetricProps) {
     <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacing['1'] }}>
       {icon}
       <span>{label}</span>
-    </div>
-  );
-}
-
-interface ActiveFileStatusProps {
-  activeFileName: string;
-}
-
-export function ActiveFileStatus({ activeFileName }: ActiveFileStatusProps) {
-  return (
-    <div style={{ display: 'flex', minWidth: 0, alignItems: 'center', gap: tokens.spacing['1'] }}>
-      <Code2 size={12} />
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {activeFileName}
-      </span>
     </div>
   );
 }

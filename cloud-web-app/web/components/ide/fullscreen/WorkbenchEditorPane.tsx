@@ -14,7 +14,9 @@ import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 
 import type {
   ActiveFileState,
+  EditorCursorStatus,
   EditorPane,
+  EditorSelectionStatus,
   InlineApplyResult,
 } from '@/components/ide/fullscreen/types';
 import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
@@ -74,6 +76,8 @@ export type WorkbenchEditorPaneProps = {
     range: monacoEditor.IRange | null;
     editor: monacoEditor.editor.IStandaloneCodeEditor | null;
   }) => void;
+  onCursorStatusChange?: (status: EditorCursorStatus) => void;
+  onSelectionStatusChange?: (status: EditorSelectionStatus) => void;
 };
 
 export function WorkbenchEditorPane({
@@ -119,6 +123,8 @@ export function WorkbenchEditorPane({
   onSaveFile,
   onCursorPresenceChange,
   onSelectionPresenceChange,
+  onCursorStatusChange,
+  onSelectionStatusChange,
 }: WorkbenchEditorPaneProps) {
   const search = useBrowserSearch();
   const inlineEditProjectId = useMemo(() => {
@@ -180,6 +186,8 @@ export function WorkbenchEditorPane({
               onSaveFile={onSaveFile}
               onCursorPresenceChange={onCursorPresenceChange}
               onSelectionPresenceChange={onSelectionPresenceChange}
+              onCursorStatusChange={onCursorStatusChange}
+              onSelectionStatusChange={onSelectionStatusChange}
             />
           </div>
           <WorkbenchEditorSidecar

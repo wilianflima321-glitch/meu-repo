@@ -9,7 +9,9 @@ import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 
 import type {
   ActiveFileState,
+  EditorCursorStatus,
   EditorPane,
+  EditorSelectionStatus,
   InlineApplyResult,
 } from '@/components/ide/fullscreen/types';
 
@@ -46,6 +48,8 @@ export type WorkbenchEditorCanvasSharedProps = {
   onSaveFile: (path: string, content: string) => Promise<void> | void;
   onCursorPresenceChange: (args: CursorPresenceChangeArgs) => void;
   onSelectionPresenceChange: (args: SelectionPresenceChangeArgs) => void;
+  onCursorStatusChange?: (status: EditorCursorStatus) => void;
+  onSelectionStatusChange?: (status: EditorSelectionStatus) => void;
 };
 
 export type WorkbenchEditorSurfaceProps = WorkbenchEditorCanvasSharedProps & {

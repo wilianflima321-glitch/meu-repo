@@ -22,6 +22,23 @@ export function buildFullscreenIDEBridgeChromeProps(
     modernPanelState: args.modernPanelState,
     activeBottomPanel: args.activeBottomPanel,
     previewMode: args.previewMode,
+    statusBar: {
+      activeFilePath: args.bridgeActiveFile?.path ?? args.activeFile?.path ?? null,
+      activeFileLanguage: args.bridgeActiveFile?.language ?? args.activeFile?.language ?? null,
+      activeDiagnostics: args.activeDiagnostics,
+      panelState: args.modernPanelState,
+      activeSidebarTab: args.sidebarTab,
+      activePreviewMode: args.previewMode,
+      activeBottomPanel: args.activeBottomPanel,
+      splitEditorOpen: args.splitEditorOpen,
+      splitActivePane: args.splitActivePane,
+      collaborationConnected: args.collaborationConnected,
+      collaboratorCount: args.editorPeers.length,
+      runtimeHealth: args.runtimeHealth,
+      runtimeReadinessStatus: args.runtimeReadiness?.status ?? null,
+      cursorStatus: args.editorCursorStatus,
+      selectionStatus: args.editorSelectionStatus,
+    },
     onResizePanel: args.onResizePanel,
     onToggleSidebar: args.onToggleSidebar,
     onTogglePanel: args.onTogglePanel,
@@ -98,6 +115,8 @@ export function buildFullscreenIDEBridgeEditorProps(
     onRequestFullAccess: args.handleToggleFullAccess,
     onCursorPresenceChange: args.broadcastCursor,
     onSelectionPresenceChange: args.broadcastSelection,
+    onCursorStatusChange: args.handleEditorCursorStatus,
+    onSelectionStatusChange: args.handleEditorSelectionStatus,
   };
 }
 

@@ -9,7 +9,9 @@ import type { WorkbenchEditorPaneProps } from '@/components/ide/fullscreen/Workb
 import type { WorkbenchPreviewPaneProps } from '@/components/ide/fullscreen/WorkbenchPreviewPane';
 import type {
   ActiveFileState,
+  EditorCursorStatus,
   InlineApplyResult,
+  EditorSelectionStatus,
   PreviewMode,
   SidebarTab,
 } from '@/components/ide/fullscreen/types';
@@ -33,6 +35,8 @@ export type UseFullscreenIDEBridgePropsArgs = {
   modernPanelState: PanelState;
   activeBottomPanel: BottomPanelMode;
   previewMode: PreviewMode;
+  editorCursorStatus: EditorCursorStatus | null;
+  editorSelectionStatus: EditorSelectionStatus | null;
   onResizePanel: (panel: keyof PanelState, size: number) => void;
   onToggleSidebar: () => void;
   onTogglePanel: (panel: keyof PanelState) => void;
@@ -85,6 +89,8 @@ export type UseFullscreenIDEBridgePropsArgs = {
   handleToggleFullAccess: WorkbenchEditorPaneProps['onRequestFullAccess'];
   broadcastCursor: WorkbenchEditorPaneProps['onCursorPresenceChange'];
   broadcastSelection: WorkbenchEditorPaneProps['onSelectionPresenceChange'];
+  handleEditorCursorStatus: NonNullable<WorkbenchEditorPaneProps['onCursorStatusChange']>;
+  handleEditorSelectionStatus: NonNullable<WorkbenchEditorPaneProps['onSelectionStatusChange']>;
   previewRefreshTick: number;
   previewRuntimeUrl: WorkbenchPreviewPaneProps['previewRuntimeUrl'];
   previewRuntimeInput: WorkbenchPreviewPaneProps['previewRuntimeInput'];

@@ -7,7 +7,14 @@ import type { SplitDirection } from '@/components/editor/SplitEditor'
 import type { PanelState as ModernPanelState } from '@/components/ide/ModernIDEShell'
 import type { DocumentSymbol } from '@/components/outline/OutlinePanel'
 import type { EntryNotice } from '@/components/ide/fullscreen/WorkbenchEntryNotice'
-import type { EditorPane, InlineApplyResult, PreviewMode, SidebarTab } from './types'
+import type {
+  EditorCursorStatus,
+  EditorPane,
+  EditorSelectionStatus,
+  InlineApplyResult,
+  PreviewMode,
+  SidebarTab,
+} from './types'
 import type { BottomPanelMode } from '@/components/ide/modern-shell/types'
 
 export const LAST_PROJECT_ID_STORAGE_KEY = 'aethel.workbench.lastProjectId'
@@ -89,6 +96,8 @@ export function useWorkbenchShellState({
   const [rollbackBusy, setRollbackBusy] = useState(false)
   const [hasToken, setHasToken] = useState(false)
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
+  const [editorCursorStatus, setEditorCursorStatus] = useState<EditorCursorStatus | null>(null)
+  const [editorSelectionStatus, setEditorSelectionStatus] = useState<EditorSelectionStatus | null>(null)
 
   const openCommandPalette = useCallback((mode: 'commands' | 'files' = 'commands') => {
     window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode } }))
@@ -175,6 +184,14 @@ export function useWorkbenchShellState({
     editor.focus()
   }, [primaryEditorRef, secondaryEditorRef, splitActivePane])
 
+  const handleEditorCursorStatus = useCallback((status: EditorCursorStatus) => {
+    setEditorCursorStatus(status)
+  }, [])
+
+  const handleEditorSelectionStatus = useCallback((status: EditorSelectionStatus) => {
+    setEditorSelectionStatus(status)
+  }, [])
+
   return {
     projectId,
     splitEditorOpen,
@@ -215,6 +232,8 @@ export function useWorkbenchShellState({
     setHasToken,
     lastAiApply,
     setLastAiApply,
+    editorCursorStatus,
+    editorSelectionStatus,
     openCommandPalette,
     handleOpenSettings,
     handleEditorUndo,
@@ -230,6 +249,8 @@ export function useWorkbenchShellState({
     showEntryNotice,
     handleToggleDiagnosticsPanel,
     handleJumpToOutlineSymbol,
+    handleEditorCursorStatus,
+    handleEditorSelectionStatus,
   }
 }
 

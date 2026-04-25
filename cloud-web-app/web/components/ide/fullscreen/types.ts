@@ -8,6 +8,18 @@ export type ActiveFileState = {
 
 export type EditorPane = 'primary' | 'secondary';
 
+export type EditorCursorStatus = {
+  pane: EditorPane;
+  line: number;
+  column: number;
+};
+
+export type EditorSelectionStatus = {
+  pane: EditorPane;
+  lines: number;
+  characters: number;
+};
+
 export type SidebarTab = 'explorer' | 'git';
 
 export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d' | 'canvas';

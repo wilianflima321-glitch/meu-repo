@@ -41,7 +41,7 @@ export interface MonacoEditorProps {
   onAiApplyResult?: (result: { runId?: string; rollbackToken?: string; message?: string; filePath?: string }) => void;
   onRequestFullAccess?: () => void;
   onCursorChange?: (position: { line: number; column: number }) => void;
-  onSelectionChange?: (selection: { text: string; range: monacoEditor.IRange }) => void;
+  onSelectionChange?: (selection: { text: string; range: monacoEditor.IRange | null }) => void;
   onDiagnosticsChange?: (diagnostics: Diagnostic[]) => void;
   onMount?: (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: Monaco) => void;
 
@@ -357,18 +357,26 @@ export function MonacoEditorPro({
     // Setup selection change listener
     editor.onDidChangeCursorSelection((e) => {
       const model = editor.getModel();
-      if (model && !e.selection.isEmpty()) {
-        const text = model.getValueInRange(e.selection);
-        setEditorSelection({
-          code: text,
-          range: e.selection,
-        });
-        onSelectionChange?.({
-          text,
-          range: e.selection,
-        });
-      }
+      const hasSelection = model && !e.selection.isEmpty();
+      const text = hasSelection && model ? model.getValueInRange(e.selection) : '';
+      const range = hasSelection ? e.selection : null;
+      setEditorSelection({
+        code: text,
+        range,
+      });
+      onSelectionChange?.({
+        text,
+        range,
+      });
     });
+
+    const initialPosition = editor.getPosition();
+    if (initialPosition) {
+      onCursorChange?.({
+        line: initialPosition.lineNumber,
+        column: initialPosition.column,
+      });
+    }
 
     // Call user's onMount
     onMountProp?.(editor, monaco);

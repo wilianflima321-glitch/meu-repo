@@ -34,10 +34,11 @@ This file is the short scoreboard that answers:
 - `sceneViewportDerivations.ts`: `89` lines
 - `WorkbenchEditorPane.tsx`: `193` lines
 - `WorkbenchEditorToolbar.tsx`: `191` lines
-- `WorkbenchEditorCanvas.tsx`: `96` lines
+- `WorkbenchEditorCanvas.tsx`: `108` lines
 - `WorkbenchEditorSidecar.tsx`: `85` lines
 - `AIChatPanelContainer.tsx`: `123` lines
-- `ModernIDEShell.tsx`: `149` lines
+- `ModernIDEShell.tsx`: `205` lines
+- `chromeStatusBar.tsx`: `371` lines
 - `ModernIDEShellPanels.tsx`: `114` lines
 - `ModernIDEShellCenterStack.tsx`: `218` lines
 - `FullscreenIDEWorkspaceBridge.tsx`: `89` lines
@@ -58,6 +59,8 @@ This file is the short scoreboard that answers:
 - `SceneViewportStage.tsx`: `117` lines
 - `useTerminalOptions.ts`: `58` lines
 - `useTerminalImperativeHandle.ts`: `51` lines
+- `useWorkbenchShellState.ts`: `257` lines
+- `MonacoEditorPro.tsx`: `955` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
@@ -137,6 +140,16 @@ This file is the short scoreboard that answers:
   - live status-bar truth for terminal sessions
   - deeper clipboard/viewport/runtime polish in the terminal stack
   - broader proof that the terminal lane is as trustworthy as the editor/preview path end to end
+
+### Shell chrome truthfulness
+- the canonical status bar is no longer a placeholder strip:
+  - `chromeStatusBar.tsx` now reads real shell/editor/preview state instead of hardcoded branch/encoding/AI-ready filler
+  - the bar now reflects active file/language, split pane ownership, live line/column, selection size, current-file diagnostics, active sidebar/bottom/preview lanes, collaboration presence, and preview-runtime health
+  - `useWorkbenchShellState.ts`, `WorkbenchEditorCanvas.tsx`, and `MonacoEditorPro.tsx` now publish cursor/selection state cleanly enough for shell chrome to stay truthful when the user moves between primary/secondary editors
+- still open:
+  - live git branch / source-control truth in the shell chrome
+  - formatter / encoding / newline truth if we want VS Code-grade footer semantics
+  - stronger session telemetry for terminal/runtime/agent work beyond the current benchmark-grade baseline
 
 ### Settings surface polish
 - `SettingsUI.tsx` is now a `159`-line shell instead of a `1184`-line dense surface

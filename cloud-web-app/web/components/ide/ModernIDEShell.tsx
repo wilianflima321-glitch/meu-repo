@@ -1,7 +1,14 @@
 'use client';
 
 import React from 'react';
+import type { Diagnostic as MonacoDiagnostic } from '@/components/editor/MonacoEditorPro';
+import type {
+  EditorCursorStatus,
+  EditorPane,
+  EditorSelectionStatus,
+} from '@/components/ide/fullscreen/types';
 import { tokens } from '@/lib/design-tokens';
+import type { PreviewRuntimeHealthState } from '@/lib/preview/runtime-manager';
 import {
   BottomDock,
   BORDER_SECONDARY,
@@ -33,6 +40,23 @@ interface ModernIDEShellProps {
   };
   projectName?: string;
   activeFileName?: string;
+  statusBarProps?: {
+    activeFilePath?: string | null;
+    activeFileLanguage?: string | null;
+    activeDiagnostics?: MonacoDiagnostic[];
+    panelState?: PanelState;
+    activeSidebarTab?: SidebarTab;
+    activePreviewMode?: PreviewMode;
+    activeBottomPanel?: BottomPanelMode;
+    splitEditorOpen?: boolean;
+    splitActivePane?: EditorPane;
+    collaborationConnected?: boolean;
+    collaboratorCount?: number;
+    runtimeHealth?: PreviewRuntimeHealthState | null;
+    runtimeReadinessStatus?: string | null;
+    cursorStatus?: EditorCursorStatus | null;
+    selectionStatus?: EditorSelectionStatus | null;
+  };
   onToggleSidebar?: () => void;
   sidebarOpen?: boolean;
   panelState?: PanelState;
@@ -58,6 +82,7 @@ export function ModernIDEShell({
   children,
   projectName = 'Projeto sem nome',
   activeFileName,
+  statusBarProps,
   onToggleSidebar,
   sidebarOpen = true,
   panelState: controlledPanelState,
@@ -165,7 +190,10 @@ export function ModernIDEShell({
             activePreviewMode={activePreviewMode}
             activeBottomPanel={activeBottomPanel}
           />
-      <StatusBar activeFileName={activeFileName} />
+          <StatusBar
+            activeFileName={activeFileName}
+            {...statusBarProps}
+          />
         </>
       )}
     </div>

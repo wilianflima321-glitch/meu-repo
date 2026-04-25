@@ -34,6 +34,8 @@ export default function WorkbenchEditorCanvas({
   onSaveFile,
   onCursorPresenceChange,
   onSelectionPresenceChange,
+  onCursorStatusChange,
+  onSelectionStatusChange,
 }: WorkbenchEditorCanvasProps) {
   const isSecondary = pane === 'secondary';
   const activeRef = isSecondary ? secondaryEditorRef : primaryEditorRef;
@@ -67,13 +69,23 @@ export default function WorkbenchEditorCanvas({
             position,
             editor: activeRef.current,
           });
+          onCursorStatusChange?.({
+            pane,
+            line: position.line,
+            column: position.column,
+          });
         }}
-        onSelectionChange={({ range }) => {
+        onSelectionChange={({ text, range }) => {
           onSelectionPresenceChange({
             filePath: fileState.path,
             pane,
             range,
             editor: activeRef.current,
+          });
+          onSelectionStatusChange?.({
+            pane,
+            lines: range ? range.endLineNumber - range.startLineNumber + 1 : 0,
+            characters: text.length,
           });
         }}
         onChange={(value) => {
