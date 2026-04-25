@@ -2,6 +2,7 @@
 
 import CanonicalPreviewSurface from '@/components/preview/CanonicalPreviewSurface';
 import { DevicePreview } from '@/components/ide/DevicePreview';
+import { PreviewRuntimeTrustNotice } from '@/components/preview/PreviewRuntimeTrustNotice';
 
 import { PREVIEW_MODES, type WorkbenchPreviewPaneProps } from './workbenchPreviewPaneModels';
 
@@ -14,6 +15,10 @@ type WorkbenchPreviewRuntimeSurfaceProps = Pick<
   | 'isSavingFile'
   | 'projectId'
   | 'runtimeHealth'
+  | 'runtimeReadiness'
+  | 'runtimePrimaryActionLabel'
+  | 'runtimeStrategyLabel'
+  | 'runtimeDiscoveryMessage'
   | 'setPreviewRefreshTick'
 > & {
   mode: 'runtime' | 'device';
@@ -55,6 +60,10 @@ export function WorkbenchPreviewRuntimeSurface({
   isSavingFile,
   projectId,
   runtimeHealth,
+  runtimeReadiness,
+  runtimePrimaryActionLabel,
+  runtimeStrategyLabel,
+  runtimeDiscoveryMessage,
   setPreviewRefreshTick,
   mode,
 }: WorkbenchPreviewRuntimeSurfaceProps) {
@@ -62,7 +71,20 @@ export function WorkbenchPreviewRuntimeSurface({
     return <WorkbenchPreviewEmptyState />;
   }
 
-  const surface = (
+  const trustNotice = (
+    <PreviewRuntimeTrustNotice
+      previewRuntimeUrl={previewRuntimeUrl}
+      runtimeHealth={runtimeHealth}
+      runtimeReadiness={runtimeReadiness}
+      runtimePrimaryActionLabel={runtimePrimaryActionLabel}
+      runtimeStrategyLabel={runtimeStrategyLabel}
+      runtimeDiscoveryMessage={runtimeDiscoveryMessage}
+      forceInlinePreviewFallback={forceInlinePreviewFallback}
+      isSavingFile={isSavingFile}
+    />
+  );
+
+  const previewSurface = (
     <CanonicalPreviewSurface
       key={`${activeFile.path}:${previewRefreshTick}${mode === 'device' ? ':device' : ''}`}
       variant="runtime"
@@ -79,8 +101,20 @@ export function WorkbenchPreviewRuntimeSurface({
   );
 
   if (mode === 'device') {
-    return <DevicePreview>{surface}</DevicePreview>;
+    return (
+      <div className="flex h-full min-h-0 flex-col">
+        {trustNotice}
+        <div className="min-h-0 flex-1">
+          <DevicePreview>{previewSurface}</DevicePreview>
+        </div>
+      </div>
+    );
   }
 
-  return <div className="h-full min-h-0">{surface}</div>;
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      {trustNotice}
+      <div className="min-h-0 flex-1">{previewSurface}</div>
+    </div>
+  );
 }

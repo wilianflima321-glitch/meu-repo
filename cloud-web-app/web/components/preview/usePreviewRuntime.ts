@@ -16,7 +16,13 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const { clearHmrBridge, connectHMR } = usePreviewRuntimeHmrBridge(setRuntime);
 
   const provision = useCallback(async () => {
-    setRuntime((prev) => ({ ...prev, state: 'provisioning', error: null }));
+    setRuntime((prev) => ({
+      ...prev,
+      state: 'provisioning',
+      error: null,
+      failureCount: 0,
+      lastHealthCheckAt: null,
+    }));
 
     try {
       const res = await fetch('/api/preview/runtime-provision', {
@@ -41,6 +47,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
           runtimeUrl: data.runtimeUrl,
           sandboxId: data.sandboxId || null,
           startedAt: Date.now(),
+          error: null,
         }));
 
         startHealthPolling(data.runtimeUrl);
@@ -52,6 +59,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
           runtimeUrl: data.discoveryResult.preferredRuntimeUrl,
           startedAt: Date.now(),
           latencyMs: data.discoveryResult.candidates?.[0]?.latencyMs || null,
+          error: null,
         }));
         startHealthPolling(data.discoveryResult.preferredRuntimeUrl);
       } else {
@@ -81,6 +89,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       runtimeUrl: null,
       sandboxId: null,
       hmrConnected: false,
+      error: prev.error,
     }));
   }, [clearHealthPolling, clearHmrBridge]);
 

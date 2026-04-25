@@ -16,6 +16,9 @@ export const INITIAL_PREVIEW_RUNTIME: PreviewRuntimeInfo = {
   hmrConnected: false,
   filesInSync: 0,
   lastSyncAt: null,
+  lastHealthCheckAt: null,
+  lastHealthyAt: null,
+  failureCount: 0,
 };
 
 export function resolvePreviewStrategy(payload: any): PreviewStrategy {

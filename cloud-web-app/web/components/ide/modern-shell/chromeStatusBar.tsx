@@ -28,6 +28,7 @@ import type { PreviewRuntimeHealthState } from '@/lib/preview/runtime-manager';
 import { StatusMetric } from './chromeDockParts';
 import { BORDER_SECONDARY, STATUS_ERROR, STATUS_SUCCESS, STATUS_WARNING, SURFACE_SECONDARY, TEXT_SECONDARY } from './chromeStyles';
 import type { BottomPanelMode, PanelState, PreviewMode, SidebarTab } from './types';
+import type { ShellSourceControlTruth } from './useShellSourceControlTruth';
 
 const statusMetricGroupStyle: React.CSSProperties = {
   display: 'flex',
@@ -57,6 +58,7 @@ export interface StatusBarProps {
   runtimeReadinessStatus?: string | null;
   cursorStatus?: EditorCursorStatus | null;
   selectionStatus?: EditorSelectionStatus | null;
+  sourceControl?: ShellSourceControlTruth | null;
 }
 
 function formatFileLabel(activeFilePath?: string | null, activeFileName?: string) {
@@ -217,6 +219,82 @@ function buildRuntimeMetric(
   };
 }
 
+function formatBranchLabel(branch: string | null): string | null {
+  if (!branch?.trim()) return null;
+  const trimmed = branch.trim();
+  return trimmed.length > 28 ? `${trimmed.slice(0, 25)}...` : trimmed;
+}
+
+function buildSourceControlMetrics(sourceControl?: ShellSourceControlTruth | null): StatusMetricDescriptor[] {
+  if (!sourceControl) return [];
+
+  if (sourceControl.state === 'loading' || sourceControl.state === 'idle') {
+    return [
+      {
+        icon: <Clock size={12} />,
+        label: 'Git verificando',
+      },
+    ];
+  }
+
+  if (sourceControl.state !== 'ready') {
+    return [
+      {
+        icon: <AlertCircle size={12} style={{ color: STATUS_WARNING }} />,
+        label: 'Git indisponivel',
+      },
+    ];
+  }
+
+  const metrics: StatusMetricDescriptor[] = [];
+  const branchLabel = formatBranchLabel(sourceControl.branch);
+  if (branchLabel) {
+    metrics.push({
+      icon: <GitBranch size={12} />,
+      label: branchLabel,
+    });
+  }
+
+  if (sourceControl.ahead > 0 || sourceControl.behind > 0) {
+    const syncState = [sourceControl.ahead > 0 ? `+${sourceControl.ahead}` : null, sourceControl.behind > 0 ? `-${sourceControl.behind}` : null]
+      .filter(Boolean)
+      .join(' ');
+    metrics.push({
+      icon: <GitBranch size={12} />,
+      label: `Sync ${syncState}`,
+    });
+  }
+
+  if (sourceControl.conflicted > 0) {
+    metrics.push({
+      icon: <AlertCircle size={12} style={{ color: STATUS_ERROR }} />,
+      label: `${sourceControl.conflicted} conflito${sourceControl.conflicted === 1 ? '' : 's'}`,
+    });
+    return metrics;
+  }
+
+  if (sourceControl.isDirty) {
+    const parts = [
+      sourceControl.staged > 0 ? `${sourceControl.staged} stage` : null,
+      sourceControl.unstaged > 0 ? `${sourceControl.unstaged} unstaged` : null,
+      sourceControl.untracked > 0 ? `${sourceControl.untracked} novo${sourceControl.untracked === 1 ? '' : 's'}` : null,
+    ].filter(Boolean);
+
+    metrics.push({
+      icon: <AlertCircle size={12} style={{ color: STATUS_WARNING }} />,
+      label: parts.length > 0 ? parts.join(' · ') : `${sourceControl.changedCount} mudanca${sourceControl.changedCount === 1 ? '' : 's'}`,
+    });
+    return metrics;
+  }
+
+  metrics.push({
+    icon: <CheckCircle size={12} style={{ color: STATUS_SUCCESS }} />,
+    label: 'Git limpo',
+  });
+
+  return metrics;
+}
+
 export function StatusBar({
   activeFileName,
   activeFilePath,
@@ -234,6 +312,7 @@ export function StatusBar({
   runtimeReadinessStatus,
   cursorStatus,
   selectionStatus,
+  sourceControl,
 }: StatusBarProps) {
   const statusBarStyle: React.CSSProperties = {
     display: 'flex',
@@ -300,7 +379,10 @@ export function StatusBar({
   }, [cursorStatus, fileLabel, languageLabel, selectionStatus, splitActivePane, splitEditorOpen]);
 
   const trailingItems = useMemo<StatusMetricDescriptor[]>(() => {
-    const items: StatusMetricDescriptor[] = [...buildDiagnosticsMetrics(activeDiagnostics)];
+    const items: StatusMetricDescriptor[] = [
+      ...buildSourceControlMetrics(sourceControl),
+      ...buildDiagnosticsMetrics(activeDiagnostics),
+    ];
 
     if (sidebarLabel) {
       items.push({
@@ -351,6 +433,7 @@ export function StatusBar({
     runtimeHealth,
     runtimeReadinessStatus,
     sidebarLabel,
+    sourceControl,
   ]);
 
   return (

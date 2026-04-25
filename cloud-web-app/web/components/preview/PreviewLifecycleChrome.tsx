@@ -9,6 +9,23 @@ import {
 } from '@/components/preview/previewRuntime.types';
 
 export function PreviewSkeleton() {
+  const title = 'Carregando preview...';
+  const detail = 'Conectando runtime, arquivos e superficie visual.';
+
+  return (
+    <PreviewSkeletonCard title={title} detail={detail} />
+  );
+}
+
+export function PreviewSkeletonCard({
+  title,
+  detail,
+  badge,
+}: {
+  title: string;
+  detail: string;
+  badge?: string | null;
+}) {
   return (
     <div className="flex h-full items-center justify-center bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-secondary)]">
       <div className="flex flex-col items-center gap-3">
@@ -17,10 +34,13 @@ export function PreviewSkeleton() {
           aria-hidden="true"
         />
         <div className="text-center">
-          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Carregando preview...</p>
-          <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">
-            Conectando runtime, arquivos e superficie visual.
-          </p>
+          {badge ? (
+            <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">
+              {badge}
+            </div>
+          ) : null}
+          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{title}</p>
+          <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{detail}</p>
         </div>
       </div>
     </div>
@@ -34,6 +54,10 @@ export function LifecycleIndicator({
   strategy,
   filesInSync,
   lastSyncAt,
+  startedAt,
+  lastHealthCheckAt,
+  lastHealthyAt,
+  failureCount,
 }: {
   state: PreviewLifecycleState;
   latencyMs: number | null;
@@ -41,8 +65,13 @@ export function LifecycleIndicator({
   strategy?: PreviewStrategy;
   filesInSync?: number;
   lastSyncAt?: number | null;
+  startedAt?: number | null;
+  lastHealthCheckAt?: number | null;
+  lastHealthyAt?: number | null;
+  failureCount?: number;
 }) {
   const showHmrWarning = state === 'healthy' && strategy && strategy !== 'inline' && !hmrConnected;
+  const hasFailures = typeof failureCount === 'number' && failureCount > 0;
 
   return (
     <div className="flex items-center gap-2 border-b border-[var(--aethel-border-secondary)]/50 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-3 py-1.5 text-xs backdrop-blur-sm">
@@ -56,6 +85,11 @@ export function LifecycleIndicator({
       {latencyMs !== null && state === 'healthy' && (
         <span className="text-[var(--aethel-text-tertiary)]">{latencyMs}ms</span>
       )}
+      {startedAt ? (
+        <span className="text-[var(--aethel-text-quaternary)]">
+          desde {new Date(startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      ) : null}
       {filesInSync !== undefined && filesInSync > 0 && (
         <span className="rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_76%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-tertiary)]">
           sincr {filesInSync}
@@ -64,6 +98,21 @@ export function LifecycleIndicator({
       {lastSyncAt ? (
         <span className="text-[var(--aethel-text-quaternary)]">
           atual. {new Date(lastSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      ) : null}
+      {lastHealthyAt && state !== 'healthy' ? (
+        <span className="text-[var(--aethel-text-quaternary)]">
+          ultimo ok {new Date(lastHealthyAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      ) : null}
+      {lastHealthCheckAt ? (
+        <span className="text-[var(--aethel-text-quaternary)]">
+          check {new Date(lastHealthCheckAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      ) : null}
+      {hasFailures ? (
+        <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_10%,transparent)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-warning)]">
+          falhas {failureCount}
         </span>
       ) : null}
       {hmrConnected && (

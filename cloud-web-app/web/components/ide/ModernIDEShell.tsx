@@ -26,9 +26,11 @@ import type {
   PreviewMode,
   SidebarTab,
 } from './modern-shell/types';
+import { useShellSourceControlTruth } from './modern-shell/useShellSourceControlTruth';
 import { useModernIDEPanels } from './modern-shell/useModernIDEPanels';
 
 interface ModernIDEShellProps {
+  projectId?: string;
   banner?: React.ReactNode;
   headerExtras?: React.ReactNode;
   children: {
@@ -77,6 +79,7 @@ interface ModernIDEShellProps {
 export type { PanelState } from './modern-shell/types';
 
 export function ModernIDEShell({
+  projectId,
   banner,
   headerExtras,
   children,
@@ -115,6 +118,10 @@ export function ModernIDEShell({
     controlledPanelState,
     controlledTogglePanel,
     controlledResizePanel,
+  });
+  const sourceControl = useShellSourceControlTruth({
+    projectId,
+    activeFilePath: statusBarProps?.activeFilePath ?? null,
   });
 
   const containerStyle: React.CSSProperties = {
@@ -192,6 +199,7 @@ export function ModernIDEShell({
           />
           <StatusBar
             activeFileName={activeFileName}
+            sourceControl={sourceControl}
             {...statusBarProps}
           />
         </>

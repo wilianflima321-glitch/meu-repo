@@ -23,6 +23,9 @@ export interface PreviewRuntimeInfo {
   hmrConnected: boolean;
   filesInSync: number;
   lastSyncAt: number | null;
+  lastHealthCheckAt: number | null;
+  lastHealthyAt: number | null;
+  failureCount: number;
 }
 
 export type CanonicalRuntimeProps = {

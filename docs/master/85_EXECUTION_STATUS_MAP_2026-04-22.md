@@ -23,9 +23,10 @@ This file is the short scoreboard that answers:
 - `SceneViewportSurface.tsx`: `98` lines
 - `WorkbenchEditorSurface.tsx`: `99` lines
 - `useTerminalRuntime.ts`: `150` lines
-- `PreviewLifecycleChrome.tsx`: `151` lines
-- `usePreviewRuntime.ts`: `107` lines
-- `RuntimePreviewSurface.tsx`: `198` lines
+- `PreviewLifecycleChrome.tsx`: `200` lines
+- `usePreviewRuntime.ts`: `116` lines
+- `RuntimePreviewSurface.tsx`: `235` lines
+- `PreviewRuntimeTrustNotice.tsx`: `131` lines
 - `SettingsUI.tsx`: `159` lines
 - `SceneViewportWorkflowDrawer.tsx`: `163` lines
 - `WorkbenchPreviewRuntimeControls.tsx`: `134` lines
@@ -37,8 +38,9 @@ This file is the short scoreboard that answers:
 - `WorkbenchEditorCanvas.tsx`: `108` lines
 - `WorkbenchEditorSidecar.tsx`: `85` lines
 - `AIChatPanelContainer.tsx`: `123` lines
-- `ModernIDEShell.tsx`: `205` lines
-- `chromeStatusBar.tsx`: `371` lines
+- `ModernIDEShell.tsx`: `213` lines
+- `chromeStatusBar.tsx`: `454` lines
+- `useShellSourceControlTruth.ts`: `262` lines
 - `ModernIDEShellPanels.tsx`: `114` lines
 - `ModernIDEShellCenterStack.tsx`: `218` lines
 - `FullscreenIDEWorkspaceBridge.tsx`: `89` lines
@@ -137,6 +139,8 @@ This file is the short scoreboard that answers:
   - clearer mode tabs
   - better preview empty-state guidance
   - explicit deploy/share trust actions in the runtime toolbar instead of only local-runtime controls
+  - `PreviewRuntimeTrustNotice.tsx` now exposes readiness, fallback, health, and next-action grammar directly above the canonical preview surface instead of leaving runtime trust implicit inside toolbar copy
+  - `PreviewLifecycleChrome.tsx` plus `usePreviewRuntime.ts` now surface `lastHealthCheckAt`, `lastHealthyAt`, and `failureCount`, so warmup no longer reads as a silent hang when the managed runtime stops responding
 - the former preview hotspot was also reduced:
   - `CanonicalPreviewSurface.tsx` now acts like a thin variant router over extracted runtime, scene, canvas, lifecycle, and derivation modules
   - `SceneViewportSurface.tsx` is now a smaller viewport seam at `98` lines, with stage/state/playback density pushed into `SceneViewportStage.tsx`, `useSceneViewportSurfaceState.ts`, and `useSceneViewportPlayback.ts`
@@ -158,8 +162,11 @@ This file is the short scoreboard that answers:
   - `chromeStatusBar.tsx` now reads real shell/editor/preview state instead of hardcoded branch/encoding/AI-ready filler
   - the bar now reflects active file/language, split pane ownership, live line/column, selection size, current-file diagnostics, active sidebar/bottom/preview lanes, collaboration presence, and preview-runtime health
   - `useWorkbenchShellState.ts`, `WorkbenchEditorCanvas.tsx`, and `MonacoEditorPro.tsx` now publish cursor/selection state cleanly enough for shell chrome to stay truthful when the user moves between primary/secondary editors
+- source-control truth is now partially live in the canonical shell:
+  - `useShellSourceControlTruth.ts` probes the existing git status API from the workbench shell and feeds real branch / ahead-behind / dirty-count truth into `chromeStatusBar.tsx`
+  - repo detection now falls back to the active absolute file path when available, and JWT identity decoding is base64url-safe instead of assuming legacy `atob`-friendly payloads
+  - the shell now stays honest when git state is unavailable by showing `Git indisponivel` instead of fake branch filler
 - still open:
-  - live git branch / source-control truth in the shell chrome
   - formatter / encoding / newline truth if we want VS Code-grade footer semantics
   - stronger session telemetry for terminal/runtime/agent work beyond the current benchmark-grade baseline
 
@@ -195,7 +202,7 @@ This file is the short scoreboard that answers:
    - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
    - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
    - highest-confidence studio/runtime cluster now includes: `components/providers/StudioRuntimeProviders.tsx`, `components/providers/StudioRuntimeRouteLayout.tsx`, `lib/a11y/accessibility.tsx`, `components/ServiceWorkerProvider.tsx`, `contexts/AuthContext.tsx`, and `lib/providers/AethelProvider.tsx`
-   - the public/auth cluster is narrower but still open: `PublicHeader.tsx` no longer depends on `use-browser-pathname.ts`, and `/terms` + `/privacy` now render static last-updated labels instead of runtime date calls, but the broader public-shell/prerender lane still lacks fresh end-to-end proof and the legacy `/404` + `/500` failure class has not been cleared by those reductions alone
+   - the public/auth cluster is narrower but still open: `PublicHeader.tsx` is now a hook-free static shell with a CSS-only mobile menu, and `/terms` + `/privacy` now render static last-updated labels instead of runtime date calls, but the broader public-shell/prerender lane still lacks fresh end-to-end proof and the legacy `/404` + `/500` failure class has not been cleared by those reductions alone
 2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`
 3. `noImplicitAny: false`
 4. full-matrix Playwright not yet default required pressure

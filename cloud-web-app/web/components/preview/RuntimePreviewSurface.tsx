@@ -4,7 +4,12 @@ import { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 
 import { MagicWandChat } from '@/components/preview/MagicWandChat';
-import { PreviewFailedState, PreviewSkeleton, LifecycleIndicator } from '@/components/preview/PreviewLifecycleChrome';
+import {
+  PreviewFailedState,
+  PreviewSkeleton,
+  PreviewSkeletonCard,
+  LifecycleIndicator,
+} from '@/components/preview/PreviewLifecycleChrome';
 import { useMagicWand } from '@/components/preview/useMagicWand';
 import { usePreviewRuntime } from '@/components/preview/usePreviewRuntime';
 import {
@@ -63,6 +68,10 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
             latencyMs={null}
             hmrConnected={false}
             strategy={effectiveStrategy}
+            startedAt={runtime.startedAt}
+            lastHealthCheckAt={runtime.lastHealthCheckAt}
+            lastHealthyAt={runtime.lastHealthyAt}
+            failureCount={runtime.failureCount}
           />
         )}
         <PreviewFailedState
@@ -79,7 +88,14 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
     return (
       <div className="flex h-full flex-col">
         {showLifecycleBar && (
-          <LifecycleIndicator state="idle" latencyMs={null} hmrConnected={false} />
+          <LifecycleIndicator
+            state="idle"
+            latencyMs={null}
+            hmrConnected={false}
+            lastHealthCheckAt={runtime.lastHealthCheckAt}
+            lastHealthyAt={runtime.lastHealthyAt}
+            failureCount={runtime.failureCount}
+          />
         )}
         <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--aethel-surface-primary)] px-6 text-center">
           <div className="max-w-md space-y-2">
@@ -121,9 +137,26 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
             latencyMs={null}
             hmrConnected={false}
             strategy={effectiveStrategy}
+            startedAt={runtime.startedAt}
+            lastHealthCheckAt={runtime.lastHealthCheckAt}
+            lastHealthyAt={runtime.lastHealthyAt}
+            failureCount={runtime.failureCount}
           />
         )}
-        <PreviewSkeleton />
+        <PreviewSkeletonCard
+          badge={effectiveState === 'provisioning' ? 'managed runtime' : 'runtime warmup'}
+          title={
+            effectiveState === 'provisioning'
+              ? 'Iniciando a lane de runtime...'
+              : 'Aquecendo a superficie remota...'
+          }
+          detail={
+            effectiveState === 'provisioning'
+              ? 'Validando provider, sandbox e endpoint antes de prometer uma URL remota confiavel.'
+              : runtime.error ||
+                'Esperando a primeira resposta do runtime para liberar health, HMR e fallback com contexto.'
+          }
+        />
       </div>
     );
   }
@@ -138,6 +171,10 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
           strategy={effectiveStrategy}
           filesInSync={runtime.filesInSync}
           lastSyncAt={runtime.lastSyncAt}
+          startedAt={runtime.startedAt}
+          lastHealthCheckAt={runtime.lastHealthCheckAt}
+          lastHealthyAt={runtime.lastHealthyAt}
+          failureCount={runtime.failureCount}
         />
       )}
       <div className="relative flex-1">

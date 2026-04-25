@@ -132,6 +132,7 @@ export function FullscreenIDEWorkspace({
           readFile={readFile}
         >
           <ModernIDEShell
+            projectId={projectId}
             projectName={`Projeto ${projectId}`}
             activeFileName={activeFile?.path}
             statusBarProps={statusBarProps}
