@@ -22,6 +22,8 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       error: null,
       failureCount: 0,
       lastHealthCheckAt: null,
+      hmrConnected: false,
+      hmrState: 'idle',
     }));
 
     try {
@@ -89,6 +91,7 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       runtimeUrl: null,
       sandboxId: null,
       hmrConnected: false,
+      hmrState: 'idle',
       error: prev.error,
     }));
   }, [clearHealthPolling, clearHmrBridge]);

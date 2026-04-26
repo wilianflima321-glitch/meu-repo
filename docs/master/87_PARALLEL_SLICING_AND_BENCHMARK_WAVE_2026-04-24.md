@@ -60,6 +60,9 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - preview runtime trust itself is now less hand-wavy: `cloud-web-app/web/components/preview/PreviewRuntimeTrustNotice.tsx` now surfaces readiness / health / fallback / next-move guidance above the canonical visual surface, while `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, `previewRuntimeState.ts`, `previewRuntime.types.ts`, and `usePreviewRuntimeHealthMonitor.ts` now track `lastHealthCheckAt`, `lastHealthyAt`, and `failureCount` so warmup can degrade honestly instead of looking silently stuck forever
 - collaboration presence is also less hidden in the cockpit: `cloud-web-app/web/components/collaboration/FilePresenceDot.tsx` now gives the explorer compact file/folder presence stacks, while `FileExplorerPro.tsx`, `WorkbenchSidebar.tsx`, `FullscreenIDEWorkspace.tsx`, and `FullscreenIDEWorkspaceBridge.tsx` now pass `collaborationPeers` into the canonical tree so file presence is visible where users actually decide what to open next
 - the public shell also took one more reduction pass: `cloud-web-app/web/components/ui/PublicHeader.tsx` is now a hook-free static header with a CSS-only mobile menu, which removes one more live-browser dependency from the public/docs cluster without overclaiming that prerender parity is solved
+- the public shell reduction is now slightly stronger again: `cloud-web-app/web/components/ui/PublicHeader.tsx` no longer needs `'use client'`, so the widest shared public header is back to a server component instead of an unnecessary client boundary
+- the bridge composition seam also got one more cleanup pass: `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeSections.ts` is now only an `8`-line barrel over `useWorkbenchBridgeChrome.ts`, `useWorkbenchBridgeEditorProps.ts`, and `workbenchBridgeModels.ts`, while `FullscreenIDE.tsx` now delegates route query parsing to `useWorkbenchRouteParams.ts`
+- preview runtime polish kept moving inside the same lane instead of ballooning the pane shell: `usePreviewRuntimeHmrBridge.ts` now tracks explicit HMR sub-states (`connecting`, `connected`, `reconnecting`, `disconnected`) plus a short recovery grace window before degrading the lane, and `PreviewLifecycleChrome.tsx` / `RuntimePreviewSurface.tsx` now surface that calmer HMR truth instead of snapping between healthy and warning too aggressively
 - the follow-up clean rerun in `cloud-web-app/web/build-probe-2026-04-24-terminal-first-class.log` confirmed that this shell work did not introduce a new failure class: the build still reached `Generating static pages (213/213)` and still failed on the same `<Html>` + `useContext` blocker cluster
 - the next root-level build probes stayed honest instead of widening the drift surface: removing the legacy `cloud-web-app/web/pages/404.tsx`, `pages/500.tsx`, `pages/_app.tsx`, `pages/_document.tsx`, and `pages/_error.tsx` fallback chain, stripping `ClientLayout` out of `app/layout.tsx`, and collapsing `app/error.tsx`, `app/global-error.tsx`, and `app/not-found.tsx` to minimal boundaries still did **not** clear the old prerender path; `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log` reproduced the same `/404`, `/500`, and `/_not-found` failure class
 - the practical mitigation is now explicit instead of implied: `cloud-web-app/web/package.json` points `npm run build` to `next build --experimental-build-mode compile`, while `npm run build:prerender-probe` preserves the older generate path for diagnosis
@@ -103,6 +106,11 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/ai-chat/useAIChatHistoryMode.ts`: `107`
 - `cloud-web-app/web/components/ai-chat/AIChatTimeline.tsx`: `90`
 - `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeSections.ts`: `158`
+- `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeSections.ts`: `8`
+- `cloud-web-app/web/components/ide/fullscreen/useWorkbenchBridgeChrome.ts`: `49`
+- `cloud-web-app/web/components/ide/fullscreen/useWorkbenchBridgeEditorProps.ts`: `57`
+- `cloud-web-app/web/components/ide/fullscreen/workbenchBridgeModels.ts`: `66`
+- `cloud-web-app/web/components/ide/fullscreen/useWorkbenchRouteParams.ts`: `16`
 - `cloud-web-app/web/components/preview/usePreviewRuntime.ts`: `116`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx`: `219`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorSurface.tsx`: `99`
@@ -111,8 +119,10 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/preview/previewRuntimeState.ts`: `38`
 - `cloud-web-app/web/components/preview/usePreviewRuntimeHealthMonitor.ts`: `57`
 - `cloud-web-app/web/components/preview/usePreviewRuntimeHmrBridge.ts`: `78`
-- `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx`: `235`
+- `cloud-web-app/web/components/preview/RuntimePreviewSurface.tsx`: `239`
+- `cloud-web-app/web/components/preview/usePreviewRuntimeHmrBridge.ts`: `122`
 - `cloud-web-app/web/components/preview/PreviewRuntimeTrustNotice.tsx`: `131`
+- `cloud-web-app/web/components/preview/PreviewLifecycleChrome.tsx`: `217`
 - `cloud-web-app/web/components/preview/SceneViewportWorkflowDrawer.tsx`: `163`
 - `cloud-web-app/web/components/terminal/useTerminalSessions.ts`: `120`
 - `cloud-web-app/web/components/terminal/useTerminalRuntime.ts`: `150`

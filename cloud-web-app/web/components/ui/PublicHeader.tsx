@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { PUBLIC_NAV_LINKS } from '@/lib/navigation/surfaces'

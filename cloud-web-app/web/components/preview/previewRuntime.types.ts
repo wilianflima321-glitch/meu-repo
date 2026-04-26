@@ -11,6 +11,7 @@ export type PreviewLifecycleState =
   | 'offline';
 
 export type PreviewStrategy = 'e2b' | 'webcontainer' | 'iframe' | 'inline' | 'none';
+export type PreviewHmrState = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
 
 export interface PreviewRuntimeInfo {
   state: PreviewLifecycleState;
@@ -21,6 +22,7 @@ export interface PreviewRuntimeInfo {
   latencyMs: number | null;
   error: string | null;
   hmrConnected: boolean;
+  hmrState: PreviewHmrState;
   filesInSync: number;
   lastSyncAt: number | null;
   lastHealthCheckAt: number | null;

@@ -14,6 +14,7 @@ export const INITIAL_PREVIEW_RUNTIME: PreviewRuntimeInfo = {
   latencyMs: null,
   error: null,
   hmrConnected: false,
+  hmrState: 'idle',
   filesInSync: 0,
   lastSyncAt: null,
   lastHealthCheckAt: null,

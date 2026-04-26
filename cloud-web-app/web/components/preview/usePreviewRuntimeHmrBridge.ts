@@ -11,14 +11,18 @@ export function usePreviewRuntimeHmrBridge(setRuntime: RuntimeSetter) {
   const bridgeRef = useRef<HMRBridge | null>(null);
   const hmrUnsubscribeRef = useRef<(() => void) | null>(null);
   const syncResetRef = useRef<NodeJS.Timeout | null>(null);
+  const degradeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const HMR_RECOVERY_GRACE_MS = 12000;
 
   const clearHmrBridge = useCallback(() => {
     bridgeRef.current?.disconnect();
     hmrUnsubscribeRef.current?.();
     if (syncResetRef.current) clearTimeout(syncResetRef.current);
+    if (degradeTimeoutRef.current) clearTimeout(degradeTimeoutRef.current);
     bridgeRef.current = null;
     hmrUnsubscribeRef.current = null;
     syncResetRef.current = null;
+    degradeTimeoutRef.current = null;
   }, []);
 
   const connectHMR = useCallback(
@@ -26,11 +30,25 @@ export function usePreviewRuntimeHmrBridge(setRuntime: RuntimeSetter) {
       clearHmrBridge();
 
       try {
+        setRuntime((prev) => ({
+          ...prev,
+          hmrConnected: false,
+          hmrState: 'connecting',
+        }));
+
         bridgeRef.current = createHMRBridge({
           runtimeUrl,
           hmrPathCandidates: ['/_next/webpack-hmr', '/__vite_hmr'],
           onConnectionChange: (connected) => {
-            setRuntime((prev) => ({ ...prev, hmrConnected: connected }));
+            if (degradeTimeoutRef.current) {
+              clearTimeout(degradeTimeoutRef.current);
+              degradeTimeoutRef.current = null;
+            }
+            setRuntime((prev) => ({
+              ...prev,
+              hmrConnected: connected,
+              hmrState: connected ? 'connected' : prev.hmrState === 'reconnecting' ? 'reconnecting' : 'disconnected',
+            }));
           },
           onUpdate: (message) => {
             if (message.type === 'full-reload' || message.type === 'update') {
@@ -39,19 +57,31 @@ export function usePreviewRuntimeHmrBridge(setRuntime: RuntimeSetter) {
               setRuntime((prev) => ({
                 ...prev,
                 state: prev.strategy === 'inline' ? 'degraded' : 'syncing',
+                error: null,
+                hmrConnected: true,
+                hmrState: 'connected',
                 filesInSync: prev.filesInSync + 1,
                 lastSyncAt: syncedAt,
               }));
               syncResetRef.current = setTimeout(() => {
                 setRuntime((prev) => ({
                   ...prev,
-                  state: prev.strategy === 'inline' ? 'degraded' : 'healthy',
+                  state:
+                    prev.strategy === 'inline'
+                      ? 'degraded'
+                      : prev.state === 'syncing'
+                        ? 'healthy'
+                        : prev.state,
                 }));
-              }, 900);
+              }, 1400);
             }
           },
           onError: () => {
-            setRuntime((prev) => ({ ...prev, hmrConnected: false }));
+            setRuntime((prev) => ({
+              ...prev,
+              hmrConnected: false,
+              hmrState: prev.strategy === 'inline' ? 'idle' : 'disconnected',
+            }));
           },
         });
 
@@ -59,8 +89,33 @@ export function usePreviewRuntimeHmrBridge(setRuntime: RuntimeSetter) {
           if (state === 'failed' || state === 'reconnecting') {
             setRuntime((prev) => {
               if (prev.strategy === 'inline') return prev;
-              if (prev.state === 'degraded') return prev;
-              return { ...prev, state: 'degraded' };
+              const hadRecentHealthySignal =
+                typeof prev.lastHealthyAt === 'number' &&
+                Date.now() - prev.lastHealthyAt < HMR_RECOVERY_GRACE_MS;
+
+              if (degradeTimeoutRef.current) clearTimeout(degradeTimeoutRef.current);
+              if (hadRecentHealthySignal) {
+                degradeTimeoutRef.current = setTimeout(() => {
+                  setRuntime((current) => {
+                    const stillRecovering =
+                      current.strategy !== 'inline' &&
+                      !current.hmrConnected &&
+                      current.hmrState === 'reconnecting';
+                    if (!stillRecovering) return current;
+                    return {
+                      ...current,
+                      state: 'degraded',
+                    };
+                  });
+                }, HMR_RECOVERY_GRACE_MS);
+              }
+
+              return {
+                ...prev,
+                hmrConnected: false,
+                hmrState: state === 'reconnecting' ? 'reconnecting' : 'disconnected',
+                state: hadRecentHealthySignal || prev.state === 'syncing' ? prev.state : 'degraded',
+              };
             });
           }
         });

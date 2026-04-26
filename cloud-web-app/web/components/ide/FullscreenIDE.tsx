@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useRef } from "react";
 import type * as monacoEditor from 'monaco-editor';
 
 import FullscreenIDEWorkspaceBridge from '@/components/ide/fullscreen/FullscreenIDEWorkspaceBridge';
 import type { FullscreenIDEWorkspaceBridgeProps } from '@/components/ide/fullscreen/FullscreenIDEWorkspaceBridge.types';
 import { useWorkbenchChrome } from '@/components/ide/fullscreen/useWorkbenchChrome';
+import { useWorkbenchRouteParams } from '@/components/ide/fullscreen/useWorkbenchRouteParams';
 import { useWorkbenchEditorModel } from '@/components/ide/fullscreen/useWorkbenchEditorModel';
 import { useWorkbenchEntryConvergence } from '@/components/ide/fullscreen/useWorkbenchEntryConvergence';
 import { useWorkbenchFiles } from '@/components/ide/fullscreen/useWorkbenchFiles';
@@ -25,18 +26,12 @@ import {
   useWorkbenchShellState,
 } from '@/components/ide/fullscreen/useWorkbenchShellState';
 import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
-import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 
 // NOTE: Workbench helpers + banner components live in components/ide/fullscreen/*
 // so this file stays focused on route bootstrap + service orchestration.
 
 function IDEContent() {
-  const search = useBrowserSearch();
-  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
-  const fileParam = searchParams.get('file');
-  const projectIdParam = searchParams.get('projectId');
-  const entryParam = searchParams.get('entry');
-  const previewUrlParam = searchParams.get('previewUrl');
+  const { fileParam, projectIdParam, entryParam, previewUrlParam } = useWorkbenchRouteParams();
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const primaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const secondaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
@@ -372,9 +367,7 @@ function IDEContent() {
     checkRuntimeHealth,
   });
 
-  return (
-    <FullscreenIDEWorkspaceBridge {...bridgeProps} />
-  );
+  return <FullscreenIDEWorkspaceBridge {...bridgeProps} />;
 }
 
 export default function FullscreenIDE() {

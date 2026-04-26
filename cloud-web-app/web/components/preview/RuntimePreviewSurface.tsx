@@ -67,6 +67,7 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
             state="failed"
             latencyMs={null}
             hmrConnected={false}
+            hmrState={runtime.hmrState}
             strategy={effectiveStrategy}
             startedAt={runtime.startedAt}
             lastHealthCheckAt={runtime.lastHealthCheckAt}
@@ -92,6 +93,7 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
             state="idle"
             latencyMs={null}
             hmrConnected={false}
+            hmrState={runtime.hmrState}
             lastHealthCheckAt={runtime.lastHealthCheckAt}
             lastHealthyAt={runtime.lastHealthyAt}
             failureCount={runtime.failureCount}
@@ -136,6 +138,7 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
             state={effectiveState}
             latencyMs={null}
             hmrConnected={false}
+            hmrState={runtime.hmrState}
             strategy={effectiveStrategy}
             startedAt={runtime.startedAt}
             lastHealthCheckAt={runtime.lastHealthCheckAt}
@@ -168,6 +171,7 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
           state={effectiveState}
           latencyMs={runtime.latencyMs}
           hmrConnected={runtime.hmrConnected}
+          hmrState={runtime.hmrState}
           strategy={effectiveStrategy}
           filesInSync={runtime.filesInSync}
           lastSyncAt={runtime.lastSyncAt}

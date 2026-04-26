@@ -1,0 +1,57 @@
+'use client';
+
+import type { UseFullscreenIDEBridgePropsArgs } from '@/components/ide/fullscreen/useFullscreenIDEBridgeProps.types';
+import type { FullscreenIDEBridgeEditorProps } from '@/components/ide/fullscreen/workbenchBridgeModels';
+
+export function buildFullscreenIDEBridgeEditorProps(
+  args: UseFullscreenIDEBridgePropsArgs,
+): FullscreenIDEBridgeEditorProps {
+  return {
+    activeFile: args.activeFile,
+    secondaryFile: args.secondaryFile,
+    bridgeActiveFile: args.bridgeActiveFile,
+    activeDiagnostics: args.activeDiagnostics,
+    splitEditorGroups: args.splitEditorGroups,
+    outlineSymbols: args.outlineSymbols,
+    splitEditorOpen: args.splitEditorOpen,
+    splitActivePane: args.splitActivePane,
+    splitDirection: args.splitDirection,
+    nextOpenTarget: args.nextOpenTarget,
+    isCompactViewport: args.isCompactViewport,
+    isReadingFile: args.isReadingFile,
+    fileError: args.fileError,
+    showIntelliSense: args.showIntelliSense,
+    showOutline: args.showOutline,
+    showDiagnostics: args.showDiagnostics,
+    fullAccessActive: Boolean(args.fullAccessActiveGrant),
+    collaborationConnected: args.collaborationConnected,
+    collaborationPeers: args.editorPeers,
+    primaryEditorRef: args.primaryEditorRef,
+    secondaryEditorRef: args.secondaryEditorRef,
+    editorRef: args.editorRef,
+    setSplitActivePane: args.setSplitActivePane,
+    setSecondaryFile: args.setSecondaryFile,
+    setActiveFile: args.setActiveFile,
+    setShowIntelliSense: args.setShowIntelliSense,
+    setShowOutline: args.setShowOutline,
+    setShowDiagnostics: args.setShowDiagnostics,
+    setSplitDirection: args.setSplitDirection,
+    setNextOpenTarget: args.setNextOpenTarget,
+    setSplitEditorOpen: args.setSplitEditorOpen,
+    setEditorDiagnostics: args.setEditorDiagnostics,
+    setSecondaryEditorDiagnostics: args.setSecondaryEditorDiagnostics,
+    onUndo: args.handleEditorUndo,
+    onRedo: args.handleEditorRedo,
+    onFind: args.handleEditorFind,
+    onReplace: args.handleEditorReplace,
+    onAIChat: args.handleAIPanel,
+    onToggleSplitEditor: args.handleToggleSplitEditor,
+    onJumpToOutlineSymbol: args.handleJumpToOutlineSymbol,
+    onRequestFullAccess: args.handleToggleFullAccess,
+    onCursorPresenceChange: args.broadcastCursor,
+    onSelectionPresenceChange: args.broadcastSelection,
+    onCursorStatusChange: args.handleEditorCursorStatus,
+    onSelectionStatusChange: args.handleEditorSelectionStatus,
+    editorCursorStatus: args.editorCursorStatus,
+  };
+}

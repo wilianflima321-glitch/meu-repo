@@ -4,6 +4,7 @@ import {
   LIFECYCLE_COLORS,
   LIFECYCLE_LABELS,
   STRATEGY_LABELS,
+  type PreviewHmrState,
   type PreviewLifecycleState,
   type PreviewStrategy,
 } from '@/components/preview/previewRuntime.types';
@@ -51,6 +52,7 @@ export function LifecycleIndicator({
   state,
   latencyMs,
   hmrConnected,
+  hmrState = 'idle',
   strategy,
   filesInSync,
   lastSyncAt,
@@ -62,6 +64,7 @@ export function LifecycleIndicator({
   state: PreviewLifecycleState;
   latencyMs: number | null;
   hmrConnected: boolean;
+  hmrState?: PreviewHmrState;
   strategy?: PreviewStrategy;
   filesInSync?: number;
   lastSyncAt?: number | null;
@@ -70,8 +73,31 @@ export function LifecycleIndicator({
   lastHealthyAt?: number | null;
   failureCount?: number;
 }) {
-  const showHmrWarning = state === 'healthy' && strategy && strategy !== 'inline' && !hmrConnected;
   const hasFailures = typeof failureCount === 'number' && failureCount > 0;
+  const effectiveHmrState = hmrConnected && hmrState !== 'idle' ? 'connected' : hmrState;
+  const showHmrChip = strategy && strategy !== 'inline' && effectiveHmrState !== 'idle';
+  const hmrTone =
+    effectiveHmrState === 'connected'
+      ? 'text-[var(--aethel-success)]'
+      : effectiveHmrState === 'connecting' || effectiveHmrState === 'reconnecting'
+        ? 'text-[var(--aethel-warning-light)]'
+        : 'text-[var(--aethel-warning)]';
+  const hmrLabel =
+    effectiveHmrState === 'connected'
+      ? 'HMR'
+      : effectiveHmrState === 'connecting'
+        ? 'HMR conectando'
+        : effectiveHmrState === 'reconnecting'
+          ? 'HMR reconectando'
+          : 'HMR sem canal';
+  const hmrIcon = effectiveHmrState === 'connected' ? (
+    <>
+      <path d="M8 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 1zm0 10a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 11z" />
+      <path d="M4.5 4a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1-.708.708l-1.5-1.5A.5.5 0 0 1 4.5 4zm7 0a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708-.708l1.5-1.5A.5.5 0 0 1 11.5 4z" />
+    </>
+  ) : (
+    <path d="M8 1a.75.75 0 0 1 .66.39l6 11A.75.75 0 0 1 14 13H2a.75.75 0 0 1-.66-1.11l6-11A.75.75 0 0 1 8 1zm0 3.25a.75.75 0 0 0-.75.75v3.5a.75.75 0 0 0 1.5 0V5a.75.75 0 0 0-.75-.75zm0 7.5a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8z" />
+  );
 
   return (
     <div className="flex items-center gap-2 border-b border-[var(--aethel-border-secondary)]/50 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-3 py-1.5 text-xs backdrop-blur-sm">
@@ -115,21 +141,12 @@ export function LifecycleIndicator({
           falhas {failureCount}
         </span>
       ) : null}
-      {hmrConnected && (
-        <span className="ml-auto flex items-center gap-1 text-[var(--aethel-success)]">
+      {showHmrChip && (
+        <span className={`ml-auto flex items-center gap-1 ${hmrTone}`}>
           <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 1zm0 10a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 11z" />
-            <path d="M4.5 4a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1-.708.708l-1.5-1.5A.5.5 0 0 1 4.5 4zm7 0a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708-.708l1.5-1.5A.5.5 0 0 1 11.5 4z" />
+            {hmrIcon}
           </svg>
-          HMR
-        </span>
-      )}
-      {showHmrWarning && (
-        <span className="ml-auto flex items-center gap-1 text-[var(--aethel-warning)]">
-          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 1a.75.75 0 0 1 .66.39l6 11A.75.75 0 0 1 14 13H2a.75.75 0 0 1-.66-1.11l6-11A.75.75 0 0 1 8 1zm0 3.25a.75.75 0 0 0-.75.75v3.5a.75.75 0 0 0 1.5 0V5a.75.75 0 0 0-.75-.75zm0 7.5a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8z" />
-          </svg>
-          HMR indisponivel
+          {hmrLabel}
         </span>
       )}
     </div>
