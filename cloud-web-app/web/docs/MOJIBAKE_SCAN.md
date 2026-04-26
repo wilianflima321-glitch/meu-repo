@@ -1,13 +1,10 @@
 # MOJIBAKE_SCAN.md
-Generated: 2026-04-26T06:51:04.409Z
+Generated: 2026-04-26T11:30:37.784Z
 
-- Files scanned: 1347
-- Findings: 44
+- Files scanned: 1362
+- Findings: 41
 
 ## Findings
-- components/ide/InlineAIChatSections.tsx:176 -> <span aria-hidden="true">�</span>
-- components/ide/InlineAIChatSections.tsx:679 -> <span>Enter envia � Shift+Enter cria nova linha</span>
-- components/ide/InlineAIChatSections.tsx:721 -> <span aria-hidden="true">�</span>
 - docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md:4 -> **VersÃ£o:** 1.0
 - docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md:5 -> **Autor:** AnÃ¡lise Automatizada
 - docs/GAP_ANALYSIS_VS_VSCODE_UNREAL.md:25 -> | **Command Palette (Ctrl+Shift+P)** | [components/ide/CommandPalette.tsx](../components/ide/CommandPalette.tsx) | ImplementaÃ§Ã£o canÃ´nica, comandos categorizados, keybindings |

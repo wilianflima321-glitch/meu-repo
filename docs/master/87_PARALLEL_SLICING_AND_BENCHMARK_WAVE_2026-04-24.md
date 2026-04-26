@@ -61,8 +61,13 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - preview/deploy trust also moved from latent backend capability into the visible cockpit: `cloud-web-app/web/components/preview/previewDeployTrust.ts` plus `usePreviewDeployTrust.ts` now persist the last known deploy, derive the best share target, and let `PreviewRuntimeToolbar.tsx` + `WorkbenchPreviewRuntimeControls.tsx` start deploys, refresh status, open the deploy site, and copy the strongest available share link from the same preview lane the user is validating
 - the deploy status loop is now coherent across surfaces too: `cloud-web-app/web/components/ide/modern-shell/deployTopbarAction.tsx` and `cloud-web-app/web/app/deploy/[id]/page.tsx` now feed the same preview deploy trust store, so top bar, status page, and preview lane all agree on the latest deployment instead of acting like isolated features
 - preview/share trust now keeps a stable review target during deploy churn: `previewDeployTrust.ts`, `usePreviewDeployTrust.ts`, `deployTopbarAction.tsx`, and `app/deploy/[id]/page.tsx` preserve `lastReadyUrl` / `lastReadyInspectorUrl`, so the strongest share action keeps pointing at the last ready public deploy while a newer deploy is still building or has errored
-- the shared studio route boundary is thinner too: `cloud-web-app/web/components/providers/StudioRuntimeRouteLayout.tsx` no longer swaps the whole shell through `next/dynamic(..., { ssr: false })`; it renders `StudioRuntimeLayoutClient` directly, which removes one broad browser-only route replacement from every studio route at once
+- the shared studio route boundary is thinner again: `cloud-web-app/web/components/providers/StudioRuntimeRouteLayout.tsx` now wraps routes directly with `StudioRuntimeProviders`, and the temporary `StudioRuntimeLayoutClient.tsx` hop has been deleted, which removes one more shared client handoff layer across dashboard/ide/settings/profile/project-settings/nexus/marketplace
 - that reduction is aligned with the live probe, but it still does **not** close prerender parity: the newest rerun in `cloud-web-app/web/build-probe-2026-04-26-prerender-probe-route-layout-direct.log` still stalls at `Creating an optimized production build ...`
+- the hidden inline-AI lane also moved another step toward product seams: `cloud-web-app/web/components/ide/InlineAIChat.tsx` remains the `136`-line shell, `InlineAIChatSections.tsx` is down to `209` lines, and the denser context/message/composer ownership now lives in `InlineAIChatContextSurface.tsx` (`217`), `InlineAIChatMessageSurface.tsx` (`177`), and `InlineAIChatComposerSurface.tsx` (`255`)
+- the marketplace creator cockpit joined Wave B too: `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx` is now an `18`-line shell over `useCreatorDashboardController.ts` (`56`), `CreatorDashboardSections.tsx` (`812`), `CreatorDashboardPrimitives.tsx` (`107`), `CreatorDashboard.api.ts` (`88`), `CreatorDashboard.constants.tsx` (`88`), and `CreatorDashboard.types.ts` (`48`), which removes the thousand-line route shell even though the biggest visual section file still needs another pass
+- the legacy settings route joined the same wave: `cloud-web-app/web/components/settings/SettingsPage.tsx` is now an `83`-line orchestrator over `SettingsPageSections.tsx` (`313`), `SettingsPageState.ts` (`215`), `SettingsPageData.tsx` (`784`), `SettingsPageInputs.tsx` (`178`), `SettingsPage.types.ts` (`60`), and `useSettingsPageStorage.ts` (`74`), which removes the thousand-line route shell even though the static catalog data still needs a calmer follow-up
+- the admin AI monitor route also split cleanly: `cloud-web-app/web/app/admin/ai-monitor/page.tsx` is now a `344`-line SWR/action orchestrator over `ai-monitor-overview.tsx` (`308`), `ai-monitor-sections.tsx` (`691`), and `ai-monitor-calls.tsx` (`207`), which removes the 1.3k-line page shell even though the operational section file remains dense
+- the freshest compile-mode reruns stayed viable through that broader Wave B pass: `cloud-web-app/web/build-probe-2026-04-26-compile-mode-marketplace-wave.log` and `cloud-web-app/web/build-probe-2026-04-26-wave-b-settings-admin.log` both completed with the same known `e2b/dist/index.mjs` warning class, while `cloud-web-app/web/build-probe-2026-04-26-wave-b-prerender-probe.log` still timed out before a final verdict after advancing into `Linting and checking validity of types ...`
 - preview runtime trust itself is now less hand-wavy: `cloud-web-app/web/components/preview/PreviewRuntimeTrustNotice.tsx` now surfaces readiness / health / fallback / next-move guidance above the canonical visual surface, while `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, `previewRuntimeState.ts`, `previewRuntime.types.ts`, and `usePreviewRuntimeHealthMonitor.ts` now track `lastHealthCheckAt`, `lastHealthyAt`, and `failureCount` so warmup can degrade honestly instead of looking silently stuck forever
 - collaboration presence is also less hidden in the cockpit: `cloud-web-app/web/components/collaboration/FilePresenceDot.tsx` now gives the explorer compact file/folder presence stacks, while `FileExplorerPro.tsx`, `WorkbenchSidebar.tsx`, `FullscreenIDEWorkspace.tsx`, and `FullscreenIDEWorkspaceBridge.tsx` now pass `collaborationPeers` into the canonical tree so file presence is visible where users actually decide what to open next
 - the public shell also took one more reduction pass: `cloud-web-app/web/components/ui/PublicHeader.tsx` is now a hook-free static header with a CSS-only mobile menu, which removes one more live-browser dependency from the public/docs cluster without overclaiming that prerender parity is solved
@@ -114,7 +119,10 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `313`
 - `cloud-web-app/web/components/ide/InlineAIChat.tsx`: `136`
 - `cloud-web-app/web/components/ide/InlineAIChatPrimitives.tsx`: `299`
-- `cloud-web-app/web/components/ide/InlineAIChatSections.tsx`: `805`
+- `cloud-web-app/web/components/ide/InlineAIChatSections.tsx`: `209`
+- `cloud-web-app/web/components/ide/InlineAIChatContextSurface.tsx`: `217`
+- `cloud-web-app/web/components/ide/InlineAIChatMessageSurface.tsx`: `177`
+- `cloud-web-app/web/components/ide/InlineAIChatComposerSurface.tsx`: `255`
 - `cloud-web-app/web/components/ide/modern-shell/chromeStatusBar.tsx`: `454`
 - `cloud-web-app/web/components/ide/modern-shell/useShellSourceControlTruth.ts`: `262`
 - `cloud-web-app/web/components/ai-chat/AIChatComposer.tsx`: `282`
@@ -148,12 +156,16 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`: `1164`
 
 ### Wave B - dense product surfaces next in line
-- `cloud-web-app/web/app/admin/ai-monitor/page.tsx`: `1249`
 - `cloud-web-app/web/components/scene-editor/SceneEditor.tsx`: `1193`
 - `cloud-web-app/web/components/engine/DetailsPanel.tsx`: `1173`
 - `cloud-web-app/web/components/assets/ContentBrowser.tsx`: `1128`
-- `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx`: `1120`
-- `cloud-web-app/web/components/settings/SettingsPage.tsx`: `1066`
+- `cloud-web-app/web/components/marketplace/CreatorDashboardSections.tsx`: `812`
+- `cloud-web-app/web/components/marketplace/CreatorDashboardPrimitives.tsx`: `107`
+- `cloud-web-app/web/components/marketplace/CreatorDashboard.api.ts`: `88`
+- `cloud-web-app/web/components/marketplace/CreatorDashboard.constants.tsx`: `88`
+- `cloud-web-app/web/components/marketplace/CreatorDashboard.types.ts`: `48`
+- `cloud-web-app/web/components/settings/SettingsPageData.tsx`: `784`
+- `cloud-web-app/web/app/admin/ai-monitor/ai-monitor-sections.tsx`: `691`
 - `cloud-web-app/web/components/engine/ProjectSettings.tsx`: `1054`
 
 ### Wave C - specialist editors and lower-priority breadth
@@ -271,9 +283,9 @@ Run sequentially because the write scope is shared:
 ### Wave 2 - dense product surfaces
 After Wave 1 stabilizes:
 1. `ProjectsDashboard.tsx`
-2. `SettingsPage.tsx`
-3. `CreatorDashboard.tsx`
-4. `app/admin/ai-monitor/page.tsx`
+2. `SettingsPageData.tsx`
+3. `CreatorDashboardSections.tsx`
+4. `app/admin/ai-monitor/ai-monitor-sections.tsx`
 5. `SceneEditor.tsx`
 
 ### Wave 2 progress snapshot
@@ -292,6 +304,9 @@ After Wave 1 stabilizes:
 - `SettingsPage.tsx` is no longer carrying its own filter/search orchestration alone:
   - `components/settings/SettingsPageState.ts` now owns category/subcategory/search state
   - `components/settings/SettingsPageSections.tsx` now exposes counts, grouped rendering, and clearer operator affordances
+- the legacy settings surface moved further again:
+  - `components/settings/SettingsPage.tsx` is now the `83`-line route shell
+  - `components/settings/SettingsPageData.tsx`, `SettingsPageInputs.tsx`, `SettingsPage.types.ts`, and `useSettingsPageStorage.ts` now hold the dense data, row controls, contracts, and persistence seams separately
 - the dashboard overview also moved from one dense surface into real seams:
   - `components/dashboard/ProjectsDashboard.tsx` is now a thin composition shell
   - `components/dashboard/useProjectsDashboardController.ts` now owns fetch/filter/stats/action state
@@ -304,6 +319,13 @@ After Wave 1 stabilizes:
   - `components/ide/InlineAIChatPrimitives.tsx`
   - `components/ide/InlineAIChatSections.tsx`
   - `components/ide/InlineAIChat.styles.ts`
+- the inline lane is thinner again now:
+  - `components/ide/InlineAIChatContextSurface.tsx`
+  - `components/ide/InlineAIChatMessageSurface.tsx`
+  - `components/ide/InlineAIChatComposerSurface.tsx`
+- the admin AI monitor route also left the Wave B monolith bucket:
+  - `app/admin/ai-monitor/page.tsx` is now the orchestration shell
+  - `app/admin/ai-monitor/ai-monitor-overview.tsx`, `ai-monitor-sections.tsx`, and `ai-monitor-calls.tsx` now own the operator chrome, heavy audit sections, and recent-call table
 - the public landing shell was reduced in parallel:
   - `app/landing-v3.tsx` is back to a server page
   - `app/landing-v3-mission-box.tsx` now holds the interactive workspace-generation flow
@@ -335,8 +357,8 @@ A slice is only complete when all of this remains true:
 4. move the editor ROI pass to symbol truth + breadcrumb navigation before attempting git-gutter depth
 5. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
 6. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
-7. keep moving the AI lane from “strong panel” to “operator surface” through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
-8. continue Wave B in `ProjectsDashboard.tsx`, `CreatorDashboard.tsx`, and `app/admin/ai-monitor/page.tsx` now that both `SettingsUI.tsx` and the legacy `SettingsPage.tsx` are calmer
+7. keep moving the AI lane from "strong panel" to "operator surface" through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
+8. continue Wave B in `ProjectsDashboardCollection.tsx`, `CreatorDashboardSections.tsx`, `app/admin/ai-monitor/ai-monitor-sections.tsx`, and `SettingsPageData.tsx` now that the route shells are calmer
 9. promote preview, collaboration, deploy, and public-shell confidence from present to trusted
 
 ## One-Line Reading

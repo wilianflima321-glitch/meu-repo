@@ -33,6 +33,13 @@ This file is the short scoreboard that answers:
 - `RuntimePreviewSurface.tsx`: `239` lines
 - `PreviewRuntimeTrustNotice.tsx`: `131` lines
 - `SettingsUI.tsx`: `162` lines
+- `SettingsPage.tsx`: `83` lines
+- `SettingsPageSections.tsx`: `313` lines
+- `SettingsPageState.ts`: `215` lines
+- `SettingsPageData.tsx`: `784` lines
+- `SettingsPageInputs.tsx`: `178` lines
+- `SettingsPage.types.ts`: `60` lines
+- `useSettingsPageStorage.ts`: `74` lines
 - `useSettingsUiState.ts`: `137` lines
 - `SettingsCategorySidebar.tsx`: `94` lines
 - `SettingsResultsPane.tsx`: `91` lines
@@ -56,7 +63,10 @@ This file is the short scoreboard that answers:
 - `WorkbenchEditorSidecar.tsx`: `85` lines
 - `InlineAIChat.tsx`: `136` lines
 - `InlineAIChatPrimitives.tsx`: `299` lines
-- `InlineAIChatSections.tsx`: `805` lines
+- `InlineAIChatSections.tsx`: `209` lines
+- `InlineAIChatContextSurface.tsx`: `217` lines
+- `InlineAIChatMessageSurface.tsx`: `177` lines
+- `InlineAIChatComposerSurface.tsx`: `255` lines
 - `InlineAIChat.styles.ts`: `23` lines
 - `AIChatPanelContainer.tsx`: `123` lines
 - `ModernIDEShell.tsx`: `213` lines
@@ -84,12 +94,23 @@ This file is the short scoreboard that answers:
 - `useTerminalImperativeHandle.ts`: `51` lines
 - `useWorkbenchShellState.ts`: `257` lines
 - `MonacoEditorPro.tsx`: `1164` lines
-- `StudioRuntimeRouteLayout.tsx`: `21` lines
+- `StudioRuntimeRouteLayout.tsx`: `20` lines
+- `CreatorDashboard.tsx`: `18` lines
+- `useCreatorDashboardController.ts`: `56` lines
+- `CreatorDashboardSections.tsx`: `812` lines
+- `CreatorDashboardPrimitives.tsx`: `107` lines
+- `CreatorDashboard.api.ts`: `88` lines
+- `CreatorDashboard.constants.tsx`: `88` lines
+- `CreatorDashboard.types.ts`: `48` lines
+- `app/admin/ai-monitor/page.tsx`: `344` lines
+- `app/admin/ai-monitor/ai-monitor-overview.tsx`: `308` lines
+- `app/admin/ai-monitor/ai-monitor-sections.tsx`: `691` lines
+- `app/admin/ai-monitor/ai-monitor-calls.tsx`: `207` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
-- `npm run build` now uses `next build --experimental-build-mode compile`; it completed successfully again on `2026-04-26` in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`, and the earlier server artifact smoke test still stands in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
-- the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the freshest local evidence is `cloud-web-app/web/build-probe-2026-04-26-prerender-probe.log`, which still stalls at `Creating an optimized production build ...`, while the strongest historical failure evidence remains `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`
+- `npm run build` now uses `next build --experimental-build-mode compile`; it completed successfully again on `2026-04-26` in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log` and again after the broader Wave B pass in `cloud-web-app/web/build-probe-2026-04-26-wave-b-settings-admin.log`, and the earlier server artifact smoke test still stands in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
+- the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the freshest local evidence is `cloud-web-app/web/build-probe-2026-04-26-wave-b-prerender-probe.log`, which advanced into `Linting and checking validity of types ...` after the same known `e2b/dist/index.mjs` warning class but still timed out without a final success/failure verdict, while the strongest historical deterministic failure evidence remains `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -127,7 +148,11 @@ This file is the short scoreboard that answers:
 - but still depends on provider/runtime readiness.
 - historical audit claims that `Cmd+K` is still unwired are now stale on this branch:
   - `MonacoEditorPro.tsx` already binds `Cmd/Ctrl+K` to `InlineEditModal`
-  - the real remaining gap is that `InlineAIChat.tsx` still exists more as latent capability than as a canonical editor-lane surface
+- the real remaining gap is that `InlineAIChat.tsx` still exists more as latent capability than as a canonical editor-lane surface
+- the inline lane is materially easier to productize now:
+  - `InlineAIChat.tsx` is still the `136`-line shell
+  - the old `InlineAIChatSections.tsx` hotspot is down to `209` lines
+  - context, transcript, and composer density now live in `InlineAIChatContextSurface.tsx`, `InlineAIChatMessageSurface.tsx`, and `InlineAIChatComposerSurface.tsx`
 - the shell keybinding grammar is also more honest now:
   - `Ctrl+I` routes to the canonical `AI Console` instead of pretending an inline-chat surface is already productized in the editor lane
 - the former container hotspot was also reduced:
@@ -205,8 +230,17 @@ This file is the short scoreboard that answers:
   - `SettingsCategorySidebar.tsx` now exposes `All settings`, per-section counts, and active child filtering instead of only scroll-jump behavior
   - `SettingsSummaryBar.tsx` and `SettingsResultsPane.tsx` now show the active filter label and a single clear-filters affordance, so search + category filters no longer feel like disconnected controls
 - still open:
-  - `SettingsPage.tsx` remains a separate thousand-line settings surface
+  - `SettingsPageData.tsx` is still a dense static catalog seam at `784` lines
   - persistence/i18n depth is still broader than this slice
+
+### Legacy settings route
+- the old `SettingsPage.tsx` monolith is now also split into calmer seams:
+  - `SettingsPage.tsx` is an `83`-line orchestrator
+  - static catalog data lives in `SettingsPageData.tsx`
+  - storage/persistence actions live in `useSettingsPageStorage.ts`
+  - row/input rendering lives in `SettingsPageInputs.tsx`
+  - shared contracts now live in `SettingsPage.types.ts`
+- this means the canonical `/settings` route is no longer carrying a thousand-line page shell even though the data catalog itself remains dense
 
 ### Dashboard overview surface
 - the old `ProjectsDashboard.tsx` monolith is no longer carrying the whole overview alone:
@@ -215,9 +249,34 @@ This file is the short scoreboard that answers:
   - toolbar, list/grid, empty state, and result-count grammar now live in `ProjectsDashboardCollection.tsx`
   - create flow and overview header/stats/quick-actions now live in `ProjectsDashboardCreateModal.tsx` and `ProjectsDashboardSections.tsx`
 - user-facing quality also improved:
-  - search now covers both project `name` and `description`
-  - the dashboard now exposes a visible `resultsLabel`
-  - `Limpar filtros` exists both in the toolbar and in the filtered empty state, which reduces recovery friction when users stack search + type filters
+- search now covers both project `name` and `description`
+- the dashboard now exposes a visible `resultsLabel`
+- `Limpar filtros` exists both in the toolbar and in the filtered empty state, which reduces recovery friction when users stack search + type filters
+
+### Marketplace creator cockpit
+- the old creator cockpit monolith also started moving into real seams:
+  - `CreatorDashboard.tsx` is now an `18`-line shell
+  - fetch/refresh/tab ownership moved into `useCreatorDashboardController.ts`
+  - API calls live in `CreatorDashboard.api.ts`
+  - shared view-models and copy moved into `CreatorDashboard.types.ts` and `CreatorDashboard.constants.tsx`
+  - section chrome and card/table density now sit in `CreatorDashboardSections.tsx` and `CreatorDashboardPrimitives.tsx`
+- this is still partial because `CreatorDashboardSections.tsx` remains a dense `812`-line surface, but the end-user route is no longer trapped inside one thousand-line file
+
+### Admin AI monitor
+- the admin monitor route is no longer a single thousand-line page:
+  - `app/admin/ai-monitor/page.tsx` is now a `344`-line state/data orchestrator
+  - header, emergency, highlight, and filter chrome moved into `ai-monitor-overview.tsx`
+  - readiness/promotion/dossier/ledger/model sections moved into `ai-monitor-sections.tsx`
+  - recent calls and expandable call rows moved into `ai-monitor-calls.tsx`
+- this is still partial because `ai-monitor-sections.tsx` remains a dense `691`-line section surface, but the route shell is now much easier to evolve and test
+
+### Shared studio route shell
+- the route wrapper is thinner than the earlier browser-shell pass:
+  - `StudioRuntimeRouteLayout.tsx` now wraps routes directly with `StudioRuntimeProviders`
+  - the intermediate `StudioRuntimeLayoutClient.tsx` seam is gone
+- this reduces one more shared handoff layer across dashboard/ide/settings/profile/project-settings/nexus/marketplace
+- it still does **not** close prerender parity by itself:
+  - `build-probe-2026-04-26-prerender-probe-route-layout-direct.log` still stalls at `Creating an optimized production build ...`
 - still open:
   - `ProjectsDashboardCollection.tsx` is still dense enough to deserve another calm pass later
   - duplicate/share actions are still UX-only hooks until stronger backend semantics are wired

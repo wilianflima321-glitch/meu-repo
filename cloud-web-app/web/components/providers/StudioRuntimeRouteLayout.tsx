@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-import type { StudioRuntimeSurface } from '@/components/providers/StudioRuntimeProviders'
-import StudioRuntimeLayoutClient from './StudioRuntimeLayoutClient'
+import StudioRuntimeProviders, { type StudioRuntimeSurface } from '@/components/providers/StudioRuntimeProviders'
 
 interface StudioRuntimeRouteLayoutProps {
   children: ReactNode
@@ -14,8 +13,8 @@ export default function StudioRuntimeRouteLayout({
   onboardingChrome = true,
 }: StudioRuntimeRouteLayoutProps) {
   return (
-    <StudioRuntimeLayoutClient surface={surface} onboardingChrome={onboardingChrome}>
+    <StudioRuntimeProviders surface={surface} onboardingChrome={onboardingChrome}>
       {children}
-    </StudioRuntimeLayoutClient>
+    </StudioRuntimeProviders>
   )
 }

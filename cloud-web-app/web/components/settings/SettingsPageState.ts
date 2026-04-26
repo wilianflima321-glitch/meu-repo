@@ -5,7 +5,7 @@ import type {
   SettingsCategory,
   SettingsGroup,
   SettingsSubcategory,
-} from './SettingsPageSections'
+} from './SettingsPage.types'
 
 interface UseSettingsPageStateOptions {
   categories: SettingsCategory[]

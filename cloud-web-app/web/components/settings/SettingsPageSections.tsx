@@ -10,47 +10,11 @@ import {
   Settings,
   X,
 } from 'lucide-react'
-
-export interface SettingItem {
-  id: string
-  label: string
-  description: string
-  type: 'toggle' | 'select' | 'number' | 'text' | 'color' | 'keybinding' | 'slider'
-  value: any
-  defaultValue: any
-  options?: { label: string; value: any }[]
-  min?: number
-  max?: number
-  step?: number
-  category: string
-  subcategory?: string
-  tags?: string[]
-  requiresReload?: boolean
-}
-
-export interface SettingsSubcategory {
-  id: string
-  label: string
-  count?: number
-  visibleCount?: number
-}
-
-export interface SettingsCategory {
-  id: string
-  label: string
-  icon: ReactNode
-  description: string
-  count?: number
-  visibleCount?: number
-  subcategories?: SettingsSubcategory[]
-}
-
-export interface SettingsGroup {
-  id: string
-  title: string
-  description: string
-  settings: SettingItem[]
-}
+import type {
+  SettingItem,
+  SettingsCategory,
+  SettingsGroup,
+} from './SettingsPage.types'
 
 type SidebarProps = {
   activeFilterLabel: string | null
