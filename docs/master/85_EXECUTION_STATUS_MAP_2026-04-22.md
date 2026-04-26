@@ -36,7 +36,15 @@ This file is the short scoreboard that answers:
 - `SettingsPage.tsx`: `83` lines
 - `SettingsPageSections.tsx`: `313` lines
 - `SettingsPageState.ts`: `215` lines
-- `SettingsPageData.tsx`: `784` lines
+- `SettingsPageData.tsx`: `20` lines
+- `SettingsPageData.defaults.ts`: `102` lines
+- `SettingsPageData.categories.tsx`: `119` lines
+- `SettingsPageData.items.editor.ts`: `135` lines
+- `SettingsPageData.items.ai.ts`: `114` lines
+- `SettingsPageData.items.workspace.ts`: `76` lines
+- `SettingsPageData.items.engine.ts`: `97` lines
+- `SettingsPageData.items.appearance.ts`: `71` lines
+- `SettingsPageData.items.system.ts`: `90` lines
 - `SettingsPageInputs.tsx`: `178` lines
 - `SettingsPage.types.ts`: `60` lines
 - `useSettingsPageStorage.ts`: `74` lines
@@ -94,23 +102,35 @@ This file is the short scoreboard that answers:
 - `useTerminalImperativeHandle.ts`: `51` lines
 - `useWorkbenchShellState.ts`: `257` lines
 - `MonacoEditorPro.tsx`: `1164` lines
+- `StudioRuntimeProviders.tsx`: `26` lines
 - `StudioRuntimeRouteLayout.tsx`: `20` lines
+- `runtime/FullStudioRuntime.tsx`: `61` lines
+- `runtime/LightweightStudioRuntime.tsx`: `20` lines
+- `runtime/StudioRuntimeLoadingFallback.tsx`: `18` lines
+- `runtime/StudioRuntimeCommandRegistration.tsx`: `8` lines
 - `CreatorDashboard.tsx`: `18` lines
 - `useCreatorDashboardController.ts`: `56` lines
-- `CreatorDashboardSections.tsx`: `812` lines
+- `CreatorDashboardSections.tsx`: `79` lines
+- `CreatorDashboardTabPanels.tsx`: `232` lines
+- `CreatorDashboardAnalyticsCards.tsx`: `264` lines
+- `CreatorDashboardAssetCards.tsx`: `309` lines
 - `CreatorDashboardPrimitives.tsx`: `107` lines
 - `CreatorDashboard.api.ts`: `88` lines
 - `CreatorDashboard.constants.tsx`: `88` lines
 - `CreatorDashboard.types.ts`: `48` lines
 - `app/admin/ai-monitor/page.tsx`: `344` lines
 - `app/admin/ai-monitor/ai-monitor-overview.tsx`: `308` lines
-- `app/admin/ai-monitor/ai-monitor-sections.tsx`: `691` lines
+- `app/admin/ai-monitor/ai-monitor-sections.tsx`: `16` lines
+- `app/admin/ai-monitor/ai-monitor-section-primitives.tsx`: `72` lines
+- `app/admin/ai-monitor/ai-monitor-readiness-sections.tsx`: `399` lines
+- `app/admin/ai-monitor/ai-monitor-core-loop-sections.tsx`: `284` lines
+- `app/admin/ai-monitor/ai-monitor-support-sections.tsx`: `113` lines
 - `app/admin/ai-monitor/ai-monitor-calls.tsx`: `207` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
-- `npm run build` now uses `next build --experimental-build-mode compile`; it completed successfully again on `2026-04-26` in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log` and again after the broader Wave B pass in `cloud-web-app/web/build-probe-2026-04-26-wave-b-settings-admin.log`, and the earlier server artifact smoke test still stands in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
-- the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the freshest local evidence is `cloud-web-app/web/build-probe-2026-04-26-wave-b-prerender-probe.log`, which advanced into `Linting and checking validity of types ...` after the same known `e2b/dist/index.mjs` warning class but still timed out without a final success/failure verdict, while the strongest historical deterministic failure evidence remains `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`
+- `npm run build` now uses `next build --experimental-build-mode compile`; it completed successfully again on `2026-04-26` in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`, again after the broader Wave B pass in `cloud-web-app/web/build-probe-2026-04-26-wave-b-settings-admin.log`, and again after the shared-runtime follow-up in `cloud-web-app/web/build-probe-2026-04-26-wave-b-runtime-pass.log`, and the earlier server artifact smoke test still stands in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
+- the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the freshest local evidence is `cloud-web-app/web/build-probe-2026-04-26-wave-b-runtime-prerender.log`, which still timed out at `Creating an optimized production build ...`, while the immediately previous `cloud-web-app/web/build-probe-2026-04-26-wave-b-prerender-probe.log` had advanced into `Linting and checking validity of types ...` before timing out, and the strongest historical deterministic failure evidence remains `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -230,7 +250,7 @@ This file is the short scoreboard that answers:
   - `SettingsCategorySidebar.tsx` now exposes `All settings`, per-section counts, and active child filtering instead of only scroll-jump behavior
   - `SettingsSummaryBar.tsx` and `SettingsResultsPane.tsx` now show the active filter label and a single clear-filters affordance, so search + category filters no longer feel like disconnected controls
 - still open:
-  - `SettingsPageData.tsx` is still a dense static catalog seam at `784` lines
+  - the settings catalog still deserves one more benchmark-density pass, but it is now distributed across focused `SettingsPageData.*` modules instead of one `784`-line blob
   - persistence/i18n depth is still broader than this slice
 
 ### Legacy settings route
@@ -259,16 +279,19 @@ This file is the short scoreboard that answers:
   - fetch/refresh/tab ownership moved into `useCreatorDashboardController.ts`
   - API calls live in `CreatorDashboard.api.ts`
   - shared view-models and copy moved into `CreatorDashboard.types.ts` and `CreatorDashboard.constants.tsx`
-  - section chrome and card/table density now sit in `CreatorDashboardSections.tsx` and `CreatorDashboardPrimitives.tsx`
-- this is still partial because `CreatorDashboardSections.tsx` remains a dense `812`-line surface, but the end-user route is no longer trapped inside one thousand-line file
+  - section chrome, tab orchestration, and visual card density now sit in `CreatorDashboardSections.tsx`, `CreatorDashboardTabPanels.tsx`, `CreatorDashboardAnalyticsCards.tsx`, `CreatorDashboardAssetCards.tsx`, and `CreatorDashboardPrimitives.tsx`
+- this is still partial because the densest creator surface is now `CreatorDashboardAssetCards.tsx` at `309` lines, but the route shell and primary section surface are no longer carrying the whole cockpit alone
 
 ### Admin AI monitor
 - the admin monitor route is no longer a single thousand-line page:
   - `app/admin/ai-monitor/page.tsx` is now a `344`-line state/data orchestrator
   - header, emergency, highlight, and filter chrome moved into `ai-monitor-overview.tsx`
-  - readiness/promotion/dossier/ledger/model sections moved into `ai-monitor-sections.tsx`
+  - readiness/promotion/dossier sections now live in `ai-monitor-readiness-sections.tsx`
+  - core-loop and run-ledger sections now live in `ai-monitor-core-loop-sections.tsx`
+  - ledger/full-access/model sections now live in `ai-monitor-support-sections.tsx`
+  - shared section primitives now live in `ai-monitor-section-primitives.tsx`
   - recent calls and expandable call rows moved into `ai-monitor-calls.tsx`
-- this is still partial because `ai-monitor-sections.tsx` remains a dense `691`-line section surface, but the route shell is now much easier to evolve and test
+- this is still partial because `ai-monitor-readiness-sections.tsx` remains the heaviest monitor seam at `399` lines, but the route shell and section barrel are now much easier to evolve and test
 
 ### Shared studio route shell
 - the route wrapper is thinner than the earlier browser-shell pass:
@@ -277,6 +300,13 @@ This file is the short scoreboard that answers:
 - this reduces one more shared handoff layer across dashboard/ide/settings/profile/project-settings/nexus/marketplace
 - it still does **not** close prerender parity by itself:
   - `build-probe-2026-04-26-prerender-probe-route-layout-direct.log` still stalls at `Creating an optimized production build ...`
+- the runtime provider stack itself is also calmer now:
+  - `StudioRuntimeProviders.tsx` is down to a `26`-line surface router
+  - full/light stacks now live in `runtime/FullStudioRuntime.tsx` and `runtime/LightweightStudioRuntime.tsx`
+  - loading and command-registration seams now live in `runtime/StudioRuntimeLoadingFallback.tsx` and `runtime/StudioRuntimeCommandRegistration.tsx`
+- regression coverage now exists for the route shell and provider surface selection:
+  - `__tests__/providers/StudioRuntimeRouteLayout.test.tsx`
+  - `__tests__/providers/StudioRuntimeProviders.test.tsx`
 - still open:
   - `ProjectsDashboardCollection.tsx` is still dense enough to deserve another calm pass later
   - duplicate/share actions are still UX-only hooks until stronger backend semantics are wired
@@ -284,7 +314,7 @@ This file is the short scoreboard that answers:
 ### Studio runtime route boundary
 - the shared studio route wrapper is now less aggressive:
   - `components/providers/StudioRuntimeRouteLayout.tsx` no longer uses `next/dynamic(..., { ssr: false })` to replace the whole route shell
-  - it now renders `StudioRuntimeLayoutClient` directly as a client child from the server route layout, which removes one broad browser-only boundary from every studio route at once
+  - it now renders `StudioRuntimeProviders` directly from the server route layout, which removes the extra `StudioRuntimeLayoutClient.tsx` handoff entirely
 - honest current read:
   - this is the right structural reduction according to the live probe triage
   - but it did **not** produce a fresh closed `build:prerender-probe`; the newest rerun still stalls at `Creating an optimized production build ...`
@@ -379,9 +409,9 @@ This file is the short scoreboard that answers:
    - build still emits the known `e2b/dist/index.mjs` critical-dependency warning through `app/api/preview/runtime-provision/route.ts`
    - `npm run build:prerender-probe` remains the open track; the freshest local rerun (`cloud-web-app/web/build-probe-2026-04-26-prerender-probe.log`) still did not clear `Creating an optimized production build ...`
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
-   - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
-   - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
-   - highest-confidence studio/runtime cluster now includes: `components/providers/StudioRuntimeRouteLayout.tsx`, `components/providers/StudioRuntimeLayoutClient.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `components/ServiceWorkerProvider.tsx`, `contexts/AuthContext.tsx`, and `lib/providers/AethelProvider.tsx`
+  - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces through extracted runtime modules, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
+  - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
+  - highest-confidence studio/runtime cluster now includes: `components/providers/StudioRuntimeRouteLayout.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `components/providers/runtime/FullStudioRuntime.tsx`, `lib/a11y/accessibility.tsx`, `components/ServiceWorkerProvider.tsx`, `contexts/AuthContext.tsx`, and `lib/providers/AethelProvider.tsx`
    - the public/auth cluster is narrower but still open: `PublicHeader.tsx` is now also a server component instead of an unnecessary client surface, and `/terms` + `/privacy` now render static last-updated labels instead of runtime date calls, but the broader public-shell/prerender lane still lacks fresh end-to-end proof and the legacy `/404` + `/500` failure class has not been cleared by those reductions alone
 2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`
 3. `noImplicitAny: false`
