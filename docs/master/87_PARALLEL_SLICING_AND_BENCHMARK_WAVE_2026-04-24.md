@@ -61,6 +61,8 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - preview/deploy trust also moved from latent backend capability into the visible cockpit: `cloud-web-app/web/components/preview/previewDeployTrust.ts` plus `usePreviewDeployTrust.ts` now persist the last known deploy, derive the best share target, and let `PreviewRuntimeToolbar.tsx` + `WorkbenchPreviewRuntimeControls.tsx` start deploys, refresh status, open the deploy site, and copy the strongest available share link from the same preview lane the user is validating
 - the deploy status loop is now coherent across surfaces too: `cloud-web-app/web/components/ide/modern-shell/deployTopbarAction.tsx` and `cloud-web-app/web/app/deploy/[id]/page.tsx` now feed the same preview deploy trust store, so top bar, status page, and preview lane all agree on the latest deployment instead of acting like isolated features
 - preview/share trust now keeps a stable review target during deploy churn: `previewDeployTrust.ts`, `usePreviewDeployTrust.ts`, `deployTopbarAction.tsx`, and `app/deploy/[id]/page.tsx` preserve `lastReadyUrl` / `lastReadyInspectorUrl`, so the strongest share action keeps pointing at the last ready public deploy while a newer deploy is still building or has errored
+- the shared studio route boundary is thinner too: `cloud-web-app/web/components/providers/StudioRuntimeRouteLayout.tsx` no longer swaps the whole shell through `next/dynamic(..., { ssr: false })`; it renders `StudioRuntimeLayoutClient` directly, which removes one broad browser-only route replacement from every studio route at once
+- that reduction is aligned with the live probe, but it still does **not** close prerender parity: the newest rerun in `cloud-web-app/web/build-probe-2026-04-26-prerender-probe-route-layout-direct.log` still stalls at `Creating an optimized production build ...`
 - preview runtime trust itself is now less hand-wavy: `cloud-web-app/web/components/preview/PreviewRuntimeTrustNotice.tsx` now surfaces readiness / health / fallback / next-move guidance above the canonical visual surface, while `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, `previewRuntimeState.ts`, `previewRuntime.types.ts`, and `usePreviewRuntimeHealthMonitor.ts` now track `lastHealthCheckAt`, `lastHealthyAt`, and `failureCount` so warmup can degrade honestly instead of looking silently stuck forever
 - collaboration presence is also less hidden in the cockpit: `cloud-web-app/web/components/collaboration/FilePresenceDot.tsx` now gives the explorer compact file/folder presence stacks, while `FileExplorerPro.tsx`, `WorkbenchSidebar.tsx`, `FullscreenIDEWorkspace.tsx`, and `FullscreenIDEWorkspaceBridge.tsx` now pass `collaborationPeers` into the canonical tree so file presence is visible where users actually decide what to open next
 - the public shell also took one more reduction pass: `cloud-web-app/web/components/ui/PublicHeader.tsx` is now a hook-free static header with a CSS-only mobile menu, which removes one more live-browser dependency from the public/docs cluster without overclaiming that prerender parity is solved
@@ -104,7 +106,15 @@ It also does **not** mean production build parity is closed: the latest evidence
 ## Current Measured User-Facing Hotspots
 ### Wave A - highest leverage for user perception
 - `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `393`
+- `cloud-web-app/web/components/dashboard/ProjectsDashboard.tsx`: `56`
+- `cloud-web-app/web/components/dashboard/useProjectsDashboardController.ts`: `146`
+- `cloud-web-app/web/components/dashboard/ProjectsDashboardCollection.tsx`: `594`
+- `cloud-web-app/web/components/dashboard/ProjectsDashboardCreateModal.tsx`: `186`
+- `cloud-web-app/web/components/dashboard/ProjectsDashboardSections.tsx`: `172`
 - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `313`
+- `cloud-web-app/web/components/ide/InlineAIChat.tsx`: `136`
+- `cloud-web-app/web/components/ide/InlineAIChatPrimitives.tsx`: `299`
+- `cloud-web-app/web/components/ide/InlineAIChatSections.tsx`: `805`
 - `cloud-web-app/web/components/ide/modern-shell/chromeStatusBar.tsx`: `454`
 - `cloud-web-app/web/components/ide/modern-shell/useShellSourceControlTruth.ts`: `262`
 - `cloud-web-app/web/components/ai-chat/AIChatComposer.tsx`: `282`
@@ -144,7 +154,6 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/assets/ContentBrowser.tsx`: `1128`
 - `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx`: `1120`
 - `cloud-web-app/web/components/settings/SettingsPage.tsx`: `1066`
-- `cloud-web-app/web/components/dashboard/ProjectsDashboard.tsx`: `1076`
 - `cloud-web-app/web/components/engine/ProjectSettings.tsx`: `1054`
 
 ### Wave C - specialist editors and lower-priority breadth
@@ -283,9 +292,18 @@ After Wave 1 stabilizes:
 - `SettingsPage.tsx` is no longer carrying its own filter/search orchestration alone:
   - `components/settings/SettingsPageState.ts` now owns category/subcategory/search state
   - `components/settings/SettingsPageSections.tsx` now exposes counts, grouped rendering, and clearer operator affordances
+- the dashboard overview also moved from one dense surface into real seams:
+  - `components/dashboard/ProjectsDashboard.tsx` is now a thin composition shell
+  - `components/dashboard/useProjectsDashboardController.ts` now owns fetch/filter/stats/action state
+  - `components/dashboard/ProjectsDashboardCollection.tsx` now owns toolbar/list-grid/empty-state/result-label behavior
+  - `components/dashboard/ProjectsDashboardCreateModal.tsx` and `components/dashboard/ProjectsDashboardSections.tsx` now own creation flow plus overview chrome
+  - search now covers both `name` and `description`, and `Limpar filtros` exists in both the toolbar and filtered empty state
 - `InlineAIChat.tsx` also moved from single-file density toward product seams:
   - `components/ide/useInlineAIChatSession.ts`
   - `components/ide/InlineAIChat.helpers.ts`
+  - `components/ide/InlineAIChatPrimitives.tsx`
+  - `components/ide/InlineAIChatSections.tsx`
+  - `components/ide/InlineAIChat.styles.ts`
 - the public landing shell was reduced in parallel:
   - `app/landing-v3.tsx` is back to a server page
   - `app/landing-v3-mission-box.tsx` now holds the interactive workspace-generation flow

@@ -37,6 +37,11 @@ This file is the short scoreboard that answers:
 - `SettingsCategorySidebar.tsx`: `94` lines
 - `SettingsResultsPane.tsx`: `91` lines
 - `SettingsSummaryBar.tsx`: `53` lines
+- `ProjectsDashboard.tsx`: `56` lines
+- `useProjectsDashboardController.ts`: `146` lines
+- `ProjectsDashboardCollection.tsx`: `594` lines
+- `ProjectsDashboardCreateModal.tsx`: `186` lines
+- `ProjectsDashboardSections.tsx`: `172` lines
 - `MobileResponsiveLayout.tsx`: `434` lines
 - `StudioLayout.tsx`: `91` lines
 - `StudioGlobalNav.tsx`: `64` lines
@@ -49,6 +54,10 @@ This file is the short scoreboard that answers:
 - `WorkbenchEditorToolbar.tsx`: `191` lines
 - `WorkbenchEditorCanvas.tsx`: `108` lines
 - `WorkbenchEditorSidecar.tsx`: `85` lines
+- `InlineAIChat.tsx`: `136` lines
+- `InlineAIChatPrimitives.tsx`: `299` lines
+- `InlineAIChatSections.tsx`: `805` lines
+- `InlineAIChat.styles.ts`: `23` lines
 - `AIChatPanelContainer.tsx`: `123` lines
 - `ModernIDEShell.tsx`: `213` lines
 - `chromeStatusBar.tsx`: `454` lines
@@ -75,6 +84,7 @@ This file is the short scoreboard that answers:
 - `useTerminalImperativeHandle.ts`: `51` lines
 - `useWorkbenchShellState.ts`: `257` lines
 - `MonacoEditorPro.tsx`: `1164` lines
+- `StudioRuntimeRouteLayout.tsx`: `21` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
@@ -198,6 +208,28 @@ This file is the short scoreboard that answers:
   - `SettingsPage.tsx` remains a separate thousand-line settings surface
   - persistence/i18n depth is still broader than this slice
 
+### Dashboard overview surface
+- the old `ProjectsDashboard.tsx` monolith is no longer carrying the whole overview alone:
+  - `ProjectsDashboard.tsx` is now a thin `56`-line composition shell
+  - data/loading/filter/action ownership moved into `useProjectsDashboardController.ts`
+  - toolbar, list/grid, empty state, and result-count grammar now live in `ProjectsDashboardCollection.tsx`
+  - create flow and overview header/stats/quick-actions now live in `ProjectsDashboardCreateModal.tsx` and `ProjectsDashboardSections.tsx`
+- user-facing quality also improved:
+  - search now covers both project `name` and `description`
+  - the dashboard now exposes a visible `resultsLabel`
+  - `Limpar filtros` exists both in the toolbar and in the filtered empty state, which reduces recovery friction when users stack search + type filters
+- still open:
+  - `ProjectsDashboardCollection.tsx` is still dense enough to deserve another calm pass later
+  - duplicate/share actions are still UX-only hooks until stronger backend semantics are wired
+
+### Studio runtime route boundary
+- the shared studio route wrapper is now less aggressive:
+  - `components/providers/StudioRuntimeRouteLayout.tsx` no longer uses `next/dynamic(..., { ssr: false })` to replace the whole route shell
+  - it now renders `StudioRuntimeLayoutClient` directly as a client child from the server route layout, which removes one broad browser-only boundary from every studio route at once
+- honest current read:
+  - this is the right structural reduction according to the live probe triage
+  - but it did **not** produce a fresh closed `build:prerender-probe`; the newest rerun still stalls at `Creating an optimized production build ...`
+
 ### New landing/runtime follow-through
 - `app/landing-v3.tsx` is now a server page again, with the mission box isolated in `app/landing-v3-mission-box.tsx`
 - that removes `next/navigation`, local state, analytics, and transient animation hooks from the public shell while preserving the interactive workspace-create flow inside a dedicated client island
@@ -215,6 +247,7 @@ This file is the short scoreboard that answers:
 - `components/ide/InlineAIChat.tsx` was productized without changing its outer contract:
   - session logic moved into `components/ide/useInlineAIChatSession.ts`
   - message/context/mock helpers moved into `components/ide/InlineAIChat.helpers.ts`
+  - presentational primitives and larger operator sections now also live in `components/ide/InlineAIChatPrimitives.tsx`, `components/ide/InlineAIChatSections.tsx`, and `components/ide/InlineAIChat.styles.ts`
   - the panel now has clearer operator affordances, explicit manual-apply messaging, safer formatted rendering, and cleaner context-shift/system messages
 
 ### Shared studio shell
