@@ -63,7 +63,7 @@ function FullStudioRuntime({ children }: { children: React.ReactNode }) {
     <CoreUiProviders>
       <ErrorBoundaryProvider>
         <A11yProvider>
-          <ServiceWorkerProvider>
+          <ServiceWorkerProvider enabled>
             <TelemetryBootstrap />
             <WebVitalsReporter />
             <AuthProvider>

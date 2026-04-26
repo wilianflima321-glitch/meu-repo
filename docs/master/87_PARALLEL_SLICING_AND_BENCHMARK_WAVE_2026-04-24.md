@@ -258,6 +258,20 @@ After Wave 1 stabilizes:
 4. `app/admin/ai-monitor/page.tsx`
 5. `SceneEditor.tsx`
 
+### Wave 2 progress snapshot
+- `SettingsPage.tsx` is no longer carrying its own filter/search orchestration alone:
+  - `components/settings/SettingsPageState.ts` now owns category/subcategory/search state
+  - `components/settings/SettingsPageSections.tsx` now exposes counts, grouped rendering, and clearer operator affordances
+- `InlineAIChat.tsx` also moved from single-file density toward product seams:
+  - `components/ide/useInlineAIChatSession.ts`
+  - `components/ide/InlineAIChat.helpers.ts`
+- the public landing shell was reduced in parallel:
+  - `app/landing-v3.tsx` is back to a server page
+  - `app/landing-v3-mission-box.tsx` now holds the interactive workspace-generation flow
+- the shared studio runtime is a bit less magic:
+  - `components/ServiceWorkerProvider.tsx` now relies on explicit enablement instead of pathname inference
+  - `lib/providers/AethelProvider.tsx` no longer persists preferences from inside the reducer
+
 ### Wave 3 - domain editors
 After the workbench/studio shell is calmer:
 1. `SceneEditor.tsx`
@@ -276,14 +290,13 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
-2. shrink `FullscreenIDE.tsx` and then `useFullscreenIDEBridgeSections.ts`
-3. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
-4. keep stabilizing `useTerminalRuntime.ts` and `useTerminalSessions.ts`
-5. turn the thinner fullscreen preview modules into the trust/share cockpit the benchmark set expects
-6. stabilize `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, and `useAIChatHistoryMode.ts` and turn the smaller shell into a benchmark-grade artifact lane
-7. keep shell-density passes in `ModernIDEShellChrome.tsx` and the extracted chrome/side-column parts
-8. move the next Wave B density pass to `ProjectsDashboard.tsx`, `SettingsPage.tsx`, `CreatorDashboard.tsx`, and `app/admin/ai-monitor/page.tsx` now that `SettingsUI.tsx` is out of the thousand-line set
-9. promote preview, collaboration, and deploy from present to trusted
+2. keep full compile-mode build green while tracing `build:prerender-probe` separately
+3. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
+4. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
+5. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
+6. keep moving the AI lane from “strong panel” to “operator surface” through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
+7. continue Wave B in `ProjectsDashboard.tsx`, `CreatorDashboard.tsx`, and `app/admin/ai-monitor/page.tsx` now that both `SettingsUI.tsx` and the legacy `SettingsPage.tsx` are calmer
+8. promote preview, collaboration, deploy, and public-shell confidence from present to trusted
 
 ## One-Line Reading
 The audits no longer leave us with ambiguity.

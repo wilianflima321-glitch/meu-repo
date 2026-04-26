@@ -235,12 +235,7 @@ function aethelReducer(state: AethelState, action: AethelAction): AethelState {
       };
 
     case 'SET_PREFERENCES':
-      const newPrefs = { ...state.preferences, ...action.payload };
-      // Persist to localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('aethel_preferences', JSON.stringify(newPrefs));
-      }
-      return { ...state, preferences: newPrefs };
+      return { ...state, preferences: { ...state.preferences, ...action.payload } };
 
     case 'SET_WS_CONNECTED':
       return { ...state, wsConnected: action.payload };
@@ -338,6 +333,14 @@ export function AethelProvider({ children }: AethelProviderProps) {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (!isBrowser) {
+      return;
+    }
+
+    localStorage.setItem('aethel_preferences', JSON.stringify(state.preferences));
+  }, [state.preferences, isBrowser]);
 
   // Update user from auth endpoint (supports both shapes)
   useEffect(() => {

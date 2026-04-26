@@ -195,6 +195,25 @@ This file is the short scoreboard that answers:
   - `SettingsPage.tsx` remains a separate thousand-line settings surface
   - persistence/i18n depth is still broader than this slice
 
+### New landing/runtime follow-through
+- `app/landing-v3.tsx` is now a server page again, with the mission box isolated in `app/landing-v3-mission-box.tsx`
+- that removes `next/navigation`, local state, analytics, and transient animation hooks from the public shell while preserving the interactive workspace-create flow inside a dedicated client island
+- `components/ServiceWorkerProvider.tsx` no longer guesses enablement from `useBrowserPathname`; `components/providers/StudioRuntimeProviders.tsx` now opts it in explicitly for full studio runtime
+- `lib/providers/AethelProvider.tsx` no longer writes `localStorage` from inside the reducer; preferences persistence moved back into an effect, which makes the provider less brittle and closer to reducer-purity
+
+### Hidden-gold activation progress
+- `components/settings/SettingsPage.tsx` now delegates search/filter orchestration to `components/settings/SettingsPageState.ts`
+- the legacy settings page now has:
+  - `All settings`
+  - scoped result counts
+  - grouped results
+  - `Cmd/Ctrl+F` focus for search
+  - filter/search behavior that composes instead of mutually overriding
+- `components/ide/InlineAIChat.tsx` was productized without changing its outer contract:
+  - session logic moved into `components/ide/useInlineAIChatSession.ts`
+  - message/context/mock helpers moved into `components/ide/InlineAIChat.helpers.ts`
+  - the panel now has clearer operator affordances, explicit manual-apply messaging, safer formatted rendering, and cleaner context-shift/system messages
+
 ### Shared studio shell
 - the shared studio shell is calmer without regrowing the route surfaces:
   - `MobileResponsiveLayout.tsx` now exports reusable mobile-nav/max-width helpers, isolates escape/body-scroll side effects, and centralizes breakpoint derivation
@@ -228,6 +247,9 @@ This file is the short scoreboard that answers:
 ## Still Open
 ### P0
 1. production build parity
+   - `npm run build` passed again on `2026-04-25` in the compile-mode production path after the landing/runtime cleanup and the SettingsPage + InlineAIChat parallel slices
+   - current compile-mode build is therefore a fresh validated mitigation, not only an older cached success
+   - build still emits the known `e2b/dist/index.mjs` critical-dependency warning through `app/api/preview/runtime-provision/route.ts`
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
    - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
    - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`

@@ -13,7 +13,6 @@ import { createContext, useContext, ReactNode, useEffect, useState } from 'react
 import Image from 'next/image';
 import { useServiceWorker, type UseServiceWorkerReturn } from '../hooks/useServiceWorker';
 import { createComponentLogger } from '@/lib/observability/logger'
-import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
 const log = createComponentLogger('ServiceWorkerProvider')
 
@@ -34,16 +33,15 @@ export function useServiceWorkerContext() {
 
 interface ServiceWorkerProviderProps {
   children: ReactNode;
+  enabled?: boolean;
 }
 
 /**
  * Provider que gerencia o Service Worker e exibe UI de atualização/offline
  */
-export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) {
-  const pathname = useBrowserPathname();
-  const isStudioSurface = Boolean(pathname && /^\/(dashboard|ide|admin|billing|settings|profile|nexus|projects|workspace)(\/|$)/.test(pathname));
+export function ServiceWorkerProvider({ children, enabled = false }: ServiceWorkerProviderProps) {
   const shouldEnableServiceWorker =
-    isStudioSurface &&
+    enabled &&
     (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_ENABLE_SERVICE_WORKER === 'true');
   const sw = useServiceWorker(shouldEnableServiceWorker);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
@@ -51,14 +49,14 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
 
   // Mostrar prompt de atualização quando disponível
   useEffect(() => {
-    if (!isStudioSurface) {
+    if (!enabled) {
       setShowUpdatePrompt(false);
       return;
     }
     if (sw.isUpdateAvailable && !dismissed) {
       setShowUpdatePrompt(true);
     }
-  }, [sw.isUpdateAvailable, dismissed, isStudioSurface]);
+  }, [sw.isUpdateAvailable, dismissed, enabled]);
 
   // Handler para atualizar
   const handleUpdate = () => {
@@ -74,7 +72,7 @@ export function ServiceWorkerProvider({ children }: ServiceWorkerProviderProps) 
     setTimeout(() => setDismissed(false), 60 * 60 * 1000);
   };
 
-  if (!isStudioSurface) {
+  if (!enabled) {
     return (
       <ServiceWorkerContext.Provider value={sw}>
         {children}

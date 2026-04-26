@@ -28,30 +28,10 @@ import {
   User,
   Cpu,
   Bot,
-  ChevronRight,
-  Check,
-  X,
   RotateCcw,
-  Download,
-  Upload,
-  Info,
-  AlertCircle,
-  Moon,
-  Sun,
-  Monitor,
-  Type,
-  Sliders,
-  Eye,
-  EyeOff,
-  Zap,
   Shield,
-  Globe,
   Bell,
-  HardDrive,
   Cloud,
-  Smartphone,
-  Lock,
-  CreditCard,
 } from 'lucide-react'
 import {
   type SettingItem,
@@ -59,6 +39,7 @@ import {
   SettingsContent,
   SettingsSidebar,
 } from './SettingsPageSections'
+import { useSettingsPageState } from './SettingsPageState'
 
 const DEFAULT_SETTINGS: Record<string, any> = {
   'editor.fontSize': 14,
@@ -852,7 +833,12 @@ function SettingSelect({ setting, value, onChange }: SettingInputProps) {
   return (
     <select
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => {
+        const nextValue =
+          setting.options?.find((option) => String(option.value) === e.target.value)?.value ??
+          e.target.value
+        onChange(nextValue)
+      }}
       className="bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded px-3 py-1.5 text-sm text-[var(--aethel-text-primary)] min-w-[200px]"
     >
       {setting.options?.map((opt) => (
@@ -965,9 +951,25 @@ function SettingRow({ setting, value, onChange, isModified, onReset }: SettingRo
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, any>>(DEFAULT_SETTINGS)
-  const [selectedCategory, setSelectedCategory] = useState('editor')
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const {
+    activeFilterLabel,
+    categories,
+    clearFilters,
+    currentCategory,
+    filteredSettings,
+    groupedSettings,
+    searchInputRef,
+    searchQuery,
+    selectedCategory,
+    selectedSubcategory,
+    selectCategory,
+    selectSubcategory,
+    setSearchQuery,
+    totalCount,
+  } = useSettingsPageState({
+    categories: CATEGORIES,
+    items: SETTING_ITEMS,
+  })
 
   useEffect(() => {
     const saved = localStorage.getItem('settings')
@@ -979,10 +981,6 @@ export default function SettingsPage() {
       }
     }
   }, [])
-
-  const saveSettings = useCallback(() => {
-    localStorage.setItem('settings', JSON.stringify(settings))
-  }, [settings])
 
   const updateSetting = useCallback((id: string, value: any) => {
     setSettings((prev) => {
@@ -1005,28 +1003,6 @@ export default function SettingsPage() {
     localStorage.setItem('settings', JSON.stringify(DEFAULT_SETTINGS))
   }, [])
 
-  const filteredSettings = useMemo(() => {
-    let items = SETTING_ITEMS.filter((s) => s.category === selectedCategory)
-
-    if (selectedSubcategory) {
-      items = items.filter((s) => s.subcategory === selectedSubcategory)
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      items = SETTING_ITEMS.filter(
-        (s) =>
-          s.label.toLowerCase().includes(query) ||
-          s.description.toLowerCase().includes(query) ||
-          s.id.toLowerCase().includes(query)
-      )
-    }
-
-    return items
-  }, [selectedCategory, selectedSubcategory, searchQuery])
-
-  const currentCategory = CATEGORIES.find((c) => c.id === selectedCategory)
-
   const modifiedCount = useMemo(() => {
     return Object.entries(settings).filter(
       ([key, value]) => DEFAULT_SETTINGS[key] !== value
@@ -1041,34 +1017,38 @@ export default function SettingsPage() {
     a.href = url
     a.download = 'settings.json'
     a.click()
+    URL.revokeObjectURL(url)
   }, [settings])
 
   return (
     <div className="flex h-full bg-[var(--aethel-surface-primary)]">
       <SettingsSidebar
-        categories={CATEGORIES}
+        activeFilterLabel={activeFilterLabel}
+        categories={categories}
+        filteredCount={filteredSettings.length}
         modifiedCount={modifiedCount}
+        searchInputRef={searchInputRef}
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
         selectedSubcategory={selectedSubcategory}
+        totalCount={totalCount}
+        onClearFilters={clearFilters}
         onExport={exportSettings}
         onResetAll={resetAllSettings}
         onSearchQueryChange={setSearchQuery}
-        onSelectCategory={(categoryId) => {
-          setSelectedCategory(categoryId)
-          setSelectedSubcategory(null)
-          setSearchQuery('')
-        }}
-        onSelectSubcategory={setSelectedSubcategory}
+        onSelectCategory={selectCategory}
+        onSelectSubcategory={selectSubcategory}
       />
 
       <SettingsContent
+        activeFilterLabel={activeFilterLabel}
         currentCategory={currentCategory}
         filteredSettings={filteredSettings}
+        groupedSettings={groupedSettings}
+        modifiedCount={modifiedCount}
+        onClearFilters={clearFilters}
         searchQuery={searchQuery}
-        settings={settings}
-        onResetSetting={resetSetting}
-        onUpdateSetting={updateSetting}
+        totalCount={totalCount}
         renderSettingRow={(setting) => (
           <SettingRow
             key={setting.id}
