@@ -5,6 +5,7 @@ import Editor, { OnMount, loader, Monaco } from '@monaco-editor/react';
 import type * as monacoEditor from 'monaco-editor';
 import { useInlineEdit, InlineEditModal } from './InlineEditModal';
 import { getAuthHeaders, submitChangeFeedback } from '@/lib/ai/change-feedback-client';
+import type { DocumentSymbol, SymbolKind } from '@/components/outline/OutlinePanel';
 
 /**
  * Professional Monaco Editor Component
@@ -43,6 +44,11 @@ export interface MonacoEditorProps {
   onCursorChange?: (position: { line: number; column: number }) => void;
   onSelectionChange?: (selection: { text: string; range: monacoEditor.IRange | null }) => void;
   onDiagnosticsChange?: (diagnostics: Diagnostic[]) => void;
+  onDocumentSymbolsChange?: (payload: {
+    path: string;
+    symbols: DocumentSymbol[];
+    authoritative: boolean;
+  }) => void;
   onMount?: (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: Monaco) => void;
 
   // Options
@@ -98,6 +104,20 @@ type ChangeApplyResponse = {
   error?: string;
   message?: string;
   metadata?: Record<string, unknown>;
+};
+
+type TypeScriptTextSpan = {
+  start: number;
+  length: number;
+};
+
+type TypeScriptNavigationTree = {
+  text?: string;
+  kind?: string;
+  kindModifiers?: string;
+  spans?: TypeScriptTextSpan[];
+  nameSpan?: TypeScriptTextSpan;
+  childItems?: TypeScriptNavigationTree[];
 };
 
 // ============================================================================
@@ -156,6 +176,154 @@ const AETHEL_DARK_THEME: monacoEditor.editor.IStandaloneThemeData = {
   },
 };
 
+function clampOffset(model: monacoEditor.editor.ITextModel, offset: number): number {
+  return Math.max(0, Math.min(offset, model.getValueLength()));
+}
+
+function toSymbolRange(
+  model: monacoEditor.editor.ITextModel,
+  span: TypeScriptTextSpan,
+): DocumentSymbol['range'] {
+  const start = model.getPositionAt(clampOffset(model, span.start));
+  const end = model.getPositionAt(clampOffset(model, span.start + Math.max(span.length, 0)));
+
+  return {
+    startLine: start.lineNumber,
+    startColumn: start.column,
+    endLine: end.lineNumber,
+    endColumn: end.column,
+  };
+}
+
+function mergeNavigationSpans(spans: TypeScriptTextSpan[] | undefined): TypeScriptTextSpan | null {
+  if (!Array.isArray(spans) || spans.length === 0) return null;
+
+  let start = Number.POSITIVE_INFINITY;
+  let end = 0;
+
+  for (const span of spans) {
+    start = Math.min(start, span.start);
+    end = Math.max(end, span.start + Math.max(span.length, 0));
+  }
+
+  if (!Number.isFinite(start)) return null;
+  return {
+    start,
+    length: Math.max(0, end - start),
+  };
+}
+
+function mapTypeScriptNavigationKind(kind: string | undefined): SymbolKind {
+  switch (kind) {
+    case 'module':
+    case 'external module name':
+      return 'module';
+    case 'namespace':
+      return 'namespace';
+    case 'class':
+    case 'local class':
+      return 'class';
+    case 'interface':
+      return 'interface';
+    case 'enum':
+      return 'enum';
+    case 'enum member':
+      return 'enumMember';
+    case 'type':
+    case 'type alias':
+      return 'typeParameter';
+    case 'constructor':
+      return 'constructor';
+    case 'member function':
+      return 'method';
+    case 'function':
+    case 'local function':
+      return 'function';
+    case 'getter':
+    case 'setter':
+    case 'member variable':
+    case 'member accessor':
+    case 'property':
+      return 'property';
+    case 'const':
+      return 'constant';
+    case 'let':
+    case 'var':
+    case 'variable':
+    case 'local var':
+      return 'variable';
+    default:
+      if (!kind) return 'variable';
+      if (kind.includes('class')) return 'class';
+      if (kind.includes('interface')) return 'interface';
+      if (kind.includes('enum member')) return 'enumMember';
+      if (kind.includes('enum')) return 'enum';
+      if (kind.includes('constructor')) return 'constructor';
+      if (kind.includes('function')) return 'function';
+      if (kind.includes('method')) return 'method';
+      if (kind.includes('property') || kind.includes('variable')) return 'property';
+      if (kind.includes('const')) return 'constant';
+      if (kind.includes('module')) return 'module';
+      if (kind.includes('namespace')) return 'namespace';
+      if (kind.includes('type')) return 'typeParameter';
+      return 'variable';
+  }
+}
+
+function mapTypeScriptNavigationTree(
+  model: monacoEditor.editor.ITextModel,
+  items: TypeScriptNavigationTree[] | undefined,
+): DocumentSymbol[] {
+  if (!Array.isArray(items) || items.length === 0) return [];
+
+  return items.flatMap((item) => {
+    const fullSpan = mergeNavigationSpans(item.spans);
+    if (!item.text || !fullSpan) return [];
+
+    const childSymbols = mapTypeScriptNavigationTree(model, item.childItems);
+    const selectionSpan = item.nameSpan ?? fullSpan;
+
+    return [
+      {
+        name: item.text,
+        kind: mapTypeScriptNavigationKind(item.kind),
+        deprecated: item.kindModifiers?.includes('deprecated') || undefined,
+        range: toSymbolRange(model, fullSpan),
+        selectionRange: toSymbolRange(model, selectionSpan),
+        children: childSymbols.length > 0 ? childSymbols : undefined,
+      },
+    ] satisfies DocumentSymbol[];
+  });
+}
+
+async function resolveAuthoritativeDocumentSymbols(
+  monaco: Monaco,
+  model: monacoEditor.editor.ITextModel,
+): Promise<DocumentSymbol[] | null> {
+  const languageId = model.getLanguageId();
+  const typescriptWorkerFactory =
+    languageId === 'typescript' || languageId === 'typescriptreact'
+      ? monaco.languages.typescript.getTypeScriptWorker
+      : languageId === 'javascript' || languageId === 'javascriptreact'
+        ? monaco.languages.typescript.getJavaScriptWorker
+        : null;
+
+  if (!typescriptWorkerFactory) {
+    return null;
+  }
+
+  const getWorker = await typescriptWorkerFactory();
+  const worker = await getWorker(model.uri);
+  const navigationTree = await (worker as { getNavigationTree?: (fileName: string) => Promise<TypeScriptNavigationTree | undefined> })
+    .getNavigationTree?.(model.uri.toString());
+
+  if (!navigationTree) {
+    return [];
+  }
+
+  return mapTypeScriptNavigationTree(model, navigationTree.childItems);
+}
+
 // ============================================================================
 // MONACO EDITOR COMPONENT
 // ============================================================================
@@ -173,6 +341,7 @@ export function MonacoEditorPro({
   onCursorChange,
   onSelectionChange,
   onDiagnosticsChange,
+  onDocumentSymbolsChange,
   onMount: onMountProp,
   readOnly = false,
   minimap = true,
@@ -195,6 +364,7 @@ export function MonacoEditorPro({
   const decorationsRef = useRef<string[]>([]);
   const lspDisposablesRef = useRef<monacoEditor.IDisposable[]>([]);
   const inlineCompletionDisposableRef = useRef<monacoEditor.IDisposable | null>(null);
+  const symbolRequestVersionRef = useRef(0);
 
   // Inline edit integration
   const { isOpen, selection, openInlineEdit, closeInlineEdit } = useInlineEdit();
@@ -420,6 +590,45 @@ export function MonacoEditorPro({
       onDiagnosticsChange([]);
     };
   }, [language, onDiagnosticsChange, path, mapMarkersToDiagnostics]);
+
+  useEffect(() => {
+    if (!editorRef.current || !monacoRef.current || !onDocumentSymbolsChange) return;
+
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    const model = editor.getModel();
+    if (!model) return;
+
+    const targetPath = path?.trim() || model.uri.path || model.uri.toString();
+    const requestVersion = ++symbolRequestVersionRef.current;
+    let cancelled = false;
+
+    const timerId = window.setTimeout(async () => {
+      try {
+        const symbols = await resolveAuthoritativeDocumentSymbols(monaco, model);
+        if (cancelled || requestVersion !== symbolRequestVersionRef.current) return;
+
+        onDocumentSymbolsChange({
+          path: targetPath,
+          symbols: symbols ?? [],
+          authoritative: symbols !== null,
+        });
+      } catch (error) {
+        if (cancelled || requestVersion !== symbolRequestVersionRef.current) return;
+        console.warn('[MonacoEditorPro] Failed to resolve document symbols:', error);
+        onDocumentSymbolsChange({
+          path: targetPath,
+          symbols: [],
+          authoritative: false,
+        });
+      }
+    }, 120);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timerId);
+    };
+  }, [language, onDocumentSymbolsChange, path, value]);
 
   useEffect(() => {
     const handleRevealLocation = (event: Event) => {

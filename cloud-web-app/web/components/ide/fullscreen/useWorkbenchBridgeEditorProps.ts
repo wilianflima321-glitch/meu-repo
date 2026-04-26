@@ -40,6 +40,8 @@ export function buildFullscreenIDEBridgeEditorProps(
     setSplitEditorOpen: args.setSplitEditorOpen,
     setEditorDiagnostics: args.setEditorDiagnostics,
     setSecondaryEditorDiagnostics: args.setSecondaryEditorDiagnostics,
+    setEditorDocumentSymbols: args.setEditorDocumentSymbols,
+    setSecondaryEditorDocumentSymbols: args.setSecondaryEditorDocumentSymbols,
     onUndo: args.handleEditorUndo,
     onRedo: args.handleEditorRedo,
     onFind: args.handleEditorFind,

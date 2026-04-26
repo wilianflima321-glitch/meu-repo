@@ -9,6 +9,7 @@ import type { RemotePeer } from '@/hooks/useCollaborationAwareness';
 
 import type {
   ActiveFileState,
+  EditorDocumentSymbolState,
   EditorCursorStatus,
   EditorPane,
   EditorSelectionStatus,
@@ -42,6 +43,8 @@ export type WorkbenchEditorCanvasSharedProps = {
   setSecondaryFile: Dispatch<SetStateAction<ActiveFileState | null>>;
   setEditorDiagnostics: Dispatch<SetStateAction<MonacoDiagnostic[]>>;
   setSecondaryEditorDiagnostics: Dispatch<SetStateAction<MonacoDiagnostic[]>>;
+  setEditorDocumentSymbols: Dispatch<SetStateAction<EditorDocumentSymbolState | null>>;
+  setSecondaryEditorDocumentSymbols: Dispatch<SetStateAction<EditorDocumentSymbolState | null>>;
   setSplitActivePane: Dispatch<SetStateAction<EditorPane>>;
   onInlineApplyResult: (result: InlineApplyResult) => void;
   onRequestFullAccess: () => void;

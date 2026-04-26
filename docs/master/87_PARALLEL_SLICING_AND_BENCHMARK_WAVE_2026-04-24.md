@@ -264,6 +264,18 @@ After Wave 1 stabilizes:
 5. `SceneEditor.tsx`
 
 ### Wave 2 progress snapshot
+
+- the symbol-truth/editor-context pass is now materially further along:
+  - `MonacoEditorPro.tsx` emits authoritative TypeScript/JavaScript document symbols via the Monaco worker
+  - `useWorkbenchShellState.ts` now owns per-pane document symbol state
+  - `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorSurface.tsx`, `WorkbenchEditorPane.tsx`, `useWorkbenchBridgeEditorProps.ts`, and `useFullscreenIDEBridgeProps.types.ts` now carry that truth through the canonical workbench editor lane
+  - `useWorkbenchEditorModel.ts` now prefers authoritative symbol payloads and only falls back to `buildOutlineSymbols(...)` when symbol truth is stale or unavailable
+- the settings-route convergence gap also moved this round:
+  - `app/settings/page.tsx` now routes its primary editor tab through `SettingsUI` + `SettingsProvider`, which means the thinner settings cockpit is no longer stranded outside the live `/settings` route
+- new focused tests now lock the recent preview/runtime and editor fallback seams:
+  - `__tests__/ide/RuntimePreviewSurface.test.tsx`
+  - `__tests__/ide/WorkbenchPreviewRuntimeSurface.test.tsx`
+  - `__tests__/ide/useWorkbenchEditorModel.test.ts`
 - `SettingsPage.tsx` is no longer carrying its own filter/search orchestration alone:
   - `components/settings/SettingsPageState.ts` now owns category/subcategory/search state
   - `components/settings/SettingsPageSections.tsx` now exposes counts, grouped rendering, and clearer operator affordances

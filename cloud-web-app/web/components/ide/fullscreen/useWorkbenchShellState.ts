@@ -8,6 +8,7 @@ import type { PanelState as ModernPanelState } from '@/components/ide/ModernIDES
 import type { DocumentSymbol } from '@/components/outline/OutlinePanel'
 import type { EntryNotice } from '@/components/ide/fullscreen/WorkbenchEntryNotice'
 import type {
+  EditorDocumentSymbolState,
   EditorCursorStatus,
   EditorPane,
   EditorSelectionStatus,
@@ -92,6 +93,8 @@ export function useWorkbenchShellState({
   const [showOutline, setShowOutline] = useState(false)
   const [editorDiagnostics, setEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
   const [secondaryEditorDiagnostics, setSecondaryEditorDiagnostics] = useState<MonacoDiagnostic[]>([])
+  const [editorDocumentSymbols, setEditorDocumentSymbols] = useState<EditorDocumentSymbolState | null>(null)
+  const [secondaryEditorDocumentSymbols, setSecondaryEditorDocumentSymbols] = useState<EditorDocumentSymbolState | null>(null)
   const [isCompactViewport, setIsCompactViewport] = useState(false)
   const [rollbackBusy, setRollbackBusy] = useState(false)
   const [hasToken, setHasToken] = useState(false)
@@ -224,6 +227,10 @@ export function useWorkbenchShellState({
     setEditorDiagnostics,
     secondaryEditorDiagnostics,
     setSecondaryEditorDiagnostics,
+    editorDocumentSymbols,
+    setEditorDocumentSymbols,
+    secondaryEditorDocumentSymbols,
+    setSecondaryEditorDocumentSymbols,
     isCompactViewport,
     setIsCompactViewport,
     rollbackBusy,

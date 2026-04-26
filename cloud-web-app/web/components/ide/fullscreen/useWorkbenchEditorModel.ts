@@ -7,11 +7,33 @@ import type { EditorGroup, EditorTab } from '@/components/editor/SplitEditor';
 import type { DocumentSymbol } from '@/components/outline/OutlinePanel';
 import { buildOutlineSymbols } from '@/components/outline/outline-parser';
 
-import type { ActiveFileState, EditorPane } from '@/components/ide/fullscreen/types';
+import type {
+  ActiveFileState,
+  EditorDocumentSymbolState,
+  EditorPane,
+} from '@/components/ide/fullscreen/types';
+
+export function resolveOutlineSymbols({
+  file,
+  documentSymbols,
+}: {
+  file: ActiveFileState | null;
+  documentSymbols: EditorDocumentSymbolState | null;
+}): DocumentSymbol[] {
+  if (!file) return [];
+
+  if (documentSymbols?.path === file.path && documentSymbols.authoritative) {
+    return documentSymbols.symbols;
+  }
+
+  return buildOutlineSymbols(file.content, file.language);
+}
 
 type UseWorkbenchEditorModelParams = {
   activeFile: ActiveFileState | null;
   secondaryFile: ActiveFileState | null;
+  editorDocumentSymbols: EditorDocumentSymbolState | null;
+  secondaryEditorDocumentSymbols: EditorDocumentSymbolState | null;
   splitEditorOpen: boolean;
   splitActivePane: EditorPane;
   editorDiagnostics: MonacoDiagnostic[];
@@ -26,6 +48,8 @@ type UseWorkbenchEditorModelParams = {
 export function useWorkbenchEditorModel({
   activeFile,
   secondaryFile,
+  editorDocumentSymbols,
+  secondaryEditorDocumentSymbols,
   splitEditorOpen,
   splitActivePane,
   editorDiagnostics,
@@ -39,11 +63,15 @@ export function useWorkbenchEditorModel({
   const bridgeActiveFile = splitActivePane === 'secondary' && secondaryFile ? secondaryFile : activeFile;
   const activeDiagnostics =
     splitActivePane === 'secondary' ? secondaryEditorDiagnostics : editorDiagnostics;
+  const activeDocumentSymbols =
+    splitActivePane === 'secondary' ? secondaryEditorDocumentSymbols : editorDocumentSymbols;
 
   const outlineSymbols = useMemo<DocumentSymbol[]>(() => {
-    if (!bridgeActiveFile) return [];
-    return buildOutlineSymbols(bridgeActiveFile.content, bridgeActiveFile.language);
-  }, [bridgeActiveFile]);
+    return resolveOutlineSymbols({
+      file: bridgeActiveFile,
+      documentSymbols: activeDocumentSymbols,
+    });
+  }, [activeDocumentSymbols, bridgeActiveFile]);
 
   useEffect(() => {
     if (!activeFile?.path) {

@@ -28,6 +28,8 @@ export default function WorkbenchEditorCanvas({
   setSecondaryFile,
   setEditorDiagnostics,
   setSecondaryEditorDiagnostics,
+  setEditorDocumentSymbols,
+  setSecondaryEditorDocumentSymbols,
   setSplitActivePane,
   onInlineApplyResult,
   onRequestFullAccess,
@@ -40,6 +42,7 @@ export default function WorkbenchEditorCanvas({
   const isSecondary = pane === 'secondary';
   const activeRef = isSecondary ? secondaryEditorRef : primaryEditorRef;
   const setDiagnostics = isSecondary ? setSecondaryEditorDiagnostics : setEditorDiagnostics;
+  const setDocumentSymbols = isSecondary ? setSecondaryEditorDocumentSymbols : setEditorDocumentSymbols;
 
   return (
     <div
@@ -62,6 +65,7 @@ export default function WorkbenchEditorCanvas({
         onAiApplyResult={onInlineApplyResult}
         onRequestFullAccess={onRequestFullAccess}
         onDiagnosticsChange={setDiagnostics}
+        onDocumentSymbolsChange={setDocumentSymbols}
         onCursorChange={(position) => {
           onCursorPresenceChange({
             filePath: fileState.path,

@@ -9,6 +9,7 @@ import type { EditorGroup, SplitDirection } from '@/components/editor/SplitEdito
 import TabBar from '@/components/editor/TabBar';
 import WorkbenchEditorSidecar from '@/components/ide/fullscreen/WorkbenchEditorSidecar';
 import WorkbenchEditorSurface from '@/components/ide/fullscreen/WorkbenchEditorSurface';
+import type { WorkbenchEditorSurfaceProps } from '@/components/ide/fullscreen/WorkbenchEditorSurface.types';
 import WorkbenchEditorToolbar from '@/components/ide/fullscreen/WorkbenchEditorToolbar';
 import { type DocumentSymbol } from '@/components/outline/OutlinePanel';
 import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
@@ -58,6 +59,8 @@ export type WorkbenchEditorPaneProps = {
   setSplitEditorOpen: Dispatch<SetStateAction<boolean>>;
   setEditorDiagnostics: Dispatch<SetStateAction<MonacoDiagnostic[]>>;
   setSecondaryEditorDiagnostics: Dispatch<SetStateAction<MonacoDiagnostic[]>>;
+  setEditorDocumentSymbols: WorkbenchEditorSurfaceProps['setEditorDocumentSymbols'];
+  setSecondaryEditorDocumentSymbols: WorkbenchEditorSurfaceProps['setSecondaryEditorDocumentSymbols'];
   onFind: () => void;
   onReplace: () => void;
   onToggleSplitEditor: () => void;
@@ -116,6 +119,8 @@ export function WorkbenchEditorPane({
   setSplitEditorOpen,
   setEditorDiagnostics,
   setSecondaryEditorDiagnostics,
+  setEditorDocumentSymbols,
+  setSecondaryEditorDocumentSymbols,
   onFind,
   onReplace,
   onToggleSplitEditor,
@@ -199,6 +204,8 @@ export function WorkbenchEditorPane({
               setSplitEditorOpen={setSplitEditorOpen}
               setEditorDiagnostics={setEditorDiagnostics}
               setSecondaryEditorDiagnostics={setSecondaryEditorDiagnostics}
+              setEditorDocumentSymbols={setEditorDocumentSymbols}
+              setSecondaryEditorDocumentSymbols={setSecondaryEditorDocumentSymbols}
               onInlineApplyResult={onInlineApplyResult}
               onRequestFullAccess={onRequestFullAccess}
               onSaveFile={onSaveFile}

@@ -1,5 +1,7 @@
 'use client';
 
+import type { DocumentSymbol } from '@/components/outline/OutlinePanel';
+
 export type ActiveFileState = {
   path: string;
   content: string;
@@ -51,4 +53,10 @@ export type InlineApplyResult = {
   rollbackToken?: string;
   message?: string;
   filePath?: string;
+};
+
+export type EditorDocumentSymbolState = {
+  path: string;
+  symbols: DocumentSymbol[];
+  authoritative: boolean;
 };

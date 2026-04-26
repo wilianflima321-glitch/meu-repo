@@ -251,6 +251,31 @@ This file is the short scoreboard that answers:
   - broader shared-text proof
   - stronger reconnect/reliability evidence
 
+
+### Editor symbol truth
+- the workbench editor lane now has a real symbol-truth seam instead of only regex outline fallbacks:
+  - `MonacoEditorPro.tsx` now resolves authoritative TypeScript/JavaScript navigation-tree symbols through the Monaco worker and emits them with file-path ownership
+  - `useWorkbenchShellState.ts` now keeps per-pane document symbol state
+  - `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorSurface.tsx`, `WorkbenchEditorPane.tsx`, `useWorkbenchBridgeEditorProps.ts`, and `useFullscreenIDEBridgeProps.types.ts` now carry that per-pane symbol truth through the canonical IDE path
+  - `useWorkbenchEditorModel.ts` now prefers authoritative symbol payloads and falls back to `buildOutlineSymbols(...)` only when symbol truth is stale, missing, or non-authoritative
+- this finally moves breadcrumbs + outline closer to editor truth instead of treating the regex parser as the primary source forever
+- coverage now exists for the controlled-preview seam and the editor symbol fallback seam:
+  - `__tests__/ide/RuntimePreviewSurface.test.tsx`
+  - `__tests__/ide/WorkbenchPreviewRuntimeSurface.test.tsx`
+  - `__tests__/ide/useWorkbenchEditorModel.test.ts`
+
+### Settings route convergence
+- `/settings` is no longer pointing its primary editor tab at the old monolithic `components/SettingsEditor.tsx`
+- `app/settings/page.tsx` now mounts the canonical `SettingsUI` inside `SettingsProvider`, so the thinner settings cockpit is finally the live route surface instead of a sidecar implementation that only existed in parallel
+- this does not yet remove the older `SettingsPage.tsx` / `SettingsEditor.tsx` debt, but it does close one of the biggest truth gaps between the audits and the real route
+
+### Validation note
+- `npm run build` passed again on `2026-04-26` in the compile-mode production path
+- `npm run typecheck` hit the known transient `.next/types` mismatch while a fresh build was regenerating artifacts, then passed again immediately after the build completed
+- current honest state remains:
+  - compile-mode build = validated production mitigation
+  - `build:prerender-probe` = still open
+
 ## Still Open
 ### P0
 1. production build parity

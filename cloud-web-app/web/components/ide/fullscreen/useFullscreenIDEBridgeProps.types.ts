@@ -79,6 +79,8 @@ export type UseFullscreenIDEBridgePropsArgs = {
   setSplitEditorOpen: WorkbenchEditorPaneProps['setSplitEditorOpen'];
   setEditorDiagnostics: WorkbenchEditorPaneProps['setEditorDiagnostics'];
   setSecondaryEditorDiagnostics: WorkbenchEditorPaneProps['setSecondaryEditorDiagnostics'];
+  setEditorDocumentSymbols: WorkbenchEditorPaneProps['setEditorDocumentSymbols'];
+  setSecondaryEditorDocumentSymbols: WorkbenchEditorPaneProps['setSecondaryEditorDocumentSymbols'];
   handleEditorUndo: () => void;
   handleEditorRedo: () => void;
   handleEditorFind: () => void;

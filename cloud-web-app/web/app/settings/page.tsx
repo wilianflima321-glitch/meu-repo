@@ -2,11 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import StudioLayout from '@/components/studio/StudioLayout'
+import SettingsUI, { SettingsProvider } from '@/components/settings/SettingsUI'
 import TwoFactorSecurityPanel from '@/components/settings/TwoFactorSecurityPanel'
-
-const SettingsEditor = dynamic(() => import('../../components/SettingsEditor'), { ssr: false })
 
 type Tab = 'editor' | 'profile' | 'security' | 'billing' | 'api'
 
@@ -111,9 +109,13 @@ export default function SettingsPage() {
             {activeTab === 'editor' && (
               <div className="p-4 sm:p-6">
                 <h2 className="text-lg font-semibold">Editor</h2>
-                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">Ajuste tema, comportamento e atalhos do workspace.</p>
-                <div className="mt-4 rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40 p-4">
-                  <SettingsEditor />
+                <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">
+                  Cockpit canonico de configuracoes do editor, workbench e engine.
+                </p>
+                <div className="mt-4 overflow-hidden rounded border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-primary)]/40">
+                  <SettingsProvider>
+                    <SettingsUI className="min-h-[720px]" />
+                  </SettingsProvider>
                 </div>
               </div>
             )}
