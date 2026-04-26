@@ -60,10 +60,10 @@ export type CanonicalPreviewSurfaceProps =
  * - 'runtime': Code preview with E2B/WebContainer/iframe/inline fallback
  * - 'scene': 3D scene preview (Nexus Canvas)
  *
- * Runtime variant includes full lifecycle management:
- * idle -> provisioning -> warming -> syncing -> healthy / degraded / failed
+ * Runtime variant can either own lifecycle locally or consume lifecycle state
+ * supplied by a parent surface such as the workbench runtime lane.
  *
- * @see docs/master/DUPLICATIONS_AND_CONFLICTS.md (C-07)
+ * @see C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\docs\master\51_DUPLICATIONS_AND_CONFLICTS_2026-03-22.md
  */
 export default function CanonicalPreviewSurface(props: CanonicalPreviewSurfaceProps) {
   if (props.variant === 'live') {

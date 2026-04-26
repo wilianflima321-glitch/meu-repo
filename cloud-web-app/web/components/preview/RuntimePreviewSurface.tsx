@@ -35,18 +35,25 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
     runtimeUrl: externalRuntimeUrl,
     forceInlineFallback,
     runtimeUnavailableReason,
+    runtimeInfoOverride,
     isStale,
     onRefresh,
+    onProvisionRequest,
+    onInlineFallbackRequest,
     autoProvision = false,
     showLifecycleBar = true,
   } = props;
 
-  const { runtime, provision, switchToInline } = usePreviewRuntime(projectId, autoProvision);
+  const { runtime: internalRuntime, provision, switchToInline } = usePreviewRuntime(projectId, autoProvision);
   const { magicWandState, openMagicWand, closeMagicWand, handleSendMessage } = useMagicWand(
     (message, context) => {
       log.info('Magic Wand message:', message, context);
     },
   );
+
+  const runtime = runtimeInfoOverride ?? internalRuntime;
+  const handleProvision = onProvisionRequest ?? provision;
+  const handleSwitchToInline = onInlineFallbackRequest ?? switchToInline;
 
   const effectiveUrl = externalRuntimeUrl || runtime.runtimeUrl;
   const effectiveStrategy =
@@ -54,10 +61,11 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
   const useInline = forceInlineFallback || effectiveStrategy === 'inline' || !effectiveUrl;
 
   const effectiveState: PreviewLifecycleState = useMemo(() => {
+    if (runtimeInfoOverride) return runtime.state;
     if (externalRuntimeUrl) return 'degraded';
     if (forceInlineFallback || effectiveStrategy === 'inline') return 'degraded';
     return runtime.state;
-  }, [externalRuntimeUrl, forceInlineFallback, runtime.state, effectiveStrategy]);
+  }, [externalRuntimeUrl, forceInlineFallback, runtime.state, effectiveStrategy, runtimeInfoOverride]);
 
   if (effectiveState === 'failed') {
     return (
@@ -77,8 +85,8 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
         )}
         <PreviewFailedState
           error={runtime.error ?? runtimeUnavailableReason ?? null}
-          onRetry={provision}
-          onFallback={switchToInline}
+          onRetry={handleProvision}
+          onFallback={handleSwitchToInline}
           strategy={effectiveStrategy}
         />
       </div>
@@ -112,14 +120,14 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
           <div className="flex flex-wrap items-center justify-center gap-2">
             <button
               type="button"
-              onClick={provision}
+              onClick={handleProvision}
               className="rounded-md bg-[var(--aethel-primary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-primary)] transition hover:brightness-110"
             >
               Iniciar preview
             </button>
             <button
               type="button"
-              onClick={switchToInline}
+              onClick={handleSwitchToInline}
               className="rounded-md border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] px-3 py-1.5 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
             >
               Usar fallback inline
@@ -194,7 +202,7 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
           isStale={isStale}
           onRefresh={onRefresh}
         />
-        {useInline && !externalRuntimeUrl && (
+        {useInline && (
           <div className="absolute left-1 top-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning)_18%,transparent)] px-2 py-0.5 text-[10px] text-[var(--aethel-warning)]">
             Fallback inline
           </div>

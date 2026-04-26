@@ -40,8 +40,11 @@ export type CanonicalRuntimeProps = {
   runtimeUrl?: string;
   forceInlineFallback?: boolean;
   runtimeUnavailableReason?: string;
+  runtimeInfoOverride?: PreviewRuntimeInfo;
   isStale?: boolean;
   onRefresh?: () => void;
+  onProvisionRequest?: () => void;
+  onInlineFallbackRequest?: () => void;
   autoProvision?: boolean;
   showLifecycleBar?: boolean;
 };

@@ -227,6 +227,13 @@ This file is the short scoreboard that answers:
   - chrome/editor/file/preview composition moved into `useWorkbenchBridgeChrome.ts`, `useWorkbenchBridgeEditorProps.ts`, and `workbenchBridgeModels.ts`
 - `FullscreenIDE.tsx` also dropped its inline query parsing in favor of `useWorkbenchRouteParams.ts`, keeping the route bootstrap closer to orchestration-only
 
+### Preview runtime ownership
+- the workbench preview lane is now less split-brain:
+  - `WorkbenchPreviewRuntimeSurface.tsx` derives a controlled runtime model from the workbench runtime manager instead of letting `RuntimePreviewSurface.tsx` invent a second lifecycle story for the same lane
+  - `RuntimePreviewSurface.tsx` now accepts optional runtime overrides plus explicit provision/fallback callbacks, which lets the workbench stay the authority while standalone runtime surfaces keep their autonomous lifecycle path
+  - the inner lifecycle bar is now hidden in the workbench runtime lane, so trust/readiness UI no longer conflicts with a second, partially synthetic lifecycle strip underneath
+- `CanonicalPreviewSurface.tsx` was also corrected to describe runtime lifecycle ownership more honestly
+
 ### Collaboration
 - the workbench editor lane was further decomposed this round:
   - `WorkbenchEditorPane.tsx` now acts as a thin coordinator over `WorkbenchEditorSurface.tsx`, `WorkbenchEditorCanvas.tsx`, `WorkbenchEditorToolbar.tsx`, and `WorkbenchEditorSidecar.tsx`
@@ -250,6 +257,7 @@ This file is the short scoreboard that answers:
    - `npm run build` passed again on `2026-04-25` in the compile-mode production path after the landing/runtime cleanup and the SettingsPage + InlineAIChat parallel slices
    - current compile-mode build is therefore a fresh validated mitigation, not only an older cached success
    - build still emits the known `e2b/dist/index.mjs` critical-dependency warning through `app/api/preview/runtime-provision/route.ts`
+   - after the controlled-preview slice, `npm run lint`, `npm run typecheck`, and `npm run qa:enterprise-gate` all passed again on `2026-04-25`; a new `npm run build` attempt timed out before returning a fresh final verdict, so compile-mode remains the current honest mitigation but not a newly re-proven success for this exact slice
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
    - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
    - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`

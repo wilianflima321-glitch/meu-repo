@@ -250,6 +250,11 @@ Run sequentially because the write scope is shared:
 1. `useFullscreenIDEBridgeSections.ts`
 2. `FullscreenIDE.tsx`
 
+### Preview/runtime follow-through
+- `WorkbenchPreviewRuntimeSurface.tsx` is now the authority adapter between the workbench runtime manager and `RuntimePreviewSurface.tsx`
+- `RuntimePreviewSurface.tsx` gained optional controlled-runtime inputs so we can keep one runtime lane truthful inside the IDE without breaking standalone runtime consumers
+- this specifically reduces the old duplicate-lifecycle problem where the workbench trust notice could say one thing and the nested runtime strip could say `degraded` just because an external URL existed
+
 ### Wave 2 - dense product surfaces
 After Wave 1 stabilizes:
 1. `ProjectsDashboard.tsx`
@@ -292,11 +297,12 @@ A slice is only complete when all of this remains true:
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
 2. keep full compile-mode build green while tracing `build:prerender-probe` separately
 3. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
-4. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
-5. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
-6. keep moving the AI lane from “strong panel” to “operator surface” through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
-7. continue Wave B in `ProjectsDashboard.tsx`, `CreatorDashboard.tsx`, and `app/admin/ai-monitor/page.tsx` now that both `SettingsUI.tsx` and the legacy `SettingsPage.tsx` are calmer
-8. promote preview, collaboration, deploy, and public-shell confidence from present to trusted
+4. move the editor ROI pass to symbol truth + breadcrumb navigation before attempting git-gutter depth
+5. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
+6. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
+7. keep moving the AI lane from “strong panel” to “operator surface” through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
+8. continue Wave B in `ProjectsDashboard.tsx`, `CreatorDashboard.tsx`, and `app/admin/ai-monitor/page.tsx` now that both `SettingsUI.tsx` and the legacy `SettingsPage.tsx` are calmer
+9. promote preview, collaboration, deploy, and public-shell confidence from present to trusted
 
 ## One-Line Reading
 The audits no longer leave us with ambiguity.
