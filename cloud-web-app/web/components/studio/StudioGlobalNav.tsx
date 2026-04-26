@@ -18,8 +18,30 @@ function linkClass(active: boolean): string {
     : 'rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-[var(--aethel-text-tertiary)] hover:border-[var(--aethel-border-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_88%,transparent)] hover:text-[var(--aethel-text-primary)]'
 }
 
+function NavLinkRow({
+  links,
+  pathname,
+}: {
+  links: typeof STUDIO_PRIMARY_LINKS
+  pathname: string
+}) {
+  return (
+    <>
+      {links.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          className={linkClass(isNavLinkActive(pathname, link))}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </>
+  )
+}
+
 export default function StudioGlobalNav({ title, subtitle, rightSlot, className = '' }: StudioGlobalNavProps) {
-  const pathname = useBrowserPathname()
+  const pathname = useBrowserPathname() ?? ''
 
   return (
     <header className={`sticky top-0 z-40 border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,18,26,0.96),rgba(9,11,16,0.98))] backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.35)] ${className}`}>
@@ -33,30 +55,14 @@ export default function StudioGlobalNav({ title, subtitle, rightSlot, className 
             {subtitle ? <p className="mt-0.5 text-xs text-[var(--aethel-text-tertiary)] sm:text-sm">{subtitle}</p> : null}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {STUDIO_SECONDARY_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={linkClass(isNavLinkActive(pathname, link))}
-              >
-                {link.label}
-              </Link>
-            ))}
+            <NavLinkRow links={STUDIO_SECONDARY_LINKS} pathname={pathname} />
             {rightSlot}
           </div>
         </div>
 
         <nav aria-label="Navegacao principal do Studio" className="mt-3 overflow-x-auto pb-1">
           <div className="flex min-w-max items-center gap-2">
-            {STUDIO_PRIMARY_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={linkClass(isNavLinkActive(pathname, link))}
-              >
-                {link.label}
-              </Link>
-            ))}
+            <NavLinkRow links={STUDIO_PRIMARY_LINKS} pathname={pathname} />
           </div>
         </nav>
       </div>

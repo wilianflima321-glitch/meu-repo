@@ -20,11 +20,17 @@ import { useSettingsUiState } from './ui/useSettingsUiState';
 function SettingsUIView({ className }: { className?: string }) {
   const { isModified, scope, setScope, settings } = useSettings();
   const {
+    activeCategoryId,
+    activeChildId,
+    activeFilterLabel,
     categories,
+    clearFilters,
     expandedCategories,
     filteredSettings,
     groupedSettings,
     searchInputRef,
+    selectCategory,
+    selectChild,
     searchQuery,
     setSearchQuery,
     setShowJSON,
@@ -110,8 +116,10 @@ function SettingsUIView({ className }: { className?: string }) {
           )}
         </div>
         <SettingsSummaryBar
+          activeFilterLabel={activeFilterLabel}
           filteredCount={filteredSettings.length}
           modifiedCount={modifiedCount}
+          onClearFilters={clearFilters}
           searchQuery={searchQuery}
           totalCount={settings.size}
         />
@@ -119,14 +127,20 @@ function SettingsUIView({ className }: { className?: string }) {
 
       <div className="flex flex-1 overflow-hidden">
         <SettingsCategorySidebar
+          activeCategoryId={activeCategoryId}
+          activeChildId={activeChildId}
           categories={categories}
           expandedCategories={expandedCategories}
+          onSelectCategory={selectCategory}
+          onSelectChild={selectChild}
           onToggleCategory={toggleCategory}
         />
         <div className="flex-1 overflow-y-auto p-6">
           <SettingsResultsPane
+            activeFilterLabel={activeFilterLabel}
             filteredSettings={filteredSettings}
             groupedSettings={groupedSettings}
+            onClearFilters={clearFilters}
             scope={scope}
             searchQuery={searchQuery}
             showJSON={showJSON}

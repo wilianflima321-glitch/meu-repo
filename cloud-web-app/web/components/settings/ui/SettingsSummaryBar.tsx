@@ -1,15 +1,19 @@
 import { AlertCircle, Info, Search } from 'lucide-react';
 
 interface SettingsSummaryBarProps {
+  activeFilterLabel: string | null;
   filteredCount: number;
   modifiedCount: number;
+  onClearFilters: () => void;
   searchQuery: string;
   totalCount: number;
 }
 
 export function SettingsSummaryBar({
+  activeFilterLabel,
   filteredCount,
   modifiedCount,
+  onClearFilters,
   searchQuery,
   totalCount,
 }: SettingsSummaryBarProps) {
@@ -31,6 +35,20 @@ export function SettingsSummaryBar({
         <span className="inline-flex items-center gap-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] px-2.5 py-1 text-[var(--aethel-info-light)]">
           Query: {searchQuery}
         </span>
+      )}
+      {activeFilterLabel && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-2.5 py-1 text-[var(--aethel-info-light)]">
+          Section: {activeFilterLabel}
+        </span>
+      )}
+      {(searchQuery || activeFilterLabel) && (
+        <button
+          type="button"
+          onClick={onClearFilters}
+          className="inline-flex items-center gap-1 rounded-full border border-[var(--aethel-border-primary)] px-2.5 py-1 text-[var(--aethel-text-secondary)] transition-colors hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+        >
+          Clear filters
+        </button>
       )}
     </div>
   );

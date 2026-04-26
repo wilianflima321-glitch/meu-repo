@@ -32,7 +32,14 @@ This file is the short scoreboard that answers:
 - `usePreviewRuntimeHmrBridge.ts`: `122` lines
 - `RuntimePreviewSurface.tsx`: `239` lines
 - `PreviewRuntimeTrustNotice.tsx`: `131` lines
-- `SettingsUI.tsx`: `159` lines
+- `SettingsUI.tsx`: `162` lines
+- `useSettingsUiState.ts`: `137` lines
+- `SettingsCategorySidebar.tsx`: `94` lines
+- `SettingsResultsPane.tsx`: `91` lines
+- `SettingsSummaryBar.tsx`: `53` lines
+- `MobileResponsiveLayout.tsx`: `434` lines
+- `StudioLayout.tsx`: `91` lines
+- `StudioGlobalNav.tsx`: `64` lines
 - `SceneViewportWorkflowDrawer.tsx`: `163` lines
 - `WorkbenchPreviewRuntimeControls.tsx`: `134` lines
 - `useTerminalTransport.ts`: `145` lines
@@ -177,12 +184,23 @@ This file is the short scoreboard that answers:
   - stronger session telemetry for terminal/runtime/agent work beyond the current benchmark-grade baseline
 
 ### Settings surface polish
-- `SettingsUI.tsx` is now a `159`-line shell instead of a `1184`-line dense surface
+- `SettingsUI.tsx` is now a `162`-line shell instead of a `1184`-line dense surface
 - the catalog, provider/store, field renderers, UI-state/search derivation, summary bar, category sidebar, results pane, and quick-settings popup now live in dedicated `components/settings/ui/*` seams
 - the top bar also got denser benchmark-style guidance with clearer English copy plus explicit visible/modified counts, which makes the surface easier to scan without growing more chrome
+- the cockpit filter lane is now more coherent:
+  - `useSettingsUiState.ts` now owns active category/child selection plus a unified clear-filters action
+  - `SettingsCategorySidebar.tsx` now exposes `All settings`, per-section counts, and active child filtering instead of only scroll-jump behavior
+  - `SettingsSummaryBar.tsx` and `SettingsResultsPane.tsx` now show the active filter label and a single clear-filters affordance, so search + category filters no longer feel like disconnected controls
 - still open:
   - `SettingsPage.tsx` remains a separate thousand-line settings surface
   - persistence/i18n depth is still broader than this slice
+
+### Shared studio shell
+- the shared studio shell is calmer without regrowing the route surfaces:
+  - `MobileResponsiveLayout.tsx` now exports reusable mobile-nav/max-width helpers, isolates escape/body-scroll side effects, and centralizes breakpoint derivation
+  - `StudioLayout.tsx` now reuses typed mobile-nav items and a single content-class helper instead of repeating responsive shell grammar inline
+  - `StudioGlobalNav.tsx` now normalizes pathname fallback and reuses a single `NavLinkRow` seam for primary + secondary link rendering
+- this is quality/predictability work, not a fake claim that the broader root prerender cluster is solved
 
 ### Bridge/workbench orchestration
 - the bridge composition seam is no longer a dense single mapper:

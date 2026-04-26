@@ -18,11 +18,6 @@ import {
   X,
   ChevronRight,
   Smartphone,
-  LayoutDashboard,
-  Zap,
-  CreditCard,
-  Users,
-  HelpCircle,
 } from 'lucide-react'
 import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 
@@ -30,7 +25,7 @@ import { useBrowserPathname } from '@/lib/navigation/use-browser-pathname'
 // MOBILE BOTTOM NAVIGATION
 // ============================================================================
 
-interface MobileNavItem {
+export interface MobileNavItem {
   href: string
   label: string
   icon: React.ElementType
@@ -62,7 +57,7 @@ export function MobileBottomNav({
 
   return (
     <nav
-      className="mobile-bottom-nav"
+      className={joinClasses('mobile-bottom-nav')}
       role="navigation"
       aria-label="Navegacao mobile"
     >
@@ -92,18 +87,41 @@ export function MobileBottomNav({
 
 interface ResponsiveContainerProps {
   children: ReactNode
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
+  maxWidth?: ResponsiveMaxWidth
   padding?: boolean
   className?: string
 }
 
-const MAX_WIDTH_MAP = {
+export type ResponsiveMaxWidth = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'full'
+
+const MAX_WIDTH_MAP: Record<ResponsiveMaxWidth, string> = {
   sm: 'max-w-screen-sm',
   md: 'max-w-screen-md',
   lg: 'max-w-screen-lg',
   xl: 'max-w-screen-xl',
   '2xl': 'max-w-[1400px]',
+  '4xl': 'max-w-4xl',
+  '5xl': 'max-w-5xl',
+  '6xl': 'max-w-6xl',
+  '7xl': 'max-w-7xl',
   full: 'max-w-full',
+}
+
+function joinClasses(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(' ')
+}
+
+export function getResponsiveContainerClassName(
+  maxWidth: ResponsiveMaxWidth = 'xl',
+  padding = true,
+  className = ''
+) {
+  return joinClasses(
+    'mx-auto w-full',
+    MAX_WIDTH_MAP[maxWidth],
+    padding && 'px-4 sm:px-6 lg:px-8',
+    className
+  )
 }
 
 export function ResponsiveContainer({
@@ -113,11 +131,7 @@ export function ResponsiveContainer({
   className = '',
 }: ResponsiveContainerProps) {
   return (
-    <div
-      className={`mx-auto w-full ${MAX_WIDTH_MAP[maxWidth]} ${
-        padding ? 'px-4 sm:px-6 lg:px-8' : ''
-      } ${className}`}
-    >
+    <div className={getResponsiveContainerClassName(maxWidth, padding, className)}>
       {children}
     </div>
   )
@@ -142,27 +156,8 @@ export function MobileSidebarOverlay({
   side = 'left',
   title,
 }: MobileSidebarProps) {
-  // Close on Escape
-  useEffect(() => {
-    if (!isOpen) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [isOpen, onClose])
-
-  // Prevent body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+  useEscapeToClose(isOpen, onClose)
+  useBodyScrollLock(isOpen)
 
   if (!isOpen) return null
 
@@ -182,9 +177,10 @@ export function MobileSidebarOverlay({
 
       {/* Drawer */}
       <div
-        className={`relative z-10 flex h-full w-[min(85vw,360px)] flex-col bg-[var(--aethel-surface-secondary)] shadow-2xl ${
+        className={joinClasses(
+          'relative z-10 flex h-full w-[min(85vw,360px)] flex-col bg-[var(--aethel-surface-secondary)] shadow-2xl',
           side === 'right' ? 'ml-auto' : 'mr-auto'
-        }`}
+        )}
         style={{
           animation: `aethel-slide-in-${side === 'right' ? 'right' : 'left'} 200ms ease-out`,
         }}
@@ -235,16 +231,14 @@ export function ResponsiveGrid({
   gap = 'gap-4 sm:gap-6',
   className = '',
 }: ResponsiveGridProps) {
-  const gridCols = [
+  const gridCols = joinClasses(
     cols.mobile === 1 ? 'grid-cols-1' : `grid-cols-${cols.mobile}`,
-    cols.tablet ? `sm:grid-cols-${cols.tablet}` : '',
-    cols.desktop ? `lg:grid-cols-${cols.desktop}` : '',
-  ]
-    .filter(Boolean)
-    .join(' ')
+    cols.tablet ? `sm:grid-cols-${cols.tablet}` : undefined,
+    cols.desktop ? `lg:grid-cols-${cols.desktop}` : undefined
+  )
 
   return (
-    <div className={`grid ${gridCols} ${gap} ${className}`}>
+    <div className={joinClasses('grid', gridCols, gap, className)}>
       {children}
     </div>
   )
@@ -370,7 +364,7 @@ export function MobileContinuityCard({
 
 export function ResponsiveTable({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`-mx-4 overflow-x-auto sm:mx-0 ${className}`}>
+    <div className={joinClasses('-mx-4 overflow-x-auto sm:mx-0', className)}>
       <div className="inline-block min-w-full align-middle">
         {children}
       </div>
@@ -393,14 +387,14 @@ export function ResponsiveStack({
   breakpoint?: 'sm' | 'md' | 'lg'
   className?: string
 }) {
-  const directionClass = {
+  const directionClass: Record<'sm' | 'md' | 'lg', string> = {
     sm: 'flex-col sm:flex-row',
     md: 'flex-col md:flex-row',
     lg: 'flex-col lg:flex-row',
   }
 
   return (
-    <div className={`flex ${directionClass[breakpoint]} ${gap} ${className}`}>
+    <div className={joinClasses('flex', directionClass[breakpoint], gap, className)}>
       {children}
     </div>
   )
@@ -423,7 +417,10 @@ export function MobileMenuButton({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] md:hidden ${className}`}
+      className={joinClasses(
+        'inline-flex h-10 w-10 items-center justify-center rounded-lg text-[var(--aethel-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--aethel-primary)] md:hidden',
+        className
+      )}
       aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
       aria-expanded={isOpen}
     >
@@ -438,19 +435,49 @@ export function MobileMenuButton({
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop' | 'wide'
 
-export function useBreakpoint(): Breakpoint {
-  const [breakpoint, setBreakpoint] = useState<Breakpoint>('desktop')
-
+function useEscapeToClose(isOpen: boolean, onClose: () => void) {
   useEffect(() => {
-    const checkBreakpoint = () => {
-      const width = window.innerWidth
-      if (width < 640) setBreakpoint('mobile')
-      else if (width < 1024) setBreakpoint('tablet')
-      else if (width < 1440) setBreakpoint('desktop')
-      else setBreakpoint('wide')
+    if (!isOpen) return
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
     }
 
-    checkBreakpoint()
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen, onClose])
+}
+
+function useBodyScrollLock(isLocked: boolean) {
+  useEffect(() => {
+    if (!isLocked) {
+      document.body.style.overflow = ''
+      return
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isLocked])
+}
+
+function getBreakpointFromWidth(width: number): Breakpoint {
+  if (width < 640) return 'mobile'
+  if (width < 1024) return 'tablet'
+  if (width < 1440) return 'desktop'
+  return 'wide'
+}
+
+export function useBreakpoint(): Breakpoint {
+  const [breakpoint, setBreakpoint] = useState<Breakpoint>(() =>
+    typeof window === 'undefined' ? 'desktop' : getBreakpointFromWidth(window.innerWidth)
+  )
+
+  useEffect(() => {
+    const checkBreakpoint = () => setBreakpoint(getBreakpointFromWidth(window.innerWidth))
     window.addEventListener('resize', checkBreakpoint)
     return () => window.removeEventListener('resize', checkBreakpoint)
   }, [])

@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -32,6 +33,7 @@ interface SettingsProviderProps {
   initialSettings?: SettingDefinition[];
   initialValues?: Map<string, SettingValue>;
   onSave?: (key: string, value: unknown, scope: SettingsScope) => void;
+  onValuesChange?: (values: Map<string, SettingValue>) => void;
 }
 
 export function SettingsProvider({
@@ -39,6 +41,7 @@ export function SettingsProvider({
   initialSettings,
   initialValues,
   onSave,
+  onValuesChange,
 }: SettingsProviderProps) {
   const [scope, setScope] = useState<SettingsScope>('user');
   const [values, setValues] = useState<Map<string, SettingValue>>(initialValues || new Map());
@@ -113,6 +116,10 @@ export function SettingsProvider({
     },
     [scope, values]
   );
+
+  useEffect(() => {
+    onValuesChange?.(values);
+  }, [onValuesChange, values]);
 
   return (
     <SettingsContext.Provider

@@ -5,16 +5,20 @@ import { useSettings } from './settings-provider';
 import type { SettingDefinition, SettingsScope } from './settings-types';
 
 interface SettingsResultsPaneProps {
+  activeFilterLabel: string | null;
   filteredSettings: SettingDefinition[];
   groupedSettings: Map<string, SettingDefinition[]>;
+  onClearFilters: () => void;
   scope: SettingsScope;
   searchQuery: string;
   showJSON: boolean;
 }
 
 export function SettingsResultsPane({
+  activeFilterLabel,
   filteredSettings,
   groupedSettings,
+  onClearFilters,
   scope,
   searchQuery,
   showJSON,
@@ -71,7 +75,20 @@ export function SettingsResultsPane({
       {filteredSettings.length === 0 && (
         <div className="py-12 text-center text-[var(--aethel-text-tertiary)]">
           <Search className="mx-auto mb-4 h-12 w-12 opacity-50" />
-          <p>No settings found for {`"${searchQuery}"`}</p>
+          <p>
+            No settings found
+            {searchQuery ? ` for "${searchQuery}"` : ''}
+            {activeFilterLabel ? ` in ${activeFilterLabel}` : ''}.
+          </p>
+          {(searchQuery || activeFilterLabel) && (
+            <button
+              type="button"
+              onClick={onClearFilters}
+              className="mt-4 rounded border border-[var(--aethel-border-primary)] px-3 py-1.5 text-sm text-[var(--aethel-text-secondary)] transition-colors hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              Clear filters
+            </button>
+          )}
         </div>
       )}
     </div>

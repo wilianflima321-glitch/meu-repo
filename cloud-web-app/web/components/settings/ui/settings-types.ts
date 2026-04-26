@@ -33,6 +33,7 @@ export type SettingsScope = 'user' | 'workspace';
 export interface SettingsCategory {
   id: string;
   label: string;
+  count?: number;
   icon?: LucideIcon;
   children?: SettingsCategory[];
 }
