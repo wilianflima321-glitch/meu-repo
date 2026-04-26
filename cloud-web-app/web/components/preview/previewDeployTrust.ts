@@ -23,6 +23,9 @@ export type PreviewDeployRecord = {
   readyAt?: string;
   buildDurationMs?: number;
   error?: string;
+  lastReadyUrl?: string;
+  lastReadyInspectorUrl?: string;
+  lastReadyAt?: string;
 };
 
 export function normalizeDeployProjectName(input: string): string {
@@ -86,12 +89,32 @@ export function persistPreviewDeploy(
   window.localStorage.setItem(storageKey, JSON.stringify(deployment));
 }
 
+export function mergePreviewDeployRecord(
+  previous: PreviewDeployRecord | null,
+  next: PreviewDeployRecord
+): PreviewDeployRecord {
+  if (next.status === 'ready' && next.url) {
+    return {
+      ...next,
+      lastReadyUrl: next.url,
+      lastReadyInspectorUrl: next.inspectorUrl || previous?.lastReadyInspectorUrl,
+      lastReadyAt: next.readyAt || next.createdAt,
+    };
+  }
+
+  return {
+    ...next,
+    lastReadyUrl: previous?.lastReadyUrl,
+    lastReadyInspectorUrl: previous?.lastReadyInspectorUrl,
+    lastReadyAt: previous?.lastReadyAt,
+  };
+}
+
 export function resolveShareHref(options: {
   deployment: PreviewDeployRecord | null;
   previewRuntimeUrl: string | null;
-  deployStatusHref: string | null;
 }) {
-  const { deployment, previewRuntimeUrl, deployStatusHref } = options;
+  const { deployment, previewRuntimeUrl } = options;
 
   if (deployment?.status === 'ready' && deployment.url) {
     return {
@@ -100,17 +123,17 @@ export function resolveShareHref(options: {
     };
   }
 
+  if (deployment?.lastReadyUrl) {
+    return {
+      href: deployment.lastReadyUrl,
+      label: 'Last public deploy',
+    };
+  }
+
   if (previewRuntimeUrl) {
     return {
       href: previewRuntimeUrl,
       label: 'Runtime preview',
-    };
-  }
-
-  if (deployStatusHref) {
-    return {
-      href: deployStatusHref,
-      label: 'Deploy status',
     };
   }
 

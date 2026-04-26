@@ -6,11 +6,17 @@ import StudioRuntimeProviders, { type StudioRuntimeSurface } from '@/components/
 interface StudioRuntimeLayoutClientProps {
   children: ReactNode
   surface?: StudioRuntimeSurface
+  onboardingChrome?: boolean
 }
 
 export default function StudioRuntimeLayoutClient({
   children,
   surface = 'full',
+  onboardingChrome = true,
 }: StudioRuntimeLayoutClientProps) {
-  return <StudioRuntimeProviders surface={surface}>{children}</StudioRuntimeProviders>
+  return (
+    <StudioRuntimeProviders surface={surface} onboardingChrome={onboardingChrome}>
+      {children}
+    </StudioRuntimeProviders>
+  )
 }

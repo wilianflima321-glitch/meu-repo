@@ -22,6 +22,7 @@ export type StudioRuntimeSurface = 'full' | 'light'
 interface StudioRuntimeProvidersProps {
   children: React.ReactNode
   surface?: StudioRuntimeSurface
+  onboardingChrome?: boolean
 }
 
 function DefaultCommandsRegistration() {
@@ -58,7 +59,13 @@ function LightweightStudioRuntime({ children }: { children: React.ReactNode }) {
   )
 }
 
-function FullStudioRuntime({ children }: { children: React.ReactNode }) {
+function FullStudioRuntime({
+  children,
+  onboardingChrome = true,
+}: {
+  children: React.ReactNode
+  onboardingChrome?: boolean
+}) {
   return (
     <CoreUiProviders>
       <ErrorBoundaryProvider>
@@ -71,10 +78,10 @@ function FullStudioRuntime({ children }: { children: React.ReactNode }) {
                 <CommandRegistryProvider>
                   <DevToolsProvider>
                     <AethelProvider>
-                      <OnboardingProvider enabled>
+                      <OnboardingProvider enabled={onboardingChrome}>
                         <DefaultCommandsRegistration />
-                        <WelcomeModal />
-                        <OnboardingChecklist />
+                        {onboardingChrome ? <WelcomeModal /> : null}
+                        {onboardingChrome ? <OnboardingChecklist /> : null}
                         <LowBalanceModalAuto />
                         <AISuggestionBubbleAuto />
                         <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
@@ -95,10 +102,11 @@ function FullStudioRuntime({ children }: { children: React.ReactNode }) {
 export default function StudioRuntimeProviders({
   children,
   surface = 'full',
+  onboardingChrome = true,
 }: StudioRuntimeProvidersProps) {
   if (surface === 'light') {
     return <LightweightStudioRuntime>{children}</LightweightStudioRuntime>
   }
 
-  return <FullStudioRuntime>{children}</FullStudioRuntime>
+  return <FullStudioRuntime onboardingChrome={onboardingChrome}>{children}</FullStudioRuntime>
 }

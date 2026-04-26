@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Loader2, Rocket } from 'lucide-react';
 import {
   buildDeployStatusHref,
+  getStoredPreviewDeploy,
+  mergePreviewDeployRecord,
   normalizeDeployProjectName,
   persistPreviewDeploy,
 } from '@/components/preview/previewDeployTrust';
@@ -131,13 +133,14 @@ export function DeployTopbarAction({ projectName }: DeployTopbarActionProps) {
         projectIdParam
       );
 
-      persistPreviewDeploy(deployProjectName, {
+      const mergedDeployment = mergePreviewDeployRecord(getStoredPreviewDeploy(deployProjectName), {
         id: payload.id,
         url: payload.url || '',
         inspectorUrl: payload.inspectorUrl || '',
         status: payload.status || 'idle',
         createdAt: new Date().toISOString(),
       });
+      persistPreviewDeploy(deployProjectName, mergedDeployment);
       setStatusHref(nextStatusHref);
       setFeedback(getDeployStartedLabel(payload.status));
       window.open(nextStatusHref, '_blank', 'noopener,noreferrer');

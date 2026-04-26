@@ -9,7 +9,11 @@ import {
   RefreshCw,
   Rocket,
 } from 'lucide-react';
-import { persistPreviewDeploy } from '@/components/preview/previewDeployTrust';
+import {
+  getStoredPreviewDeploy,
+  mergePreviewDeployRecord,
+  persistPreviewDeploy,
+} from '@/components/preview/previewDeployTrust';
 import { gradients, tokens } from '@/lib/design-tokens';
 import { useBrowserPathname, useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 
@@ -136,7 +140,11 @@ export default function DeployStatusPage() {
 
   useEffect(() => {
     if (!state.deployment) return;
-    persistPreviewDeploy(projectName, state.deployment);
+    const merged = mergePreviewDeployRecord(
+      getStoredPreviewDeploy(projectName),
+      state.deployment
+    );
+    persistPreviewDeploy(projectName, merged);
   }, [projectName, state.deployment]);
 
   const statusMeta = useMemo(

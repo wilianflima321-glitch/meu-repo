@@ -6,6 +6,7 @@ import {
   absoluteBrowserHref,
   buildDeployStatusHref,
   getStoredPreviewDeploy,
+  mergePreviewDeployRecord,
   normalizeDeployProjectName,
   persistPreviewDeploy,
   resolveShareHref,
@@ -56,9 +57,8 @@ export function usePreviewDeployTrust({
       resolveShareHref({
         deployment,
         previewRuntimeUrl,
-        deployStatusHref,
       }),
-    [deployStatusHref, deployment, previewRuntimeUrl]
+    [deployment, previewRuntimeUrl]
   );
 
   const loadReadiness = useCallback(async () => {
@@ -102,8 +102,11 @@ export function usePreviewDeployTrust({
           );
         }
 
-        setDeployment(payload);
-        persistPreviewDeploy(projectName, payload);
+        setDeployment((previous) => {
+          const merged = mergePreviewDeployRecord(previous, payload);
+          persistPreviewDeploy(projectName, merged);
+          return merged;
+        });
       } catch (error) {
         setFeedback(
           error instanceof Error ? error.message : 'Falha ao carregar deploy'
@@ -172,8 +175,11 @@ export function usePreviewDeployTrust({
         );
       }
 
-      setDeployment(payload);
-      persistPreviewDeploy(projectName, payload);
+      setDeployment((previous) => {
+        const merged = mergePreviewDeployRecord(previous, payload);
+        persistPreviewDeploy(projectName, merged);
+        return merged;
+      });
       setFeedback(getDeployStartedLabel(payload.status));
 
       if (typeof window !== 'undefined') {

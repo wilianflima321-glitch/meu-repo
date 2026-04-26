@@ -34,7 +34,7 @@ These references should keep driving spacing, density, cockpit hierarchy, and pr
 
 ## Round Delta On 2026-04-24
 This follow-up round kept cutting the core creation loop and materially reduced the route shell, preview cockpit, shell panels, terminal runtime, and AI sidecar seams:
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now `379`, while route/workspace orchestration moved out of `FullscreenIDEWorkspaceBridge.tsx` and into `useFullscreenIDEBridgeSections.ts` (`141`) plus `useFullscreenIDEBridgeProps.types.ts` (`117`), with `useFullscreenIDEBridgeProps.ts` now only `19`
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is now `393`, while route/workspace orchestration moved out of `FullscreenIDEWorkspaceBridge.tsx` and into `useFullscreenIDEBridgeSections.ts` (`141`) plus `useFullscreenIDEBridgeProps.types.ts` (`117`), with `useFullscreenIDEBridgeProps.ts` now only `19`
 - `cloud-web-app/web/components/ide/fullscreen/FullscreenIDEWorkspaceBridge.tsx` is now only `89`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewPane.tsx` is now only `44`, with preview cockpit density moved into `WorkbenchPreviewRuntimeControls.tsx` (`134`), `WorkbenchPreviewRuntimeSurface.tsx` (`87`), `WorkbenchPreviewModeHeader.tsx` (`70`), and `workbenchPreviewPaneModels.ts` (`56`)
 - `cloud-web-app/web/components/preview/SceneViewportSurface.tsx` is now `98` after extracting `SceneViewportStage.tsx` (`117`), `useSceneViewportSurfaceState.ts` (`149`), and `useSceneViewportPlayback.ts` (`53`)
@@ -53,11 +53,14 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - the shell chrome also stopped bluffing: `cloud-web-app/web/components/ide/modern-shell/chromeStatusBar.tsx` now reads real shell/editor/preview state instead of the old `main / 0 / 0 / Prettier / UTF-8 / Ln 1, Col 1 / AI Ready` placeholder grammar, while `useWorkbenchShellState.ts`, `WorkbenchEditorCanvas.tsx`, and `MonacoEditorPro.tsx` now publish live cursor/selection state so the footer can reflect active file/language, split-pane ownership, diagnostics, collaboration, current lanes, and preview-runtime health honestly
 - the shell source-control slice is also no longer filler-only: `cloud-web-app/web/components/ide/modern-shell/useShellSourceControlTruth.ts` now probes the existing git status API from the canonical shell, so `chromeStatusBar.tsx` can surface real branch / ahead-behind / dirty truth when the repo path resolves and can explicitly report `Git indisponivel` when it cannot
 - the canonical editor lane also closed another stale benchmark gap: `cloud-web-app/web/components/ide/fullscreen/WorkbenchEditorPane.tsx` now mounts `Breadcrumbs.tsx` above the editor toolbar and feeds it with the live cursor line plus current outline symbols, so file-path and symbol breadcrumbs are now part of the real workbench instead of sitting as latent editor capability outside the main shell
-- this also corrects part of the historical V6 drift: on the current branch `cloud-web-app/web/components/editor/MonacoEditorPro.tsx` is `867` lines and already binds `Cmd/Ctrl+K` to `InlineEditModal`; the real remaining inline-AI gap is `InlineAIChat.tsx`, which still exists more as latent capability than as a productized canonical editor-lane surface
+- this also corrects part of the historical V6 drift: on the current branch `cloud-web-app/web/components/editor/MonacoEditorPro.tsx` already binds `Cmd/Ctrl+K` to `InlineEditModal`; the real remaining inline-AI gap is still `InlineAIChat.tsx`, which remains a large latent capability rather than a fully productized canonical editor-lane surface
 - the keyboard layer is now more honest too: `cloud-web-app/web/lib/keybindings/keybindings-service.ts` no longer pretends `Ctrl+I` opens a productized inline-chat lane; it routes to the canonical `AI Console` instead, while inline chat remains an explicit open gap rather than fake-complete behavior
 - the dashboard also closed one of the ugliest hidden-gold gaps from the old audits: `cloud-web-app/web/components/useAethelDashboardRuntime.tsx` now opens `OnboardingWizard` from the persisted `/api/onboarding` welcome state instead of the looser first-value-guide toggle, and `cloud-web-app/web/components/dashboard/useDashboardActions.ts` now syncs wizard complete/skip outcomes back to `/api/onboarding` instead of leaving the wizard as an effectively orphaned surface
+- the onboarding loop is now less self-contradictory too: `cloud-web-app/web/app/dashboard/layout.tsx` suppresses the global runtime onboarding chrome through `components/providers/StudioRuntimeRouteLayout.tsx` / `StudioRuntimeProviders.tsx`, so the dashboard wizard no longer competes with a second welcome/checklist layer on the same route
+- the onboarding API itself also stopped being memory-only on the main path: `cloud-web-app/web/app/api/onboarding/route.ts` now persists through Prisma `OnboardingProgress` and only falls back to the in-memory map when the table/runtime is unavailable
 - preview/deploy trust also moved from latent backend capability into the visible cockpit: `cloud-web-app/web/components/preview/previewDeployTrust.ts` plus `usePreviewDeployTrust.ts` now persist the last known deploy, derive the best share target, and let `PreviewRuntimeToolbar.tsx` + `WorkbenchPreviewRuntimeControls.tsx` start deploys, refresh status, open the deploy site, and copy the strongest available share link from the same preview lane the user is validating
 - the deploy status loop is now coherent across surfaces too: `cloud-web-app/web/components/ide/modern-shell/deployTopbarAction.tsx` and `cloud-web-app/web/app/deploy/[id]/page.tsx` now feed the same preview deploy trust store, so top bar, status page, and preview lane all agree on the latest deployment instead of acting like isolated features
+- preview/share trust now keeps a stable review target during deploy churn: `previewDeployTrust.ts`, `usePreviewDeployTrust.ts`, `deployTopbarAction.tsx`, and `app/deploy/[id]/page.tsx` preserve `lastReadyUrl` / `lastReadyInspectorUrl`, so the strongest share action keeps pointing at the last ready public deploy while a newer deploy is still building or has errored
 - preview runtime trust itself is now less hand-wavy: `cloud-web-app/web/components/preview/PreviewRuntimeTrustNotice.tsx` now surfaces readiness / health / fallback / next-move guidance above the canonical visual surface, while `PreviewLifecycleChrome.tsx`, `usePreviewRuntime.ts`, `previewRuntimeState.ts`, `previewRuntime.types.ts`, and `usePreviewRuntimeHealthMonitor.ts` now track `lastHealthCheckAt`, `lastHealthyAt`, and `failureCount` so warmup can degrade honestly instead of looking silently stuck forever
 - collaboration presence is also less hidden in the cockpit: `cloud-web-app/web/components/collaboration/FilePresenceDot.tsx` now gives the explorer compact file/folder presence stacks, while `FileExplorerPro.tsx`, `WorkbenchSidebar.tsx`, `FullscreenIDEWorkspace.tsx`, and `FullscreenIDEWorkspaceBridge.tsx` now pass `collaborationPeers` into the canonical tree so file presence is visible where users actually decide what to open next
 - the public shell also took one more reduction pass: `cloud-web-app/web/components/ui/PublicHeader.tsx` is now a hook-free static header with a CSS-only mobile menu, which removes one more live-browser dependency from the public/docs cluster without overclaiming that prerender parity is solved
@@ -68,8 +71,9 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - the follow-up clean rerun in `cloud-web-app/web/build-probe-2026-04-24-terminal-first-class.log` confirmed that this shell work did not introduce a new failure class: the build still reached `Generating static pages (213/213)` and still failed on the same `<Html>` + `useContext` blocker cluster
 - the next root-level build probes stayed honest instead of widening the drift surface: removing the legacy `cloud-web-app/web/pages/404.tsx`, `pages/500.tsx`, `pages/_app.tsx`, `pages/_document.tsx`, and `pages/_error.tsx` fallback chain, stripping `ClientLayout` out of `app/layout.tsx`, and collapsing `app/error.tsx`, `app/global-error.tsx`, and `app/not-found.tsx` to minimal boundaries still did **not** clear the old prerender path; `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log` reproduced the same `/404`, `/500`, and `/_not-found` failure class
 - the practical mitigation is now explicit instead of implied: `cloud-web-app/web/package.json` points `npm run build` to `next build --experimental-build-mode compile`, while `npm run build:prerender-probe` preserves the older generate path for diagnosis
-- this mitigation is backed by real evidence, not wishful wording: `cloud-web-app/web/build-probe-2026-04-25-compile-mode.log` completed successfully, and the resulting artifact booted under `next start` with `200` returned for `/` in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
+- this mitigation is backed by real evidence, not wishful wording: `cloud-web-app/web/build-probe-2026-04-25-compile-mode.log` completed successfully, the resulting artifact booted under `next start` with `200` returned for `/` in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`, and the compile path completed successfully again in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`
 - that does **not** mean full prerender parity is solved; it means the branch now has a production-viable server-rendered build path while the original `<Html>` / `useContext` export cluster remains open under `npm run build:prerender-probe`
+- the freshest local probe remains honest too: `cloud-web-app/web/build-probe-2026-04-26-prerender-probe.log` still stalls at `Creating an optimized production build ...`, which keeps prerender parity explicitly open even after the recent dashboard-onboarding and deploy-share stabilization passes
 - the public prerender suspect set also got one honest reduction pass this round: `PublicHeader.tsx` no longer depends on `use-browser-pathname.ts`, and `/terms` + `/privacy` now use static last-updated labels instead of runtime date calls; the latest direct rerun still stalled at `Creating an optimized production build ...`, so this is a surface simplification, not a false claim that the broader public-shell blocker is closed
 
 This is real progress.
@@ -99,7 +103,7 @@ It also does **not** mean production build parity is closed: the latest evidence
 
 ## Current Measured User-Facing Hotspots
 ### Wave A - highest leverage for user perception
-- `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `379`
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx`: `393`
 - `cloud-web-app/web/components/ide/AIChatPanelPro.tsx`: `313`
 - `cloud-web-app/web/components/ide/modern-shell/chromeStatusBar.tsx`: `454`
 - `cloud-web-app/web/components/ide/modern-shell/useShellSourceControlTruth.ts`: `262`
@@ -131,7 +135,7 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/preview/useSceneViewportSurfaceState.ts`: `149`
 - `cloud-web-app/web/components/terminal/useTerminalTransport.ts`: `145`
 - `cloud-web-app/web/components/ide/fullscreen/WorkbenchPreviewRuntimeControls.tsx`: `134`
-- `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`: `867`
+- `cloud-web-app/web/components/editor/MonacoEditorPro.tsx`: `1164`
 
 ### Wave B - dense product surfaces next in line
 - `cloud-web-app/web/app/admin/ai-monitor/page.tsx`: `1249`
@@ -139,7 +143,7 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/engine/DetailsPanel.tsx`: `1173`
 - `cloud-web-app/web/components/assets/ContentBrowser.tsx`: `1128`
 - `cloud-web-app/web/components/marketplace/CreatorDashboard.tsx`: `1120`
-- `cloud-web-app/web/components/settings/SettingsPage.tsx`: `1086`
+- `cloud-web-app/web/components/settings/SettingsPage.tsx`: `1066`
 - `cloud-web-app/web/components/dashboard/ProjectsDashboard.tsx`: `1076`
 - `cloud-web-app/web/components/engine/ProjectSettings.tsx`: `1054`
 
@@ -288,6 +292,7 @@ After Wave 1 stabilizes:
 - the shared studio runtime is a bit less magic:
   - `components/ServiceWorkerProvider.tsx` now relies on explicit enablement instead of pathname inference
   - `lib/providers/AethelProvider.tsx` no longer persists preferences from inside the reducer
+  - `app/dashboard/layout.tsx` now opts out of duplicate onboarding chrome through `StudioRuntimeRouteLayout`, which keeps dashboard onboarding in one lane instead of two
 
 ### Wave 3 - domain editors
 After the workbench/studio shell is calmer:

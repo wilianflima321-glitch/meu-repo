@@ -1,6 +1,6 @@
 # 85_EXECUTION_STATUS_MAP_2026-04-22
 Date: 2026-04-22
-Last refreshed: 2026-04-25
+Last refreshed: 2026-04-26
 Status: ACTIVE
 Role: short execution snapshot and no-drift scoreboard across the canonical audit set
 
@@ -12,7 +12,7 @@ This file is the short scoreboard that answers:
 3. what is still open and should stay on the board
 
 ## Current Snapshot
-- `FullscreenIDE.tsx`: `385` lines
+- `FullscreenIDE.tsx`: `393` lines
 - `AIChatPanelPro.tsx`: `313` lines
 - `AIChatComposer.tsx`: `282` lines
 - `useAIChatComposerState.ts`: `220` lines
@@ -74,12 +74,12 @@ This file is the short scoreboard that answers:
 - `useTerminalOptions.ts`: `58` lines
 - `useTerminalImperativeHandle.ts`: `51` lines
 - `useWorkbenchShellState.ts`: `257` lines
-- `MonacoEditorPro.tsx`: `867` lines
+- `MonacoEditorPro.tsx`: `1164` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
-  - `npm run build` now uses `next build --experimental-build-mode compile` and completed successfully in `cloud-web-app/web/build-probe-2026-04-25-compile-mode.log`; the resulting server build was also smoke-tested with `next start` and returned `200` for `/` in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
-  - the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the latest canonical evidence is `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`, which still fail with the same `/404`, `/500`, `/_not-found`, public/docs, and seven-studio-route export cluster even after removing the legacy `pages/*` fallback chain and simplifying the root App Router boundaries
+- `npm run build` now uses `next build --experimental-build-mode compile`; it completed successfully again on `2026-04-26` in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`, and the earlier server artifact smoke test still stands in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
+- the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the freshest local evidence is `cloud-web-app/web/build-probe-2026-04-26-prerender-probe.log`, which still stalls at `Creating an optimized production build ...`, while the strongest historical failure evidence remains `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -106,9 +106,11 @@ This file is the short scoreboard that answers:
 ### Onboarding
 - the funnel exists and is instrumented,
 - the dashboard now opens `OnboardingWizard` from the real `/api/onboarding` welcome-state signal instead of the looser first-value-guide toggle, and `?onboarding=1` remains as an explicit manual override for walkthrough/debug runs
+- the dashboard route now also suppresses duplicate global onboarding chrome through `app/dashboard/layout.tsx` + `components/providers/StudioRuntimeProviders.tsx`, so the wizard is no longer competing with the runtime-level `WelcomeModal` / `OnboardingChecklist` pair on the same surface
 - but durable onboarding state and stronger first-run continuity are still open.
 - the next honest gap is persistence quality:
-  - the server onboarding route still keeps state in memory, so the UX is now more visible but not yet enterprise-durable across full backend restarts
+  - `app/api/onboarding/route.ts` now persists the primary path through Prisma `OnboardingProgress` and only falls back to the in-memory map when the table/runtime is unavailable
+  - this is materially better than the old memory-only path, but full durability still depends on the DB table being present and healthy in every environment
 
 ### Inline AI editing
 - the canonical inline-edit path is wired and user-facing,
@@ -142,6 +144,7 @@ This file is the short scoreboard that answers:
 - the preview cockpit now mirrors that same deploy truth instead of leaving deploy credibility trapped in the top bar:
   - `components/preview/previewDeployTrust.ts` and `components/preview/usePreviewDeployTrust.ts` now persist the last known deploy, derive the best share target, and let the preview lane start deploys, refresh status, open the live site, and copy the best available share link
   - `WorkbenchPreviewRuntimeControls.tsx`, `PreviewRuntimeToolbar.tsx`, `deployTopbarAction.tsx`, and `app/deploy/[id]/page.tsx` now speak the same deploy/share grammar, so the user sees one deploy story across top bar, preview, and status page
+  - the share target is now more stable during deploy churn: `lastReadyUrl` / `lastReadyInspectorUrl` survive building/error refreshes, so the review action keeps pointing at the last known public deploy instead of degrading to a status page or local runtime preview mid-rollout
 - but still depend on readiness/environment truth.
 
 ### Preview runtime orchestration
@@ -274,19 +277,19 @@ This file is the short scoreboard that answers:
 - `npm run typecheck` hit the known transient `.next/types` mismatch while a fresh build was regenerating artifacts, then passed again immediately after the build completed
 - current honest state remains:
   - compile-mode build = validated production mitigation
-  - `build:prerender-probe` = still open
+  - `build:prerender-probe` = still open, with the newest local rerun still stuck at `Creating an optimized production build ...`
 
 ## Still Open
 ### P0
 1. production build parity
-   - `npm run build` passed again on `2026-04-25` in the compile-mode production path after the landing/runtime cleanup and the SettingsPage + InlineAIChat parallel slices
-   - current compile-mode build is therefore a fresh validated mitigation, not only an older cached success
+   - `npm run build` passed again on `2026-04-26` in the compile-mode production path (`cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`)
+   - current compile-mode build is therefore still a fresh validated mitigation, not only an older cached success
    - build still emits the known `e2b/dist/index.mjs` critical-dependency warning through `app/api/preview/runtime-provision/route.ts`
-   - after the controlled-preview slice, `npm run lint`, `npm run typecheck`, and `npm run qa:enterprise-gate` all passed again on `2026-04-25`; a new `npm run build` attempt timed out before returning a fresh final verdict, so compile-mode remains the current honest mitigation but not a newly re-proven success for this exact slice
+   - `npm run build:prerender-probe` remains the open track; the freshest local rerun (`cloud-web-app/web/build-probe-2026-04-26-prerender-probe.log`) still did not clear `Creating an optimized production build ...`
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
    - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
    - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`
-   - highest-confidence studio/runtime cluster now includes: `components/providers/StudioRuntimeProviders.tsx`, `components/providers/StudioRuntimeRouteLayout.tsx`, `lib/a11y/accessibility.tsx`, `components/ServiceWorkerProvider.tsx`, `contexts/AuthContext.tsx`, and `lib/providers/AethelProvider.tsx`
+   - highest-confidence studio/runtime cluster now includes: `components/providers/StudioRuntimeRouteLayout.tsx`, `components/providers/StudioRuntimeLayoutClient.tsx`, `components/providers/StudioRuntimeProviders.tsx`, `lib/a11y/accessibility.tsx`, `components/ServiceWorkerProvider.tsx`, `contexts/AuthContext.tsx`, and `lib/providers/AethelProvider.tsx`
    - the public/auth cluster is narrower but still open: `PublicHeader.tsx` is now also a server component instead of an unnecessary client surface, and `/terms` + `/privacy` now render static last-updated labels instead of runtime date calls, but the broader public-shell/prerender lane still lacks fresh end-to-end proof and the legacy `/404` + `/500` failure class has not been cleared by those reductions alone
 2. remaining workbench, preview, and terminal implementation hotspot reduction led by `FullscreenIDE.tsx`, `useFullscreenIDEBridgeSections.ts`, `usePreviewRuntime.ts`, `WorkbenchEditorSurface.tsx`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, `useTerminalSessions.ts`, and `useTerminalRuntime.ts`
 3. `noImplicitAny: false`

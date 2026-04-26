@@ -5,6 +5,7 @@ import type { StudioRuntimeSurface } from '@/components/providers/StudioRuntimeP
 interface StudioRuntimeRouteLayoutProps {
   children: ReactNode
   surface?: StudioRuntimeSurface
+  onboardingChrome?: boolean
 }
 
 function StudioRuntimeRouteFallback() {
@@ -28,6 +29,11 @@ const StudioRuntimeLayoutClient = nextDynamic(() => import('./StudioRuntimeLayou
 export default function StudioRuntimeRouteLayout({
   children,
   surface = 'full',
+  onboardingChrome = true,
 }: StudioRuntimeRouteLayoutProps) {
-  return <StudioRuntimeLayoutClient surface={surface}>{children}</StudioRuntimeLayoutClient>
+  return (
+    <StudioRuntimeLayoutClient surface={surface} onboardingChrome={onboardingChrome}>
+      {children}
+    </StudioRuntimeLayoutClient>
+  )
 }
