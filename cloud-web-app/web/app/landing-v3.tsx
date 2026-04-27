@@ -101,6 +101,7 @@ const TRUST_ACTIONS = [
   { label: 'Ver status', href: '/status' },
   { label: 'Ler docs', href: '/docs' },
   { label: 'Pricing real', href: '/pricing' },
+  { label: 'Customer proof', href: '/customers' },
 ]
 
 function ScreenshotCard({

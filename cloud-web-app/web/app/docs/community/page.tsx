@@ -1,53 +1,111 @@
-import { Users } from 'lucide-react'
-import DocsResourcePage from '@/app/docs/docs-resource-page'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowLeft, GitBranch, MessageSquare, Users2 } from 'lucide-react'
+import PublicFooter from '@/components/ui/PublicFooter'
+import PublicHeader from '@/components/ui/PublicHeader'
 
-const CARDS = [
+export const metadata: Metadata = {
+  title: 'Comunidade | Aethel Docs',
+  description: 'Onde a comunidade do Aethel vive hoje, como participar sem prometer canais que ainda nao estao publicos e como virar design partner.',
+}
+
+const COMMUNITY_SURFACES = [
   {
-    eyebrow: 'Public loop',
-    title: 'Repositorio e feedback aberto',
-    description:
-      'Hoje o loop publico mais forte do Aethel ainda passa pelo repositorio, pelas auditorias vivas e pela trilha de implementacao que vai ficando explicita no codigo.',
-    links: [{ label: 'Abrir repositorio', href: 'https://github.com/wilianflima321-glitch/meu-repo', external: true }],
+    icon: GitBranch,
+    title: 'GitHub publico',
+    description: 'Hoje o centro mais real da comunidade continua sendo o repositorio publico, com auditorias, codigo e historico de execucao.',
+    href: 'https://github.com/wilianflima321-glitch/meu-repo',
+    actionLabel: 'Abrir repositorio',
   },
   {
-    eyebrow: 'Public loop',
-    title: 'Docs e changelog como memoria publica',
-    description:
-      'A comunidade publica atual e mais orientada a documentacao, status e changelog do que a um grande espaco social estilo Discord ou forum robusto.',
-    links: [
-      { label: 'Ler docs', href: '/docs' },
-      { label: 'Ler changelog', href: '/docs/changelog' },
-    ],
+    icon: MessageSquare,
+    title: 'Feedback orientado por docs e status',
+    description: 'Muita conversa produtiva comeca em uma superficie publica: docs, pricing, status ou customer proof, antes de virar ticket ou rollout.',
+    href: '/docs',
+    actionLabel: 'Explorar docs',
   },
   {
-    eyebrow: 'Public loop',
-    title: 'Roadmap e rollout ainda em construcao',
-    description:
-      'Comparado com Vercel, Linear, Notion e Replit, ainda faltam espacos publicos mais fortes de comunidade, showcases e customer proof. Hoje a comunidade e menor, mas mais honesta sobre o que o produto ja entrega.',
-    links: [
-      { label: 'Ver status', href: '/status' },
-      { label: 'Falar com vendas', href: '/contact-sales' },
-    ],
+    icon: Users2,
+    title: 'Design partner conversations',
+    description: 'Quando o interesse ja e validar fit, backlog e rollout de equipe, a conversa certa hoje ainda passa por contato comercial e discovery guiado.',
+    href: '/contact-sales?source=docs-community',
+    actionLabel: 'Falar com o time',
   },
 ]
 
-export default function CommunityPage() {
+const HONEST_COMMUNITY_NOTES = [
+  'Hoje nao estamos vendendo uma Discord community publica ou um Slack massivo que ainda nao existe.',
+  'A melhor forma de participar e cruzar o repositorio, as auditorias, os docs e as superficies publicas do produto.',
+  'Para design partners, o valor maior vem de feedback especifico sobre time, fluxo e rollout - nao de hype vazio de comunidade.',
+]
+
+export default function CommunityDocsPage() {
   return (
-    <DocsResourcePage
-      eyebrow="Comunidade"
-      title="Como o loop publico do Aethel funciona hoje"
-      description="Aethel ainda nao tem uma comunidade publica tao expansiva quanto os melhores players do mercado, mas ja tem uma base forte de transparencia operacional, docs e codigo publico."
-      icon={Users}
-      accentClassName="text-[var(--aethel-warning)]"
-      summary="Hoje a comunidade e menor e menos social-first do que Replit ou Vercel. Em compensacao, o produto mostra mais claramente o que esta entregue, parcial ou aberto."
-      cards={CARDS}
-      calloutTitle="Onde o benchmark ainda esta na frente"
-      calloutDescription="Os lideres do mercado costumam combinar docs profundas, customer stories, showcase de templates, changelog vivo e espacos comunitarios mais ativos. O Aethel ja tem a honestidade e o repositorio serio; agora precisa ampliar a superficie publica dessa conversa."
-      calloutLinks={[
-        { label: 'Abrir docs', href: '/docs' },
-        { label: 'Abrir pricing', href: '/pricing' },
-        { label: 'Repositorio no GitHub', href: 'https://github.com/wilianflima321-glitch/meu-repo', external: true },
-      ]}
-    />
+    <div className="min-h-screen bg-[var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
+      <PublicHeader />
+
+      <main className="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-12">
+        <Link href="/docs" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--aethel-text-tertiary)] transition-colors hover:text-[var(--aethel-text-primary)]">
+          <ArrowLeft className="h-4 w-4" /> Voltar para Docs
+        </Link>
+
+        <section className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-primary)_14%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent))] p-6 shadow-[0_20px_80px_rgba(2,8,23,0.22)] sm:p-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">Comunidade</p>
+          <h1 className="mt-3 text-4xl font-bold">A comunidade que existe hoje e a que ainda nao fingimos ter.</h1>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-[var(--aethel-text-secondary)]">
+            O Aethel ja tem codigo publico, auditorias profundas e conversas de design partner. O que ainda nao tem - e nao vamos fingir nesta pagina - e uma camada de comunidade gigante cheia de badges e canais vazios.
+          </p>
+        </section>
+
+        <section className="mt-10 grid gap-5 md:grid-cols-3">
+          {COMMUNITY_SURFACES.map((surface) => {
+            const Icon = surface.icon
+            const external = surface.href.startsWith('http')
+
+            return (
+              <article
+                key={surface.title}
+                className="rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_56%,transparent)] p-5"
+              >
+                <Icon className="h-5 w-5 text-[var(--aethel-primary-light)]" />
+                <h2 className="mt-4 text-lg font-semibold">{surface.title}</h2>
+                <p className="mt-2 text-sm leading-7 text-[var(--aethel-text-secondary)]">{surface.description}</p>
+                {external ? (
+                  <a
+                    href={surface.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-5 inline-flex items-center rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition hover:border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)] hover:text-[var(--aethel-primary-light)]"
+                  >
+                    {surface.actionLabel}
+                  </a>
+                ) : (
+                  <Link
+                    href={surface.href}
+                    className="mt-5 inline-flex items-center rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition hover:border-[color-mix(in_srgb,var(--aethel-primary)_28%,transparent)] hover:text-[var(--aethel-primary-light)]"
+                  >
+                    {surface.actionLabel}
+                  </Link>
+                )}
+              </article>
+            )
+          })}
+        </section>
+
+        <section className="mt-10 rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold">Notas honestas</h2>
+          <ul className="mt-5 space-y-3 text-sm leading-7 text-[var(--aethel-text-secondary)]">
+            {HONEST_COMMUNITY_NOTES.map((note) => (
+              <li key={note} className="flex items-start gap-3">
+                <span className="mt-2 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--aethel-primary-light)]" />
+                <span>{note}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </main>
+
+      <PublicFooter />
+    </div>
   )
 }

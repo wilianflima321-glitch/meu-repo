@@ -83,6 +83,22 @@ This follow-up round kept cutting the core creation loop and materially reduced 
 - the freshest local probe remains honest too: `cloud-web-app/web/build-probe-2026-04-26-wave-b-runtime-prerender.log` still timed out at `Creating an optimized production build ...`, while the immediately previous `cloud-web-app/web/build-probe-2026-04-26-wave-b-prerender-probe.log` had advanced into `Linting and checking validity of types ...` before timing out, which keeps prerender parity explicitly open even after the recent Wave B slicing pass
 - the public prerender suspect set also got one honest reduction pass this round: `PublicHeader.tsx` no longer depends on `use-browser-pathname.ts`, and `/terms` + `/privacy` now use static last-updated labels instead of runtime date calls; the latest direct rerun still stalled at `Creating an optimized production build ...`, so this is a surface simplification, not a false claim that the broader public-shell blocker is closed
 
+## Round Delta On 2026-04-27
+This follow-up round pushed the public trust/buyer path closer to benchmark-grade while also hardening deploy operations:
+- `cloud-web-app/web/app/security/page.tsx` (`167`) and `app/compliance/page.tsx` (`167`) now give the product real public trust-center surfaces instead of only footer chips, both mounted on the shared `app/security/trust-center-shared.tsx` shell (`248`)
+- `cloud-web-app/web/app/customers/page.tsx` (`221`) plus `app/customers/customerProofContent.ts` (`97`) now turn the earlier benchmark critique into an honest customer-proof surface: beta design partners, use-case fit, public evidence links, and next-step CTAs without fake logos or inflated customer counts
+- `cloud-web-app/web/app/status/page.tsx` is now a `311`-line shell over `app/status/status.content.ts` (`46`), `status.logic.ts` (`379`), and `status.types.ts` (`26`), which makes incident grammar, page-coverage truth, and customer-impact framing easier to evolve without regrowing the status route monolith
+- the buyer path is materially tighter now:
+  - `components/ui/PublicFooter.tsx`, `app/contact-sales/page.tsx`, and `lib/navigation/surfaces.ts` all route users toward `/security`, `/customers`, `/status`, and `/compliance`
+  - `app/landing-v3.tsx` now includes customer-proof in the public trust actions, so the commercial narrative no longer jumps directly from landing to pricing/status without any proof-of-fit layer
+- deploy credibility also tightened on the backend:
+  - `app/api/deploy/route.ts` now requires auth plus `build` entitlements, redacts readiness internals, and emits structured logger events instead of raw `console.error`
+  - regression coverage now exists in `__tests__/api/deploy-route.test.ts`
+- this improves trust and governance, but it does **not** close the top remaining gaps:
+  - public case-study depth is still lighter than the best Vercel/Linear buyer paths
+  - the shared compile-mode build path still needs fresh revalidation on each wave
+  - `npm run build:prerender-probe` remains explicitly open
+
 This is real progress.
 It does **not** mean the workbench is solved.
 It means the next cuts are now safer and more localized.

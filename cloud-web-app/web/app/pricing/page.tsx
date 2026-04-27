@@ -233,7 +233,7 @@ export default function PricingPage() {
                 </ul>
 
                 <Link
-                  href={`/dashboard-tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`}
+                  href={`/dashboard?tab=billing&plan=${plan.id}&interval=${isAnnual ? 'year' : 'month'}`}
                   className={`inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] w-full rounded-xl px-4 py-3 text-sm font-semibold ${plan.popular ? 'bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] shadow-lg' : 'bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)]'}`}
                 >
                   Selecionar {plan.name}
@@ -258,6 +258,17 @@ export default function PricingPage() {
                     <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Trilhas de auditoria</span>
                     <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Suporte 24/7</span>
                     <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-primary)]">Rollout guiado</span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link href="/security" className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]">
+                      Ver seguranca
+                    </Link>
+                    <Link href="/compliance" className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]">
+                      Ver compliance
+                    </Link>
+                    <Link href="/customers" className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1 text-[11px] font-medium text-[var(--aethel-text-secondary)] transition hover:text-[var(--aethel-text-primary)]">
+                      Ver clientes beta
+                    </Link>
                   </div>
                 </div>
 

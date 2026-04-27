@@ -37,6 +37,13 @@ const SALES_SIGNALS = [
   'Preview, readiness e governanca devem ser tratados no mesmo rollout, nao em trilhas separadas.',
 ]
 
+const TRUST_LINKS = [
+  { label: 'Status operacional', href: '/status' },
+  { label: 'Seguranca', href: '/security' },
+  { label: 'Compliance', href: '/compliance' },
+  { label: 'Clientes beta', href: '/customers' },
+]
+
 export default function ContactSalesPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -164,6 +171,18 @@ export default function ContactSalesPage() {
                     </article>
                   )
                 })}
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                {TRUST_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
             </div>
 

@@ -1,6 +1,6 @@
 # 85_EXECUTION_STATUS_MAP_2026-04-22
 Date: 2026-04-22
-Last refreshed: 2026-04-26
+Last refreshed: 2026-04-27
 Status: ACTIVE
 Role: short execution snapshot and no-drift scoreboard across the canonical audit set
 
@@ -126,6 +126,17 @@ This file is the short scoreboard that answers:
 - `app/admin/ai-monitor/ai-monitor-core-loop-sections.tsx`: `284` lines
 - `app/admin/ai-monitor/ai-monitor-support-sections.tsx`: `113` lines
 - `app/admin/ai-monitor/ai-monitor-calls.tsx`: `207` lines
+- `app/security/page.tsx`: `167` lines
+- `app/security/trust-center-shared.tsx`: `248` lines
+- `app/compliance/page.tsx`: `167` lines
+- `app/customers/page.tsx`: `221` lines
+- `app/customers/customerProofContent.ts`: `97` lines
+- `app/status/page.tsx`: `311` lines
+- `app/status/status.content.ts`: `46` lines
+- `app/status/status.logic.ts`: `379` lines
+- `app/status/status.types.ts`: `26` lines
+- `app/api/deploy/route.ts`: `145` lines
+- `__tests__/api/deploy-route.test.ts`: `106` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
@@ -201,6 +212,25 @@ This file is the short scoreboard that answers:
   - `WorkbenchPreviewRuntimeControls.tsx`, `PreviewRuntimeToolbar.tsx`, `deployTopbarAction.tsx`, and `app/deploy/[id]/page.tsx` now speak the same deploy/share grammar, so the user sees one deploy story across top bar, preview, and status page
   - the share target is now more stable during deploy churn: `lastReadyUrl` / `lastReadyInspectorUrl` survive building/error refreshes, so the review action keeps pointing at the last known public deploy instead of degrading to a status page or local runtime preview mid-rollout
 - but still depend on readiness/environment truth.
+- the public deploy API is also materially less porous now:
+  - `app/api/deploy/route.ts` now requires auth plus `build` entitlements for create, list, status, and readiness reads
+  - readiness responses now redact raw missing-env details into client-safe `deployment configuration` messaging instead of leaking internals through the public payload
+  - route logging moved from `console.error` to `createComponentLogger('api-deploy-route')`
+  - regression coverage now exists in `__tests__/api/deploy-route.test.ts`
+- still open:
+  - stronger deploy UI evidence under real production envs
+  - clearer plan/entitlement messaging when build access is denied
+
+### Public trust and buyer path
+- the public shell now has real trust-center surfaces instead of only roadmap chips:
+  - `/security` documents current MFA, status, and governance truth without overclaiming SSO/SAML or certifications
+  - `/compliance` now frames procurement/compliance readiness honestly instead of leaving the buyer path implicit
+  - `/customers` now gives honest beta design-partner proof and use-case fit without inventing logo walls
+  - `/status` is no longer a single dense file; it now uses `status.content.ts`, `status.logic.ts`, and `status.types.ts` to explain incident grammar, page coverage, and customer impact more clearly
+- public navigation/footer/contact-sales also now route users toward `/security`, `/customers`, `/status`, and `/compliance`, which materially improves the enterprise evaluation path without pretending trust-center completeness
+- still open:
+  - case-study depth beyond beta-design-partner framing
+  - public trust artifacts like security questionnaires, compliance docs, and richer incident history
 
 ### Preview runtime orchestration
 - discovery, provision, sync, and health flows exist,

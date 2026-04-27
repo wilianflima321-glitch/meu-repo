@@ -15,6 +15,7 @@ const FOOTER_SECTIONS = [
     title: 'Empresa',
     links: [
       { label: 'Contato', href: '/contact-sales' },
+      { label: 'Clientes', href: '/customers' },
       { label: 'Status', href: '/status' },
       { label: 'Termos', href: '/terms' },
       { label: 'Privacidade', href: '/privacy' },
@@ -23,7 +24,9 @@ const FOOTER_SECTIONS = [
   {
     title: 'Recursos',
     links: [
-      { label: 'Ajuda', href: '/help' },
+      { label: 'Changelog', href: '/docs/changelog' },
+      { label: 'Ajuda', href: '/docs/support' },
+      { label: 'Comunidade', href: '/docs/community' },
       { label: 'Download', href: '/download' },
       { label: 'Marketplace', href: '/marketplace' },
     ],
@@ -86,9 +89,9 @@ export default function PublicFooter() {
               ))}
             </div>
             <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">
-              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1">SOC 2 (planejado)</span>
-              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1">GDPR (alvo)</span>
-              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1">SSO (roadmap)</span>
+              <Link href="/security" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">MFA live</Link>
+              <Link href="/compliance" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">GDPR roadmap</Link>
+              <Link href="/contact-sales" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">SSO/SAML consultivo</Link>
             </div>
             <div className="mt-6 flex items-center gap-4">
               <a

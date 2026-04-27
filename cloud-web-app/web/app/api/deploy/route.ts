@@ -8,24 +8,41 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
+import { requireAuth } from '@/lib/auth-server';
 import {
+  type DeployReadiness,
   createDeployment,
   getDeploymentStatus,
   listDeployments,
   checkDeployReadiness,
 } from '@/lib/deploy/vercel-deploy';
+import { requireFeatureForUser } from '@/lib/entitlements';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 export const dynamic = 'force-dynamic';
 
+const logger = createComponentLogger('api-deploy-route');
+
+function sanitizeReadinessForClient(readiness: DeployReadiness) {
+  return {
+    ...readiness,
+    missing: readiness.canDeploy ? [] : ['deployment configuration'],
+  };
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const user = requireAuth(req);
+    const entitlements = await requireFeatureForUser(user.userId, 'build');
+
     const readiness = checkDeployReadiness();
     if (!readiness.canDeploy) {
       return NextResponse.json(
         {
           error: 'DEPLOY_NOT_CONFIGURED',
           message: 'Vercel deployment is not configured.',
-          missing: readiness.missing,
+          missing: sanitizeReadinessForClient(readiness).missing,
           capabilityStatus: 'PARTIAL',
         },
         { status: 503 }
@@ -62,18 +79,23 @@ export async function POST(req: NextRequest) {
       gitRef,
     });
 
+    logger.info('Deploy created', {
+      action: 'create-deploy',
+      userId: user.userId,
+      planId: entitlements.plan.id,
+      projectName,
+      deploymentId: result.id,
+      status: result.status,
+    });
+
     return NextResponse.json(result, {
       status: result.status === 'error' ? 502 : 200,
     });
   } catch (error) {
-    console.error('Deploy error:', error);
-    return NextResponse.json(
-      {
-        error: 'DEPLOY_FAILED',
-        message: error instanceof Error ? error.message : 'Deployment failed',
-      },
-      { status: 500 }
-    );
+    logger.error('Deploy creation failed', error, { action: 'create-deploy' });
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }
 
@@ -82,11 +104,16 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const deploymentId = url.searchParams.get('id');
     const projectName = url.searchParams.get('project');
+    const readinessQuery = url.searchParams.get('readiness') === 'true';
+    const user = requireAuth(req);
 
     // Readiness check
-    if (url.searchParams.get('readiness') === 'true') {
-      return NextResponse.json(checkDeployReadiness());
+    if (readinessQuery) {
+      await requireFeatureForUser(user.userId, 'build');
+      return NextResponse.json(sanitizeReadinessForClient(checkDeployReadiness()));
     }
+
+    const entitlements = await requireFeatureForUser(user.userId, 'build');
 
     // Single deployment status
     if (deploymentId) {
@@ -97,6 +124,12 @@ export async function GET(req: NextRequest) {
           { status: 404 }
         );
       }
+      logger.debug('Deploy status fetched', {
+        action: 'read-deploy-status',
+        userId: user.userId,
+        planId: entitlements.plan.id,
+        deploymentId,
+      });
       return NextResponse.json(status);
     }
 
@@ -104,6 +137,13 @@ export async function GET(req: NextRequest) {
     if (projectName) {
       const limit = parseInt(url.searchParams.get('limit') || '10', 10);
       const deployments = await listDeployments(projectName, limit);
+      logger.debug('Deployments listed', {
+        action: 'list-deploys',
+        userId: user.userId,
+        planId: entitlements.plan.id,
+        projectName,
+        limit,
+      });
       return NextResponse.json({ deployments });
     }
 
@@ -112,10 +152,11 @@ export async function GET(req: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Deploy status error:', error);
-    return NextResponse.json(
-      { error: 'Failed to get deployment status' },
-      { status: 500 }
-    );
+    logger.error('Deploy status request failed', error, {
+      action: 'read-deploy-status',
+    });
+    const mapped = apiErrorToResponse(error);
+    if (mapped) return mapped;
+    return apiInternalError();
   }
 }
