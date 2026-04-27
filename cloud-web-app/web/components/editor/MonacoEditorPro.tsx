@@ -1,11 +1,21 @@
 'use client';
 
 import React, { useRef, useCallback, useEffect, useState } from 'react';
-import Editor, { OnMount, loader, Monaco } from '@monaco-editor/react';
+import Editor, { OnMount, Monaco } from '@monaco-editor/react';
 import type * as monacoEditor from 'monaco-editor';
 import { useInlineEdit, InlineEditModal } from './InlineEditModal';
+import {
+  configureMonacoEditor,
+  registerMonacoEditorActions,
+} from './MonacoEditorPro.actions';
+import { resolveAuthoritativeDocumentSymbols } from './MonacoEditorPro.symbols';
+import {
+  ensureMonacoLoaderConfigured,
+  registerAethelMonacoTheme,
+} from './MonacoEditorPro.theme';
 import { getAuthHeaders, submitChangeFeedback } from '@/lib/ai/change-feedback-client';
-import type { DocumentSymbol, SymbolKind } from '@/components/outline/OutlinePanel';
+import type { DocumentSymbol } from '@/components/outline/OutlinePanel';
+import { createComponentLogger } from '@/lib/observability/logger';
 
 /**
  * Professional Monaco Editor Component
@@ -106,223 +116,9 @@ type ChangeApplyResponse = {
   metadata?: Record<string, unknown>;
 };
 
-type TypeScriptTextSpan = {
-  start: number;
-  length: number;
-};
+const log = createComponentLogger('MonacoEditorPro');
 
-type TypeScriptNavigationTree = {
-  text?: string;
-  kind?: string;
-  kindModifiers?: string;
-  spans?: TypeScriptTextSpan[];
-  nameSpan?: TypeScriptTextSpan;
-  childItems?: TypeScriptNavigationTree[];
-};
-
-// ============================================================================
-// MONACO CONFIGURATION
-// ============================================================================
-
-// Configure Monaco loader
-loader.config({
-  paths: {
-    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs',
-  },
-});
-
-// Custom Aethel Dark theme
-const AETHEL_DARK_THEME: monacoEditor.editor.IStandaloneThemeData = {
-  base: 'vs-dark',
-  inherit: true,
-  rules: [
-    { token: 'comment', foreground: '64748b', fontStyle: 'italic' },
-    { token: 'keyword', foreground: '8b5cf6' },
-    { token: 'string', foreground: '10b981' },
-    { token: 'number', foreground: 'f59e0b' },
-    { token: 'type', foreground: 'fbbf24' },
-    { token: 'function', foreground: '818cf8' },
-    { token: 'variable', foreground: 'e2e8f0' },
-    { token: 'class', foreground: 'fbbf24' },
-    { token: 'interface', foreground: '22d3ee' },
-    { token: 'namespace', foreground: 'ec4899' },
-    { token: 'operator', foreground: '06b6d4' },
-    { token: 'delimiter', foreground: '94a3b8' },
-    { token: 'constant', foreground: 'f59e0b' },
-    { token: 'regexp', foreground: 'ef4444' },
-  ],
-  colors: {
-    'editor.background': 'var(--aethel-surface-primary)',
-    'editor.foreground': 'var(--aethel-text-primary)',
-    'editor.lineHighlightBackground': 'var(--aethel-surface-secondary)',
-    'editor.selectionBackground': 'var(--aethel-surface-quaternary)',
-    'editor.selectionHighlightBackground': 'color-mix(in_srgb,var(--aethel-surface-quaternary)_80%,transparent)',
-    'editorCursor.foreground': 'var(--aethel-text-primary)',
-    'editorWhitespace.foreground': 'var(--aethel-border-secondary)',
-    'editorIndentGuide.background1': 'var(--aethel-border-primary)',
-    'editorIndentGuide.activeBackground1': 'var(--aethel-border-secondary)',
-    'editorLineNumber.foreground': 'var(--aethel-text-quaternary)',
-    'editorLineNumber.activeForeground': 'var(--aethel-text-secondary)',
-    'editorBracketMatch.background': 'var(--aethel-surface-tertiary)',
-    'editorBracketMatch.border': 'var(--aethel-primary)',
-    'editorGutter.addedBackground': 'var(--aethel-success)',
-    'editorGutter.modifiedBackground': 'var(--aethel-warning)',
-    'editorGutter.deletedBackground': 'var(--aethel-error)',
-    'minimap.background': 'var(--aethel-surface-primary)',
-    'scrollbar.shadow': 'transparent',
-    'scrollbarSlider.background': 'color-mix(in_srgb,var(--aethel-border-secondary)_50%,transparent)',
-    'scrollbarSlider.hoverBackground': 'var(--aethel-border-secondary)',
-    'scrollbarSlider.activeBackground': 'var(--aethel-text-quaternary)',
-  },
-};
-
-function clampOffset(model: monacoEditor.editor.ITextModel, offset: number): number {
-  return Math.max(0, Math.min(offset, model.getValueLength()));
-}
-
-function toSymbolRange(
-  model: monacoEditor.editor.ITextModel,
-  span: TypeScriptTextSpan,
-): DocumentSymbol['range'] {
-  const start = model.getPositionAt(clampOffset(model, span.start));
-  const end = model.getPositionAt(clampOffset(model, span.start + Math.max(span.length, 0)));
-
-  return {
-    startLine: start.lineNumber,
-    startColumn: start.column,
-    endLine: end.lineNumber,
-    endColumn: end.column,
-  };
-}
-
-function mergeNavigationSpans(spans: TypeScriptTextSpan[] | undefined): TypeScriptTextSpan | null {
-  if (!Array.isArray(spans) || spans.length === 0) return null;
-
-  let start = Number.POSITIVE_INFINITY;
-  let end = 0;
-
-  for (const span of spans) {
-    start = Math.min(start, span.start);
-    end = Math.max(end, span.start + Math.max(span.length, 0));
-  }
-
-  if (!Number.isFinite(start)) return null;
-  return {
-    start,
-    length: Math.max(0, end - start),
-  };
-}
-
-function mapTypeScriptNavigationKind(kind: string | undefined): SymbolKind {
-  switch (kind) {
-    case 'module':
-    case 'external module name':
-      return 'module';
-    case 'namespace':
-      return 'namespace';
-    case 'class':
-    case 'local class':
-      return 'class';
-    case 'interface':
-      return 'interface';
-    case 'enum':
-      return 'enum';
-    case 'enum member':
-      return 'enumMember';
-    case 'type':
-    case 'type alias':
-      return 'typeParameter';
-    case 'constructor':
-      return 'constructor';
-    case 'member function':
-      return 'method';
-    case 'function':
-    case 'local function':
-      return 'function';
-    case 'getter':
-    case 'setter':
-    case 'member variable':
-    case 'member accessor':
-    case 'property':
-      return 'property';
-    case 'const':
-      return 'constant';
-    case 'let':
-    case 'var':
-    case 'variable':
-    case 'local var':
-      return 'variable';
-    default:
-      if (!kind) return 'variable';
-      if (kind.includes('class')) return 'class';
-      if (kind.includes('interface')) return 'interface';
-      if (kind.includes('enum member')) return 'enumMember';
-      if (kind.includes('enum')) return 'enum';
-      if (kind.includes('constructor')) return 'constructor';
-      if (kind.includes('function')) return 'function';
-      if (kind.includes('method')) return 'method';
-      if (kind.includes('property') || kind.includes('variable')) return 'property';
-      if (kind.includes('const')) return 'constant';
-      if (kind.includes('module')) return 'module';
-      if (kind.includes('namespace')) return 'namespace';
-      if (kind.includes('type')) return 'typeParameter';
-      return 'variable';
-  }
-}
-
-function mapTypeScriptNavigationTree(
-  model: monacoEditor.editor.ITextModel,
-  items: TypeScriptNavigationTree[] | undefined,
-): DocumentSymbol[] {
-  if (!Array.isArray(items) || items.length === 0) return [];
-
-  return items.flatMap((item) => {
-    const fullSpan = mergeNavigationSpans(item.spans);
-    if (!item.text || !fullSpan) return [];
-
-    const childSymbols = mapTypeScriptNavigationTree(model, item.childItems);
-    const selectionSpan = item.nameSpan ?? fullSpan;
-
-    return [
-      {
-        name: item.text,
-        kind: mapTypeScriptNavigationKind(item.kind),
-        deprecated: item.kindModifiers?.includes('deprecated') || undefined,
-        range: toSymbolRange(model, fullSpan),
-        selectionRange: toSymbolRange(model, selectionSpan),
-        children: childSymbols.length > 0 ? childSymbols : undefined,
-      },
-    ] satisfies DocumentSymbol[];
-  });
-}
-
-async function resolveAuthoritativeDocumentSymbols(
-  monaco: Monaco,
-  model: monacoEditor.editor.ITextModel,
-): Promise<DocumentSymbol[] | null> {
-  const languageId = model.getLanguageId();
-  const typescriptWorkerFactory =
-    languageId === 'typescript' || languageId === 'typescriptreact'
-      ? monaco.languages.typescript.getTypeScriptWorker
-      : languageId === 'javascript' || languageId === 'javascriptreact'
-        ? monaco.languages.typescript.getJavaScriptWorker
-        : null;
-
-  if (!typescriptWorkerFactory) {
-    return null;
-  }
-
-  const getWorker = await typescriptWorkerFactory();
-  const worker = await getWorker(model.uri);
-  const navigationTree = await (worker as { getNavigationTree?: (fileName: string) => Promise<TypeScriptNavigationTree | undefined> })
-    .getNavigationTree?.(model.uri.toString());
-
-  if (!navigationTree) {
-    return [];
-  }
-
-  return mapTypeScriptNavigationTree(model, navigationTree.childItems);
-}
+ensureMonacoLoaderConfigured();
 
 // ============================================================================
 // MONACO EDITOR COMPONENT
@@ -406,8 +202,7 @@ export function MonacoEditorPro({
     monacoRef.current = monaco;
 
     // Register custom theme
-    monaco.editor.defineTheme('dark', AETHEL_DARK_THEME);
-    monaco.editor.setTheme('dark');
+    registerAethelMonacoTheme(monaco);
 
     // Register LSP providers for supported languages
     const lspLanguages = ['typescript', 'javascript', 'typescriptreact', 'javascriptreact'];
@@ -416,7 +211,7 @@ export function MonacoEditorPro({
       import('@/lib/monaco-lsp-http').then(({ registerLspProviders }) => {
         lspDisposablesRef.current = registerLspProviders(monaco as any, language);
       }).catch(err => {
-        console.warn('[MonacoEditorPro] Failed to register LSP providers:', err);
+        log.warn('Failed to register LSP providers.', err);
       });
     }
 
@@ -436,85 +231,30 @@ export function MonacoEditorPro({
           'python',
         ]);
       }).catch(err => {
-        console.warn('[MonacoEditorPro] Failed to register inline completions:', err);
+        log.warn('Failed to register inline completions.', err);
       });
     }
 
     // Configure editor
-    editor.updateOptions({
+    configureMonacoEditor(editor, monaco, {
       fontSize,
-      lineHeight: Math.round(fontSize * 1.5),
-      tabSize,
-      minimap: { enabled: minimap },
       lineNumbers,
+      minimap,
+      tabSize,
       wordWrap,
       readOnly,
-      cursorBlinking: 'smooth',
-      cursorSmoothCaretAnimation: 'on',
-      smoothScrolling: true,
-      fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
-      fontLigatures: true,
-      renderWhitespace: 'selection',
-      guides: {
-        bracketPairs: true,
-        indentation: true,
-      },
-      bracketPairColorization: {
-        enabled: true,
-      },
-      suggest: {
-        showKeywords: true,
-        showSnippets: true,
-        showFunctions: true,
-        showConstants: true,
-        showOperators: true,
-        showVariables: true,
-        showClasses: true,
-        showInterfaces: true,
-        showModules: true,
-        showProperties: true,
-        showEvents: true,
-        showColors: true,
-        showFiles: true,
-        showFolders: true,
-        preview: true,
-        previewMode: 'subwordSmart',
-        filterGraceful: true,
-        localityBonus: true,
-      },
-      quickSuggestions: {
-        other: true,
-        comments: false,
-        strings: true,
-      },
-      parameterHints: {
-        enabled: true,
-        cycle: true,
-      },
-      inlineSuggest: {
-        enabled: enableAISuggestions,
-        mode: 'subwordSmart',
-      },
-      folding: true,
-      foldingStrategy: 'indentation',
-      showFoldingControls: 'mouseover',
-      linkedEditing: true,
-      formatOnPaste: true,
-      formatOnType: true,
-      autoIndent: 'full',
-      autoClosingBrackets: 'languageDefined',
-      autoClosingQuotes: 'languageDefined',
-      autoSurround: 'languageDefined',
-      stickyScroll: {
-        enabled: true,
-      },
+      enableAISuggestions,
     });
 
-    // Register keybindings
-    registerKeybindings(editor, monaco);
-
-    // Register commands
-    registerCommands(editor, monaco);
+    registerMonacoEditorActions(editor, monaco, {
+      enableAISuggestions,
+      enableInlineEdit,
+      language,
+      onSave,
+      openInlineEdit,
+      path,
+      readOnly,
+    });
 
     // Setup cursor change listener
     editor.onDidChangeCursorPosition((e) => {
@@ -550,7 +290,7 @@ export function MonacoEditorPro({
 
     // Call user's onMount
     onMountProp?.(editor, monaco);
-  // registerKeybindings/registerCommands are intentionally invoked during mount lifecycle.
+  // Monaco action registration stays inside mount to keep the editor instance authoritative.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fontSize, tabSize, minimap, lineNumbers, wordWrap, readOnly, enableAISuggestions, language, onCursorChange, onSelectionChange, onMountProp]);
 
@@ -615,7 +355,7 @@ export function MonacoEditorPro({
         });
       } catch (error) {
         if (cancelled || requestVersion !== symbolRequestVersionRef.current) return;
-        console.warn('[MonacoEditorPro] Failed to resolve document symbols:', error);
+        log.warn('Failed to resolve document symbols.', error);
         onDocumentSymbolsChange({
           path: targetPath,
           symbols: [],
@@ -656,165 +396,6 @@ export function MonacoEditorPro({
       window.removeEventListener('aethel.editor.revealLocation', handleRevealLocation as EventListener);
     };
   }, [path]);
-
-  // Register keybindings
-  function registerKeybindings(
-    editor: monacoEditor.editor.IStandaloneCodeEditor,
-    monaco: Monaco
-  ) {
-    // Cmd+S / Ctrl+S - Save
-    editor.addAction({
-      id: 'aethel.save',
-      label: 'Save File',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
-      run: () => {
-        const value = editor.getValue();
-        onSave?.(value);
-      },
-    });
-
-    // Cmd+K - Inline Edit
-    if (enableInlineEdit) {
-      editor.addAction({
-        id: 'aethel.inlineEdit',
-        label: 'Inline Edit (AI)',
-        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
-        run: () => {
-          const selection = editor.getSelection();
-          const model = editor.getModel();
-
-          if (selection && model) {
-            const selectedText = model.getValueInRange(selection);
-            openInlineEdit(
-              selectedText,
-              language,
-              path,
-              { line: selection.startLineNumber, column: selection.startColumn }
-            );
-          } else {
-            openInlineEdit('', language, path);
-          }
-        },
-      });
-    }
-
-    // Cmd+Shift+K - Delete Line
-    editor.addAction({
-      id: 'aethel.deleteLine',
-      label: 'Delete Line',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyK],
-      run: () => {
-        editor.trigger('', 'editor.action.deleteLines', null);
-      },
-    });
-
-    // Cmd+D - Add Selection to Next Find Match
-    editor.addAction({
-      id: 'aethel.addSelectionToNextFindMatch',
-      label: 'Add Selection To Next Find Match',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD],
-      run: () => {
-        editor.trigger('', 'editor.action.addSelectionToNextFindMatch', null);
-      },
-    });
-
-    // Alt+Up/Down - Move Line
-    editor.addAction({
-      id: 'aethel.moveLineUp',
-      label: 'Move Line Up',
-      keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.UpArrow],
-      run: () => {
-        editor.trigger('', 'editor.action.moveLinesUpAction', null);
-      },
-    });
-
-    editor.addAction({
-      id: 'aethel.moveLineDown',
-      label: 'Move Line Down',
-      keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.DownArrow],
-      run: () => {
-        editor.trigger('', 'editor.action.moveLinesDownAction', null);
-      },
-    });
-
-    // Cmd+/ - Toggle Comment
-    editor.addAction({
-      id: 'aethel.toggleComment',
-      label: 'Toggle Line Comment',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
-      run: () => {
-        editor.trigger('', 'editor.action.commentLine', null);
-      },
-    });
-
-    // F2 - Rename Symbol
-    editor.addAction({
-      id: 'aethel.rename',
-      label: 'Rename Symbol',
-      keybindings: [monaco.KeyCode.F2],
-      run: () => {
-        editor.trigger('', 'editor.action.rename', null);
-      },
-    });
-
-    // F12 - Go to Definition
-    editor.addAction({
-      id: 'aethel.goToDefinition',
-      label: 'Go to Definition',
-      keybindings: [monaco.KeyCode.F12],
-      run: () => {
-        editor.trigger('', 'editor.action.revealDefinition', null);
-      },
-    });
-
-    // Cmd+. - Quick Fix
-    editor.addAction({
-      id: 'aethel.quickFix',
-      label: 'Quick Fix',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Period],
-      run: () => {
-        editor.trigger('', 'editor.action.quickFix', null);
-      },
-    });
-  }
-
-  // Register custom commands
-  function registerCommands(
-    editor: monacoEditor.editor.IStandaloneCodeEditor,
-    monaco: Monaco
-  ) {
-    // Format Document
-    editor.addAction({
-      id: 'aethel.formatDocument',
-      label: 'Format Document',
-      keybindings: [monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF],
-      contextMenuGroupId: 'modification',
-      contextMenuOrder: 1,
-      run: () => {
-        editor.trigger('', 'editor.action.formatDocument', null);
-      },
-    });
-
-    // Fold All
-    editor.addAction({
-      id: 'aethel.foldAll',
-      label: 'Fold All',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.BracketLeft],
-      run: () => {
-        editor.trigger('', 'editor.foldAll', null);
-      },
-    });
-
-    // Unfold All
-    editor.addAction({
-      id: 'aethel.unfoldAll',
-      label: 'Unfold All',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.BracketRight],
-      run: () => {
-        editor.trigger('', 'editor.unfoldAll', null);
-      },
-    });
-  }
 
   // Apply diagnostics decorations
   useEffect(() => {
@@ -927,7 +508,7 @@ export function MonacoEditorPro({
       });
 
       if (!validationResponse.ok) {
-        console.warn('[MonacoEditorPro] Inline edit validation request failed', await validationResponse.text());
+        log.warn('Inline edit validation request failed.', await validationResponse.text());
         setInlineEditFeedback({
           type: 'error',
           message: 'Validation request failed before apply.',
@@ -941,7 +522,7 @@ export function MonacoEditorPro({
           ? validation.checks.find((check) => check?.status === 'fail')
           : null;
         const reason = firstFailure?.message || 'Validation blocked this patch.';
-        console.warn('[MonacoEditorPro] Inline edit blocked:', reason);
+        log.warn('Inline edit blocked.', { reason });
         setInlineEditFeedback({
           type: 'error',
           message: `Patch blocked: ${reason}`,
@@ -1002,7 +583,7 @@ export function MonacoEditorPro({
         ) {
           setInlineEditNeedsFullAccess(true);
         }
-        console.warn('[MonacoEditorPro] Inline edit apply rejected:', message);
+        log.warn('Inline edit apply rejected.', { message, runId });
         if (runId) {
           void submitChangeFeedback({
             runId,
@@ -1038,7 +619,7 @@ export function MonacoEditorPro({
         });
       }
     } catch (error) {
-      console.error('[MonacoEditorPro] Inline edit validation error:', error);
+      log.error('Inline edit validation error.', error);
       setInlineEditFeedback({
         type: 'error',
         message: error instanceof Error ? error.message : 'Inline edit request failed.',
@@ -1093,7 +674,7 @@ export function MonacoEditorPro({
         value={value}
         defaultValue={defaultValue}
         path={path}
-        theme="dark"
+        theme={theme}
         onMount={handleMount}
         onChange={onChange}
         options={{

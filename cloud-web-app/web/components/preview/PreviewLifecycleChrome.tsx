@@ -155,11 +155,19 @@ export function LifecycleIndicator({
 
 export function PreviewFailedState({
   error,
+  guidance,
+  recommendedAction,
+  setupEnv,
+  provider,
   onRetry,
   onFallback,
   strategy,
 }: {
   error: string | null;
+  guidance?: string | null;
+  recommendedAction?: string | null;
+  setupEnv?: string[];
+  provider?: string | null;
   onRetry: () => void;
   onFallback?: () => void;
   strategy?: PreviewStrategy;
@@ -186,11 +194,29 @@ export function PreviewFailedState({
         <p className="max-w-xs text-xs text-[var(--aethel-text-tertiary)]">
           {error || 'Nao foi possivel conectar ao runtime de preview.'}
         </p>
+        {guidance && guidance !== error ? (
+          <p className="mx-auto mt-2 max-w-sm text-[11px] text-[var(--aethel-text-secondary)]">{guidance}</p>
+        ) : null}
+        {recommendedAction ? (
+          <p className="mx-auto mt-2 max-w-sm text-[11px] text-[var(--aethel-text-secondary)]">
+            Proximo passo: {recommendedAction}
+          </p>
+        ) : null}
         {strategy && (
           <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
             estrategia {STRATEGY_LABELS[strategy]}
           </p>
         )}
+        {provider ? (
+          <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">
+            provider {provider}
+          </p>
+        ) : null}
+        {setupEnv && setupEnv.length > 0 ? (
+          <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
+            env {setupEnv.join(' · ')}
+          </p>
+        ) : null}
       </div>
       <div className="flex gap-2">
         <button

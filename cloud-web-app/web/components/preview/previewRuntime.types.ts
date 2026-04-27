@@ -18,9 +18,13 @@ export interface PreviewRuntimeInfo {
   strategy: PreviewStrategy;
   runtimeUrl: string | null;
   sandboxId: string | null;
+  provider: string | null;
   startedAt: number | null;
   latencyMs: number | null;
   error: string | null;
+  guidance: string | null;
+  recommendedAction: string | null;
+  setupEnv: string[];
   hmrConnected: boolean;
   hmrState: PreviewHmrState;
   filesInSync: number;

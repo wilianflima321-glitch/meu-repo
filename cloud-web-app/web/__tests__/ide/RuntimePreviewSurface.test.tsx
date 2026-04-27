@@ -32,9 +32,13 @@ vi.mock('@/components/preview/usePreviewRuntime', () => ({
       strategy: 'none',
       runtimeUrl: null,
       sandboxId: null,
+      provider: null,
       startedAt: null,
       latencyMs: null,
       error: null,
+      guidance: null,
+      recommendedAction: null,
+      setupEnv: [],
       hmrConnected: false,
       hmrState: 'idle',
       filesInSync: 0,
@@ -57,9 +61,13 @@ function createRuntimeOverride(overrides: Partial<PreviewRuntimeInfo> = {}): Pre
     strategy: 'iframe',
     runtimeUrl: 'http://localhost:3001',
     sandboxId: null,
+    provider: null,
     startedAt: null,
     latencyMs: 42,
     error: null,
+    guidance: null,
+    recommendedAction: null,
+    setupEnv: [],
     hmrConnected: false,
     hmrState: 'idle',
     filesInSync: 0,
@@ -109,5 +117,30 @@ describe('RuntimePreviewSurface', () => {
     expect(screen.getByText('Preview degradado')).toBeInTheDocument()
     expect(screen.getByText('Fallback inline')).toBeInTheDocument()
     expect(screen.getByTestId('preview-panel')).toHaveAttribute('data-inline', 'yes')
+  })
+
+  it('shows actionable guidance when the managed runtime fails', () => {
+    render(
+      <RuntimePreviewSurface
+        variant="runtime"
+        projectId="p1"
+        runtimeInfoOverride={createRuntimeOverride({
+          state: 'failed',
+          strategy: 'e2b',
+          runtimeUrl: null,
+          provider: 'e2b',
+          error: 'Provisionamento falhou.',
+          guidance: 'E2B_API_KEY nao configurada.',
+          recommendedAction: 'Configure o provider antes de compartilhar review remoto.',
+          setupEnv: ['E2B_API_KEY', 'AETHEL_PREVIEW_E2B_TEMPLATE'],
+        })}
+      />,
+    )
+
+    expect(screen.getAllByText('Falha no preview').length).toBeGreaterThan(0)
+    expect(screen.getByText('E2B_API_KEY nao configurada.')).toBeInTheDocument()
+    expect(screen.getByText(/Configure o provider antes de compartilhar review remoto/i)).toBeInTheDocument()
+    expect(screen.getByText(/provider e2b/i)).toBeInTheDocument()
+    expect(screen.getByText(/env E2B_API_KEY/i)).toBeInTheDocument()
   })
 })

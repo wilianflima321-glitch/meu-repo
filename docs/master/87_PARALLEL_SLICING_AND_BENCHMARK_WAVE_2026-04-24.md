@@ -385,6 +385,27 @@ After Wave 1 stabilizes:
   - `components/ServiceWorkerProvider.tsx` now relies on explicit enablement instead of pathname inference
   - `lib/providers/AethelProvider.tsx` no longer persists preferences from inside the reducer
   - `app/dashboard/layout.tsx` now opts out of duplicate onboarding chrome through `StudioRuntimeRouteLayout`, which keeps dashboard onboarding in one lane instead of two
+- the public buyer/trust path is materially less hollow now:
+  - `app/roadmap/page.tsx`
+  - `app/security-policy/page.tsx`
+  - `app/security-acknowledgments/page.tsx`
+  - `SECURITY.md`
+  - `public/.well-known/security.txt`
+  - plus public-nav/footer/docs/contact-sales/landing wiring into those trust routes
+- the collaboration lane is also more honest than the earlier optimistic-presence version:
+  - `useWorkbenchRealtimeCollaboration.ts` now derives `disabled | connecting | syncing | live | reconnecting | error`
+  - `WorkbenchEditorToolbar.tsx` now only shows live collaborator avatars after sync confirmation, and otherwise surfaces the real state (`Solo`, `Conectando`, `Sincronizando`, `Reconectando`, `Sync com erro`)
+  - `useWorkbenchBridgeChrome.ts` no longer promotes collaboration as effectively live before the editor lane is actually synced
+  - coverage exists in `__tests__/ide/WorkbenchEditorToolbar.test.tsx`
+- the preview/runtime trust lane also advanced again:
+  - `usePreviewRuntime.ts`, `previewRuntime.types.ts`, `previewRuntimeState.ts`, `RuntimePreviewSurface.tsx`, and `PreviewLifecycleChrome.tsx` now preserve provider identity, env/setup hints, recommended next action, and clearer failure guidance from `/api/preview/runtime-provision`
+  - this moves failed/warming/idle runtime states closer to the trust grammar expected from Replit/Vercel review surfaces
+- the heaviest remaining editor hotspot finally lost a chunk of density:
+  - `MonacoEditorPro.tsx` dropped to `667` lines
+  - theming moved into `components/editor/MonacoEditorPro.theme.ts`
+  - Monaco command/action registration moved into `components/editor/MonacoEditorPro.actions.ts`
+  - TS/JS symbol mapping moved into `components/editor/MonacoEditorPro.symbols.ts`
+  - focused coverage exists in `__tests__/editor/MonacoEditorPro.symbols.test.ts`
 
 ### Wave 3 - domain editors
 After the workbench/studio shell is calmer:
@@ -404,7 +425,7 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
-2. keep full compile-mode build green while tracing `build:prerender-probe` separately
+2. keep full compile-mode build green while tracing `build:prerender-probe` separately, but note that the freshest `2026-04-27` compile-mode rerun did **not** revalidate with a new PASS and stalled again at `Creating an optimized production build ...`
 3. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
 4. move the editor ROI pass to symbol truth + breadcrumb navigation before attempting git-gutter depth
 5. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`

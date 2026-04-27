@@ -67,6 +67,11 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
     return runtime.state;
   }, [externalRuntimeUrl, forceInlineFallback, runtime.state, effectiveStrategy, runtimeInfoOverride]);
 
+  const runtimeGuidance = runtime.guidance ?? runtime.error ?? runtimeUnavailableReason ?? null;
+  const runtimeAction = runtime.recommendedAction;
+  const runtimeSetupEnv = runtime.setupEnv;
+  const runtimeProviderLabel = runtime.provider;
+
   if (effectiveState === 'failed') {
     return (
       <div className="flex h-full flex-col">
@@ -85,6 +90,10 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
         )}
         <PreviewFailedState
           error={runtime.error ?? runtimeUnavailableReason ?? null}
+          guidance={runtimeGuidance}
+          recommendedAction={runtimeAction}
+          setupEnv={runtimeSetupEnv}
+          provider={runtimeProviderLabel}
           onRetry={handleProvision}
           onFallback={handleSwitchToInline}
           strategy={effectiveStrategy}
@@ -113,9 +122,19 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
               Preview pronto para iniciar
             </h3>
             <p className="text-xs text-[var(--aethel-text-tertiary)]">
-              {runtimeUnavailableReason ||
+              {runtimeGuidance ||
                 'Inicie o runtime gerenciado ou use o fallback inline para continuar sem prometer um preview remoto ativo.'}
             </p>
+            {runtimeAction ? (
+              <p className="mt-2 text-[11px] text-[var(--aethel-text-secondary)]">
+                Proximo passo: {runtimeAction}
+              </p>
+            ) : null}
+            {runtimeSetupEnv.length > 0 ? (
+              <p className="mt-2 text-[10px] uppercase tracking-[0.12em] text-[var(--aethel-text-quaternary)]">
+                env: {runtimeSetupEnv.join(' · ')}
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             <button
@@ -163,8 +182,8 @@ export default function RuntimePreviewSurface(props: CanonicalRuntimeProps) {
           }
           detail={
             effectiveState === 'provisioning'
-              ? 'Validando provider, sandbox e endpoint antes de prometer uma URL remota confiavel.'
-              : runtime.error ||
+              ? runtimeAction || 'Validando provider, sandbox e endpoint antes de prometer uma URL remota confiavel.'
+              : runtimeGuidance ||
                 'Esperando a primeira resposta do runtime para liberar health, HMR e fallback com contexto.'
           }
         />

@@ -25,6 +25,7 @@ export function buildFullscreenIDEBridgeEditorProps(
     showDiagnostics: args.showDiagnostics,
     fullAccessActive: Boolean(args.fullAccessActiveGrant),
     collaborationConnected: args.collaborationConnected,
+    collaborationStatus: args.collaborationStatus,
     collaborationPeers: args.editorPeers,
     primaryEditorRef: args.primaryEditorRef,
     secondaryEditorRef: args.secondaryEditorRef,

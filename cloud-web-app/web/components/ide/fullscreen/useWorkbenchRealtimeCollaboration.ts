@@ -13,7 +13,10 @@ import {
 } from '@/lib/yjs-collaboration';
 import { createComponentLogger } from '@/lib/observability/logger';
 
-import type { EditorPane } from './types';
+import type {
+  EditorPane,
+  WorkbenchCollaborationStatus,
+} from './types';
 
 const log = createComponentLogger('useWorkbenchRealtimeCollaboration');
 
@@ -99,6 +102,7 @@ export function useWorkbenchRealtimeCollaboration({
   projectId,
 }: UseWorkbenchRealtimeCollaborationParams) {
   const [currentUser, setCurrentUser] = useState<DecodedWorkbenchUser | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     setCurrentUser(hasToken ? decodeWorkbenchUser() : null);
@@ -126,18 +130,25 @@ export function useWorkbenchRealtimeCollaboration({
 
   useEffect(() => {
     if (!collaborationEnabled) {
+      setIsConnecting(false);
       disconnect();
       return;
     }
 
-    void connect().catch((connectError) => {
-      log.warn('Workbench collaboration connection failed', {
-        projectId,
-        error: connectError,
+    setIsConnecting(true);
+    void connect()
+      .catch((connectError) => {
+        log.warn('Workbench collaboration connection failed', {
+          projectId,
+          error: connectError,
+        });
+      })
+      .finally(() => {
+        setIsConnecting(false);
       });
-    });
 
     return () => {
+      setIsConnecting(false);
       disconnect();
     };
   }, [collaborationEnabled, connect, disconnect, projectId]);
@@ -157,6 +168,100 @@ export function useWorkbenchRealtimeCollaboration({
         lastActivity: Date.now(),
       }));
   }, [collaborationEnabled, currentUser?.id, users]);
+
+  const collaborationStatus = useMemo<WorkbenchCollaborationStatus>(() => {
+    const peerCount = editorPeers.length;
+    const liveCursorCount = editorPeers.filter((peer) => peer.cursor).length;
+    const normalizedErrorMessage = error?.message?.trim() || undefined;
+
+    if (!collaborationEnabled) {
+      const detail = !hasToken
+        ? 'Entre com sua conta para sincronizar cursores e presenca.'
+        : currentUser?.id
+          ? 'Abra um projeto real para ativar a sessao compartilhada.'
+          : 'Identidade de colaboracao indisponivel neste momento.';
+
+      return {
+        state: 'disabled',
+        tone: 'neutral',
+        label: 'Solo',
+        detail,
+        peerCount,
+        liveCursorCount,
+      };
+    }
+
+    if (normalizedErrorMessage) {
+      return {
+        state: 'error',
+        tone: 'danger',
+        label: 'Sync com erro',
+        detail: normalizedErrorMessage,
+        peerCount,
+        liveCursorCount,
+        errorMessage: normalizedErrorMessage,
+      };
+    }
+
+    if (isConnected && isSynced) {
+      return {
+        state: 'live',
+        tone: 'success',
+        label: 'Ao vivo',
+        detail:
+          peerCount > 0
+            ? liveCursorCount > 0
+              ? `${peerCount} peer${peerCount === 1 ? '' : 's'} conectado${peerCount === 1 ? '' : 's'} - ${liveCursorCount} cursor${liveCursorCount === 1 ? '' : 'es'} ativo${liveCursorCount === 1 ? '' : 's'}`
+              : `${peerCount} peer${peerCount === 1 ? '' : 's'} conectado${peerCount === 1 ? '' : 's'} - presenca sincronizada`
+            : 'Sessao sincronizada. Convide alguem para editar junto.',
+        peerCount,
+        liveCursorCount,
+      };
+    }
+
+    if (isConnected) {
+      return {
+        state: 'syncing',
+        tone: 'warning',
+        label: 'Sincronizando',
+        detail:
+          peerCount > 0
+            ? `Canal conectado; aguardando sync do documento com ${peerCount} peer${peerCount === 1 ? '' : 's'}.`
+            : 'Canal conectado; aguardando confirmacao de sync do documento.',
+        peerCount,
+        liveCursorCount,
+      };
+    }
+
+    if (isConnecting) {
+      return {
+        state: 'connecting',
+        tone: 'warning',
+        label: 'Conectando',
+        detail: 'Entrando na sessao compartilhada do projeto.',
+        peerCount,
+        liveCursorCount,
+      };
+    }
+
+    return {
+      state: 'reconnecting',
+      tone: 'warning',
+      label: 'Reconectando',
+      detail: 'Sem sync confirmado. Suas alteracoes seguem locais ate a sessao voltar.',
+      peerCount,
+      liveCursorCount,
+    };
+  }, [
+    collaborationEnabled,
+    currentUser?.id,
+    editorPeers,
+    error,
+    hasToken,
+    isConnected,
+    isConnecting,
+    isSynced,
+  ]);
 
   const broadcastCursor = useCallback(({
     filePath,
@@ -222,6 +327,7 @@ export function useWorkbenchRealtimeCollaboration({
     collaborationConnected: isConnected,
     collaborationSynced: isSynced,
     collaborationError: error,
+    collaborationStatus,
     editorPeers,
     broadcastCursor,
     broadcastSelection,

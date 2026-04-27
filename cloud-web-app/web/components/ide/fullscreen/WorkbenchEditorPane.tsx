@@ -16,6 +16,7 @@ import { useBrowserSearch } from '@/lib/navigation/use-browser-pathname';
 
 import type {
   ActiveFileState,
+  WorkbenchCollaborationStatus,
   EditorCursorStatus,
   EditorPane,
   EditorSelectionStatus,
@@ -44,6 +45,7 @@ export type WorkbenchEditorPaneProps = {
   showDiagnostics: boolean;
   fullAccessActive: boolean;
   collaborationConnected: boolean;
+  collaborationStatus: WorkbenchCollaborationStatus;
   collaborationPeers: RemotePeer[];
   primaryEditorRef: EditorInstanceRef;
   secondaryEditorRef: EditorInstanceRef;
@@ -104,6 +106,7 @@ export function WorkbenchEditorPane({
   showDiagnostics,
   fullAccessActive,
   collaborationConnected,
+  collaborationStatus,
   collaborationPeers,
   primaryEditorRef,
   secondaryEditorRef,
@@ -163,6 +166,7 @@ export function WorkbenchEditorPane({
       <WorkbenchEditorToolbar
         isCompactViewport={isCompactViewport}
         collaborationConnected={collaborationConnected}
+        collaborationStatus={collaborationStatus}
         collaborationPeers={collaborationPeers}
         splitEditorOpen={splitEditorOpen}
         nextOpenTarget={nextOpenTarget}

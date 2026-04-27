@@ -463,18 +463,57 @@ This file is the short scoreboard that answers:
 - `app/settings/page.tsx` now mounts the canonical `SettingsUI` inside `SettingsProvider`, so the thinner settings cockpit is finally the live route surface instead of a sidecar implementation that only existed in parallel
 - this does not yet remove the older `SettingsPage.tsx` / `SettingsEditor.tsx` debt, but it does close one of the biggest truth gaps between the audits and the real route
 
+### Public trust and buyer path
+- the public trust path is no longer mostly implied:
+  - `app/roadmap/page.tsx`
+  - `app/security-policy/page.tsx`
+  - `app/security-acknowledgments/page.tsx`
+  - `SECURITY.md`
+  - `public/.well-known/security.txt`
+- `landing-v3.tsx`, `docs/page.tsx`, `contact-sales/page.tsx`, `PublicFooter.tsx`, and `lib/navigation/surfaces.ts` now route buyers through real roadmap/security surfaces instead of leaving trust claims detached from public navigation
+- this is still a minimum honest trust center, not the same thing as named enterprise case studies or a procurement pack
+
+### Collaboration honesty
+- the collaboration lane now communicates real sync truth instead of optimistic presence:
+  - `useWorkbenchRealtimeCollaboration.ts` now derives a typed `WorkbenchCollaborationStatus` with `disabled | connecting | syncing | live | reconnecting | error`
+  - `WorkbenchEditorToolbar.tsx` now shows `Solo`, `Conectando`, `Sincronizando`, `Ao vivo`, `Reconectando`, or `Sync com erro` explicitly, and only mounts `CollaboratorsBar` after real document sync is confirmed
+  - `useWorkbenchBridgeChrome.ts` no longer treats the session as effectively live for higher chrome surfaces while the editor is merely connected but not synced
+- coverage now exists for this honesty pass in `__tests__/ide/WorkbenchEditorToolbar.test.tsx`
+
+### Preview runtime guidance
+- `usePreviewRuntime.ts`, `previewRuntime.types.ts`, `previewRuntimeState.ts`, `RuntimePreviewSurface.tsx`, and `PreviewLifecycleChrome.tsx` now preserve provider/guidance/setup-env context from `/api/preview/runtime-provision`
+- the runtime lane now carries:
+  - provider identity
+  - recommended next action
+  - required env hints
+  - clearer managed/local failure guidance
+- this means failed/warming/idle preview states are less hand-wavy and closer to the trust grammar expected from Replit/Vercel-style review surfaces
+
+### Monaco editor hotspot reduction
+- `MonacoEditorPro.tsx` is no longer carrying all editor theming, action registration, and TypeScript symbol mapping inline
+- new seams now own that density:
+  - `components/editor/MonacoEditorPro.actions.ts`
+  - `components/editor/MonacoEditorPro.symbols.ts`
+  - `components/editor/MonacoEditorPro.theme.ts`
+- `MonacoEditorPro.tsx` dropped to `667` lines, while still keeping:
+  - authoritative TS/JS symbol resolution
+  - inline-edit apply/validate flow
+  - Monaco lifecycle orchestration
+- focused symbol coverage now exists in `__tests__/editor/MonacoEditorPro.symbols.test.ts`
+
 ### Validation note
 - `npm run build` passed again on `2026-04-26` in the compile-mode production path
 - `npm run typecheck` hit the known transient `.next/types` mismatch while a fresh build was regenerating artifacts, then passed again immediately after the build completed
+- a fresh `2026-04-27` compile-mode rerun did **not** revalidate cleanly; `build-probe-2026-04-27-roadmap-security-ai.log` stalled again at `Creating an optimized production build ...`
 - current honest state remains:
-  - compile-mode build = validated production mitigation
+  - compile-mode build = historically validated production mitigation, but not freshly reconfirmed in the latest `2026-04-27` rerun
   - `build:prerender-probe` = still open, with the newest local rerun still stuck at `Creating an optimized production build ...`
 
 ## Still Open
 ### P0
 1. production build parity
    - `npm run build` passed again on `2026-04-26` in the compile-mode production path (`cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`)
-   - current compile-mode build is therefore still a fresh validated mitigation, not only an older cached success
+   - that compile-mode mitigation is still the best honest production path we have, but the newest `2026-04-27` rerun (`cloud-web-app/web/build-probe-2026-04-27-roadmap-security-ai.log`) did not finish cleanly and therefore did not provide a new fresh PASS
    - build still emits the known `e2b/dist/index.mjs` critical-dependency warning through `app/api/preview/runtime-provision/route.ts`
    - `npm run build:prerender-probe` remains the open track; the freshest local rerun (`cloud-web-app/web/build-probe-2026-04-26-prerender-probe.log`) still did not clear `Creating an optimized production build ...`
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker

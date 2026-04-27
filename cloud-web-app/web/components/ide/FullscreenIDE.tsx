@@ -202,6 +202,7 @@ function IDEContent() {
   });
 
   const {
+    collaborationStatus,
     collaborationConnected,
     editorPeers,
     broadcastCursor,
@@ -316,6 +317,7 @@ function IDEContent() {
     showDiagnostics,
     fullAccessActiveGrant,
     collaborationConnected,
+    collaborationStatus,
     editorPeers,
     setSplitActivePane,
     setSecondaryFile,

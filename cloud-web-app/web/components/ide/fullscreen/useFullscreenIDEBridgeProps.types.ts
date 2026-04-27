@@ -9,6 +9,7 @@ import type { WorkbenchEditorPaneProps } from '@/components/ide/fullscreen/Workb
 import type { WorkbenchPreviewPaneProps } from '@/components/ide/fullscreen/WorkbenchPreviewPane';
 import type {
   ActiveFileState,
+  WorkbenchCollaborationStatus,
   EditorCursorStatus,
   InlineApplyResult,
   EditorSelectionStatus,
@@ -67,6 +68,7 @@ export type UseFullscreenIDEBridgePropsArgs = {
   showDiagnostics: boolean;
   fullAccessActiveGrant: unknown;
   collaborationConnected: boolean;
+  collaborationStatus: WorkbenchCollaborationStatus;
   editorPeers: RemotePeer[];
   setSplitActivePane: WorkbenchEditorPaneProps['setSplitActivePane'];
   setSecondaryFile: WorkbenchEditorPaneProps['setSecondaryFile'];

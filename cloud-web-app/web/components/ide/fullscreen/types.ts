@@ -26,6 +26,26 @@ export type SidebarTab = 'explorer' | 'git';
 
 export type PreviewMode = 'runtime' | 'device' | 'console' | 'viewport3d' | 'canvas';
 
+export type WorkbenchCollaborationState =
+  | 'disabled'
+  | 'connecting'
+  | 'syncing'
+  | 'live'
+  | 'reconnecting'
+  | 'error';
+
+export type WorkbenchCollaborationTone = 'neutral' | 'success' | 'warning' | 'danger';
+
+export type WorkbenchCollaborationStatus = {
+  state: WorkbenchCollaborationState;
+  tone: WorkbenchCollaborationTone;
+  label: string;
+  detail: string;
+  peerCount: number;
+  liveCursorCount: number;
+  errorMessage?: string;
+};
+
 export type CollaborationRoomParticipant = {
   userId: string;
   status: 'online' | 'away' | 'offline' | string;
