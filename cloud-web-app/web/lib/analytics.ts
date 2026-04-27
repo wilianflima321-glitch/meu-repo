@@ -419,7 +419,7 @@ export class AnalyticsTracker {
       // Re-add events on failure
       this.events.push(...eventsToSend);
       this.metrics.push(...metricsToSend);
-      console.error('[Analytics] Failed to flush:', error);
+      log.error('[Analytics] Failed to flush', error);
     }
   }
   
@@ -566,8 +566,26 @@ export class MetricsAggregator {
 // SINGLETON EXPORT
 // ============================================================================
 
-export const analytics = typeof window !== 'undefined' 
-  ? AnalyticsTracker.getInstance() 
+type AnalyticsFacade = Pick<
+  AnalyticsTracker,
+  'track' | 'trackError' | 'trackPerformance' | 'trackPageLoad' | 'measure' | 'setUser' | 'clearUser' | 'flush'
+>;
+
+function createAnalyticsFacade(): AnalyticsFacade {
+  return {
+    track: (...args) => AnalyticsTracker.getInstance().track(...args),
+    trackError: (...args) => AnalyticsTracker.getInstance().trackError(...args),
+    trackPerformance: (...args) => AnalyticsTracker.getInstance().trackPerformance(...args),
+    trackPageLoad: (...args) => AnalyticsTracker.getInstance().trackPageLoad(...args),
+    measure: (...args) => AnalyticsTracker.getInstance().measure(...args),
+    setUser: (...args) => AnalyticsTracker.getInstance().setUser(...args),
+    clearUser: (...args) => AnalyticsTracker.getInstance().clearUser(...args),
+    flush: (...args) => AnalyticsTracker.getInstance().flush(...args),
+  };
+}
+
+export const analytics: AnalyticsFacade | null = typeof window !== 'undefined'
+  ? createAnalyticsFacade()
   : null;
 
 const analyticsModule = {

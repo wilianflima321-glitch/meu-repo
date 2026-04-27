@@ -107,10 +107,11 @@ This file is the short scoreboard that answers:
 - `MonacoEditorPro.theme.ts`: `69` lines
 - `StudioRuntimeProviders.tsx`: `26` lines
 - `StudioRuntimeRouteLayout.tsx`: `20` lines
-- `runtime/FullStudioRuntime.tsx`: `61` lines
+- `runtime/FullStudioRuntime.tsx`: `64` lines
 - `runtime/LightweightStudioRuntime.tsx`: `20` lines
 - `runtime/StudioRuntimeLoadingFallback.tsx`: `18` lines
 - `runtime/StudioRuntimeCommandRegistration.tsx`: `8` lines
+- `runtime/useDeferredRuntimeActivation.ts`: `83` lines
 - `CreatorDashboard.tsx`: `18` lines
 - `useCreatorDashboardController.ts`: `56` lines
 - `CreatorDashboardSections.tsx`: `79` lines
@@ -514,16 +515,26 @@ This file is the short scoreboard that answers:
   - `components/editor/MonacoEditorPro.actions.ts`
   - `components/editor/MonacoEditorPro.symbols.ts`
   - `components/editor/MonacoEditorPro.theme.ts`
-- `MonacoEditorPro.tsx` dropped to `667` lines, while still keeping:
+- `MonacoEditorPro.tsx` dropped from the historical monolith down to `745` lines, while still keeping:
   - authoritative TS/JS symbol resolution
   - inline-edit apply/validate flow
   - Monaco lifecycle orchestration
 - focused symbol coverage now exists in `__tests__/editor/MonacoEditorPro.symbols.test.ts`
 
+### Shared runtime background pressure
+- the canonical shared runtime now stages the noisiest ambient work instead of turning everything on at first paint:
+  - `components/providers/runtime/useDeferredRuntimeActivation.ts` now delays session tracking, telemetry, service-worker registration, and ambient modal/bubble UI until idle or clear user intent
+  - `runtime/FullStudioRuntime.tsx` now waits on that staged activation before enabling `SessionTrackerProvider`, `TelemetryBootstrap`, `WebVitalsReporter`, `ServiceWorkerProvider`, `LowBalanceModalAuto`, and `AISuggestionBubbleAuto`
+- `lib/analytics.ts` also stopped instantiating the tracker singleton on import:
+  - `analytics` is now a lazy facade, so the 30-second flush interval only starts after a real caller uses analytics
+  - failed batch flushes now emit structured logger output instead of raw `console.error`
+- `app/marketplace/layout.tsx` now opts into `surface="light"` and `onboardingChrome={false}`, which removes one more public route from the heaviest runtime path
+- this does not mean prerender parity is solved, but it materially narrows the shared-runtime search space and reduces benchmark-visible background pressure in the studio shell
+
 ### Validation note
 - `npm run build` passed again on `2026-04-26` in the compile-mode production path
 - `npm run typecheck` hit the known transient `.next/types` mismatch while a fresh build was regenerating artifacts, then passed again immediately after the build completed
-- a fresh `2026-04-27` compile-mode rerun did **not** revalidate cleanly; `build-probe-2026-04-27-roadmap-security-ai.log` stalled again at `Creating an optimized production build ...`
+- the freshest `2026-04-27` compile-mode rerun still did **not** revalidate cleanly; `build-probe-2026-04-27-runtime-deferral-compile.log` stalled again at `Creating an optimized production build ...`
 - current honest state remains:
   - compile-mode build = historically validated production mitigation, but not freshly reconfirmed in the latest `2026-04-27` rerun
   - `build:prerender-probe` = still open, with the newest local rerun still stuck at `Creating an optimized production build ...`
@@ -532,7 +543,7 @@ This file is the short scoreboard that answers:
 ### P0
 1. production build parity
    - `npm run build` passed again on `2026-04-26` in the compile-mode production path (`cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`)
-   - that compile-mode mitigation is still the best honest production path we have, but the newest `2026-04-27` rerun (`cloud-web-app/web/build-probe-2026-04-27-roadmap-security-ai.log`) did not finish cleanly and therefore did not provide a new fresh PASS
+  - that compile-mode mitigation is still the best honest production path we have, but the newest `2026-04-27` rerun (`cloud-web-app/web/build-probe-2026-04-27-runtime-deferral-compile.log`) did not finish cleanly and therefore did not provide a new fresh PASS
    - build still emits the known `e2b/dist/index.mjs` critical-dependency warning through `app/api/preview/runtime-provision/route.ts`
    - `npm run build:prerender-probe` remains the open track; the freshest local rerun (`cloud-web-app/web/build-probe-2026-04-26-prerender-probe.log`) still did not clear `Creating an optimized production build ...`
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker

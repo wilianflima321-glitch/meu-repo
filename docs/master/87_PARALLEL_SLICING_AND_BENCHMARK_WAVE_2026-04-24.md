@@ -114,10 +114,13 @@ This follow-up round pushed the public trust/buyer path closer to benchmark-grad
   - `__tests__/server/websocket-runtime-contract.test.ts` now locks the compat export and helper-route contract instead of leaving the convergence untested
 - the shared-runtime search space also narrowed one more notch:
   - `app/marketplace/layout.tsx` now mounts `StudioRuntimeRouteLayout` with `surface="light"` and `onboardingChrome={false}`, so the public marketplace no longer opts into the heaviest runtime path by default
+  - `components/providers/runtime/useDeferredRuntimeActivation.ts` now stages session tracking, telemetry, service-worker registration, and ambient AI/billing surfaces behind idle or clear user intent instead of enabling all background work at first paint
+  - `runtime/FullStudioRuntime.tsx` now uses that staged activation to defer `SessionTrackerProvider`, `TelemetryBootstrap`, `WebVitalsReporter`, `ServiceWorkerProvider`, `LowBalanceModalAuto`, and `AISuggestionBubbleAuto`
+  - `lib/analytics.ts` now exports a lazy facade, so the analytics singleton and its 30-second flush interval are only created after a real caller touches analytics instead of on module import
 - this improves trust and governance, but it does **not** close the top remaining gaps:
   - public case-study depth is still lighter than the best Vercel/Linear buyer paths
-  - the shared compile-mode build path still needs fresh revalidation on each wave; the latest rerun in `cloud-web-app/web/build-probe-2026-04-27-roadmap-security-ai.log` timed out again at `Creating an optimized production build ...`
-  - `npm run build:prerender-probe` remains explicitly open
+  - the shared compile-mode build path still needs fresh revalidation on each wave; the latest rerun in `cloud-web-app/web/build-probe-2026-04-27-runtime-deferral-compile.log` timed out again at `Creating an optimized production build ...`
+  - `npm run build:prerender-probe` remains explicitly open, with the newest evidence in `cloud-web-app/web/build-probe-2026-04-27-runtime-deferral-prerender.log` also stalling at `Creating an optimized production build ...`
 
 This is real progress.
 It does **not** mean the workbench is solved.

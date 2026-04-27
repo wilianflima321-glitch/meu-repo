@@ -19,6 +19,7 @@ import WebVitalsReporter from '@/components/analytics/WebVitalsReporter'
 
 import StudioRuntimeCommandRegistration from './StudioRuntimeCommandRegistration'
 import StudioRuntimeLoadingFallback from './StudioRuntimeLoadingFallback'
+import { useDeferredRuntimeActivation } from './useDeferredRuntimeActivation'
 
 export default function FullStudioRuntime({
   children,
@@ -27,15 +28,17 @@ export default function FullStudioRuntime({
   children: ReactNode
   onboardingChrome?: boolean
 }) {
+  const deferredActivation = useDeferredRuntimeActivation()
+
   return (
     <CoreUiProviders>
       <ErrorBoundaryProvider>
         <A11yProvider>
-          <ServiceWorkerProvider enabled>
-            <TelemetryBootstrap />
-            <WebVitalsReporter />
+          <ServiceWorkerProvider enabled={deferredActivation.serviceWorkerReady}>
+            {deferredActivation.telemetryReady ? <TelemetryBootstrap /> : null}
+            {deferredActivation.telemetryReady ? <WebVitalsReporter /> : null}
             <AuthProvider>
-              <SessionTrackerProvider>
+              <SessionTrackerProvider enabled={deferredActivation.sessionTrackingReady}>
                 <CommandRegistryProvider>
                   <DevToolsProvider>
                     <AethelProvider>
@@ -43,8 +46,8 @@ export default function FullStudioRuntime({
                         <StudioRuntimeCommandRegistration />
                         {onboardingChrome ? <WelcomeModal /> : null}
                         {onboardingChrome ? <OnboardingChecklist /> : null}
-                        <LowBalanceModalAuto />
-                        <AISuggestionBubbleAuto />
+                        {deferredActivation.ambientUiReady ? <LowBalanceModalAuto /> : null}
+                        {deferredActivation.ambientUiReady ? <AISuggestionBubbleAuto /> : null}
                         <Suspense fallback={<StudioRuntimeLoadingFallback />}>{children}</Suspense>
                         <CookieConsent />
                       </OnboardingProvider>
