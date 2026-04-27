@@ -20,31 +20,31 @@ function formatLimit(value: number) {
 
 const FAQ_ITEMS = [
   {
-    q: 'Posso comecar sem cartao de credito-',
+    q: 'Posso comecar sem cartao de credito?',
     a: 'Sim. O produto pode ser explorado a partir do fluxo gratuito e do onboarding do studio antes de qualquer upgrade.',
   },
   {
-    q: 'Qual a diferenca entre Aethel e outros IDEs AI-',
+    q: 'Qual a diferenca entre Aethel e outros IDEs AI?',
     a: 'Aethel combina studio home, workbench, preview, billing e readiness na mesma experiencia. O objetivo nao e parecer um wrapper de prompt, mas um produto operacional.',
   },
   {
-    q: 'Os precos incluem tokens de IA-',
+    q: 'Os precos incluem tokens de IA?',
     a: 'Sim. Cada plano inclui quotas, mas voce tambem pode conectar providers proprios para ampliar flexibilidade de custo.',
   },
   {
-    q: 'Games e Films estao incluidos-',
+    q: 'Games e Films estao incluidos?',
     a: 'As superficies existem, mas o foco comercial do produto hoje continua em Apps + Pesquisa. Games e Films seguem em maturidade experimental.',
   },
   {
-    q: 'O billing ja esta funcionando ponta a ponta-',
+    q: 'O billing ja esta funcionando ponta a ponta?',
     a: 'As superficies de billing ja existem, mas o checkout publico depende das credenciais reais do Stripe. Mantemos essa transparencia na propria pagina.',
   },
   {
-    q: 'Como funciona o cancelamento-',
+    q: 'Como funciona o cancelamento?',
     a: 'Voce pode cancelar a qualquer momento. O acesso permanece ativo ate o fim do ciclo contratado.',
   },
   {
-    q: 'Impostos estao incluidos-',
+    q: 'Impostos estao incluidos?',
     a: 'Os valores exibidos nao incluem impostos locais. A cobranca segue a politica fiscal aplicavel a sua regiao.',
   },
 ]
@@ -103,7 +103,7 @@ export default function PricingPage() {
 
               <div className="mt-8 flex flex-wrap justify-start gap-3">
                 <Link
-                  href="/dashboard-onboarding=1&source=pricing-hero"
+                  href="/dashboard?onboarding=1&source=pricing-hero"
                   className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-primary)] text-[var(--aethel-text-inverse)] hover:bg-[var(--aethel-primary-dark)] rounded-xl px-5 py-3 text-sm font-semibold"
                 >
                   Comecar no Studio

@@ -64,6 +64,45 @@ const PROOF_STRIP = [
   { label: 'Experiencia unificada', detail: 'Pesquisa, codigo e preview no mesmo fluxo' },
 ]
 
+const BENCHMARK_COMPARISONS = [
+  {
+    title: 'Cockpit de codigo',
+    benchmark: 'Cursor / Windsurf / VS Code',
+    market:
+      'Os melhores editores unem ghost text, navegacao por simbolo, multiplos loops de AI e atalhos densos no mesmo cockpit.',
+    aethel:
+      'O Aethel ja entrega shell canonica, AI Console por modo, terminal de primeira classe, breadcrumbs com symbol truth e Inline Edit no fluxo principal.',
+    gap:
+      'Ainda falta transformar Inline AI, memoria persistente e mais automacao de agentes em superficie canonicamente inevitavel.',
+  },
+  {
+    title: 'Preview e deploy',
+    benchmark: 'Replit / Windsurf / Vercel / v0',
+    market:
+      'Os lideres mantem preview, deploy, share e review no mesmo loop com URLs reais, feedback visual e rollback facil.',
+    aethel:
+      'O Aethel ja expoe preview trust, share/deploy state, link de review e build compile-mode viavel dentro do proprio studio.',
+    gap:
+      'Ainda precisamos fechar prerender parity total e deixar o review/share igualmente forte em todos os estados de runtime.',
+  },
+  {
+    title: 'Operacao e confianca',
+    benchmark: 'Linear / Notion / Vercel',
+    market:
+      'Os melhores produtos deixam status, docs, triagem, seguranca e governanca faceis de encontrar e coerentes com o produto principal.',
+    aethel:
+      'Ja temos auditorias canonicamente honestas, status publico, MFA, readiness visivel e governanca de repo mais madura que a media.',
+    gap:
+      'Ainda faltam docs com busca melhor, prova comercial mais forte e paginas publicas de confianca enterprise mais completas.',
+  },
+]
+
+const TRUST_ACTIONS = [
+  { label: 'Ver status', href: '/status' },
+  { label: 'Ler docs', href: '/docs' },
+  { label: 'Pricing real', href: '/pricing' },
+]
+
 function ScreenshotCard({
   src,
   alt,
@@ -151,6 +190,18 @@ export default function LandingPageV3() {
                   Ver referencia do workbench
                 </Link>
               </div>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {TRUST_ACTIONS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             </div>
 
             <aside className="animate-in fade-in slide-in-from-right-4 space-y-4 duration-500 delay-100">
@@ -215,6 +266,56 @@ export default function LandingPageV3() {
               ))}
             </div>
           </GlassCard>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+          <div className="rounded-[32px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-6 shadow-[0_18px_60px_rgba(2,6,23,0.28)] sm:p-8">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
+                Comparacao honesta
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold text-[var(--aethel-text-primary)] sm:text-4xl">
+                O que os melhores do mercado fazem bem e o que o Aethel ja entrega.
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-[var(--aethel-text-tertiary)]">
+                Em vez de fingir equivalencia total, mostramos onde ja temos um studio forte e onde ainda estamos elevando a barra para chegar no melhor nivel de Cursor, Windsurf, Replit, Linear e Vercel.
+              </p>
+            </div>
+
+            <div className="mt-8 grid gap-4 lg:grid-cols-3">
+              {BENCHMARK_COMPARISONS.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-[26px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-soft))] p-5"
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">
+                    {item.benchmark}
+                  </p>
+                  <h3 className="mt-3 text-xl font-semibold text-[var(--aethel-text-primary)]">{item.title}</h3>
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">
+                        Benchmark
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.market}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)]">
+                        Aethel hoje
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.aethel}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-warning-light)]">
+                        Proximo salto
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.gap}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">

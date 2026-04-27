@@ -322,6 +322,8 @@ This file is the short scoreboard that answers:
 ### New landing/runtime follow-through
 - `app/landing-v3.tsx` is now a server page again, with the mission box isolated in `app/landing-v3-mission-box.tsx`
 - that removes `next/navigation`, local state, analytics, and transient animation hooks from the public shell while preserving the interactive workspace-create flow inside a dedicated client island
+- the public landing also now carries a more honest benchmark/trust layer instead of only aspirational hero copy: `app/landing-v3.tsx` now exposes direct status/docs/pricing trust actions plus an explicit `Cursor / Windsurf / VS Code`, `Replit / Windsurf / Vercel / v0`, and `Linear / Notion / Vercel` comparison section that explains what the market leaders do, what Aethel already ships, and what remains open
+- the public pricing entry is slightly less lossy too: `app/pricing/page.tsx` now fixes the broken `Comecar no Studio` onboarding CTA route and normalizes the visible FAQ punctuation so the commercial page does not lose users on a malformed link or low-signal copy noise
 - `components/ServiceWorkerProvider.tsx` no longer guesses enablement from `useBrowserPathname`; `components/providers/StudioRuntimeProviders.tsx` now opts it in explicitly for full studio runtime
 - `lib/providers/AethelProvider.tsx` no longer writes `localStorage` from inside the reducer; preferences persistence moved back into an effect, which makes the provider less brittle and closer to reducer-purity
 

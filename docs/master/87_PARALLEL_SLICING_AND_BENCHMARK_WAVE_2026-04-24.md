@@ -345,6 +345,8 @@ After Wave 1 stabilizes:
 - the public landing shell was reduced in parallel:
   - `app/landing-v3.tsx` is back to a server page
   - `app/landing-v3-mission-box.tsx` now holds the interactive workspace-generation flow
+  - the same landing shell now carries a more benchmark-aware public story instead of only aspirational hero language: direct trust actions for status/docs/pricing plus an explicit three-card comparison against `Cursor / Windsurf / VS Code`, `Replit / Windsurf / Vercel / v0`, and `Linear / Notion / Vercel`
+  - `app/pricing/page.tsx` also fixed the malformed onboarding CTA route and cleaned the visible FAQ grammar, which is small work but meaningful because these are first-impression commercial surfaces
 - the shared studio runtime is a bit less magic:
   - `components/ServiceWorkerProvider.tsx` now relies on explicit enablement instead of pathname inference
   - `lib/providers/AethelProvider.tsx` no longer persists preferences from inside the reducer
