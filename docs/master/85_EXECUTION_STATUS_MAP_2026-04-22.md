@@ -101,7 +101,10 @@ This file is the short scoreboard that answers:
 - `useTerminalOptions.ts`: `58` lines
 - `useTerminalImperativeHandle.ts`: `51` lines
 - `useWorkbenchShellState.ts`: `257` lines
-- `MonacoEditorPro.tsx`: `1164` lines
+- `MonacoEditorPro.tsx`: `745` lines
+- `MonacoEditorPro.actions.ts`: `245` lines
+- `MonacoEditorPro.symbols.ts`: `169` lines
+- `MonacoEditorPro.theme.ts`: `69` lines
 - `StudioRuntimeProviders.tsx`: `26` lines
 - `StudioRuntimeRouteLayout.tsx`: `20` lines
 - `runtime/FullStudioRuntime.tsx`: `61` lines
@@ -138,11 +141,19 @@ This file is the short scoreboard that answers:
 - `app/docs/page.tsx`: `393` lines
 - `app/docs/procurement-starter-pack/page.tsx`: `387` lines
 - `app/contact-sales/page.tsx`: `534` lines
-- `components/ai-chat/AIChatOpsSidebar.tsx`: `152` lines
+- `components/ai-chat/AIChatOpsSidebar.tsx`: `154` lines
+- `components/ai-chat/AIChatRulesPanel.tsx`: `122` lines
+- `components/ai-chat/useAIChatProjectRules.ts`: `136` lines
 - `components/ai-chat/AgentBoard.tsx`: `160` lines
 - `components/ai-chat/useAIChatRunState.ts`: `149` lines
 - `components/ai-chat/useAIChatOpsArtifacts.ts`: `149` lines
+- `app/api/project-rules/route.ts`: `93` lines
+- `lib/server/project-rules.ts`: `250` lines
+- `app/compare/page.tsx`: `298` lines
+- `app/compare/comparison-content.ts`: `208` lines
 - `__tests__/ai-chat/AIChatOpsSidebar.test.tsx`: `71` lines
+- `__tests__/ai-chat/AIChatRulesPanel.test.tsx`: `71` lines
+- `__tests__/api/project-rules-route.test.ts`: `99` lines
 - `lib/server/websocket-server.ts`: `1661` lines
 - `server/websocket-server.ts`: `47` lines
 - `app/api/deploy/route.ts`: `145` lines
@@ -218,6 +229,12 @@ This file is the short scoreboard that answers:
 - the advanced ops lane stopped bluffing emptiness as productized truth:
   - `components/ai-chat/AIChatOpsSidebar.tsx` now persists real operator memories per project through `useAIChatOpsArtifacts.ts` instead of mounting `MemoryPanel` with `memories={[]}`
   - the approval tab now reflects the live pending diff bridge instead of rendering `ApprovalCard` with an empty `changes` array
+- the ops lane now also exposes project rules in the canonical operator surface:
+  - `app/api/project-rules/route.ts` gives authenticated owners a read/write route for `.aethelrules`
+  - `lib/server/project-rules.ts` now supports descriptor loading, cache invalidation, and durable writes back to workspace- or repo-scoped rules files
+  - `components/ai-chat/AIChatRulesPanel.tsx` + `useAIChatProjectRules.ts` let the operator inspect scope/path, load a starter template, edit rules, save them, and revert drafts without leaving the AI console
+- this closes one of the older “hidden gold” gaps from the audits:
+  - project rules are no longer only injected silently into backend prompts; they are visible and editable from the canonical AI ops rail
 - multi-agent telemetry is now more honest than the old demo scaffold:
   - `useAIChatRunState.ts` no longer fabricates `Architect / Engineer / QA` progress, confidence, and cost values
   - `AgentBoard.tsx` now labels partial telemetry explicitly and only renders per-agent progress/cost/confidence when those numbers actually exist
@@ -254,6 +271,8 @@ This file is the short scoreboard that answers:
   - `/customers` now includes composed evaluation snapshots plus trust/procurement links instead of stopping at generic beta-fit cards
   - `/roadmap` now exists as a public, truth-oriented planning surface instead of leaving roadmap language implicit in audits and landing chips alone
   - `/security-policy` and `/security-acknowledgments` now exist, and `.well-known/security.txt` plus root `SECURITY.md` point at real public routes instead of broken placeholders
+  - `/compare` now exists as a public benchmark surface that compares Aethel honestly with Cursor, Windsurf, Replit, Vercel, Linear, and Notion, and that route is now linked from the landing, docs, public nav, public footer, and trust/buyer surfaces
+  - `app/sitemap.ts` now includes `/compare`, `/roadmap`, `/security`, `/compliance`, `/customers`, `/docs/changelog`, `/docs/support`, and `/docs/community`, so the public proof surfaces are no longer invisible to search/indexing by default
 
 ### Collaboration/runtime server alignment
 - the active `npm run ws` path is now being normalized around a compatibility entrypoint:

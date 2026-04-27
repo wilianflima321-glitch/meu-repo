@@ -6,6 +6,7 @@ export type NavigationLink = {
 
 export const PUBLIC_NAV_LINKS: NavigationLink[] = [
   { href: '/pricing', label: 'Planos' },
+  { href: '/compare', label: 'Compare' },
   { href: '/docs', label: 'Documentacao' },
   { href: '/roadmap', label: 'Roadmap' },
   { href: '/security', label: 'Seguranca' },

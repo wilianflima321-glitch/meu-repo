@@ -12,13 +12,14 @@ import {
   MessageSquare,
   Play,
   Radio,
+  ScrollText,
   Terminal,
   Wand2,
   Zap,
 } from 'lucide-react'
 
 export type AIChatConsoleMode = 'ask' | 'plan' | 'execute' | 'review' | 'live'
-export type AIChatOpsTab = 'memory' | 'approval' | 'diff' | 'execution'
+export type AIChatOpsTab = 'memory' | 'rules' | 'approval' | 'diff' | 'execution'
 
 export interface QuickPromptDefinition {
   icon: LucideIcon
@@ -82,6 +83,7 @@ export const CONSOLE_MODES: AIChatConsoleModeDefinition[] = [
 
 export const OPS_TABS: AIChatOpsTabDefinition[] = [
   { id: 'memory', label: 'Memoria', icon: Brain },
+  { id: 'rules', label: 'Rules', icon: ScrollText },
   { id: 'approval', label: 'Aprovacao', icon: Check },
   { id: 'diff', label: 'Diff', icon: Code },
   { id: 'execution', label: 'Execucao', icon: ClipboardList },

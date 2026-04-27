@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { ApprovalCard } from '@/components/ide/ApprovalCard'
 import { MemoryPanel } from '@/components/ide/MemoryPanel'
 import { TaskOpsPanel } from '@/components/ide/TaskOpsPanel'
+import { AIChatRulesPanel } from './AIChatRulesPanel'
 import { OPS_TABS, type AIChatOpsTab } from './presets'
 import { useAIChatOpsArtifacts, type AIChatApprovalChange } from './useAIChatOpsArtifacts'
 
@@ -115,6 +116,8 @@ export function AIChatOpsSidebar({
             onUpdate={updateMemory}
           />
         )}
+
+        {opsTab === 'rules' && <AIChatRulesPanel projectId={projectId} />}
 
         {opsTab === 'approval' && (
           <ApprovalCard

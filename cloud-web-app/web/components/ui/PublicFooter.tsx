@@ -8,6 +8,7 @@ const FOOTER_SECTIONS = [
       { label: 'Dashboard', href: '/dashboard' },
       { label: 'IDE', href: '/ide' },
       { label: 'Planos', href: '/pricing' },
+      { label: 'Compare', href: '/compare' },
       { label: 'Roadmap', href: '/roadmap' },
       { label: 'Documentacao', href: '/docs' },
     ],
@@ -28,6 +29,7 @@ const FOOTER_SECTIONS = [
     title: 'Recursos',
     links: [
       { label: 'Procurement pack', href: '/docs/procurement-starter-pack' },
+      { label: 'Comparativo honesto', href: '/compare' },
       { label: 'Security policy', href: '/security-policy' },
       { label: 'Changelog', href: '/docs/changelog' },
       { label: 'Ajuda', href: '/docs/support' },
@@ -97,6 +99,7 @@ export default function PublicFooter() {
               <Link href="/security" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">MFA live</Link>
               <Link href="/compliance" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">GDPR roadmap</Link>
               <Link href="/roadmap" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Roadmap publico</Link>
+              <Link href="/compare" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Compare sem hype</Link>
               <Link href="/docs/procurement-starter-pack" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Procurement pack</Link>
               <Link href="/contact-sales" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">SSO/SAML consultivo</Link>
             </div>
@@ -123,6 +126,12 @@ export default function PublicFooter() {
                 className="flex h-9 min-w-[88px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
               >
                 Roadmap
+              </Link>
+              <Link
+                href="/compare"
+                className="flex h-9 min-w-[88px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+              >
+                Compare
               </Link>
               <Link
                 href="/docs/procurement-starter-pack"

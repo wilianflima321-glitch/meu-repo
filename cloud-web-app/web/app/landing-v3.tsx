@@ -100,6 +100,7 @@ const BENCHMARK_COMPARISONS = [
 const TRUST_ACTIONS = [
   { label: 'Ver status', href: '/status' },
   { label: 'Ler docs', href: '/docs' },
+  { label: 'Comparar com o mercado', href: '/compare' },
   { label: 'Roadmap', href: '/roadmap' },
   { label: 'Pricing real', href: '/pricing' },
   { label: 'Customer proof', href: '/customers' },
@@ -316,6 +317,19 @@ export default function LandingPageV3() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/compare"
+                className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-2 text-xs font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_42%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)]"
+              >
+                Ver comparativo completo
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <span className="inline-flex items-center rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2 text-xs text-[var(--aethel-text-secondary)]">
+                Cursor, Windsurf, Replit, Vercel, Linear e Notion com leitura honesta
+              </span>
             </div>
           </div>
         </section>

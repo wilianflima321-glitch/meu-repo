@@ -99,15 +99,21 @@ This follow-up round pushed the public trust/buyer path closer to benchmark-grad
   - `app/docs/page.tsx`, `app/contact-sales/page.tsx`, `app/customers/page.tsx`, `app/customers/customerProofContent.ts`, and `components/ui/PublicFooter.tsx` now all route buyers through the same trust -> proof -> procurement -> contact journey
   - `app/roadmap/page.tsx` now gives the public shell an explicit truth-oriented roadmap surface instead of leaving roadmap grammar trapped in audits and landing chips
   - `app/security-policy/page.tsx`, `app/security-acknowledgments/page.tsx`, root `SECURITY.md`, and `public/.well-known/security.txt` now line up around real disclosure and acknowledgment routes instead of broken placeholders
+  - `app/compare/page.tsx` plus `app/compare/comparison-content.ts` now expose an honest benchmark surface against Cursor, Windsurf, Replit, Vercel, Linear, and Notion
+  - `app/landing-v3.tsx`, `app/docs/page.tsx`, `components/ui/PublicFooter.tsx`, and `lib/navigation/surfaces.ts` now route buyers into that comparison page instead of leaving benchmark framing trapped in audits alone
+  - `app/sitemap.ts` now includes `/compare`, `/roadmap`, `/security`, `/compliance`, `/customers`, `/docs/changelog`, `/docs/support`, and `/docs/community`, so the proof/trust surfaces are materially more discoverable
 - the AI ops lane also stopped pretending demo data was real telemetry:
   - `components/ai-chat/useAIChatRunState.ts` no longer fabricates architect/engineer/QA progress, cost, and confidence values
   - `components/ai-chat/AgentBoard.tsx` now labels partial telemetry explicitly and only renders detailed metrics when they actually exist
   - `components/ai-chat/AIChatOpsSidebar.tsx` now persists project-scoped operator memories and reflects the live pending diff in the approval lane instead of mounting empty arrays
   - `components/ide/AIChatPanelPro.tsx` also no longer seeds the lane with a canned assistant greeting, so first-load chat history is now empty-state truthful instead of demo-like
+  - `app/api/project-rules/route.ts`, `lib/server/project-rules.ts`, `components/ai-chat/AIChatRulesPanel.tsx`, and `components/ai-chat/useAIChatProjectRules.ts` now expose `.aethelrules` as a canonical read/write operator surface instead of a backend-only hidden constraint
 - the websocket runtime convergence also moved forward:
   - `server/websocket-server.ts` is now a compatibility wrapper over `lib/server/websocket-server.ts`, which keeps the npm script stable while consolidating runtime behavior in one implementation
   - the shared runtime libs (`bootstrap.ts`, `file-watcher-runtime.ts`, `hot-reload-runtime.ts`, `terminal-pty-runtime.ts`) now use relative logger imports and consistent port resolution
   - `__tests__/server/websocket-runtime-contract.test.ts` now locks the compat export and helper-route contract instead of leaving the convergence untested
+- the shared-runtime search space also narrowed one more notch:
+  - `app/marketplace/layout.tsx` now mounts `StudioRuntimeRouteLayout` with `surface="light"` and `onboardingChrome={false}`, so the public marketplace no longer opts into the heaviest runtime path by default
 - this improves trust and governance, but it does **not** close the top remaining gaps:
   - public case-study depth is still lighter than the best Vercel/Linear buyer paths
   - the shared compile-mode build path still needs fresh revalidation on each wave; the latest rerun in `cloud-web-app/web/build-probe-2026-04-27-roadmap-security-ai.log` timed out again at `Creating an optimized production build ...`

@@ -72,6 +72,11 @@ const sections: DocSection[] = [
         summary: 'Separa o que esta live, parcial e planejado sem maquiar maturidade.',
       },
       {
+        title: 'Compare o Aethel com o mercado',
+        href: '/compare',
+        summary: 'Comparativo honesto contra Cursor, Windsurf, Replit, Vercel, Linear e Notion.',
+      },
+      {
         title: 'Panorama de compliance',
         href: '/compliance',
         summary: 'Explica governanca atual, limites publicos e o que ainda segue como alvo.',
@@ -170,6 +175,11 @@ const quickLinks: DocLink[] = [
     title: 'Procurement starter pack',
     href: '/docs/procurement-starter-pack',
     summary: 'Como buyers podem revisar seguranca, compliance e rollout com base em artefatos publicos reais.',
+  },
+  {
+    title: 'Comparativo de mercado',
+    href: '/compare',
+    summary: 'Ajuda buyer e champion tecnico a entender onde o Aethel ja ganha e onde o mercado ainda lidera.',
   },
   {
     title: 'Roadmap publico',
