@@ -5,13 +5,20 @@
  * Inicia WebSocket server, file watcher e hot reload.
  */
 
-import { startWebSocketServer, AethelWebSocketServer } from './websocket-server';
-import { getFileWatcherManager, FileWatcherManager } from './file-watcher-runtime';
-import { getHotReloadManager, HotReloadManager } from './hot-reload-runtime';
-import { getTerminalPtyManager, TerminalPtyManager } from './terminal-pty-runtime';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import type { AethelWebSocketServer } from './websocket-server';
+import type { FileWatcherManager } from './file-watcher-runtime';
+import type { HotReloadManager } from './hot-reload-runtime';
+import type { TerminalPtyManager } from './terminal-pty-runtime';
 import * as path from 'path';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+const require = createRequire(import.meta.url);
+const { startWebSocketServer } = require('./websocket-server.ts') as typeof import('./websocket-server');
+const { getFileWatcherManager } = require('./file-watcher-runtime.ts') as typeof import('./file-watcher-runtime');
+const { getHotReloadManager } = require('./hot-reload-runtime.ts') as typeof import('./hot-reload-runtime');
+const { getTerminalPtyManager } = require('./terminal-pty-runtime.ts') as typeof import('./terminal-pty-runtime');
+const { createComponentLogger } = require('../observability/logger.ts') as typeof import('../observability/logger');
 
 const log = createComponentLogger('server/bootstrap')
 
@@ -28,7 +35,7 @@ interface ServerConfig {
 }
 
 const defaultConfig: Required<ServerConfig> = {
-  wsPort: parseInt(process.env.AETHEL_WS_PORT || '3001'),
+  wsPort: parseInt(process.env.AETHEL_WS_PORT || process.env.RUNTIME_PORT || '3001', 10),
   workspacePath: process.env.AETHEL_WORKSPACE_PATH || process.cwd(),
   enableHotReload: process.env.AETHEL_HOT_RELOAD !== 'false',
   enableFileWatcher: process.env.AETHEL_FILE_WATCHER !== 'false',
@@ -232,7 +239,9 @@ function setupProcessHandlers(): void {
 // ============================================================================
 
 // Auto-start if run directly
-if (require.main === module) {
+const isDirectRun = process.argv[1] === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
   setupProcessHandlers();
   
   bootstrap().catch((error) => {

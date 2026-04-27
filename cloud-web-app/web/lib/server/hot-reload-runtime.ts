@@ -6,13 +6,16 @@
  */
 
 import { EventEmitter } from 'events';
-import { getFileWatcherManager, FileChangeEvent } from './file-watcher-runtime';
-import { getWebSocketServer, AethelWebSocketServer } from './websocket-server';
+import { createRequire } from 'module';
+import type { FileChangeEvent } from './file-watcher-runtime';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as crypto from 'crypto';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+const require = createRequire(import.meta.url);
+const { getFileWatcherManager } = require('./file-watcher-runtime.ts') as typeof import('./file-watcher-runtime');
+const { getWebSocketServer } = require('./websocket-server.ts') as typeof import('./websocket-server');
+const { createComponentLogger } = require('../observability/logger.ts') as typeof import('../observability/logger');
 
 const log = createComponentLogger('server/hot-reload-runtime')
 

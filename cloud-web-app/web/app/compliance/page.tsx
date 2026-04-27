@@ -6,6 +6,7 @@ import {
   type TrustAction,
   type TrustFaq,
   type TrustMetric,
+  type TrustResource,
   type TrustSection,
 } from '../security/trust-center-shared'
 
@@ -143,10 +144,40 @@ const faqs: TrustFaq[] = [
     answer:
       'Use /security e /status para a leitura inicial e depois leve os pontos de rollout, procurement e requisitos contratuais para /contact-sales.',
   },
+  {
+    question: 'Existe um kit publico para procurement antes da call?',
+    answer:
+      'Sim. O /docs/procurement-starter-pack organiza o melhor material publico disponivel hoje para buyers, champions tecnicos e equipes de seguranca.',
+  },
+]
+
+const resources: TrustResource[] = [
+  {
+    eyebrow: 'Procurement',
+    title: 'Starter pack para avaliacao',
+    description:
+      'Material publico para orientar champions, seguranca e compras sem depender de uma call logo na primeira leitura.',
+    href: '/docs/procurement-starter-pack',
+  },
+  {
+    eyebrow: 'Trust',
+    title: 'Seguranca e controles live',
+    description:
+      'Cruze esta pagina com /security para separar MFA, status e readiness entregue de tudo o que ainda segue assistido.',
+    href: '/security',
+  },
+  {
+    eyebrow: 'Comercial',
+    title: 'Contato enterprise',
+    description:
+      'Quando a revisao virar rollout, questionario ou alinhamento contratual, a trilha certa continua em /contact-sales.',
+    href: '/contact-sales',
+  },
 ]
 
 const actions: TrustAction[] = [
   { label: 'Ver seguranca', href: '/security', tone: 'primary' },
+  { label: 'Pack de procurement', href: '/docs/procurement-starter-pack' },
   { label: 'Ver status publico', href: '/status' },
   { label: 'Falar com vendas', href: '/contact-sales' },
 ]
@@ -164,9 +195,11 @@ export default function CompliancePage() {
         'Status publico e readiness ja estao visiveis.',
         'Auditorias internas pressionam o roadmap de verdade.',
         'SOC 2, GDPR e SSO/SAML continuam tratados com cautela e sem overclaim.',
+        'Agora ja existe um starter pack publico para estruturar procurement sem depender de logo wall.',
       ]}
       metrics={metrics}
       sections={sections}
+      resources={resources}
       faqs={faqs}
       actions={actions}
     />

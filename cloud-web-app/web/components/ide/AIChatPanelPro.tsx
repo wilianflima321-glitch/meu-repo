@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react'
 import {
   DEFAULT_MODELS,
   type AIChatPanelProps,
-  type Message,
 } from './AIChatPanelPro.types'
 import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models'
 import { useEditorApplyBridge } from './EditorApplyBridgeContext'
@@ -25,19 +24,8 @@ import { useAIChatRunState } from '@/components/ai-chat/useAIChatRunState'
 import { useAIChatHistoryMode } from '@/components/ai-chat/useAIChatHistoryMode'
 import { useAIChatSpeechPlayback } from '@/components/ai-chat/useAIChatSpeechPlayback'
 
-const DEMO_MESSAGES: Message[] = [
-  {
-    id: '1',
-    role: 'assistant',
-    content:
-      'Ola! Sou seu assistente de IA. Posso ajudar com:\n\n- **Explicacao de codigo** - entender trechos complexos\n- **Deteccao de bugs** - encontrar problemas no seu codigo\n- **Otimizacao** - melhorar performance\n- **Geracao de codigo** - escrever codigo novo\n\nComo posso ajudar voce hoje?',
-    timestamp: new Date(Date.now() - 60000),
-    model: DEFAULT_OPENROUTER_MODEL_ID,
-  },
-]
-
 export default function AIChatPanelPro({
-  messages = DEMO_MESSAGES,
+  messages = [],
   onSendMessage,
   onInterrupt,
   onRegenerateResponse,

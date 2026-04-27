@@ -94,9 +94,23 @@ This follow-up round pushed the public trust/buyer path closer to benchmark-grad
 - deploy credibility also tightened on the backend:
   - `app/api/deploy/route.ts` now requires auth plus `build` entitlements, redacts readiness internals, and emits structured logger events instead of raw `console.error`
   - regression coverage now exists in `__tests__/api/deploy-route.test.ts`
+- the public buyer path is deeper now instead of stopping at top-level trust pages:
+  - `app/docs/procurement-starter-pack/page.tsx` adds a real procurement reading order, FAQ, and trust-artifact map
+  - `app/docs/page.tsx`, `app/contact-sales/page.tsx`, `app/customers/page.tsx`, `app/customers/customerProofContent.ts`, and `components/ui/PublicFooter.tsx` now all route buyers through the same trust -> proof -> procurement -> contact journey
+  - `app/roadmap/page.tsx` now gives the public shell an explicit truth-oriented roadmap surface instead of leaving roadmap grammar trapped in audits and landing chips
+  - `app/security-policy/page.tsx`, `app/security-acknowledgments/page.tsx`, root `SECURITY.md`, and `public/.well-known/security.txt` now line up around real disclosure and acknowledgment routes instead of broken placeholders
+- the AI ops lane also stopped pretending demo data was real telemetry:
+  - `components/ai-chat/useAIChatRunState.ts` no longer fabricates architect/engineer/QA progress, cost, and confidence values
+  - `components/ai-chat/AgentBoard.tsx` now labels partial telemetry explicitly and only renders detailed metrics when they actually exist
+  - `components/ai-chat/AIChatOpsSidebar.tsx` now persists project-scoped operator memories and reflects the live pending diff in the approval lane instead of mounting empty arrays
+  - `components/ide/AIChatPanelPro.tsx` also no longer seeds the lane with a canned assistant greeting, so first-load chat history is now empty-state truthful instead of demo-like
+- the websocket runtime convergence also moved forward:
+  - `server/websocket-server.ts` is now a compatibility wrapper over `lib/server/websocket-server.ts`, which keeps the npm script stable while consolidating runtime behavior in one implementation
+  - the shared runtime libs (`bootstrap.ts`, `file-watcher-runtime.ts`, `hot-reload-runtime.ts`, `terminal-pty-runtime.ts`) now use relative logger imports and consistent port resolution
+  - `__tests__/server/websocket-runtime-contract.test.ts` now locks the compat export and helper-route contract instead of leaving the convergence untested
 - this improves trust and governance, but it does **not** close the top remaining gaps:
   - public case-study depth is still lighter than the best Vercel/Linear buyer paths
-  - the shared compile-mode build path still needs fresh revalidation on each wave
+  - the shared compile-mode build path still needs fresh revalidation on each wave; the latest rerun in `cloud-web-app/web/build-probe-2026-04-27-roadmap-security-ai.log` timed out again at `Creating an optimized production build ...`
   - `npm run build:prerender-probe` remains explicitly open
 
 This is real progress.
@@ -145,6 +159,10 @@ It also does **not** mean production build parity is closed: the latest evidence
 - `cloud-web-app/web/components/ai-chat/useAIChatComposerState.ts`: `220`
 - `cloud-web-app/web/components/ai-chat/useAIChatHistoryMode.ts`: `107`
 - `cloud-web-app/web/components/ai-chat/AIChatTimeline.tsx`: `90`
+- `cloud-web-app/web/components/ai-chat/AIChatOpsSidebar.tsx`: `152`
+- `cloud-web-app/web/components/ai-chat/AgentBoard.tsx`: `160`
+- `cloud-web-app/web/components/ai-chat/useAIChatRunState.ts`: `149`
+- `cloud-web-app/web/components/ai-chat/useAIChatOpsArtifacts.ts`: `149`
 - `cloud-web-app/web/components/ide/fullscreen/useFullscreenIDEBridgeSections.ts`: `8`
 - `cloud-web-app/web/components/ide/fullscreen/useWorkbenchBridgeChrome.ts`: `49`
 - `cloud-web-app/web/components/ide/fullscreen/useWorkbenchBridgeEditorProps.ts`: `57`

@@ -7,11 +7,13 @@
 
 import type { FSWatcher, WatchOptions } from 'chokidar';
 import { EventEmitter } from 'events';
+import { createRequire } from 'module';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { getWebSocketServer } from './websocket-server';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+const require = createRequire(import.meta.url);
+const { getWebSocketServer } = require('./websocket-server.ts') as typeof import('./websocket-server');
+const { createComponentLogger } = require('../observability/logger.ts') as typeof import('../observability/logger');
 
 const log = createComponentLogger('server/file-watcher-runtime')
 

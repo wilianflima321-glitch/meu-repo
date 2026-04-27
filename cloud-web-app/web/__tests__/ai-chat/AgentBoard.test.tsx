@@ -24,6 +24,7 @@ function agent(overrides: Partial<AgentInfo> & { id: string }): AgentInfo {
     confidence: 80,
     cost: 0.0123,
     status: 'working',
+    telemetry: 'live',
     ...overrides,
   };
 }
@@ -44,7 +45,7 @@ describe('AgentBoard', () => {
         onAgentClick={() => {}}
       />,
     );
-    expect(screen.getByText('Planner')).toBeInTheDocument();
+    expect(screen.getAllByText('Planner').length).toBeGreaterThan(0);
     expect(screen.getByText('Coder')).toBeInTheDocument();
     expect(screen.getByText('Editing App.tsx')).toBeInTheDocument();
   });
@@ -79,5 +80,27 @@ describe('AgentBoard', () => {
       />,
     );
     expect(screen.getByText('3 agentes')).toBeInTheDocument();
+  });
+
+  it('shows an honest partial-telemetry state when detailed agent metrics are unavailable', () => {
+    render(
+      <AgentBoard
+        agents={[
+          agent({
+            id: '1',
+            telemetry: 'unavailable',
+            progress: undefined,
+            confidence: undefined,
+            cost: undefined,
+            status: 'queued',
+          }),
+        ]}
+        onAgentClick={() => {}}
+      />,
+    );
+
+    expect(screen.getByText('Telemetria parcial')).toBeInTheDocument();
+    expect(screen.getByText('Sem telemetria detalhada')).toBeInTheDocument();
+    expect(screen.getByText(/Telemetria por agente ainda nao disponivel/i)).toBeInTheDocument();
   });
 });

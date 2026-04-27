@@ -7,11 +7,13 @@
 
 import { spawn, type IPty } from 'node-pty';
 import { EventEmitter } from 'events';
+import { createRequire } from 'module';
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { createComponentLogger } from '@/lib/observability/logger'
+const require = createRequire(import.meta.url);
+const { createComponentLogger } = require('../observability/logger.ts') as typeof import('../observability/logger');
 
 const log = createComponentLogger('server/terminal-pty-runtime')
 

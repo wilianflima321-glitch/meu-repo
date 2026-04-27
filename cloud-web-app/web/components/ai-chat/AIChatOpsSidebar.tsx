@@ -1,10 +1,12 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useCallback } from 'react'
 import { ApprovalCard } from '@/components/ide/ApprovalCard'
 import { MemoryPanel } from '@/components/ide/MemoryPanel'
 import { TaskOpsPanel } from '@/components/ide/TaskOpsPanel'
 import { OPS_TABS, type AIChatOpsTab } from './presets'
+import { useAIChatOpsArtifacts, type AIChatApprovalChange } from './useAIChatOpsArtifacts'
 
 const MonacoChatDiffPanel = dynamic(
   () => import('@/components/ide/MonacoChatDiffPanel').then((module) => module.MonacoChatDiffPanel),
@@ -45,6 +47,39 @@ export function AIChatOpsSidebar({
   projectId,
   defaultGoal,
 }: AIChatOpsSidebarProps) {
+  const { approvalChanges, memories, addMemory, deleteMemory, updateMemory } = useAIChatOpsArtifacts({
+    pendingDiff,
+    projectId,
+  })
+
+  const handleApproveChanges = useCallback(
+    (changes: AIChatApprovalChange[]) => {
+      const change = changes[0]
+      if (!change) return
+      onAcceptDiff(change.newContent)
+    },
+    [onAcceptDiff]
+  )
+
+  const handleRejectChanges = useCallback(
+    (changes: AIChatApprovalChange[]) => {
+      if (changes.length === 0) return
+      onRejectDiff()
+    },
+    [onRejectDiff]
+  )
+
+  const handleApproveSingleChange = useCallback(
+    (change: AIChatApprovalChange) => {
+      onAcceptDiff(change.newContent)
+    },
+    [onAcceptDiff]
+  )
+
+  const handleRejectSingleChange = useCallback(() => {
+    onRejectDiff()
+  }, [onRejectDiff])
+
   if (!showAdvancedControls) {
     return null
   }
@@ -73,11 +108,22 @@ export function AIChatOpsSidebar({
 
       <div className="min-h-0 flex-1 overflow-hidden">
         {opsTab === 'memory' && (
-          <MemoryPanel memories={[]} onAdd={() => undefined} onDelete={() => undefined} onUpdate={() => undefined} />
+          <MemoryPanel
+            memories={memories}
+            onAdd={addMemory}
+            onDelete={deleteMemory}
+            onUpdate={updateMemory}
+          />
         )}
 
         {opsTab === 'approval' && (
-          <ApprovalCard changes={[]} onApprove={() => undefined} onReject={() => undefined} />
+          <ApprovalCard
+            changes={approvalChanges}
+            onApprove={handleApproveChanges}
+            onReject={handleRejectChanges}
+            onApprovePartial={handleApproveSingleChange}
+            onRejectPartial={handleRejectSingleChange}
+          />
         )}
 
         {opsTab === 'diff' &&

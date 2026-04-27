@@ -8,6 +8,7 @@ const FOOTER_SECTIONS = [
       { label: 'Dashboard', href: '/dashboard' },
       { label: 'IDE', href: '/ide' },
       { label: 'Planos', href: '/pricing' },
+      { label: 'Roadmap', href: '/roadmap' },
       { label: 'Documentacao', href: '/docs' },
     ],
   },
@@ -17,6 +18,8 @@ const FOOTER_SECTIONS = [
       { label: 'Contato', href: '/contact-sales' },
       { label: 'Clientes', href: '/customers' },
       { label: 'Status', href: '/status' },
+      { label: 'Seguranca', href: '/security' },
+      { label: 'Compliance', href: '/compliance' },
       { label: 'Termos', href: '/terms' },
       { label: 'Privacidade', href: '/privacy' },
     ],
@@ -24,6 +27,8 @@ const FOOTER_SECTIONS = [
   {
     title: 'Recursos',
     links: [
+      { label: 'Procurement pack', href: '/docs/procurement-starter-pack' },
+      { label: 'Security policy', href: '/security-policy' },
       { label: 'Changelog', href: '/docs/changelog' },
       { label: 'Ajuda', href: '/docs/support' },
       { label: 'Comunidade', href: '/docs/community' },
@@ -91,6 +96,8 @@ export default function PublicFooter() {
             <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-quaternary)]">
               <Link href="/security" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">MFA live</Link>
               <Link href="/compliance" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">GDPR roadmap</Link>
+              <Link href="/roadmap" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Roadmap publico</Link>
+              <Link href="/docs/procurement-starter-pack" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">Procurement pack</Link>
               <Link href="/contact-sales" className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-1 transition hover:text-[var(--aethel-text-primary)]">SSO/SAML consultivo</Link>
             </div>
             <div className="mt-6 flex items-center gap-4">
@@ -110,6 +117,18 @@ export default function PublicFooter() {
                 className="flex h-9 min-w-[96px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
               >
                 Documentacao
+              </Link>
+              <Link
+                href="/roadmap"
+                className="flex h-9 min-w-[88px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+              >
+                Roadmap
+              </Link>
+              <Link
+                href="/docs/procurement-starter-pack"
+                className="flex h-9 min-w-[132px] items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 text-xs font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] hover:text-[var(--aethel-text-primary)]"
+              >
+                Procurement pack
               </Link>
               <Link
                 href="/status"

@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, CheckCircle2, Mail, ShieldCheck, Users, Workflow } from 'lucide-react'
+
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 
@@ -11,7 +13,7 @@ const enterpriseFeatures = [
   {
     icon: ShieldCheck,
     title: 'Governanca e readiness',
-    desc: 'Controles operacionais, audit trail e estado explicito por superficie.',
+    desc: 'Controles operacionais, trust pages publicas e estado explicito por superficie.',
   },
   {
     icon: Workflow,
@@ -20,19 +22,19 @@ const enterpriseFeatures = [
   },
   {
     icon: Users,
-    title: 'Times e operacao',
-    desc: 'Ponto de partida para alinhamento comercial com workspace, roles e rollout.',
+    title: 'Procurement com contexto',
+    desc: 'Briefings mais completos ajudam a encurtar a primeira conversa enterprise.',
   },
 ]
 
 const DEAL_STEPS = [
-  'Compartilhe contexto do time, prioridades e necessidades de compliance.',
-  'Nossa equipe recebe o briefing e organiza o proximo passo comercial.',
-  'Voltamos por email com direcionamento, plano recomendado e agenda quando necessario.',
+  'Compartilhe contexto do time, necessidades de rollout e requisitos de seguranca ou procurement.',
+  'Nossa equipe recebe o briefing e organiza o proximo passo comercial com a trilha certa.',
+  'Voltamos por email com direcionamento, materiais adicionais e agenda quando necessario.',
 ]
 
 const SALES_SIGNALS = [
-  'SSO, SAML, rollout e trilha de auditoria entram melhor na conversa enterprise.',
+  'SSO, SAML, rollout e trilha de auditoria entram melhor na conversa enterprise assistida.',
   'Apps + Pesquisa continuam sendo a frente comercial mais madura do produto.',
   'Preview, readiness e governanca devem ser tratados no mesmo rollout, nao em trilhas separadas.',
 ]
@@ -41,23 +43,70 @@ const TRUST_LINKS = [
   { label: 'Status operacional', href: '/status' },
   { label: 'Seguranca', href: '/security' },
   { label: 'Compliance', href: '/compliance' },
-  { label: 'Clientes beta', href: '/customers' },
+  { label: 'Roadmap publico', href: '/roadmap' },
+  { label: 'Pack de procurement', href: '/docs/procurement-starter-pack' },
 ]
 
+const PRIMARY_GOALS = [
+  { value: '', label: 'Selecione' },
+  { value: 'avaliar-piloto', label: 'Avaliar piloto / design partner' },
+  { value: 'security-procurement', label: 'Security / procurement review' },
+  { value: 'rollout-enterprise', label: 'Rollout enterprise assistido' },
+  { value: 'pricing-billing', label: 'Pricing, billing ou contrato' },
+]
+
+const TIMELINE_OPTIONS = [
+  { value: '', label: 'Selecione' },
+  { value: 'exploratorio', label: 'Exploratorio / sem data fechada' },
+  { value: '0-30', label: '0-30 dias' },
+  { value: '30-90', label: '30-90 dias' },
+  { value: '90+', label: '90+ dias' },
+]
+
+const BRIEFING_PREP = [
+  'Liste a superficie em avaliacao: Apps, Pesquisa, preview, readiness comercial ou trust / governance.',
+  'Explique se a conversa depende de identidade corporativa, logging, procurement ou champion tecnico.',
+  'Inclua prazo desejado, tamanho do time e o que precisa estar claro para a proxima etapa.',
+]
+
+const BUYER_FAQS = [
+  {
+    question: 'Preciso marcar call antes de ler trust material?',
+    answer: 'Nao. O melhor primeiro passo publico hoje e o pack em /docs/procurement-starter-pack junto de /security, /compliance e /status.',
+  },
+  {
+    question: 'SSO / SAML ja e self-serve?',
+    answer: 'Ainda nao. A conversa certa hoje e assistida, com roteiro enterprise e alinhamento de rollout.',
+  },
+  {
+    question: 'O que acelera nossa resposta?',
+    answer: 'Briefings com contexto, timeline, dono da avaliacao e requisitos de seguranca evitam uma primeira resposta vaga.',
+  },
+]
+
+const sourceReasonLabel = (source: string) => source.replace(/[-_]+/g, ' ').trim()
+
 export default function ContactSalesPage() {
+  const searchParams = useSearchParams()
+  const source = searchParams?.get('source')?.trim() ?? ''
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     company: '',
     role: '',
     teamSize: '',
+    primaryGoal: '',
+    timeline: '',
     message: '',
   })
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const requiredReady = formData.name.trim() && formData.email.trim() && formData.company.trim()
+  const requiredReady =
+    formData.name.trim() && formData.email.trim() && formData.company.trim() && formData.message.trim()
+
   const fieldBase =
     'h-12 w-full rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_70%,transparent)] px-4 text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] focus:border-[color-mix(in_srgb,var(--aethel-info)_40%,transparent)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]'
   const textAreaBase =
@@ -70,13 +119,29 @@ export default function ContactSalesPage() {
     setLoading(true)
     setError(null)
 
+    const compiledMessage = [
+      formData.message.trim(),
+      '',
+      '--- briefing metadata ---',
+      formData.role.trim() ? `Cargo: ${formData.role.trim()}` : null,
+      formData.teamSize ? `Tamanho do time: ${formData.teamSize}` : null,
+      formData.primaryGoal ? `Objetivo principal: ${PRIMARY_GOALS.find((option) => option.value === formData.primaryGoal)?.label}` : null,
+      formData.timeline ? `Timeline: ${TIMELINE_OPTIONS.find((option) => option.value === formData.timeline)?.label}` : null,
+      source ? `Origem da jornada: ${sourceReasonLabel(source)}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n')
+
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          reason: 'enterprise-sales',
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          reason: source ? `enterprise-sales:${source}` : 'enterprise-sales',
+          message: compiledMessage,
         }),
       })
 
@@ -92,6 +157,8 @@ export default function ContactSalesPage() {
         company: '',
         role: '',
         teamSize: '',
+        primaryGoal: '',
+        timeline: '',
         message: '',
       })
     } catch (submitError) {
@@ -116,16 +183,16 @@ export default function ContactSalesPage() {
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
-                href="/pricing"
+                href="/docs/procurement-starter-pack"
                 className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-primary)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:brightness-110"
               >
-                Revisar planos
+                Revisar procurement pack
               </Link>
               <Link
-                href="/dashboard?onboarding=1&source=contact-sales-success"
+                href="/pricing"
                 className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-strong)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]"
               >
-                Abrir studio
+                Revisar planos
               </Link>
             </div>
           </div>
@@ -155,7 +222,7 @@ export default function ContactSalesPage() {
                 Fale com vendas e desenhe o melhor rollout para o seu time.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
-                Compartilhe objetivos, requisitos de seguranca e contexto operacional. Organizamos a conversa comercial para acelerar avaliacao, plano e proximos passos.
+                Compartilhe objetivos, requisitos de seguranca, procurement e contexto operacional. Organizamos a conversa comercial para acelerar avaliacao, plano e proximos passos.
               </p>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -209,26 +276,35 @@ export default function ContactSalesPage() {
           <section className="grid gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(300px,0.52fr)]">
             <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] p-6 sm:p-8">
               <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Contato comercial</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Compartilhe seu briefing enterprise</h2>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Contato comercial</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Compartilhe seu briefing enterprise</h2>
+                  </div>
+                  <Mail className="mt-1 h-5 w-5 shrink-0 text-[var(--aethel-text-tertiary)]" />
                 </div>
-                <Mail className="mt-1 h-5 w-5 shrink-0 text-[var(--aethel-text-tertiary)]" />
-              </div>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--aethel-text-tertiary)]">
-                Use este formulario para compartilhar contexto comercial, requisitos tecnicos e prioridades de rollout. Nossa equipe responde com direcionamento claro e proximo passo recomendado.
-              </p>
 
-              <div className="mt-8 space-y-5">
-                {error && (
+                <p className="max-w-2xl text-sm leading-6 text-[var(--aethel-text-tertiary)]">
+                  Use este formulario para compartilhar contexto comercial, requisitos tecnicos e prioridades de rollout. Nossa equipe responde com direcionamento claro e proximo passo recomendado.
+                </p>
+
+                {source ? (
+                  <div className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)]">
+                    Origem detectada: <span className="font-medium text-[var(--aethel-text-primary)]">{sourceReasonLabel(source)}</span>
+                  </div>
+                ) : null}
+
+                {error ? (
                   <div className="rounded-2xl border border-[color-mix(in_srgb,var(--aethel-error)_40%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_14%,transparent)] px-4 py-3 text-sm text-[var(--aethel-error-light)]">
                     {error}
                   </div>
-                )}
+                ) : null}
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="contact-sales-name" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Nome *</label>
+                    <label htmlFor="contact-sales-name" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
+                      Nome *
+                    </label>
                     <input
                       id="contact-sales-name"
                       type="text"
@@ -239,7 +315,9 @@ export default function ContactSalesPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="contact-sales-email" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Email corporativo *</label>
+                    <label htmlFor="contact-sales-email" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
+                      Email corporativo *
+                    </label>
                     <input
                       id="contact-sales-email"
                       type="email"
@@ -251,21 +329,24 @@ export default function ContactSalesPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="contact-sales-company" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Empresa *</label>
-                  <input
-                    id="contact-sales-company"
-                    type="text"
-                    value={formData.company}
-                    onChange={(event) => setFormData({ ...formData, company: event.target.value })}
-                    className={fieldBase}
-                    placeholder="Nome da empresa"
-                  />
-                </div>
-
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="contact-sales-role" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Cargo</label>
+                    <label htmlFor="contact-sales-company" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
+                      Empresa *
+                    </label>
+                    <input
+                      id="contact-sales-company"
+                      type="text"
+                      value={formData.company}
+                      onChange={(event) => setFormData({ ...formData, company: event.target.value })}
+                      className={fieldBase}
+                      placeholder="Nome da empresa"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="contact-sales-role" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
+                      Cargo
+                    </label>
                     <input
                       id="contact-sales-role"
                       type="text"
@@ -275,34 +356,84 @@ export default function ContactSalesPage() {
                       placeholder="Seu cargo"
                     />
                   </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
                   <div>
-                    <label htmlFor="contact-sales-team-size" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Tamanho do time</label>
+                    <label htmlFor="contact-sales-team-size" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
+                      Tamanho do time
+                    </label>
                     <select
                       id="contact-sales-team-size"
                       value={formData.teamSize}
                       onChange={(event) => setFormData({ ...formData, teamSize: event.target.value })}
                       className={fieldBase}
                     >
-                      <option value="" className="bg-[var(--aethel-surface-primary)]">Selecione</option>
-                      <option value="1-10" className="bg-[var(--aethel-surface-primary)]">1-10</option>
-                      <option value="11-50" className="bg-[var(--aethel-surface-primary)]">11-50</option>
-                      <option value="51-200" className="bg-[var(--aethel-surface-primary)]">51-200</option>
-                      <option value="201-500" className="bg-[var(--aethel-surface-primary)]">201-500</option>
-                      <option value="500+" className="bg-[var(--aethel-surface-primary)]">500+</option>
+                      {['', '1-10', '11-50', '51-200', '201-500', '500+'].map((value) => (
+                        <option key={value || 'blank'} value={value} className="bg-[var(--aethel-surface-primary)]">
+                          {value || 'Selecione'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="contact-sales-primary-goal" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
+                      Objetivo principal
+                    </label>
+                    <select
+                      id="contact-sales-primary-goal"
+                      value={formData.primaryGoal}
+                      onChange={(event) => setFormData({ ...formData, primaryGoal: event.target.value })}
+                      className={fieldBase}
+                    >
+                      {PRIMARY_GOALS.map((option) => (
+                        <option key={option.value || 'blank'} value={option.value} className="bg-[var(--aethel-surface-primary)]">
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="contact-sales-timeline" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
+                      Timeline
+                    </label>
+                    <select
+                      id="contact-sales-timeline"
+                      value={formData.timeline}
+                      onChange={(event) => setFormData({ ...formData, timeline: event.target.value })}
+                      className={fieldBase}
+                    >
+                      {TIMELINE_OPTIONS.map((option) => (
+                        <option key={option.value || 'blank'} value={option.value} className="bg-[var(--aethel-surface-primary)]">
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="contact-sales-message" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">Contexto e requisitos</label>
+                  <label htmlFor="contact-sales-message" className="mb-2 block text-sm font-medium text-[var(--aethel-text-secondary)]">
+                    Contexto e requisitos *
+                  </label>
                   <textarea
                     id="contact-sales-message"
-                    rows={5}
+                    rows={6}
                     value={formData.message}
                     onChange={(event) => setFormData({ ...formData, message: event.target.value })}
                     className={textAreaBase}
-                    placeholder="Ex: necessidades de compliance, preview sandbox, billing enterprise, SSO, audit trail."
+                    placeholder="Ex: precisamos avaliar SSO assistido, trust artifacts publicos, timeline de rollout, billing enterprise e ownership da revisao de seguranca."
                   />
+                </div>
+
+                <div className="grid gap-3 rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] p-5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Como escrever um briefing melhor</p>
+                  {BRIEFING_PREP.map((item) => (
+                    <div key={item} className="flex items-start gap-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                      <span className="mt-2 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--aethel-info-light)]" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row">
@@ -316,20 +447,21 @@ export default function ContactSalesPage() {
                     }`}
                   >
                     {loading ? 'Enviando briefing...' : 'Enviar briefing para vendas'}
-                    {!loading && <ArrowRight className="h-4 w-4" />}
+                    {!loading ? <ArrowRight className="h-4 w-4" /> : null}
                   </button>
                   <Link
-                    href="/pricing"
+                    href="/docs/procurement-starter-pack"
                     className="inline-flex w-full items-center justify-center rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-6 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_80%,transparent)] hover:text-[var(--aethel-text-primary)]"
                   >
-                    Revisar pricing
+                    Ler procurement pack
                   </Link>
                 </div>
 
-                {!requiredReady && (
-                  <p className="text-xs text-[var(--aethel-text-tertiary)]">Preencha nome, email e empresa para enviar o briefing.</p>
-                )}
-              </div>
+                {!requiredReady ? (
+                  <p className="text-xs text-[var(--aethel-text-tertiary)]">
+                    Preencha nome, email, empresa e contexto para enviar o briefing.
+                  </p>
+                ) : null}
               </form>
             </div>
 
@@ -360,16 +492,16 @@ export default function ContactSalesPage() {
               </div>
 
               <div className="rounded-[28px] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">Pronto para avaliacao enterprise</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-info-light)]">Starter pack recomendado</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                  Ideal para times que querem discutir seguranca, governanca, rollout controlado e o melhor caminho para adocao em ambiente real.
+                  Se o seu processo envolve buyer, champion tecnico ou seguranca, use primeiro o pack publico para alinhar linguagem e reduzir perguntas repetidas.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
-                    href="/pricing"
+                    href="/docs/procurement-starter-pack"
                     className="inline-flex items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--aethel-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_84%,transparent)]"
                   >
-                    Revisar planos
+                    Abrir pack
                   </Link>
                   <Link
                     href="/status"
@@ -377,6 +509,18 @@ export default function ContactSalesPage() {
                   >
                     Ver status
                   </Link>
+                </div>
+              </div>
+
+              <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">FAQ rapida para buyers</p>
+                <div className="mt-4 space-y-4">
+                  {BUYER_FAQS.map((item) => (
+                    <div key={item.question} className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_50%,transparent)] p-4">
+                      <h3 className="text-sm font-semibold text-[var(--aethel-text-primary)]">{item.question}</h3>
+                      <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.answer}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </aside>

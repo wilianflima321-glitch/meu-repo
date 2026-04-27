@@ -126,21 +126,32 @@ This file is the short scoreboard that answers:
 - `app/admin/ai-monitor/ai-monitor-core-loop-sections.tsx`: `284` lines
 - `app/admin/ai-monitor/ai-monitor-support-sections.tsx`: `113` lines
 - `app/admin/ai-monitor/ai-monitor-calls.tsx`: `207` lines
-- `app/security/page.tsx`: `167` lines
+- `app/security/page.tsx`: `208` lines
 - `app/security/trust-center-shared.tsx`: `248` lines
-- `app/compliance/page.tsx`: `167` lines
-- `app/customers/page.tsx`: `221` lines
-- `app/customers/customerProofContent.ts`: `97` lines
+- `app/compliance/page.tsx`: `208` lines
+- `app/customers/page.tsx`: `283` lines
+- `app/customers/customerProofContent.ts`: `151` lines
 - `app/status/page.tsx`: `311` lines
 - `app/status/status.content.ts`: `46` lines
 - `app/status/status.logic.ts`: `379` lines
 - `app/status/status.types.ts`: `26` lines
+- `app/docs/page.tsx`: `393` lines
+- `app/docs/procurement-starter-pack/page.tsx`: `387` lines
+- `app/contact-sales/page.tsx`: `534` lines
+- `components/ai-chat/AIChatOpsSidebar.tsx`: `152` lines
+- `components/ai-chat/AgentBoard.tsx`: `160` lines
+- `components/ai-chat/useAIChatRunState.ts`: `149` lines
+- `components/ai-chat/useAIChatOpsArtifacts.ts`: `149` lines
+- `__tests__/ai-chat/AIChatOpsSidebar.test.tsx`: `71` lines
+- `lib/server/websocket-server.ts`: `1661` lines
+- `server/websocket-server.ts`: `47` lines
 - `app/api/deploy/route.ts`: `145` lines
 - `__tests__/api/deploy-route.test.ts`: `106` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
 - `npm run build` now uses `next build --experimental-build-mode compile`; it completed successfully again on `2026-04-26` in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`, again after the broader Wave B pass in `cloud-web-app/web/build-probe-2026-04-26-wave-b-settings-admin.log`, and again after the shared-runtime follow-up in `cloud-web-app/web/build-probe-2026-04-26-wave-b-runtime-pass.log`, and the earlier server artifact smoke test still stands in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
+- the freshest compile-mode rerun on `2026-04-27` did **not** revalidate the pass: `cloud-web-app/web/build-probe-2026-04-27-roadmap-security-ai.log` timed out again at `Creating an optimized production build ...`
 - the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the freshest local evidence is `cloud-web-app/web/build-probe-2026-04-26-wave-b-runtime-prerender.log`, which still timed out at `Creating an optimized production build ...`, while the immediately previous `cloud-web-app/web/build-probe-2026-04-26-wave-b-prerender-probe.log` had advanced into `Linting and checking validity of types ...` before timing out, and the strongest historical deterministic failure evidence remains `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`
 
 ## Closed Or Materially Stabilized
@@ -204,6 +215,12 @@ This file is the short scoreboard that answers:
   - semantic history search
   - shareable threads / stronger conversation information architecture
   - separate backend execution semantics per mode
+- the advanced ops lane stopped bluffing emptiness as productized truth:
+  - `components/ai-chat/AIChatOpsSidebar.tsx` now persists real operator memories per project through `useAIChatOpsArtifacts.ts` instead of mounting `MemoryPanel` with `memories={[]}`
+  - the approval tab now reflects the live pending diff bridge instead of rendering `ApprovalCard` with an empty `changes` array
+- multi-agent telemetry is now more honest than the old demo scaffold:
+  - `useAIChatRunState.ts` no longer fabricates `Architect / Engineer / QA` progress, confidence, and cost values
+  - `AgentBoard.tsx` now labels partial telemetry explicitly and only renders per-agent progress/cost/confidence when those numbers actually exist
 
 ### Deploy from IDE
 - the deploy action and status page exist in the canonical IDE,
@@ -231,6 +248,26 @@ This file is the short scoreboard that answers:
 - still open:
   - case-study depth beyond beta-design-partner framing
   - public trust artifacts like security questionnaires, compliance docs, and richer incident history
+- the buyer path now has a real public procurement bridge:
+  - `/docs/procurement-starter-pack` exists and is linked from docs, trust pages, customer proof, pricing, contact-sales, and the public footer
+  - `/contact-sales` now accepts richer buyer/procurement context instead of a thin generic lead form
+  - `/customers` now includes composed evaluation snapshots plus trust/procurement links instead of stopping at generic beta-fit cards
+  - `/roadmap` now exists as a public, truth-oriented planning surface instead of leaving roadmap language implicit in audits and landing chips alone
+  - `/security-policy` and `/security-acknowledgments` now exist, and `.well-known/security.txt` plus root `SECURITY.md` point at real public routes instead of broken placeholders
+
+### Collaboration/runtime server alignment
+- the active `npm run ws` path is now being normalized around a compatibility entrypoint:
+  - `server/websocket-server.ts` now acts as a thin stable wrapper over `lib/server/websocket-server.ts` so scripts can stay put while runtime behavior converges in one place
+  - the shared runtime server also now uses safer relative logger imports and consistent port resolution across `bootstrap.ts`, `file-watcher-runtime.ts`, `hot-reload-runtime.ts`, and `terminal-pty-runtime.ts`
+  - focused contract coverage now exists in `__tests__/server/websocket-runtime-contract.test.ts`, covering compat exports plus `/`, `/health`, `/stats`, `/metrics`, and HTTP-only upgrade rejection
+- this improves maintainability, but co-editing proof and full runtime validation are still open.
+
+### AI ops honesty
+- the AI operator lane is less fake-complete now:
+  - `AIChatOpsSidebar.tsx` persists project-scoped memories and routes approval actions through the live pending diff bridge instead of empty placeholders
+  - `useAIChatRunState.ts` no longer fabricates named multi-agent telemetry values
+  - `AgentBoard.tsx` now labels partial telemetry explicitly and only shows deeper metrics when we actually have them
+  - `AIChatPanelPro.tsx` no longer boots with a canned assistant greeting that can be mistaken for a real conversation history
 
 ### Preview runtime orchestration
 - discovery, provision, sync, and health flows exist,

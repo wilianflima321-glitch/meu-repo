@@ -40,6 +40,13 @@ export interface TrustAction {
   tone?: 'primary' | 'secondary'
 }
 
+export interface TrustResource {
+  eyebrow: string
+  title: string
+  description: string
+  href: string
+}
+
 interface TrustCenterPageShellProps {
   badge: string
   heroIcon: LucideIcon
@@ -50,6 +57,7 @@ interface TrustCenterPageShellProps {
   summaryPoints: string[]
   metrics: TrustMetric[]
   sections: TrustSection[]
+  resources?: TrustResource[]
   faqs: TrustFaq[]
   actions: TrustAction[]
 }
@@ -116,6 +124,7 @@ export function TrustCenterPageShell({
   summaryPoints,
   metrics,
   sections,
+  resources = [],
   faqs,
   actions,
 }: TrustCenterPageShellProps) {
@@ -222,6 +231,42 @@ export function TrustCenterPageShell({
               </div>
             </section>
           ))}
+
+          {resources.length ? (
+            <section className="space-y-5">
+              <div className="max-w-3xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
+                  Artefatos publicos
+                </p>
+                <h2 className="mt-2 text-3xl font-semibold text-[var(--aethel-text-primary)]">
+                  O melhor kit publico para due diligence agora.
+                </h2>
+                <p className="mt-3 text-base leading-7 text-[var(--aethel-text-secondary)]">
+                  Em vez de um trust portal decorativo, junte estas superficies para entender o que esta live, o
+                  que segue assistido e onde a conversa comercial realmente comeca.
+                </p>
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-3">
+                {resources.map((resource) => (
+                  <Link
+                    key={resource.href}
+                    href={resource.href}
+                    className="group rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-soft))] p-6 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)]"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                      {resource.eyebrow}
+                    </p>
+                    <div className="mt-3 flex items-start justify-between gap-3">
+                      <h3 className="text-xl font-semibold text-[var(--aethel-text-primary)]">{resource.title}</h3>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-[var(--aethel-info-light)] transition group-hover:translate-x-0.5" />
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">{resource.description}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.9fr)]">
             <div className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6">

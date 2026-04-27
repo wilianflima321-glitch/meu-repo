@@ -6,6 +6,7 @@ import {
   type TrustAction,
   type TrustFaq,
   type TrustMetric,
+  type TrustResource,
   type TrustSection,
 } from './trust-center-shared'
 
@@ -143,10 +144,48 @@ const faqs: TrustFaq[] = [
     answer:
       'A pagina /status e o melhor ponto publico para acompanhar readiness e bloqueios reais do runtime sem maquiagem de marketing.',
   },
+  {
+    question: 'Como um buyer deveria iniciar procurement ou due diligence?',
+    answer:
+      'Comece pelo pack publico em /docs/procurement-starter-pack, confira /status para saude operacional e use /contact-sales quando a conversa envolver SSO, rollout ou revisao de requisitos.',
+  },
+]
+
+const resources: TrustResource[] = [
+  {
+    eyebrow: 'Procurement',
+    title: 'Starter pack para buyers',
+    description:
+      'Checklist publico com ordem de leitura, perguntas de due diligence e o que enviar para acelerar a avaliacao enterprise.',
+    href: '/docs/procurement-starter-pack',
+  },
+  {
+    eyebrow: 'Operacao',
+    title: 'Status operacional',
+    description:
+      'Valide runtime, readiness e dependencias publicas antes de transformar a conversa de seguranca em pura narrativa.',
+    href: '/status',
+  },
+  {
+    eyebrow: 'Proof',
+    title: 'Clientes beta e fit atual',
+    description:
+      'Veja quais tipos de time ja encontram valor hoje sem inventar logo wall, contagem de clientes ou rollout inflado.',
+    href: '/customers',
+  },
+  {
+    eyebrow: 'Policy',
+    title: 'Security policy e acknowledgments',
+    description:
+      'Buyer, champion tecnico e pesquisador agora encontram a politica publica de disclosure e o destino dos acknowledgments sem cair em link quebrado.',
+    href: '/security-policy',
+  },
 ]
 
 const actions: TrustAction[] = [
   { label: 'Ver status publico', href: '/status', tone: 'primary' },
+  { label: 'Pack de procurement', href: '/docs/procurement-starter-pack' },
+  { label: 'Security policy', href: '/security-policy' },
   { label: 'Ler compliance', href: '/compliance' },
   { label: 'Falar com vendas', href: '/contact-sales' },
 ]
@@ -164,9 +203,11 @@ export default function SecurityPage() {
         'MFA/TOTP com backup codes ja esta no produto.',
         'Status publico mede endpoints reais, nao um uptime decorativo.',
         'SSO/SAML segue como readiness + roadmap, nao como promessa GA.',
+        'Buyers agora podem comecar por um pack publico de procurement antes da conversa assistida.',
       ]}
       metrics={metrics}
       sections={sections}
+      resources={resources}
       faqs={faqs}
       actions={actions}
     />

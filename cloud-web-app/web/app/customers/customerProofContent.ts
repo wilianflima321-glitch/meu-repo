@@ -77,11 +77,53 @@ export const PUBLIC_EVIDENCE: CustomerProofLink[] = [
   },
 ]
 
+export const COMPOSITE_EVALUATIONS: CustomerProofCard[] = [
+  {
+    eyebrow: 'Snapshot composto 01',
+    title: 'Founders saindo do discovery para um app validavel sem trocar de cockpit.',
+    description:
+      'Este e o caminho de equipes pequenas que entram pelo produto, usam preview e readiness para validar o fluxo principal e so depois puxam a conversa comercial.',
+    bullets: ['Comecam por dashboard, pricing e docs', 'Usam preview para reduzir handoff entre ideia e revisao', 'Escalam para vendas quando seguranca ou rollout entram em cena'],
+  },
+  {
+    eyebrow: 'Snapshot composto 02',
+    title: 'Squads de produto consolidando pesquisa, implementacao e check de readiness.',
+    description:
+      'Aqui o ganho aparece menos como automacao magica e mais como reducao de troca de contexto entre analise, execucao e verificacao publica.',
+    bullets: ['Pesquisa e implementacao ficam no mesmo loop', 'Status e docs ajudam a qualificar maturidade real', 'A prova comercial vem do produto em uso, nao de branding'],
+  },
+  {
+    eyebrow: 'Snapshot composto 03',
+    title: 'Buyers ensaiando procurement sem promessas de GA que ainda nao fechou.',
+    description:
+      'Quando SSO, governanca e requisitos de rollout entram na conversa, a jornada certa cruza security, compliance e um pack publico antes da call assistida.',
+    bullets: ['Security e compliance separam live, partial e planned', 'O starter pack reduz idas e vindas na primeira avaliacao', 'A conversa enterprise acontece com escopo mais claro e menos fantasia'],
+  },
+]
+
 export const HONEST_NOTES = [
   'Hoje falamos em beta design partners e tipos de times, nao em uma logo wall publica ou contagem inflada de clientes.',
   'Nao estamos publicando claims de SOC 2, compliance formal ou customer stories com marca nomeada nesta pagina.',
   'O foco comercial continua em Apps + Pesquisa; outras superficies do produto ainda seguem em maturacao relativa.',
   'Preferimos mostrar evidence surfaces publicas e estado de readiness em vez de prometer um nivel de rollout que ainda nao fechou ponta a ponta.',
+]
+
+export const BUYER_READINESS_LINKS: CustomerProofLink[] = [
+  {
+    label: 'Pack de procurement',
+    href: '/docs/procurement-starter-pack',
+    note: 'Organiza a ordem de leitura publica para due diligence, procurement e alinhamento inicial com champions tecnicos.',
+  },
+  {
+    label: 'Trust center de seguranca',
+    href: '/security',
+    note: 'Mostra o que esta live agora, o que segue assistido e onde preferimos nao inflar a narrativa enterprise.',
+  },
+  {
+    label: 'Postura de compliance',
+    href: '/compliance',
+    note: 'Explica a base atual de governanca e deixa visivel o que ainda e alvo, planejamento ou rollout em aberto.',
+  },
 ]
 
 export const NEXT_STEPS: CustomerProofLink[] = [
@@ -99,5 +141,10 @@ export const NEXT_STEPS: CustomerProofLink[] = [
     label: 'Falar com vendas',
     href: '/contact-sales?source=customers-proof',
     note: 'Melhor para times com requisitos de governanca, procurement ou rollout assistido.',
+  },
+  {
+    label: 'Abrir procurement pack',
+    href: '/docs/procurement-starter-pack',
+    note: 'Melhor para buyers que precisam montar a primeira leitura publica antes de envolver times juridicos ou de seguranca.',
   },
 ]

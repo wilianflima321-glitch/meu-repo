@@ -100,6 +100,7 @@ const BENCHMARK_COMPARISONS = [
 const TRUST_ACTIONS = [
   { label: 'Ver status', href: '/status' },
   { label: 'Ler docs', href: '/docs' },
+  { label: 'Roadmap', href: '/roadmap' },
   { label: 'Pricing real', href: '/pricing' },
   { label: 'Customer proof', href: '/customers' },
 ]

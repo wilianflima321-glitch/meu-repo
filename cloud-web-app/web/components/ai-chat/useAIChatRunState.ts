@@ -31,7 +31,6 @@ export function useAIChatRunState({
   onSendMessage,
   streamingContent,
 }: UseAIChatRunStateParams) {
-  const [agents, setAgents] = useState<AgentInfo[]>([])
   const [isAIWorking, setIsAIWorking] = useState(false)
   const [runStartTime, setRunStartTime] = useState<number | null>(null)
 
@@ -45,58 +44,74 @@ export function useAIChatRunState({
     }
   }, [isLoading, runStartTime, streamingContent])
 
-  useEffect(() => {
-    if (agentCount > 1 && isAIWorking) {
-      const agentRoles = [
-        {
-          id: '1',
-          role: 'Architect',
-          name: 'Arquiteto',
-          currentTask: 'Analisando requisitos',
-          dependency: undefined,
-          progress: 75,
-          output: 'Estrutura definida',
-          confidence: 85,
-          cost: 0.0023,
-          status: 'working' as const,
-        },
-        {
-          id: '2',
-          role: 'Engineer',
-          name: 'Engenheiro',
-          currentTask: 'Implementando componentes',
-          dependency: 'Arquiteto',
-          progress: 45,
-          output: 'Componentes base criados',
-          confidence: 78,
-          cost: 0.0045,
-          status: 'working' as const,
-        },
-        {
-          id: '3',
-          role: 'QA',
-          name: 'QA',
-          currentTask: 'Aguardando implementacao',
-          dependency: 'Engenheiro',
-          progress: 0,
-          output: undefined,
-          confidence: 0,
-          cost: 0,
-          status: 'idle' as const,
-        },
-      ]
-
-      setAgents(agentRoles.slice(0, agentCount))
-      return
-    }
-
-    setAgents([])
-  }, [agentCount, isAIWorking])
-
   const selectedModel = useMemo(
     () => models.find((model) => model.id === currentModel) || models[0],
     [currentModel, models]
   )
+
+  const agents = useMemo<AgentInfo[]>(() => {
+    if (agentCount <= 1) return []
+
+    const blueprints = [
+      {
+        id: 'planner',
+        role: 'Planner lane',
+        name: 'Planner',
+        idleTask: 'Pronto para estruturar a proxima execucao.',
+        activeTask: 'Consolidando contexto e objetivos da resposta.',
+      },
+      {
+        id: 'builder',
+        role: 'Builder lane',
+        name: 'Builder',
+        idleTask: 'Aguardando uma execucao com telemetria aprofundada.',
+        activeTask: 'Faixa reservada para execucao e aplicacao de artefatos.',
+      },
+      {
+        id: 'reviewer',
+        role: 'Reviewer lane',
+        name: 'Reviewer',
+        idleTask: 'Aguardando diff, testes ou validacao adicional.',
+        activeTask: 'Faixa reservada para revisao e fechamento do loop.',
+      },
+    ] as const
+
+    return blueprints.slice(0, agentCount).map((blueprint, index) => {
+      if (!isAIWorking) {
+        return {
+          id: blueprint.id,
+          role: blueprint.role,
+          name: blueprint.name,
+          currentTask: blueprint.idleTask,
+          dependency: index > 0 ? blueprints[index - 1]?.name : undefined,
+          status: 'idle',
+          telemetry: 'unavailable',
+        }
+      }
+
+      if (index === 0) {
+        return {
+          id: blueprint.id,
+          role: blueprint.role,
+          name: blueprint.name,
+          currentTask: blueprint.activeTask,
+          dependency: undefined,
+          status: 'working',
+          telemetry: 'estimated',
+        }
+      }
+
+      return {
+        id: blueprint.id,
+        role: blueprint.role,
+        name: blueprint.name,
+        currentTask: 'Telemetria por agente ainda nao foi exposta nesta execucao.',
+        dependency: blueprints[index - 1]?.name,
+        status: 'queued',
+        telemetry: 'unavailable',
+      }
+    })
+  }, [agentCount, isAIWorking])
 
   const runDuration = runStartTime ? (Date.now() - runStartTime) / 1000 : undefined
   const estimatedCost =

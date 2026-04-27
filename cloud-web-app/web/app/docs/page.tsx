@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { Book, Code2, Rocket, Layers, Terminal, Puzzle, Search, ChevronRight, ArrowRight } from 'lucide-react'
+import { Book, Code2, Rocket, Layers, Terminal, Puzzle, Search, ChevronRight, ArrowRight, ShieldCheck } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
 
@@ -50,6 +50,31 @@ const sections: DocSection[] = [
         title: 'Endpoints e contratos',
         href: '/docs/api',
         summary: 'Visao da API publica e das rotas operacionais mais importantes.',
+      },
+    ],
+  },
+  {
+    title: 'Trust e buyers',
+    description: 'Starter pack para procurement, trust center publico e postura de compliance sem claims infladas.',
+    icon: ShieldCheck,
+    color: 'text-[var(--aethel-info-light)]',
+    bgColor: 'bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)]',
+    href: '/docs/procurement-starter-pack',
+    items: [
+      {
+        title: 'Procurement starter pack',
+        href: '/docs/procurement-starter-pack',
+        summary: 'Ordem de leitura publica para due diligence, champion tecnico e conversa enterprise.',
+      },
+      {
+        title: 'Trust center de seguranca',
+        href: '/security',
+        summary: 'Separa o que esta live, parcial e planejado sem maquiar maturidade.',
+      },
+      {
+        title: 'Panorama de compliance',
+        href: '/compliance',
+        summary: 'Explica governanca atual, limites publicos e o que ainda segue como alvo.',
       },
     ],
   },
@@ -142,6 +167,16 @@ const quickLinks: DocLink[] = [
     summary: 'Como chat, editor e preview convivem no mesmo shell de produto.',
   },
   {
+    title: 'Procurement starter pack',
+    href: '/docs/procurement-starter-pack',
+    summary: 'Como buyers podem revisar seguranca, compliance e rollout com base em artefatos publicos reais.',
+  },
+  {
+    title: 'Roadmap publico',
+    href: '/roadmap',
+    summary: 'Visao honesta do que esta live, parcial e planejado sem transformar auditoria em promessa falsa.',
+  },
+  {
     title: 'Roadmap de Games',
     href: '/docs/games',
     summary: 'Estado atual do modulo Games sem claims infladas.',
@@ -214,10 +249,12 @@ export default function DocsPage() {
             <div className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_35%,transparent)] p-5 shadow-[0_24px_60px_rgba(2,8,23,0.32)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Acesso rapido</p>
               <div className="mt-4 space-y-3 text-sm text-[var(--aethel-text-secondary)]">
-                <p>Use a busca para filtrar guias existentes e entrar mais rapido em Primeiros passos, API, IDE, Games, Films e changelog.</p>
+                <p>Use a busca para filtrar guias existentes e entrar mais rapido em Primeiros passos, API, trust, roadmap, IDE, Games, Films e changelog.</p>
                 <div className="flex flex-wrap gap-2">
                   <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] text-[var(--aethel-text-primary)]">Primeiros passos</span>
                   <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] text-[var(--aethel-text-primary)]">API</span>
+                  <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] text-[var(--aethel-text-primary)]">Trust</span>
+                  <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] text-[var(--aethel-text-primary)]">Roadmap</span>
                   <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] text-[var(--aethel-text-primary)]">IDE</span>
                   <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-3 py-1 text-[11px] text-[var(--aethel-text-primary)]">Suporte</span>
                 </div>

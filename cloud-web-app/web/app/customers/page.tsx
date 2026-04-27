@@ -4,7 +4,15 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Compass, ShieldCheck, Sparkles, Users2 } from 'lucide-react'
 import PublicFooter from '@/components/ui/PublicFooter'
 import PublicHeader from '@/components/ui/PublicHeader'
-import { HONEST_NOTES, NEXT_STEPS, PUBLIC_EVIDENCE, TEAM_PROFILES, USE_CASES } from './customerProofContent'
+import {
+  BUYER_READINESS_LINKS,
+  COMPOSITE_EVALUATIONS,
+  HONEST_NOTES,
+  NEXT_STEPS,
+  PUBLIC_EVIDENCE,
+  TEAM_PROFILES,
+  USE_CASES,
+} from './customerProofContent'
 
 export const metadata: Metadata = {
   title: 'Clientes | Aethel Studio',
@@ -192,6 +200,40 @@ export default function CustomersPage() {
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)]">{item.label}</h3>
                     <ArrowRight className="h-4 w-4 text-[var(--aethel-text-tertiary)] transition group-hover:translate-x-0.5 group-hover:text-[var(--aethel-info-light)]" />
+                  </div>
+                  <p className="mt-2 text-sm leading-7 text-[var(--aethel-text-secondary)]">{item.note}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="rounded-[32px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(135deg,color-mix(in_srgb,var(--aethel-success)_10%,transparent),color-mix(in_srgb,var(--aethel-surface-secondary)_66%,transparent))] p-6 shadow-[0_24px_90px_rgba(2,8,23,0.24)] sm:p-8">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-success-light)]">Snapshots compostos</p>
+              <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Como a prova publica costuma ser usada por buyers e champions.</h2>
+              <p className="mt-3 text-sm leading-7 text-[var(--aethel-text-secondary)]">
+                Nao sao case studies nomeados. Sao trilhas compostas que explicam como times reais costumam validar o Aethel sem precisarmos inventar logos, porcentagens ou resultados fechados.
+              </p>
+            </div>
+
+            <div className="mt-8 grid gap-5 xl:grid-cols-3">
+              {COMPOSITE_EVALUATIONS.map((evaluation) => (
+                <SectionCard key={evaluation.title} {...evaluation} />
+              ))}
+            </div>
+
+            <div className="mt-8 grid gap-4 lg:grid-cols-3">
+              {BUYER_READINESS_LINKS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="group rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] p-5 transition hover:border-[color-mix(in_srgb,var(--aethel-success)_34%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_72%,transparent)]"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)]">{item.label}</h3>
+                    <ArrowRight className="h-4 w-4 text-[var(--aethel-success-light)] transition group-hover:translate-x-0.5" />
                   </div>
                   <p className="mt-2 text-sm leading-7 text-[var(--aethel-text-secondary)]">{item.note}</p>
                 </Link>
