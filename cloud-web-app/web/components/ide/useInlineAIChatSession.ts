@@ -1,27 +1,40 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { DEFAULT_OPENROUTER_MODEL_ID } from '@/lib/ai/openrouter-models'
+import { buildLocalDemoChatContent, consumeLocalDemoUsage } from '@/lib/ai-chat-local-demo'
+import {
+  fetchAiProviderStatus,
+  type AiProviderStatusResponse,
+} from '@/lib/ai-provider-status-client'
+import { inferAdvancedProfile, requestAdvancedChat } from '@/lib/ai-chat-advanced-client'
 
 import {
+  buildInlineAIRequestMessage,
   buildContextShiftMessage,
   buildWelcomeMessage,
   createInlineAIMessage,
+  extractAdvancedResponseContent,
   extractCodeBlocks,
-  generateMockResponse,
   type InlineAIFileContext,
   type InlineAIMessage,
+  type InlineAIProjectContext,
 } from './InlineAIChat.helpers'
 
-export function useInlineAIChatSession(activeFile?: InlineAIFileContext) {
+export function useInlineAIChatSession(
+  activeFile?: InlineAIFileContext,
+  projectContext?: InlineAIProjectContext,
+) {
   const [messages, setMessages] = useState<InlineAIMessage[]>(() => [buildWelcomeMessage(activeFile)])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isExpanded, setIsExpanded] = useState(true)
   const [showContext, setShowContext] = useState(false)
+  const [providerStatus, setProviderStatus] = useState<AiProviderStatusResponse | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const responseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestAbortRef = useRef<AbortController | null>(null)
   const lastActivePathRef = useRef<string | undefined>(activeFile?.path)
 
   useEffect(() => {
@@ -34,10 +47,23 @@ export function useInlineAIChatSession(activeFile?: InlineAIFileContext) {
 
   useEffect(() => {
     return () => {
-      if (responseTimerRef.current) {
-        clearTimeout(responseTimerRef.current)
-      }
+      requestAbortRef.current?.abort()
     }
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    void (async () => {
+      try {
+        const status = await fetchAiProviderStatus(controller.signal)
+        setProviderStatus(status)
+      } catch {
+        setProviderStatus(null)
+      }
+    })()
+
+    return () => controller.abort()
   }, [])
 
   useEffect(() => {
@@ -49,9 +75,9 @@ export function useInlineAIChatSession(activeFile?: InlineAIFileContext) {
 
     const previousPath = lastActivePathRef.current
     lastActivePathRef.current = nextPath
-    setMessages((previousMessages) => [
-      ...previousMessages,
-      buildContextShiftMessage(activeFile, previousPath),
+      setMessages((previousMessages) => [
+        ...previousMessages,
+        buildContextShiftMessage(activeFile, previousPath),
     ])
   }, [activeFile])
 
@@ -63,10 +89,7 @@ export function useInlineAIChatSession(activeFile?: InlineAIFileContext) {
         return
       }
 
-      if (responseTimerRef.current) {
-        clearTimeout(responseTimerRef.current)
-        responseTimerRef.current = null
-      }
+      requestAbortRef.current?.abort()
 
       setMessages((previousMessages) => [
         ...previousMessages,
@@ -75,20 +98,76 @@ export function useInlineAIChatSession(activeFile?: InlineAIFileContext) {
       setInput('')
       setIsLoading(true)
 
-      const responseContent = generateMockResponse(nextPrompt, activeFile)
+      void (async () => {
+        try {
+          let status = providerStatus
+          if (!status) {
+            status = await fetchAiProviderStatus()
+            setProviderStatus(status)
+          }
 
-      responseTimerRef.current = setTimeout(() => {
-        setMessages((previousMessages) => [
-          ...previousMessages,
-          createInlineAIMessage('assistant', responseContent, {
-            codeBlocks: extractCodeBlocks(responseContent),
-          }),
-        ])
-        setIsLoading(false)
-        responseTimerRef.current = null
-      }, 1100)
+          const profile = inferAdvancedProfile(nextPrompt)
+          const requestMessage = buildInlineAIRequestMessage({
+            prompt: nextPrompt,
+            activeFile,
+            projectContext,
+          })
+
+          let responseContent = ''
+
+          if (!status?.configured && !status?.demoModeEnabled) {
+            const usage = consumeLocalDemoUsage(status?.demoDailyLimit)
+            responseContent = usage.allowed
+              ? buildLocalDemoChatContent({
+                  message: nextPrompt,
+                  qualityMode: profile.qualityMode,
+                  agentCount: profile.agentCount,
+                  enableWebResearch: profile.enableWebResearch,
+                  remaining: usage.remaining,
+                  limit: usage.limit,
+                })
+              : `DEMO_LIMIT_REACHED: limite diario do demo local atingido (${usage.used}/${usage.limit}). Configure um provider em /settings?tab=api ou tente novamente em ${usage.resetAt}.`
+          } else {
+            const controller = new AbortController()
+            requestAbortRef.current = controller
+
+            const result = await requestAdvancedChat({
+              message: requestMessage,
+              model: DEFAULT_OPENROUTER_MODEL_ID,
+              messages: [{ role: 'user', content: requestMessage }],
+              profileOverride: profile,
+              signal: controller.signal,
+            })
+
+            responseContent = extractAdvancedResponseContent(result.raw)
+          }
+
+          setMessages((previousMessages) => [
+            ...previousMessages,
+            createInlineAIMessage('assistant', responseContent || 'Sem resposta da IA.', {
+              codeBlocks: extractCodeBlocks(responseContent),
+            }),
+          ])
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+            return
+          }
+
+          const fallbackContent = createInlineAIMessage(
+            'assistant',
+            activeFile
+              ? `Nao consegui consultar a IA agora. Posso continuar em modo local explicando ou revisando **${activeFile.path}** se voce quiser tentar novamente.`
+              : 'Nao consegui consultar a IA agora. Tente novamente em alguns instantes ou abra um arquivo para eu responder com contexto mais forte.',
+          )
+
+          setMessages((previousMessages) => [...previousMessages, fallbackContent])
+        } finally {
+          requestAbortRef.current = null
+          setIsLoading(false)
+        }
+      })()
     },
-    [activeFile, input, isLoading],
+    [activeFile, input, isLoading, projectContext, providerStatus],
   )
 
   const stagePrompt = useCallback((prompt: string) => {

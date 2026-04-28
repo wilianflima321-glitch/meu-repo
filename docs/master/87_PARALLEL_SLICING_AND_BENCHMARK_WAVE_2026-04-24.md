@@ -411,6 +411,10 @@ After Wave 1 stabilizes:
   - controller changes only trigger a full reload after an explicit user-driven `skipWaiting` action
   - `components/ServiceWorkerProvider.tsx` now persists update-prompt dismissal for one hour and keys its prompt/offline chrome off the truly gated enablement path
   - coverage exists in `__tests__/service-worker/useServiceWorker.test.tsx`
+- the shared state provider stack is calmer too:
+  - `lib/providers/AethelProvider.tsx` now accepts `runtimeReady`, so auth, wallet, onboarding, and websocket work no longer wake up before the shared runtime says the studio lane is ready
+  - `components/providers/runtime/FullStudioRuntime.tsx` now passes `deferredActivation.sessionTrackingReady` into `AethelProvider`
+  - coverage exists in `__tests__/providers/AethelProvider.runtimeReady.test.tsx`
 - the preview/runtime trust lane also advanced again:
   - `usePreviewRuntime.ts`, `previewRuntime.types.ts`, `previewRuntimeState.ts`, `RuntimePreviewSurface.tsx`, and `PreviewLifecycleChrome.tsx` now preserve provider identity, env/setup hints, recommended next action, and clearer failure guidance from `/api/preview/runtime-provision`
   - this moves failed/warming/idle runtime states closer to the trust grammar expected from Replit/Vercel review surfaces
@@ -418,6 +422,11 @@ After Wave 1 stabilizes:
   - `components/ai-chat/AIChatPendingDiffTray.tsx` now surfaces pending file edits directly above the composer with `Open diff`, `Reject`, and `Apply now`
   - `components/ide/AIChatPanelPro.tsx` mounts that tray whenever `editorBridge.pendingDiff` exists, which makes the main artifact-review loop more obvious before the user opens the full ops sidebar
   - focused coverage exists in `__tests__/ai-chat/AIChatPendingDiffTray.test.tsx`
+- the inline AI lane also stopped being only a local mock loop:
+  - `components/ide/useInlineAIChatSession.ts` now resolves provider status, uses the advanced chat request path when possible, and only falls back to the bounded local demo when providers are absent
+  - `components/ide/InlineAIChat.helpers.ts` now builds an explicit inline request envelope with file/project context and parses advanced-chat response payloads
+  - `components/ide/InlineAIChat.tsx` now forwards project context into that real session layer
+  - focused coverage exists in `__tests__/ide/InlineAIChat.helpers.test.ts`
 - the heaviest remaining editor hotspot finally lost a chunk of density:
   - `MonacoEditorPro.tsx` dropped to `667` lines
   - theming moved into `components/editor/MonacoEditorPro.theme.ts`
@@ -443,7 +452,7 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
-2. keep full compile-mode build green while tracing `build:prerender-probe` separately, but note that the freshest `2026-04-28` compile-mode rerun still did **not** revalidate with a new PASS and again stalled at `Creating an optimized production build ...`
+2. keep full compile-mode build green while tracing `build:prerender-probe` separately, but note that the freshest `2026-04-28` compile-mode reruns still did **not** revalidate with a new PASS; one stalled at `Creating an optimized production build ...`, and the inline/runtime follow-up advanced into late trace collection before timing out without final success
 3. keep reducing shared-runtime noise through `FullStudioRuntime.tsx`, `ServiceWorkerProvider.tsx`, `useServiceWorker.tsx`, and `AethelProvider.tsx`
 4. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
 5. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`

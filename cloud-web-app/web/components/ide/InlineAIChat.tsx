@@ -39,7 +39,7 @@ export function InlineAIChat({
     stagePrompt,
     toggleExpanded,
     toggleContext,
-  } = useInlineAIChatSession(activeFile)
+  } = useInlineAIChatSession(activeFile, projectContext)
 
   const bodyId = useId()
   const contextId = useId()

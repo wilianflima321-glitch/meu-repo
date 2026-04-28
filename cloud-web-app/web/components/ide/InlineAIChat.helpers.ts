@@ -207,6 +207,48 @@ export function getLoadingLabel(
   return 'Rascunhando uma resposta geral.'
 }
 
+export function buildInlineAIRequestMessage(params: {
+  prompt: string
+  activeFile?: InlineAIFileContext
+  projectContext?: InlineAIProjectContext
+}): string {
+  const sections: string[] = []
+  const normalizedPrompt = params.prompt.trim()
+
+  if (params.activeFile) {
+    sections.push(
+      [
+        'INLINE_FILE_CONTEXT',
+        `path: ${params.activeFile.path}`,
+        `language: ${params.activeFile.language}`,
+        'content:',
+        params.activeFile.content.slice(0, 6000),
+      ].join('\n'),
+    )
+  }
+
+  if (params.projectContext) {
+    sections.push(
+      [
+        'INLINE_PROJECT_CONTEXT',
+        `project: ${params.projectContext.name}`,
+        `knownFiles: ${params.projectContext.files.slice(0, 24).join(', ') || 'n/a'}`,
+      ].join('\n'),
+    )
+  }
+
+  sections.push(
+    [
+      'INLINE_OPERATOR_GOAL',
+      normalizedPrompt,
+      '',
+      'Responda de forma operacional. Quando sugerir codigo, prefira blocos aplicaveis e explique rapidamente o alvo da mudanca.',
+    ].join('\n'),
+  )
+
+  return sections.join('\n\n')
+}
+
 export function getInlineAIFileName(path: string): string {
   const segments = path.split(/[\\/]/)
   return segments[segments.length - 1] || path
@@ -227,6 +269,21 @@ export function extractCodeBlocks(content: string): InlineAIMessageCodeBlock[] {
   }
 
   return blocks
+}
+
+export function extractAdvancedResponseContent(raw: string): string {
+  try {
+    const data = JSON.parse(raw)
+    return (
+      data?.choices?.[0]?.message?.content ||
+      data?.message?.content ||
+      data?.content ||
+      data?.output?.text ||
+      raw
+    )
+  } catch {
+    return raw
+  }
 }
 
 export function stripCodeBlocks(content: string): string {

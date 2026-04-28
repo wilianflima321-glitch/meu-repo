@@ -288,28 +288,30 @@ const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 interface AethelProviderProps {
   children: ReactNode;
+  runtimeReady?: boolean;
 }
 
-export function AethelProvider({ children }: AethelProviderProps) {
+export function AethelProvider({ children, runtimeReady = true }: AethelProviderProps) {
   const [state, dispatch] = useReducer(aethelReducer, initialState);
   const wsRef = useRef<WebSocket | null>(null);
   const isBrowser = typeof window !== 'undefined';
+  const allowRuntimeFetch = isBrowser && runtimeReady;
 
   // Fetch authenticated user (JWT-only, no server sessions)
-  const { data: userData } = useSWR(isBrowser ? '/api/auth/me' : null, fetcher, {
+  const { data: userData } = useSWR(allowRuntimeFetch ? '/api/auth/me' : null, fetcher, {
     revalidateOnFocus: false,
   });
 
   // Fetch wallet data
   const { data: walletData, mutate: mutateWallet } = useSWR(
-    isBrowser && state.isAuthenticated ? '/api/wallet/summary' : null,
+    allowRuntimeFetch && state.isAuthenticated ? '/api/wallet/summary' : null,
     fetcher,
     { refreshInterval: 30000 }
   );
 
   // Fetch onboarding status
   const { data: onboardingData } = useSWR(
-    isBrowser && state.isAuthenticated ? '/api/onboarding' : null,
+    allowRuntimeFetch && state.isAuthenticated ? '/api/onboarding' : null,
     fetcher
   );
 
@@ -433,7 +435,7 @@ export function AethelProvider({ children }: AethelProviderProps) {
 
   // WebSocket connection for real-time updates
   useEffect(() => {
-    if (!state.isAuthenticated) return;
+    if (!runtimeReady || !state.isAuthenticated) return;
 
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
     
@@ -467,7 +469,7 @@ export function AethelProvider({ children }: AethelProviderProps) {
     return () => {
       wsRef.current?.close();
     };
-  }, [state.isAuthenticated, handleWebSocketMessage]);
+  }, [runtimeReady, state.isAuthenticated, handleWebSocketMessage]);
 
   // Convenience methods
   const updateWallet = useCallback((data: Partial<WalletState>) => {

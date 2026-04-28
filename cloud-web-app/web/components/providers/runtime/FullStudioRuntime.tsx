@@ -41,7 +41,7 @@ export default function FullStudioRuntime({
               <SessionTrackerProvider enabled={deferredActivation.sessionTrackingReady}>
                 <CommandRegistryProvider>
                   <DevToolsProvider>
-                    <AethelProvider>
+                    <AethelProvider runtimeReady={deferredActivation.sessionTrackingReady}>
                       <OnboardingProvider enabled={onboardingChrome}>
                         <StudioRuntimeCommandRegistration />
                         {onboardingChrome ? <WelcomeModal /> : null}
