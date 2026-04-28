@@ -527,6 +527,16 @@ The newest high-ROI slices are now explicit too:
    - keep shrinking the shared-runtime/build search space
    - move preview further from runtime toolbar toward review-surface authority
 
+### Wave 6 - inline convergence and root-boundary isolation
+The next measured tightening now looks like this:
+1. inline convergence
+   - `InlineAIChat.helpers.ts`, `useInlineAIChatSession.ts`, and `InlineAIChatMessageSurface.tsx` now reuse the same evidence grammar as the main AI console
+   - this means the lightweight editor lane is no longer blind to `traceSummary`, which narrows the product gap between \"full AI ops\" and \"fast inline action\"
+2. root-boundary isolation
+   - the latest local read suggests the residual prerender cluster is no longer best explained by missing `/404` or `/500`
+   - because the pages manifest already registers those routes, the highest-signal next experiment is now the App Router root boundary in `app/layout.tsx`
+   - the honest recommendation is to test one small root-level static/dynamic isolation patch there before spending more cycles on fallback pages
+
 ## Definition Of Done For Every Slice
 A slice is only complete when all of this remains true:
 - lint passes

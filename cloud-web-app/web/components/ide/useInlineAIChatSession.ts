@@ -15,6 +15,7 @@ import {
   buildWelcomeMessage,
   createInlineAIMessage,
   extractAdvancedResponseContent,
+  extractAdvancedTraceArtifact,
   extractCodeBlocks,
   type InlineAIFileContext,
   type InlineAIMessage,
@@ -114,6 +115,7 @@ export function useInlineAIChatSession(
           })
 
           let responseContent = ''
+          let traceArtifact: InlineAIMessage['traceArtifact'] = null
 
           if (!status?.configured && !status?.demoModeEnabled) {
             const usage = consumeLocalDemoUsage(status?.demoDailyLimit)
@@ -140,12 +142,14 @@ export function useInlineAIChatSession(
             })
 
             responseContent = extractAdvancedResponseContent(result.raw)
+            traceArtifact = extractAdvancedTraceArtifact(result.raw)
           }
 
           setMessages((previousMessages) => [
             ...previousMessages,
             createInlineAIMessage('assistant', responseContent || 'Sem resposta da IA.', {
               codeBlocks: extractCodeBlocks(responseContent),
+              traceArtifact,
             }),
           ])
         } catch (error) {

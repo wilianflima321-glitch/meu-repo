@@ -1,4 +1,5 @@
 import { Check, Code2, FileText, Sparkles, type LucideIcon } from 'lucide-react'
+import { buildTraceArtifact, type AIChatTraceArtifact } from '@/components/ai-chat/ai-chat-evidence'
 
 export interface InlineAIFileContext {
   path: string
@@ -30,6 +31,7 @@ export interface InlineAIMessage {
   timestamp: Date
   codeBlocks?: InlineAIMessageCodeBlock[]
   isStreaming?: boolean
+  traceArtifact?: AIChatTraceArtifact | null
 }
 
 export interface SuggestionChip {
@@ -283,6 +285,15 @@ export function extractAdvancedResponseContent(raw: string): string {
     )
   } catch {
     return raw
+  }
+}
+
+export function extractAdvancedTraceArtifact(raw: string): AIChatTraceArtifact | null {
+  try {
+    const data = JSON.parse(raw)
+    return buildTraceArtifact(data?.traceSummary)
+  } catch {
+    return null
   }
 }
 

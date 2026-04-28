@@ -742,6 +742,22 @@ This file is the short scoreboard that answers:
   - `build:prerender-probe` remains open
   - the new evidence workflow is a confirmed product improvement, while the pages residual experiment is still only a bounded parity attempt
 
+## Delta 2026-04-28 - Inline evidence convergence
+- the new evidence grammar is no longer limited to the main AI console:
+  - `components/ide/InlineAIChat.helpers.ts`
+  - `components/ide/useInlineAIChatSession.ts`
+  - `components/ide/InlineAIChatMessageSurface.tsx`
+- practical effect:
+  - inline AI now extracts `traceSummary` into the same evidence artifact shape already used by the main ops lane
+  - assistant replies in the inline lane can show provenance, evidence counts, risk/tool telemetry, and model/provider hints directly next to the suggested code
+  - this closes a real gap between the full AI console and the lightweight inline lane, moving both toward the same `research -> answer -> evidence -> apply` workflow
+- focused regression coverage now exists in:
+  - `__tests__/ide/InlineAIChat.helpers.test.ts`
+  - `__tests__/ide/InlineAIChatMessageSurface.test.tsx`
+- the latest residual parity reading also got sharper:
+  - because `.next/server/pages-manifest.json` now registers `/404` and `/500`, the residual prerender cluster is less likely to be a simple missing-pages fallback problem
+  - the highest-signal next isolation experiment is now the root App Router boundary in `app/layout.tsx`, not more churn in `pages/404.tsx` or `pages/500.tsx`
+
 ## One-Line Truth
 The work now is not discovering what to do.
 The work is executing the already-known sequence without drift.

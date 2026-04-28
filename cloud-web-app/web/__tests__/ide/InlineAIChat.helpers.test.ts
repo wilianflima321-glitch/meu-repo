@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildInlineAIRequestMessage, extractAdvancedResponseContent } from '@/components/ide/InlineAIChat.helpers'
+import {
+  buildInlineAIRequestMessage,
+  extractAdvancedResponseContent,
+  extractAdvancedTraceArtifact,
+} from '@/components/ide/InlineAIChat.helpers'
 
 describe('InlineAIChat helpers', () => {
   it('builds a context-rich inline AI request message', () => {
@@ -32,5 +36,23 @@ describe('InlineAIChat helpers', () => {
 
     expect(extractAdvancedResponseContent(raw)).toContain('const ok = true')
     expect(extractAdvancedResponseContent('plain text')).toBe('plain text')
+  })
+
+  it('extracts the trace artifact from advanced chat payloads', () => {
+    const raw = JSON.stringify({
+      content: 'Resposta pronta',
+      traceSummary: {
+        traceId: 'trace_inline_123',
+        summary: 'Resposta gerada no lane inline.',
+        evidence: [{ kind: 'context', label: 'historyContextMessages=1' }],
+        telemetry: { provider: 'openrouter', model: 'openai/gpt-4.1', tokensUsed: 321 },
+      },
+    })
+
+    const artifact = extractAdvancedTraceArtifact(raw)
+
+    expect(artifact?.traceId).toBe('trace_inline_123')
+    expect(artifact?.summary).toContain('lane inline')
+    expect(artifact?.evidence[0]?.label).toBe('historyContextMessages=1')
   })
 })

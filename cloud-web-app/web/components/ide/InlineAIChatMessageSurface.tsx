@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { AIChatEvidenceCard } from '@/components/ai-chat/AIChatEvidenceCard'
 import { tokens } from '@/lib/design-tokens'
 import { Bot, Sparkles, User } from 'lucide-react'
 
@@ -171,6 +172,12 @@ function MessageBubble({ message, onApplyCode }: MessageBubbleProps) {
             onApply={onApplyCode}
           />
         ))}
+
+        {!isUser && !isSystem && message.traceArtifact ? (
+          <div style={{ marginTop: tokens.spacing['3'] }}>
+            <AIChatEvidenceCard artifact={message.traceArtifact} compact />
+          </div>
+        ) : null}
       </div>
     </div>
   )
