@@ -7,6 +7,7 @@ interface AIChatPendingDiffTrayProps {
   onOpenDiff: () => void
   onAcceptDiff: () => void
   onRejectDiff: () => void
+  diffOpen?: boolean
 }
 
 function getChangedLineCount(pendingDiff: ChatDiffFile): number {
@@ -23,6 +24,7 @@ export function AIChatPendingDiffTray({
   onOpenDiff,
   onAcceptDiff,
   onRejectDiff,
+  diffOpen = false,
 }: AIChatPendingDiffTrayProps) {
   const changedLineCount = getChangedLineCount(pendingDiff)
   const fileLabel = getShortPath(pendingDiff.path)
@@ -48,7 +50,7 @@ export function AIChatPendingDiffTray({
             onClick={onOpenDiff}
             className="rounded-md border border-[var(--aethel-border-primary)] px-3 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition-colors hover:border-[var(--aethel-border-strong)] hover:text-[var(--aethel-text-primary)]"
           >
-            Open diff
+            {diffOpen ? 'Hide review' : 'Open diff'}
           </button>
           <button
             type="button"

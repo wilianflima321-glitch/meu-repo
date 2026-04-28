@@ -104,8 +104,8 @@ export function ModernIDEShellCenterStack({
           <div
             style={{
               height: `${chatSize}%`,
-              minHeight: '160px',
-              maxHeight: '55%',
+              minHeight: '136px',
+              maxHeight: '42%',
               borderTop: `1px solid ${BORDER_SECONDARY}`,
               background: 'rgba(15, 23, 42, 0.82)',
               display: 'flex',

@@ -40,10 +40,10 @@ export function BottomDock({
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacing['2'],
-    padding: `${tokens.spacing['2']} ${tokens.spacing['4']}`,
+    padding: `${tokens.spacing['1.5']} ${tokens.spacing['3']}`,
     background: gradients.glassStrong,
     borderTop: `1px solid ${BORDER_SECONDARY}`,
-    minHeight: '52px',
+    minHeight: '44px',
     overflowX: 'auto',
   };
 

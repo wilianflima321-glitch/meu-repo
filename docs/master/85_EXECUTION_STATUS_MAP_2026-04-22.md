@@ -570,6 +570,45 @@ This file is the short scoreboard that answers:
 - this does not yet make inline AI fully benchmark-complete, but it materially reduces the old “different brain / demo-only lane” gap versus Cursor/Windsurf
 - focused coverage now exists in `__tests__/ide/InlineAIChat.helpers.test.ts`
 
+
+### Public shell server wrappers
+- the shared public lane is less fragile in the App Router now:
+  - `app/contact/page.tsx` and `app/docs/page.tsx` are now server wrappers that only export metadata and mount thin client islands
+  - the interactive density moved into `app/contact/contact-content.tsx` and `app/docs/docs-content.tsx`
+- this follows the same public-shell reduction already applied to `/contact-sales`, so the buyer/docs path is less likely to drag extra client work into prerender-sensitive boundaries
+
+### Proposal review closer to the artifact
+- the main AI lane now exposes a first-class inline proposal surface instead of forcing the user into the deeper ops sidebar:
+  - `components/ai-chat/AIChatPendingDiffTray.tsx` now toggles `Open diff` / `Hide review`
+  - `components/ide/AIChatPanelPro.tsx` now carries local `showInlineDiffPreview` state
+  - `components/ai-chat/AIChatProposalPreview.tsx` now mounts `MonacoChatDiffPanel` directly above the composer when `pendingDiff` exists
+- that moves the review/apply moment closer to the benchmark posture from the reference images: proposal visible in the main lane, not hidden behind advanced tooling
+- focused coverage now exists in `__tests__/ai-chat/AIChatProposalPreview.test.tsx`
+
+### Prerender isolation breakthrough
+- the `2026-04-28` prerender investigation finally produced a high-signal isolation result:
+  - removing `app/error.tsx` collapses the widespread App Router `Cannot read properties of null (reading 'useContext')` export cluster
+  - with that root boundary removed, `cloud-web-app/web/build-probe-2026-04-28-error-disabled-prerender.log` only fails on `/404` and `/500`
+- reintroducing a minimal pages fallback chain (`pages/_app.tsx`, `pages/_document.tsx`, `pages/_error.tsx`, `pages/404.tsx`, `pages/500.tsx`) did **not** solve the remaining pages-runtime fault:
+  - `cloud-web-app/web/build-probe-2026-04-28-pages-error-chain-prerender.log` proves the `<Html> should not be imported outside of pages/_document` class still survives
+  - that same fallback-chain experiment also brings the App Router `useContext` export cluster back, so it is not a safe permanent mitigation
+- the honest highest-confidence local direction now is:
+  - keep `app/error.tsx` removed
+  - keep pages fallback files absent
+  - treat `/404` + `/500` as the separate residual parity class
+- compile-mode also stayed healthy after the root error-boundary removal:
+  - `cloud-web-app/web/build-probe-2026-04-28-error-removed-compile.log` = PASS
+
+### Artifact-first shell density
+- the canonical workbench now leans a bit closer to the target images for new sessions:
+  - `useWorkbenchShellState.ts` now defaults `previewMode` to `viewport3d`
+  - the no-storage fallback opens preview from `1280px` instead of `1440px`
+  - fallback panel proportions now bias more toward a denser center/editor lane and a calmer preview/chat footprint
+  - `workbenchPreviewPaneModels.ts` now places `Visual (3D)` and `Visual (UI)` ahead of runtime-only views in the mode selector
+- the chrome itself also tightened:
+  - `chromeStyles.ts`, `chromeHeader.tsx`, `chromeBottomDock.tsx`, `sideColumnSidebar.tsx`, `sideColumnPreview.tsx`, `ModernIDEShellCenterStack.tsx`, `WorkbenchPreviewModeHeader.tsx`, and `WorkbenchSidebar.tsx` now use smaller paddings/heights/width clamps so the shell feels less inflated and more production-dense
+- this is a UX-density move, not a structural rewrite, but it materially improves first-impression parity with the visual references
+
 ### Validation note
 - `npm run build` passed again on `2026-04-26` in the compile-mode production path
 - `npm run typecheck` hit the known transient `.next/types` mismatch while a fresh build was regenerating artifacts, then passed again immediately after the build completed
@@ -584,9 +623,18 @@ This file is the short scoreboard that answers:
   - `cloud-web-app/web/build-probe-2026-04-28-externalized-e2b-runtime.log` completed successfully with a fresh compile-mode PASS
   - `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-compile.log` reconfirmed that PASS after a public-route App Router cleanup
   - `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-prerender.log` no longer stalled at startup; it reached `Generating static pages (224/224)` and then failed deterministically on `/404`, `/500`, and the wider App Router `useContext` export cluster
+- the newest `2026-04-28` isolation wave narrowed that even further:
+  - `cloud-web-app/web/build-probe-2026-04-28-proposal-preview-compile.log` passed while the new proposal-review surface was live
+  - `cloud-web-app/web/build-probe-2026-04-28-error-removed-compile.log` also passed after removing `app/error.tsx`
+  - `cloud-web-app/web/build-probe-2026-04-28-artifact-first-compile.log` reconfirmed compile-mode PASS after the workbench density/artifact-first posture pass
+  - `cloud-web-app/web/build-probe-2026-04-28-error-disabled-prerender.log` proved that removing `app/error.tsx` collapses the broad App Router `useContext` export cluster and leaves only `/404` + `/500`
+  - `cloud-web-app/web/build-probe-2026-04-28-pages-error-chain-prerender.log` proved that a reintroduced pages fallback chain does not solve the residual `<Html>` parity fault and also reopens the wider App Router failure family
+  - `cloud-web-app/web/build-probe-2026-04-28-artifact-first-prerender.log` did not add a stronger signal; it stalled again after `Linting and checking validity of types ...`
 - current honest state remains:
   - compile-mode build = freshly reconfirmed production mitigation on `2026-04-28`
-  - `build:prerender-probe` = still open, but now narrowed to deterministic pages-router/App Router parity failures instead of a blind build stall
+  - `build:prerender-probe` = still open, but the current search space is now much narrower:
+    - residual pages-runtime `/404` + `/500` `<Html>` fault
+    - root App Router export cluster only when `app/error.tsx` is present
 
 ## Still Open
 ### P0
@@ -594,9 +642,14 @@ This file is the short scoreboard that answers:
    - `npm run build` passed again on `2026-04-26` in the compile-mode production path (`cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`) and was freshly revalidated on `2026-04-28` in both `cloud-web-app/web/build-probe-2026-04-28-externalized-e2b-runtime.log` and `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-compile.log`
    - that compile-mode mitigation is still the best honest production path we have today
    - the old `e2b/dist/index.mjs` warning class is now materially reduced by `lib/server/e2b-runtime.ts`, direct imports in `lib/server/mention-context.ts`, runtime-only `y-websocket` util loading in `lib/server/websocket-server.ts`, and `experimental.serverComponentsExternalPackages: ['e2b']` in `next.config.js`
-   - `npm run build:prerender-probe` remains the open track; the freshest local rerun (`cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-prerender.log`) now fails deterministically instead of stalling:
+   - `npm run build:prerender-probe` remains the open track; the freshest useful local reruns now fail deterministically instead of stalling:
      - `/404` and `/500`: `<Html> should not be imported outside of pages/_document`
-     - shared export cluster: `Cannot read properties of null (reading 'useContext')`
+     - shared export cluster: `Cannot read properties of null (reading 'useContext')` only when `app/error.tsx` is present
+   - `cloud-web-app/web/build-probe-2026-04-28-error-disabled-prerender.log` is the strongest current isolation proof:
+     - with `app/error.tsx` removed, the shared App Router `useContext` cluster disappears and only `/404` + `/500` remain
+   - `cloud-web-app/web/build-probe-2026-04-28-pages-error-chain-prerender.log` shows that reintroducing minimal pages fallback files is not a valid permanent fix:
+     - `/404` and `/500` still fail with the `<Html>` parity fault
+     - the wider App Router `useContext` cluster returns
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
   - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces through extracted runtime modules, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
   - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`

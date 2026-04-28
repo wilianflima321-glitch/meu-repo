@@ -17,10 +17,10 @@ export function useModernIDEPanels({
   controlledResizePanel,
 }: UseModernIDEPanelsArgs) {
   const [internalPanelState, setInternalPanelState] = useState<PanelState>({
-    sidebar: { open: sidebarOpen, size: 20 },
-    editor: { open: true, size: 40 },
-    preview: { open: true, size: 40 },
-    chat: { open: false, size: 25 },
+    sidebar: { open: sidebarOpen, size: 18 },
+    editor: { open: true, size: 50 },
+    preview: { open: true, size: 32 },
+    chat: { open: false, size: 22 },
   });
   const [isCompact, setIsCompact] = useState(false);
 
@@ -34,7 +34,7 @@ export function useModernIDEPanels({
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        setIsCompact(entry.contentRect.width < 1024);
+        setIsCompact(entry.contentRect.width < 960);
       }
     });
 
@@ -46,9 +46,9 @@ export function useModernIDEPanels({
   }, []);
 
   const clampPanelSize = useCallback((panel: keyof PanelState, size: number) => {
-    if (panel === 'sidebar') return Math.min(32, Math.max(16, size));
-    if (panel === 'preview') return Math.min(55, Math.max(25, size));
-    if (panel === 'chat') return Math.min(45, Math.max(18, size));
+    if (panel === 'sidebar') return Math.min(30, Math.max(16, size));
+    if (panel === 'preview') return Math.min(45, Math.max(25, size));
+    if (panel === 'chat') return Math.min(40, Math.max(18, size));
     return Math.min(60, Math.max(25, size));
   }, []);
 

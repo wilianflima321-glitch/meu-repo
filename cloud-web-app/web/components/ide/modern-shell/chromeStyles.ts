@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
 import { gradients, tokens } from '@/lib/design-tokens';
 
-export const chromeBarPadding = `${tokens.spacing['2']} ${tokens.spacing['4']}`;
-export const chromeBarHeight = '48px';
+export const chromeBarPadding = `${tokens.spacing['1.5']} ${tokens.spacing['3']}`;
+export const chromeBarHeight = '44px';
 export const SURFACE_PRIMARY = 'var(--aethel-surface-primary)';
 export const SURFACE_SECONDARY = 'var(--aethel-surface-secondary)';
 export const TEXT_PRIMARY = 'var(--aethel-text-primary)';

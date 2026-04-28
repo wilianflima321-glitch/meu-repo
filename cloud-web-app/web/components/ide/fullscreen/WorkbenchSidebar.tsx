@@ -21,11 +21,11 @@ export function WorkbenchSidebar({
 }: WorkbenchSidebarProps) {
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-3 py-3">
+      <div className="flex items-center gap-2 border-b border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-2.5 py-2">
         <button
           type="button"
           onClick={() => onSidebarTabChange('explorer')}
-          className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
+          className={`flex-1 rounded-lg px-2.5 py-1.5 min-h-8 text-[10px] font-medium transition-colors ${
             sidebarTab === 'explorer'
               ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
               : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -36,7 +36,7 @@ export function WorkbenchSidebar({
         <button
           type="button"
           onClick={() => onSidebarTabChange('git')}
-          className={`flex-1 rounded-lg px-3 py-2 min-h-9 text-[11px] font-medium transition-colors ${
+          className={`flex-1 rounded-lg px-2.5 py-1.5 min-h-8 text-[10px] font-medium transition-colors ${
             sidebarTab === 'git'
               ? 'bg-[color-mix(in_srgb,var(--aethel-info)_18%,transparent)] text-[var(--aethel-info-light)]'
               : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'

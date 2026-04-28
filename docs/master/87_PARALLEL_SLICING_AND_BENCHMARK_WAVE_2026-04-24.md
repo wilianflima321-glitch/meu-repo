@@ -456,6 +456,25 @@ After Wave 1 stabilizes:
   - TS/JS symbol mapping moved into `components/editor/MonacoEditorPro.symbols.ts`
   - focused coverage exists in `__tests__/editor/MonacoEditorPro.symbols.test.ts`
 
+
+- the public-shell/App Router cleanup moved further again:
+  - `app/contact/page.tsx` and `app/docs/page.tsx` are now server wrappers over `contact-content.tsx` and `docs-content.tsx`
+  - that keeps metadata at the route boundary while the interactive buyer/docs surfaces live in thinner client islands
+- the AI lane now shows proposal review where the operator already is:
+  - `components/ai-chat/AIChatProposalPreview.tsx` mounts the diff surface inline in the main chat lane
+  - `components/ai-chat/AIChatPendingDiffTray.tsx` now toggles `Open diff` / `Hide review`
+  - `components/ide/AIChatPanelPro.tsx` now owns the lighter inline review toggle instead of forcing every review through the deeper ops sidebar
+  - focused coverage exists in `__tests__/ai-chat/AIChatProposalPreview.test.tsx`
+- the workbench default posture also got denser and more visual-first:
+  - `useWorkbenchShellState.ts` now defaults to `previewMode = 'viewport3d'`
+  - preview auto-open now starts at `1280px`
+  - fallback panel proportions and clamps now bias toward a tighter center lane through `useWorkbenchShellState.ts`, `useModernIDEPanels.ts`, `chromeStyles.ts`, `chromeHeader.tsx`, `chromeBottomDock.tsx`, `sideColumnSidebar.tsx`, `sideColumnPreview.tsx`, `ModernIDEShellCenterStack.tsx`, `WorkbenchPreviewModeHeader.tsx`, and `WorkbenchSidebar.tsx`
+- the prerender investigation also crossed an important threshold:
+  - removing `app/error.tsx` collapses the broad App Router `useContext` export cluster (`build-probe-2026-04-28-error-disabled-prerender.log`)
+  - reintroducing minimal pages fallback files does not solve the residual `/404` + `/500` `<Html>` parity failure and also reopens the wider export cluster (`build-probe-2026-04-28-pages-error-chain-prerender.log`)
+  - compile mode stayed healthy after the root-error removal in `build-probe-2026-04-28-error-removed-compile.log`
+  - the later density/artifact-first pass also held compile mode green in `build-probe-2026-04-28-artifact-first-compile.log`
+
 ### Wave 3 - domain editors
 After the workbench/studio shell is calmer:
 1. `SceneEditor.tsx`
@@ -474,14 +493,15 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
-2. keep full compile-mode build green while tracing `build:prerender-probe` separately; the freshest honest evidence is now a pair of real `2026-04-28` compile-mode PASS logs in `cloud-web-app/web/build-probe-2026-04-28-externalized-e2b-runtime.log` and `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-compile.log`, while the separate prerender probe remains explicitly open
-3. keep reducing shared-runtime noise through `FullStudioRuntime.tsx`, `ServiceWorkerProvider.tsx`, `useServiceWorker.tsx`, and `AethelProvider.tsx`
-4. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
-5. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
-6. keep moving the AI lane from "strong panel" to "operator surface" through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
-7. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
-8. continue Wave B in `ProjectsDashboardCollection.tsx`, `CreatorDashboardSections.tsx`, `app/admin/ai-monitor/ai-monitor-sections.tsx`, and `SettingsPageData.tsx` now that the route shells are calmer
-9. promote preview, collaboration, deploy, and public-shell confidence from present to trusted
+2. keep full compile-mode build green while tracing `build:prerender-probe` separately; the freshest honest evidence now includes `cloud-web-app/web/build-probe-2026-04-28-proposal-preview-compile.log` and `cloud-web-app/web/build-probe-2026-04-28-error-removed-compile.log`, while the separate prerender probe is narrower but still explicitly open
+3. keep the narrowed parity search focused on the residual `/404` + `/500` pages-runtime fault and the root App Router export cluster that only returns when `app/error.tsx` is present
+4. keep reducing shared-runtime noise through `FullStudioRuntime.tsx`, `ServiceWorkerProvider.tsx`, `useServiceWorker.tsx`, and `AethelProvider.tsx`
+5. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
+6. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
+7. keep moving the AI lane from "strong panel" to "operator surface" through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
+8. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
+9. continue Wave B in `ProjectsDashboardCollection.tsx`, `CreatorDashboardSections.tsx`, `app/admin/ai-monitor/ai-monitor-sections.tsx`, and `SettingsPageData.tsx` now that the route shells are calmer
+10. promote preview, collaboration, deploy, and public-shell confidence from present to trusted
 
 ## One-Line Reading
 The audits no longer leave us with ambiguity.

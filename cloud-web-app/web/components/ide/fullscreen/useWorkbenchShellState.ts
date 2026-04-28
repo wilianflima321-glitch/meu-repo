@@ -54,14 +54,14 @@ export function useWorkbenchShellState({
     const stored = window.localStorage.getItem(PREVIEW_ENABLED_STORAGE_KEY)
     if (stored === '1') return true
     if (stored === '0') return false
-    return window.innerWidth >= 1440
+    return window.innerWidth >= 1280
   })
   const [modernPanelState, setModernPanelState] = useState<ModernPanelState>(() => {
     const fallback: ModernPanelState = {
-      sidebar: { open: true, size: 20 },
-      editor: { open: true, size: 45 },
-      preview: { open: true, size: 35 },
-      chat: { open: false, size: 25 },
+      sidebar: { open: true, size: 18 },
+      editor: { open: true, size: 50 },
+      preview: { open: true, size: 32 },
+      chat: { open: false, size: 22 },
     }
 
     if (typeof window === 'undefined') return fallback
@@ -85,7 +85,7 @@ export function useWorkbenchShellState({
     const stored = window.localStorage.getItem(BOTTOM_PANEL_MODE_STORAGE_KEY)
     return stored === 'terminal' ? 'terminal' : 'chat'
   })
-  const [previewMode, setPreviewMode] = useState<PreviewMode>('runtime')
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('viewport3d')
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('explorer')
   const [entryNotice, setEntryNotice] = useState<EntryNotice | null>(null)
   const [showIntelliSense, setShowIntelliSense] = useState(false)

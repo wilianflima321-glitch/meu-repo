@@ -21,7 +21,7 @@ export function ModernIDEShellPreviewColumn({
     <div
       style={{
         width: `${size}%`,
-        minWidth: '250px',
+        minWidth: '224px',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',

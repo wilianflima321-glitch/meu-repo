@@ -17,8 +17,8 @@ export function ModernIDEShellSidebarColumn({
     <div
       style={{
         width: `${size}%`,
-        minWidth: '200px',
-        maxWidth: '400px',
+        minWidth: '184px',
+        maxWidth: '360px',
         background: gradients.glassSubtle,
         borderRight: `1px solid ${BORDER_SECONDARY}`,
         display: 'flex',

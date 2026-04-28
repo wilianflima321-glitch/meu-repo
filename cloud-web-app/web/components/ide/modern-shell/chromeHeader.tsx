@@ -43,10 +43,10 @@ export function IDEHeader({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: `${tokens.spacing['2.5']} ${tokens.spacing['4']}`,
+    padding: `${tokens.spacing['1.5']} ${tokens.spacing['3.5']}`,
     background: gradients.glassStrong,
     borderBottom: `1px solid ${BORDER_SECONDARY}`,
-    minHeight: '56px',
+    minHeight: '48px',
     gap: tokens.spacing['3'],
   };
 

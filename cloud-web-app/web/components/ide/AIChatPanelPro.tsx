@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   DEFAULT_MODELS,
   type AIChatPanelProps,
@@ -12,6 +12,7 @@ import { AIChatComposer } from '@/components/ai-chat/AIChatComposer'
 import { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
 import { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
 import { AIChatPendingDiffTray } from '@/components/ai-chat/AIChatPendingDiffTray'
+import { AIChatProposalPreview } from '@/components/ai-chat/AIChatProposalPreview'
 import { AIChatTimeline } from '@/components/ai-chat/AIChatTimeline'
 import { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRail'
 import { AIChatMessagesPane } from '@/components/ai-chat/AIChatMessagesPane'
@@ -150,12 +151,19 @@ export default function AIChatPanelPro({
     useAIChatContextActions()
   const { handleToggleSpeaking, isSpeaking } = useAIChatSpeechPlayback({ messages })
   const pendingDiff = editorBridge?.pendingDiff ?? null
+  const [showInlineDiffPreview, setShowInlineDiffPreview] = useState(false)
 
   const handleOpenPendingDiff = () => {
+    setShowInlineDiffPreview((previous) => !previous)
     enableAdvancedControls()
     setOpsTab('diff')
   }
 
+  useEffect(() => {
+    if (!pendingDiff) {
+      setShowInlineDiffPreview(false)
+    }
+  }, [pendingDiff])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -255,6 +263,15 @@ export default function AIChatPanelPro({
             pendingDiff={pendingDiff}
             onOpenDiff={handleOpenPendingDiff}
             onAcceptDiff={() => handleAcceptPendingDiff(pendingDiff.newContent)}
+            onRejectDiff={handleRejectPendingDiff}
+            diffOpen={showInlineDiffPreview}
+          />
+        ) : null}
+
+        {pendingDiff && showInlineDiffPreview ? (
+          <AIChatProposalPreview
+            pendingDiff={pendingDiff}
+            onAcceptDiff={handleAcceptPendingDiff}
             onRejectDiff={handleRejectPendingDiff}
           />
         ) : null}
