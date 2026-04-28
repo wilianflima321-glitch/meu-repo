@@ -1,15 +1,15 @@
 /**
  * Service Worker Registration Hook
- * 
+ *
  * Provides a React hook to register and manage the Service Worker lifecycle.
  * Handles updates, offline status, and provides controls for the SW.
- * 
+ *
  * @module hooks/useServiceWorker
  */
 
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createComponentLogger } from '@/lib/observability/logger';
 
 export interface ServiceWorkerState {
@@ -29,20 +29,25 @@ export interface ServiceWorkerActions {
 }
 
 export type UseServiceWorkerReturn = ServiceWorkerState & ServiceWorkerActions;
-const logger = createComponentLogger('service-worker');
 
-/**
- * Hook para gerenciar o Service Worker
- * 
- * @example
- * ```tsx
- * const { isOnline, isUpdateAvailable, update } = useServiceWorker();
- * 
- * if (isUpdateAvailable) {
- *   return <button onClick={update}>Atualizar</button>;
- * }
- * ```
- */
+const logger = createComponentLogger('service-worker');
+const REGISTRATION_IDLE_DELAY_MS = 1200;
+const PERIODIC_UPDATE_INTERVAL_MS = 4 * 60 * 60 * 1000;
+
+function scheduleIdleTask(callback: () => void): () => void {
+  if (typeof window === 'undefined') return () => {};
+
+  if ('requestIdleCallback' in window) {
+    const handle = window.requestIdleCallback(() => callback(), {
+      timeout: REGISTRATION_IDLE_DELAY_MS,
+    });
+    return () => window.cancelIdleCallback(handle);
+  }
+
+  const handle = globalThis.setTimeout(callback, REGISTRATION_IDLE_DELAY_MS);
+  return () => globalThis.clearTimeout(handle);
+}
+
 export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
   const [state, setState] = useState<ServiceWorkerState>({
     isSupported: false,
@@ -55,10 +60,18 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
 
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cancelQueuedRegistrationRef = useRef<(() => void) | null>(null);
+  const registrationInFlightRef = useRef(false);
+  const registrationSucceededRef = useRef(false);
+  const shouldReloadOnControllerChangeRef = useRef(false);
 
-  // Registrar Service Worker
   useEffect(() => {
     if (!enabled) {
+      cancelQueuedRegistrationRef.current?.();
+      cancelQueuedRegistrationRef.current = null;
+      registrationInFlightRef.current = false;
+      registrationSucceededRef.current = false;
+      shouldReloadOnControllerChangeRef.current = false;
       setState((prev) => ({
         ...prev,
         isSupported: typeof window !== 'undefined' && 'serviceWorker' in navigator,
@@ -70,83 +83,121 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
       return;
     }
 
-    // Verificar suporte
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
       setState((prev) => ({ ...prev, isSupported: false }));
       return;
     }
 
-    setState((prev) => ({ ...prev, isSupported: true, isOnline: navigator.onLine }));
+    setState((prev) => ({
+      ...prev,
+      isSupported: true,
+      isOnline: navigator.onLine,
+    }));
 
-    // Event listeners para status online/offline
-    const handleOnline = () => setState((prev) => ({ ...prev, isOnline: true }));
-    const handleOffline = () => setState((prev) => ({ ...prev, isOnline: false }));
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    // Registrar SW
     const registerServiceWorker = async () => {
+      if (registrationRef.current || registrationInFlightRef.current || registrationSucceededRef.current) {
+        return;
+      }
+
+      if (document.visibilityState === 'hidden') {
+        return;
+      }
+
+      if (!navigator.onLine) {
+        logger.info('[SW Hook] Delaying registration until the browser is back online');
+        return;
+      }
+
+      registrationInFlightRef.current = true;
       try {
         const registration = await navigator.serviceWorker.register('/sw.js', {
           scope: '/',
-          updateViaCache: 'none', // Sempre verificar atualizações
+          updateViaCache: 'none',
         });
 
         registrationRef.current = registration;
+        registrationSucceededRef.current = true;
 
         setState((prev) => ({
           ...prev,
           isRegistered: true,
           registration,
+          error: null,
         }));
 
         logger.info('[SW Hook] Service Worker registered', { scope: registration.scope });
 
-        // Verificar se há SW aguardando
         if (registration.waiting) {
           setState((prev) => ({ ...prev, isUpdateAvailable: true }));
         }
 
-        // Listener para novo SW instalado
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
 
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Novo SW instalado, update disponível
-                setState((prev) => ({ ...prev, isUpdateAvailable: true }));
-                logger.info('[SW Hook] New version available');
-              }
-            });
-          }
+          if (!newWorker) return;
+
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              setState((prev) => ({ ...prev, isUpdateAvailable: true }));
+              logger.info('[SW Hook] New version available');
+            }
+          });
         });
 
-        // Verificar atualizações periodicamente
         updateCheckIntervalRef.current = setInterval(() => {
+          if (document.visibilityState !== 'visible' || !navigator.onLine) {
+            return;
+          }
+
           registration.update().catch((error) => {
             logger.error('[SW Hook] Periodic update check failed', error);
           });
-        }, 60 * 60 * 1000); // A cada hora
-
+        }, PERIODIC_UPDATE_INTERVAL_MS);
       } catch (error) {
+        registrationSucceededRef.current = false;
         logger.error('[SW Hook] Registration failed', error);
         setState((prev) => ({
           ...prev,
           error: error instanceof Error ? error : new Error('Registration failed'),
         }));
+      } finally {
+        registrationInFlightRef.current = false;
       }
     };
 
-    // Aguardar página carregar completamente
-    if (document.readyState === 'complete') {
-      registerServiceWorker();
-    } else {
-      window.addEventListener('load', registerServiceWorker);
-    }
+    const scheduleRegistration = () => {
+      if (
+        registrationRef.current ||
+        registrationInFlightRef.current ||
+        registrationSucceededRef.current ||
+        document.visibilityState === 'hidden' ||
+        !navigator.onLine
+      ) {
+        return;
+      }
 
-    // Listener para mensagens do SW
+      cancelQueuedRegistrationRef.current?.();
+      cancelQueuedRegistrationRef.current = scheduleIdleTask(() => {
+        cancelQueuedRegistrationRef.current = null;
+        void registerServiceWorker();
+      });
+    };
+
+    const handleOnline = () => {
+      setState((prev) => ({ ...prev, isOnline: true }));
+      scheduleRegistration();
+    };
+
+    const handleOffline = () => {
+      setState((prev) => ({ ...prev, isOnline: false }));
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        scheduleRegistration();
+      }
+    };
+
     const handleMessage = (event: MessageEvent) => {
       const { type, payload } = event.data || {};
 
@@ -155,30 +206,47 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
           setState((prev) => ({ ...prev, isUpdateAvailable: true }));
           logger.info('[SW Hook] Update available', { version: payload?.version });
           break;
-
         case 'CACHE_UPDATED':
           logger.info('[SW Hook] Cache updated');
+          break;
+        default:
           break;
       }
     };
 
-    navigator.serviceWorker.addEventListener('message', handleMessage);
-
-    // Listener para controllerchange (SW atualizado)
     const handleControllerChange = () => {
-      logger.info('[SW Hook] Controller changed, reloading...');
+      if (!shouldReloadOnControllerChangeRef.current) {
+        logger.info('[SW Hook] Controller changed without explicit user update request');
+        setState((prev) => ({ ...prev, isUpdateAvailable: false }));
+        return;
+      }
+
+      logger.info('[SW Hook] Controller changed after explicit update request, reloading...');
       window.location.reload();
     };
 
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    navigator.serviceWorker.addEventListener('message', handleMessage);
     navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
 
-    // Cleanup
+    if (document.readyState === 'complete') {
+      scheduleRegistration();
+    } else {
+      window.addEventListener('load', scheduleRegistration);
+    }
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('load', registerServiceWorker);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('load', scheduleRegistration);
       navigator.serviceWorker.removeEventListener('message', handleMessage);
       navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+      cancelQueuedRegistrationRef.current?.();
+      cancelQueuedRegistrationRef.current = null;
+
       if (updateCheckIntervalRef.current) {
         clearInterval(updateCheckIntervalRef.current);
         updateCheckIntervalRef.current = null;
@@ -186,7 +254,6 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
     };
   }, [enabled]);
 
-  // Forçar atualização do SW
   const update = useCallback(async () => {
     const registration = registrationRef.current;
 
@@ -203,23 +270,21 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
     }
   }, []);
 
-  // Pular waiting e ativar novo SW
   const skipWaiting = useCallback(() => {
     const registration = registrationRef.current;
 
     if (registration?.waiting) {
+      shouldReloadOnControllerChangeRef.current = true;
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
     }
   }, []);
 
-  // Limpar todos os caches
   const clearCache = useCallback(() => {
     if (navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
     }
   }, []);
 
-  // Obter versão do SW
   const getVersion = useCallback(async (): Promise<string | null> => {
     return new Promise((resolve) => {
       if (!navigator.serviceWorker.controller) {
@@ -227,19 +292,23 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
         return;
       }
 
+      let resolved = false;
       const messageChannel = new MessageChannel();
+      const timeoutId = window.setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          resolve(null);
+        }
+      }, 3000);
 
       messageChannel.port1.onmessage = (event) => {
+        if (resolved) return;
+        resolved = true;
+        window.clearTimeout(timeoutId);
         resolve(event.data?.version || null);
       };
 
-      navigator.serviceWorker.controller.postMessage(
-        { type: 'GET_VERSION' },
-        [messageChannel.port2]
-      );
-
-      // Timeout de 3 segundos
-      setTimeout(() => resolve(null), 3000);
+      navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' }, [messageChannel.port2]);
     });
   }, []);
 
@@ -252,23 +321,20 @@ export function useServiceWorker(enabled = true): UseServiceWorkerReturn {
   };
 }
 
-/**
- * Componente para exibir prompt de atualização
- */
 export function UpdatePrompt() {
   const { isUpdateAvailable, skipWaiting } = useServiceWorker();
 
   if (!isUpdateAvailable) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-[var(--aethel-primary-dark)] text-white p-4 rounded-lg shadow-lg flex items-center gap-4">
+    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-4 rounded-lg bg-[var(--aethel-primary-dark)] p-4 text-white shadow-lg">
       <div>
-        <p className="font-medium">Nova versão disponível!</p>
+        <p className="font-medium">Nova versao disponivel!</p>
         <p className="text-sm opacity-90">Clique para atualizar</p>
       </div>
       <button
         onClick={skipWaiting}
-        className="px-4 py-2 bg-white text-[var(--aethel-primary-dark)] rounded font-medium hover:bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] transition-colors"
+        className="rounded bg-white px-4 py-2 font-medium text-[var(--aethel-primary-dark)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)]"
       >
         Atualizar
       </button>
@@ -276,18 +342,15 @@ export function UpdatePrompt() {
   );
 }
 
-/**
- * Componente para exibir status offline
- */
 export function OfflineIndicator() {
   const { isOnline, isSupported } = useServiceWorker();
 
   if (!isSupported || isOnline) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-black text-center py-2 text-sm font-medium">
-      <span className="mr-2">⚠️</span>
-      Você está offline. Algumas funcionalidades podem estar limitadas.
+    <div className="fixed left-0 right-0 top-0 z-50 bg-amber-500 py-2 text-center text-sm font-medium text-black">
+      <span className="mr-2">Offline</span>
+      Voce esta offline. Algumas funcionalidades podem estar limitadas.
     </div>
   );
 }

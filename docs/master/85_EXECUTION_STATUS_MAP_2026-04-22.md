@@ -531,10 +531,31 @@ This file is the short scoreboard that answers:
 - `app/marketplace/layout.tsx` now opts into `surface="light"` and `onboardingChrome={false}`, which removes one more public route from the heaviest runtime path
 - this does not mean prerender parity is solved, but it materially narrows the shared-runtime search space and reduces benchmark-visible background pressure in the studio shell
 
+### Service worker activation honesty
+- the service-worker lane is now less eager and less surprising:
+  - `hooks/useServiceWorker.tsx` now delays registration until the page is visible, online, and idle instead of firing immediately on first paint
+  - periodic update polling now only runs while the tab is visible and online, and the interval moved away from the noisier hourly cadence
+  - `controllerchange` no longer hard-reloads the app unless the user explicitly requested `skipWaiting`, which removes one of the more jarring premium-UX regressions
+- `components/ServiceWorkerProvider.tsx` also became calmer and more explicit:
+  - update-prompt dismissal now survives route churn for one hour via session storage
+  - prompt/offline chrome now keys off the actual gated service-worker enablement path instead of the broader pre-gated `enabled` prop
+- focused coverage now exists in `__tests__/service-worker/useServiceWorker.test.tsx`
+
+### AI pending edit visibility
+- the main AI chat lane now exposes pending edits near the composer instead of hiding the strongest review loop inside the ops sidebar:
+  - `components/ai-chat/AIChatPendingDiffTray.tsx` now surfaces file ownership, changed-line count, and first-class `Open diff`, `Reject`, and `Apply now` actions
+  - `components/ide/AIChatPanelPro.tsx` now mounts that tray whenever `editorBridge.pendingDiff` exists, while still keeping the deeper diff panel in `AIChatOpsSidebar`
+- this is a meaningful benchmark improvement against Cursor/Windsurf because the user no longer has to discover the review loop behind advanced controls before seeing that an edit is ready
+- focused coverage now exists in `__tests__/ai-chat/AIChatPendingDiffTray.test.tsx`
+
 ### Validation note
 - `npm run build` passed again on `2026-04-26` in the compile-mode production path
 - `npm run typecheck` hit the known transient `.next/types` mismatch while a fresh build was regenerating artifacts, then passed again immediately after the build completed
 - the freshest `2026-04-27` compile-mode rerun still did **not** revalidate cleanly; `build-probe-2026-04-27-runtime-deferral-compile.log` stalled again at `Creating an optimized production build ...`
+- the freshest `2026-04-28` reruns still did **not** revalidate cleanly either:
+  - `cloud-web-app/web/build-probe-2026-04-28-service-worker-runtime.log`
+  - `cloud-web-app/web/build-probe-2026-04-28-service-worker-prerender.log`
+  - both again stalled at `Creating an optimized production build ...`
 - current honest state remains:
   - compile-mode build = historically validated production mitigation, but not freshly reconfirmed in the latest `2026-04-27` rerun
   - `build:prerender-probe` = still open, with the newest local rerun still stuck at `Creating an optimized production build ...`
@@ -543,9 +564,9 @@ This file is the short scoreboard that answers:
 ### P0
 1. production build parity
    - `npm run build` passed again on `2026-04-26` in the compile-mode production path (`cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`)
-  - that compile-mode mitigation is still the best honest production path we have, but the newest `2026-04-27` rerun (`cloud-web-app/web/build-probe-2026-04-27-runtime-deferral-compile.log`) did not finish cleanly and therefore did not provide a new fresh PASS
+  - that compile-mode mitigation is still the best honest production path we have, but the newest `2026-04-28` rerun (`cloud-web-app/web/build-probe-2026-04-28-service-worker-runtime.log`) also did not finish cleanly and therefore did not provide a new fresh PASS
    - build still emits the known `e2b/dist/index.mjs` critical-dependency warning through `app/api/preview/runtime-provision/route.ts`
-   - `npm run build:prerender-probe` remains the open track; the freshest local rerun (`cloud-web-app/web/build-probe-2026-04-26-prerender-probe.log`) still did not clear `Creating an optimized production build ...`
+   - `npm run build:prerender-probe` remains the open track; the freshest local rerun (`cloud-web-app/web/build-probe-2026-04-28-service-worker-prerender.log`) still did not clear `Creating an optimized production build ...`
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
   - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces through extracted runtime modules, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
   - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`

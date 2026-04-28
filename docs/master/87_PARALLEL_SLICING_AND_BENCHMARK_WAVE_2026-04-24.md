@@ -406,9 +406,18 @@ After Wave 1 stabilizes:
   - `WorkbenchEditorToolbar.tsx` now only shows live collaborator avatars after sync confirmation, and otherwise surfaces the real state (`Solo`, `Conectando`, `Sincronizando`, `Reconectando`, `Sync com erro`)
   - `useWorkbenchBridgeChrome.ts` no longer promotes collaboration as effectively live before the editor lane is actually synced
   - coverage exists in `__tests__/ide/WorkbenchEditorToolbar.test.tsx`
+- the service-worker/runtime edge is also less eager now:
+  - `hooks/useServiceWorker.tsx` defers registration until the document is visible, online, and idle
+  - controller changes only trigger a full reload after an explicit user-driven `skipWaiting` action
+  - `components/ServiceWorkerProvider.tsx` now persists update-prompt dismissal for one hour and keys its prompt/offline chrome off the truly gated enablement path
+  - coverage exists in `__tests__/service-worker/useServiceWorker.test.tsx`
 - the preview/runtime trust lane also advanced again:
   - `usePreviewRuntime.ts`, `previewRuntime.types.ts`, `previewRuntimeState.ts`, `RuntimePreviewSurface.tsx`, and `PreviewLifecycleChrome.tsx` now preserve provider identity, env/setup hints, recommended next action, and clearer failure guidance from `/api/preview/runtime-provision`
   - this moves failed/warming/idle runtime states closer to the trust grammar expected from Replit/Vercel review surfaces
+- the AI review loop is a bit less hidden:
+  - `components/ai-chat/AIChatPendingDiffTray.tsx` now surfaces pending file edits directly above the composer with `Open diff`, `Reject`, and `Apply now`
+  - `components/ide/AIChatPanelPro.tsx` mounts that tray whenever `editorBridge.pendingDiff` exists, which makes the main artifact-review loop more obvious before the user opens the full ops sidebar
+  - focused coverage exists in `__tests__/ai-chat/AIChatPendingDiffTray.test.tsx`
 - the heaviest remaining editor hotspot finally lost a chunk of density:
   - `MonacoEditorPro.tsx` dropped to `667` lines
   - theming moved into `components/editor/MonacoEditorPro.theme.ts`
@@ -434,12 +443,12 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
-2. keep full compile-mode build green while tracing `build:prerender-probe` separately, but note that the freshest `2026-04-27` compile-mode rerun did **not** revalidate with a new PASS and stalled again at `Creating an optimized production build ...`
-3. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
-4. move the editor ROI pass to symbol truth + breadcrumb navigation before attempting git-gutter depth
+2. keep full compile-mode build green while tracing `build:prerender-probe` separately, but note that the freshest `2026-04-28` compile-mode rerun still did **not** revalidate with a new PASS and again stalled at `Creating an optimized production build ...`
+3. keep reducing shared-runtime noise through `FullStudioRuntime.tsx`, `ServiceWorkerProvider.tsx`, `useServiceWorker.tsx`, and `AethelProvider.tsx`
+4. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
 5. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`
-6. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
-7. keep moving the AI lane from "strong panel" to "operator surface" through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
+6. keep moving the AI lane from "strong panel" to "operator surface" through `AIChatPanelPro.tsx`, `AIChatComposer.tsx`, `useAIChatComposerState.ts`, `AIChatTimeline.tsx`, `useAIChatHistoryMode.ts`, and the thinner `InlineAIChat.tsx` seams
+7. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
 8. continue Wave B in `ProjectsDashboardCollection.tsx`, `CreatorDashboardSections.tsx`, `app/admin/ai-monitor/ai-monitor-sections.tsx`, and `SettingsPageData.tsx` now that the route shells are calmer
 9. promote preview, collaboration, deploy, and public-shell confidence from present to trusted
 

@@ -11,6 +11,7 @@ import { AIChatBenchmarkTelemetry } from '@/components/ai-chat/AIChatBenchmarkTe
 import { AIChatComposer } from '@/components/ai-chat/AIChatComposer'
 import { AIChatContextStrip } from '@/components/ai-chat/AIChatContextStrip'
 import { AIChatHeader } from '@/components/ai-chat/AIChatHeader'
+import { AIChatPendingDiffTray } from '@/components/ai-chat/AIChatPendingDiffTray'
 import { AIChatTimeline } from '@/components/ai-chat/AIChatTimeline'
 import { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRail'
 import { AIChatMessagesPane } from '@/components/ai-chat/AIChatMessagesPane'
@@ -148,6 +149,12 @@ export default function AIChatPanelPro({
   const { handleCopy, handleOpenCodeContextResult, handleOpenMentionContextBlock } =
     useAIChatContextActions()
   const { handleToggleSpeaking, isSpeaking } = useAIChatSpeechPlayback({ messages })
+  const pendingDiff = editorBridge?.pendingDiff ?? null
+
+  const handleOpenPendingDiff = () => {
+    enableAdvancedControls()
+    setOpsTab('diff')
+  }
 
 
   useEffect(() => {
@@ -243,6 +250,15 @@ export default function AIChatPanelPro({
           onQuickPrompt={handleQuickPrompt}
         />
 
+        {pendingDiff ? (
+          <AIChatPendingDiffTray
+            pendingDiff={pendingDiff}
+            onOpenDiff={handleOpenPendingDiff}
+            onAcceptDiff={() => handleAcceptPendingDiff(pendingDiff.newContent)}
+            onRejectDiff={handleRejectPendingDiff}
+          />
+        ) : null}
+
         <AIChatComposer
           input={input}
           inputRef={inputRef}
@@ -290,7 +306,7 @@ export default function AIChatPanelPro({
         showAdvancedControls={showAdvancedControls}
         opsTab={opsTab}
         onOpsTabChange={setOpsTab}
-        pendingDiff={editorBridge?.pendingDiff}
+        pendingDiff={pendingDiff}
         onAcceptDiff={handleAcceptPendingDiff}
         onRejectDiff={handleRejectPendingDiff}
         projectId={projectId}

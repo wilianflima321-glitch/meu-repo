@@ -9,20 +9,17 @@
 
 'use client';
 
-import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import { createContext, useContext, ReactNode, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useServiceWorker, type UseServiceWorkerReturn } from '../hooks/useServiceWorker';
-import { createComponentLogger } from '@/lib/observability/logger'
+import { createComponentLogger } from '@/lib/observability/logger';
 
-const log = createComponentLogger('ServiceWorkerProvider')
+const log = createComponentLogger('ServiceWorkerProvider');
+const SERVICE_WORKER_DISMISS_KEY = 'aethel:sw-update-dismissed-at';
+const DISMISS_WINDOW_MS = 60 * 60 * 1000;
 
-
-// Context para expor o estado do SW para toda a aplicação
 const ServiceWorkerContext = createContext<UseServiceWorkerReturn | null>(null);
 
-/**
- * Hook para acessar o contexto do Service Worker
- */
 export function useServiceWorkerContext() {
   const context = useContext(ServiceWorkerContext);
   if (!context) {
@@ -36,66 +33,109 @@ interface ServiceWorkerProviderProps {
   enabled?: boolean;
 }
 
-/**
- * Provider que gerencia o Service Worker e exibe UI de atualização/offline
- */
+function readDismissedUntil(): number | null {
+  if (typeof window === 'undefined') return null;
+  const raw = window.sessionStorage.getItem(SERVICE_WORKER_DISMISS_KEY);
+  if (!raw) return null;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function writeDismissedUntil(timestamp: number | null) {
+  if (typeof window === 'undefined') return;
+  if (timestamp === null) {
+    window.sessionStorage.removeItem(SERVICE_WORKER_DISMISS_KEY);
+    return;
+  }
+  window.sessionStorage.setItem(SERVICE_WORKER_DISMISS_KEY, String(timestamp));
+}
+
 export function ServiceWorkerProvider({ children, enabled = false }: ServiceWorkerProviderProps) {
   const shouldEnableServiceWorker =
     enabled &&
     (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_ENABLE_SERVICE_WORKER === 'true');
   const sw = useServiceWorker(shouldEnableServiceWorker);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissedUntil, setDismissedUntil] = useState<number | null>(null);
+  const dismissResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Mostrar prompt de atualização quando disponível
   useEffect(() => {
-    if (!enabled) {
+    if (!shouldEnableServiceWorker) {
+      setDismissedUntil(null);
+      setShowUpdatePrompt(false);
+      writeDismissedUntil(null);
+      return;
+    }
+
+    const storedDismissedUntil = readDismissedUntil();
+    if (!storedDismissedUntil || storedDismissedUntil <= Date.now()) {
+      setDismissedUntil(null);
+      writeDismissedUntil(null);
+      return;
+    }
+
+    setDismissedUntil(storedDismissedUntil);
+  }, [shouldEnableServiceWorker]);
+
+  useEffect(() => {
+    if (!shouldEnableServiceWorker) {
       setShowUpdatePrompt(false);
       return;
     }
-    if (sw.isUpdateAvailable && !dismissed) {
-      setShowUpdatePrompt(true);
-    }
-  }, [sw.isUpdateAvailable, dismissed, enabled]);
 
-  // Handler para atualizar
+    const isDismissed = typeof dismissedUntil === 'number' && dismissedUntil > Date.now();
+    if (sw.isSupported && sw.isUpdateAvailable && !isDismissed) {
+      setShowUpdatePrompt(true);
+      return;
+    }
+
+    setShowUpdatePrompt(false);
+  }, [dismissedUntil, shouldEnableServiceWorker, sw.isSupported, sw.isUpdateAvailable]);
+
+  useEffect(() => {
+    return () => {
+      if (dismissResetTimerRef.current) {
+        clearTimeout(dismissResetTimerRef.current);
+        dismissResetTimerRef.current = null;
+      }
+    };
+  }, []);
+
   const handleUpdate = () => {
     sw.skipWaiting();
     setShowUpdatePrompt(false);
   };
 
-  // Handler para dispensar
   const handleDismiss = () => {
+    const nextDismissedUntil = Date.now() + DISMISS_WINDOW_MS;
+    if (dismissResetTimerRef.current) {
+      clearTimeout(dismissResetTimerRef.current);
+    }
+
     setShowUpdatePrompt(false);
-    setDismissed(true);
-    // Permitir mostrar novamente após 1 hora
-    setTimeout(() => setDismissed(false), 60 * 60 * 1000);
+    setDismissedUntil(nextDismissedUntil);
+    writeDismissedUntil(nextDismissedUntil);
+
+    dismissResetTimerRef.current = setTimeout(() => {
+      setDismissedUntil(null);
+      writeDismissedUntil(null);
+    }, DISMISS_WINDOW_MS);
   };
 
-  if (!enabled) {
-    return (
-      <ServiceWorkerContext.Provider value={sw}>
-        {children}
-      </ServiceWorkerContext.Provider>
-    );
+  if (!shouldEnableServiceWorker) {
+    return <ServiceWorkerContext.Provider value={sw}>{children}</ServiceWorkerContext.Provider>;
   }
 
   return (
     <ServiceWorkerContext.Provider value={sw}>
-      {/* Indicador de Offline */}
-      {sw.isSupported && !sw.isOnline && (
+      {sw.isSupported && !sw.isOnline ? (
         <div
-          className="fixed top-0 left-0 right-0 z-[9999] bg-gradient-to-r from-[var(--aethel-warning)] to-[var(--aethel-warning-dark)] text-[var(--aethel-text-primary)] text-center py-2 px-4 text-sm font-medium shadow-lg"
+          className="fixed left-0 right-0 top-0 z-[9999] bg-gradient-to-r from-[var(--aethel-warning)] to-[var(--aethel-warning-dark)] px-4 py-2 text-center text-sm font-medium text-[var(--aethel-text-primary)] shadow-lg"
           role="alert"
           aria-live="polite"
         >
           <span className="inline-flex items-center gap-2">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -103,29 +143,23 @@ export function ServiceWorkerProvider({ children, enabled = false }: ServiceWork
                 d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"
               />
             </svg>
-            Você está offline. Algumas funcionalidades podem estar limitadas.
+            Voce esta offline. Algumas funcionalidades podem ficar limitadas.
           </span>
         </div>
-      )}
+      ) : null}
 
-      {/* Prompt de Atualização */}
-      {showUpdatePrompt && (
+      {showUpdatePrompt ? (
         <div
           className="fixed bottom-4 right-4 z-[9999] max-w-sm animate-in slide-in-from-bottom-4 fade-in duration-300"
           role="dialog"
           aria-labelledby="update-title"
           aria-describedby="update-description"
         >
-          <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl overflow-hidden">
+          <div className="overflow-hidden rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] shadow-2xl">
             <div className="p-4">
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-[var(--aethel-info-light)]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)]">
+                  <svg className="h-5 w-5 text-[var(--aethel-info-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -134,57 +168,50 @@ export function ServiceWorkerProvider({ children, enabled = false }: ServiceWork
                     />
                   </svg>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3
-                    id="update-title"
-                    className="text-sm font-semibold text-[var(--aethel-text-primary)]"
-                  >
-                    Nova versão disponível!
+                <div className="min-w-0 flex-1">
+                  <h3 id="update-title" className="text-sm font-semibold text-[var(--aethel-text-primary)]">
+                    Nova versao disponivel
                   </h3>
-                  <p
-                    id="update-description"
-                    className="mt-1 text-sm text-[var(--aethel-text-tertiary)]"
-                  >
-                    Uma nova versão do Aethel Engine está pronta para ser instalada.
+                  <p id="update-description" className="mt-1 text-sm text-[var(--aethel-text-tertiary)]">
+                    Uma nova versao do Aethel Engine esta pronta para ser instalada.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="flex border-t border-[var(--aethel-border-primary)]">
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleDismiss}
-                className="flex-1 px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-primary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] transition-colors"
+                className="flex-1 px-4 py-3 text-sm font-medium text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_50%,transparent)] hover:text-[var(--aethel-text-primary)]"
               >
                 Mais tarde
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleUpdate}
-                className="flex-1 px-4 py-3 text-sm font-medium text-[var(--aethel-info-light)] hover:text-[var(--aethel-info)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] transition-colors border-l border-[var(--aethel-border-primary)]"
+                className="flex-1 border-l border-[var(--aethel-border-primary)] px-4 py-3 text-sm font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] hover:text-[var(--aethel-info)]"
               >
                 Atualizar agora
               </button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {children}
     </ServiceWorkerContext.Provider>
   );
 }
 
-/**
- * Componente para verificar se app pode ser instalado
- */
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    const handler = (event: Event) => {
+      event.preventDefault();
+      setDeferredPrompt(event as BeforeInstallPromptEvent);
       setShowPrompt(true);
     };
 
@@ -200,7 +227,6 @@ export function InstallPrompt() {
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-
     log.info('[PWA] Install prompt outcome:', outcome);
 
     setDeferredPrompt(null);
@@ -211,20 +237,17 @@ export function InstallPrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 z-[9999] max-w-sm">
-      <div className="bg-[var(--aethel-surface-secondary)] border border-[var(--aethel-border-primary)] rounded-lg shadow-2xl p-4">
+      <div className="rounded-lg border border-[var(--aethel-border-primary)] bg-[var(--aethel-surface-secondary)] p-4 shadow-2xl">
         <div className="flex items-center gap-3">
-            <Image src="/branding/aethel-icon-source.png" alt="" width={40} height={40} sizes="40px" className="w-10 h-10 rounded-lg" />
+          <Image src="/branding/aethel-icon-source.png" alt="" width={40} height={40} sizes="40px" className="h-10 w-10 rounded-lg" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">
-              Instalar Aethel Engine
-            </p>
-            <p className="text-xs text-[var(--aethel-text-tertiary)]">
-              Acesse rapidamente do seu desktop
-            </p>
+            <p className="text-sm font-medium text-[var(--aethel-text-primary)]">Instalar Aethel Engine</p>
+            <p className="text-xs text-[var(--aethel-text-tertiary)]">Acesse rapidamente do seu desktop</p>
           </div>
-          <button type="button"
+          <button
+            type="button"
             onClick={handleInstall}
-            className="px-3 py-1.5 bg-[var(--aethel-info)] text-[var(--aethel-text-primary)] text-sm rounded font-medium hover:brightness-110 transition-colors"
+            className="rounded bg-[var(--aethel-info)] px-3 py-1.5 text-sm font-medium text-[var(--aethel-text-primary)] transition-colors hover:brightness-110"
           >
             Instalar
           </button>
@@ -234,7 +257,6 @@ export function InstallPrompt() {
   );
 }
 
-// Tipos para o evento beforeinstallprompt
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
