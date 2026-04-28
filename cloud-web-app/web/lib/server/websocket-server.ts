@@ -11,6 +11,7 @@ import { EventEmitter } from 'events';
 import { createServer, IncomingMessage, Server as HttpServer } from 'http';
 import { createRequire } from 'module';
 import { dirname, join } from 'path';
+import { pathToFileURL } from 'url';
 import type { ParsedUrlQuery } from 'querystring';
 import { parse as parseUrl } from 'url';
 import jwt from 'jsonwebtoken';
@@ -32,6 +33,13 @@ const log = createComponentLogger('server/websocket-server');
 let setupWSConnection: ((conn: WebSocket, req: IncomingMessage, options?: any) => void) | null = null;
 let yWebsocketInitPromise: Promise<void> | null = null;
 
+async function importNodeModuleRuntimeOnly<T>(specifier: string): Promise<T> {
+  const importer = new Function('resolvedSpecifier', 'return import(resolvedSpecifier)') as (
+    resolvedSpecifier: string
+  ) => Promise<T>;
+  return importer(specifier);
+}
+
 async function initYWebsocket(): Promise<void> {
   if (yWebsocketInitPromise) {
     await yWebsocketInitPromise;
@@ -41,7 +49,10 @@ async function initYWebsocket(): Promise<void> {
   yWebsocketInitPromise = (async () => {
     try {
       const utilsPath = join(dirname(require.resolve('y-websocket/package.json')), 'bin', 'utils.cjs');
-      const utils = require(utilsPath) as { setupWSConnection?: typeof setupWSConnection; default?: { setupWSConnection?: typeof setupWSConnection } };
+      const utils = await importNodeModuleRuntimeOnly<{
+        setupWSConnection?: typeof setupWSConnection;
+        default?: { setupWSConnection?: typeof setupWSConnection };
+      }>(pathToFileURL(utilsPath).href).catch(() => null);
       const setup = utils?.setupWSConnection || utils?.default?.setupWSConnection;
       if (setup) {
         setupWSConnection = setup as typeof setupWSConnection;

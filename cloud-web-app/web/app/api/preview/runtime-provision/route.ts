@@ -18,6 +18,7 @@ import {
   getManagedPreviewProviderConfig,
   parseConfiguredProvisionEndpoints,
 } from '@/lib/server/preview-provider-config'
+import { loadE2BModule, resolveE2BSandboxCtor } from '@/lib/server/e2b-runtime'
 import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
 
 const CAPABILITY = 'IDE_PREVIEW_RUNTIME_PROVISION'
@@ -451,8 +452,8 @@ async function provisionWithE2B(params: {
   totalBytes: number
   startMode: string
 }> {
-  const e2bModule = await import('e2b')
-  const Sandbox = (e2bModule as { default?: any; Sandbox?: any }).default || (e2bModule as { Sandbox?: any }).Sandbox
+  const e2bModule = await loadE2BModule()
+  const Sandbox = resolveE2BSandboxCtor(e2bModule)
   if (!Sandbox) {
     throw new Error('E2B SDK not available')
   }

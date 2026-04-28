@@ -122,6 +122,28 @@ This follow-up round pushed the public trust/buyer path closer to benchmark-grad
   - the shared compile-mode build path still needs fresh revalidation on each wave; the latest rerun in `cloud-web-app/web/build-probe-2026-04-27-runtime-deferral-compile.log` timed out again at `Creating an optimized production build ...`
   - `npm run build:prerender-probe` remains explicitly open, with the newest evidence in `cloud-web-app/web/build-probe-2026-04-27-runtime-deferral-prerender.log` also stalling at `Creating an optimized production build ...`
 
+## Round Delta On 2026-04-28
+This follow-up round focused on real build confidence instead of cosmetic route churn:
+- the preview/runtime server edge is now materially calmer for Next's build graph:
+  - `cloud-web-app/web/lib/server/e2b-runtime.ts` now centralizes `e2b` loading and sandbox resolution
+  - `app/api/preview/runtime-provision/route.ts`, `app/api/preview/runtime-sync/route.ts`, and `app/api/preview/runtime-sync-file/route.ts` now consume that helper instead of each doing their own inline `import('e2b')`
+  - `cloud-web-app/web/next.config.js` now externalizes `e2b` through `experimental.serverComponentsExternalPackages`
+- the AI context path also stopped pulling the broad server barrel into more routes than necessary:
+  - `cloud-web-app/web/lib/server/mention-context.ts` now imports `git-service` and `search-runtime` directly instead of the wider `lib/server` barrel
+- the websocket runtime path is slightly more bundler-friendly now:
+  - `cloud-web-app/web/lib/server/websocket-server.ts` now loads `y-websocket` helpers through a runtime-only `pathToFileURL(...)` import instead of expression-based `require(...)`
+- the public enterprise path also got a lower-risk App Router cleanup:
+  - `cloud-web-app/web/app/contact-sales/page.tsx` is now a server wrapper with metadata and explicit `searchParams` parsing
+  - `cloud-web-app/web/app/contact-sales/contact-sales-content.tsx` owns the interactive client surface, which removes `useSearchParams()` from a high-value public route without changing the UX
+- the compile-mode production path is now freshly revalidated instead of only historically trusted:
+  - `cloud-web-app/web/build-probe-2026-04-28-externalized-e2b-runtime.log` completed successfully on `2026-04-28`
+  - `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-compile.log` completed successfully again after the public `contact-sales` route was split into a server wrapper plus client content island
+- the prerender probe is still open, but the debugging state is much better:
+  - `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-prerender.log` now reaches `Generating static pages (224/224)` and fails deterministically
+  - the remaining families are now explicit:
+    - `/404` and `/500`: `<Html> should not be imported outside of pages/_document`
+    - wider App Router export cluster: `Cannot read properties of null (reading 'useContext')`
+
 This is real progress.
 It does **not** mean the workbench is solved.
 It means the next cuts are now safer and more localized.
@@ -452,7 +474,7 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
-2. keep full compile-mode build green while tracing `build:prerender-probe` separately, but note that the freshest `2026-04-28` compile-mode reruns still did **not** revalidate with a new PASS; one stalled at `Creating an optimized production build ...`, and the inline/runtime follow-up advanced into late trace collection before timing out without final success
+2. keep full compile-mode build green while tracing `build:prerender-probe` separately; the freshest honest evidence is now a pair of real `2026-04-28` compile-mode PASS logs in `cloud-web-app/web/build-probe-2026-04-28-externalized-e2b-runtime.log` and `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-compile.log`, while the separate prerender probe remains explicitly open
 3. keep reducing shared-runtime noise through `FullStudioRuntime.tsx`, `ServiceWorkerProvider.tsx`, `useServiceWorker.tsx`, and `AethelProvider.tsx`
 4. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
 5. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`

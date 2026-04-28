@@ -4,6 +4,7 @@ import fs from 'node:fs/promises'
 import { requireAuth } from '@/lib/auth-server'
 import { apiErrorToResponse } from '@/lib/api-errors'
 import { capabilityResponse } from '@/lib/server/capability-response'
+import { loadE2BModule, resolveE2BSandboxCtor } from '@/lib/server/e2b-runtime'
 import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
 
 const CAPABILITY = 'IDE_PREVIEW_RUNTIME_SYNC'
@@ -153,16 +154,6 @@ function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {
   return view.buffer
 }
 
-type E2BModule = typeof import('e2b')
-
-async function loadE2BModule(): Promise<E2BModule> {
-  const importer = new Function('specifier', 'return import(specifier)') as (
-    specifier: string
-  ) => Promise<E2BModule>
-
-  return importer('e2b')
-}
-
 async function syncWorkspaceToSandbox(params: {
   sandbox: any
   workspaceRoot: string
@@ -255,7 +246,7 @@ export async function POST(request: NextRequest) {
     }
 
     const e2bModule = await loadE2BModule()
-    const Sandbox = (e2bModule as { default?: any; Sandbox?: any }).default || (e2bModule as { Sandbox?: any }).Sandbox
+    const Sandbox = resolveE2BSandboxCtor(e2bModule)
     if (!Sandbox) {
       return capabilityResponse({
         error: 'RUNTIME_SYNC_SDK_UNAVAILABLE',

@@ -1,6 +1,6 @@
 # 85_EXECUTION_STATUS_MAP_2026-04-22
 Date: 2026-04-22
-Last refreshed: 2026-04-27
+Last refreshed: 2026-04-28
 Status: ACTIVE
 Role: short execution snapshot and no-drift scoreboard across the canonical audit set
 
@@ -141,7 +141,8 @@ This file is the short scoreboard that answers:
 - `app/status/status.types.ts`: `26` lines
 - `app/docs/page.tsx`: `393` lines
 - `app/docs/procurement-starter-pack/page.tsx`: `387` lines
-- `app/contact-sales/page.tsx`: `534` lines
+- `app/contact-sales/page.tsx`: `16` lines
+- `app/contact-sales/contact-sales-content.tsx`: `488` lines
 - `components/ai-chat/AIChatOpsSidebar.tsx`: `154` lines
 - `components/ai-chat/AIChatRulesPanel.tsx`: `122` lines
 - `components/ai-chat/useAIChatProjectRules.ts`: `136` lines
@@ -155,16 +156,24 @@ This file is the short scoreboard that answers:
 - `__tests__/ai-chat/AIChatOpsSidebar.test.tsx`: `71` lines
 - `__tests__/ai-chat/AIChatRulesPanel.test.tsx`: `71` lines
 - `__tests__/api/project-rules-route.test.ts`: `99` lines
-- `lib/server/websocket-server.ts`: `1661` lines
+- `lib/server/websocket-server.ts`: `1420` lines
 - `server/websocket-server.ts`: `47` lines
 - `app/api/deploy/route.ts`: `145` lines
 - `__tests__/api/deploy-route.test.ts`: `106` lines
+- `lib/server/e2b-runtime.ts`: `10` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
 - production build parity is now split into two explicit tracks:
-- `npm run build` now uses `next build --experimental-build-mode compile`; it completed successfully again on `2026-04-26` in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`, again after the broader Wave B pass in `cloud-web-app/web/build-probe-2026-04-26-wave-b-settings-admin.log`, and again after the shared-runtime follow-up in `cloud-web-app/web/build-probe-2026-04-26-wave-b-runtime-pass.log`, and the earlier server artifact smoke test still stands in `cloud-web-app/web/start-probe-2026-04-25-compile-mode.out.log`
-- the freshest compile-mode rerun on `2026-04-27` did **not** revalidate the pass: `cloud-web-app/web/build-probe-2026-04-27-roadmap-security-ai.log` timed out again at `Creating an optimized production build ...`
-- the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the freshest local evidence is `cloud-web-app/web/build-probe-2026-04-26-wave-b-runtime-prerender.log`, which still timed out at `Creating an optimized production build ...`, while the immediately previous `cloud-web-app/web/build-probe-2026-04-26-wave-b-prerender-probe.log` had advanced into `Linting and checking validity of types ...` before timing out, and the strongest historical deterministic failure evidence remains `cloud-web-app/web/build-probe-2026-04-25-pages-fallback-chain-removed.log` and `cloud-web-app/web/build-probe-2026-04-25-root-boundaries-minimal.log`
+- `npm run build` now uses `next build --experimental-build-mode compile`; it completed successfully again on `2026-04-26` in `cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`, again after the broader Wave B pass in `cloud-web-app/web/build-probe-2026-04-26-wave-b-settings-admin.log`, again after the shared-runtime follow-up in `cloud-web-app/web/build-probe-2026-04-26-wave-b-runtime-pass.log`, again on `2026-04-28` in `cloud-web-app/web/build-probe-2026-04-28-externalized-e2b-runtime.log`, and once more after the `contact-sales` server-wrapper cleanup in `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-compile.log`
+- the latest `2026-04-28` build-confidence slice also materially narrowed the compile blocker surface:
+  - `app/api/preview/runtime-provision/route.ts`, `app/api/preview/runtime-sync/route.ts`, and `app/api/preview/runtime-sync-file/route.ts` now load `e2b` through `lib/server/e2b-runtime.ts` instead of inline imports
+  - `lib/server/mention-context.ts` now imports `git-service` and `search-runtime` directly instead of pulling the broader `lib/server` barrel into the AI context path
+  - `lib/server/websocket-server.ts` now loads `y-websocket` utils through a runtime-only `pathToFileURL(...)` import instead of expression-based `require(...)`
+  - `next.config.js` now externalizes `e2b` through `experimental.serverComponentsExternalPackages`
+- the old prerender path remains open and is now preserved as `npm run build:prerender-probe`; the freshest local evidence is `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-prerender.log`, which now reaches `Generating static pages (224/224)` and fails deterministically instead of stalling blindly:
+  - `/404` and `/500`: `Error: <Html> should not be imported outside of pages/_document.`
+  - wider App Router export cluster: `TypeError: Cannot read properties of null (reading 'useContext')`
+  - representative failing routes now include `/_not-found`, `/compare`, `/compliance`, `/contact-sales`, `/customers`, `/dashboard`, `/docs`, `/ide`, `/marketplace`, `/pricing`, `/security`, `/settings`, `/status`, `/terms`, and `/`
 
 ## Closed Or Materially Stabilized
 ### Governance baseline
@@ -565,26 +574,29 @@ This file is the short scoreboard that answers:
 - `npm run build` passed again on `2026-04-26` in the compile-mode production path
 - `npm run typecheck` hit the known transient `.next/types` mismatch while a fresh build was regenerating artifacts, then passed again immediately after the build completed
 - the freshest `2026-04-27` compile-mode rerun still did **not** revalidate cleanly; `build-probe-2026-04-27-runtime-deferral-compile.log` stalled again at `Creating an optimized production build ...`
-- the freshest `2026-04-28` reruns still did **not** revalidate cleanly either:
+- the early `2026-04-28` reruns stayed honest too:
   - `cloud-web-app/web/build-probe-2026-04-28-service-worker-runtime.log`
   - `cloud-web-app/web/build-probe-2026-04-28-service-worker-prerender.log`
-  - both again stalled at `Creating an optimized production build ...`
-- the newest inline/runtime follow-up reruns on `2026-04-28` also remain honest:
   - `cloud-web-app/web/build-probe-2026-04-28-inline-runtime.log`
   - `cloud-web-app/web/build-probe-2026-04-28-inline-runtime-prerender.log`
-  - compile-mode again emitted the known websocket/e2b critical-dependency warning class and advanced into late build phases (`Collecting page data`, `Finalizing page optimization`, `Collecting build traces`) before timing out without a final PASS
-  - prerender probe still stalled in `Creating an optimized production build ...`
+  - those still timed out or stalled before a fresh pass, which is why the branch kept build parity explicitly open
+- the later `2026-04-28` build-confidence slice materially improved that read:
+  - `cloud-web-app/web/build-probe-2026-04-28-externalized-e2b-runtime.log` completed successfully with a fresh compile-mode PASS
+  - `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-compile.log` reconfirmed that PASS after a public-route App Router cleanup
+  - `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-prerender.log` no longer stalled at startup; it reached `Generating static pages (224/224)` and then failed deterministically on `/404`, `/500`, and the wider App Router `useContext` export cluster
 - current honest state remains:
-  - compile-mode build = historically validated production mitigation, but not freshly reconfirmed in the latest `2026-04-27` rerun
-  - `build:prerender-probe` = still open, with the newest local rerun still stuck at `Creating an optimized production build ...`
+  - compile-mode build = freshly reconfirmed production mitigation on `2026-04-28`
+  - `build:prerender-probe` = still open, but now narrowed to deterministic pages-router/App Router parity failures instead of a blind build stall
 
 ## Still Open
 ### P0
 1. production build parity
-   - `npm run build` passed again on `2026-04-26` in the compile-mode production path (`cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`)
-  - that compile-mode mitigation is still the best honest production path we have, but the newest `2026-04-28` reruns (`cloud-web-app/web/build-probe-2026-04-28-service-worker-runtime.log` and `cloud-web-app/web/build-probe-2026-04-28-inline-runtime.log`) also did not finish cleanly and therefore did not provide a new fresh PASS
-   - build still emits the known `e2b/dist/index.mjs` critical-dependency warning through `app/api/preview/runtime-provision/route.ts`
-   - `npm run build:prerender-probe` remains the open track; the freshest local reruns (`cloud-web-app/web/build-probe-2026-04-28-service-worker-prerender.log` and `cloud-web-app/web/build-probe-2026-04-28-inline-runtime-prerender.log`) still did not clear `Creating an optimized production build ...`
+   - `npm run build` passed again on `2026-04-26` in the compile-mode production path (`cloud-web-app/web/build-probe-2026-04-26-compile-mode.log`) and was freshly revalidated on `2026-04-28` in both `cloud-web-app/web/build-probe-2026-04-28-externalized-e2b-runtime.log` and `cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-compile.log`
+   - that compile-mode mitigation is still the best honest production path we have today
+   - the old `e2b/dist/index.mjs` warning class is now materially reduced by `lib/server/e2b-runtime.ts`, direct imports in `lib/server/mention-context.ts`, runtime-only `y-websocket` util loading in `lib/server/websocket-server.ts`, and `experimental.serverComponentsExternalPackages: ['e2b']` in `next.config.js`
+   - `npm run build:prerender-probe` remains the open track; the freshest local rerun (`cloud-web-app/web/build-probe-2026-04-28-contact-sales-wrapper-prerender.log`) now fails deterministically instead of stalling:
+     - `/404` and `/500`: `<Html> should not be imported outside of pages/_document`
+     - shared export cluster: `Cannot read properties of null (reading 'useContext')`
    - the root provider split into `components/providers/CoreUiProviders.tsx` was tested and did not clear the blocker
   - `components/providers/StudioRuntimeProviders.tsx` now supports `full` and `light` runtime surfaces through extracted runtime modules, `app/admin/layout.tsx` and `app/billing/layout.tsx` now browser-load light-runtime shells, and `app/dashboard/layout.tsx`, `app/ide/layout.tsx`, `app/settings/layout.tsx`, `app/profile/layout.tsx`, `app/project-settings/layout.tsx`, `app/nexus/layout.tsx`, and `app/marketplace/layout.tsx` now route through `components/providers/StudioRuntimeRouteLayout.tsx`, but the broader blocker remained
   - tested-but-insufficient suspects now include: `components/ClientLayout.tsx`, `contexts/ThemeContext.tsx`, and `components/ui/toast-system.tsx`

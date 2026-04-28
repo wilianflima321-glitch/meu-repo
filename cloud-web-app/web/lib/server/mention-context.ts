@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { getSearchRuntime, getGitService } from '@/lib/server'
+import { getGitService } from '@/lib/server/git-service'
+import { getSearchRuntime } from '@/lib/server/search-runtime'
 import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
 import { searchSemanticCodebase } from '@/lib/server/semantic-code-search'
 
