@@ -692,6 +692,26 @@ This file is the short scoreboard that answers:
 6. continue `: any` reduction and move toward `noImplicitAny: true`
 7. deepen tests, coverage, admin consolidation, and i18n
 
+## Delta 2026-04-28 - Canonical arsenal blueprint
+- a new canonical strategy document now exists:
+  - `docs/master/88_AI_ARSENAL_AND_DOMAIN_SUPERIORITY_BLUEPRINT_2026-04-28.md`
+- this closes a real synthesis gap that had remained open across `15`, `16`, `23`, `24`, `25`, `27`, `45`, `46`, `57`, `65`, `66`, `76`, `77`, `79`, `85`, `86`, and `87`:
+  - one place for domain packs
+  - one place for market benchmark truth
+  - one place for user triage
+  - one place for \"how weaker models become robust\" through orchestration
+  - one place for margin-safe execution rules
+- the new document does not change the immediate P0:
+  - `build:prerender-probe` remains the main platform-confidence blocker
+- but it now makes the next strategic work much harder to lose:
+  1. research plane
+  2. memory plane
+  3. validation plane
+  4. games pack
+  5. films pack
+  6. apps/sites pack
+  7. economics and governance plane
+
 ## One-Line Truth
 The work now is not discovering what to do.
 The work is executing the already-known sequence without drift.

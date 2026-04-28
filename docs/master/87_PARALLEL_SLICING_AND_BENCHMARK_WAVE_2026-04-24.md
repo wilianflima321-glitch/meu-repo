@@ -486,6 +486,32 @@ After the workbench/studio shell is calmer:
 3. `ContentBrowser.tsx`
 4. domain editors such as audio, terrain, quest, and timeline surfaces
 
+### Wave 4 - arsenal and domain packs
+With the current repo and benchmark truth reconciled in `docs/master/88_AI_ARSENAL_AND_DOMAIN_SUPERIORITY_BLUEPRINT_2026-04-28.md`, the next parallel slicing wave should also treat the product as a domain-capable AI operating system, not only a better shell.
+
+Primary waves:
+1. research plane
+   - evidence board
+   - contradiction lane
+   - replayable research runs
+   - artifact exports
+2. apps/sites plane
+   - chat -> diff -> apply -> review -> rollback unification
+   - preview/review/deploy trust
+3. games plane
+   - asset validation
+   - runtime simulation checks
+   - render/build queue semantics
+4. films plane
+   - continuity memory
+   - shot/version authority
+   - render/export review pipeline
+5. economics/governance plane
+   - cost capsule
+   - budget caps
+   - provenance ledger
+   - approval-first expensive execution
+
 ## Definition Of Done For Every Slice
 A slice is only complete when all of this remains true:
 - lint passes
