@@ -9,11 +9,14 @@ import {
   mergePreviewDeployRecord,
   normalizeDeployProjectName,
   persistPreviewDeploy,
+  resolveReviewTarget,
   resolveShareHref,
   type PreviewDeployReadiness,
   type PreviewDeployRecord,
+  type PreviewReviewTarget,
   type PreviewDeployStatus,
 } from '@/components/preview/previewDeployTrust';
+import type { PreviewRuntimeHealthStatus } from '@/lib/preview/runtime-manager';
 
 type DeployResponse = PreviewDeployRecord & {
   message?: string;
@@ -23,6 +26,8 @@ type DeployResponse = PreviewDeployRecord & {
 type UsePreviewDeployTrustOptions = {
   projectId: string;
   previewRuntimeUrl: string | null;
+  runtimeHealthStatus: PreviewRuntimeHealthStatus;
+  runtimeReadinessStatus?: string | null;
 };
 
 const ACTIVE_DEPLOY_STATUSES = new Set<PreviewDeployStatus>([
@@ -35,6 +40,8 @@ const ACTIVE_DEPLOY_STATUSES = new Set<PreviewDeployStatus>([
 export function usePreviewDeployTrust({
   projectId,
   previewRuntimeUrl,
+  runtimeHealthStatus,
+  runtimeReadinessStatus,
 }: UsePreviewDeployTrustOptions) {
   const projectName = useMemo(
     () => normalizeDeployProjectName(projectId || 'aethel-preview'),
@@ -59,6 +66,18 @@ export function usePreviewDeployTrust({
         previewRuntimeUrl,
       }),
     [deployment, previewRuntimeUrl]
+  );
+
+  const reviewTarget = useMemo<PreviewReviewTarget | null>(
+    () =>
+      resolveReviewTarget({
+        deployment,
+        previewRuntimeUrl,
+        runtimeHealthStatus,
+        runtimeReadinessStatus,
+        deployReadiness: readiness,
+      }),
+    [deployment, previewRuntimeUrl, readiness, runtimeHealthStatus, runtimeReadinessStatus]
   );
 
   const loadReadiness = useCallback(async () => {
@@ -203,15 +222,16 @@ export function usePreviewDeployTrust({
   }, [projectId, projectName, readiness?.canDeploy, readiness?.message, submitting]);
 
   const copyShareLink = useCallback(async () => {
-    if (!shareTarget?.href || typeof navigator === 'undefined') return;
+    const target = reviewTarget ?? shareTarget;
+    if (!target?.href || typeof navigator === 'undefined') return;
 
     try {
-      await navigator.clipboard.writeText(absoluteBrowserHref(shareTarget.href));
-      setFeedback(`${shareTarget.label} copiado`);
+      await navigator.clipboard.writeText(absoluteBrowserHref(target.href));
+      setFeedback(`${target.label} copiado`);
     } catch {
       setFeedback('Nao foi possivel copiar o link');
     }
-  }, [shareTarget]);
+  }, [reviewTarget, shareTarget]);
 
   const openDeployStatus = useCallback(() => {
     if (!deployStatusHref || typeof window === 'undefined') return;
@@ -229,6 +249,7 @@ export function usePreviewDeployTrust({
     deployment,
     deployStatusHref,
     shareTarget,
+    reviewTarget,
     feedback,
     isSubmittingDeploy: submitting,
     isRefreshingDeploy: refreshing,

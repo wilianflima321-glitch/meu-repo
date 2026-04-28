@@ -758,6 +758,34 @@ This file is the short scoreboard that answers:
   - because `.next/server/pages-manifest.json` now registers `/404` and `/500`, the residual prerender cluster is less likely to be a simple missing-pages fallback problem
   - the highest-signal next isolation experiment is now the root App Router boundary in `app/layout.tsx`, not more churn in `pages/404.tsx` or `pages/500.tsx`
 
+## Delta 2026-04-28 - Review-ready preview contract
+- the preview/deploy lane now distinguishes review intent instead of flattening every share action into one generic link:
+  - `components/preview/previewDeployTrust.ts`
+  - `components/preview/usePreviewDeployTrust.ts`
+  - `components/ide/fullscreen/WorkbenchPreviewRuntimeControls.tsx`
+  - `components/ide/PreviewRuntimeToolbar.tsx`
+- the new review grammar now separates:
+  - `review_ready_public`
+  - `review_ready_runtime`
+  - `ephemeral_runtime`
+  - `blocked_stale`
+  - `blocked_degraded`
+- practical effect:
+  - stable public deploys now surface as explicit review-ready links
+  - reachable runtime previews now surface as internal review targets instead of generic share targets
+  - stale last-good deploys stay available with honest labeling when the current publish lane is blocked
+  - degraded runtime or QA-blocked publish states no longer present as safe review handoff targets
+- focused regression coverage now exists in:
+  - `__tests__/preview/previewDeployTrust.test.ts`
+  - `__tests__/preview/previewDeployTrust.stableShare.test.ts`
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-28-review-ready-compile.log` = fresh compile-mode `PASS`
+  - `cloud-web-app/web/build-probe-2026-04-28-review-ready-prerender.log` = still open, but now reaches `Collecting page data ...` before timing out inside the execution window
+- current honest state after this wave:
+  - compile-mode production mitigation is freshly revalidated on `2026-04-28`
+  - `build:prerender-probe` remains open
+  - preview sharing is materially closer to a trustworthy review lane instead of a generic runtime/deploy link picker
+
 ## One-Line Truth
 The work now is not discovering what to do.
 The work is executing the already-known sequence without drift.

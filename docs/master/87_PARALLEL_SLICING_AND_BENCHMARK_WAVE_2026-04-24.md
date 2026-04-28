@@ -537,6 +537,35 @@ The next measured tightening now looks like this:
    - because the pages manifest already registers those routes, the highest-signal next experiment is now the App Router root boundary in `app/layout.tsx`
    - the honest recommendation is to test one small root-level static/dynamic isolation patch there before spending more cycles on fallback pages
 
+### Wave 7 - review-ready preview lane
+The preview/deploy cockpit is now moving from "best available share link" toward an explicit review contract:
+1. review target grammar
+   - `components/preview/previewDeployTrust.ts` now defines:
+     - `review_ready_public`
+     - `review_ready_runtime`
+     - `ephemeral_runtime`
+     - `blocked_stale`
+     - `blocked_degraded`
+2. review-aware hook layer
+   - `components/preview/usePreviewDeployTrust.ts` now resolves a `reviewTarget` from deploy state, runtime health, runtime readiness, and deploy gate status
+   - copy feedback now follows the review target instead of only the older generic share target when available
+3. operator-facing toolbar
+   - `components/ide/fullscreen/WorkbenchPreviewRuntimeControls.tsx` now forwards runtime health and readiness into the deploy trust hook
+   - `components/ide/PreviewRuntimeToolbar.tsx` now surfaces:
+     - `Review ready`
+     - `Runtime review`
+     - `Ephemeral preview`
+     - `Review stale`
+     - `Review blocked`
+   - the copy action now switches between `Copy review link`, `Copy preview link`, and `Copy last public link` instead of one generic label
+4. regression proof
+   - `__tests__/preview/previewDeployTrust.test.ts`
+   - `__tests__/preview/previewDeployTrust.stableShare.test.ts`
+5. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-28-review-ready-compile.log` = compile-mode `PASS`
+   - `cloud-web-app/web/build-probe-2026-04-28-review-ready-prerender.log` = still open, but the probe now reaches `Collecting page data ...` before timing out
+   - therefore the product lane improved while prerender parity remains explicitly unresolved
+
 ## Definition Of Done For Every Slice
 A slice is only complete when all of this remains true:
 - lint passes
@@ -548,10 +577,10 @@ A slice is only complete when all of this remains true:
 
 ## Current Truthful Next Order
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
-2. keep full compile-mode build green while tracing `build:prerender-probe` separately; the freshest honest evidence now includes `cloud-web-app/web/build-probe-2026-04-28-proposal-preview-compile.log` and `cloud-web-app/web/build-probe-2026-04-28-error-removed-compile.log`, while the separate prerender probe is narrower but still explicitly open
+2. keep full compile-mode build green while tracing `build:prerender-probe` separately; the freshest honest evidence now includes `cloud-web-app/web/build-probe-2026-04-28-review-ready-compile.log`, and the separate prerender probe is narrower but still explicitly open
 3. keep the narrowed parity search focused on the residual `/404` + `/500` pages-runtime fault and the root App Router export cluster that only returns when `app/error.tsx` is present
-   - freshest deterministic evidence is now `cloud-web-app/web/build-probe-2026-04-28-deploy-qa-prerender.log`
-   - compile mode remains green in `cloud-web-app/web/build-probe-2026-04-28-deploy-qa-compile.log`
+   - freshest deterministic evidence is now `cloud-web-app/web/build-probe-2026-04-28-review-ready-prerender.log`
+   - compile mode remains green in `cloud-web-app/web/build-probe-2026-04-28-review-ready-compile.log`
 4. keep reducing shared-runtime noise through `FullStudioRuntime.tsx`, `ServiceWorkerProvider.tsx`, `useServiceWorker.tsx`, and `AethelProvider.tsx`
 5. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
 6. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`

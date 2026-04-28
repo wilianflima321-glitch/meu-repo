@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   mergePreviewDeployRecord,
+  resolveReviewTarget,
   resolveShareHref,
   type PreviewDeployRecord,
 } from '@/components/preview/previewDeployTrust';
@@ -95,6 +96,83 @@ describe('resolveShareHref', () => {
     expect(target).toEqual({
       href: 'https://deploy-stable.example.com',
       label: 'Last public deploy',
+    });
+  });
+});
+
+describe('resolveReviewTarget', () => {
+  it('marks a ready public deploy as review-ready', () => {
+    const target = resolveReviewTarget({
+      deployment: buildDeployment({
+        status: 'ready',
+        url: 'https://deploy-ready.example.com',
+      }),
+      previewRuntimeUrl: 'http://localhost:3000',
+      runtimeHealthStatus: 'reachable',
+      runtimeReadinessStatus: 'ready',
+    });
+
+    expect(target).toMatchObject({
+      kind: 'review_ready_public',
+      href: 'https://deploy-ready.example.com',
+      actionLabel: 'Copy review link',
+    });
+  });
+
+  it('promotes a reachable ready runtime into an internal review target', () => {
+    const target = resolveReviewTarget({
+      deployment: null,
+      previewRuntimeUrl: 'http://localhost:3000',
+      runtimeHealthStatus: 'reachable',
+      runtimeReadinessStatus: 'ready',
+    });
+
+    expect(target).toMatchObject({
+      kind: 'review_ready_runtime',
+      href: 'http://localhost:3000',
+      actionLabel: 'Copy review link',
+    });
+  });
+
+  it('keeps a stale public deploy available when current publish is blocked', () => {
+    const target = resolveReviewTarget({
+      deployment: buildDeployment({
+        status: 'building',
+        url: '',
+        lastReadyUrl: 'https://deploy-stable.example.com',
+      }),
+      previewRuntimeUrl: 'http://localhost:3000',
+      runtimeHealthStatus: 'unreachable',
+      runtimeReadinessStatus: 'partial',
+      deployReadiness: {
+        canDeploy: false,
+        qaGate: {
+          ok: false,
+          blockers: ['tests', 'bundle'],
+          durationMs: 1250,
+        },
+      },
+    });
+
+    expect(target).toMatchObject({
+      kind: 'blocked_stale',
+      href: 'https://deploy-stable.example.com',
+      actionLabel: 'Copy last public link',
+    });
+  });
+
+  it('marks preview-only runtime as ephemeral before review promotion', () => {
+    const target = resolveReviewTarget({
+      deployment: null,
+      previewRuntimeUrl: 'http://localhost:3000',
+      runtimeHealthStatus: 'checking',
+      runtimeReadinessStatus: 'partial',
+    });
+
+    expect(target).toMatchObject({
+      kind: 'ephemeral_runtime',
+      href: 'http://localhost:3000',
+      actionLabel: 'Copy preview link',
     });
   });
 });

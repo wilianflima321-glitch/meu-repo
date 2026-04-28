@@ -106,7 +106,7 @@ export function WorkbenchPreviewRuntimeControls({
     readiness: deployReadiness,
     deployment,
     deployStatusHref,
-    shareTarget,
+    reviewTarget,
     feedback: deployFeedback,
     isSubmittingDeploy,
     isRefreshingDeploy,
@@ -118,6 +118,8 @@ export function WorkbenchPreviewRuntimeControls({
   } = usePreviewDeployTrust({
     projectId,
     previewRuntimeUrl,
+    runtimeHealthStatus: runtimeHealth.status,
+    runtimeReadinessStatus: runtimeReadiness?.status ?? null,
   });
 
   return (
@@ -149,7 +151,7 @@ export function WorkbenchPreviewRuntimeControls({
       deployStatusHref={deployStatusHref}
       deployUrl={deployment?.url ?? null}
       deployFeedback={deployFeedback}
-      shareTargetLabel={shareTarget?.label ?? null}
+      reviewTarget={reviewTarget ?? null}
       isDeploySubmitting={isSubmittingDeploy}
       isDeployRefreshing={isRefreshingDeploy}
       onRunRecommendedAction={runRecommendedAction}

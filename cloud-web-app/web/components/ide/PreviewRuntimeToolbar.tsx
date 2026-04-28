@@ -2,7 +2,11 @@
 
 import type { ReactNode } from 'react'
 
-import type { PreviewDeployReadiness, PreviewDeployStatus } from '@/components/preview/previewDeployTrust'
+import type {
+  PreviewDeployReadiness,
+  PreviewDeployStatus,
+  PreviewReviewTarget,
+} from '@/components/preview/previewDeployTrust'
 import type { PreviewRuntimeHealthStatus, PreviewRuntimeReadinessResponse } from '@/lib/preview/runtime-manager'
 
 import { ptBR } from '@/lib/locales/pt-BR'
@@ -41,7 +45,7 @@ type Props = {
   deployStatusHref: string | null
   deployUrl: string | null
   deployFeedback: string | null
-  shareTargetLabel: string | null
+  reviewTarget: PreviewReviewTarget | null
   isDeploySubmitting: boolean
   isDeployRefreshing: boolean
   onStartDeploy: () => void
@@ -117,7 +121,7 @@ export default function PreviewRuntimeToolbar({
   deployStatusHref,
   deployUrl,
   deployFeedback,
-  shareTargetLabel,
+  reviewTarget,
   isDeploySubmitting,
   isDeployRefreshing,
   onStartDeploy,
@@ -229,6 +233,9 @@ export default function PreviewRuntimeToolbar({
     deployReadiness?.qaGate && !deployReadiness.qaGate.ok
       ? deployReadiness.qaGate.blockers.slice(0, 2).join(', ')
       : null
+  const reviewTargetToneClass = getReviewTargetToneClass(reviewTarget?.kind ?? null)
+  const reviewTargetBadge = getReviewTargetBadge(reviewTarget?.kind ?? null)
+  const reviewActionLabel = reviewTarget?.actionLabel ?? 'Copy review link'
 
   const quickFacts = [
     { label: t.health, value: runtimeStateLabel, hint: runtimeHealthHint },
@@ -315,14 +322,14 @@ export default function PreviewRuntimeToolbar({
                       QA: {qaBlockerSummary}
                     </ToolbarChip>
                   ) : null}
-                  {shareTargetLabel ? (
-                    <ToolbarChip toneClass="border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]">
-                      Share via {shareTargetLabel}
+                  {reviewTarget && reviewTargetBadge ? (
+                    <ToolbarChip toneClass={reviewTargetToneClass}>
+                      {reviewTargetBadge}: {reviewTarget.label}
                     </ToolbarChip>
                   ) : null}
                 </div>
                 <div className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-                  {deployHint}
+                  {reviewTarget?.summary ?? deployHint}
                 </div>
                 {deployFeedback ? (
                   <div className="mt-2 text-[11px] text-[var(--aethel-text-secondary)]">
@@ -364,11 +371,11 @@ export default function PreviewRuntimeToolbar({
                 <button
                   type="button"
                   onClick={onCopyShareLink}
-                  disabled={!shareTargetLabel}
-                  aria-label="Copy best available share link"
+                  disabled={!reviewTarget?.href}
+                  aria-label={reviewActionLabel}
                   className="min-h-[34px] rounded-xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-info-light)] transition-colors hover:bg-[color-mix(in_srgb,var(--aethel-info)_20%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-info)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Copy share link
+                  {reviewActionLabel}
                 </button>
                 {deployStatusHref ? (
                   <button
@@ -585,6 +592,39 @@ export default function PreviewRuntimeToolbar({
       ) : null}
     </div>
   )
+}
+
+function getReviewTargetBadge(kind: PreviewReviewTarget['kind'] | null) {
+  switch (kind) {
+    case 'review_ready_public':
+      return 'Review ready';
+    case 'review_ready_runtime':
+      return 'Runtime review';
+    case 'ephemeral_runtime':
+      return 'Ephemeral preview';
+    case 'blocked_stale':
+      return 'Review stale';
+    case 'blocked_degraded':
+      return 'Review blocked';
+    default:
+      return null;
+  }
+}
+
+function getReviewTargetToneClass(kind: PreviewReviewTarget['kind'] | null) {
+  switch (kind) {
+    case 'review_ready_public':
+      return 'border-[color-mix(in_srgb,var(--aethel-success)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success)]';
+    case 'review_ready_runtime':
+      return 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]';
+    case 'ephemeral_runtime':
+      return 'border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]';
+    case 'blocked_stale':
+    case 'blocked_degraded':
+      return 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]';
+    default:
+      return 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]';
+  }
 }
 
 function getDeployStatusLabel(status: PreviewDeployStatus | null) {
