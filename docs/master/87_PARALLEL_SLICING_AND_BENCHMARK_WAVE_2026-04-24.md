@@ -440,6 +440,10 @@ After Wave 1 stabilizes:
 - the preview/runtime trust lane also advanced again:
   - `usePreviewRuntime.ts`, `previewRuntime.types.ts`, `previewRuntimeState.ts`, `RuntimePreviewSurface.tsx`, and `PreviewLifecycleChrome.tsx` now preserve provider identity, env/setup hints, recommended next action, and clearer failure guidance from `/api/preview/runtime-provision`
   - this moves failed/warming/idle runtime states closer to the trust grammar expected from Replit/Vercel review surfaces
+- the deploy/review lane is also less optimistic than before:
+  - `app/api/deploy/route.ts` now runs `runQaGate()` during both deploy readiness checks and deploy creation
+  - `components/preview/usePreviewDeployTrust.ts` now surfaces release-quality blockers coming back from the API instead of flattening every deploy block into generic missing-config feedback
+  - `components/ide/PreviewRuntimeToolbar.tsx` now shows inline `QA:` blocker chips when publish is blocked by quality checks, which is materially closer to a trustworthy Vercel-style release lane than the older binary `Deploy ready` grammar
 - the AI review loop is a bit less hidden:
   - `components/ai-chat/AIChatPendingDiffTray.tsx` now surfaces pending file edits directly above the composer with `Open diff`, `Reject`, and `Apply now`
   - `components/ide/AIChatPanelPro.tsx` mounts that tray whenever `editorBridge.pendingDiff` exists, which makes the main artifact-review loop more obvious before the user opens the full ops sidebar
@@ -495,6 +499,8 @@ A slice is only complete when all of this remains true:
 1. keep full prerender parity open until `npm run build:prerender-probe` proves end-to-end success, while treating compile-mode build success as the current honest production mitigation
 2. keep full compile-mode build green while tracing `build:prerender-probe` separately; the freshest honest evidence now includes `cloud-web-app/web/build-probe-2026-04-28-proposal-preview-compile.log` and `cloud-web-app/web/build-probe-2026-04-28-error-removed-compile.log`, while the separate prerender probe is narrower but still explicitly open
 3. keep the narrowed parity search focused on the residual `/404` + `/500` pages-runtime fault and the root App Router export cluster that only returns when `app/error.tsx` is present
+   - freshest deterministic evidence is now `cloud-web-app/web/build-probe-2026-04-28-deploy-qa-prerender.log`
+   - compile mode remains green in `cloud-web-app/web/build-probe-2026-04-28-deploy-qa-compile.log`
 4. keep reducing shared-runtime noise through `FullStudioRuntime.tsx`, `ServiceWorkerProvider.tsx`, `useServiceWorker.tsx`, and `AethelProvider.tsx`
 5. return to `FullscreenIDE.tsx` and the remaining workbench bridge/runtime hotspots
 6. keep polishing preview through `usePreviewRuntime.ts`, `RuntimePreviewSurface.tsx`, `SceneViewportWorkflowDrawer.tsx`, and `useSceneViewportSurfaceState.ts`

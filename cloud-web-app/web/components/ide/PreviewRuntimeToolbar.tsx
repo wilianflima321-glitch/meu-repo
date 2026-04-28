@@ -216,13 +216,19 @@ export default function PreviewRuntimeToolbar({
           ? 'border-[color-mix(in_srgb,var(--aethel-error)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error-light)]'
           : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] text-[var(--aethel-text-secondary)]'
   const deployHint =
-    deployReadiness?.canDeploy === false && deployReadiness.missing?.length
+    deployReadiness?.canDeploy === false && deployReadiness.message
+      ? deployReadiness.message
+      : deployReadiness?.canDeploy === false && deployReadiness.missing?.length
       ? `Configure ${deployReadiness.missing.join(', ')} para publicar.`
       : deployStatus === 'ready'
         ? 'Deploy publico pronto para compartilhar.'
         : deployStatusHref
           ? 'Status do deploy acompanhado na mesma lane.'
           : 'Publique quando precisar validar share e parity fora do runtime local.'
+  const qaBlockerSummary =
+    deployReadiness?.qaGate && !deployReadiness.qaGate.ok
+      ? deployReadiness.qaGate.blockers.slice(0, 2).join(', ')
+      : null
 
   const quickFacts = [
     { label: t.health, value: runtimeStateLabel, hint: runtimeHealthHint },
@@ -304,6 +310,11 @@ export default function PreviewRuntimeToolbar({
                   >
                     {deployReadiness?.canDeploy === false ? 'Deploy blocked' : 'Deploy ready'}
                   </ToolbarChip>
+                  {qaBlockerSummary ? (
+                    <ToolbarChip toneClass="border-[color-mix(in_srgb,var(--aethel-warning)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning)]">
+                      QA: {qaBlockerSummary}
+                    </ToolbarChip>
+                  ) : null}
                   {shareTargetLabel ? (
                     <ToolbarChip toneClass="border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]">
                       Share via {shareTargetLabel}

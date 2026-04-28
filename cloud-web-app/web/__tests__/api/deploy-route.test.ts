@@ -16,9 +16,14 @@ const deployMocks = vi.hoisted(() => ({
   listDeployments: vi.fn(),
 }))
 
+const qaGateMocks = vi.hoisted(() => ({
+  runQaGate: vi.fn(),
+}))
+
 vi.mock('@/lib/auth-server', () => authMocks)
 vi.mock('@/lib/entitlements', () => entitlementMocks)
 vi.mock('@/lib/deploy/vercel-deploy', () => deployMocks)
+vi.mock('@/lib/server/qa-gate', () => qaGateMocks)
 
 import { GET, POST } from '@/app/api/deploy/route'
 
@@ -29,6 +34,11 @@ describe('api/deploy route', () => {
     entitlementMocks.requireFeatureForUser.mockResolvedValue({
       plan: { id: 'pro' },
       source: 'subscription',
+    })
+    qaGateMocks.runQaGate.mockResolvedValue({
+      ok: true,
+      durationMs: 1200,
+      checks: [],
     })
   })
 
@@ -68,6 +78,39 @@ describe('api/deploy route', () => {
     expect(payload.canDeploy).toBe(false)
     expect(payload.missing).toEqual(['deployment configuration'])
     expect(entitlementMocks.requireFeatureForUser).toHaveBeenCalledWith('user-1', 'build')
+    expect(qaGateMocks.runQaGate).not.toHaveBeenCalled()
+  })
+
+  it('surfaces qa gate blockers in readiness mode', async () => {
+    deployMocks.checkDeployReadiness.mockReturnValue({
+      configured: true,
+      tokenPresent: true,
+      teamConfigured: true,
+      canDeploy: true,
+      missing: [],
+    })
+    qaGateMocks.runQaGate.mockResolvedValue({
+      ok: false,
+      durationMs: 980,
+      checks: [
+        { id: 'button-types', ok: false, stdout: '', stderr: 'bad buttons' },
+        { id: 'hardcoded-colors', ok: true, stdout: '', stderr: '' },
+      ],
+      error: 'QA_GATE_BLOCKED',
+    })
+
+    const req = new NextRequest('http://localhost:3000/api/deploy?readiness=true')
+    const response = await GET(req)
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.canDeploy).toBe(false)
+    expect(payload.missing).toEqual(['quality gate'])
+    expect(payload.qaGate).toEqual({
+      ok: false,
+      blockers: ['button-types'],
+      durationMs: 980,
+    })
   })
 
   it('returns 503 when deploy runtime is not configured', async () => {
@@ -123,5 +166,42 @@ describe('api/deploy route', () => {
     expect(deployMocks.createDeployment).toHaveBeenCalledWith(
       expect.objectContaining({ projectName: 'demo-project' })
     )
+  })
+
+  it('blocks deploy creation when the qa gate fails', async () => {
+    deployMocks.checkDeployReadiness.mockReturnValue({
+      configured: true,
+      tokenPresent: true,
+      teamConfigured: true,
+      canDeploy: true,
+      missing: [],
+    })
+    qaGateMocks.runQaGate.mockResolvedValue({
+      ok: false,
+      durationMs: 1100,
+      checks: [
+        { id: 'button-types', ok: false, stdout: '', stderr: 'bad buttons' },
+      ],
+      error: 'QA_GATE_BLOCKED',
+    })
+
+    const req = new NextRequest('http://localhost:3000/api/deploy', {
+      method: 'POST',
+      body: JSON.stringify({ projectName: 'demo-project' }),
+      headers: { 'content-type': 'application/json' },
+    })
+
+    const response = await POST(req)
+    const payload = await response.json()
+
+    expect(response.status).toBe(412)
+    expect(payload.error).toBe('DEPLOY_QA_GATE_BLOCKED')
+    expect(payload.missing).toEqual(['quality gate'])
+    expect(payload.qaGate).toEqual({
+      ok: false,
+      blockers: ['button-types'],
+      durationMs: 1100,
+    })
+    expect(deployMocks.createDeployment).not.toHaveBeenCalled()
   })
 })

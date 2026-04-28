@@ -62,6 +62,9 @@ This file is the short scoreboard that answers:
 - `StudioGlobalNav.tsx`: `64` lines
 - `SceneViewportWorkflowDrawer.tsx`: `163` lines
 - `WorkbenchPreviewRuntimeControls.tsx`: `134` lines
+- `PreviewRuntimeToolbar.tsx`: `609` lines
+- `previewDeployTrust.ts`: `155` lines
+- `usePreviewDeployTrust.ts`: `258` lines
 - `useTerminalTransport.ts`: `145` lines
 - `chromeResizeHandle.tsx`: `106` lines
 - `sceneViewportDerivations.ts`: `89` lines
@@ -158,8 +161,8 @@ This file is the short scoreboard that answers:
 - `__tests__/api/project-rules-route.test.ts`: `99` lines
 - `lib/server/websocket-server.ts`: `1420` lines
 - `server/websocket-server.ts`: `47` lines
-- `app/api/deploy/route.ts`: `145` lines
-- `__tests__/api/deploy-route.test.ts`: `106` lines
+- `app/api/deploy/route.ts`: `245` lines
+- `__tests__/api/deploy-route.test.ts`: `207` lines
 - `lib/server/e2b-runtime.ts`: `10` lines
 - default PR browser pressure exists through `playwright.merge.config.ts`
 - last documented local Chromium replay for the merge-pressure suite: `5 passed`
@@ -174,6 +177,15 @@ This file is the short scoreboard that answers:
   - `/404` and `/500`: `Error: <Html> should not be imported outside of pages/_document.`
   - wider App Router export cluster: `TypeError: Cannot read properties of null (reading 'useContext')`
   - representative failing routes now include `/_not-found`, `/compare`, `/compliance`, `/contact-sales`, `/customers`, `/dashboard`, `/docs`, `/ide`, `/marketplace`, `/pricing`, `/security`, `/settings`, `/status`, `/terms`, and `/`
+- deploy confidence is also stricter than the older audits still imply:
+  - `app/api/deploy/route.ts` now runs `runQaGate()` before both `GET ?readiness=true` and `POST /api/deploy`
+  - preview deploy readiness now distinguishes infrastructure blockers from release-quality blockers and surfaces `quality gate` failures back to the preview lane
+  - `PreviewRuntimeToolbar.tsx` now exposes blocked QA checks inline instead of only showing a generic deploy-ready/deploy-blocked badge
+- the freshest `2026-04-28` build evidence after that deploy-trust hardening is:
+  - `cloud-web-app/web/build-probe-2026-04-28-deploy-qa-compile.log`: `npm run build` passed again in compile mode
+  - `cloud-web-app/web/build-probe-2026-04-28-deploy-qa-prerender.log`: `npm run build:prerender-probe` still fails deterministically with the same two residual classes:
+    - `/404` and `/500`: `Error: <Html> should not be imported outside of pages/_document.`
+    - wider App Router export cluster: `TypeError: Cannot read properties of null (reading 'useContext')`
 
 ## Closed Or Materially Stabilized
 ### Governance baseline

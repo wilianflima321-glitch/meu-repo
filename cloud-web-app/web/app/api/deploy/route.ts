@@ -19,15 +19,84 @@ import {
 } from '@/lib/deploy/vercel-deploy';
 import { requireFeatureForUser } from '@/lib/entitlements';
 import { createComponentLogger } from '@/lib/observability/logger';
+import { runQaGate, type QaGateResult } from '@/lib/server/qa-gate';
 
 export const dynamic = 'force-dynamic';
 
 const logger = createComponentLogger('api-deploy-route');
 
-function sanitizeReadinessForClient(readiness: DeployReadiness) {
+type DeployQaGateSummary = {
+  ok: boolean;
+  blockers: string[];
+  durationMs: number;
+};
+
+type ClientDeployReadiness = {
+  canDeploy: boolean;
+  missing: string[];
+  message?: string;
+  qaGate?: DeployQaGateSummary;
+};
+
+function summarizeQaGate(qaGate: QaGateResult): DeployQaGateSummary {
   return {
-    ...readiness,
-    missing: readiness.canDeploy ? [] : ['deployment configuration'],
+    ok: qaGate.ok,
+    durationMs: qaGate.durationMs,
+    blockers: qaGate.checks.filter((check) => !check.ok).map((check) => check.id),
+  };
+}
+
+function sanitizeReadinessForClient(
+  readiness: DeployReadiness,
+  qaGate?: QaGateResult | null
+): ClientDeployReadiness {
+  if (!readiness.canDeploy) {
+    return {
+      canDeploy: false,
+      missing: ['deployment configuration'],
+      message: 'Configure a infraestrutura de deploy antes de publicar.',
+    };
+  }
+
+  if (qaGate && !qaGate.ok) {
+    const summary = summarizeQaGate(qaGate);
+    return {
+      canDeploy: false,
+      missing: ['quality gate'],
+      message:
+        summary.blockers.length > 0
+          ? `Resolva ${summary.blockers.join(', ')} antes de publicar.`
+          : 'Resolva os bloqueios do quality gate antes de publicar.',
+      qaGate: summary,
+    };
+  }
+
+  return {
+    canDeploy: true,
+    missing: [],
+    qaGate: qaGate ? summarizeQaGate(qaGate) : undefined,
+  };
+}
+
+async function evaluateDeployReadiness(): Promise<{
+  infrastructure: DeployReadiness;
+  qaGate: QaGateResult | null;
+  clientReadiness: ClientDeployReadiness;
+}> {
+  const infrastructure = checkDeployReadiness();
+  if (!infrastructure.canDeploy) {
+    return {
+      infrastructure,
+      qaGate: null,
+      clientReadiness: sanitizeReadinessForClient(infrastructure),
+    };
+  }
+
+  const qaGate = await runQaGate({ timeoutMs: 30_000 });
+  return {
+    infrastructure,
+    qaGate,
+    clientReadiness: sanitizeReadinessForClient(infrastructure, qaGate),
   };
 }
 
@@ -36,16 +105,29 @@ export async function POST(req: NextRequest) {
     const user = requireAuth(req);
     const entitlements = await requireFeatureForUser(user.userId, 'build');
 
-    const readiness = checkDeployReadiness();
-    if (!readiness.canDeploy) {
+    const readiness = await evaluateDeployReadiness();
+    if (!readiness.infrastructure.canDeploy) {
       return NextResponse.json(
         {
           error: 'DEPLOY_NOT_CONFIGURED',
           message: 'Vercel deployment is not configured.',
-          missing: sanitizeReadinessForClient(readiness).missing,
+          missing: readiness.clientReadiness.missing,
           capabilityStatus: 'PARTIAL',
         },
         { status: 503 }
+      );
+    }
+
+    if (readiness.qaGate && !readiness.qaGate.ok) {
+      return NextResponse.json(
+        {
+          error: 'DEPLOY_QA_GATE_BLOCKED',
+          message: readiness.clientReadiness.message,
+          missing: readiness.clientReadiness.missing,
+          qaGate: readiness.clientReadiness.qaGate,
+          capabilityStatus: 'PARTIAL',
+        },
+        { status: 412 }
       );
     }
 
@@ -110,7 +192,8 @@ export async function GET(req: NextRequest) {
     // Readiness check
     if (readinessQuery) {
       await requireFeatureForUser(user.userId, 'build');
-      return NextResponse.json(sanitizeReadinessForClient(checkDeployReadiness()));
+      const readiness = await evaluateDeployReadiness();
+      return NextResponse.json(readiness.clientReadiness);
     }
 
     const entitlements = await requireFeatureForUser(user.userId, 'build');

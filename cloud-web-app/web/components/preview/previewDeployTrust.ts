@@ -12,6 +12,12 @@ export type PreviewDeployStatus =
 export type PreviewDeployReadiness = {
   canDeploy?: boolean;
   missing?: string[];
+  message?: string;
+  qaGate?: {
+    ok: boolean;
+    blockers: string[];
+    durationMs: number;
+  };
 };
 
 export type PreviewDeployRecord = {

@@ -69,7 +69,9 @@ export function usePreviewDeployTrust({
       if (!response.ok) return;
       const payload = (await response.json()) as PreviewDeployReadiness;
       setReadiness(payload);
-      if (payload.canDeploy === false && payload.missing?.length) {
+      if (payload.canDeploy === false && payload.message) {
+        setFeedback(payload.message);
+      } else if (payload.canDeploy === false && payload.missing?.length) {
         setFeedback(`Configure ${payload.missing.join(', ')}`);
       }
     } catch {
@@ -146,7 +148,12 @@ export function usePreviewDeployTrust({
   }, [deployment, refreshDeployment]);
 
   const startDeploy = useCallback(async () => {
-    if (submitting || readiness?.canDeploy === false) return;
+    if (submitting || readiness?.canDeploy === false) {
+      if (readiness?.canDeploy === false && readiness.message) {
+        setFeedback(readiness.message);
+      }
+      return;
+    }
 
     setSubmitting(true);
     setFeedback(null);
@@ -193,7 +200,7 @@ export function usePreviewDeployTrust({
     } finally {
       setSubmitting(false);
     }
-  }, [projectId, projectName, readiness?.canDeploy, submitting]);
+  }, [projectId, projectName, readiness?.canDeploy, readiness?.message, submitting]);
 
   const copyShareLink = useCallback(async () => {
     if (!shareTarget?.href || typeof navigator === 'undefined') return;
