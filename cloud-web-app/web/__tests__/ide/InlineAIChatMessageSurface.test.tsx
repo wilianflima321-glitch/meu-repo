@@ -1,6 +1,6 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import { InlineAIMessageList } from '@/components/ide/InlineAIChatMessageSurface'
 
@@ -38,5 +38,40 @@ describe('InlineAIChatMessageSurface', () => {
     expect(screen.getByText('Execution trace')).toBeInTheDocument()
     expect(screen.getByText(/Resposta gerada com trace detalhada/i)).toBeInTheDocument()
     expect(screen.getByText(/historyContextMessages=1/i)).toBeInTheDocument()
+  })
+
+  it('prefers review diff actions before direct apply in inline code suggestions', () => {
+    const onReviewCode = vi.fn()
+    const onApplyCode = vi.fn()
+
+    render(
+      <InlineAIMessageList
+        isLoading={false}
+        label="loading"
+        onReviewCode={onReviewCode}
+        onApplyCode={onApplyCode}
+        messages={[
+          {
+            id: 'assistant-2',
+            role: 'assistant',
+            content: '```ts\nconst nextValue = true\n```',
+            timestamp: new Date('2026-04-28T18:12:00.000Z'),
+            codeBlocks: [
+              {
+                language: 'ts',
+                code: 'const nextValue = true',
+              },
+            ],
+          },
+        ]}
+        messagesEndRef={{ current: null }}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /Abrir diff de revisao/i }))
+    expect(onReviewCode).toHaveBeenCalledWith('const nextValue = true')
+
+    fireEvent.click(screen.getByRole('button', { name: /Aplicar bloco de codigo ao editor/i }))
+    expect(onApplyCode).toHaveBeenCalledWith('const nextValue = true')
   })
 })

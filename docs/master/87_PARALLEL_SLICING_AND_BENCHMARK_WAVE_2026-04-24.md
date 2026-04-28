@@ -566,6 +566,22 @@ The preview/deploy cockpit is now moving from "best available share link" toward
    - `cloud-web-app/web/build-probe-2026-04-28-review-ready-prerender.log` = still open, but the probe now reaches `Collecting page data ...` before timing out
    - therefore the product lane improved while prerender parity remains explicitly unresolved
 
+### Wave 8 - inline review-first bridge
+The next convergence slice now pushes inline suggestions into the same artifact-review posture as the main AI lane:
+1. inline action grammar
+   - `components/ide/InlineAIChat.helpers.ts` now allows a separate `onReviewCode` path instead of only `onApplyCode`
+2. bridge reuse
+   - `components/ide/InlineAIChat.tsx` now reuses `useEditorApplyBridge()`
+   - when an active workbench file exists, inline code review stages a diff through `stageDiffForActiveFile(code)` and dispatches `aethel.ide.openChatDiff`
+3. message/code-block surface
+   - `components/ide/InlineAIChatMessageSurface.tsx` now threads both review and apply actions down to code blocks
+   - `components/ide/InlineAIChatPrimitives.tsx` now promotes `Review diff` to the primary action, while `Aplicar` remains the explicit fallback
+4. regression proof
+   - `__tests__/ide/InlineAIChatMessageSurface.test.tsx` now verifies both the new review-first button and the remaining direct-apply fallback
+5. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-28-inline-review-only-compile.log` did not produce a fresh pass and stalled again at `Creating an optimized production build ...`
+   - so this slice is a confirmed product improvement, but not a new platform-confidence win
+
 ## Definition Of Done For Every Slice
 A slice is only complete when all of this remains true:
 - lint passes

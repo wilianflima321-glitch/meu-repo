@@ -6,6 +6,7 @@
 'use client'
 
 import React, { useEffect, useId } from 'react'
+import { useEditorApplyBridge } from '@/components/ide/EditorApplyBridgeContext'
 import { tokens } from '@/lib/design-tokens'
 
 import { buildContextSummary, getLoadingLabel, type InlineAIChatProps } from './InlineAIChat.helpers'
@@ -24,8 +25,10 @@ export function InlineAIChat({
   activeFile,
   projectContext,
   onApplyCode,
+  onReviewCode,
   onClose,
 }: InlineAIChatProps) {
+  const editorBridge = useEditorApplyBridge()
   const {
     messages,
     input,
@@ -62,6 +65,28 @@ export function InlineAIChat({
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
       sendMessage()
+    }
+  }
+
+  const handleReviewCode = (code: string) => {
+    if (onReviewCode) {
+      onReviewCode(code)
+      return
+    }
+
+    if (!editorBridge?.activeFilePath) {
+      onApplyCode?.(code)
+      return
+    }
+
+    const result = editorBridge.stageDiffForActiveFile(code)
+    if (!result.ok) {
+      onApplyCode?.(code)
+      return
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('aethel.ide.openChatDiff'))
     }
   }
 
@@ -112,6 +137,7 @@ export function InlineAIChat({
             messages={messages}
             messagesEndRef={messagesEndRef}
             onApplyCode={onApplyCode}
+            onReviewCode={handleReviewCode}
           />
 
           <SuggestionStrip activeFile={activeFile} onSelect={stagePrompt} />

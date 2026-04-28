@@ -786,6 +786,25 @@ This file is the short scoreboard that answers:
   - `build:prerender-probe` remains open
   - preview sharing is materially closer to a trustworthy review lane instead of a generic runtime/deploy link picker
 
+## Delta 2026-04-28 - Inline review-first code actions
+- the lightweight inline AI lane now hands code suggestions toward the same review grammar instead of defaulting to direct apply:
+  - `components/ide/InlineAIChat.helpers.ts`
+  - `components/ide/InlineAIChat.tsx`
+  - `components/ide/InlineAIChatMessageSurface.tsx`
+  - `components/ide/InlineAIChatPrimitives.tsx`
+- practical effect:
+  - code blocks in the inline lane now expose `Review diff` as the primary artifact action
+  - when the workbench editor bridge is available, inline review stages a pending diff and opens the same `aethel.ide.openChatDiff` path already used by the main AI console
+  - direct apply remains available as a fallback instead of being the default path
+- focused regression coverage now exists in:
+  - `__tests__/ide/InlineAIChatMessageSurface.test.tsx`
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-28-inline-review-only-compile.log` did not close with a fresh pass and stalled again at `Creating an optimized production build ...`
+- current honest state after this wave:
+  - the product lane improved by converging inline suggestions with the review-first artifact workflow
+  - no fresh compile-mode pass was revalidated after this specific inline-review slice
+  - `build:prerender-probe` remains open
+
 ## One-Line Truth
 The work now is not discovering what to do.
 The work is executing the already-known sequence without drift.

@@ -26,11 +26,13 @@ type InlineAIMessageListProps = {
   messages: InlineAIMessage[]
   messagesEndRef: React.RefObject<HTMLDivElement>
   onApplyCode?: (code: string) => void
+  onReviewCode?: (code: string) => void
 }
 
 type MessageBubbleProps = {
   message: InlineAIMessage
   onApplyCode?: (code: string) => void
+  onReviewCode?: (code: string) => void
 }
 
 export function InlineAIMessageList({
@@ -39,6 +41,7 @@ export function InlineAIMessageList({
   messages,
   messagesEndRef,
   onApplyCode,
+  onReviewCode,
 }: InlineAIMessageListProps) {
   return (
     <div
@@ -51,9 +54,14 @@ export function InlineAIMessageList({
         flexDirection: 'column',
         gap: tokens.spacing['4'],
       }}
-    >
+      >
       {messages.map((message) => (
-        <MessageBubble key={message.id} message={message} onApplyCode={onApplyCode} />
+        <MessageBubble
+          key={message.id}
+          message={message}
+          onApplyCode={onApplyCode}
+          onReviewCode={onReviewCode}
+        />
       ))}
 
       {isLoading && <LoadingState label={label} />}
@@ -62,7 +70,7 @@ export function InlineAIMessageList({
   )
 }
 
-function MessageBubble({ message, onApplyCode }: MessageBubbleProps) {
+function MessageBubble({ message, onApplyCode, onReviewCode }: MessageBubbleProps) {
   const isUser = message.role === 'user'
   const isSystem = message.role === 'system'
   const plainTextContent = stripCodeBlocks(message.content)
@@ -170,6 +178,7 @@ function MessageBubble({ message, onApplyCode }: MessageBubbleProps) {
             key={`${block.language}-${block.code.slice(0, 24)}`}
             block={block}
             onApply={onApplyCode}
+            onReview={onReviewCode}
           />
         ))}
 

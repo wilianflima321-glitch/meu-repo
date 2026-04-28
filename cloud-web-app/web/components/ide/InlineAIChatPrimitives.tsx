@@ -74,9 +74,11 @@ export function LoadingState({ label }: { label: string }) {
 export function CodeBlock({
   block,
   onApply,
+  onReview,
 }: {
   block: InlineAIMessageCodeBlock
   onApply?: (code: string) => void
+  onReview?: (code: string) => void
 }) {
   const [copied, setCopied] = useState(false)
 
@@ -147,17 +149,28 @@ export function CodeBlock({
             {copied ? 'Copiado' : 'Copiar'}
           </button>
 
-          {onApply && (
+          {onReview && (
             <button
               type="button"
-              aria-label="Aplicar bloco de codigo ao editor"
-              onClick={() => onApply(block.code)}
+              aria-label="Abrir diff de revisao para o bloco de codigo"
               style={{
                 ...codeActionButtonStyle,
                 background: PRIMARY_GRADIENT,
                 border: 'none',
                 color: TEXT_PRIMARY,
               }}
+              onClick={() => onReview(block.code)}
+            >
+              <Sparkles size={12} />
+              Review diff
+            </button>
+          )}
+          {onApply && (
+            <button
+              type="button"
+              aria-label="Aplicar bloco de codigo ao editor"
+              onClick={() => onApply(block.code)}
+              style={codeActionButtonStyle}
             >
               <Sparkles size={12} />
               Aplicar

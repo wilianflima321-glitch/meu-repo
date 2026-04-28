@@ -16,6 +16,7 @@ export interface InlineAIChatProps {
   activeFile?: InlineAIFileContext
   projectContext?: InlineAIProjectContext
   onApplyCode?: (code: string) => void
+  onReviewCode?: (code: string) => void
   onClose?: () => void
 }
 
