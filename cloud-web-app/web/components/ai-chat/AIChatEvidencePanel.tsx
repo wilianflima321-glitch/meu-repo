@@ -1,0 +1,36 @@
+import { SearchCheck } from 'lucide-react'
+import { AIChatEvidenceCard } from '@/components/ai-chat/AIChatEvidenceCard'
+import type { AIChatEvidenceArtifact } from '@/components/ai-chat/ai-chat-evidence'
+
+interface AIChatEvidencePanelProps {
+  latestArtifact?: AIChatEvidenceArtifact | null
+}
+
+export function AIChatEvidencePanel({ latestArtifact }: AIChatEvidencePanelProps) {
+  if (!latestArtifact) {
+    return (
+      <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 p-4 text-center text-[11px] text-[var(--aethel-text-tertiary)]">
+        <SearchCheck className="h-5 w-5 text-[var(--aethel-text-quaternary)]" />
+        <p>Nenhuma capsula de evidencia disponivel.</p>
+        <p className="max-w-[240px] text-[var(--aethel-text-quaternary)]">
+          Quando a IA responder com trace ou quando um handoff de pesquisa entrar no cockpit, a evidencia aparece aqui.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-full overflow-y-auto p-3">
+      <div className="mb-3">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+          Evidence workflow
+        </div>
+        <p className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+          Proveniencia e sinais de confianca da resposta mais recente.
+        </p>
+      </div>
+
+      <AIChatEvidenceCard artifact={latestArtifact} />
+    </div>
+  )
+}

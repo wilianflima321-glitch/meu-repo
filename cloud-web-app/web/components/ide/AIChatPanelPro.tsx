@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   DEFAULT_MODELS,
   type AIChatPanelProps,
@@ -152,6 +152,13 @@ export default function AIChatPanelPro({
   const { handleToggleSpeaking, isSpeaking } = useAIChatSpeechPlayback({ messages })
   const pendingDiff = editorBridge?.pendingDiff ?? null
   const [showInlineDiffPreview, setShowInlineDiffPreview] = useState(false)
+  const latestEvidence = useMemo(() => {
+    const candidate = [...messages]
+      .reverse()
+      .find((message) => message.role !== 'user' && (message.traceArtifact || message.researchArtifact))
+
+    return candidate?.traceArtifact ?? candidate?.researchArtifact ?? null
+  }, [messages])
 
   const handleOpenPendingDiff = () => {
     setShowInlineDiffPreview((previous) => !previous)
@@ -328,6 +335,7 @@ export default function AIChatPanelPro({
         onRejectDiff={handleRejectPendingDiff}
         projectId={projectId}
         defaultGoal={lastUserGoal}
+        latestEvidence={latestEvidence}
       />
     </div>
   )

@@ -5,7 +5,9 @@ import { useCallback } from 'react'
 import { ApprovalCard } from '@/components/ide/ApprovalCard'
 import { MemoryPanel } from '@/components/ide/MemoryPanel'
 import { TaskOpsPanel } from '@/components/ide/TaskOpsPanel'
+import { AIChatEvidencePanel } from './AIChatEvidencePanel'
 import { AIChatRulesPanel } from './AIChatRulesPanel'
+import type { AIChatEvidenceArtifact } from './ai-chat-evidence'
 import { OPS_TABS, type AIChatOpsTab } from './presets'
 import { useAIChatOpsArtifacts, type AIChatApprovalChange } from './useAIChatOpsArtifacts'
 
@@ -36,6 +38,7 @@ interface AIChatOpsSidebarProps {
   onRejectDiff: () => void
   projectId?: string
   defaultGoal: string
+  latestEvidence?: AIChatEvidenceArtifact | null
 }
 
 export function AIChatOpsSidebar({
@@ -47,6 +50,7 @@ export function AIChatOpsSidebar({
   onRejectDiff,
   projectId,
   defaultGoal,
+  latestEvidence,
 }: AIChatOpsSidebarProps) {
   const { approvalChanges, memories, addMemory, deleteMemory, updateMemory } = useAIChatOpsArtifacts({
     pendingDiff,
@@ -118,6 +122,8 @@ export function AIChatOpsSidebar({
         )}
 
         {opsTab === 'rules' && <AIChatRulesPanel projectId={projectId} />}
+
+        {opsTab === 'evidence' && <AIChatEvidencePanel latestArtifact={latestEvidence} />}
 
         {opsTab === 'approval' && (
           <ApprovalCard

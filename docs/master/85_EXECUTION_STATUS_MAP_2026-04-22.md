@@ -712,6 +712,36 @@ This file is the short scoreboard that answers:
   6. apps/sites pack
   7. economics and governance plane
 
+## Delta 2026-04-28 - Evidence capsules and residual pages probe
+- the AI lane now surfaces evidence as a first-class artifact instead of hidden prompt stuffing:
+  - `components/ai-chat/ai-chat-evidence.ts`
+  - `components/ai-chat/AIChatEvidenceCard.tsx`
+  - `components/ai-chat/AIChatEvidencePanel.tsx`
+  - `components/ai-chat/useAIChatController.ts`
+  - `components/ai-chat/useAIChatSessionContext.ts`
+  - `components/ide/AIChatPanelPro.tsx`
+  - `components/ai-chat/AIChatOpsSidebar.tsx`
+  - `components/ai-chat/MessageBubble.tsx`
+- practical effect:
+  - assistant replies can now carry `traceSummary` provenance into the visible chat lane
+  - Nexus research handoffs now arrive with a visible research capsule instead of disappearing into a system prompt only
+  - the ops sidebar now has an `Evidence` lane for the freshest trace or research artifact
+- focused coverage exists in:
+  - `__tests__/ai-chat/ai-chat-evidence.test.ts`
+  - `__tests__/ai-chat/AIChatEvidenceCard.test.tsx`
+  - `__tests__/ai-chat/AIChatOpsSidebar.test.tsx`
+- the residual pages-runtime probe also moved one step:
+  - minimal `pages/404.tsx` and `pages/500.tsx` now exist as a narrow compatibility experiment for the remaining `/404` + `/500` prerender fault
+  - this experiment is currently safe against lint/typecheck/enterprise gates
+  - but it still has **no fresh build PASS** attached to it yet
+- freshest honest local build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-28-evidence-capsule-compile.log` still stalled at `Creating an optimized production build ...`
+  - `cloud-web-app/web/build-probe-2026-04-28-evidence-capsule-prerender.log` and `cloud-web-app/web/build-probe-2026-04-28-evidence-capsule-prerender-long.log` advanced to `Linting and checking validity of types ...` but did not close with a final verdict inside the time window
+- therefore the honest state remains:
+  - compile-mode build viability still relies on the earlier `2026-04-28` PASS logs
+  - `build:prerender-probe` remains open
+  - the new evidence workflow is a confirmed product improvement, while the pages residual experiment is still only a bounded parity attempt
+
 ## One-Line Truth
 The work now is not discovering what to do.
 The work is executing the already-known sequence without drift.

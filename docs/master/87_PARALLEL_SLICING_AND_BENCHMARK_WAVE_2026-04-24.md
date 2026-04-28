@@ -512,6 +512,21 @@ Primary waves:
    - provenance ledger
    - approval-first expensive execution
 
+### Wave 5 - evidence workflow and residual parity narrowing
+The newest high-ROI slices are now explicit too:
+1. evidence workflow
+   - `traceSummary` is no longer backend-only
+   - `components/ai-chat/ai-chat-evidence.ts`, `AIChatEvidenceCard.tsx`, and `AIChatEvidencePanel.tsx` now promote research handoffs and advanced-chat traces into visible operator artifacts
+   - `useAIChatController.ts`, `useAIChatSessionContext.ts`, `MessageBubble.tsx`, `AIChatOpsSidebar.tsx`, and `AIChatPanelPro.tsx` now keep that evidence attached to the chat lane and the ops lane
+2. residual pages-runtime parity experiment
+   - minimal `pages/404.tsx` and `pages/500.tsx` now exist as a bounded experiment against the remaining `/404` + `/500` prerender fault
+   - unlike the earlier full fallback-chain attempt, `_app`, `_error`, and `_document` remain absent
+   - this experiment is currently validated by lint/typecheck/enterprise gate only; it still has no fresh build verdict
+3. next benchmark-grade follow-ons from here
+   - unify `InlineAIChat` with the visible evidence/review loop
+   - keep shrinking the shared-runtime/build search space
+   - move preview further from runtime toolbar toward review-surface authority
+
 ## Definition Of Done For Every Slice
 A slice is only complete when all of this remains true:
 - lint passes

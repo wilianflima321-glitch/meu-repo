@@ -6,6 +6,7 @@ import type { Message } from '../ide/AIChatPanelPro.types'
 import { ThinkingDisplay, ToolCallDisplay } from '../ide/AIChatPanelChrome'
 import { MessageBubbleActionBar } from '@/components/ai-chat/MessageBubbleActionBar'
 import { MessageBubbleContent } from '@/components/ai-chat/MessageBubbleContent'
+import { AIChatEvidenceCard } from '@/components/ai-chat/AIChatEvidenceCard'
 import { useMessageBubbleCopyActions } from '@/components/ai-chat/useMessageBubbleCopyActions'
 
 export interface MessageBubbleProps {
@@ -23,6 +24,7 @@ export function MessageBubble({ message, onCopy, onRegenerate, onRate }: Message
   const [showThinking, setShowThinking] = useState(false)
   const isUser = message.role === 'user'
   const { copiedCode, copiedMessage, copyCode, copyMessage } = useMessageBubbleCopyActions(onCopy)
+  const evidenceArtifact = message.traceArtifact ?? message.researchArtifact ?? null
 
   return (
     <div className={`group/message flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
@@ -91,6 +93,12 @@ export function MessageBubble({ message, onCopy, onRegenerate, onRate }: Message
             <MessageBubbleContent content={message.content} copiedCode={copiedCode} onCopy={copyCode} />
           </div>
         </div>
+
+        {!isUser && evidenceArtifact ? (
+          <div className="mt-2 max-w-full">
+            <AIChatEvidenceCard artifact={evidenceArtifact} compact />
+          </div>
+        ) : null}
 
         <MessageBubbleActionBar
           copied={copiedMessage}

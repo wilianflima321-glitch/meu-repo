@@ -11,6 +11,7 @@ import {
   requestAdvancedChat,
 } from '@/lib/ai-chat-advanced-client'
 import type { AiProviderStatusResponse } from '@/lib/ai-provider-status-client'
+import { buildTraceArtifact } from '@/components/ai-chat/ai-chat-evidence'
 import type { ChatMessage, ProviderGateState } from '@/components/ai-chat/ai-chat-container.types'
 import type { AIChatConsoleMode } from '@/components/ai-chat/presets'
 import type { MessageContext } from '@/components/ide/AIChatPanelPro.types'
@@ -347,6 +348,7 @@ export function useAIChatController({
         const parsedResponse = tryParseJson(result.raw)
         const content = extractContent(result.raw)
         const tokenCount = typeof parsedResponse?.tokensUsed === 'number' ? parsedResponse.tokensUsed : undefined
+        const traceArtifact = buildTraceArtifact(parsedResponse?.traceSummary)
         const latencyMs = Math.max(
           0,
           Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startedAt)
@@ -358,6 +360,7 @@ export function useAIChatController({
           timestamp: new Date(),
           model: currentModel,
           tokens: tokenCount,
+          traceArtifact,
         }
 
         analytics?.trackPerformance?.('ai_chat_latency', latencyMs, 'ms', {
@@ -378,6 +381,10 @@ export function useAIChatController({
             enableWebResearch: profileResolution.profile.enableWebResearch,
             consoleMode: context?.consoleMode ?? 'ask',
             mentionTags: profileResolution.tags,
+            traceId: traceArtifact?.traceId,
+            evidenceItems: traceArtifact?.evidence.length ?? 0,
+            riskChecks: traceArtifact?.riskChecks.length ?? 0,
+            toolRuns: traceArtifact?.toolRuns.length ?? 0,
           },
         })
 

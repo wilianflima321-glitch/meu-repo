@@ -3,6 +3,7 @@
 import { useEffect, type Dispatch, type SetStateAction } from 'react'
 import { analytics } from '@/lib/analytics'
 import { buildResearchPrompt, consumeResearchHandoff } from '@/lib/research-handoff'
+import { buildResearchArtifactFromPayload } from '@/components/ai-chat/ai-chat-evidence'
 import type { ChatMessage } from '@/components/ai-chat/ai-chat-container.types'
 
 type UseAIChatSessionContextArgs = {
@@ -44,6 +45,7 @@ export function useAIChatSessionContext({
     if (!handoff) return
 
     const contextPrompt = buildResearchPrompt(handoff)
+    const researchArtifact = buildResearchArtifactFromPayload(handoff)
     setMessages((prev) => {
       if (prev.length > 0) return prev
 
@@ -61,6 +63,7 @@ export function useAIChatSessionContext({
             'Handoff de pesquisa carregado. Envie sua proxima mensagem para transformar isso em passos de implementacao. Dica: use @studio @web para uma analise multiagente mais profunda.',
           timestamp: new Date(),
           model: currentModel,
+          researchArtifact,
         },
       ]
     })

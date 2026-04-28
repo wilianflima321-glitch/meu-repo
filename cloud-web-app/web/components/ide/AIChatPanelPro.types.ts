@@ -1,4 +1,5 @@
 import type { AIChatConsoleMode } from '@/components/ai-chat/presets'
+import type { AIChatResearchArtifact, AIChatTraceArtifact } from '@/components/ai-chat/ai-chat-evidence'
 import {
   OPENROUTER_BEST_MODELS_SORTED,
   OPENROUTER_BUDGET_MODELS_SORTED,
@@ -76,6 +77,8 @@ export interface Message {
   thinking?: string
   toolCalls?: ToolCall[]
   attachments?: Attachment[]
+  traceArtifact?: AIChatTraceArtifact | null
+  researchArtifact?: AIChatResearchArtifact | null
 }
 
 export interface ChatThread {

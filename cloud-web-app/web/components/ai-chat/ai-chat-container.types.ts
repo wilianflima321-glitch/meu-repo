@@ -1,3 +1,5 @@
+import type { AIChatResearchArtifact, AIChatTraceArtifact } from '@/components/ai-chat/ai-chat-evidence'
+
 export type ChatMessage = {
   id: string
   role: 'user' | 'assistant' | 'system'
@@ -5,6 +7,8 @@ export type ChatMessage = {
   timestamp: Date
   model?: string
   tokens?: number
+  traceArtifact?: AIChatTraceArtifact | null
+  researchArtifact?: AIChatResearchArtifact | null
 }
 
 export type ProviderGateState = {

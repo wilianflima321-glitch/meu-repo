@@ -71,4 +71,34 @@ describe('AIChatOpsSidebar', () => {
     },
     30000
   )
+
+  it('shows the latest evidence capsule in the ops lane', () => {
+    render(
+      <AIChatOpsSidebar
+        showAdvancedControls
+        opsTab="evidence"
+        onOpsTabChange={() => undefined}
+        onAcceptDiff={() => undefined}
+        onRejectDiff={() => undefined}
+        projectId="project-42"
+        defaultGoal=""
+        latestEvidence={{
+          kind: 'trace',
+          traceId: 'trace_1234abcd',
+          summary: 'Resposta gerada com evidencias e tool runs.',
+          decision: 'Executar multi-role.',
+          reasons: [],
+          tradeoffs: [],
+          evidence: [{ kind: 'context', label: 'historyContextMessages=4' }],
+          riskChecks: [],
+          toolRuns: [{ toolName: 'searchWeb', status: 'ok', durationMs: 210 }],
+          telemetry: { provider: 'openrouter', model: 'openai/gpt-4.1', tokensUsed: 480 },
+        }}
+      />
+    )
+
+    expect(screen.getByText(/Evidence workflow/i)).toBeInTheDocument()
+    expect(screen.getByText(/Resposta gerada com evidencias/i)).toBeInTheDocument()
+    expect(screen.getByText(/historyContextMessages=4/i)).toBeInTheDocument()
+  })
 })
