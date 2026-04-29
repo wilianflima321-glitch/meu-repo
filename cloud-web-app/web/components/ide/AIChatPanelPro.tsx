@@ -15,6 +15,7 @@ import { AIChatPendingDiffTray } from '@/components/ai-chat/AIChatPendingDiffTra
 import { AIChatProposalPreview } from '@/components/ai-chat/AIChatProposalPreview'
 import { AIChatTimeline } from '@/components/ai-chat/AIChatTimeline'
 import { AIChatHistoryModeRail } from '@/components/ai-chat/AIChatHistoryModeRail'
+import { AIChatLedgerStrip } from '@/components/ai-chat/AIChatLedgerStrip'
 import { AIChatMessagesPane } from '@/components/ai-chat/AIChatMessagesPane'
 import { AIChatOpsSidebar } from '@/components/ai-chat/AIChatOpsSidebar'
 import { MODE_PRESETS } from '@/components/ai-chat/presets'
@@ -166,6 +167,16 @@ export default function AIChatPanelPro({
     setOpsTab('diff')
   }
 
+  const handleOpenEvidence = () => {
+    enableAdvancedControls()
+    setOpsTab('evidence')
+  }
+
+  const handleOpenEconomics = () => {
+    enableAdvancedControls()
+    setOpsTab('economics')
+  }
+
   useEffect(() => {
     if (!pendingDiff) {
       setShowInlineDiffPreview(false)
@@ -234,6 +245,18 @@ export default function AIChatPanelPro({
           onOpenHistory={toggleHistorySidebar}
         />
 
+        <AIChatLedgerStrip
+          agentCount={agentCount}
+          consoleMode={consoleMode}
+          currentRunEstimate={estimatedCost}
+          isAIWorking={isAIWorking}
+          latestEvidence={latestEvidence}
+          pendingDiff={pendingDiff}
+          onOpenDiff={handleOpenPendingDiff}
+          onOpenEconomics={handleOpenEconomics}
+          onOpenEvidence={handleOpenEvidence}
+        />
+
         <AIChatMessagesPane
           messages={messages}
           streamingContent={streamingContent}
@@ -249,21 +272,23 @@ export default function AIChatPanelPro({
           messagesEndRef={messagesEndRef}
         />
 
-        <AIChatBenchmarkTelemetry
-          consoleMode={consoleMode}
-          isAIWorking={isAIWorking}
-          runDuration={runDuration}
-          estimatedCost={estimatedCost}
-          selectedModelName={resolvedModel.name}
-          onInterrupt={handleLiveInterrupt}
-          onSendLiveMessage={handleLiveSendMessage}
-          agentCount={agentCount}
-          agents={agents}
-          onAgentClick={handleAgentClick}
-          quickPrompts={modePreset.quickPrompts}
-          showAdvancedControls={showAdvancedControls}
-          onQuickPrompt={handleQuickPrompt}
-        />
+        {showAdvancedControls ? (
+          <AIChatBenchmarkTelemetry
+            consoleMode={consoleMode}
+            isAIWorking={isAIWorking}
+            runDuration={runDuration}
+            estimatedCost={estimatedCost}
+            selectedModelName={resolvedModel.name}
+            onInterrupt={handleLiveInterrupt}
+            onSendLiveMessage={handleLiveSendMessage}
+            agentCount={agentCount}
+            agents={agents}
+            onAgentClick={handleAgentClick}
+            quickPrompts={modePreset.quickPrompts}
+            showAdvancedControls={showAdvancedControls}
+            onQuickPrompt={handleQuickPrompt}
+          />
+        ) : null}
 
         {pendingDiff ? (
           <AIChatPendingDiffTray

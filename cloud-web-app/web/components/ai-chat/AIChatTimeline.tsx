@@ -35,6 +35,8 @@ const TONE_STYLES = {
 
 export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHistory }: AIChatTimelineProps) {
   if (items.length === 0 && !activeThreadTitle) return null
+  const visibleItems = items.slice(0, 3)
+  const hiddenCount = Math.max(items.length - visibleItems.length, 0)
 
   return (
     <section className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)] px-4 py-2">
@@ -60,27 +62,38 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
         )}
       </div>
 
-      {items.length > 0 && (
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-          {items.map((item) => {
+      {visibleItems.length > 0 && (
+        <div className="mt-2 space-y-2">
+          {visibleItems.map((item) => {
             const tone = TONE_STYLES[item.tone]
             const Icon = tone.icon
             return (
               <article
                 key={item.id}
-                className={`min-w-[190px] max-w-[240px] rounded-2xl border px-3 py-2 ${tone.className}`}
+                className={`rounded-2xl border px-3 py-2 ${tone.className}`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 text-[11px] font-medium">
+                <div className="flex items-start gap-2">
+                  <span className="mt-0.5 inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-current/20 bg-black/10">
                     <Icon className="h-3.5 w-3.5" />
-                    {item.title}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-[11px] font-medium">{item.title}</div>
+                      <span className="text-[10px] text-[var(--aethel-text-quaternary)]">{item.meta}</span>
+                    </div>
+                    <div className="mt-0.5 line-clamp-2 text-[11px] leading-5 text-[var(--aethel-text-secondary)]">
+                      {item.summary}
+                    </div>
                   </div>
-                  <span className="text-[10px] text-[var(--aethel-text-quaternary)]">{item.meta}</span>
                 </div>
-                <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[var(--aethel-text-secondary)]">{item.summary}</div>
               </article>
             )
           })}
+          {hiddenCount > 0 ? (
+            <div className="px-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+              +{hiddenCount} eventos adicionais no historico completo
+            </div>
+          ) : null}
         </div>
       )}
     </section>

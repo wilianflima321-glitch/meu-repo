@@ -736,3 +736,31 @@ The next user-facing slice improves information density without collapsing the p
    - `cloud-web-app/web/build-probe-2026-04-29-command-center-compact-compile.log` = compile-mode `PASS`
    - `cloud-web-app/web/build-probe-2026-04-29-command-center-compact-prerender.log` = still open and timed out after `Linting and checking validity of types ...`
    - therefore this wave is a confirmed UX/shell-density win and a fresh compile-mode revalidation, but not the final prerender-parity fix
+
+### Wave 14 - AI execution ledger strip
+The next premium slice reduces stacked AI chrome and moves operator truth closer to the main conversation:
+1. compact operator ledger
+   - `components/ai-chat/AIChatLedgerStrip.tsx`
+   - `components/ide/AIChatPanelPro.tsx`
+   - the main chat lane now surfaces a compact ledger for:
+     - active mode
+     - execution state
+     - agent count
+     - evidence-ready state
+     - pending diff review
+     - run estimate / economics jump
+   - this keeps execution/review signals inside the primary lane instead of forcing users into the side rail for every serious action
+2. timeline compaction
+   - `components/ai-chat/AIChatTimeline.tsx`
+   - the old horizontal scroller of cards is now a compact vertical ledger
+   - only the top three events stay visible in the default lane, while the component explicitly advertises the rest through the history rail
+3. reduced default chrome
+   - `AIChatBenchmarkTelemetry` is now shown only when advanced controls are enabled
+   - this returns more height to the actual conversation, diff, and artifact loops in the default premium posture
+4. regression proof
+   - `__tests__/ai-chat/AIChatLedgerStrip.test.tsx`
+   - `__tests__/ai-chat/AIChatTimeline.test.tsx`
+5. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-29-ledger-strip-compile.log` reached `Collecting build traces ...` but did not close with a fresh pass before the execution window expired
+   - `cloud-web-app/web/build-probe-2026-04-29-global-error-prerender-experiment.log` also remained open after a temporary `app/global-error.tsx` removal experiment
+   - therefore this wave is a confirmed AI-lane UX/ergonomics win, but not a fresh platform-confidence win

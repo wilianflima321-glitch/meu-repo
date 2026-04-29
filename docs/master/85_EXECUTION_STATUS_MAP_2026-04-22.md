@@ -940,3 +940,35 @@ The work is executing the already-known sequence without drift.
   - the cockpit is more aligned with the target artifact-first images and benchmark shell density
   - compile-mode is freshly revalidated again on `2026-04-29`
   - `build:prerender-probe` remains open
+
+## Delta 2026-04-29 - AI execution ledger strip
+- the main AI lane now exposes a compact execution ledger above the conversation instead of forcing every operator cue into side rails or secondary panels:
+  - `components/ai-chat/AIChatLedgerStrip.tsx`
+  - `components/ai-chat/AIChatTimeline.tsx`
+  - `components/ide/AIChatPanelPro.tsx`
+- practical effect:
+  - the conversation now surfaces a compact operator rail for:
+    - active mode
+    - execution state
+    - agent count
+    - latest evidence
+    - pending diff review
+    - run estimate / economics jump
+  - the timeline no longer uses a horizontal card scroller; it now shows the top three events as a compact vertical ledger and explicitly advertises hidden history
+  - `AIChatBenchmarkTelemetry` now stays behind advanced controls instead of consuming permanent height in the default lane
+- focused regression coverage now exists in:
+  - `__tests__/ai-chat/AIChatLedgerStrip.test.tsx`
+  - `__tests__/ai-chat/AIChatTimeline.test.tsx`
+- honest validation state after this wave:
+  - targeted vitest coverage is green
+  - lint is green
+  - direct typecheck is green
+  - `qa:enterprise-gate` is green
+  - `qa:canonical-doc-alignment` is green
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-29-ledger-strip-compile.log` advanced through `Collecting build traces ...` but did not close with a fresh pass before the execution window expired
+  - `cloud-web-app/web/build-probe-2026-04-29-global-error-prerender-experiment.log` also remained open after temporarily removing `app/global-error.tsx`, so that experiment did not yet provide a decisive parity win
+- current honest state after this wave:
+  - the AI lane is materially closer to an execution/review ledger instead of a stacked chat dashboard
+  - no fresh compile-mode pass is claimed for this specific ledger slice
+  - `build:prerender-probe` remains open
