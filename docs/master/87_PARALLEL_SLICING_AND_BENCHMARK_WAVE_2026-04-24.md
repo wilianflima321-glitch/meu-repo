@@ -838,3 +838,27 @@ The next premium slice promotes AI proposals from a floating card into the artif
    - `cloud-web-app/web/build-probe-2026-04-29-proposal-ghost-compile.log` = compile-mode `PASS`
    - `cloud-web-app/web/build-probe-2026-04-29-proposal-ghost-prerender.log` still timed out after `Linting and checking validity of types ...`
    - therefore this wave is a confirmed artifact-first UX win plus a fresh compile-mode revalidation, but not the final prerender-parity fix
+
+### Wave 18 - docs shell server split and search-first public IA
+The next buyer-facing slice reduces public-route client pressure while improving the docs experience:
+1. server shell + client search island
+   - `app/docs/docs-content.tsx`
+   - `app/docs/docs-content.data.ts`
+   - `app/docs/docs-directory-client.tsx`
+   - `PublicHeader` and `PublicFooter` now stay in the server shell instead of living inside the interactive search/filter component
+2. why this matters
+   - it moves `/docs` closer to the better help-center patterns the market already expects:
+     - search first
+     - result counts
+     - clean quick-link recirculation
+     - less client work surrounding the global shell
+   - it also removes one more broad public-route client boundary from the App Router search space
+3. regression proof
+   - `__tests__/docs/docs-directory-client.test.tsx`
+4. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-29-docs-shell-compile.log` = compile-mode `PASS`
+   - `cloud-web-app/web/build-probe-2026-04-29-docs-shell-prerender.log` still timed out, but the visible prerender failures narrowed to:
+     - `/404`
+     - `/500`
+   - no broad public/studio `useContext` cluster was visible in the tail of this probe
+   - therefore this wave is both a UX/docs-information-architecture win and a useful narrowing of the remaining platform-confidence search space

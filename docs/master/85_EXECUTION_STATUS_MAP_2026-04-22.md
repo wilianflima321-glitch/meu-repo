@@ -1060,3 +1060,35 @@ The work is executing the already-known sequence without drift.
   - the preview lane is more artifact-first and materially closer to the target imagery
   - compile-mode is freshly revalidated again on `2026-04-29`
   - `build:prerender-probe` remains open
+
+## Delta 2026-04-29 - Docs route shell split and search-first IA
+- the public docs entry now keeps the shell server-side and isolates only the search/filter loop as a client island:
+  - `app/docs/docs-content.tsx`
+  - `app/docs/docs-content.data.ts`
+  - `app/docs/docs-directory-client.tsx`
+- practical effect:
+  - `PublicHeader` and `PublicFooter` no longer live inside the client search component for `/docs`
+  - the docs lane now behaves more like the stronger public knowledge surfaces from Linear/Notion-style help centers:
+    - search first
+    - result counts
+    - quick-link recirculation
+    - less client chrome around the global shell
+  - this also reduces one of the broad public-route client boundaries in the App Router cluster
+- focused regression coverage now exists in:
+  - `__tests__/docs/docs-directory-client.test.tsx`
+- honest validation state after this wave:
+  - focused vitest coverage is green
+  - lint is green
+  - direct typecheck is green
+  - `qa:enterprise-gate` is green
+  - `qa:canonical-doc-alignment` is green
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-29-docs-shell-compile.log` = compile-mode `PASS`
+  - `cloud-web-app/web/build-probe-2026-04-29-docs-shell-prerender.log` still timed out, but the visible prerender failures in the log narrowed to:
+    - `/404`
+    - `/500`
+  - the previous broad `useContext` public/studio cluster did not reappear in the visible probe output for this slice
+- current honest state after this wave:
+  - the docs entry is better aligned with buyer-facing usability and lower-risk App Router boundaries
+  - compile-mode is freshly revalidated again on `2026-04-29`
+  - `build:prerender-probe` remains open, with the residual signal concentrated on the legacy `/404` and `/500` lane
