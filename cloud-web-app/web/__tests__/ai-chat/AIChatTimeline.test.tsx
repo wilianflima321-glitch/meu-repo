@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { AIChatTimeline } from '@/components/ai-chat/AIChatTimeline'
 
 describe('AIChatTimeline', () => {
-  it('shows only the top three items and advertises the remaining history', () => {
+  it('starts compact, expands on demand, and advertises the remaining history', () => {
     const onOpenHistory = vi.fn()
 
     render(
@@ -23,6 +23,12 @@ describe('AIChatTimeline', () => {
     )
 
     expect(screen.getByText('Plano')).toBeInTheDocument()
+    expect(screen.queryByText('Execucao')).not.toBeInTheDocument()
+    expect(screen.queryByText('Gate')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pedido')).not.toBeInTheDocument()
+    expect(screen.getByText('+3 eventos adicionais no historico completo')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Ver detalhes/i }))
     expect(screen.getByText('Execucao')).toBeInTheDocument()
     expect(screen.getByText('Gate')).toBeInTheDocument()
     expect(screen.queryByText('Pedido')).not.toBeInTheDocument()

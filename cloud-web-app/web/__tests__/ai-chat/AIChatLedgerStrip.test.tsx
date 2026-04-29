@@ -45,14 +45,14 @@ describe('AIChatLedgerStrip', () => {
       />,
     )
 
-    expect(screen.getByText('Ledger execute')).toBeInTheDocument()
-    expect(screen.getByText(/Trace pronta/)).toBeInTheDocument()
+    expect(screen.getByText('Execution rail')).toBeInTheDocument()
+    expect(screen.getByText(/Inspect trace/)).toBeInTheDocument()
     expect(screen.getByText(/Review page.tsx/)).toBeInTheDocument()
-    expect(screen.getByText(/Run estimate/)).toBeInTheDocument()
+    expect(screen.getByText(/Budget/)).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /Trace pronta/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Inspect trace/i }))
     fireEvent.click(screen.getByRole('button', { name: /Review page.tsx/i }))
-    fireEvent.click(screen.getByRole('button', { name: /Run estimate/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Budget/i }))
 
     expect(onOpenEvidence).toHaveBeenCalledTimes(1)
     expect(onOpenDiff).toHaveBeenCalledTimes(1)

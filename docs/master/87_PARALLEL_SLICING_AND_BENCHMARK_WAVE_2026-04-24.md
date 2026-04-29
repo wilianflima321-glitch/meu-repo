@@ -781,3 +781,31 @@ The next cockpit slice returns more stage space to the viewport by making runtim
    - `cloud-web-app/web/build-probe-2026-04-29-preview-compact-compile.log` = compile-mode `PASS`
    - the freshest prerender search-signal remains `cloud-web-app/web/build-probe-2026-04-29-global-error-prerender-experiment.log`, which stayed open even after a temporary `app/global-error.tsx` removal
    - therefore this wave is a confirmed preview-density win and a fresh compile-mode revalidation, but not the final prerender-parity fix
+
+### Wave 16 - AI lane density and action-first ledger
+The next premium slice reduces stacked chrome in the main assistant lane and gives more stage back to conversation plus review:
+1. action-first operator rail
+   - `components/ide/AIChatPanelPro.tsx`
+   - `components/ai-chat/AIChatLedgerStrip.tsx`
+   - the ledger now sits before the timeline and behaves more like a review rail than a status badge shelf
+   - it prioritizes the strongest user actions:
+     - `Review diff`
+     - `Inspect trace/research`
+     - `Budget`
+   - generic duplicate chips were removed in favor of a calmer execution summary
+2. single-row context strip
+   - `components/ai-chat/AIChatContextStrip.tsx`
+   - the old second helper line is gone
+   - the current objective or operating context now stays inline as a compact chip
+3. timeline starts collapsed
+   - `components/ai-chat/AIChatTimeline.tsx`
+   - the lane now opens with just the latest event visible
+   - users can expand into the top three events only when they want detail
+   - this makes the AI lane feel more like a working surface and less like a vertical stack of operator dashboards
+4. regression proof
+   - `__tests__/ai-chat/AIChatLedgerStrip.test.tsx`
+   - `__tests__/ai-chat/AIChatTimeline.test.tsx`
+5. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-29-ai-lane-density-compile.log` remained stuck in `Creating an optimized production build ...` before the execution window expired
+   - the freshest compile-mode `PASS` still remains `cloud-web-app/web/build-probe-2026-04-29-preview-compact-compile.log`
+   - therefore this wave is a confirmed AI-lane density and usability win, but not a fresh platform-confidence revalidation

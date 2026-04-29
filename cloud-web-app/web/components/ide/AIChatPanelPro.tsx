@@ -238,13 +238,6 @@ export default function AIChatPanelPro({
           isAIWorking={isAIWorking}
         />
 
-        <AIChatTimeline
-          activeThreadTitle={activeThread?.title ?? null}
-          hasHistory={hasHistory}
-          items={timelineItems}
-          onOpenHistory={toggleHistorySidebar}
-        />
-
         <AIChatLedgerStrip
           agentCount={agentCount}
           consoleMode={consoleMode}
@@ -255,6 +248,13 @@ export default function AIChatPanelPro({
           onOpenDiff={handleOpenPendingDiff}
           onOpenEconomics={handleOpenEconomics}
           onOpenEvidence={handleOpenEvidence}
+        />
+
+        <AIChatTimeline
+          activeThreadTitle={activeThread?.title ?? null}
+          hasHistory={hasHistory}
+          items={timelineItems}
+          onOpenHistory={toggleHistorySidebar}
         />
 
         <AIChatMessagesPane

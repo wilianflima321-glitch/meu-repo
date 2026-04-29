@@ -995,3 +995,34 @@ The work is executing the already-known sequence without drift.
   - the preview lane is more artifact-first by default
   - compile-mode is freshly revalidated again on `2026-04-29`
   - `build:prerender-probe` remains open
+
+## Delta 2026-04-29 - AI lane density and action-first review rail
+- the main AI lane now spends less height on stacked chrome and more on the conversation, diff, and artifact loop:
+  - `components/ide/AIChatPanelPro.tsx`
+  - `components/ai-chat/AIChatContextStrip.tsx`
+  - `components/ai-chat/AIChatLedgerStrip.tsx`
+  - `components/ai-chat/AIChatTimeline.tsx`
+- practical effect:
+  - the execution ledger now sits before the timeline so the first post-header rail is action-first instead of feed-first
+  - the ledger no longer repeats generic state pills; it now focuses on the highest-value actions:
+    - `Review diff`
+    - `Inspect trace/research`
+    - `Budget`
+  - the context strip is now a single compact row with inline objective/context chips instead of a second descriptive line
+  - the timeline now starts compact with the latest event only and expands on demand, which returns more vertical stage to messages and proposals
+- focused regression coverage now exists in:
+  - `__tests__/ai-chat/AIChatLedgerStrip.test.tsx`
+  - `__tests__/ai-chat/AIChatTimeline.test.tsx`
+- honest validation state after this wave:
+  - targeted vitest coverage is green
+  - lint is green
+  - direct typecheck is green
+  - `qa:enterprise-gate` is green
+  - `qa:canonical-doc-alignment` is green
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-29-ai-lane-density-compile.log` remained stuck in `Creating an optimized production build ...` before the execution window expired
+  - the freshest compile-mode `PASS` still remains `cloud-web-app/web/build-probe-2026-04-29-preview-compact-compile.log`
+- current honest state after this wave:
+  - the AI lane is materially calmer and more action-first for end users
+  - no fresh compile-mode pass is claimed for this specific density slice
+  - `build:prerender-probe` remains open

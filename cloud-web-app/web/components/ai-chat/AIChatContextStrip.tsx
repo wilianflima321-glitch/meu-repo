@@ -37,9 +37,13 @@ export function AIChatContextStrip({
 }: AIChatContextStripProps) {
   const modeDefinition = CONSOLE_MODES.find((mode) => mode.id === consoleMode)
   const summarizedGoal = summarizeGoal(lastUserGoal)
+  const helperLabel = summarizedGoal ? null : modePreset.helper
 
   return (
-    <section className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-4 py-2">
+    <section
+      className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-4 py-2"
+      title={lastUserGoal || modePreset.helper}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${MODE_TONE_CLASSES[consoleMode]}`}
@@ -65,13 +69,15 @@ export function AIChatContextStrip({
         {summarizedGoal ? (
           <span className="inline-flex min-h-[28px] max-w-full items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]">
             <Target className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="truncate">{summarizedGoal}</span>
+            <span className="truncate">Objetivo: {summarizedGoal}</span>
           </span>
         ) : null}
-      </div>
 
-      <div className="mt-1.5 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]" title={lastUserGoal || modePreset.helper}>
-        {summarizedGoal ? modePreset.helper : `Contexto atual: ${modePreset.helper}`}
+        {helperLabel ? (
+          <span className="inline-flex min-h-[28px] max-w-full items-center gap-1.5 rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_58%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-tertiary)]">
+            <span className="truncate">Contexto: {helperLabel}</span>
+          </span>
+        ) : null}
       </div>
     </section>
   )
