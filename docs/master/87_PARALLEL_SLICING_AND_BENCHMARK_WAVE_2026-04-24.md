@@ -607,6 +607,7 @@ The next user-facing slice pushes pending AI work into the viewport itself:
 ### Wave 10 - light runtime route split
 The next platform-confidence slice reduces how many studio routes still mount the full ambient runtime by default:
 1. route-shell split
+   - `app/dashboard/layout.tsx`
    - `app/settings/layout.tsx`
    - `app/profile/layout.tsx`
    - `app/project-settings/layout.tsx`
@@ -623,12 +624,32 @@ The next platform-confidence slice reduces how many studio routes still mount th
    - it also sharpens the remaining parity search space by leaving the heavy runtime concentrated in the truly interactive studio routes
 3. regression proof
    - `__tests__/app/light-runtime-route-layouts.test.tsx`
+   - `__tests__/dashboard/dashboardRouteLayout.test.tsx`
    - `__tests__/providers/StudioRuntimeRouteLayout.test.tsx`
    - `__tests__/providers/StudioRuntimeProviders.test.tsx`
 4. truthful build state after this slice
    - `cloud-web-app/web/build-probe-2026-04-28-light-runtime-routes-compile.log` = compile-mode `PASS`
    - `cloud-web-app/web/build-probe-2026-04-28-light-runtime-routes-prerender.log` = still open and timed out after `Linting and checking validity of types ...`
    - therefore the route-shell split is a confirmed platform simplification and a fresh compile-mode win, but not yet the final prerender-parity fix
+
+### Wave 11 - service worker leaf refactor
+The next shared-runtime slice removes one more browser-heavy wrapper from the center of the full studio lane:
+1. ambient-leaf refactor
+   - `components/providers/runtime/FullStudioRuntime.tsx` no longer wraps the entire runtime tree with `ServiceWorkerProvider`
+   - `components/ServiceWorkerProvider.tsx` now accepts optional children and can mount as a browser-only leaf for registration, offline messaging, and update prompts
+2. why this matters
+   - the service-worker lane was one of the most browser-specific parts of the heavy runtime and sat above auth, session tracking, Aethel state, onboarding, and the suspended route tree
+   - by moving it to an ambient leaf, the remaining parity search space gets closer to the real shared-runtime pressure instead of keeping SW registration in the middle of the stack
+3. regression proof
+   - `__tests__/providers/FullStudioRuntime.test.tsx`
+   - `__tests__/app/light-runtime-route-layouts.test.tsx`
+   - `__tests__/dashboard/dashboardRouteLayout.test.tsx`
+4. truthful validation state after this slice
+   - targeted vitest coverage is green
+   - lint is green
+   - direct `tsc --noEmit` is green again after terminating stale timed-out build processes
+   - `qa:enterprise-gate` is green again after the same cleanup
+   - fresh compile/prerender probe evidence should still be recorded separately after this refactor before claiming a new platform-confidence win
 
 ## Definition Of Done For Every Slice
 A slice is only complete when all of this remains true:

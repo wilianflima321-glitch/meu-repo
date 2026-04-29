@@ -833,6 +833,7 @@ This file is the short scoreboard that answers:
 
 ## Delta 2026-04-28 - Light runtime route split
 - the shared studio runtime is now narrower in the routes that mostly need shell consistency, not the full ambient runtime stack:
+  - `app/dashboard/layout.tsx`
   - `app/settings/layout.tsx`
   - `app/profile/layout.tsx`
   - `app/project-settings/layout.tsx`
@@ -841,11 +842,12 @@ This file is the short scoreboard that answers:
   - `surface="light"`
   - `onboardingChrome={false}`
 - practical effect:
-  - settings, profile, project settings, and nexus no longer mount the full studio runtime stack by default
+  - dashboard, settings, profile, project settings, and nexus no longer mount the full studio runtime stack by default
   - the heavy lane is now more concentrated around the routes that actually need it most, instead of being the default for nearly every studio surface
   - this reduces shared-runtime pressure without sacrificing the canonical studio shell
 - focused regression coverage now exists in:
   - `__tests__/app/light-runtime-route-layouts.test.tsx`
+  - `__tests__/dashboard/dashboardRouteLayout.test.tsx`
   - `__tests__/providers/StudioRuntimeRouteLayout.test.tsx`
   - `__tests__/providers/StudioRuntimeProviders.test.tsx`
 - freshest honest build read after this wave:
@@ -855,6 +857,23 @@ This file is the short scoreboard that answers:
   - compile-mode production mitigation is freshly revalidated again on `2026-04-28`
   - `build:prerender-probe` remains open
   - the highest-value remaining parity search space is now even more focused on the residual shared-runtime/App Router interaction instead of these lighter route shells
+
+## Delta 2026-04-28 - Service worker as ambient leaf
+- the full studio runtime now treats service-worker concerns as ambient UI instead of a global wrapper around the entire runtime tree:
+  - `components/providers/runtime/FullStudioRuntime.tsx`
+  - `components/ServiceWorkerProvider.tsx`
+- practical effect:
+  - the service-worker lane no longer wraps auth, session tracking, Aethel state, onboarding, and the suspended page subtree
+  - `ServiceWorkerProvider` now behaves like a browser-only leaf for offline/update affordances and SW registration, which narrows shared-runtime surface area without removing the feature
+- focused regression coverage now exists in:
+  - `__tests__/providers/FullStudioRuntime.test.tsx`
+- validation note:
+  - targeted vitest coverage, lint, direct typecheck, `qa:enterprise-gate`, and canonical-doc alignment all pass after killing stale timed-out build processes before rerunning the heavy checks
+- freshest honest build read for this exact slice is still pending:
+  - the next compile/prerender probes should be treated as the source of truth after this leaf refactor
+- current honest state after this slice:
+  - platform pressure is lower
+  - the remaining parity investigation is even more centered on the true heavy lane rather than service-worker wrapping semantics
 
 ## One-Line Truth
 The work now is not discovering what to do.

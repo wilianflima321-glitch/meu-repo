@@ -29,6 +29,7 @@ vi.mock('@/components/providers/StudioRuntimeRouteLayout', () => ({
   }) => routeLayoutSpy(props),
 }))
 
+import DashboardLayout from '@/app/dashboard/layout'
 import NexusLayout from '@/app/nexus/layout'
 import ProfileLayout from '@/app/profile/layout'
 import ProjectSettingsLayout from '@/app/project-settings/layout'
@@ -36,6 +37,7 @@ import SettingsLayout from '@/app/settings/layout'
 
 describe('light runtime route layouts', () => {
   it.each([
+    ['dashboard', DashboardLayout],
     ['settings', SettingsLayout],
     ['profile', ProfileLayout],
     ['project-settings', ProjectSettingsLayout],

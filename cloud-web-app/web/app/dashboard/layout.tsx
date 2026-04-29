@@ -2,5 +2,9 @@ import type { ReactNode } from 'react'
 import StudioRuntimeRouteLayout from '@/components/providers/StudioRuntimeRouteLayout'
 
 export default function RouteLayout({ children }: { children: ReactNode }) {
-  return <StudioRuntimeRouteLayout onboardingChrome={false}>{children}</StudioRuntimeRouteLayout>
+  return (
+    <StudioRuntimeRouteLayout surface="light" onboardingChrome={false}>
+      {children}
+    </StudioRuntimeRouteLayout>
+  )
 }

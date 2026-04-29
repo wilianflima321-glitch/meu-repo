@@ -34,29 +34,28 @@ export default function FullStudioRuntime({
     <CoreUiProviders>
       <ErrorBoundaryProvider>
         <A11yProvider>
-          <ServiceWorkerProvider enabled={deferredActivation.serviceWorkerReady}>
-            {deferredActivation.telemetryReady ? <TelemetryBootstrap /> : null}
-            {deferredActivation.telemetryReady ? <WebVitalsReporter /> : null}
-            <AuthProvider>
-              <SessionTrackerProvider enabled={deferredActivation.sessionTrackingReady}>
-                <CommandRegistryProvider>
-                  <DevToolsProvider>
-                    <AethelProvider runtimeReady={deferredActivation.sessionTrackingReady}>
-                      <OnboardingProvider enabled={onboardingChrome}>
-                        <StudioRuntimeCommandRegistration />
-                        {onboardingChrome ? <WelcomeModal /> : null}
-                        {onboardingChrome ? <OnboardingChecklist /> : null}
-                        {deferredActivation.ambientUiReady ? <LowBalanceModalAuto /> : null}
-                        {deferredActivation.ambientUiReady ? <AISuggestionBubbleAuto /> : null}
-                        <Suspense fallback={<StudioRuntimeLoadingFallback />}>{children}</Suspense>
-                        <CookieConsent />
-                      </OnboardingProvider>
-                    </AethelProvider>
-                  </DevToolsProvider>
-                </CommandRegistryProvider>
-              </SessionTrackerProvider>
-            </AuthProvider>
-          </ServiceWorkerProvider>
+          {deferredActivation.telemetryReady ? <TelemetryBootstrap /> : null}
+          {deferredActivation.telemetryReady ? <WebVitalsReporter /> : null}
+          <AuthProvider>
+            <SessionTrackerProvider enabled={deferredActivation.sessionTrackingReady}>
+              <CommandRegistryProvider>
+                <DevToolsProvider>
+                  <AethelProvider runtimeReady={deferredActivation.sessionTrackingReady}>
+                    <OnboardingProvider enabled={onboardingChrome}>
+                      <StudioRuntimeCommandRegistration />
+                      {onboardingChrome ? <WelcomeModal /> : null}
+                      {onboardingChrome ? <OnboardingChecklist /> : null}
+                      {deferredActivation.ambientUiReady ? <LowBalanceModalAuto /> : null}
+                      {deferredActivation.ambientUiReady ? <AISuggestionBubbleAuto /> : null}
+                      <Suspense fallback={<StudioRuntimeLoadingFallback />}>{children}</Suspense>
+                      <CookieConsent />
+                    </OnboardingProvider>
+                  </AethelProvider>
+                </DevToolsProvider>
+              </CommandRegistryProvider>
+            </SessionTrackerProvider>
+          </AuthProvider>
+          <ServiceWorkerProvider enabled={deferredActivation.serviceWorkerReady} />
         </A11yProvider>
       </ErrorBoundaryProvider>
     </CoreUiProviders>

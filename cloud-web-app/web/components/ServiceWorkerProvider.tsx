@@ -29,7 +29,7 @@ export function useServiceWorkerContext() {
 }
 
 interface ServiceWorkerProviderProps {
-  children: ReactNode;
+  children?: ReactNode;
   enabled?: boolean;
 }
 
