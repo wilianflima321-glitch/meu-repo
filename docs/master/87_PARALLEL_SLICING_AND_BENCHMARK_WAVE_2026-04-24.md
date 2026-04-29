@@ -582,6 +582,28 @@ The next convergence slice now pushes inline suggestions into the same artifact-
    - `cloud-web-app/web/build-probe-2026-04-28-inline-review-only-compile.log` did not produce a fresh pass and stalled again at `Creating an optimized production build ...`
    - so this slice is a confirmed product improvement, but not a new platform-confidence win
 
+### Wave 9 - preview proposal overlay and root-boundary read
+The next user-facing slice pushes pending AI work into the viewport itself:
+1. artifact-first preview overlay
+   - `components/ide/fullscreen/WorkbenchPreviewProposalOverlay.tsx` now surfaces pending AI proposals directly over the preview/viewport lane
+   - `components/ide/fullscreen/WorkbenchPreviewPane.tsx` now mounts that overlay whenever the editor bridge has a `pendingDiff`
+   - operators can now `Open review`, `Apply proposal`, or `Dismiss` without leaving the artifact surface
+2. why this matters
+   - this closes a gap against the target image language where proposal review lives beside the object/viewport, not only in a side rail
+   - it also keeps the diff/review workflow visible even when the chat rail is collapsed or out of focus
+3. regression proof
+   - `__tests__/ide/WorkbenchPreviewProposalOverlay.test.tsx`
+4. root-boundary investigation note
+   - the smallest App Router root experiment was also tested locally:
+     - `app/layout.tsx` with `export const dynamic = 'force-dynamic'`
+   - honest outcome:
+     - the test did not produce a strong enough durable signal to justify keeping it
+     - the committed branch therefore leaves `app/layout.tsx` clean and continues treating shared-runtime/prerender parity as an open investigation below the root boundary
+5. truthful validation state
+   - targeted vitest/lint/typecheck/enterprise gate are green
+   - no fresh compile-mode pass is claimed for this viewport-overlay slice
+   - `build:prerender-probe` remains explicitly unresolved
+
 ## Definition Of Done For Every Slice
 A slice is only complete when all of this remains true:
 - lint passes

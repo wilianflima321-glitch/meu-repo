@@ -805,6 +805,32 @@ This file is the short scoreboard that answers:
   - no fresh compile-mode pass was revalidated after this specific inline-review slice
   - `build:prerender-probe` remains open
 
+## Delta 2026-04-28 - Artifact-first preview proposal overlay
+- the viewport lane now surfaces pending AI proposals directly over the artifact instead of hiding every patch inside chat-only chrome:
+  - `components/ide/fullscreen/WorkbenchPreviewProposalOverlay.tsx`
+  - `components/ide/fullscreen/WorkbenchPreviewPane.tsx`
+- practical effect:
+  - when a pending diff exists, the preview surface shows an `AI proposal preview` capsule with:
+    - target file
+    - changed-line count
+    - `Open review`
+    - `Apply proposal`
+    - `Dismiss`
+  - this moves the cockpit closer to the image-driven `artifact-first` posture where proposal review lives beside the viewport, not only inside the chat rail
+- focused regression coverage now exists in:
+  - `__tests__/ide/WorkbenchPreviewProposalOverlay.test.tsx`
+- freshest honest validation after this wave:
+  - targeted vitest/lint/typecheck/enterprise gate all pass
+  - no fresh compile-mode pass has been revalidated for this specific slice yet
+  - `build:prerender-probe` remains open
+
+## Investigation note - root App Router boundary
+- the current highest-signal root experiment was tested locally and then deliberately not kept:
+  - adding `export const dynamic = 'force-dynamic'` to `app/layout.tsx`
+- honest read:
+  - it did not produce a strong enough durable win to justify leaving the root layout in that state
+  - the committed branch therefore keeps the root layout clean while the real shared-runtime/prerender search space remains open below it
+
 ## One-Line Truth
 The work now is not discovering what to do.
 The work is executing the already-known sequence without drift.
