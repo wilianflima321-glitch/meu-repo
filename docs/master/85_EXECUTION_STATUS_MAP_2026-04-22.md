@@ -972,3 +972,26 @@ The work is executing the already-known sequence without drift.
   - the AI lane is materially closer to an execution/review ledger instead of a stacked chat dashboard
   - no fresh compile-mode pass is claimed for this specific ledger slice
   - `build:prerender-probe` remains open
+
+## Delta 2026-04-29 - Preview trust rail compact by default
+- the preview lane now hides its heavier runtime metrics until the operator explicitly expands runtime settings:
+  - `components/ide/PreviewRuntimeToolbar.tsx`
+- practical effect:
+  - `Deploy trust` stays visible in the compact default lane together with review/share actions
+  - the three runtime quick-fact cards now appear only when runtime settings are expanded
+  - this returns more vertical space to the viewport without sacrificing trust or actionability
+- focused regression coverage now exists in:
+  - `__tests__/ide/PreviewRuntimeToolbar.test.tsx`
+- honest validation state after this wave:
+  - targeted vitest coverage is green
+  - lint is green
+  - direct typecheck is green
+  - `qa:enterprise-gate` is green
+  - `qa:canonical-doc-alignment` is green
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-29-preview-compact-compile.log` = compile-mode `PASS`
+  - the freshest root-cause experiment for prerender remains `cloud-web-app/web/build-probe-2026-04-29-global-error-prerender-experiment.log`, which stayed open even after temporarily removing `app/global-error.tsx`
+- current honest state after this wave:
+  - the preview lane is more artifact-first by default
+  - compile-mode is freshly revalidated again on `2026-04-29`
+  - `build:prerender-probe` remains open

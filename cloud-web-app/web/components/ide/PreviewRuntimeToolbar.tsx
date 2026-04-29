@@ -292,13 +292,7 @@ export default function PreviewRuntimeToolbar({
             ) : null}
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {quickFacts.map((item) => (
-              <CompactMetric key={item.label} label={item.label} value={item.value} hint={item.hint} />
-            ))}
-          </div>
-
-          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-3 py-2.5">
+          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-3 py-2">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-[220px] flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -391,6 +385,14 @@ export default function PreviewRuntimeToolbar({
               </div>
             </div>
           </div>
+
+          {showRuntimeSettings ? (
+            <div className="flex flex-wrap gap-2">
+              {quickFacts.map((item) => (
+                <CompactMetric key={item.label} label={item.label} value={item.value} hint={item.hint} />
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex max-w-[420px] flex-wrap items-center justify-end gap-2">

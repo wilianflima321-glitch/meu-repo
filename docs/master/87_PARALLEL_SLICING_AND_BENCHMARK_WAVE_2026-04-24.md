@@ -764,3 +764,20 @@ The next premium slice reduces stacked AI chrome and moves operator truth closer
    - `cloud-web-app/web/build-probe-2026-04-29-ledger-strip-compile.log` reached `Collecting build traces ...` but did not close with a fresh pass before the execution window expired
    - `cloud-web-app/web/build-probe-2026-04-29-global-error-prerender-experiment.log` also remained open after a temporary `app/global-error.tsx` removal experiment
    - therefore this wave is a confirmed AI-lane UX/ergonomics win, but not a fresh platform-confidence win
+
+### Wave 15 - compact preview trust rail
+The next cockpit slice returns more stage space to the viewport by making runtime trust details progressive instead of permanently tall:
+1. compact-by-default runtime trust
+   - `components/ide/PreviewRuntimeToolbar.tsx`
+   - the default preview lane now keeps `Deploy trust`, review/share actions, and recommended runtime action visible
+   - the three quick-fact metric cards only render when runtime settings are expanded
+2. why this matters
+   - the user still sees the trust grammar and the handoff path
+   - but the preview lane stops spending that vertical space before the operator asks for detailed runtime mechanics
+   - this is closer to the target image posture where the viewport stays primary and chrome becomes secondary
+3. regression proof
+   - `__tests__/ide/PreviewRuntimeToolbar.test.tsx`
+4. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-29-preview-compact-compile.log` = compile-mode `PASS`
+   - the freshest prerender search-signal remains `cloud-web-app/web/build-probe-2026-04-29-global-error-prerender-experiment.log`, which stayed open even after a temporary `app/global-error.tsx` removal
+   - therefore this wave is a confirmed preview-density win and a fresh compile-mode revalidation, but not the final prerender-parity fix
