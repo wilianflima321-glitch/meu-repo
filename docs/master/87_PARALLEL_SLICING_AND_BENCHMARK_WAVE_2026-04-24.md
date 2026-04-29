@@ -604,6 +604,32 @@ The next user-facing slice pushes pending AI work into the viewport itself:
    - no fresh compile-mode pass is claimed for this viewport-overlay slice
    - `build:prerender-probe` remains explicitly unresolved
 
+### Wave 10 - light runtime route split
+The next platform-confidence slice reduces how many studio routes still mount the full ambient runtime by default:
+1. route-shell split
+   - `app/settings/layout.tsx`
+   - `app/profile/layout.tsx`
+   - `app/project-settings/layout.tsx`
+   - `app/nexus/layout.tsx`
+   - all now use `StudioRuntimeRouteLayout surface="light" onboardingChrome={false}`
+2. why this matters
+   - these routes still keep the canonical studio shell, but they no longer pay the default cost of `FullStudioRuntime`
+   - that means less shared runtime pressure from:
+     - `ServiceWorkerProvider`
+     - `AethelProvider`
+     - session tracking
+     - onboarding chrome
+     - other ambient runtime mounts
+   - it also sharpens the remaining parity search space by leaving the heavy runtime concentrated in the truly interactive studio routes
+3. regression proof
+   - `__tests__/app/light-runtime-route-layouts.test.tsx`
+   - `__tests__/providers/StudioRuntimeRouteLayout.test.tsx`
+   - `__tests__/providers/StudioRuntimeProviders.test.tsx`
+4. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-28-light-runtime-routes-compile.log` = compile-mode `PASS`
+   - `cloud-web-app/web/build-probe-2026-04-28-light-runtime-routes-prerender.log` = still open and timed out after `Linting and checking validity of types ...`
+   - therefore the route-shell split is a confirmed platform simplification and a fresh compile-mode win, but not yet the final prerender-parity fix
+
 ## Definition Of Done For Every Slice
 A slice is only complete when all of this remains true:
 - lint passes
