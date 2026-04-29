@@ -336,6 +336,7 @@ export default function AIChatPanelPro({
         projectId={projectId}
         defaultGoal={lastUserGoal}
         latestEvidence={latestEvidence}
+        currentRunEstimate={estimatedCost}
       />
     </div>
   )

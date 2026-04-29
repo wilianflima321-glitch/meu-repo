@@ -100,6 +100,46 @@ export type BillingReadiness = {
 	error?: string;
 };
 
+export type StudioCostLive = {
+	status: 'ready' | 'attention' | 'blocked' | string;
+	projectId?: string | null;
+	wallet: {
+		balance: number;
+		currency: string;
+		lowBalance: boolean;
+		lowBalanceThreshold: number;
+	};
+	budget: {
+		hourly: { spendUsd: number; budgetUsd: number; percent: number; status: 'healthy' | 'warning' | 'critical' | string };
+		daily: { spendUsd: number; budgetUsd: number; percent: number; status: 'healthy' | 'warning' | 'critical' | string };
+		monthly: { spendUsd: number; budgetUsd: number; percent: number; status: 'healthy' | 'warning' | 'critical' | string };
+	};
+	billing: {
+		status: string;
+		checkoutReady: boolean;
+		portalReady: boolean;
+		webhookReady: boolean;
+		blockers: string[];
+		providerLabel: string;
+		setupEnv: string[];
+	};
+	policy: {
+		emergencyLevel: string;
+		fallbackModel: string;
+		autoDowngradeOnWarning: boolean;
+		autoShutdownOnCritical: boolean;
+		maxTokensPerRequest: number;
+		allowedModels: string[];
+	};
+	metrics: {
+		totalRequestsToday: number;
+		totalTokensToday: number;
+		avgCostPerRequestUsd: number;
+		updatedAt: string;
+	};
+	guidance: string[];
+};
+
 export type BillingSubscriptionStatus = {
 	plan: string;
 	stripeCustomerId?: string | null;
@@ -253,6 +293,11 @@ export const AethelAPIClient = {
 
 	getBillingReadiness: async (): Promise<BillingReadiness> => {
 		return requestJSON<BillingReadiness>('/billing/readiness');
+	},
+
+	getStudioCostLive: async (projectId?: string): Promise<StudioCostLive> => {
+		const suffix = projectId ? `?projectId=${encodeURIComponent(projectId)}` : '';
+		return requestJSON<StudioCostLive>(`/studio/cost/live${suffix}`);
 	},
 
 	getBillingSubscription: async (): Promise<BillingSubscriptionStatus> => {

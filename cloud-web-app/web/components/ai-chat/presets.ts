@@ -3,6 +3,7 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   Brain,
+  DollarSign,
   Bug,
   Check,
   ClipboardList,
@@ -20,7 +21,7 @@ import {
 } from 'lucide-react'
 
 export type AIChatConsoleMode = 'ask' | 'plan' | 'execute' | 'review' | 'live'
-export type AIChatOpsTab = 'memory' | 'rules' | 'evidence' | 'approval' | 'diff' | 'execution'
+export type AIChatOpsTab = 'memory' | 'rules' | 'evidence' | 'economics' | 'approval' | 'diff' | 'execution'
 
 export interface QuickPromptDefinition {
   icon: LucideIcon
@@ -86,6 +87,7 @@ export const OPS_TABS: AIChatOpsTabDefinition[] = [
   { id: 'memory', label: 'Memoria', icon: Brain },
   { id: 'rules', label: 'Rules', icon: ScrollText },
   { id: 'evidence', label: 'Evidence', icon: SearchCheck },
+  { id: 'economics', label: 'Economics', icon: DollarSign },
   { id: 'approval', label: 'Aprovacao', icon: Check },
   { id: 'diff', label: 'Diff', icon: Code },
   { id: 'execution', label: 'Execucao', icon: ClipboardList },

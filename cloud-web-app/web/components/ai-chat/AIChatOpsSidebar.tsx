@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { ApprovalCard } from '@/components/ide/ApprovalCard'
 import { MemoryPanel } from '@/components/ide/MemoryPanel'
 import { TaskOpsPanel } from '@/components/ide/TaskOpsPanel'
+import { AIChatEconomicsPanel } from './AIChatEconomicsPanel'
 import { AIChatEvidencePanel } from './AIChatEvidencePanel'
 import { AIChatRulesPanel } from './AIChatRulesPanel'
 import type { AIChatEvidenceArtifact } from './ai-chat-evidence'
@@ -39,6 +40,7 @@ interface AIChatOpsSidebarProps {
   projectId?: string
   defaultGoal: string
   latestEvidence?: AIChatEvidenceArtifact | null
+  currentRunEstimate?: number
 }
 
 export function AIChatOpsSidebar({
@@ -51,6 +53,7 @@ export function AIChatOpsSidebar({
   projectId,
   defaultGoal,
   latestEvidence,
+  currentRunEstimate,
 }: AIChatOpsSidebarProps) {
   const { approvalChanges, memories, addMemory, deleteMemory, updateMemory } = useAIChatOpsArtifacts({
     pendingDiff,
@@ -91,13 +94,13 @@ export function AIChatOpsSidebar({
 
   return (
     <aside className="flex w-80 flex-col border-l border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]">
-      <div className="flex items-center gap-1 border-b border-[var(--aethel-border-secondary)] px-2 py-2">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-[var(--aethel-border-secondary)] px-2 py-2">
         {OPS_TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => onOpsTabChange(tab.id)}
-            className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+            className={`shrink-0 whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
               opsTab === tab.id
                 ? 'bg-[color-mix(in_srgb,var(--aethel-primary)_18%,transparent)] text-[var(--aethel-primary-light)]'
                 : 'text-[var(--aethel-text-tertiary)] hover:text-[var(--aethel-text-secondary)]'
@@ -124,6 +127,13 @@ export function AIChatOpsSidebar({
         {opsTab === 'rules' && <AIChatRulesPanel projectId={projectId} />}
 
         {opsTab === 'evidence' && <AIChatEvidencePanel latestArtifact={latestEvidence} />}
+
+        {opsTab === 'economics' && (
+          <AIChatEconomicsPanel
+            projectId={projectId}
+            currentRunEstimate={currentRunEstimate}
+          />
+        )}
 
         {opsTab === 'approval' && (
           <ApprovalCard

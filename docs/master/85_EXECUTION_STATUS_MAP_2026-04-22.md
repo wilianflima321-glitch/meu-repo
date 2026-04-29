@@ -878,3 +878,33 @@ This file is the short scoreboard that answers:
 ## One-Line Truth
 The work now is not discovering what to do.
 The work is executing the already-known sequence without drift.
+
+
+## Delta 2026-04-28 - Economics plane in the AI ops rail
+- the operator lane now exposes a real economics surface instead of leaving cost/billing readiness hidden behind scattered runtime files:
+  - `app/api/studio/cost/live/route.ts`
+  - `components/ai-chat/AIChatEconomicsPanel.tsx`
+  - `components/ai-chat/AIChatOpsSidebar.tsx`
+  - `components/ide/AIChatPanelPro.tsx`
+  - `lib/api.ts`
+- practical effect:
+  - `/api/studio/cost/live` now returns authenticated, entitled live state for wallet balance, emergency budgets, billing readiness, model policy, and operator guidance
+  - the AI ops rail now has an `Economics` tab with live budget meters, current run estimate, billing blockers, and policy guidance
+  - the tab strip now scrolls horizontally instead of compressing every operator tab into unreadable micro-buttons
+- focused regression coverage now exists in:
+  - `__tests__/api/studio-cost-live-route.test.ts`
+  - `__tests__/ai-chat/AIChatEconomicsPanel.test.tsx`
+  - `__tests__/ai-chat/AIChatOpsSidebar.test.tsx`
+- honest validation state after this wave:
+  - targeted vitest coverage is green
+  - lint is green
+  - direct typecheck is green
+  - `qa:enterprise-gate` is green
+  - `qa:canonical-doc-alignment` is green
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-28-economics-plane-compile.log` did not produce a fresh pass and timed out at `Creating an optimized production build ...`
+  - `cloud-web-app/web/build-probe-2026-04-28-economics-plane-prerender.log` also timed out at the same early build phase
+- current honest state after this wave:
+  - the product lane improved materially for operator cost/governance awareness
+  - no fresh compile-mode pass is claimed for this economics slice
+  - `build:prerender-probe` remains open

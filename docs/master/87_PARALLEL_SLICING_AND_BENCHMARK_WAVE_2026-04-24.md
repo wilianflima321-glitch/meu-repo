@@ -673,7 +673,39 @@ A slice is only complete when all of this remains true:
 8. stabilize `useTerminalRuntime.ts` and `useTerminalSessions.ts`
 9. continue Wave B in `ProjectsDashboardCollection.tsx`, `CreatorDashboardSections.tsx`, `app/admin/ai-monitor/ai-monitor-sections.tsx`, and `SettingsPageData.tsx` now that the route shells are calmer
 10. promote preview, collaboration, deploy, and public-shell confidence from present to trusted
+11. keep expanding the operator plane through cost/governance/research surfaces so even smaller models have budget, evidence, and approval rails by default
 
 ## One-Line Reading
 The audits no longer leave us with ambiguity.
 The fastest honest path is to keep slicing by real UX seams, starting with preview/deploy trust, explorer collaboration visibility, and the remaining workbench core while prerender parity stays explicitly open.
+
+
+### Wave 12 - economics plane in the operator rail
+The next benchmark-grade slice closes a real operator gap: the AI lane now exposes budget and billing truth instead of leaving economics hidden behind backend helpers.
+1. real economics endpoint
+   - `app/api/studio/cost/live/route.ts` no longer returns `studioNotImplemented(...)`
+   - it now resolves:
+     - authenticated user wallet balance from `CreditLedgerEntry`
+     - live emergency metrics from `emergencyController.updateMetrics()`
+     - billing readiness from `getBillingRuntimeState()`
+     - policy/budget guidance for the current operator session
+2. canonical AI ops surface
+   - `components/ai-chat/AIChatEconomicsPanel.tsx` mounts as a live `Economics` tab inside `AIChatOpsSidebar.tsx`
+   - `components/ide/AIChatPanelPro.tsx` now forwards the live run estimate into that panel
+   - `lib/api.ts` now exposes `StudioCostLive` + `getStudioCostLive(...)` for the canonical client facade
+3. user-facing quality improvements
+   - operator tabs now scroll horizontally instead of compressing each tab into unreadable width after adding `Economics`
+   - the economics panel shows:
+     - wallet balance
+     - current run estimate
+     - hourly/daily/monthly budget meters
+     - billing blockers
+     - fallback/policy guidance
+4. regression proof
+   - `__tests__/api/studio-cost-live-route.test.ts`
+   - `__tests__/ai-chat/AIChatEconomicsPanel.test.tsx`
+   - `__tests__/ai-chat/AIChatOpsSidebar.test.tsx`
+5. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-28-economics-plane-compile.log` timed out at `Creating an optimized production build ...`
+   - `cloud-web-app/web/build-probe-2026-04-28-economics-plane-prerender.log` also timed out at the same early phase
+   - therefore this wave is a confirmed product/ops improvement, but not a fresh platform-confidence win
