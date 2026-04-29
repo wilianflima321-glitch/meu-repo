@@ -17,6 +17,7 @@ type PreviewRuntimeTrustNoticeProps = {
   forceInlinePreviewFallback: boolean;
   isSavingFile: boolean;
   density?: 'default' | 'compact';
+  artifactLabel?: 'live' | 'proposal';
 };
 
 type NoticeTone = 'success' | 'info' | 'warning';
@@ -52,6 +53,7 @@ export function PreviewRuntimeTrustNotice({
   forceInlinePreviewFallback,
   isSavingFile,
   density = 'default',
+  artifactLabel = 'live',
 }: PreviewRuntimeTrustNoticeProps) {
   const firstBlocker = runtimeReadiness?.blockers?.[0] ?? null;
   const hasReachableRuntime = runtimeHealth.status === 'reachable';
@@ -112,6 +114,9 @@ export function PreviewRuntimeTrustNotice({
               Readiness {runtimeReadiness.status}
             </NoticeChip>
           ) : null}
+          <NoticeChip tone={artifactLabel === 'proposal' ? 'info' : hasReachableRuntime ? 'success' : tone}>
+            Artifact {artifactLabel}
+          </NoticeChip>
           <span className="inline-flex min-h-[28px] items-center rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
             Next move: {runtimePrimaryActionLabel}
           </span>
@@ -140,6 +145,9 @@ export function PreviewRuntimeTrustNotice({
                 Readiness {runtimeReadiness.status}
               </NoticeChip>
             ) : null}
+            <NoticeChip tone={artifactLabel === 'proposal' ? 'info' : hasReachableRuntime ? 'success' : tone}>
+              Artifact {artifactLabel}
+            </NoticeChip>
           </div>
           <div className="mt-2 text-sm font-semibold text-[var(--aethel-text-primary)]">{heading}</div>
           <div className="mt-1 max-w-3xl text-xs leading-5 text-[var(--aethel-text-tertiary)]">{body}</div>

@@ -1026,3 +1026,37 @@ The work is executing the already-known sequence without drift.
   - the AI lane is materially calmer and more action-first for end users
   - no fresh compile-mode pass is claimed for this specific density slice
   - `build:prerender-probe` remains open
+
+## Delta 2026-04-29 - Proposal ghost preview in the workbench lane
+- the runtime preview lane can now switch between the live artifact and the pending AI proposal for the active file before the patch is applied:
+  - `components/ide/fullscreen/WorkbenchPreviewPane.tsx`
+  - `components/ide/fullscreen/WorkbenchPreviewProposalOverlay.tsx`
+  - `components/ide/fullscreen/WorkbenchPreviewRuntimeSurface.tsx`
+  - `components/preview/PreviewRuntimeTrustNotice.tsx`
+- practical effect:
+  - pending AI edits for the active file now render as a proposal artifact inside the preview lane instead of only showing a floating patch card
+  - the operator can explicitly toggle:
+    - `View proposal`
+    - `Back to live`
+    - `Open review`
+    - `Apply proposal`
+    - `Dismiss`
+  - the compact runtime trust notice now tells the truth about which artifact is on stage:
+    - `Artifact live`
+    - `Artifact proposal`
+- focused regression coverage now exists in:
+  - `__tests__/ide/WorkbenchPreviewProposalOverlay.test.tsx`
+  - `__tests__/ide/WorkbenchPreviewRuntimeSurface.test.tsx`
+- honest validation state after this wave:
+  - focused vitest coverage is green
+  - lint is green
+  - direct typecheck is green
+  - `qa:enterprise-gate` is green
+  - `qa:canonical-doc-alignment` is green
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-29-proposal-ghost-compile.log` = compile-mode `PASS`
+  - `cloud-web-app/web/build-probe-2026-04-29-proposal-ghost-prerender.log` still timed out after reaching `Linting and checking validity of types ...`
+- current honest state after this wave:
+  - the preview lane is more artifact-first and materially closer to the target imagery
+  - compile-mode is freshly revalidated again on `2026-04-29`
+  - `build:prerender-probe` remains open

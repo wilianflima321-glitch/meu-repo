@@ -8,13 +8,19 @@ const { canonicalPreviewSpy } = vi.hoisted(() => ({
       data-testid="canonical-preview"
       data-state={props.runtimeInfoOverride?.state ?? 'none'}
       data-show-lifecycle={props.showLifecycleBar === false ? 'no' : 'yes'}
+      data-title={props.title ?? 'none'}
+      data-content={props.content ?? 'none'}
     />
   )),
 }))
 
 const { trustNoticeSpy } = vi.hoisted(() => ({
   trustNoticeSpy: vi.fn((props: any) => (
-    <div data-testid="trust-notice" data-density={props.density ?? 'default'} />
+    <div
+      data-testid="trust-notice"
+      data-density={props.density ?? 'default'}
+      data-artifact={props.artifactLabel ?? 'live'}
+    />
   )),
 }))
 
@@ -67,8 +73,14 @@ describe('WorkbenchPreviewRuntimeSurface', () => {
 
     expect(screen.getByTestId('trust-notice')).toBeInTheDocument()
     expect(screen.getByTestId('trust-notice')).toHaveAttribute('data-density', 'compact')
+    expect(screen.getByTestId('trust-notice')).toHaveAttribute('data-artifact', 'live')
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-state', 'healthy')
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-show-lifecycle', 'no')
+    expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-title', 'Previa ao vivo')
+    expect(screen.getByTestId('canonical-preview')).toHaveAttribute(
+      'data-content',
+      'export default function App() { return null }',
+    )
   })
 
   it('maps unreachable runtime health to degraded controlled state', () => {
@@ -82,5 +94,23 @@ describe('WorkbenchPreviewRuntimeSurface', () => {
 
     expect(screen.getByTestId('device-preview')).toBeInTheDocument()
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-state', 'degraded')
+  })
+
+  it('switches the runtime artifact to proposal content when previewing a pending patch', () => {
+    render(
+      <WorkbenchPreviewRuntimeSurface
+        {...baseProps}
+        mode="runtime"
+        proposalContent={'export default function App() { return <main>Proposal</main> }'}
+        isProposalPreviewing
+      />,
+    )
+
+    expect(screen.getByTestId('trust-notice')).toHaveAttribute('data-artifact', 'proposal')
+    expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-title', 'Previa da proposta')
+    expect(screen.getByTestId('canonical-preview')).toHaveAttribute(
+      'data-content',
+      'export default function App() { return <main>Proposal</main> }',
+    )
   })
 })

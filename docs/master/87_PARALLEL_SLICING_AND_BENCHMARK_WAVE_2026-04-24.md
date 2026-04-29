@@ -809,3 +809,32 @@ The next premium slice reduces stacked chrome in the main assistant lane and giv
    - `cloud-web-app/web/build-probe-2026-04-29-ai-lane-density-compile.log` remained stuck in `Creating an optimized production build ...` before the execution window expired
    - the freshest compile-mode `PASS` still remains `cloud-web-app/web/build-probe-2026-04-29-preview-compact-compile.log`
    - therefore this wave is a confirmed AI-lane density and usability win, but not a fresh platform-confidence revalidation
+
+### Wave 17 - ghost proposal preview inside the runtime lane
+The next premium slice promotes AI proposals from a floating card into the artifact lane itself:
+1. proposal artifact switching
+   - `components/ide/fullscreen/WorkbenchPreviewPane.tsx`
+   - `components/ide/fullscreen/WorkbenchPreviewRuntimeSurface.tsx`
+   - when the pending patch belongs to the active file and the operator is in `runtime` or `device`, the workbench can now preview `pendingDiff.newContent` directly in the preview lane before the editor is mutated
+2. overlay becomes a mode controller
+   - `components/ide/fullscreen/WorkbenchPreviewProposalOverlay.tsx`
+   - the operator can now explicitly move between:
+     - `View proposal`
+     - `Back to live`
+     - `Open review`
+     - `Apply proposal`
+     - `Dismiss`
+   - this is materially closer to the target preview image posture where AI changes are inspected on the artifact itself rather than only in chat chrome
+3. runtime trust now declares the staged artifact
+   - `components/preview/PreviewRuntimeTrustNotice.tsx`
+   - the compact trust lane now shows:
+     - `Artifact live`
+     - `Artifact proposal`
+   - this keeps runtime trust and artifact trust aligned in the same band
+4. regression proof
+   - `__tests__/ide/WorkbenchPreviewProposalOverlay.test.tsx`
+   - `__tests__/ide/WorkbenchPreviewRuntimeSurface.test.tsx`
+5. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-29-proposal-ghost-compile.log` = compile-mode `PASS`
+   - `cloud-web-app/web/build-probe-2026-04-29-proposal-ghost-prerender.log` still timed out after `Linting and checking validity of types ...`
+   - therefore this wave is a confirmed artifact-first UX win plus a fresh compile-mode revalidation, but not the final prerender-parity fix

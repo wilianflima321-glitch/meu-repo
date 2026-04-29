@@ -7,6 +7,7 @@ import { WorkbenchPreviewProposalOverlay } from '@/components/ide/fullscreen/Wor
 describe('WorkbenchPreviewProposalOverlay', () => {
   it('renders the proposal summary and review actions', () => {
     const onOpenReview = vi.fn()
+    const onTogglePreview = vi.fn()
     const onApply = vi.fn()
     const onReject = vi.fn()
 
@@ -22,7 +23,10 @@ describe('WorkbenchPreviewProposalOverlay', () => {
             { type: 'added', leftNumber: null, rightNumber: 2, content: '+ new' },
           ],
         }}
+        canPreviewArtifact
+        isPreviewingProposal={false}
         onOpenReview={onOpenReview}
+        onTogglePreview={onTogglePreview}
         onApply={onApply}
         onReject={onReject}
       />
@@ -31,6 +35,10 @@ describe('WorkbenchPreviewProposalOverlay', () => {
     expect(screen.getByText('AI proposal preview')).toBeInTheDocument()
     expect(screen.getByText('Character_Controller.cpp')).toBeInTheDocument()
     expect(screen.getByText(/2 changed lines/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /View proposal/i })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /View proposal/i }))
+    expect(onTogglePreview).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByRole('button', { name: /Open review/i }))
     expect(onOpenReview).toHaveBeenCalledTimes(1)

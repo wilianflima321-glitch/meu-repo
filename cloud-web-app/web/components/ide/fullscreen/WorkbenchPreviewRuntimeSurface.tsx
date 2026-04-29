@@ -29,6 +29,8 @@ type WorkbenchPreviewRuntimeSurfaceProps = Pick<
   | 'handleUseInlineFallback'
 > & {
   mode: 'runtime' | 'device';
+  proposalContent?: string | null;
+  isProposalPreviewing?: boolean;
 };
 
 function WorkbenchPreviewEmptyState() {
@@ -76,6 +78,8 @@ export function WorkbenchPreviewRuntimeSurface({
   provisionRuntime,
   handleUseInlineFallback,
   mode,
+  proposalContent = null,
+  isProposalPreviewing = false,
 }: WorkbenchPreviewRuntimeSurfaceProps) {
   const controlledRuntime = useMemo<PreviewRuntimeInfo>(() => {
     const baseRuntime: PreviewRuntimeInfo = {
@@ -148,16 +152,17 @@ export function WorkbenchPreviewRuntimeSurface({
       forceInlinePreviewFallback={forceInlinePreviewFallback}
       isSavingFile={isSavingFile}
       density="compact"
+      artifactLabel={isProposalPreviewing ? 'proposal' : 'live'}
     />
   );
 
   const previewSurface = (
     <CanonicalPreviewSurface
-      key={`${activeFile.path}:${previewRefreshTick}${mode === 'device' ? ':device' : ''}`}
+      key={`${activeFile.path}:${previewRefreshTick}${mode === 'device' ? ':device' : ''}:${isProposalPreviewing ? 'proposal' : 'live'}`}
       variant="runtime"
-      title="Previa ao vivo"
+      title={isProposalPreviewing ? 'Previa da proposta' : 'Previa ao vivo'}
       filePath={activeFile.path}
-      content={activeFile.content}
+      content={proposalContent ?? activeFile.content}
       projectId={projectId}
       runtimeUrl={previewRuntimeUrl ?? undefined}
       runtimeInfoOverride={controlledRuntime}

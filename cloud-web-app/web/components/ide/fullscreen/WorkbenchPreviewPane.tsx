@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToast } from '@/components/ui/Toast';
 import { useEditorApplyBridge } from '@/components/ide/EditorApplyBridgeContext';
 import CanonicalPreviewSurface from '@/components/preview/CanonicalPreviewSurface';
@@ -20,13 +20,36 @@ export function WorkbenchPreviewPane({
   const editorBridge = useEditorApplyBridge()
   const toast = useToast()
   const pendingDiff = editorBridge?.pendingDiff ?? null
+  const [isProposalPreviewing, setIsProposalPreviewing] = useState(false)
   const showProposalOverlay = previewMode !== 'console' && Boolean(pendingDiff)
+  const canPreviewProposalArtifact = useMemo(
+    () =>
+      (previewMode === 'runtime' || previewMode === 'device') &&
+      Boolean(activeFile) &&
+      Boolean(pendingDiff) &&
+      pendingDiff?.path === activeFile?.path,
+    [activeFile, pendingDiff, previewMode],
+  )
+  const proposalContent =
+    canPreviewProposalArtifact && isProposalPreviewing && pendingDiff ? pendingDiff.newContent : null
+
+  useEffect(() => {
+    setIsProposalPreviewing(canPreviewProposalArtifact)
+  }, [canPreviewProposalArtifact, pendingDiff?.newContent])
 
   const handleOpenReview = useCallback(() => {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('aethel.ide.openChatDiff'))
     }
   }, [])
+
+  const handleToggleProposalPreview = useCallback(() => {
+    if (!canPreviewProposalArtifact) {
+      return
+    }
+
+    setIsProposalPreviewing((current) => !current)
+  }, [canPreviewProposalArtifact])
 
   const handleApplyProposal = useCallback(() => {
     if (!editorBridge || !pendingDiff) {
@@ -40,6 +63,7 @@ export function WorkbenchPreviewPane({
     }
 
     editorBridge.clearPendingDiff()
+    setIsProposalPreviewing(false)
     toast.success('Proposta aplicada', 'O patch foi promovido para o editor ativo.')
   }, [editorBridge, pendingDiff, toast])
 
@@ -49,6 +73,7 @@ export function WorkbenchPreviewPane({
     }
 
     editorBridge.clearPendingDiff()
+    setIsProposalPreviewing(false)
     toast.info('Proposta descartada', 'A previa de patch foi removida do cockpit.')
   }, [editorBridge, toast])
 
@@ -68,7 +93,10 @@ export function WorkbenchPreviewPane({
         {showProposalOverlay && pendingDiff ? (
           <WorkbenchPreviewProposalOverlay
             pendingDiff={pendingDiff}
+            canPreviewArtifact={canPreviewProposalArtifact}
+            isPreviewingProposal={isProposalPreviewing}
             onOpenReview={handleOpenReview}
+            onTogglePreview={handleToggleProposalPreview}
             onApply={handleApplyProposal}
             onReject={handleRejectProposal}
           />
@@ -81,6 +109,8 @@ export function WorkbenchPreviewPane({
             {...runtimeSurfaceProps}
             activeFile={activeFile}
             mode={previewMode}
+            proposalContent={proposalContent}
+            isProposalPreviewing={canPreviewProposalArtifact && isProposalPreviewing}
           />
         )}
       </div>
