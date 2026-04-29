@@ -908,3 +908,35 @@ The work is executing the already-known sequence without drift.
   - the product lane improved materially for operator cost/governance awareness
   - no fresh compile-mode pass is claimed for this economics slice
   - `build:prerender-probe` remains open
+
+## Delta 2026-04-29 - Command center and compact cockpit chrome
+- the shell and preview lane now spend less vertical space on chrome and more on the artifact, while promoting a benchmark-grade command surface:
+  - `components/ide/modern-shell/chromeHeaderParts.tsx`
+  - `components/ide/PreviewRuntimeToolbar.tsx`
+  - `components/preview/PreviewRuntimeTrustNotice.tsx`
+  - `components/ide/fullscreen/WorkbenchPreviewModeHeader.tsx`
+  - `components/ide/fullscreen/WorkbenchPreviewRuntimeSurface.tsx`
+  - `components/ai-chat/AIChatContextStrip.tsx`
+  - `components/ai-chat/AIChatTimeline.tsx`
+- practical effect:
+  - the old pair of tiny command-palette buttons is now a real `Command Center` bar with a stronger affordance for `Cmd+K`, plus a dedicated `Files` quick-open button for `Cmd+P`
+  - the preview trust notice stays in a compact inline grammar inside the workbench
+  - the preview mode selector is now a denser segmented control instead of tall per-mode cards
+  - the preview runtime toolbar now uses smaller metrics, shorter copy, and less vertical weight
+  - the AI context strip and timeline consume less space while preserving operator truth
+- focused regression coverage now exists in:
+  - `__tests__/ide/chromeHeaderParts.test.tsx`
+  - `__tests__/ide/WorkbenchPreviewRuntimeSurface.test.tsx`
+- honest validation state after this wave:
+  - targeted vitest coverage is green
+  - lint is green
+  - direct typecheck is green
+  - `qa:enterprise-gate` is green
+  - `qa:canonical-doc-alignment` is green
+- freshest honest build read after this wave:
+  - `cloud-web-app/web/build-probe-2026-04-29-command-center-compact-compile.log` = compile-mode `PASS`
+  - `cloud-web-app/web/build-probe-2026-04-29-command-center-compact-prerender.log` = still open and timed out after `Linting and checking validity of types ...`
+- current honest state after this wave:
+  - the cockpit is more aligned with the target artifact-first images and benchmark shell density
+  - compile-mode is freshly revalidated again on `2026-04-29`
+  - `build:prerender-probe` remains open

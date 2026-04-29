@@ -38,29 +38,6 @@ const headerPanelItems: ReadonlyArray<{
   { panel: 'preview', icon: <Play size={16} />, label: 'Visual' },
 ];
 
-const commandPaletteItems: ReadonlyArray<{
-  mode: CommandPaletteMode;
-  icon: React.ReactNode;
-  label: string;
-  ariaLabel: string;
-  title: string;
-}> = [
-  {
-    mode: 'commands',
-    icon: <Sparkles size={14} />,
-    label: 'Cmd+K',
-    ariaLabel: 'Abrir paleta de comandos',
-    title: 'Cmd+K',
-  },
-  {
-    mode: 'files',
-    icon: <Search size={14} />,
-    label: 'Cmd+P',
-    ariaLabel: 'Abrir paleta de arquivos',
-    title: 'Cmd+P',
-  },
-];
-
 const floatingClusterStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -71,6 +48,46 @@ const floatingClusterStyle: React.CSSProperties = {
   background: 'color-mix(in srgb, var(--aethel-surface-secondary) 76%, transparent)',
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
   flexShrink: 0,
+};
+
+const commandCenterButtonStyle: React.CSSProperties = {
+  display: 'flex',
+  minWidth: '280px',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: tokens.spacing['3'],
+  minHeight: '38px',
+  padding: `${tokens.spacing['2']} ${tokens.spacing['3']}`,
+  border: `1px solid ${BORDER_SECONDARY}`,
+  borderRadius: tokens.radius.full,
+  background: 'color-mix(in srgb, var(--aethel-surface-secondary) 64%, transparent)',
+  color: TEXT_SECONDARY,
+  cursor: 'pointer',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+  transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.default}`,
+};
+
+const commandCenterMetaStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: tokens.spacing['2'],
+  minWidth: 0,
+  flex: '1 1 auto',
+};
+
+const commandCenterHintStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minHeight: '24px',
+  padding: `0 ${tokens.spacing['2']}`,
+  borderRadius: tokens.radius.full,
+  border: `1px solid ${BORDER_SECONDARY}`,
+  background: 'color-mix(in srgb, var(--aethel-surface-primary) 48%, transparent)',
+  color: TEXT_TERTIARY,
+  fontSize: tokens.typography.fontSize.xs,
+  fontWeight: tokens.typography.fontWeight.medium,
+  whiteSpace: 'nowrap',
 };
 
 interface HeaderIdentityProps {
@@ -230,26 +247,7 @@ export function HeaderWorkspaceControls({
       </div>
 
       {onOpenCommandPalette ? (
-        <div style={floatingClusterStyle}>
-          {commandPaletteItems.map((item) => (
-            <button
-              key={item.mode}
-              type="button"
-              onClick={() => onOpenCommandPalette(item.mode)}
-              style={{
-                ...HEADER_ACTION_BUTTON,
-                minHeight: '34px',
-                padding: `${tokens.spacing['1.5']} ${tokens.spacing['2.5']}`,
-                borderRadius: tokens.radius.full,
-              }}
-              aria-label={item.ariaLabel}
-              title={item.title}
-            >
-              {item.icon}
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <CommandCenterButton onOpenCommandPalette={onOpenCommandPalette} />
       ) : null}
     </div>
   );
@@ -319,5 +317,92 @@ function PanelToggle({ icon, label, active, onClick }: PanelToggleProps) {
       {icon}
       {label}
     </button>
+  );
+}
+
+function CommandCenterButton({
+  onOpenCommandPalette,
+}: {
+  onOpenCommandPalette: (mode: CommandPaletteMode) => void;
+}) {
+  return (
+    <div style={floatingClusterStyle}>
+      <button
+        type="button"
+        onClick={() => onOpenCommandPalette('commands')}
+        aria-label="Abrir command center"
+        title="Cmd+K"
+        style={commandCenterButtonStyle}
+      >
+        <span style={commandCenterMetaStyle}>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              borderRadius: tokens.radius.full,
+              border: `1px solid ${BORDER_SECONDARY}`,
+              background:
+                'color-mix(in srgb, var(--aethel-primary) 14%, transparent)',
+              color: 'var(--aethel-primary-light)',
+              flexShrink: 0,
+            }}
+          >
+            <Sparkles size={14} />
+          </span>
+          <span
+            style={{
+              display: 'flex',
+              minWidth: 0,
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: '2px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: tokens.typography.fontSize.sm,
+                fontWeight: tokens.typography.fontWeight.semibold,
+                color: TEXT_PRIMARY,
+              }}
+            >
+              Command Center
+            </span>
+            <span
+              style={{
+                fontSize: tokens.typography.fontSize.xs,
+                color: TEXT_TERTIARY,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Pergunte, navegue e execute sem sair do cockpit.
+            </span>
+          </span>
+        </span>
+        <span style={commandCenterHintStyle}>Cmd+K</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onOpenCommandPalette('files')}
+        style={{
+          ...HEADER_ACTION_BUTTON,
+          minHeight: '38px',
+          padding: `${tokens.spacing['2']} ${tokens.spacing['2.5']}`,
+          borderRadius: tokens.radius.full,
+          whiteSpace: 'nowrap',
+        }}
+        aria-label="Abrir quick open de arquivos"
+        title="Cmd+P"
+      >
+        <Search size={14} />
+        Files
+        <span style={commandCenterHintStyle}>Cmd+P</span>
+      </button>
+    </div>
   );
 }

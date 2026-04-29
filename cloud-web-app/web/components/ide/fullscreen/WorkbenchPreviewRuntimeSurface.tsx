@@ -147,6 +147,7 @@ export function WorkbenchPreviewRuntimeSurface({
       runtimeDiscoveryMessage={runtimeDiscoveryMessage}
       forceInlinePreviewFallback={forceInlinePreviewFallback}
       isSavingFile={isSavingFile}
+      density="compact"
     />
   );
 

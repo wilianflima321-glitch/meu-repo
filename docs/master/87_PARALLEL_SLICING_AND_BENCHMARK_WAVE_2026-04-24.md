@@ -709,3 +709,30 @@ The next benchmark-grade slice closes a real operator gap: the AI lane now expos
    - `cloud-web-app/web/build-probe-2026-04-28-economics-plane-compile.log` timed out at `Creating an optimized production build ...`
    - `cloud-web-app/web/build-probe-2026-04-28-economics-plane-prerender.log` also timed out at the same early phase
    - therefore this wave is a confirmed product/ops improvement, but not a fresh platform-confidence win
+
+### Wave 13 - command center and compact cockpit chrome
+The next user-facing slice improves information density without collapsing the product into tiny controls:
+1. command center promotion
+   - `components/ide/modern-shell/chromeHeaderParts.tsx`
+   - the header no longer exposes only two small palette buttons
+   - it now shows a proper `Command Center` affordance with a clearer primary action for `Cmd+K` plus a dedicated `Files` quick-open button for `Cmd+P`
+2. preview chrome compaction
+   - `components/ide/PreviewRuntimeToolbar.tsx`
+   - `components/preview/PreviewRuntimeTrustNotice.tsx`
+   - `components/ide/fullscreen/WorkbenchPreviewModeHeader.tsx`
+   - `components/ide/fullscreen/WorkbenchPreviewRuntimeSurface.tsx`
+   - the runtime trust notice stays compact inside the workbench lane
+   - the preview mode selector is now a denser segmented control
+   - the runtime toolbar uses smaller metrics, shorter copy, and less vertical overhead
+3. AI lane compaction
+   - `components/ai-chat/AIChatContextStrip.tsx`
+   - `components/ai-chat/AIChatTimeline.tsx`
+   - the context strip now carries the current goal inline as a chip instead of spending a larger second row on the same information
+   - the operational timeline cards are smaller and more glanceable, which returns more space to the message and artifact lanes
+4. regression proof
+   - `__tests__/ide/chromeHeaderParts.test.tsx`
+   - `__tests__/ide/WorkbenchPreviewRuntimeSurface.test.tsx`
+5. truthful build state after this slice
+   - `cloud-web-app/web/build-probe-2026-04-29-command-center-compact-compile.log` = compile-mode `PASS`
+   - `cloud-web-app/web/build-probe-2026-04-29-command-center-compact-prerender.log` = still open and timed out after `Linting and checking validity of types ...`
+   - therefore this wave is a confirmed UX/shell-density win and a fresh compile-mode revalidation, but not the final prerender-parity fix

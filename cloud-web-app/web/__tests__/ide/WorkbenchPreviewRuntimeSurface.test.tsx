@@ -12,12 +12,18 @@ const { canonicalPreviewSpy } = vi.hoisted(() => ({
   )),
 }))
 
+const { trustNoticeSpy } = vi.hoisted(() => ({
+  trustNoticeSpy: vi.fn((props: any) => (
+    <div data-testid="trust-notice" data-density={props.density ?? 'default'} />
+  )),
+}))
+
 vi.mock('@/components/preview/CanonicalPreviewSurface', () => ({
   default: canonicalPreviewSpy,
 }))
 
 vi.mock('@/components/preview/PreviewRuntimeTrustNotice', () => ({
-  PreviewRuntimeTrustNotice: () => <div data-testid="trust-notice" />,
+  PreviewRuntimeTrustNotice: trustNoticeSpy,
 }))
 
 vi.mock('@/components/ide/DevicePreview', () => ({
@@ -53,12 +59,14 @@ const baseProps = {
 describe('WorkbenchPreviewRuntimeSurface', () => {
   beforeEach(() => {
     canonicalPreviewSpy.mockClear()
+    trustNoticeSpy.mockClear()
   })
 
   it('passes a controlled healthy runtime into the canonical preview surface', () => {
     render(<WorkbenchPreviewRuntimeSurface {...baseProps} mode="runtime" />)
 
     expect(screen.getByTestId('trust-notice')).toBeInTheDocument()
+    expect(screen.getByTestId('trust-notice')).toHaveAttribute('data-density', 'compact')
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-state', 'healthy')
     expect(screen.getByTestId('canonical-preview')).toHaveAttribute('data-show-lifecycle', 'no')
   })

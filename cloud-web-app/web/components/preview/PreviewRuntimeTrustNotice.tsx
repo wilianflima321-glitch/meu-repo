@@ -16,6 +16,7 @@ type PreviewRuntimeTrustNoticeProps = {
   runtimeDiscoveryMessage: string | null;
   forceInlinePreviewFallback: boolean;
   isSavingFile: boolean;
+  density?: 'default' | 'compact';
 };
 
 type NoticeTone = 'success' | 'info' | 'warning';
@@ -50,6 +51,7 @@ export function PreviewRuntimeTrustNotice({
   runtimeDiscoveryMessage,
   forceInlinePreviewFallback,
   isSavingFile,
+  density = 'default',
 }: PreviewRuntimeTrustNoticeProps) {
   const firstBlocker = runtimeReadiness?.blockers?.[0] ?? null;
   const hasReachableRuntime = runtimeHealth.status === 'reachable';
@@ -94,6 +96,33 @@ export function PreviewRuntimeTrustNotice({
     (previewRuntimeUrl
       ? 'Use a proxima acao recomendada para restaurar parity de runtime sem sair da IDE.'
       : 'Descubra ou provisione um runtime quando precisar validar device, rede ou deploy fora do inline.');
+
+  if (density === 'compact') {
+    return (
+      <div className="border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_78%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_94%,transparent))] px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <NoticeChip tone={tone}>
+            {forceInlinePreviewFallback || !previewRuntimeUrl ? 'Inline fallback' : runtimeStrategyLabel}
+          </NoticeChip>
+          <NoticeChip tone={hasReachableRuntime ? 'success' : tone}>
+            {hasReachableRuntime ? 'Runtime reachable' : `Health ${runtimeHealth.status}`}
+          </NoticeChip>
+          {runtimeReadiness?.status ? (
+            <NoticeChip tone={runtimeReadiness.status === 'ready' ? 'success' : tone}>
+              Readiness {runtimeReadiness.status}
+            </NoticeChip>
+          ) : null}
+          <span className="inline-flex min-h-[28px] items-center rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+            Next move: {runtimePrimaryActionLabel}
+          </span>
+        </div>
+        <div className="mt-2 flex flex-wrap items-start gap-x-3 gap-y-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+          <span className="font-medium text-[var(--aethel-text-secondary)]">{heading}</span>
+          <span>{body}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_86%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_96%,transparent))] px-4 py-3">

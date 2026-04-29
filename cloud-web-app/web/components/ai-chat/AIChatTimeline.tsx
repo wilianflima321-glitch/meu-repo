@@ -37,17 +37,15 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
   if (items.length === 0 && !activeThreadTitle) return null
 
   return (
-    <section className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)] px-4 py-3">
+    <section className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)] px-4 py-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="inline-flex items-center rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--aethel-text-quaternary)]">
             Timeline operacional
+          </span>
+          <div className="min-w-0 truncate text-[11px] text-[var(--aethel-text-tertiary)]">
+            {activeThreadTitle ? `Thread em foco: ${activeThreadTitle}` : 'Retome o fluxo certo sem recontar o contexto inteiro.'}
           </div>
-          {activeThreadTitle ? (
-            <div className="mt-1 text-xs text-[var(--aethel-text-secondary)]">Thread em foco: {activeThreadTitle}</div>
-          ) : (
-            <div className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">Retome o fluxo certo sem recontar o contexto inteiro.</div>
-          )}
         </div>
 
         {hasHistory && onOpenHistory && (
@@ -63,14 +61,14 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
       </div>
 
       {items.length > 0 && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
           {items.map((item) => {
             const tone = TONE_STYLES[item.tone]
             const Icon = tone.icon
             return (
               <article
                 key={item.id}
-                className={`min-w-[220px] max-w-[280px] rounded-2xl border px-3 py-2 ${tone.className}`}
+                className={`min-w-[190px] max-w-[240px] rounded-2xl border px-3 py-2 ${tone.className}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 text-[11px] font-medium">
@@ -79,7 +77,7 @@ export function AIChatTimeline({ activeThreadTitle, hasHistory, items, onOpenHis
                   </div>
                   <span className="text-[10px] text-[var(--aethel-text-quaternary)]">{item.meta}</span>
                 </div>
-                <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{item.summary}</div>
+                <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[var(--aethel-text-secondary)]">{item.summary}</div>
               </article>
             )
           })}

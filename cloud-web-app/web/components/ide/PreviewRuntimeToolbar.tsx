@@ -65,10 +65,10 @@ function CompactMetric({
   hint?: string | null
 }) {
   return (
-    <div className="min-w-[170px] rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_65%,transparent)] px-3 py-2">
+    <div className="min-w-[148px] rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_65%,transparent)] px-2.5 py-1.5">
       <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">{label}</div>
       <div className="mt-1 text-[12px] font-semibold text-[var(--aethel-text-primary)]">{value}</div>
-      {hint ? <div className="mt-1 text-[11px] text-[var(--aethel-text-tertiary)]">{hint}</div> : null}
+      {hint ? <div className="mt-1 line-clamp-2 text-[10px] leading-4 text-[var(--aethel-text-tertiary)]">{hint}</div> : null}
     </div>
   )
 }
@@ -252,9 +252,9 @@ export default function PreviewRuntimeToolbar({
   ].filter(Boolean) as string[]
 
   return (
-    <div className="border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,18,25,0.97),rgba(11,13,18,0.985))] px-3 py-2.5 text-xs shadow-[inset_0_-1px_0_rgba(255,255,255,0.03)]">
+    <div className="border-b border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(16,18,25,0.97),rgba(11,13,18,0.985))] px-3 py-2 text-xs shadow-[inset_0_-1px_0_rgba(255,255,255,0.03)]">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-[320px] flex-1 flex-col gap-2.5">
+        <div className="flex min-w-[280px] flex-1 flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-tertiary)]">{t.runtime}</span>
             <ToolbarChip
@@ -271,34 +271,34 @@ export default function PreviewRuntimeToolbar({
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
             <div className="min-w-[220px] flex-1">
-              <div className="text-[13px] font-semibold text-[var(--aethel-text-primary)]">
+              <div className="text-[12px] font-semibold text-[var(--aethel-text-primary)]">
                 {previewRuntimeUrl
-                  ? 'Preview routed to an external runtime.'
-                  : 'Inline preview is active while runtime orchestration stays offline.'}
+                  ? 'Runtime lane active.'
+                  : 'Inline lane active.'}
               </div>
-              <div className="mt-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+              <div className="mt-1 text-[10px] leading-4 text-[var(--aethel-text-tertiary)]">
                 {previewRuntimeUrl
-                  ? 'Validate health, keep runtime synced, and jump into the hosted surface without losing editor context.'
-                  : 'Use the recommended action to discover or provision a runtime when you need real network, device, or deploy parity.'}
+                  ? 'Valide health, mantenha o sync e promova a mesma lane para review sem perder contexto.'
+                  : 'Use a acao recomendada para descobrir ou provisionar parity real quando o artefato pedir rede, device ou deploy.'}
               </div>
             </div>
             {firstBlocker ? (
-              <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_8%,transparent)] px-3 py-2 text-[11px] text-[var(--aethel-warning-light)]">
+              <div className="rounded-xl border border-[color-mix(in_srgb,var(--aethel-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_8%,transparent)] px-2.5 py-1.5 text-[10px] text-[var(--aethel-warning-light)]">
                 <div className="text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-warning)]">Primary blocker</div>
                 <div className="mt-1">{firstBlocker}</div>
               </div>
             ) : null}
           </div>
 
-          <div className="grid gap-2 md:grid-cols-3">
+          <div className="flex flex-wrap gap-2">
             {quickFacts.map((item) => (
               <CompactMetric key={item.label} label={item.label} value={item.value} hint={item.hint} />
             ))}
           </div>
 
-          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-3 py-3">
+          <div className="rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)] px-3 py-2.5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-[220px] flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -328,11 +328,11 @@ export default function PreviewRuntimeToolbar({
                     </ToolbarChip>
                   ) : null}
                 </div>
-                <div className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                <div className="mt-1.5 text-[10px] leading-4 text-[var(--aethel-text-tertiary)]">
                   {reviewTarget?.summary ?? deployHint}
                 </div>
                 {deployFeedback ? (
-                  <div className="mt-2 text-[11px] text-[var(--aethel-text-secondary)]">
+                  <div className="mt-1.5 text-[10px] text-[var(--aethel-text-secondary)]">
                     {deployFeedback}
                   </div>
                 ) : null}

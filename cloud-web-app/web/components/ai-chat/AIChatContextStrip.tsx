@@ -39,7 +39,7 @@ export function AIChatContextStrip({
   const summarizedGoal = summarizeGoal(lastUserGoal)
 
   return (
-    <section className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-4 py-3">
+    <section className="border-b border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-4 py-2">
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${MODE_TONE_CLASSES[consoleMode]}`}
@@ -62,16 +62,16 @@ export function AIChatContextStrip({
           {isAIWorking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Radio className="h-3.5 w-3.5" />}
           {isAIWorking ? 'IA trabalhando' : 'Pronto para responder'}
         </span>
+        {summarizedGoal ? (
+          <span className="inline-flex min-h-[28px] max-w-full items-center gap-1.5 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-2.5 py-1 text-[11px] text-[var(--aethel-text-secondary)]">
+            <Target className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">{summarizedGoal}</span>
+          </span>
+        ) : null}
       </div>
 
-      <div className="mt-2 flex items-start gap-2 text-xs text-[var(--aethel-text-tertiary)]">
-        <Target className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[var(--aethel-text-quaternary)]" />
-        <div className="min-w-0">
-          <div className="font-medium text-[var(--aethel-text-secondary)]">Contexto atual</div>
-          <div className="mt-1 leading-5" title={lastUserGoal || modePreset.helper}>
-            {summarizedGoal || modePreset.helper}
-          </div>
-        </div>
+      <div className="mt-1.5 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]" title={lastUserGoal || modePreset.helper}>
+        {summarizedGoal ? modePreset.helper : `Contexto atual: ${modePreset.helper}`}
       </div>
     </section>
   )
