@@ -50,6 +50,24 @@ export type ActiveTab =
   | 'download'
   | 'admin'
 
+export const MISSION_CONTROL_TABS = ['overview', 'ai-chat', 'projects'] as const satisfies readonly ActiveTab[]
+export const OPERATIONS_TABS = ['billing', 'wallet', 'connectivity'] as const satisfies readonly ActiveTab[]
+export const EXPLORE_TABS = [
+  'agent-canvas',
+  'templates',
+  'use-cases',
+  'content-creation',
+  'unreal',
+  'download',
+  'admin',
+] as const satisfies readonly ActiveTab[]
+
+export const DASHBOARD_TAB_GROUPS = {
+  mission: MISSION_CONTROL_TABS,
+  operations: OPERATIONS_TABS,
+  explore: EXPLORE_TABS,
+} as const
+
 export type ToastType = 'success' | 'error' | 'info'
 
 export interface ToastState {
@@ -89,19 +107,9 @@ export const STORAGE_KEYS = {
 } as const
 
 export const DASHBOARD_TABS: ActiveTab[] = [
-  'overview',
-  'projects',
-  'ai-chat',
-  'agent-canvas',
-  'content-creation',
-  'unreal',
-  'wallet',
-  'billing',
-  'connectivity',
-  'templates',
-  'use-cases',
-  'download',
-  'admin',
+  ...MISSION_CONTROL_TABS,
+  ...OPERATIONS_TABS,
+  ...EXPLORE_TABS,
 ]
 
 const isChatMessage = (value: unknown): value is ChatMessage => {

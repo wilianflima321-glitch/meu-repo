@@ -4,9 +4,13 @@ import { useEffect } from 'react';
 
 import type { EntryNotice } from '@/components/ide/fullscreen/WorkbenchEntryNotice';
 import type { PreviewMode } from '@/components/ide/fullscreen/types';
+import type { WorkbenchEntryProfile } from '@/components/ide/fullscreen/workbench-entry-triage';
 
 type UseWorkbenchEntryConvergenceParams = {
   entryParam: string | null;
+  sourceParam: string | null;
+  missionParam: string | null;
+  entryProfile: WorkbenchEntryProfile;
   clearEntryNotice: () => void;
   openCommandPalette: (mode?: 'commands' | 'files') => void;
   showEntryNotice: (notice: EntryNotice) => void;
@@ -16,6 +20,9 @@ type UseWorkbenchEntryConvergenceParams = {
 
 export function useWorkbenchEntryConvergence({
   entryParam,
+  sourceParam,
+  missionParam,
+  entryProfile,
   clearEntryNotice,
   openCommandPalette,
   showEntryNotice,
@@ -23,26 +30,39 @@ export function useWorkbenchEntryConvergence({
   handleSelectPreviewMode,
 }: UseWorkbenchEntryConvergenceParams) {
   useEffect(() => {
-    if (!entryParam) return;
-
-    const entry = entryParam.toLowerCase();
+    const entry = entryParam?.toLowerCase() ?? null;
+    const hasContextualEntry = Boolean(sourceParam?.trim() || missionParam?.trim());
+    const laneLabel = entryProfile.laneLabel;
+    const showLaneNotice = () => {
+      if (entryProfile.notice) {
+        showEntryNotice(entryProfile.notice);
+      }
+    };
     const labNotice = {
       tone: 'warning' as const,
       title: 'Surface em modo Labs',
       description:
-        'Esta rota foi convergida para o workbench principal. A experiência canônica ainda está no shell de código, prévia e revisão.',
+        'Esta rota foi convergida para o workbench principal. A experiencia canonica continua no shell de codigo, previa e revisao.',
     };
 
     clearEntryNotice();
 
+    if (!entry) {
+      if (hasContextualEntry) {
+        showLaneNotice();
+      }
+      return;
+    }
+
     if (entry === 'ai' || entry === 'chat' || entry === 'ai-command') {
       window.dispatchEvent(new Event('aethel.layout.openAI'));
-      if (entry === 'ai-command') {
+      if (entry === 'ai-command' || missionParam?.trim()) {
         showEntryNotice({
           tone: 'info',
-          title: 'Comando de IA convergido',
-          description:
-            'A ação abriu o painel principal de IA dentro do workbench, onde diff, execução e contexto ficam centralizados.',
+          title: missionParam?.trim() ? `${laneLabel} em foco no AI Console` : 'Comando de IA convergido',
+          description: missionParam?.trim()
+            ? 'A missao entrou no rail principal de IA, onde briefing, diff, execucao e contexto ficam centralizados.'
+            : 'A acao abriu o painel principal de IA dentro do workbench, onde diff, execucao e contexto ficam centralizados.',
         });
       }
       return;
@@ -67,7 +87,7 @@ export function useWorkbenchEntryConvergence({
         tone: 'info',
         title: 'Git aberto no workbench',
         description:
-          'A rota dedicada foi convergida para a barra lateral do IDE para manter revisão, arquivos e diff no mesmo fluxo.',
+          'A rota dedicada foi convergida para a barra lateral do IDE para manter revisao, arquivos e diff no mesmo fluxo.',
       });
       return;
     }
@@ -94,9 +114,11 @@ export function useWorkbenchEntryConvergence({
       setPreviewEnabled(true);
       showEntryNotice({
         tone: 'info',
-        title: 'Prévia aberta no shell principal',
+        title: entryProfile.dominantSurface === 'runtime' ? 'Runtime aberto no shell principal' : 'Previa aberta no shell principal',
         description:
-          'A prévia canônica agora vive dentro do workbench para manter runtime, console e editor no mesmo contexto.',
+          entryProfile.dominantSurface === 'runtime'
+            ? `${laneLabel} abriu com runtime, console e editor no mesmo cockpit para evitar um side-by-side fraco entre chat e preview.`
+            : 'A previa canonica agora vive dentro do workbench para manter runtime, console e editor no mesmo contexto.',
       });
       return;
     }
@@ -107,8 +129,13 @@ export function useWorkbenchEntryConvergence({
         tone: 'info',
         title: 'Editor Hub convergido',
         description:
-          'Você já está no hub principal do editor. A navegação dedicada foi removida para evitar duplicidade de shell.',
+          'Voce ja esta no hub principal do editor. A navegacao dedicada foi removida para evitar duplicidade de shell.',
       });
+      return;
+    }
+
+    if (entry === 'quick-open') {
+      showLaneNotice();
       return;
     }
 
@@ -118,7 +145,7 @@ export function useWorkbenchEntryConvergence({
         tone: 'info',
         title: 'Busca convergida',
         description:
-          'A busca dedicada foi substituída pela command palette e pelo quick open do workbench.',
+          'A busca dedicada foi substituida pela command palette e pelo quick open do workbench.',
       });
       return;
     }
@@ -130,7 +157,7 @@ export function useWorkbenchEntryConvergence({
         tone: 'info',
         title: 'Playground convergido',
         description:
-          'O playground agora usa o shell principal com prévia ativa e copiloto aberto, evitando uma superfície paralela.',
+          'O playground agora usa o shell principal com previa ativa e copiloto aberto, evitando uma superficie paralela.',
       });
       return;
     }
@@ -146,7 +173,7 @@ export function useWorkbenchEntryConvergence({
         tone: 'info',
         title: 'Testing convergido',
         description:
-          'A rota abriu a prévia e os diagnósticos do editor para manter testes e inspeção no mesmo fluxo.',
+          'A rota abriu a previa e os diagnosticos do editor para manter testes e inspecao no mesmo fluxo.',
       });
       return;
     }
@@ -165,11 +192,14 @@ export function useWorkbenchEntryConvergence({
     }
   }, [
     clearEntryNotice,
+    entryProfile,
     entryParam,
     handleSelectPreviewMode,
+    missionParam,
     openCommandPalette,
     setPreviewEnabled,
     showEntryNotice,
+    sourceParam,
   ]);
 }
 

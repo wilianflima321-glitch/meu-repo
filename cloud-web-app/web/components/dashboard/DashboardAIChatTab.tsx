@@ -44,87 +44,128 @@ type DashboardAIChatTabProps = {
 const SESSION_PROMPTS = [
   {
     id: 'plan',
-    label: 'Planejar stack e escopo',
-    description: 'Transformar a ideia em plano tecnico, milestones e riscos.',
-    prompt: 'Quero transformar esta ideia em um plano tecnico com escopo, stack, milestones, riscos e criterio de sucesso.',
+    label: 'Plan the stack',
+    description: 'Turn the idea into scope, milestones and technical risk.',
+    prompt:
+      'Turn this mission into a technical plan with scope, stack, milestones, risk and definition of done.',
   },
   {
     id: 'research',
-    label: 'Pesquisar e comparar',
-    description: 'Analisar concorrentes, experiencia alvo e lacunas do produto.',
-    prompt: 'Pesquise a melhor experiencia para este produto, compare com os principais concorrentes e proponha o nosso delta.',
+    label: 'Research the market',
+    description: 'Compare competitors, target experience and product gaps.',
+    prompt:
+      'Research the strongest benchmark for this product, compare the main competitors and define our advantage.',
   },
   {
     id: 'build',
-    label: 'Preparar para construir',
-    description: 'Sair do chat com briefing pronto para projeto e IDE.',
-    prompt: 'Consolide um briefing executavel para eu seguir para projeto, IDE e preview sem perder contexto.',
+    label: 'Prepare the handoff',
+    description: 'Leave with a briefing ready for Projects, Studio and preview.',
+    prompt:
+      'Consolidate an executable briefing that is ready for Projects, Studio and preview without losing continuity.',
   },
   {
     id: 'review',
-    label: 'Revisar e validar',
-    description: 'Criticar o que ja foi feito e apontar o proximo bloco de qualidade.',
-    prompt: 'Revise o estado atual, identifique riscos reais e diga o proximo bloco de trabalho com maior impacto.',
+    label: 'Review the current state',
+    description: 'Critique what exists and call the next highest-leverage improvement.',
+    prompt:
+      'Review the current state with rigor, identify real risk and define the next block of work with highest impact.',
   },
 ] as const
 
 const AGENT_PLAYBOOK = [
   {
     title: 'Research',
-    description: 'Comparar mercado, consolidar evidencias e fechar estrategia.',
-    prompt: 'Pesquise, compare e resuma o melhor benchmark para este fluxo de produto.',
+    description: 'Compare the market, consolidate evidence and close the strategy.',
+    prompt: 'Research, compare and summarize the strongest benchmark for this mission.',
   },
   {
     title: 'Planner',
-    description: 'Quebrar o objetivo em backlog, fases e gates operacionais.',
-    prompt: 'Quebre esta meta em backlog executavel com fases, dependencias e criterios de saida.',
+    description: 'Break the objective into backlog, phases and exit gates.',
+    prompt: 'Break this mission into an executable backlog with phases, dependencies and exit criteria.',
   },
   {
     title: 'Builder',
-    description: 'Preparar handoff para projeto, IDE, preview e runtime.',
-    prompt: 'Converta esta missao em um handoff pronto para projeto, IDE e preview.',
+    description: 'Prepare the handoff for Projects, Studio, preview and runtime.',
+    prompt: 'Convert this mission into a handoff ready for Projects, Studio and preview.',
   },
   {
     title: 'Operator',
-    description: 'Organizar automacoes, runtime, observabilidade e operacao.',
-    prompt: 'Defina os passos operacionais e de runtime para executar esta tarefa sem lacunas.',
+    description: 'Organize automation, runtime, observability and operational flow.',
+    prompt: 'Define the operational and runtime steps needed to execute this mission without blind spots.',
   },
   {
     title: 'Reviewer',
-    description: 'Criticar UX, fluxo, arquitetura e regressao antes de seguir.',
-    prompt: 'Critique este estado com rigor, apontando regressao, inconsistencias e proxima melhora.',
+    description: 'Critique UX, architecture and regression risk before the next move.',
+    prompt: 'Critique this state with rigor, pointing out regression risk, inconsistency and the next improvement.',
   },
   {
     title: 'Asset Maker',
-    description: 'Preparar conteudo, docs, imagens e superfícies de apresentacao.',
-    prompt: 'Monte os assets e materiais necessarios para apresentar e validar esta entrega.',
+    description: 'Prepare docs, content, images and review surfaces for presentation.',
+    prompt: 'Prepare the assets and supporting materials needed to present and validate this delivery.',
   },
 ] as const
 
 const PAGE_CLASS = `${CANONICAL_SPACING.page.padding} space-y-6`
-const MODE_TOGGLE_CLASS = (isActive: boolean) =>
-  [
-    'rounded-full px-4 py-2 text-sm font-medium border',
-    CANONICAL_MOTION,
-    CANONICAL_FOCUS,
-    isActive
-      ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)]'
-      : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]',
-  ].join(' ')
 const PANEL_CLASS =
   'rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_22%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.16)]'
 const INPUT_CLASS = `h-12 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-tertiary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 const PRIMARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 const SECONDARY_BUTTON_CLASS = `inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 const GHOST_BUTTON_CLASS = `inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
-const MESSAGE_CARD_CLASS = (role: ChatMessage['role']) =>
-  `rounded-2xl border border-[var(--aethel-border-subtle)] px-4 py-3 ${
-    role === 'user'
-      ? 'ml-12 bg-[linear-gradient(135deg,rgba(59,130,246,0.22),rgba(14,165,233,0.12))]'
-      : 'mr-12 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
-  }`
 const EMPTY_CANVAS_CLASS =
   'mx-auto max-w-xl rounded-2xl border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_16%,transparent)] px-4 py-4 text-xs text-[var(--aethel-text-secondary)]'
+
+const MODE_META: Record<
+  ChatMode,
+  {
+    label: string
+    description: string
+    eyebrow: string
+  }
+> = {
+  chat: {
+    label: 'Chat',
+    eyebrow: 'Fast lane',
+    description: 'Use the default lane when you need fast iteration with mission memory still attached.',
+  },
+  agent: {
+    label: 'Agent',
+    eyebrow: 'Delegation lane',
+    description: 'Use explicit roles when the work benefits from structured delegation and auditable steps.',
+  },
+  canvas: {
+    label: 'Canvas',
+    eyebrow: 'Visual lane',
+    description: 'Keep visual exploration light here and hand off to Studio when the artifact becomes primary.',
+  },
+}
+
+function ModePill({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean
+  onClick: () => void
+  label: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        'rounded-full px-4 py-2 text-sm font-medium border',
+        CANONICAL_MOTION,
+        CANONICAL_FOCUS,
+        active
+          ? 'border-[color-mix(in_srgb,var(--aethel-info)_35%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.35),rgba(14,165,233,0.2))] text-[var(--aethel-text-primary)]'
+          : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] text-[var(--aethel-text-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]',
+      ].join(' ')}
+    >
+      {label}
+    </button>
+  )
+}
 
 export function DashboardAIChatTab({
   chatMode,
@@ -154,122 +195,87 @@ export function DashboardAIChatTab({
   onOpenProjects,
   onOpenIde,
 }: DashboardAIChatTabProps) {
-  const starterPrompt = entryMission || 'Quero criar um app SaaS com dashboard e autenticacao.'
-  const activeModeDescription =
-    chatMode === 'chat'
-      ? 'Conversa continua e rapida para pensar, ajustar e seguir.'
-      : chatMode === 'agent'
-        ? 'Fluxo estruturado para delegar pesquisa, plano, execucao e revisao.'
-        : 'Espaco de exploracao visual e handoff entre conceito e implementacao.'
+  const starterPrompt = entryMission || 'I want to create a SaaS app with dashboard, auth and a clean launch path.'
+  const activeModeMeta = MODE_META[chatMode]
 
   return (
     <div className={PAGE_CLASS}>
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Studio Copilot</p>
-          <h2 className={CANONICAL_TYPOGRAPHY.h1}>Chat IA</h2>
-          <p className="text-sm text-[var(--aethel-text-secondary)] mt-1">Orquestracao multi-agent com contexto do studio.</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">AI Console</p>
+          <h2 className={CANONICAL_TYPOGRAPHY.h1}>Turn mission context into an executable next move.</h2>
+          <p className="mt-1 text-sm text-[var(--aethel-text-secondary)]">
+            Research, planning and orchestration stay here until the artifact needs deeper Studio focus.
+          </p>
         </div>
+
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => onChatModeChange('chat')}
-            aria-label="Alternar para modo de chat"
-            className={MODE_TOGGLE_CLASS(chatMode === 'chat')}
-          >
-            Chat
-          </button>
-          <button
-            type="button"
-            onClick={() => onChatModeChange('agent')}
-            aria-label="Alternar para modo agente"
-            className={MODE_TOGGLE_CLASS(chatMode === 'agent')}
-          >
-            Modo agente
-          </button>
-          <button
-            type="button"
-            onClick={() => onChatModeChange('canvas')}
-            aria-label="Alternar para modo canvas"
-            className={MODE_TOGGLE_CLASS(chatMode === 'canvas')}
-          >
-            Canvas
-          </button>
+          <ModePill active={chatMode === 'chat'} onClick={() => onChatModeChange('chat')} label="Chat" />
+          <ModePill active={chatMode === 'agent'} onClick={() => onChatModeChange('agent')} label="Agent" />
+          <ModePill active={chatMode === 'canvas'} onClick={() => onChatModeChange('canvas')} label="Canvas" />
         </div>
       </div>
 
-      <div className="mb-6 rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(15,23,42,0.86),rgba(8,47,73,0.18),rgba(15,23,42,0.7))] p-5 shadow-[0_20px_70px_rgba(2,6,23,0.24)]">
+      <section className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(15,23,42,0.86),rgba(8,47,73,0.18),rgba(15,23,42,0.7))] p-5 shadow-[0_20px_70px_rgba(2,6,23,0.24)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Jornada guiada</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">{activeModeMeta.eyebrow}</p>
             <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
-              Use o chat para transformar contexto em plano executavel.
+              Keep the mission moving without turning this into another product.
             </h3>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
               {entryMission
                 ? entryMission
-                : 'Descreva o que quer construir, alinhe escopo, depois siga para projeto e IDE com o mesmo handoff.'}
+                : 'Describe the task, align scope and keep the flow clean before handing off to Projects or Studio.'}
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-3 py-1 text-xs text-[var(--aethel-text-secondary)]">
+                Mode: {activeModeMeta.label}
+              </span>
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1 text-xs text-[var(--aethel-info-light)]">
+                Workflows: {copilotWorkflows.length}
+              </span>
+            </div>
           </div>
+
           <div className="flex shrink-0 flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => onChatMessageChange(starterPrompt)}
-              className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-4 py-2 text-sm font-medium text-[var(--aethel-text-primary)] transition hover:border-[var(--aethel-border-secondary)]"
-            >
-              Carregar briefing
+            <button type="button" onClick={() => onChatMessageChange(starterPrompt)} className={SECONDARY_BUTTON_CLASS}>
+              Load briefing
             </button>
             {onOpenProjects ? (
-              <button
-                type="button"
-                onClick={onOpenProjects}
-                className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
-              >
-                Ir para projetos
+              <button type="button" onClick={onOpenProjects} className={GHOST_BUTTON_CLASS}>
+                Open Projects
               </button>
             ) : null}
             {onOpenIde ? (
-              <button
-                type="button"
-                onClick={onOpenIde}
-                className="rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.95),rgba(14,165,233,0.9))] px-4 py-2 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
-              >
-                Abrir IDE
+              <button type="button" onClick={onOpenIde} className={PRIMARY_BUTTON_CLASS}>
+                Expand Studio
               </button>
             ) : null}
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="mb-6 grid gap-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Experiencia alvo</p>
-          <h3 className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">
-            Menos chat solto, mais sessao de trabalho com contexto continuo.
-          </h3>
-          <p className="mt-2 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-            {activeModeDescription} O objetivo aqui e sair do Studio Copilot com briefing pronto, proxima acao clara e contexto preservado para projetos, IDE e preview.
-          </p>
-        </div>
-
-        <div className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Qualidades que estamos perseguindo</p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
-              <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Contexto persistente</p>
-              <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">Missao, origem e proxima etapa continuam entre surfaces.</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
-              <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Operacao guiada</p>
-              <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">Pesquisa, plano, build e revisao aparecem como trilhos reais.</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
-              <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Handoff sem quebra</p>
-              <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">Chat, projetos, IDE e preview funcionam como um studio unico.</p>
-            </div>
+      <section className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_20%,transparent)] p-5">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
+            <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Persistent context</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+              Mission, source and next move survive between surfaces.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
+            <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Operational rail</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{activeModeMeta.description}</p>
+          </div>
+          <div className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)] px-4 py-3">
+            <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Clean handoff</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">
+              Projects, Studio and preview stay on one continuous path.
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
       <DashboardCopilotWorkflowBar
         activeWorkflowId={activeWorkflowId}
@@ -287,23 +293,20 @@ export function DashboardAIChatTab({
         onMergeWorkflow={onMergeWorkflow}
       />
 
-      {providerSetupGate && (
-        <div className="mb-6">
-          <AIProviderSetupGuide
-            source="dashboard"
-            message={providerSetupGate.message}
-            capabilityStatus={providerSetupGate.capabilityStatus}
-            settingsHref={providerSetupGate.setupUrl}
-            onOpenSettings={onOpenProviderSettings}
-          />
-        </div>
-      )}
+      {providerSetupGate ? (
+        <AIProviderSetupGuide
+          source="dashboard"
+          message={providerSetupGate.message}
+          capabilityStatus={providerSetupGate.capabilityStatus}
+          settingsHref={providerSetupGate.setupUrl}
+          onOpenSettings={onOpenProviderSettings}
+        />
+      ) : null}
 
-      {chatMode === 'chat' && (
+      {chatMode === 'chat' ? (
         <div className={`${PANEL_CLASS} mx-auto max-w-4xl`}>
-          <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
-            Chat conversacional padrao com os agentes avancados do Aethel.
-          </div>
+          <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">{MODE_META.chat.description}</div>
+
           <div className="mb-6 grid gap-3 md:grid-cols-2">
             {SESSION_PROMPTS.map((item) => (
               <button
@@ -317,93 +320,94 @@ export function DashboardAIChatTab({
               </button>
             ))}
           </div>
-          {chatHistory.length === 0 && !isStreaming && (
+
+          {chatHistory.length === 0 && !isStreaming ? (
             <div className="mb-6">
               <EmptyState
-                title="Inicie o chat"
-                description="Descreva o que voce quer construir. O Aethel responde com um plano e os proximos passos."
+                title="Start the thread"
+                description="Describe what you want to build, fix, research or operate. Aethel will answer with a plan and the next move."
                 action={{
-                  label: 'Usar prompt inicial',
+                  label: 'Use starter prompt',
                   onClick: () => onChatMessageChange(starterPrompt),
                 }}
                 secondaryAction={{
-                  label: 'Ver exemplos',
-                  onClick: () => onChatMessageChange('Mostre exemplos de prompts e boas praticas.'),
+                  label: 'Show examples',
+                  onClick: () => onChatMessageChange('Show a few strong prompt examples for this product flow.'),
                 }}
               />
             </div>
-          )}
-          <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
-            {chatHistory.map((msg, index) => (
+          ) : null}
+
+          <div className="mb-4 max-h-96 space-y-4 overflow-y-auto">
+            {chatHistory.map((message, index) => (
               <div
                 key={index}
-                className={MESSAGE_CARD_CLASS(msg.role)}
+                className={`rounded-2xl border border-[var(--aethel-border-subtle)] px-4 py-3 ${
+                  message.role === 'user'
+                    ? 'ml-12 bg-[linear-gradient(135deg,rgba(59,130,246,0.22),rgba(14,165,233,0.12))]'
+                    : 'mr-12 bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)]'
+                }`}
               >
-                <p className="text-sm font-medium mb-1">{msg.role === 'user' ? 'Voce' : 'IA'}</p>
-                <p className="text-sm">{msg.content}</p>
+                <p className="mb-1 text-sm font-medium text-[var(--aethel-text-primary)]">
+                  {message.role === 'user' ? 'You' : 'Aethel'}
+                </p>
+                <p className="text-sm text-[var(--aethel-text-secondary)]">{message.content}</p>
               </div>
             ))}
-            {isStreaming && <AIThinkingPanel isStreaming={isStreaming} position="floating" />}
+            {isStreaming ? <AIThinkingPanel isStreaming={isStreaming} position="floating" /> : null}
           </div>
+
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={chatMessage}
               onChange={(event) => onChatMessageChange(event.target.value)}
               disabled={isStreaming}
-              aria-label="Mensagem para o chat de IA"
+              aria-label="Message for the AI console"
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   onSendChatMessage()
                 }
               }}
-              placeholder="Digite sua mensagem..."
+              placeholder="Ask Aethel to build, research, fix or operate..."
               className={`${INPUT_CLASS} flex-1`}
             />
             <button
               type="button"
               onClick={onSendChatMessage}
-              aria-label="Enviar mensagem para o chat de IA"
+              aria-label="Send message to the AI console"
               className={PRIMARY_BUTTON_CLASS}
               disabled={isStreaming || chatMessage.trim().length === 0}
             >
-              {isStreaming ? 'Processando...' : 'Enviar'}
+              {isStreaming ? 'Working...' : 'Send'}
             </button>
-            {isStreaming && onStopStreaming && (
-              <button
-                type="button"
-                onClick={onStopStreaming}
-                aria-label="Interromper resposta em streaming"
-                className={`${GHOST_BUTTON_CLASS} text-xs`}
-              >
-                Interromper
+            {isStreaming && onStopStreaming ? (
+              <button type="button" onClick={onStopStreaming} aria-label="Stop streaming response" className={GHOST_BUTTON_CLASS}>
+                Stop
               </button>
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
 
-      {chatMode === 'agent' && (
+      {chatMode === 'agent' ? (
         <div className={`${PANEL_CLASS} mx-auto max-w-4xl`}>
-          <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
-            Modo de agente autonomo em passos auditaveis, com validacao antes de aplicar mudancas.
+          <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">{MODE_META.agent.description}</div>
+          <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {AGENT_PLAYBOOK.map((item) => (
+              <button
+                key={item.title}
+                type="button"
+                onClick={() => onChatMessageChange(entryMission ? `${entryMission}\n\n${item.prompt}` : item.prompt)}
+                aria-label={`Prepare ${item.title} agent prompt`}
+                className={`${PANEL_CLASS} p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
+              >
+                <h3 className="mb-2 font-semibold text-[var(--aethel-text-primary)]">{item.title}</h3>
+                <p className="text-sm text-[var(--aethel-text-secondary)]">{item.description}</p>
+              </button>
+            ))}
           </div>
-          <div className="space-y-4 mb-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {AGENT_PLAYBOOK.map((item) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  onClick={() => onChatMessageChange(entryMission ? `${entryMission}\n\n${item.prompt}` : item.prompt)}
-                  aria-label={`Preparar prompt do agente ${item.title}`}
-                  className={`${PANEL_CLASS} p-4 text-left hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] ${CANONICAL_MOTION} ${CANONICAL_FOCUS}`}
-                >
-                  <h3 className="font-semibold mb-2">{item.title}</h3>
-                  <p className="text-sm text-[var(--aethel-text-secondary)]">{item.description}</p>
-                </button>
-              ))}
-            </div>
-          </div>
+
           <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
@@ -414,42 +418,50 @@ export function DashboardAIChatTab({
                   onSendChatMessage()
                 }
               }}
-              placeholder="Descreva a tarefa para o agente..."
-              aria-label="Mensagem para o modo agente"
+              placeholder="Describe the task for the agent lane..."
+              aria-label="Message for agent mode"
               className={`${INPUT_CLASS} flex-1`}
             />
-            <button type="button" onClick={onSendChatMessage} aria-label="Executar tarefa no modo agente" className={PRIMARY_BUTTON_CLASS}>
-              Executar
+            <button type="button" onClick={onSendChatMessage} aria-label="Run the agent task" className={PRIMARY_BUTTON_CLASS}>
+              Run agent
             </button>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {chatMode === 'canvas' && (
+      {chatMode === 'canvas' ? (
         <div className={`${PANEL_CLASS} mx-auto max-w-6xl`}>
-          <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">
-            Canvas visual para colaboracao com IA.
-          </div>
-          <div className="min-h-96 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4 relative">
+          <div className="mb-4 text-sm text-[var(--aethel-text-secondary)]">{MODE_META.canvas.description}</div>
+          <div className="relative min-h-96 rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-4">
             <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-              <button type="button" disabled aria-label="Ferramenta desenhar indisponivel" className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`}>Desenhar</button>
-              <button type="button" disabled aria-label="Ferramenta formas indisponivel" className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`}>Formas</button>
-              <button type="button" disabled aria-label="Ferramenta texto indisponivel" className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`}>Texto</button>
-              <button type="button" disabled aria-label="Melhorar canvas com IA indisponivel" className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`}>Melhorar com IA</button>
+              <button type="button" disabled className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`} aria-label="Draw tool unavailable">
+                Draw
+              </button>
+              <button type="button" disabled className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`} aria-label="Shapes tool unavailable">
+                Shapes
+              </button>
+              <button type="button" disabled className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`} aria-label="Text tool unavailable">
+                Text
+              </button>
+              <button type="button" disabled className={`${GHOST_BUTTON_CLASS} text-xs opacity-60`} aria-label="AI improve tool unavailable">
+                Improve with AI
+              </button>
             </div>
-            <div className="text-center text-[var(--aethel-text-tertiary)] py-32">
-              <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="py-32 text-center text-[var(--aethel-text-tertiary)]">
+              <svg className="mx-auto mb-4 h-16 w-16 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
-              <p className="text-lg font-medium mb-2">Canvas interativo</p>
+              <p className="mb-2 text-lg font-medium text-[var(--aethel-text-primary)]">Canvas stays lightweight here</p>
               <div className={EMPTY_CANVAS_CLASS}>
-                <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1 text-[var(--aethel-text-primary)]`}>Capability status: PARTIAL</p>
-                <p>Ferramentas de desenho no Studio Home ainda estao limitadas. Use o modo avancado em /ide para edicao completa.</p>
+                <p className={`${CANONICAL_TYPOGRAPHY.label} mb-1 text-[var(--aethel-text-primary)]`}>
+                  Capability status: partial
+                </p>
+                <p>Use Studio when the artifact needs deeper visual editing, review or viewport authority.</p>
               </div>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

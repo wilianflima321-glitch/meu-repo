@@ -41,6 +41,8 @@ Do not invent extra core surfaces.
 Do not create heavy decorative gradients, purple-on-black clichés, or futuristic clutter.
 Do not over-explain the product with text.
 Do not let cards, panels and banners compete equally for attention.
+Do not make preview and chat share equal weight by default.
+Do not make Studio Local look like a separate product.
 
 Use the following product architecture exactly.
 
@@ -61,6 +63,8 @@ Core surfaces only:
 13. Admin / Monitoring
 14. Docs / Help
 15. Mobile Companion
+16. Studio Local
+17. Depth Modes and Handoffs
 
 AETHEL PRODUCT LAYERS
 1. Public layer
@@ -69,6 +73,14 @@ AETHEL PRODUCT LAYERS
 4. Workbench layer
 5. Governance layer
 6. Mobile Companion as constrained Workbench variant
+7. Local Studio as depth-unlock variant of Workbench
+
+AETHEL DEPTH MODES
+1. Web Light
+2. Mission Control
+3. Operator Surface
+4. Studio Cloud
+5. Studio Local
 
 CRITICAL PRODUCT DECISIONS
 1. Workbench is the center. Everything else must either get the user into Workbench, return the user to Workbench, or govern what happens around Workbench.
@@ -77,6 +89,7 @@ CRITICAL PRODUCT DECISIONS
 4. Preview is unified. Web preview, 3D viewport, media preview and research preview are variants of one preview engine.
 5. Projects have connected flows. One project may contain one primary domain, multiple connected flows, one shared asset layer and one shared AI scope model.
 6. Mobile is a constrained Workbench variant. It preserves context, approvals, previews and prompt-driven control, and returns the user to desktop for dense production work.
+7. Local is not a fork. Studio Local is the same product identity with deeper local execution, stronger filesystem trust, and heavier runtime support.
 
 BENCHMARK PRINCIPLES TO ABSORB
 From VS Code:
@@ -90,7 +103,8 @@ From Firebase Studio:
 - editor and AI in one workspace
 - preview in the same environment
 - prototyping and coding as one loop
-Do not let the product feel like AI wrapped around a weak shell.
+- low-friction, app-like entry
+Do not let the product feel like AI wrapped around a weak shell or reduce Aethel to a prompt box.
 
 From Replit Agent:
 - visible execution steps
@@ -108,6 +122,7 @@ From Manus:
 - advanced research should feel parallel, evidence-heavy and connected to deliverables
 - browser-assisted collection, extraction and structured outputs should remain in the same task context
 - research should be able to feed real artifacts, not end as a transcript
+- operator-style internet work should feel useful immediately
 Do not let research become a dead-end reading pane or a detached AI report page.
 
 From Unreal Viewport:

@@ -7,18 +7,21 @@ Surface Type: Studio
 Orient the user immediately and make the next action obvious.
 Studio Home is not a reporting dashboard.
 It is the continuity layer between the public product and the Workbench.
+It is the canonical Mission Control surface.
 
 ## Critical Opinion
 ### What this page should be
 - a mission control page for the current workspace
 - a fast resume surface
 - a place to understand project focus, connected flows, and current next step
+- the bridge between web-light simplicity and Studio depth
 
 ### What this page should not be
 - a mini IDE
 - a generic metrics dashboard
 - a catch-all page for every feature the product has
 - a full AI chat surface
+- a second product identity
 
 ### Current repo risk this blueprint must prevent
 The current dashboard family has enough tabs and utilities to easily become a fragmented control center.
@@ -78,6 +81,7 @@ Reject:
 
 ## Secondary CTA
 - `Open Workbench`
+- `Open in Studio`
 - `New Project`
 
 ## Questions This Page Must Answer
@@ -99,6 +103,7 @@ Reject:
 Contains:
 - workspace switcher
 - global search
+- mission quick input
 - `New Project`
 - `Open Workbench`
 - compact status pills
@@ -115,6 +120,7 @@ Fields:
 - primary CTA
 - secondary CTA
 - optional tertiary action: `Open Preview`
+- optional quaternary action: `Open Operator`
 
 ### Row 3: Connected flows rail
 A horizontal rail of compact cards.
@@ -131,6 +137,8 @@ Recommended connected flow types:
 - Asset Library
 - Audio Pack
 - Research Board
+- Browser Operator
+- Deploy Review
 
 ### Row 4: Live and AI strip
 This is not a full chat.
@@ -140,12 +148,17 @@ It is an operational strip showing:
 - agent count
 - last output updated
 - quick action: `Open AI Console`
+- quick action: `Review Proposal`
 
 ### Row 5: Recent work and quick actions
 Left side:
 - recent files, scenes, pages, assets, or runs
 Right side:
 - recommended next actions as a compact stack
+
+Rule:
+- next actions must outrank "recent runs" when user attention is needed
+- recommendation quality matters more than quantity
 
 ### Row 6: Runtime and health summary
 Compact health matrix only.
@@ -156,6 +169,13 @@ Domains:
 - Deploy
 - Sync
 This row can never outrank the mission header.
+
+### Row 7: Studio proof rail
+One compact right-weighted area must prove depth exists without competing with the page:
+- small live artifact preview
+- Studio shell crop
+- `Open in Studio` CTA
+- optional `Continue where I left off` state
 
 ## Component Tree
 ### StudioTopBar
@@ -169,6 +189,7 @@ Subcomponents:
 Opinion:
 This bar must feel lighter than Workbench chrome.
 It should not look like an admin top bar.
+The quick input must feel like a continuation of Web Light, not a new search product.
 
 ### MissionHeaderCard
 Subcomponents:
@@ -180,6 +201,7 @@ Subcomponents:
 Opinion:
 This is the emotional and operational center of the page.
 If this card is weak, the page becomes a dashboard again.
+If this card does not dominate, the user will not understand what to do next.
 
 ### ConnectedFlowRail
 Subcomponents:
@@ -190,6 +212,7 @@ Subcomponents:
 Opinion:
 This rail is the key to avoiding product fragmentation.
 It visually proves that site, trailer, assets, and research are connected production contexts, not separate products.
+It also proves that Operator, research, deploy, and creation are one mission family.
 
 ### FlowCard
 Subcomponents:
@@ -216,6 +239,7 @@ Subcomponents:
 Opinion:
 This strip must stay shallow.
 If it expands into a full conversation feed, Studio Home loses focus.
+It is a ledger, not a chat transcript.
 
 ### RecentWorkList
 Subcomponents:
@@ -240,6 +264,7 @@ Actions may include:
 Opinion:
 Quick actions must be tightly curated.
 If there are more than five visible at once, prioritization has failed.
+These actions should feel like the best next moves, not feature shortcuts.
 
 ### RuntimeSummaryMatrix
 Subcomponents:
@@ -251,12 +276,30 @@ Opinion:
 Health belongs here only in compact form.
 Anything larger becomes internal noise.
 
+### StudioProofCard
+Contains:
+- mini artifact preview
+- mini Studio shell crop
+- one sentence of context
+- `Open in Studio`
+
+Opinion:
+This is how Studio Home preserves the IDE as the product core without turning the page into a mini IDE.
+
 ## Resume Logic
 The primary CTA label changes by last useful state:
 - `Continue in Build`
 - `Continue in Preview`
 - `Continue in Canvas`
 - `Resume AI Run`
+- `Resume Operator Task`
+
+## Mission Control Rule Set
+1. The mission hero must outrank every card below it.
+2. The user must always see one obvious next step.
+3. AI belongs here as execution state, not as a full detached conversation.
+4. Deploy, budget, evidence, and approvals must support the mission, not compete with it.
+5. Studio must feel one click away, not like another product.
 
 The destination is never a neutral shell.
 It should restore:

@@ -1,9 +1,16 @@
 'use client';
 
+import { useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
+
 import type {
   ActiveFileState,
   PreviewMode,
 } from '@/components/ide/fullscreen/types';
+import {
+  describeWorkbenchEntryProfile,
+  resolveWorkbenchEntryProfile,
+} from '@/components/ide/fullscreen/workbench-entry-triage';
 
 import { PREVIEW_MODES } from './workbenchPreviewPaneModels';
 
@@ -18,7 +25,22 @@ export function WorkbenchPreviewModeHeader({
   previewMode,
   setPreviewMode,
 }: WorkbenchPreviewModeHeaderProps) {
+  const searchParams = useSearchParams();
   const activeModeMeta = PREVIEW_MODES.find((mode) => mode.id === previewMode) ?? PREVIEW_MODES[0];
+  const sourceParam = searchParams?.get('source') ?? null;
+  const missionParam = searchParams?.get('mission') ?? null;
+  const entryProfile = useMemo(
+    () =>
+      resolveWorkbenchEntryProfile({
+        source: sourceParam,
+        mission: missionParam,
+      }),
+    [missionParam, sourceParam],
+  );
+  const chromeContext = useMemo(
+    () => describeWorkbenchEntryProfile(entryProfile),
+    [entryProfile],
+  );
 
   return (
     <div className="border-b border-[var(--aethel-border-secondary)] bg-[linear-gradient(180deg,color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent),color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent))] px-2 py-1.5">
@@ -47,17 +69,25 @@ export function WorkbenchPreviewModeHeader({
 
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
           <span className="inline-flex min-h-[26px] items-center rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-secondary)]">
+            {chromeContext.stageLabel}
+          </span>
+          <span className="inline-flex min-h-[26px] items-center rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-secondary)]">
             Surface: {activeModeMeta.label}
           </span>
+          {missionParam?.trim() ? (
+            <span
+              title={missionParam}
+              className="inline-flex min-h-[26px] max-w-[220px] items-center truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-tertiary)]"
+            >
+              {missionParam}
+            </span>
+          ) : null}
           {activeFile ? (
             <span className="inline-flex min-h-[26px] max-w-[260px] items-center truncate rounded-full border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_50%,transparent)] px-2.5 py-1 text-[var(--aethel-text-tertiary)]">
               {activeFile.path}
             </span>
           ) : null}
         </div>
-      </div>
-      <div className="mt-1.5 px-1 text-[11px] text-[var(--aethel-text-tertiary)]">
-        {activeModeMeta.description}
       </div>
     </div>
   );

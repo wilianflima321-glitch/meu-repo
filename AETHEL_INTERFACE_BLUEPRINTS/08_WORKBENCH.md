@@ -5,18 +5,21 @@ Surface Type: Core Production Surface
 
 ## Mission
 A single production shell where the user can build, preview, review, create assets and work with AI without switching products.
+This shell must exist in both cloud and local depth modes without changing identity.
 
 ## Critical Opinion
 ### What this surface should be
 - the real center of Aethel
 - a professional workbench with a VS Code-grade mental model
 - a place where chat, preview, code, canvas, assets, and review stay connected
+- a viewport-serious shell that can deepen beyond browser-only limits
 
 ### What this surface should not be
 - a dashboard in disguise
 - a set of unrelated panes with equal weight
 - a chat product with an editor bolted on
 - a preview page plus an IDE page plus an assets page pretending to be one experience
+- a cloud-only shell whose interaction model breaks in local mode
 
 ### What the current repo is already telling us
 The codebase already has enough parts for a strong workbench.
@@ -174,6 +177,27 @@ Use one workbench shell model built around these permanent zones:
 
 No other page family is allowed to compete with this shell for the role of main product surface.
 
+## Cloud / Local Parity Rule
+Workbench exists in:
+- Studio Cloud
+- Studio Local
+
+Shared invariants:
+- same mission context
+- same layout grammar
+- same navigation objects
+- same artifact states
+- same approval / evidence / cost language
+
+Allowed differences:
+- local filesystem depth
+- heavier runtime execution
+- stronger device integration
+- local terminal and tool access
+
+Local mode increases capability.
+It must not create a new product language.
+
 ## Quality Correction
 The current interface still has critical quality gaps that must be treated as first-class product work, not polish work.
 
@@ -213,11 +237,30 @@ One surface must clearly lead:
 - approval/compare in Review
 - asset browser in Assets
 
+Rule:
+- preview and chat must never share equal default weight during artifact review
+- the dominant surface changes by task, not by static layout dogma
+
 ### 3. Act
 The main action surface must have immediate supporting controls nearby:
 - AI in the right rail
 - diagnostics in the dock
 - scope and navigation in top bar or side bar
+
+### 4. Review
+The workbench must make proposal review artifact-first:
+- live artifact
+- proposal artifact
+- compare state
+- inspect state
+- apply / reject / rollback
+
+### 5. Recover
+The workbench must always support continuity:
+- restore last mission
+- restore last dominant surface
+- restore last file or artifact
+- recover into cloud or local without context loss
 
 ### 4. Validate
 Any meaningful change should become visible without sending the user into another product:

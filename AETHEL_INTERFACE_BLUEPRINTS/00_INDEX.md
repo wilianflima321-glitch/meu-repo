@@ -20,6 +20,7 @@ Aethel is:
 - one AI operational layer
 - one preview engine that adapts by domain
 - one connected project model with parallel flows
+- one product with multiple depth modes
 
 ## Product Layers
 1. Public layer
@@ -44,6 +45,10 @@ Aethel is:
 13. `13_ADMIN_MONITORING.md`
 14. `14_DOCS_HELP.md`
 15. `15_MOBILE_COMPANION.md`
+16. `16_MASTER_FIGMA_PROMPT.md`
+17. `17_STUDIO_LOCAL.md`
+18. `18_DEPTH_MODES_AND_HANDOFFS.md`
+19. `19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
 
 ## Critical Product Decisions
 ### Decision 1: Workbench is the center
@@ -74,6 +79,33 @@ A project may have:
 - several connected flows
 - one shared asset layer
 This avoids creating separate products for game, film, site, and assets.
+
+### Decision 6: Depth changes, identity does not
+Aethel has four depth states:
+- Web Light
+- Mission Control
+- Studio Cloud
+- Studio Local
+
+These are not separate products.
+They are one product with different depth and responsibility.
+
+### Decision 7: Local is a depth unlock, not a fork
+The downloadable local Studio exists to beat browser ceilings:
+- filesystem limits
+- GPU/runtime limits
+- long-lived execution limits
+- device-trust limits
+
+It must share the same mission model, navigation grammar, and visual system as Studio Cloud.
+
+### Decision 8: Clean beats crowded
+Best-in-market interfaces do not win by showing more interface.
+They win by:
+- stronger protagonists,
+- less equal-weight noise,
+- better handoffs,
+- and higher action clarity.
 
 ## Benchmark Principles To Absorb
 ### VS Code

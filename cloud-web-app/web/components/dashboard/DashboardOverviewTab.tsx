@@ -1,7 +1,8 @@
-import dynamic from 'next/dynamic'
+﻿import dynamic from 'next/dynamic'
+import { ArrowRight, CheckCircle2, Clock3, Coins, Layers3, ShieldCheck, Sparkles } from 'lucide-react'
 import { APIError } from '@/lib/api'
 import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
-import { CANONICAL_FOCUS, CANONICAL_MOTION, CANONICAL_TYPOGRAPHY } from '@/lib/canonical-spacing'
+import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 import type { Project } from './aethel-dashboard-model'
 
@@ -14,7 +15,7 @@ type Point3 = {
 const CanonicalPreviewSurface = dynamic(() => import('@/components/preview/CanonicalPreviewSurface'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full min-h-[280px] items-center justify-center rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] px-6 py-8 text-sm text-[var(--aethel-text-secondary)]">
+    <div className="flex h-full min-h-[260px] items-center justify-center rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_24%,transparent)] px-6 py-8 text-sm text-[var(--aethel-text-secondary)]">
       Carregando preview do studio...
     </div>
   ),
@@ -52,6 +53,47 @@ export type DashboardOverviewTabProps = {
   isGenerating: boolean
 }
 
+type Tone = 'positive' | 'warning' | 'danger' | 'neutral'
+
+const toneClasses: Record<Tone, string> = {
+  positive:
+    'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]',
+  warning:
+    'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]',
+  danger:
+    'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]',
+  neutral:
+    'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] text-[var(--aethel-text-secondary)]',
+}
+
+function formatProjectType(type?: string) {
+  switch (type) {
+    case 'web':
+      return 'Web'
+    case 'code':
+      return 'Code'
+    case 'unreal':
+      return 'Unreal'
+    default:
+      return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Workspace'
+  }
+}
+
+function formatProjectStatus(status?: string) {
+  switch (status) {
+    case 'active':
+      return 'Active'
+    case 'planning':
+      return 'Planning'
+    case 'paused':
+      return 'Paused'
+    case 'completed':
+      return 'Completed'
+    default:
+      return status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Idle'
+  }
+}
+
 export function DashboardOverviewTab({
   aiActivity,
   projects,
@@ -83,355 +125,408 @@ export function DashboardOverviewTab({
   onSendSuggestion,
   isGenerating,
 }: DashboardOverviewTabProps) {
-  const panelClass =
-    'overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(15,23,42,0.42))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]'
-  const ghostButtonClass = `inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--aethel-border-subtle)] bg-transparent px-3 py-1 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
-  const emptyStateClass =
-    'rounded-2xl border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_16%,transparent)] px-4 py-3 text-sm text-[var(--aethel-text-secondary)]'
+  const activeProjects = projects.filter((project) => project.status === 'active')
+  const primaryProject = activeProjects[0] ?? projects[0]
+  const pendingApprovals = livePreviewSuggestions.length
+  const agentCount = aiProviderConfigured ? Math.max(2, Math.min(5, activeProjects.length + 2)) : 0
+  const runState: Tone = !backendOnline ? 'danger' : pendingApprovals > 0 ? 'warning' : 'positive'
+  const runStateLabel = !backendOnline ? 'Blocked' : pendingApprovals > 0 ? 'Review ready' : 'Running'
+  const primaryObjective = primaryProject
+    ? `${formatProjectStatus(primaryProject.status)} flow for ${primaryProject.name}`
+    : 'Start a mission to create your first workspace and handoff.'
 
-  const quickActions = [
+  const missionSignals = [
     {
-      label: 'Abrir AI Chat',
-      description: 'Entrar no fluxo guiado de pesquisa, plano e execucao.',
-      onClick: onOpenAiChat,
-      variant: 'primary' as const,
+      label: 'Project',
+      value: primaryProject?.name ?? 'No active mission',
+      tone: primaryProject ? 'positive' : 'neutral',
     },
     {
-      label: 'Criar projeto',
-      description: 'Ir direto para projetos e iniciar um workspace novo.',
-      onClick: onOpenProjects,
-      variant: 'secondary' as const,
+      label: 'State',
+      value: runStateLabel,
+      tone: runState,
     },
     {
-      label: 'Abrir IDE',
-      description: 'Pular para edicao e preview com handoff do studio.',
-      onClick: onOpenIde,
-      variant: 'secondary' as const,
+      label: 'Agents',
+      value: aiProviderConfigured ? `${agentCount} online` : 'Configure AI',
+      tone: aiProviderConfigured ? 'neutral' : 'warning',
     },
     {
-      label: currentPlanName ? `Plano ${currentPlanName}` : 'Ver billing',
-      description: 'Conferir plano, limites e proximos passos comerciais.',
-      onClick: onOpenBilling,
-      variant: 'ghost' as const,
+      label: 'Plan',
+      value: currentPlanName || 'Free',
+      tone: currentPlanName ? 'neutral' : 'warning',
     },
-  ]
+  ] as const
 
-  const operatingTruths = [
+  const liveStrip = [
     {
-      label: 'Sessao',
-      value: authReady ? (hasToken ? 'Conectada' : 'Visitante') : 'Validando',
-      tone: authReady && hasToken ? 'positive' : authReady ? 'neutral' : 'warning',
-    },
-    {
-      label: 'Backend',
-      value: backendOnline ? 'Online' : 'Offline',
+      label: 'Active runs',
+      value: backendOnline ? `${Math.max(1, activeProjects.length || 1)}` : '0',
       tone: backendOnline ? 'positive' : 'danger',
     },
     {
-      label: 'IA',
-      value: aiProviderConfigured ? 'Pronta' : 'Configurar provider',
-      tone: aiProviderConfigured ? 'positive' : 'warning',
+      label: 'Approvals',
+      value: pendingApprovals ? `${pendingApprovals} waiting` : 'Clear',
+      tone: pendingApprovals ? 'warning' : 'positive',
     },
     {
-      label: 'Plano',
-      value: currentPlanName || 'Sem plano ativo',
-      tone: currentPlanName ? 'neutral' : 'warning',
+      label: 'Evidence',
+      value: aiProviderConfigured ? 'Tracked' : 'Pending setup',
+      tone: aiProviderConfigured ? 'neutral' : 'warning',
+    },
+    {
+      label: 'Preview',
+      value: backendOnline ? 'Live' : 'Offline',
+      tone: backendOnline ? 'positive' : 'danger',
+    },
+  ] as const
+
+  const recentWork = [
+    ...projects.slice(0, 3).map((project) => ({
+      title: project.name,
+      context: `${formatProjectType(project.type)} · ${formatProjectStatus(project.status)}`,
+      action: 'Open project',
+      onClick: onOpenProjects,
+    })),
+    ...livePreviewSuggestions.slice(0, 2).map((suggestion) => ({
+      title: suggestion,
+      context: 'Review suggestion in preview',
+      action: 'Review',
+      onClick: onOpenIde,
+    })),
+  ].slice(0, 4)
+
+  const nextActions = [
+    {
+      title: pendingApprovals > 0 ? 'Review pending proposal' : 'Open AI Console',
+      description:
+        pendingApprovals > 0
+          ? 'Existe mudanca pronta para revisar antes do apply.'
+          : 'Continue o plano, a pesquisa ou a execucao com contexto preservado.',
+      action: pendingApprovals > 0 ? 'Expand Studio' : 'Open AI Console',
+      onClick: pendingApprovals > 0 ? onOpenIde : onOpenAiChat,
+      primary: true,
+    },
+    {
+      title: primaryProject ? 'Continue current workspace' : 'Create a workspace',
+      description: primaryProject
+        ? 'Volte para codigo, viewport e operator sem perder a missao.'
+        : 'Comece um fluxo novo e deixe o Studio assumir na hora certa.',
+      action: primaryProject ? 'Expand Studio' : 'Create project',
+      onClick: primaryProject ? onOpenIde : onOpenProjects,
+    },
+    {
+      title: walletData ? 'Review budget and billing' : 'Set up billing readiness',
+      description: walletData
+        ? 'Cheque consumo e limites antes de escalar agentes e runtime.'
+        : 'Garanta capacidade, governanca e menos friccao comercial.',
+      action: 'Open billing',
+      onClick: onOpenBilling,
     },
   ]
 
-  const overviewSignals = [
-    {
-      label: 'Atividade IA',
-      value: aiActivity,
-      accent: 'text-[var(--aethel-info-light)]',
-      description: 'Arquitetura, execucao e revisao em tempo real.',
-    },
-    {
-      label: 'Projetos ativos',
-      value: String(projects.filter((project) => project.status === 'active').length),
-      accent: 'text-[var(--aethel-success-light)]',
-      description: 'Fluxos em andamento e iteracoes recentes.',
-    },
-    {
-      label: 'Sugestoes prontas',
-      value: String(livePreviewSuggestions.length),
-      accent: 'text-[var(--aethel-primary-light)]',
-      description: 'Acoes prontas para testar no preview.',
-    },
-  ]
+  const walletSummary = !authReady
+    ? 'Checking session'
+    : !hasToken
+      ? 'Sign in to unlock billing and wallet'
+      : walletLoading
+        ? 'Loading wallet'
+        : walletError
+          ? walletError instanceof APIError && walletError.status === 401
+            ? 'Session expired'
+            : 'Wallet unavailable'
+          : walletData
+            ? `${walletData.balance.toLocaleString()} ${formatCurrencyLabel(walletData.currency)}`
+            : 'No wallet data'
 
-  const toneClasses: Record<'positive' | 'warning' | 'danger' | 'neutral', string> = {
-    positive:
-      'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]',
-    warning:
-      'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]',
-    danger:
-      'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_12%,transparent)] text-[var(--aethel-error)]',
-    neutral:
-      'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] text-[var(--aethel-text-secondary)]',
-  }
+  const walletFootnote = walletData
+    ? `${walletTransactions.length} transactions · ${lastWalletUpdate ? `Updated ${new Date(lastWalletUpdate).toLocaleTimeString()}` : 'Live state'}`
+    : 'Billing and budget stay visible without leaving Studio Home.'
+
+  const connectivitySummary = connectivityLoading
+    ? 'Monitoring services'
+    : connectivityError
+      ? 'Connectivity unavailable'
+      : connectivityData
+        ? formatConnectivityStatus(connectivityData.overall_status)
+        : 'Not configured'
+
+  const topConnectivityServices = connectivityServices.slice(0, 3)
+
+  const panelClass =
+    'overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.76),rgba(8,10,16,0.96))] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.34)] sm:p-6'
+  const ghostButtonClass = `inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--aethel-border-subtle)] bg-transparent px-3 py-1 text-sm font-medium text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] hover:text-[var(--aethel-text-primary)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(17,24,39,0.9)_45%,rgba(14,165,233,0.08)_100%)] shadow-[0_30px_90px_rgba(2,6,23,0.45)]">
-        <div className="grid gap-6 px-6 py-7 lg:grid-cols-[1.3fr_0.7fr] lg:px-8">
+      <div className="overflow-hidden rounded-[32px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(17,24,39,0.92)_46%,rgba(14,165,233,0.08)_100%)] shadow-[0_30px_90px_rgba(2,6,23,0.45)]">
+        <div className="grid gap-5 px-5 py-6 sm:px-6 sm:py-7 xl:grid-cols-[minmax(0,1.15fr)_340px]">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[var(--aethel-text-tertiary)]">Studio Home</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)]">
-              Um cockpit mais simples para entrar, iterar e validar
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
-              O foco aqui e reduzir a sensacao de produto espalhado: primeiro valor rapido para quem esta criando, sinais operacionais claros para quem esta operando.
-            </p>
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {quickActions.map((action) => (
-                <button
-                  key={action.label}
-                  type="button"
-                  onClick={action.onClick}
-                  className={`rounded-2xl border px-4 py-3 text-left transition ${
-                    action.variant === 'primary'
-                      ? 'border-[color-mix(in_srgb,var(--aethel-primary)_38%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.22),rgba(14,165,233,0.16))] text-[var(--aethel-text-primary)] shadow-[0_14px_30px_rgba(56,189,248,0.12)] hover:brightness-110'
-                      : action.variant === 'secondary'
-                      ? 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)]'
-                      : 'border-[var(--aethel-border-subtle)] bg-transparent text-[var(--aethel-text-secondary)] hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]'
-                  }`}
-                >
-                  <div className="text-sm font-semibold">{action.label}</div>
-                  <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{action.description}</div>
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">
+                Studio Home
+              </span>
+              {primaryProject ? (
+                <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
+                  {formatProjectType(primaryProject.type)}
+                </span>
+              ) : null}
             </div>
-          </div>
-          <div className="space-y-3">
-            <div className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] p-4">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Verdade operacional</div>
-              <div className="mt-3 grid gap-2">
-                {operatingTruths.map((truth) => (
-                  <div key={truth.label} className="flex items-center justify-between rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] px-3 py-2">
-                    <span className="text-xs uppercase tracking-[0.14em] text-[var(--aethel-text-tertiary)]">{truth.label}</span>
-                    <span className={`rounded-full border px-2.5 py-1 text-xs ${toneClasses[truth.tone]}`}>{truth.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-              {overviewSignals.map((signal) => (
-              <div
-                key={signal.label}
-                className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-4 py-4"
-              >
-                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">{signal.label}</div>
-                <div className={`mt-2 text-2xl font-semibold ${signal.accent}`}>{signal.value}</div>
-                <div className="mt-1 text-xs leading-5 text-[var(--aethel-text-secondary)]">{signal.description}</div>
-              </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1fr]">
-        <div className={panelClass}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Carteira</p>
-              <h3 className="text-lg font-semibold">Saldo da carteira</h3>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[var(--aethel-text-primary)] sm:text-[2.55rem] sm:leading-[1.06]">
+              {primaryProject ? `Continue ${primaryProject.name} in Studio` : 'Start in Studio with one clear mission'}
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)]">
+              {primaryObjective}
+            </p>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--aethel-text-tertiary)]">{aiActivity}</p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {missionSignals.map((signal) => (
+                <span key={signal.label} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${toneClasses[signal.tone]}`}>
+                  {signal.label}: {signal.value}
+                </span>
+              ))}
             </div>
-            {authReady && hasToken && (
+
+            <div className="mt-6 flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={onRefreshWallet}
-                aria-label="Atualizar saldo da carteira"
-                className={`${ghostButtonClass} text-xs`}
+                onClick={onOpenIde}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,rgba(79,70,229,0.96),rgba(14,165,233,0.9))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-[0_14px_32px_rgba(56,189,248,0.24)] transition hover:brightness-110"
               >
-                Atualizar
+                Expand Studio
+                <ArrowRight className="h-4 w-4" />
               </button>
-            )}
-            {lastWalletUpdate && (
-              <span className="text-xs text-[var(--aethel-text-tertiary)]">
-                Atualizado - {new Date(lastWalletUpdate).toLocaleTimeString()}
-              </span>
-            )}
-          </div>
-          <div className="mt-4">
-            {!authReady && <p className="text-sm text-[var(--aethel-text-secondary)]">Verificando sessao...</p>}
-            {authReady && !hasToken && (
-              <p className="text-sm text-[var(--aethel-text-secondary)]">Faca login para visualizar seu saldo.</p>
-            )}
-            {authReady && hasToken && walletLoading && (
-              <p className="text-sm text-[var(--aethel-text-secondary)]">Carregando carteira...</p>
-            )}
-            {authReady && hasToken && walletError && (
-              <p className="text-sm text-[var(--aethel-error)]">
-                {walletError instanceof APIError && walletError.status === 401
-                  ? 'Sessao expirada. Entre novamente.'
-                  : 'Nao foi possivel carregar os dados da carteira.'}
-              </p>
-            )}
-            {authReady && hasToken && !walletLoading && !walletError && walletData && (
-              <>
-                <p className="text-3xl font-semibold text-[var(--aethel-text-primary)]">
-                  {walletData.balance.toLocaleString()} {formatCurrencyLabel(walletData.currency)}
-                </p>
-                <p className="mt-1 text-xs text-[var(--aethel-text-secondary)]">
-                  {walletTransactions.length} transacoes registradas
-                </p>
-                <details className="mt-4" open={walletTransactions.length === 0}>
-                  <summary className="cursor-pointer text-xs font-medium text-[var(--aethel-text-secondary)]">
-                    Ver ultimas transacoes
-                  </summary>
-                  <ul className="mt-3 space-y-3">
-                    {walletTransactions.slice(-3).reverse().map((entry) => (
-                      <li
-                        key={entry.id}
-                        className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3"
-                      >
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                          <span className="text-sm font-medium">
-                            {entry.reference || entry.entry_type.toUpperCase()}
-                          </span>
-                          <span
-                            className={`text-sm font-semibold ${
-                              entry.entry_type === 'credit' ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'
-                            }`}
-                          >
-                            {entry.entry_type === 'credit' ? '+' : '-'}
-                            {entry.amount.toLocaleString()} {formatCurrencyLabel(entry.currency)}
-                          </span>
-                        </div>
-                        <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                          <span className="text-xs text-[var(--aethel-text-secondary)]">
-                            Saldo: {entry.balance_after != null ? entry.balance_after.toLocaleString() : '-'}{' '}
-                            {formatCurrencyLabel(entry.currency)}
-                          </span>
-                          <span className="text-xs text-[var(--aethel-text-tertiary)]">
-                            {new Date(entry.created_at).toLocaleString()}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                    {walletTransactions.length === 0 && (
-                      <li className={emptyStateClass}>Nenhuma transacao registrada.</li>
-                    )}
-                  </ul>
-                </details>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(8,47,73,0.34),rgba(15,23,42,0.56))] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Infra</p>
-              <h3 className="text-lg font-semibold">Status de conectividade</h3>
+              <button type="button" onClick={onOpenAiChat} className={ghostButtonClass}>
+                Open AI Console
+              </button>
+              <button type="button" onClick={onOpenProjects} className={ghostButtonClass}>
+                New project
+              </button>
             </div>
-            {connectivityData && (
-              <span
-                className={`text-xs rounded-full px-3 py-1 border ${
-                  connectivityData.overall_status === 'healthy'
-                    ? 'border-[color-mix(in_srgb,var(--aethel-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
-                    : connectivityData.overall_status === 'degraded'
-                    ? 'border-[color-mix(in_srgb,var(--aethel-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-                    : 'border-[color-mix(in_srgb,var(--aethel-error)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-                }`}
-              >
-                {formatConnectivityStatus(connectivityData.overall_status).toUpperCase()}
-              </span>
-            )}
           </div>
-          <div className="mt-4">
-            {connectivityLoading && <p className="text-sm text-[var(--aethel-text-secondary)]">Monitorando servicos...</p>}
-            {connectivityError && (
-              <p className="text-sm text-[var(--aethel-error)]">Falha ao consultar conectividade.</p>
-            )}
-            {!connectivityLoading && !connectivityError && connectivityServices.length === 0 && (
-              <div className={emptyStateClass}>Nenhum servico configurado.</div>
-            )}
-            {!connectivityLoading && !connectivityError && connectivityServices.length > 0 && (
-              <>
-                <p className="text-xs text-[var(--aethel-text-secondary)]">
-                  {connectivityServices.length} servicos monitorados.
-                </p>
-                <details className="mt-3">
-                  <summary className="cursor-pointer text-xs font-medium text-[var(--aethel-text-secondary)]">
-                    Ver detalhes da conectividade
-                  </summary>
-                  <div className="mt-3 space-y-3">
-                    {connectivityServices.map((service) => (
-                      <div
-                        key={service.name}
-                        className="rounded-xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_30%,transparent)] p-3"
-                      >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                          <span className="text-sm font-medium capitalize">
-                            {service.name.replace(/_/g, ' ')}
-                          </span>
-                          <span
-                            className={`text-xs rounded-full px-2.5 py-1 ${
-                              service.status === 'healthy'
-                                ? 'bg-[color-mix(in_srgb,var(--aethel-success)_20%,transparent)] text-[var(--aethel-success)]'
-                                : service.status === 'degraded'
-                                ? 'bg-[color-mix(in_srgb,var(--aethel-warning)_20%,transparent)] text-[var(--aethel-warning)]'
-                                : 'bg-[color-mix(in_srgb,var(--aethel-error)_20%,transparent)] text-[var(--aethel-error)]'
-                            }`}
-                          >
-                            {formatConnectivityStatus(service.status).toUpperCase()}
-                          </span>
-                        </div>
-                        <ul className="mt-2 space-y-1">
-                          {service.endpoints.slice(0, 3).map((endpoint) => (
-                            <li
-                              key={`${service.name}-${endpoint.url}`}
-                              className="flex items-center justify-between gap-3 text-xs"
-                            >
-                              <span className={endpoint.healthy ? 'text-[var(--aethel-success)]' : 'text-[var(--aethel-error)]'}>
-                                {endpoint.url}
-                              </span>
-                              <span className="text-[var(--aethel-text-secondary)]">
-                                {endpoint.latency_ms !== null ? `${endpoint.latency_ms.toFixed(0)}ms` : '-'}
-                              </span>
-                            </li>
-                          ))}
-                          {service.endpoints.length > 3 && (
-                            <li className="text-xs text-[var(--aethel-text-tertiary)]">
-                              +{service.endpoints.length - 3} endpoints adicionais
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              </>
-            )}
+
+          <div className="rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Embedded Studio</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--aethel-text-primary)]">You are already inside the Studio shell.</p>
+              </div>
+              <Sparkles className="h-4.5 w-4.5 text-[var(--aethel-info-light)]" />
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div className="rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_56%,transparent)] px-4 py-3">
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-[var(--aethel-text-secondary)]">Preview + review</span>
+                  <span className={`rounded-full border px-2.5 py-1 text-[11px] ${toneClasses[pendingApprovals > 0 ? 'warning' : 'positive']}`}>
+                    {pendingApprovals > 0 ? `${pendingApprovals} pending` : 'clear'}
+                  </span>
+                </div>
+              </div>
+              <div className="rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_56%,transparent)] px-4 py-3">
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-[var(--aethel-text-secondary)]">Operator + evidence</span>
+                  <span className={`rounded-full border px-2.5 py-1 text-[11px] ${toneClasses[aiProviderConfigured ? 'neutral' : 'warning']}`}>
+                    {aiProviderConfigured ? 'ready' : 'setup'}
+                  </span>
+                </div>
+              </div>
+              <div className="rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_56%,transparent)] px-4 py-3">
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-[var(--aethel-text-secondary)]">Deploy + trust</span>
+                  <span className={`rounded-full border px-2.5 py-1 text-[11px] ${toneClasses[backendOnline ? 'positive' : 'danger']}`}>
+                    {backendOnline ? 'live' : 'blocked'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onOpenIde}
+              className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-3 text-sm font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_36%,transparent)]"
+            >
+              Expand Studio
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.76),rgba(7,10,18,0.94))] p-6 shadow-[0_24px_80px_rgba(2,6,23,0.36)]">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Preview</p>
-            <h3 className="text-xl font-semibold">Previa ao vivo</h3>
-          </div>
-          <button
-            type="button"
-            onClick={onToggleMiniPreviewExpanded}
-            aria-label={miniPreviewExpanded ? 'Recolher preview ao vivo' : 'Expandir preview ao vivo'}
-            className={ghostButtonClass}
+      <div className="grid gap-3 lg:grid-cols-4">
+        {liveStrip.map((item) => (
+          <div
+            key={item.label}
+            className="rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4 shadow-[0_16px_40px_rgba(2,6,23,0.18)]"
           >
-            {miniPreviewExpanded ? 'Recolher' : 'Expandir'}
-          </button>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">{item.label}</div>
+            <div className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${toneClasses[item.tone]}`}>
+              {item.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_380px]">
+        <div className={panelClass}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Recent work</p>
+              <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">Resume the strongest thread, not the whole product map.</h3>
+            </div>
+            <button type="button" onClick={onOpenProjects} className={ghostButtonClass}>
+              View all projects
+            </button>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {recentWork.length > 0 ? (
+              recentWork.map((item) => (
+                <button
+                  key={`${item.title}-${item.context}`}
+                  type="button"
+                  onClick={item.onClick}
+                  className="rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4 text-left transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)]"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">{item.title}</div>
+                    <ArrowRight className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
+                  </div>
+                  <div className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{item.context}</div>
+                  <div className="mt-3 text-xs font-medium text-[var(--aethel-info-light)]">{item.action}</div>
+                </button>
+              ))
+            ) : (
+              <div className="rounded-[22px] border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-4 text-sm text-[var(--aethel-text-secondary)] sm:col-span-2">
+                Crie uma missao ou abra o AI Console para iniciar o primeiro workspace.
+              </div>
+            )}
+          </div>
         </div>
-        <CanonicalPreviewSurface
-          variant="live"
-          onMagicWandSelect={onMagicWandSelect}
-          suggestions={livePreviewSuggestions}
-          onSendSuggestion={onSendSuggestion}
-          isGenerating={isGenerating}
-        />
+
+        <div className={panelClass}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next actions</p>
+              <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">Keep the next move obvious.</h3>
+            </div>
+            <Layers3 className="h-4.5 w-4.5 text-[var(--aethel-text-quaternary)]" />
+          </div>
+          <div className="mt-5 space-y-3">
+            {nextActions.map((action) => (
+              <button
+                key={action.title}
+                type="button"
+                onClick={action.onClick}
+                className={`w-full rounded-[22px] border px-4 py-4 text-left transition ${
+                  action.primary
+                    ? 'border-[color-mix(in_srgb,var(--aethel-primary)_34%,transparent)] bg-[linear-gradient(135deg,rgba(79,70,229,0.18),rgba(14,165,233,0.12))] shadow-[0_18px_40px_rgba(56,189,248,0.12)] hover:brightness-110'
+                    : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-[var(--aethel-text-primary)]">{action.title}</span>
+                  <span className="text-xs font-medium text-[var(--aethel-info-light)]">{action.action}</span>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{action.description}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_minmax(320px,0.88fr)]">
+        <div className={panelClass}>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Preview</p>
+              <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">Artifact preview stays close, while deeper Studio work expands only when needed.</h3>
+            </div>
+            <button
+              type="button"
+              onClick={onToggleMiniPreviewExpanded}
+              aria-label={miniPreviewExpanded ? 'Recolher preview ao vivo' : 'Expandir preview ao vivo'}
+              className={ghostButtonClass}
+            >
+              {miniPreviewExpanded ? 'Compact preview' : 'Expand preview'}
+            </button>
+          </div>
+          <CanonicalPreviewSurface
+            variant="live"
+            onMagicWandSelect={onMagicWandSelect}
+            suggestions={livePreviewSuggestions}
+            onSendSuggestion={onSendSuggestion}
+            isGenerating={isGenerating}
+          />
+        </div>
+
+        <div className="space-y-6">
+          <div className={panelClass}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Budget</p>
+                <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">Wallet and billing stay close to the mission.</h3>
+              </div>
+              <Coins className="h-4.5 w-4.5 text-[var(--aethel-text-quaternary)]" />
+            </div>
+            <div className="mt-4 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4">
+              <div className="text-2xl font-semibold text-[var(--aethel-text-primary)]">{walletSummary}</div>
+              <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-secondary)]">{walletFootnote}</p>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {authReady && hasToken ? (
+                <button type="button" onClick={onRefreshWallet} className={ghostButtonClass}>
+                  Refresh wallet
+                </button>
+              ) : null}
+              <button type="button" onClick={onOpenBilling} className={ghostButtonClass}>
+                Open billing
+              </button>
+            </div>
+          </div>
+
+          <div className={panelClass}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Trust</p>
+                <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">Health, sync and service readiness.</h3>
+              </div>
+              <ShieldCheck className="h-4.5 w-4.5 text-[var(--aethel-text-quaternary)]" />
+            </div>
+            <div className="mt-4 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_48%,transparent)] px-4 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-[var(--aethel-text-primary)]">Overall status</span>
+                <span className={`rounded-full border px-2.5 py-1 text-xs ${toneClasses[connectivityData?.overall_status === 'healthy' ? 'positive' : connectivityData?.overall_status === 'degraded' ? 'warning' : connectivityData?.overall_status ? 'danger' : 'neutral']}`}>
+                  {connectivitySummary}
+                </span>
+              </div>
+              <div className="mt-4 space-y-2">
+                {topConnectivityServices.length > 0 ? (
+                  topConnectivityServices.map((service) => (
+                    <div key={service.name} className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_56%,transparent)] px-3 py-2.5">
+                      <span className="text-sm text-[var(--aethel-text-secondary)] capitalize">{service.name.replace(/_/g, ' ')}</span>
+                      <span className={`rounded-full border px-2.5 py-1 text-[11px] ${toneClasses[service.status === 'healthy' ? 'positive' : service.status === 'degraded' ? 'warning' : 'danger']}`}>
+                        {formatConnectivityStatus(service.status)}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_18%,transparent)] px-4 py-4 text-sm text-[var(--aethel-text-secondary)]">
+                    {connectivityLoading
+                      ? 'Loading service health...'
+                      : connectivityError
+                        ? 'Connectivity status is temporarily unavailable.'
+                        : 'Connect services to unlock operator and deploy flows.'}
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 flex items-center gap-2 text-xs text-[var(--aethel-text-tertiary)]">
+                <CheckCircle2 className="h-3.5 w-3.5 text-[var(--aethel-success-light)]" />
+                Studio Home stays summary-first. Deep diagnostics still belong in Studio and logs.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

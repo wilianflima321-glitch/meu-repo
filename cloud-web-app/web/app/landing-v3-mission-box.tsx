@@ -1,22 +1,31 @@
 'use client'
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Loader2, Sparkles } from 'lucide-react'
+import { ArrowRight, Loader2, Paperclip, Sparkles } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 
 const QUICK_MISSIONS = [
-  'Criar dashboard SaaS com auth, billing e deploy',
-  'Planejar e implementar um app fullstack com Prisma',
-  'Abrir o studio e seguir com onboarding guiado',
+  'Configure my domain and publish my site',
+  'Fix the failing deployment on Vercel',
+  'Research competitors and prepare a launch brief',
+  'Set up Stripe billing and customer portal',
+]
+
+const QUICK_CHIPS = [
+  'Launch a marketing site',
+  'Connect cloud accounts',
+  'Review current deployment',
+  'Build in Studio',
 ]
 
 const GENERATION_STEPS = [
-  { step: 'Analisando requisitos...', progress: 20 },
-  { step: 'Criando estrutura do projeto...', progress: 40 },
-  { step: 'Configurando dependencias...', progress: 60 },
-  { step: 'Gerando arquivos base...', progress: 80 },
-  { step: 'Finalizando workspace...', progress: 95 },
+  { step: 'Analisando a missao...', progress: 18 },
+  { step: 'Montando o workspace...', progress: 42 },
+  { step: 'Conectando o fluxo inicial...', progress: 68 },
+  { step: 'Preparando Mission Control...', progress: 88 },
+  { step: 'Finalizando handoff...', progress: 96 },
 ]
 
 export default function LandingMissionBox() {
@@ -30,7 +39,7 @@ export default function LandingMissionBox() {
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       setSuggestionIndex((current) => (current + 1) % QUICK_MISSIONS.length)
-    }, 2600)
+    }, 2800)
 
     return () => window.clearTimeout(timeout)
   }, [suggestionIndex])
@@ -64,11 +73,11 @@ export default function LandingMissionBox() {
 
     setIsGenerating(true)
     setGenerationProgress(0)
-    setGenerationStep('Inicializando workspace...')
+    setGenerationStep('Inicializando missao...')
 
     try {
       for (const { step, progress } of GENERATION_STEPS) {
-        await new Promise((resolve) => setTimeout(resolve, 400))
+        await new Promise((resolve) => setTimeout(resolve, 320))
         setGenerationStep(step)
         setGenerationProgress(progress)
       }
@@ -78,7 +87,7 @@ export default function LandingMissionBox() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mission,
-          source: 'landing-magic-box',
+          source: 'landing-mission-box',
           template: 'saas-starter',
         }),
       })
@@ -90,10 +99,10 @@ export default function LandingMissionBox() {
 
       const data = await response.json()
       setGenerationProgress(100)
-      setGenerationStep('Workspace criado com sucesso!')
+      setGenerationStep('Missao pronta!')
 
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      router.push(`/dashboard?workspace=${data.workspaceId}&onboarding=1&source=landing-magic-box`)
+      await new Promise((resolve) => setTimeout(resolve, 360))
+      router.push(`/dashboard?workspace=${data.workspaceId}&onboarding=1&source=landing-mission-box`)
     } catch {
       pushMissionFallback(mission, 'landing-v3-fallback')
     } finally {
@@ -102,10 +111,22 @@ export default function LandingMissionBox() {
   }
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="mt-8 max-w-2xl">
-        <div className="flex flex-col gap-3 rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] p-4 shadow-[0_24px_80px_rgba(2,6,23,0.42)] sm:flex-row sm:items-center">
-          <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_74%,transparent)] px-4 py-3">
+    <div className="mt-8 max-w-4xl">
+      <form onSubmit={handleSubmit} className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.72),rgba(8,10,16,0.92))] p-4 shadow-[0_24px_80px_rgba(2,6,23,0.34)] sm:p-5">
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+          <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-2.5 py-1 text-[var(--aethel-info-light)]">
+            Mission intake
+          </span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-2.5 py-1">
+            Web Light
+          </span>
+          <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-2.5 py-1">
+            Studio handoff
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-3 rounded-[24px] border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_72%,transparent)] p-3 sm:flex-row sm:items-center sm:p-4">
+          <div className="flex min-w-0 flex-1 items-center gap-3 rounded-[20px] px-2 py-2">
             <Sparkles className="h-4.5 w-4.5 shrink-0 text-[var(--aethel-info-light)]" />
             <input
               type="text"
@@ -116,41 +137,59 @@ export default function LandingMissionBox() {
               className="w-full bg-transparent text-sm text-[var(--aethel-text-primary)] placeholder:text-[var(--aethel-text-quaternary)] outline-none disabled:opacity-50 sm:text-[15px]"
             />
           </div>
-          <button
-            type="submit"
-            disabled={isGenerating}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-            {isGenerating ? 'Gerando...' : 'Abrir studio'}
-          </button>
+          <div className="flex items-center gap-2 sm:pl-2">
+            <button
+              type="button"
+              aria-label="Anexar contexto"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_46%,transparent)] text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+            >
+              <Paperclip className="h-4 w-4" />
+            </button>
+            <button
+              type="submit"
+              disabled={isGenerating}
+              className="inline-flex min-w-[168px] items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,var(--aethel-primary),var(--aethel-info))] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+              {isGenerating ? 'Starting...' : 'Start a mission'}
+            </button>
+          </div>
         </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {QUICK_CHIPS.map((chip) => (
+            <button
+              key={chip}
+              type="button"
+              onClick={() => setInputValue(chip)}
+              className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_62%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:text-[var(--aethel-text-primary)]"
+            >
+              {chip}
+            </button>
+          ))}
+          <Link
+            href="/ide"
+            className="rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1.5 text-xs font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_36%,transparent)]"
+          >
+            Open Studio
+          </Link>
+        </div>
+
         {isGenerating && (
-          <div className="mt-4 rounded-2xl border p-4 bg-[var(--aethel-surface-secondary)]">
-            <div className="mb-2 flex justify-between">
-              <span className="text-xs">{generationStep}</span>
-              <span className="text-xs">{generationProgress}%</span>
+          <div className="mt-4 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="text-xs text-[var(--aethel-text-secondary)]">{generationStep}</span>
+              <span className="text-xs text-[var(--aethel-text-tertiary)]">{generationProgress}%</span>
             </div>
             <div className="h-2 rounded-full bg-[var(--aethel-surface-quaternary)]">
               <div
-                className="h-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)]"
+                className="h-full rounded-full bg-gradient-to-r from-[var(--aethel-primary)] to-[var(--aethel-info)]"
                 style={{ width: `${generationProgress}%` }}
               />
             </div>
           </div>
         )}
       </form>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[var(--aethel-text-tertiary)]">
-        <span>Sugestao:</span>
-        <button
-          type="button"
-          onClick={() => setInputValue(placeholder)}
-          className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)]"
-        >
-          {placeholder}
-        </button>
-      </div>
-    </>
+    </div>
   )
 }

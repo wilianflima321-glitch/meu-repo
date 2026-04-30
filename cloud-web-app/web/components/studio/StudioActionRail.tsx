@@ -78,7 +78,7 @@ export default function StudioActionRail({
           onClick={onResetDashboard}
           className="hidden rounded-xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_82%,transparent)] px-3 py-2 text-xs font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)] lg:inline-flex"
         >
-          Redefinir painel
+          Reset
         </button>
       )}
 
@@ -149,7 +149,7 @@ export default function StudioActionRail({
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          Abrir IDE
+          Open Studio
         </button>
       )}
 

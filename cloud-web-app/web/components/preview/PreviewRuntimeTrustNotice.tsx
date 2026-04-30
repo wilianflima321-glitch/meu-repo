@@ -98,6 +98,24 @@ export function PreviewRuntimeTrustNotice({
     (previewRuntimeUrl
       ? 'Use a proxima acao recomendada para restaurar parity de runtime sem sair da IDE.'
       : 'Descubra ou provisione um runtime quando precisar validar device, rede ou deploy fora do inline.');
+  const compactSummary = isSavingFile
+    ? 'Syncing the latest visual changes.'
+    : forceInlinePreviewFallback || !previewRuntimeUrl
+      ? 'Inline fallback active.'
+      : runtimeHealth.status === 'checking'
+        ? 'Revalidating remote runtime.'
+        : runtimeHealth.status === 'unhealthy' || runtimeHealth.status === 'unreachable' || runtimeHealth.status === 'invalid'
+          ? 'Runtime trust degraded.'
+          : 'Runtime is reachable, but readiness is still tightening.';
+  const compactDetail =
+    isSavingFile ||
+    forceInlinePreviewFallback ||
+    runtimeHealth.status === 'unhealthy' ||
+    runtimeHealth.status === 'unreachable' ||
+    runtimeHealth.status === 'invalid' ||
+    runtimeReadiness?.status === 'partial'
+      ? body
+      : null;
 
   if (density === 'compact') {
     return (
@@ -121,9 +139,14 @@ export function PreviewRuntimeTrustNotice({
             Next move: {runtimePrimaryActionLabel}
           </span>
         </div>
-        <div className="mt-2 flex flex-wrap items-start gap-x-3 gap-y-1 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
-          <span className="font-medium text-[var(--aethel-text-secondary)]">{heading}</span>
-          <span>{body}</span>
+        <div
+          className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-5"
+          title={compactDetail ? `${heading} ${compactDetail}` : heading}
+        >
+          <span className="font-medium text-[var(--aethel-text-secondary)]">{compactSummary}</span>
+          {compactDetail ? (
+            <span className="text-[var(--aethel-text-tertiary)]">{compactDetail}</span>
+          ) : null}
         </div>
       </div>
     );

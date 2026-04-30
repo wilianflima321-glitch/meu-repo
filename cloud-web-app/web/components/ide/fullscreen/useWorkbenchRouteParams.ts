@@ -12,6 +12,8 @@ export function useWorkbenchRouteParams() {
     fileParam: searchParams.get('file'),
     projectIdParam: searchParams.get('projectId'),
     entryParam: searchParams.get('entry'),
+    sourceParam: searchParams.get('source'),
+    missionParam: searchParams.get('mission'),
     previewUrlParam: searchParams.get('previewUrl'),
   };
 }

@@ -31,13 +31,14 @@ import { usePreviewRuntimeManager } from '@/hooks/usePreviewRuntimeManager';
 // so this file stays focused on route bootstrap + service orchestration.
 
 function IDEContent() {
-  const { fileParam, projectIdParam, entryParam, previewUrlParam } = useWorkbenchRouteParams();
+  const { fileParam, projectIdParam, entryParam, sourceParam, missionParam, previewUrlParam } = useWorkbenchRouteParams();
   const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const primaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
   const secondaryEditorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null);
 
   const {
     projectId,
+    entryProfile,
     splitEditorOpen,
     setSplitEditorOpen,
     splitDirection,
@@ -96,6 +97,9 @@ function IDEContent() {
     handleEditorSelectionStatus,
   } = useWorkbenchShellState({
     projectIdParam,
+    entryParam,
+    sourceParam,
+    missionParam,
     editorRef,
     primaryEditorRef,
     secondaryEditorRef,
@@ -252,6 +256,9 @@ function IDEContent() {
 
   useWorkbenchEntryConvergence({
     entryParam,
+    sourceParam,
+    missionParam,
+    entryProfile,
     clearEntryNotice,
     openCommandPalette,
     showEntryNotice,

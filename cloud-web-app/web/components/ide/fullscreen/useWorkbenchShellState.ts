@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState, type RefObject } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import type * as monacoEditor from 'monaco-editor'
 import type { Diagnostic as MonacoDiagnostic } from '@/components/editor/MonacoEditorPro'
 import type { SplitDirection } from '@/components/editor/SplitEditor'
@@ -17,6 +17,7 @@ import type {
   SidebarTab,
 } from './types'
 import type { BottomPanelMode } from '@/components/ide/modern-shell/types'
+import { resolveWorkbenchEntryProfile } from './workbench-entry-triage'
 
 export const LAST_PROJECT_ID_STORAGE_KEY = 'aethel.workbench.lastProjectId'
 export const PREVIEW_ENABLED_STORAGE_KEY = 'aethel.workbench.preview.enabled'
@@ -25,6 +26,9 @@ export const BOTTOM_PANEL_MODE_STORAGE_KEY = 'aethel.workbench.bottomPanelMode'
 
 type UseWorkbenchShellStateOptions = {
   projectIdParam: string | null
+  entryParam: string | null
+  sourceParam: string | null
+  missionParam: string | null
   editorRef: RefObject<monacoEditor.editor.IStandaloneCodeEditor | null>
   primaryEditorRef: RefObject<monacoEditor.editor.IStandaloneCodeEditor | null>
   secondaryEditorRef: RefObject<monacoEditor.editor.IStandaloneCodeEditor | null>
@@ -32,10 +36,23 @@ type UseWorkbenchShellStateOptions = {
 
 export function useWorkbenchShellState({
   projectIdParam,
+  entryParam,
+  sourceParam,
+  missionParam,
   editorRef,
   primaryEditorRef,
   secondaryEditorRef,
 }: UseWorkbenchShellStateOptions) {
+  const entryProfile = useMemo(
+    () =>
+      resolveWorkbenchEntryProfile({
+        source: sourceParam,
+        mission: missionParam,
+      }),
+    [missionParam, sourceParam],
+  )
+  const hasContextualEntry = Boolean(sourceParam?.trim() || missionParam?.trim())
+
   const projectId = useMemo(() => {
     if (projectIdParam && projectIdParam.trim()) {
       return projectIdParam.trim()
@@ -50,7 +67,8 @@ export function useWorkbenchShellState({
   const [splitActivePane, setSplitActivePane] = useState<EditorPane>('primary')
   const [nextOpenTarget, setNextOpenTarget] = useState<EditorPane>('primary')
   const [previewEnabled, setPreviewEnabled] = useState(() => {
-    if (typeof window === 'undefined') return true
+    if (typeof window === 'undefined') return entryProfile.previewEnabled
+    if (hasContextualEntry) return entryProfile.previewEnabled
     const stored = window.localStorage.getItem(PREVIEW_ENABLED_STORAGE_KEY)
     if (stored === '1') return true
     if (stored === '0') return false
@@ -58,13 +76,14 @@ export function useWorkbenchShellState({
   })
   const [modernPanelState, setModernPanelState] = useState<ModernPanelState>(() => {
     const fallback: ModernPanelState = {
-      sidebar: { open: true, size: 18 },
-      editor: { open: true, size: 50 },
-      preview: { open: true, size: 32 },
-      chat: { open: false, size: 22 },
+      sidebar: { ...entryProfile.panelState.sidebar },
+      editor: { ...entryProfile.panelState.editor },
+      preview: { ...entryProfile.panelState.preview },
+      chat: { ...entryProfile.panelState.chat },
     }
 
     if (typeof window === 'undefined') return fallback
+    if (hasContextualEntry) return fallback
 
     try {
       const stored = window.localStorage.getItem(PANEL_STATE_STORAGE_KEY)
@@ -81,12 +100,13 @@ export function useWorkbenchShellState({
     }
   })
   const [activeBottomPanel, setActiveBottomPanel] = useState<BottomPanelMode>(() => {
-    if (typeof window === 'undefined') return 'chat'
+    if (typeof window === 'undefined') return entryProfile.bottomPanel
+    if (hasContextualEntry) return entryProfile.bottomPanel
     const stored = window.localStorage.getItem(BOTTOM_PANEL_MODE_STORAGE_KEY)
     return stored === 'terminal' ? 'terminal' : 'chat'
   })
-  const [previewMode, setPreviewMode] = useState<PreviewMode>('viewport3d')
-  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('explorer')
+  const [previewMode, setPreviewMode] = useState<PreviewMode>(entryProfile.previewMode)
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>(entryProfile.sidebarTab)
   const [entryNotice, setEntryNotice] = useState<EntryNotice | null>(null)
   const [showIntelliSense, setShowIntelliSense] = useState(false)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
@@ -101,6 +121,32 @@ export function useWorkbenchShellState({
   const [lastAiApply, setLastAiApply] = useState<(InlineApplyResult & { appliedAt: string }) | null>(null)
   const [editorCursorStatus, setEditorCursorStatus] = useState<EditorCursorStatus | null>(null)
   const [editorSelectionStatus, setEditorSelectionStatus] = useState<EditorSelectionStatus | null>(null)
+  const appliedEntryPresetRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!hasContextualEntry) return
+
+    const presetKey = JSON.stringify({
+      entry: entryParam?.trim() || null,
+      source: sourceParam?.trim() || null,
+      mission: missionParam?.trim() || null,
+      lane: entryProfile.laneId,
+    })
+
+    if (appliedEntryPresetRef.current === presetKey) return
+    appliedEntryPresetRef.current = presetKey
+
+    setPreviewEnabled(entryProfile.previewEnabled)
+    setPreviewMode(entryProfile.previewMode)
+    setSidebarTab(entryProfile.sidebarTab)
+    setActiveBottomPanel(entryProfile.bottomPanel)
+    setModernPanelState({
+      sidebar: { ...entryProfile.panelState.sidebar },
+      editor: { ...entryProfile.panelState.editor },
+      preview: { ...entryProfile.panelState.preview },
+      chat: { ...entryProfile.panelState.chat },
+    })
+  }, [entryParam, entryProfile, hasContextualEntry, missionParam, sourceParam])
 
   const openCommandPalette = useCallback((mode: 'commands' | 'files' = 'commands') => {
     window.dispatchEvent(new CustomEvent('aethel.commandPalette.open', { detail: { mode } }))
@@ -197,6 +243,7 @@ export function useWorkbenchShellState({
 
   return {
     projectId,
+    entryProfile,
     splitEditorOpen,
     setSplitEditorOpen,
     splitDirection,

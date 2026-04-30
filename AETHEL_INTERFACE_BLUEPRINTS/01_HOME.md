@@ -4,34 +4,35 @@ Status: BLUEPRINT
 Surface Type: Public
 
 ## Mission
-Sell the category in one glance.
-The page must make Aethel feel like one premium studio for creation, execution, preview and validation with AI.
+Make Aethel feel like an AI app immediately while still pointing honestly toward a deeper Studio.
+This page must feel closer to Firebase Studio, ChatGPT, Gemini and Manus than to a classic SaaS landing page.
 
 ## Critical Opinion
 ### What this page should be
-- category-defining
-- visually confident
+- mission-first
+- app-like
+- low-anxiety
 - product-led
-- impossible to confuse with a generic AI chat or SaaS dashboard
+- impossible to confuse with a generic marketing site
 
 ### What this page should not be
 - a manifesto wall
-- a technical dashboard
+- a feature grid explosion
 - a collage of unrelated modules
-- a landing page that depends on long explanation to be understood
+- a hero that explains more than it proves
 
 ## Primary User Questions
 - What is this product?
-- Why is it better than a chat tool or builder?
-- What can I do first?
-- Where do I start?
+- What can I ask it to do?
+- How do I start without getting lost?
+- When do I go into Studio?
 
 ## Primary CTA
-- `Open Studio`
+- `Start a Mission`
 
 ## Secondary CTA
-- `Watch Workflow`
-- `See Pricing`
+- `Open Studio`
+- `See Workflow`
 
 ## Layout Grid
 - max content width: 1280 px
@@ -40,56 +41,53 @@ The page must make Aethel feel like one premium studio for creation, execution, 
 - text column width in hero: max 560 px
 
 ## Information Hierarchy
-1. Category and headline
-2. Product visual proof
-3. Primary CTA
-4. Workflow proof
-5. Differentiation
-6. Pricing teaser
+1. Mission input
+2. Prompt suggestions and domain triage
+3. Continue recent work
+4. Connected tools
+5. Studio proof
+6. Lightweight trust proof
 7. Footer
 
 ## Layout Anatomy
 ### Section 1: Hero
-Left side:
-- eyebrow or category badge
-- headline
-- one short subheadline
-- CTA row
-- one compact trust row
+Dominant center:
+- mission input card
+- one short headline
+- one sentence of support copy maximum
+- suggestion chips
+- domain triage row
 
-Right side:
-- dominant screenshot of the Workbench
-- screenshot must show editor, preview, AI console and preview deck at once
-- optional callout hotspots on top of screenshot, maximum three
+Secondary support zones:
+- recent mission continuation
+- connected tools rail
+- compact Studio proof card
 
-### Section 2: Three-step workflow
-Three cards only:
-- Start with a project mission
-- Build inside the Workbench
-- Validate and publish
-Each card includes:
-- title
-- one-line explanation
-- small real product crop
-- tiny directional arrow or sequence marker
+### Section 2: Start points
+Six compact domain or mission cards maximum:
+- Apps / Sites
+- Research
+- Cloud / DevOps
+- Growth / Ops
+- Games
+- Films / Media
 
-### Section 3: Product proof strip
-Three proof chips only.
-Examples:
-- Unified Workbench
-- Context-aware AI
-- Web, 3D and media preview
+### Section 3: Continue where you left off
+- recent mission cards only
+- open state, blocked state, ready-for-review state supported
 
-### Section 4: Why it is different
-Three columns only.
-Each column includes:
-- short heading
-- one sentence
-- one visual cue or compact icon
+### Section 4: Connected tools
+- compact icons and labels for connected services
+- examples:
+  - GitHub
+  - Vercel
+  - Cloudflare
+  - Stripe
+  - Notion
 
-### Section 5: Pricing teaser
-- three compact pricing cards
-- one shared CTA row below if needed
+### Section 5: Studio proof
+- one compact card proving there is a deeper environment
+- not a huge marketing screenshot
 
 ### Section 6: Footer
 - Product
@@ -101,120 +99,125 @@ Each column includes:
 ### PublicHeader
 Slots:
 1. BrandMark
-2. NavGroup
-3. `Docs`
-4. `Pricing`
-5. `Status`
-6. `Sign in`
-7. `Open Studio`
+2. `Docs`
+3. `Pricing`
+4. `Status`
+5. `Sign in`
+6. `Open Studio`
 
 Rule:
-- only one strong entry CTA in the header
-- the header must remain calm; do not add product-category dropdowns here
+- keep the header short and calm
+- do not add category-navigation clutter here
 - nav labels stay short and literal
 
-### HeroStatement
+### MissionHero
 Contains:
-- EyebrowBadge
 - Headline
-- Subheadline
+- OneSentenceSupport
+- MissionInput
+- MissionSuggestionChips
+- DomainTriageRow
 - CTACluster
-- TrustStrip
 
 Rule:
-- headline is the only large text block in the hero
-- subheadline must be one sentence, not a paragraph
-- trust strip must be factual and short
+- the mission input is the main object on the page
+- support copy must stay shorter than the input affordance
+- this must feel like an app surface, not a hero banner
 
 Opinion:
-This block must feel decisive.
-If the headline sounds like an internal strategy memo, the whole page fails.
+If this block feels like marketing instead of starting work, the page fails.
 
-### HeroScreenshot
-Must visibly contain:
-- editor area
-- preview area
-- AI console area
-- preview deck or connected-flow cue
+### MissionInput
+Must support:
+- one-line natural-language mission
+- placeholder that implies action, not chat
+- attach/import affordance
+- optional connected-account cue
 
-Optional overlays:
-- three hotspots maximum
-- one mode chip maximum
+Examples:
+- Configure my domain and publish my site
+- Fix the failing deployment on Vercel
+- Research competitors and create a launch brief
+- Build a marketing site and open it in Studio
+
+### DomainTriageRow
+Purpose:
+- reduce anxiety
+- make the user feel understood quickly
+- route into the correct starting grammar
 
 Opinion:
-If the hero visual looks like a generic dashboard, the entire home page fails.
-The screenshot must prove the product category visually.
+These cards should feel like starting modes, not feature tiles.
 
-### WorkflowStepCard
+### RecentMissionRail
 Contains:
-- StepNumber
-- StepTitle
-- StepDescription
-- StepCrop
+- MissionCard
+- state chip
+- progress cue
+- reopen action
 
 Rule:
-- each card explains one stage only
-- cards must visually connect in sequence
-- product crops must look like the same system, not three unrelated screens
+- maximum three visible missions by default
+- must favor continuation over browsing
 
-### DifferenceGrid
-Each column must answer one sharp question:
-- why not a plain AI chat
-- why not a plain IDE
-- why not a plain no-code builder
-
-Rule:
-- no column should exceed one sentence plus one supporting phrase
-- avoid long checklists here
-
-### PricingTeaser
+### ConnectedToolsRail
 Contains:
-- compact plan cards
-- one short transition line
-- CTA cluster
+- compact connected service pills or cards
+- one short line explaining cross-tool execution
 
 Rule:
-- teaser creates confidence and momentum
-- it does not replace the pricing page
+- no giant logos section
+- no fake customer noise here
+
+### StudioProofCard
+Contains:
+- small Studio crop
+- one sentence
+- `Open Studio` action
+
+Rule:
+- this proves depth without stealing the homepage
+- it must not dominate the mission input
 
 ## Interactions Between Components
-- header CTA and hero CTA both point to the same primary path
-- workflow step cards should reinforce the same product story as the hero screenshot
-- pricing teaser should reinforce the decision, not introduce a new narrative
-- footer should help exit to docs, status or sales without pulling attention above the CTA sections
+- header `Open Studio` and hero `Open Studio` both open the deeper mode
+- `Start a Mission` routes into Mission Control with the task already initialized
+- recent mission cards resume the last meaningful task context
+- connected tools prime trust that the product can act across services
 
 ## Button Inventory
 ### Header
-- `Open Studio`
-- `Pricing`
 - `Docs`
+- `Pricing`
 - `Status`
 - `Sign in`
-
-### Hero
 - `Open Studio`
-- `Watch Workflow`
 
-### Pricing teaser
-- `Choose Plan`
+### MissionHero
+- `Start a Mission`
+- `Open Studio`
+
+### Optional lower-page actions
+- `See Workflow`
 - `Talk to Sales`
 
 ## Microinteractions
 - header condenses slightly on scroll
-- hero screenshot hotspots highlight on hover
-- workflow cards raise subtly on hover, but do not animate excessively
-- CTA hover should feel precise and fast, not playful
+- suggestion chips should feel tappable but calm
+- domain cards may raise subtly on hover
+- recent mission cards must reveal resume state clearly
 
 ## Copy Rules
-- headline describes the category, not the technology stack
-- subheadline explains the value in one sentence
-- avoid internal words like readiness, blockers, orchestration, enterprise in the hero
-- no paragraph longer than 24 words in the first fold
+- one short headline
+- one support sentence
+- little visible infrastructure language
+- no paragraph longer than 20 words in the first fold
+- avoid words like orchestration, enterprise, runtime, governance in the hero
 
 ## Visual Rules
-- product visual must dominate more than decorative gradients
-- use one dominant screenshot, not a collage of tiny UI fragments
-- public surfaces should feel premium and calm, not dark-noisy or sci-fi cluttered
+- input and action surface must dominate more than decorative gradients
+- avoid screenshot collage
+- public surfaces should feel premium and calm, not noisy or speculative
 
 ## States
 ### Default

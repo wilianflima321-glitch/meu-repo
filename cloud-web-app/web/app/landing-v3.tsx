@@ -1,442 +1,286 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
+import { ArrowRight, Clock3, Link2, Sparkles } from 'lucide-react'
 import PublicHeader from '@/components/ui/PublicHeader'
 import PublicFooter from '@/components/ui/PublicFooter'
-import { GlassCard, GlowBadge } from '@/components/ui/premium'
 import LandingMissionBox from '@/app/landing-v3-mission-box'
 
-const WORKFLOW = [
+const START_MODES = [
   {
-    step: '01',
-    title: 'Defina a missao',
-    description: 'Entre pelo problema que quer resolver, nao por uma pilha de menus desconectados.',
+    title: 'Apps / Sites',
+    description: 'Criar produto, landing, auth, billing e deploy.',
+    href: '/dashboard?onboarding=1&source=home-apps',
   },
   {
-    step: '02',
-    title: 'Itere dentro do studio',
-    description: 'Dashboard, chat, editor e preview convivem no mesmo shell em vez de espalhar contexto.',
+    title: 'Research',
+    description: 'Pesquisar concorrentes, validar decisoes e montar brief.',
+    href: '/dashboard?onboarding=1&source=home-research',
   },
   {
-    step: '03',
-    title: 'Valide antes de prometer',
-    description: 'Readiness, health e status deixam claro o que esta pronto, parcial ou bloqueado.',
-  },
-]
-
-const TRUST_NOTES = [
-  'Workspace unico para pesquisa, implementacao e validacao.',
-  'Papeis multi-agent com trilha operacional explicita.',
-  'Governanca, rollback e readiness visiveis no mesmo fluxo.',
-]
-
-const PRICING_TEASER = [
-  {
-    title: 'Gratis',
-    price: '$0',
-    desc: 'Explore o studio e valide o fluxo principal.',
-    features: ['1 projeto ativo', 'Limites de IA diarios', 'Preview inline (fallback)'],
-    cta: 'Comecar gratis',
-    href: '/dashboard?onboarding=1&source=landing-pricing-free',
+    title: 'Cloud / DevOps',
+    description: 'Configurar dominio, ambiente, deploy e custos.',
+    href: '/dashboard?onboarding=1&source=home-cloud',
   },
   {
-    title: 'Pro',
-    price: '$49',
-    desc: 'Para devs e squads que precisam de capacidade extra.',
-    features: ['Preview gerenciado (quando disponivel)', 'Contexto RAG expandido', 'Creditos de IA extras'],
-    cta: 'Ver detalhes',
-    href: '/billing?source=landing-pricing-pro',
-    highlight: true,
+    title: 'Growth / Ops',
+    description: 'Conectar analytics, CRM, suporte e automacoes.',
+    href: '/dashboard?onboarding=1&source=home-growth',
   },
   {
-    title: 'Enterprise',
-    price: 'Sob consulta',
-    desc: 'Governanca, compliance e suporte dedicado.',
-    features: ['SSO/SAML', 'SLA + trilhas de auditoria', 'Limites customizados'],
-    cta: 'Falar com vendas',
-    href: '/contact-sales?source=landing-pricing-enterprise',
+    title: 'Games',
+    description: 'Organizar worlds, assets, build e preview.',
+    href: '/dashboard?onboarding=1&source=home-games',
+  },
+  {
+    title: 'Films / Media',
+    description: 'Planejar shots, assets, render e aprovacoes.',
+    href: '/dashboard?onboarding=1&source=home-media',
   },
 ]
 
-const PROOF_STRIP = [
-  { label: 'Fluxo orientado a entrega', detail: 'Da missao ao ambiente validavel' },
-  { label: 'Governanca visivel', detail: 'Status e readiness no mesmo studio' },
-  { label: 'Experiencia unificada', detail: 'Pesquisa, codigo e preview no mesmo fluxo' },
-]
-
-const BENCHMARK_COMPARISONS = [
+const RECENT_MISSIONS = [
   {
-    title: 'Cockpit de codigo',
-    benchmark: 'Cursor / Windsurf / VS Code',
-    market:
-      'Os melhores editores unem ghost text, navegacao por simbolo, multiplos loops de AI e atalhos densos no mesmo cockpit.',
-    aethel:
-      'O Aethel ja entrega shell canonica, AI Console por modo, terminal de primeira classe, breadcrumbs com symbol truth e Inline Edit no fluxo principal.',
-    gap:
-      'Ainda falta transformar Inline AI, memoria persistente e mais automacao de agentes em superficie canonicamente inevitavel.',
+    title: 'Fix failing deployment',
+    state: 'Ready for review',
+    detail: 'Preview publicada e aguardando aprovacao.',
+    href: '/dashboard?tab=overview&source=resume-review',
+    tone: 'success',
   },
   {
-    title: 'Preview e deploy',
-    benchmark: 'Replit / Windsurf / Vercel / v0',
-    market:
-      'Os lideres mantem preview, deploy, share e review no mesmo loop com URLs reais, feedback visual e rollback facil.',
-    aethel:
-      'O Aethel ja expoe preview trust, share/deploy state, link de review e build compile-mode viavel dentro do proprio studio.',
-    gap:
-      'Ainda precisamos fechar prerender parity total e deixar o review/share igualmente forte em todos os estados de runtime.',
+    title: 'Launch marketing site',
+    state: 'In progress',
+    detail: 'Plano ativo com studio e agentes em execucao.',
+    href: '/dashboard?tab=overview&source=resume-launch',
+    tone: 'info',
   },
   {
-    title: 'Operacao e confianca',
-    benchmark: 'Linear / Notion / Vercel',
-    market:
-      'Os melhores produtos deixam status, docs, triagem, seguranca e governanca faceis de encontrar e coerentes com o produto principal.',
-    aethel:
-      'Ja temos auditorias canonicamente honestas, status publico, MFA, readiness visivel e governanca de repo mais madura que a media.',
-    gap:
-      'Ainda faltam docs com busca melhor, prova comercial mais forte e paginas publicas de confianca enterprise mais completas.',
+    title: 'Research competitor matrix',
+    state: 'Blocked',
+    detail: 'Falta conectar uma fonte antes de continuar.',
+    href: '/dashboard?tab=overview&source=resume-research',
+    tone: 'warning',
   },
+] as const
+
+const CONNECTED_TOOLS = ['GitHub', 'Vercel', 'Cloudflare', 'Stripe', 'Notion']
+
+const STUDIO_SIGNALS = [
+  'Mission intake sem poluicao',
+  'Operator, preview e evidence no mesmo fluxo',
+  'Studio Cloud e Studio Local com a mesma gramatica',
 ]
 
-const TRUST_ACTIONS = [
-  { label: 'Ver status', href: '/status' },
-  { label: 'Ler docs', href: '/docs' },
-  { label: 'Comparar com o mercado', href: '/compare' },
-  { label: 'Roadmap', href: '/roadmap' },
-  { label: 'Pricing real', href: '/pricing' },
-  { label: 'Customer proof', href: '/customers' },
-]
+function toneClass(tone: 'success' | 'info' | 'warning') {
+  if (tone === 'success') {
+    return 'border-[color-mix(in_srgb,var(--aethel-success)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+  }
 
-function ScreenshotCard({
-  src,
-  alt,
-  title,
-  subtitle,
-  priority = false,
-}: {
-  src: string
-  alt: string
-  title: string
-  subtitle: string
-  priority?: boolean
-}) {
-  return (
-    <div className="overflow-hidden rounded-[28px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] shadow-[0_24px_90px_rgba(2,6,23,0.42)]">
-      <div className="flex items-center justify-between border-b border-[var(--aethel-border-primary)] px-4 py-3">
-        <div>
-          <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{title}</p>
-          <p className="text-xs text-[var(--aethel-text-tertiary)]">{subtitle}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-error)_78%,transparent)]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-warning-light)_80%,transparent)]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[color-mix(in_srgb,var(--aethel-success)_78%,transparent)]" />
-        </div>
-      </div>
-      <Image src={src} alt={alt} width={1600} height={960} className="h-auto w-full object-cover" priority={priority} />
-    </div>
-  )
+  if (tone === 'warning') {
+    return 'border-[color-mix(in_srgb,var(--aethel-warning)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+  }
+
+  return 'border-[color-mix(in_srgb,var(--aethel-info)_26%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] text-[var(--aethel-info-light)]'
 }
 
 export default function LandingPageV3() {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--aethel-info)_10%,transparent),transparent_24%),var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.08),transparent_24%),var(--aethel-surface-primary)] text-[var(--aethel-text-primary)]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute left-1/4 top-0 h-[620px] w-[620px] rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] blur-[170px]" />
-        <div className="absolute bottom-0 right-1/4 h-[540px] w-[540px] rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_8%,transparent)] blur-[170px]" />
+        <div className="absolute left-[12%] top-0 h-[560px] w-[560px] rounded-full bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] blur-[180px]" />
+        <div className="absolute bottom-0 right-[10%] h-[480px] w-[480px] rounded-full bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] blur-[170px]" />
       </div>
 
       <PublicHeader />
 
       <main id="main-content" className="relative z-10">
-        <section className="mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(340px,0.75fr)] lg:items-center">
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
+        <section className="mx-auto max-w-7xl px-4 pb-14 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_360px] xl:items-start">
+            <div className="rounded-[36px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(8,10,16,0.92),rgba(15,23,42,0.84))] p-6 shadow-[0_28px_100px_rgba(2,6,23,0.42)] sm:p-8 lg:p-10">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--aethel-info-light)]">
                 <Sparkles className="h-3.5 w-3.5" />
-                Software studio operacional
+                Agent OS
               </div>
 
-              <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight text-[var(--aethel-text-primary)] sm:text-5xl lg:text-6xl">
-                Crie apps com IA sem perder o controle do que realmente funciona.
+              <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-[var(--aethel-text-primary)] sm:text-5xl lg:text-[3.75rem] lg:leading-[1.04]">
+                Ask Aethel to build, research, fix or operate anything.
               </h1>
-
-              <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--aethel-text-secondary)] sm:text-lg">
-                O Aethel conecta pesquisa, implementacao, preview e readiness no mesmo fluxo. O foco principal hoje e{' '}
-                <span className="font-medium text-[var(--aethel-text-primary)]">Apps + Pesquisa</span>, com governanca explicita e sem promessas falsas.
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)] sm:text-base">
+                Entre por uma missao clara. Continue no Mission Control. Aprofunde no Studio so quando a tarefa pedir.
               </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <span className="rounded-full border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-text-secondary)]">Entregue mais rapido com contexto unico</span>
-                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-success-light)]">Preview e validacao no mesmo fluxo</span>
-                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_12%,transparent)] px-3 py-1.5 text-xs text-[var(--aethel-primary-light)]">Governanca pronta para equipes</span>
-              </div>
 
               <LandingMissionBox />
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-5 flex flex-wrap gap-3">
                 <Link
                   href="/dashboard?onboarding=1&source=landing-primary-cta"
                   className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-primary)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:brightness-110"
                 >
-                  Comecar gratis
+                  Start in Mission Control
                 </Link>
                 <Link
-                  href="/pricing"
-                  className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                  href="/ide"
+                  className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
                 >
-                  Ver planos
-                </Link>
-                <Link
-                  href="/workbench-preview.html"
-                  className="inline-flex items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_38%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)]"
-                >
-                  Ver referencia do workbench
+                  Open Studio
                 </Link>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-2">
-                {TRUST_ACTIONS.map((item) => (
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {START_MODES.slice(0, 3).map((mode) => (
                   <Link
-                    key={item.href}
-                    href={item.href}
-                    className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-3 py-1.5 text-[11px] font-medium text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
+                    key={mode.title}
+                    href={mode.href}
+                    className="group rounded-[24px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_52%,transparent)] px-4 py-4 transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)]"
                   >
-                    {item.label}
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{mode.title}</p>
+                      <ArrowRight className="h-4 w-4 text-[var(--aethel-text-quaternary)] transition group-hover:text-[var(--aethel-info-light)]" />
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{mode.description}</p>
                   </Link>
                 ))}
               </div>
             </div>
 
-            <aside className="animate-in fade-in slide-in-from-right-4 space-y-4 duration-500 delay-100">
-              <ScreenshotCard
-                src="/screenshots/dashboard.png"
-                alt="Dashboard do Aethel"
-                title="Studio Home"
-                subtitle="projetos, onboarding, billing e sinais de readiness"
-                priority
-              />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[26px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Por que equipes escolhem o studio</p>
-                  <ul className="mt-4 space-y-3">
-                    {TRUST_NOTES.map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                        <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[var(--aethel-success-light)]" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+            <aside className="space-y-4">
+              <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.82),rgba(8,10,16,0.94))] p-5 shadow-[0_22px_70px_rgba(2,6,23,0.36)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                      Continue mission
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Retome sem reexplicar tudo</p>
+                  </div>
+                  <Clock3 className="h-4 w-4 text-[var(--aethel-text-quaternary)]" />
                 </div>
-                <div className="rounded-[26px] border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_12%,transparent)] p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-info-light)]">Fluxo unico</p>
-                  <p className="mt-4 text-sm leading-6 text-[var(--aethel-text-secondary)]">
-                    Dashboard, editor, preview e status funcionam como um unico studio para reduzir troca de contexto e acelerar entrega.
-                  </p>
+                <div className="mt-4 space-y-3">
+                  {RECENT_MISSIONS.map((mission) => (
+                    <Link
+                      key={mission.title}
+                      href={mission.href}
+                      className="block rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] px-4 py-3 transition hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_60%,transparent)]"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium text-[var(--aethel-text-primary)]">{mission.title}</p>
+                        <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${toneClass(mission.tone)}`}>
+                          {mission.state}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{mission.detail}</p>
+                    </Link>
+                  ))}
                 </div>
+              </div>
+
+              <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(8,10,16,0.92))] p-5 shadow-[0_20px_70px_rgba(2,6,23,0.32)]">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Studio depth</p>
+                    <p className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)]">Cloud agora. Local quando a tarefa exigir.</p>
+                  </div>
+                  <Link
+                    href="/ide"
+                    className="inline-flex items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_36%,transparent)]"
+                  >
+                    Open Studio
+                  </Link>
+                </div>
+                <div className="mt-4 overflow-hidden rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_58%,transparent)]">
+                  <Image
+                    src="/screenshots/editor.png"
+                    alt="Aethel Studio preview"
+                    width={1280}
+                    height={760}
+                    className="h-auto w-full object-cover"
+                    priority
+                  />
+                </div>
+                <ul className="mt-4 space-y-2 text-xs text-[var(--aethel-text-secondary)]">
+                  {STUDIO_SIGNALS.map((signal) => (
+                    <li key={signal} className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--aethel-info)]" />
+                      {signal}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </aside>
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-          <GlassCard variant="elevated" border={false} className="p-6 sm:p-8">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <GlowBadge color="info">Studio real</GlowBadge>
-                <h2 className="mt-3 text-2xl font-semibold text-[var(--aethel-text-primary)] sm:text-3xl">Veja o fluxo completo em uma tela</h2>
-                <p className="mt-2 text-sm text-[var(--aethel-text-secondary)]">
-                  Missao, contexto, execucao e validacao no mesmo ambiente operacional.
-                </p>
-              </div>
-              <span className="text-xs text-[var(--aethel-text-secondary)]">Captura real</span>
-            </div>
-            <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--aethel-border-primary)] shadow-[0_20px_70px_rgba(2,6,23,0.45)]">
-              <Image
-                src="/screenshots/editor.png"
-                alt="Aethel Studio com editor, contexto e preview integrados"
-                width={1600}
-                height={960}
-                className="h-auto w-full object-cover"
-                priority
-              />
-            </div>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              {PROOF_STRIP.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] px-4 py-4">
-                  <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">{item.label}</p>
-                  <p className="mt-1 text-xs text-[var(--aethel-text-tertiary)]">{item.detail}</p>
+        <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+          <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Start points</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Escolha um modo de entrada, nao um mar de features.</h2>
                 </div>
-              ))}
-            </div>
-          </GlassCard>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-          <div className="rounded-[32px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_32%,transparent)] p-6 shadow-[0_18px_60px_rgba(2,6,23,0.28)] sm:p-8">
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">
-                Comparacao honesta
-              </p>
-              <h2 className="mt-3 text-3xl font-semibold text-[var(--aethel-text-primary)] sm:text-4xl">
-                O que os melhores do mercado fazem bem e o que o Aethel ja entrega.
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-[var(--aethel-text-tertiary)]">
-                Em vez de fingir equivalencia total, mostramos onde ja temos um studio forte e onde ainda estamos elevando a barra para chegar no melhor nivel de Cursor, Windsurf, Replit, Linear e Vercel.
-              </p>
-            </div>
-
-            <div className="mt-8 grid gap-4 lg:grid-cols-3">
-              {BENCHMARK_COMPARISONS.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-[26px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-soft))] p-5"
-                >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">
-                    {item.benchmark}
-                  </p>
-                  <h3 className="mt-3 text-xl font-semibold text-[var(--aethel-text-primary)]">{item.title}</h3>
-                  <div className="mt-4 space-y-4">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-text-quaternary)]">
-                        Benchmark
-                      </p>
-                      <p className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.market}</p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-success-light)]">
-                        Aethel hoje
-                      </p>
-                      <p className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.aethel}</p>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--aethel-warning-light)]">
-                        Proximo salto
-                      </p>
-                      <p className="mt-1 text-sm leading-6 text-[var(--aethel-text-secondary)]">{item.gap}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/compare"
-                className="inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-2 text-xs font-semibold text-[var(--aethel-info-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_42%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-info)_16%,transparent)]"
-              >
-                Ver comparativo completo
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-              <span className="inline-flex items-center rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-4 py-2 text-xs text-[var(--aethel-text-secondary)]">
-                Cursor, Windsurf, Replit, Vercel, Linear e Notion com leitura honesta
-              </span>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[var(--aethel-text-tertiary)]">Planos</p>
-                <h2 className="mt-3 text-3xl font-semibold text-[var(--aethel-text-primary)]">Planos transparentes para cada fase</h2>
-                <p className="mt-2 text-sm text-[var(--aethel-text-tertiary)]">Escolha um plano para explorar, escalar o time ou abrir conversa enterprise com contexto claro.</p>
+                <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_66%,transparent)] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-secondary)]">
+                  6 modos
+                </span>
               </div>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_76%,transparent)] px-4 py-2 text-xs text-[var(--aethel-text-primary)] hover:border-[var(--aethel-border-secondary)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)]"
-              >
-                Ver todos os planos
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-3">
-              {PRICING_TEASER.map((plan) => (
-                <GlassCard
-                  key={plan.title}
-                  variant={plan.highlight ? 'glow' : 'default'}
-                  className="flex flex-col gap-4 p-6"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-[var(--aethel-text-primary)]">{plan.title}</h3>
-                    {plan.highlight ? <GlowBadge color="primary">Mais usado</GlowBadge> : null}
-                  </div>
-                  <div>
-                    <p className="text-3xl font-semibold text-[var(--aethel-text-primary)]">{plan.price}</p>
-                    <p className="text-xs text-[var(--aethel-text-tertiary)]">{plan.desc}</p>
-                  </div>
-                  <ul className="space-y-2 text-xs text-[var(--aethel-text-secondary)]">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-[var(--aethel-success-light)]" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {START_MODES.map((mode) => (
                   <Link
-                    href={plan.href}
-                    className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-primary)] px-4 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:brightness-110"
+                    key={mode.title}
+                    href={mode.href}
+                    className="rounded-[24px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.52),rgba(8,10,16,0.68))] px-4 py-4 transition hover:border-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)]"
                   >
-                    {plan.cta}
+                    <div className="text-sm font-semibold text-[var(--aethel-text-primary)]">{mode.title}</div>
+                    <div className="mt-2 text-xs leading-5 text-[var(--aethel-text-tertiary)]">{mode.description}</div>
                   </Link>
-                </GlassCard>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
 
-        <section className="bg-[color-mix(in_srgb,var(--aethel-surface-primary)_88%,transparent)]">
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-primary-light)]">Fluxo de produto</p>
-              <h2 className="mt-3 text-3xl font-semibold text-[var(--aethel-text-primary)] sm:text-4xl">
-                Fluxo unico, do onboarding ao estado operacional.
-              </h2>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--aethel-text-tertiary)]">
-                Entrar, iniciar, iterar e validar no mesmo ambiente. Esse e o padrao que a experiencia inteira precisa seguir.
+            <div className="rounded-[30px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_42%,transparent)] p-6 shadow-[0_20px_70px_rgba(2,6,23,0.28)]">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">
+                <Link2 className="h-3.5 w-3.5" />
+                Connected tools
+              </div>
+              <p className="mt-2 text-2xl font-semibold text-[var(--aethel-text-primary)]">Aethel funciona melhor quando suas ferramentas ja estao por perto.</p>
+              <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                Navegue, configure, pesquise e publique no mesmo fluxo sem virar uma colecao de produtos soltos.
               </p>
-            </div>
-
-            <div className="mt-10 grid gap-5 lg:grid-cols-3">
-              {WORKFLOW.map((item) => (
-                <div key={item.step} className="rounded-[28px] border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_72%,transparent)] p-6">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-quaternary)]">{item.step}</p>
-                  <h3 className="mt-3 text-xl font-semibold text-[var(--aethel-text-primary)]">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-[var(--aethel-text-tertiary)]">{item.description}</p>
-                </div>
-              ))}
+              <div className="mt-5 flex flex-wrap gap-3">
+                {CONNECTED_TOOLS.map((tool) => (
+                  <span
+                    key={tool}
+                    className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-3 py-2 text-sm font-medium text-[var(--aethel-text-secondary)]"
+                  >
+                    {tool}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-6 rounded-[22px] border border-[color-mix(in_srgb,var(--aethel-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_8%,transparent)] px-4 py-4 text-sm leading-6 text-[var(--aethel-text-secondary)]">
+                Web Light para entrar. Mission Control para orientar. Studio para executar. Local para romper o teto do browser.
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <div className="grid gap-6 rounded-[32px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,var(--aethel-panel),var(--aethel-panel-strong))] p-8 shadow-[0_24px_90px_rgba(2,6,23,0.42)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+          <div className="grid gap-4 rounded-[34px] border border-[var(--aethel-border-primary)] bg-[linear-gradient(180deg,rgba(15,23,42,0.78),rgba(8,10,16,0.92))] p-6 shadow-[0_26px_90px_rgba(2,6,23,0.38)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:p-8">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--aethel-text-tertiary)]">Proximo passo</p>
-              <h2 className="mt-3 text-3xl font-semibold text-[var(--aethel-text-primary)]">Entre pelo studio e siga com o fluxo real do produto.</h2>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--aethel-text-tertiary)]">
-                Para avaliar compra, veja pricing. Para testar o produto, abra o studio e siga pelo onboarding.
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Next step</p>
+              <h2 className="mt-3 text-3xl font-semibold text-[var(--aethel-text-primary)]">Entre pelo fluxo leve. Aprofunde so quando fizer sentido.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--aethel-text-secondary)]">
+                Sem landing de marketing antiga. Sem cockpit pesado cedo demais. Um unico produto, com profundidade progressiva.
               </p>
             </div>
             <div className="flex flex-wrap gap-3 lg:justify-end">
               <Link
-                href="/dashboard?onboarding=1&source=landing-bottom-cta"
+                href="/dashboard?onboarding=1&source=home-bottom-start"
                 className="inline-flex items-center justify-center rounded-2xl bg-[var(--aethel-primary)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-primary)] transition hover:brightness-110"
               >
-                Abrir studio
+                Start a mission
               </Link>
               <Link
-                href="/docs"
-                className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_72%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[color-mix(in_srgb,var(--aethel-info)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-surface-quaternary)_76%,transparent)] hover:text-[var(--aethel-text-primary)]"
+                href="/ide"
+                className="inline-flex items-center justify-center rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_68%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-text-secondary)] transition hover:border-[var(--aethel-border-secondary)] hover:text-[var(--aethel-text-primary)]"
               >
-                Ler documentacao
-              </Link>
-              <Link
-                href="/contact-sales"
-                className="inline-flex items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-primary)_35%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-5 py-3 text-sm font-semibold text-[var(--aethel-primary-light)] transition hover:border-[color-mix(in_srgb,var(--aethel-primary)_55%,transparent)] hover:bg-[color-mix(in_srgb,var(--aethel-primary)_16%,transparent)]"
-              >
-                Falar com vendas
+                Open Studio
               </Link>
             </div>
           </div>

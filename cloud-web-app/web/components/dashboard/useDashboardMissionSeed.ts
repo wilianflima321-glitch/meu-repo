@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { resolveDashboardEntrySeed } from './aethel-dashboard-entry-triage'
 import { STORAGE_KEYS, type ActiveTab, type ToastType } from './aethel-dashboard-model'
 import {
   getMissionFromLocation,
@@ -40,25 +41,30 @@ export function useDashboardMissionSeed({
     const mission = getMissionFromLocation()
     const onboarding = getOnboardingFlagFromLocation()
     const source = getSourceFromLocation()
+    const seed = resolveDashboardEntrySeed({ mission, onboarding, source })
 
-    if (onboarding) {
+    if (seed.showFirstValueGuide) {
       setShowFirstValueGuide(true)
-      setActiveTab('projects')
-      window.localStorage.setItem(STORAGE_KEYS.activeTab, 'projects')
+      setActiveTab(seed.targetTab)
+      window.localStorage.setItem(STORAGE_KEYS.activeTab, seed.targetTab)
       trackEvent('user', 'settings_change', {
         section: 'onboarding',
         action: 'entry',
         source: source || 'unknown',
       })
-      showToastMessage('Onboarding iniciado. Crie o primeiro projeto e avance no guia.', 'success')
+      if (seed.toast && !seed.chatSeed) {
+        showToastMessage(seed.toast.message, seed.toast.type)
+      }
     }
 
-    if (!mission) return
-    setActiveTab('ai-chat')
-    window.localStorage.setItem(STORAGE_KEYS.activeTab, 'ai-chat')
-    setChatMessage((prev) => (prev.trim() ? prev : mission))
-    setShowFirstValueGuide(true)
-    trackEvent('ai', 'ai_chat', { source: 'dashboard-mission-seed' })
-    showToastMessage('Missao carregada no Studio Home. Revise e envie para iniciar.', 'info')
+    if (!seed.chatSeed) return
+    setActiveTab(seed.targetTab)
+    window.localStorage.setItem(STORAGE_KEYS.activeTab, seed.targetTab)
+    setChatMessage((prev) => (prev.trim() ? prev : seed.chatSeed ?? ''))
+    setShowFirstValueGuide(seed.showFirstValueGuide)
+    trackEvent('ai', 'ai_chat', { source: 'dashboard-mission-seed', lane: source || 'unknown' })
+    if (seed.toast) {
+      showToastMessage(seed.toast.message, seed.toast.type)
+    }
   }, [setActiveTab, setChatMessage, setShowFirstValueGuide, showToastMessage, trackEvent])
 }

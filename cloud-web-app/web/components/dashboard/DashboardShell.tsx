@@ -13,6 +13,7 @@ import { DashboardMainContent } from './DashboardMainContent'
 import OnboardingWizard from '../onboarding/OnboardingWizard'
 import { DashboardToast } from './DashboardToast'
 import { DashboardRoutingNotice } from './DashboardRoutingNotice'
+import { resolveDashboardEntryLane } from './aethel-dashboard-entry-triage'
 import { MobileBottomNav } from '@/components/ui/MobileResponsiveLayout'
 
 type OnboardingCompleteHandler = ComponentProps<typeof OnboardingWizard>['onComplete']
@@ -93,6 +94,8 @@ export function DashboardShell({
   dashboardMainProps,
   toast,
 }: DashboardShellProps) {
+  const entryLane = resolveDashboardEntryLane(entrySource)
+
   return (
     <div
       className={`relative flex min-h-screen flex-col overflow-hidden ${
@@ -119,7 +122,7 @@ export function DashboardShell({
 
       <StudioGlobalNav
         title="Studio Home"
-        subtitle="Operacao, IA, preview e billing no mesmo shell."
+        subtitle="Comece leve, continue na mesma shell e aprofunde no cockpit so quando a tarefa pedir."
         rightSlot={
           <StudioActionRail
             sidebarOpen={sidebarOpen}
@@ -166,17 +169,22 @@ export function DashboardShell({
                 </span>
                 {entrySource ? (
                   <span className="rounded-full border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_70%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
-                    origem {entrySource}
+                    {entryLane.label}
                   </span>
                 ) : null}
+                <span className="rounded-full border border-[color-mix(in_srgb,var(--aethel-primary)_24%,transparent)] bg-[color-mix(in_srgb,var(--aethel-primary)_10%,transparent)] px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-text-secondary)]">
+                  Studio Home
+                </span>
               </div>
               <h2 className="mt-2 text-base font-semibold text-[var(--aethel-text-primary)] sm:text-lg">
-                Continue a missao sem trocar de produto no meio do caminho.
+                Continue a missao dentro do Studio, sem trocar de produto no meio do caminho.
               </h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
                 {entryMission
                   ? entryMission
-                  : 'Entre, refine o contexto no AI Chat e siga para preview e IDE com o mesmo handoff.'}
+                  : entrySource
+                    ? entryLane.description
+                    : 'Studio Home orienta a proxima acao. O cockpit profundo so expande quando a tarefa realmente precisar.'}
               </p>
             </div>
 
@@ -245,11 +253,11 @@ export function DashboardShell({
 
       <MobileBottomNav
         items={[
-          { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, matchPaths: ['/dashboard'] },
-          { href: '/ide', label: 'IDE', icon: Code, matchPaths: ['/ide'] },
-          { href: '/dashboard?tab=ai-chat', label: 'Chat', icon: MessageSquare, matchPaths: [] },
-          { href: '/billing', label: 'Faturamento', icon: CreditCard, matchPaths: ['/billing'] },
-          { href: '/settings', label: 'Ajustes', icon: Settings, matchPaths: ['/settings'] },
+          { href: '/dashboard', label: 'Home', icon: LayoutDashboard, matchPaths: ['/dashboard'] },
+          { href: '/ide', label: 'Studio', icon: Code, matchPaths: ['/ide'] },
+          { href: '/dashboard?tab=ai-chat', label: 'AI', icon: MessageSquare, matchPaths: [] },
+          { href: '/billing', label: 'Billing', icon: CreditCard, matchPaths: ['/billing'] },
+          { href: '/settings', label: 'Settings', icon: Settings, matchPaths: ['/settings'] },
         ]}
       />
 
