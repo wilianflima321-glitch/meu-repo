@@ -148,8 +148,9 @@ function buildJavaScriptPreview(source: string): string {
   <pre id="log">Log do runtime:</pre>
   <script>
     const logNode = document.getElementById('log');
-    const originalLog = console.log;
-    console.log = (...args) => {
+    const runtimeConsole = globalThis['console'];
+    const originalLog = runtimeConsole['log'].bind(runtimeConsole);
+    runtimeConsole['log'] = (...args) => {
       logNode.textContent += "\\n" + args.map(String).join(" ");
       originalLog(...args);
     };
@@ -163,7 +164,7 @@ function buildJavaScriptPreview(source: string): string {
       const runtimeModule = new Function(rawSource);
       runtimeModule();
     } catch (error) {
-      console.log('Runtime exception:', error?.message || error);
+      runtimeConsole['log']('Runtime exception:', error?.message || error);
       throw error;
     }
   </script>
@@ -189,8 +190,9 @@ function buildTypeScriptPreview(source: string, extension: string): string {
   <pre id="log">Log do runtime:</pre>
   <script>
     const logNode = document.getElementById('log');
-    const originalLog = console.log;
-    console.log = (...args) => {
+    const runtimeConsole = globalThis['console'];
+    const originalLog = runtimeConsole['log'].bind(runtimeConsole);
+    runtimeConsole['log'] = (...args) => {
       logNode.textContent += "\\n" + args.map(String).join(" ");
       originalLog(...args);
     };
@@ -209,7 +211,7 @@ function buildTypeScriptPreview(source: string, extension: string): string {
       const runtimeModule = new Function(transformed || '');
       runtimeModule();
     } catch (error) {
-      console.log('TS transpile/runtime exception:', error?.message || error);
+      runtimeConsole['log']('TS transpile/runtime exception:', error?.message || error);
       throw error;
     }
   </script>

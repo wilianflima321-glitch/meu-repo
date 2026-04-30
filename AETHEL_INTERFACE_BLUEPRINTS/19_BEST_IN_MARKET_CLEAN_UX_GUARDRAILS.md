@@ -19,7 +19,7 @@ It defines what must be true if the product is going to feel as clean as the bes
 - `AETHEL_INTERFACE_BLUEPRINTS/01_HOME.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/06_STUDIO_HOME.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-- `C:\Users\Grosarik\Desktop\Aethel engine\AETHEL_UX_ARSENAL_2026-04-29\00_ARSENAL_INDEX.md`
+- local UX arsenal folder `AETHEL_UX_ARSENAL_2026-04-29/00_ARSENAL_INDEX.md` when present outside the repo
 
 ## Firebase Article Reading
 

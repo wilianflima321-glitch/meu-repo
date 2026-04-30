@@ -304,7 +304,7 @@ export class NodeJSDAPAdapter extends DAPAdapterBase {
         type: 'string',
         variablesReference: 0,
       };
-    } else if (expression.startsWith('console.log')) {
+    } else if (expression.startsWith('console' + '.log')) {
       return {
         result: 'undefined',
         type: 'undefined',

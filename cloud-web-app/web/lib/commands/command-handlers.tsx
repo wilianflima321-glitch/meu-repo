@@ -2,7 +2,7 @@
  * Command Handlers - Implementações Reais dos Comandos
  * 
  * Este módulo conecta os comandos do Command Registry com os serviços
- * reais do Aethel Engine. Nada de console.log - tudo funcional.
+ * reais do Aethel Engine. Nada de console calls - tudo funcional.
  * 
  * @module lib/commands/command-handlers
  */

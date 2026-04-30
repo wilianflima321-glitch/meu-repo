@@ -48,8 +48,8 @@ These points still align with the repo and remain strategic priorities:
 
 - design-system drift is still real, even after ThemeToggle and Storybook progress;
 - the workbench remains the core product and still needs deeper shell convergence;
-- `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\FullscreenIDE.tsx` is still too large for a cockpit-grade shell;
-- `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\components\ide\AIChatPanelPro.tsx` was reduced below `300` lines, so the next work is stabilization and interaction polish rather than emergency decomposition;
+- `cloud-web-app/web/components/ide/FullscreenIDE.tsx` is still an important cockpit-grade shell seam to keep bounded;
+- `cloud-web-app/web/components/ide/AIChatPanelPro.tsx` was substantially reduced, so the next work is stabilization and interaction polish rather than emergency decomposition;
 - the chat lane is no longer only “smaller”; it also gained calmer message-bubble hierarchy plus a real stop/interrupt affordance during active runs, which improves operator confidence without closing the larger artifact-lane gaps;
 - preview and collaboration still lag behind the benchmark set by Cursor, Replit, Windsurf, and Unreal-style workflows;
 - admin surface area is still larger than ideal and should continue converging toward fewer canonical areas;
@@ -73,29 +73,29 @@ The following PDF claims should no longer be treated as current truth without re
 ### Dead engine libs
 - PDF framed a large set of dead engine libraries as still present.
 - Current branch already removed a major dead-code island, including files like:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lib\behavior-tree.ts`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lib\world-partition.ts`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lib\skeletal-animation.ts`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lib\collaboration-realtime.ts`
+  - `cloud-web-app/web/lib/behavior-tree.ts`
+  - `cloud-web-app/web/lib/world-partition.ts`
+  - `cloud-web-app/web/lib/skeletal-animation.ts`
+  - `cloud-web-app/web/lib/collaboration-realtime.ts`
 
 ### Next/Image and performance baseline
 - PDF flagged `images.unoptimized: true` as a critical performance bug.
 - Current branch already re-enabled modern image behavior in:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\next.config.js`
+  - `cloud-web-app/web/next.config.js`
 - That specific blocker is no longer an active current-state claim.
 
 ### `.aethelrules`
 - PDF criticized absolute-path usage in `.aethelrules`.
 - Current branch already fixed this in:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\.aethelrules`
+  - `.aethelrules`
 
 ### Testing and quality pressure
 - PDF described the test story as critically weak.
 - That concern still exists directionally, but current reality improved:
   - tracked test files are now `49`
-  - `collectCoverage` is now wired in CI-sensitive form in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\jest.config.ts`
-  - Lighthouse configuration now exists in `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\lighthouserc.js`
-  - Prisma migrations are now seeded at `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\cloud-web-app\web\prisma\migrations\`
+  - `collectCoverage` is now wired in CI-sensitive form in `cloud-web-app/web/jest.config.ts`
+  - Lighthouse configuration exists in `cloud-web-app/web/lighthouserc.js`
+  - Prisma migrations remain open; `cloud-web-app/web/prisma/migrations/` currently has `0` migration folders per `npm run qa:product-quality-progress`
 
 ### Admin page count
 - PDF cites `47` admin pages.

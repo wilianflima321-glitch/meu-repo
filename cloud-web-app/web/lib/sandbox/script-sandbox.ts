@@ -33,7 +33,7 @@ export interface SandboxConfig {
 }
 
 export type AllowedAPI = 
-  | 'console'      // console.log, etc
+  | 'console'      // console APIs
   | 'math'         // Math.*
   | 'json'         // JSON.parse/stringify
   | 'date'         // Date

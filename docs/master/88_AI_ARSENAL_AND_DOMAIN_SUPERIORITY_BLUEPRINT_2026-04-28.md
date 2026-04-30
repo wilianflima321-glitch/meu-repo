@@ -52,9 +52,9 @@ It consolidates them into one operational superiority playbook tied to the curre
 - `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
 - local visual targets:
-  - `C:\Users\Grosarik\Desktop\Aethel engine\imagen ide aethel.png`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\2 imagen ide aethel.png`
-  - `C:\Users\Grosarik\Desktop\Aethel engine\3 imagen preview aethel.png`
+  - `imagen ide aethel.png` when present outside the repo
+  - `2 imagen ide aethel.png` when present outside the repo
+  - `3 imagen preview aethel.png` when present outside the repo
 
 ### 2.2 External benchmark checked on 2026-04-28
 - OpenAI Deep Research

@@ -56,8 +56,8 @@ Empty directories removed: `lib/achievements`, `lib/replay`, `lib/store`,
 - **Next/Image restored:** removed `images: { unoptimized: true }` from
   `cloud-web-app/web/next.config.js`. LCP < 2.5s budget is now achievable
   again and the Lighthouse Perf score should recover from the V5 5.2 baseline.
-- **.aethelrules absolute paths:** replaced every
-  `C:\Users\Grosarik\Desktop\Aethel engine\meu-repo\…` reference with
+- **.aethelrules absolute paths:** replaced every local Windows workspace
+  reference with
   `cloud-web-app/web/…` project-relative paths so the rules file works on
   Linux CI / macOS / Cursor / Windsurf without surprise. Expanded the
   **Observability**, **Collaboration**, **Accessibility**, **Testing** and

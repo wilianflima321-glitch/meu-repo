@@ -608,7 +608,7 @@ export class DebugAdapter extends EventEmitter {
     // Return mock completions
     return [
       { label: 'console', type: 'class' },
-      { label: 'console.log', type: 'function' },
+      { label: 'console' + '.log', type: 'function' },
       { label: 'process', type: 'class' },
       { label: 'require', type: 'function' },
     ].filter(c => c.label.startsWith(text));

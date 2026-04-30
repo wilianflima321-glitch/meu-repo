@@ -580,7 +580,7 @@ export class GameSystem implements ISystem {
   private entities: Entity[] = [];
 
   initialize() {
-    console.log('System initialized');
+    this.entities = [];
   }
 
   update(delta: number) {

@@ -15,7 +15,8 @@ Use this checklist only with:
 - `docs/master/89_WEB_LIGHT_STUDIO_CLOUD_LOCAL_ARCHITECTURE_2026-04-29.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
-- `C:\Users\Grosarik\Desktop\Aethel engine\AETHEL_UX_ARSENAL_2026-04-29\00_ARSENAL_INDEX.md`
+- `docs/master/92_V10_AUDIT_RECONCILIATION_2026-04-30.md`
+- local UX arsenal folder `AETHEL_UX_ARSENAL_2026-04-29/00_ARSENAL_INDEX.md` when present outside the repo
 
 ## Current Product Order
 The canonical product path is:
@@ -43,6 +44,7 @@ Goal:
 Do:
 - keep `npm run qa:enterprise-gate` green,
 - keep `npm run qa:canonical-doc-alignment` green,
+- run `npm run qa:product-quality-progress` before accepting broad audit claims,
 - keep `git diff --check` clean,
 - continue isolating build/prerender blockers honestly.
 

@@ -35,9 +35,9 @@ This checkpoint was reconciled against:
 - `AETHEL_INTERFACE_BLUEPRINTS/17_STUDIO_LOCAL.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/18_DEPTH_MODES_AND_HANDOFFS.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
-- `C:\Users\Grosarik\Desktop\Aethel engine\AETHEL_UX_ARSENAL_2026-04-29\00_ARSENAL_INDEX.md`
-- `C:\Users\Grosarik\Desktop\Aethel engine\2 imagen ide aethel.png`
-- `C:\Users\Grosarik\Desktop\Aethel engine\AETHEL_UX_ARSENAL_2026-04-29\33_vercel_dashboard_design-language_reference.webp`
+- local UX arsenal folder `AETHEL_UX_ARSENAL_2026-04-29/00_ARSENAL_INDEX.md` when present outside the repo
+- local reference image `2 imagen ide aethel.png` when present outside the repo
+- local Vercel dashboard reference image from the UX arsenal when present outside the repo
 
 ## Canonical Product Reading
 The current product should be read as:

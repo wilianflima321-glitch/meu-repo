@@ -175,7 +175,7 @@ O arquivo novo no root contém regras canônicas que **o Cursor usa se o desenvo
 
 **Opinião de senior engineer:** **isto é outstanding**. Essa é exatamente a pattern Cursor/Windsurf. **3 problemas**:
 
-1. **Paths com `C:\Users\Grosarik\Desktop\...`** hardcoded no arquivo — **bug embaraçoso**. Deve usar paths relativos: `cloud-web-app/web/lib/design-tokens.ts`.
+1. **Paths locais Windows hardcoded** no arquivo — **bug embaraçoso**. Deve usar paths relativos: `cloud-web-app/web/lib/design-tokens.ts`.
 2. `.aethelrules` não é lido pelo próprio chat do Aethel (só pelo Cursor) — o loader `lib/server/project-rules.ts` **existe** mas verifiquei: **0 componentes de chat o importam**.
 3. Falta versão pública compartilhável (ex.: `aethel.dev/rules/template`) para usuários criarem o próprio.
 
@@ -1096,7 +1096,7 @@ Estruturado em 4 épicos de 3 semanas cada.
 - Gate no CI: `npm run typecheck` obrigatório.
 
 **S1.5 — `.aethelrules` path fix**
-- Substituir paths `C:\Users\...` por `cloud-web-app/web/...` relativos.
+- Substituir paths locais Windows por `cloud-web-app/web/...` relativos.
 - Commit: `fix(rules): remove hardcoded windows paths`.
 
 #### Semana 2: Build & Perf
