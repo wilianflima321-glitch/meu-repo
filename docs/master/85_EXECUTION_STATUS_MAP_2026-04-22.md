@@ -1,8 +1,17 @@
 # 85_EXECUTION_STATUS_MAP_2026-04-22
 Date: 2026-04-22
-Last refreshed: 2026-04-28
+Last refreshed: 2026-04-30
 Status: ACTIVE
 Role: short execution snapshot and no-drift scoreboard across the canonical audit set
+
+## Current Alignment Override
+Read this file together with:
+- `docs/master/89_WEB_LIGHT_STUDIO_CLOUD_LOCAL_ARCHITECTURE_2026-04-29.md`
+- `docs/master/90_CANONICAL_PRODUCT_QUALITY_TRIAGE_2026-04-30.md`
+
+Canonical naming note:
+- the logged-in continuity surface should now be read as `Studio Home`,
+- not as a separate dashboard product family.
 
 ## Why This Exists
 The project already has strong audits.

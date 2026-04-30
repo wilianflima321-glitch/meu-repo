@@ -181,7 +181,7 @@ Rule:
 
 ## Interactions Between Components
 - header `Open Studio` and hero `Open Studio` both open the deeper mode
-- `Start a Mission` routes into Mission Control with the task already initialized
+- `Start a Mission` routes into Studio Home with the task already initialized
 - recent mission cards resume the last meaningful task context
 - connected tools prime trust that the product can act across services
 

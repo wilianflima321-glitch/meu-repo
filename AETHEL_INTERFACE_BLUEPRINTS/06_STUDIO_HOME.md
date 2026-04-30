@@ -7,11 +7,11 @@ Surface Type: Studio
 Orient the user immediately and make the next action obvious.
 Studio Home is not a reporting dashboard.
 It is the continuity layer between the public product and the Workbench.
-It is the canonical Mission Control surface.
+It is the canonical Studio Home surface.
 
 ## Critical Opinion
 ### What this page should be
-- a mission control page for the current workspace
+- a Studio Home surface for the current workspace
 - a fast resume surface
 - a place to understand project focus, connected flows, and current next step
 - the bridge between web-light simplicity and Studio depth
@@ -294,7 +294,7 @@ The primary CTA label changes by last useful state:
 - `Resume AI Run`
 - `Resume Operator Task`
 
-## Mission Control Rule Set
+## Studio Home Rule Set
 1. The mission hero must outrank every card below it.
 2. The user must always see one obvious next step.
 3. AI belongs here as execution state, not as a full detached conversation.

@@ -56,7 +56,7 @@ Every major surface must have one obvious protagonist.
 
 Allowed examples:
 - Home -> mission input
-- Mission Control -> mission hero
+- Studio Home -> mission hero
 - Operator -> browser canvas
 - Workbench -> editor or viewport
 - Preview Review -> artifact
@@ -124,7 +124,7 @@ Must avoid:
 - too many CTAs
 - heavy nav
 
-### Mission Control
+### Studio Home
 Must feel:
 - like a control room
 - like a continuity layer

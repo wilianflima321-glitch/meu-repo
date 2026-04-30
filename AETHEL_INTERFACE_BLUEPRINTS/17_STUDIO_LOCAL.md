@@ -95,7 +95,7 @@ Shows:
 - never direct by default
 - only offered when the user explicitly needs depth
 
-### From Mission Control
+### From Studio Home
 - `Open in Studio`
 - `Download Local Studio` when local depth is the better answer
 

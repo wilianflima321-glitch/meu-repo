@@ -77,7 +77,7 @@ AETHEL PRODUCT LAYERS
 
 AETHEL DEPTH MODES
 1. Web Light
-2. Mission Control
+2. Studio Home
 3. Operator Surface
 4. Studio Cloud
 5. Studio Local
@@ -662,7 +662,7 @@ The hero screenshot must prove in one composition:
 - connected flow cue or Preview Deck
 
 STUDIO HOME CONTRACT
-Studio Home is mission control, not a dashboard.
+Studio Home is the continuity shell, not a dashboard.
 It must answer quickly:
 - what is my main project
 - what should I do next

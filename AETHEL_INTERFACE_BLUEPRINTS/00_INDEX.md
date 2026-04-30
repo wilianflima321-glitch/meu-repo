@@ -7,6 +7,9 @@ Owner: Product + UX + Frontend + AI
 This folder is the canonical interface blueprint for Aethel.
 It exists to stop interface drift, stop page fragmentation, and force one unified product language across marketing, studio, workbench, and governance.
 
+Current no-drift checkpoint:
+- `docs/master/90_CANONICAL_PRODUCT_QUALITY_TRIAGE_2026-04-30.md`
+
 ## Core Product Thesis
 Aethel is not:
 - a dashboard with tools attached
@@ -50,6 +53,13 @@ Aethel is:
 18. `18_DEPTH_MODES_AND_HANDOFFS.md`
 19. `19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
 
+## Naming Override
+Where older documents still say `Mission Control`, the current canonical product name is `Studio Home`.
+Use `Studio Home` whenever the meaning is:
+- the initial logged-in Studio shell,
+- the continuity layer after mission intake,
+- or the lighter depth mode that expands into deeper Studio work.
+
 ## Critical Product Decisions
 ### Decision 1: Workbench is the center
 Everything else must either:
@@ -83,7 +93,7 @@ This avoids creating separate products for game, film, site, and assets.
 ### Decision 6: Depth changes, identity does not
 Aethel has four depth states:
 - Web Light
-- Mission Control
+- Studio Home
 - Studio Cloud
 - Studio Local
 

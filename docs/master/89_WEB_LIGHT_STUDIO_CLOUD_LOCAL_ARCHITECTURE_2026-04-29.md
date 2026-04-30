@@ -6,7 +6,7 @@ Define the canonical user-experience architecture that lets Aethel:
 - feel as simple as Firebase Studio / ChatGPT / Gemini / Manus at entry,
 - keep the Studio IDE as the real product core,
 - scale into a local desktop experience when browser limits become the bottleneck,
-- avoid future drift between web, dashboard, operator, preview, and Studio.
+- avoid future drift between web, Studio Home, operator, preview, and Studio.
 
 This document exists to prevent a false tradeoff:
 - "light AI app" versus
@@ -52,7 +52,7 @@ We are extracting:
 
 Aethel must be:
 - `Web Light` for low-anxiety entry,
-- `Mission Control` for current-task orientation,
+- `Studio Home` for current-task orientation,
 - `Studio Cloud` for deep browser-native work,
 - `Studio Local` for heavier and more trusted device execution.
 
@@ -68,7 +68,7 @@ The user must feel:
 
 1. The IDE remains the product core.
 2. The public web must not look like a generic marketing site.
-3. The dashboard must not look like a generic SaaS admin board.
+3. Studio Home must not look like a generic SaaS admin board.
 4. The Studio must not feel like a second product.
 5. The browser/operator surface must not feel like ungoverned magic.
 6. The viewport must beat the chrome in Studio mode.
@@ -91,7 +91,7 @@ Audience:
 - casual operator,
 - first-time visitor.
 
-### 5.2 Mission Control
+### 5.2 Studio Home
 Purpose:
 - orient the user around the current mission,
 - show what is running,
@@ -185,10 +185,10 @@ We do not inherit:
 - thin governance language,
 - overreliance on one input surface.
 
-## 7) Mission Dashboard Architecture
+## 7) Studio Home Architecture
 
 ### 7.1 Goal
-Turn `/dashboard` into a control room, not a metrics dashboard.
+Turn `/dashboard` into Studio Home, not a metrics dashboard.
 
 ### 7.2 Primary hierarchy
 1. current mission
@@ -301,7 +301,7 @@ Local changes depth, not identity.
 
 ## 10) Transition Rules Between Modes
 
-### 10.1 Web Light -> Mission Control
+### 10.1 Web Light -> Studio Home
 Triggered by:
 - mission submitted
 - account created
@@ -312,7 +312,7 @@ User lands on:
 - one suggested next step,
 - one clear Studio/Operator path.
 
-### 10.2 Mission Control -> Studio Cloud
+### 10.2 Studio Home -> Studio Cloud
 Triggered by:
 - open in Studio
 - edit artifact
@@ -325,7 +325,7 @@ Studio opens with:
 - relevant file or artifact selected,
 - contextual AI already scoped.
 
-### 10.3 Mission Control -> Operator
+### 10.3 Studio Home -> Operator
 Triggered by:
 - web task execution,
 - domain/cloud/billing/admin navigation task,
@@ -359,7 +359,7 @@ Needs:
 
 Surface priority:
 - Web Light
-- Mission Control
+- Studio Home
 - Studio only when needed
 
 ### 11.2 Operator / production builder
@@ -371,7 +371,7 @@ Needs:
 - approvals
 
 Surface priority:
-- Mission Control
+- Studio Home
 - Operator
 - Studio Cloud
 
@@ -384,7 +384,7 @@ Needs:
 - review confidence
 
 Surface priority:
-- Mission Control
+- Studio Home
 - evidence/run surfaces
 - Studio Cloud
 
@@ -409,7 +409,7 @@ Needs:
 - exportable artifacts
 
 Surface priority:
-- Mission Control
+- Studio Home
 - evidence/research surfaces
 - Studio when creation becomes implementation
 
@@ -428,14 +428,14 @@ Surface priority:
 2. Keep inspector and structure strong, but contextual.
 3. Use adaptive density:
    - low density in Web Light,
-   - medium density in Mission Control,
+   - medium density in Studio Home,
    - high density in Studio.
 4. Do not expose maximum complexity before the user has a mission.
 5. Keep the same component grammar across all density levels.
 
 ## 14) Anti-Fragmentation Rules
 
-1. Same product language across web, dashboard, operator, and Studio.
+1. Same product language across web, Studio Home, operator, and Studio.
 2. Same mission object everywhere.
 3. Same run/evidence/approval/cost vocabulary everywhere.
 4. Same navigation source of truth.
@@ -450,8 +450,8 @@ Surface priority:
 - add recent-mission continuation
 - add connected-tools framing
 
-### 15.2 Mission Control
-- re-architect dashboard around mission hero + next action
+### 15.2 Studio Home
+- re-architect Studio Home around mission hero + next action
 - reduce equal-weight card clutter
 - make Studio entry inevitable
 

@@ -29,20 +29,22 @@ Status: CANONICAL ENTRYPOINT
 24. `docs/master/87_PARALLEL_SLICING_AND_BENCHMARK_WAVE_2026-04-24.md`
 25. `docs/master/88_AI_ARSENAL_AND_DOMAIN_SUPERIORITY_BLUEPRINT_2026-04-28.md`
 26. `docs/master/89_WEB_LIGHT_STUDIO_CLOUD_LOCAL_ARCHITECTURE_2026-04-29.md`
-27. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
-28. `docs/master/85_EXECUTION_STATUS_MAP_2026-04-22.md`
-29. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
-30. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
-31. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
-32. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
-33. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
-34. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
-35. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
-36. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
-37. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
-38. `AETHEL_INTERFACE_BLUEPRINTS/17_STUDIO_LOCAL.md`
-39. `AETHEL_INTERFACE_BLUEPRINTS/18_DEPTH_MODES_AND_HANDOFFS.md`
-40. `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
+27. `docs/master/90_CANONICAL_PRODUCT_QUALITY_TRIAGE_2026-04-30.md`
+28. `docs/master/91_PRODUCT_QUALITY_EXECUTION_CHECKLIST_2026-04-30.md`
+29. `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
+30. `docs/master/85_EXECUTION_STATUS_MAP_2026-04-22.md`
+31. `docs/master/76_AUDITORIA_DEFINITIVA_BENCHMARK_2026-04-11.md`
+32. `docs/master/77_FINAL_10_10_GAP_AUDIT_2026-04-11.md`
+33. `docs/master/78_EXECUTION_MASTER_PLAN_2026-04-12.md`
+34. `docs/master/79_TUDO_QUE_PRECISA_SABER_2026-04-12.md`
+35. `docs/master/80_CONVERSA_10_10_2026-04-12.md`
+36. `AETHEL_INTERFACE_BLUEPRINTS/00_INDEX.md`
+37. `AETHEL_INTERFACE_BLUEPRINTS/08_WORKBENCH.md`
+38. `AETHEL_INTERFACE_BLUEPRINTS/15_MOBILE_COMPANION.md`
+39. `AETHEL_INTERFACE_BLUEPRINTS/16_MASTER_FIGMA_PROMPT.md`
+40. `AETHEL_INTERFACE_BLUEPRINTS/17_STUDIO_LOCAL.md`
+41. `AETHEL_INTERFACE_BLUEPRINTS/18_DEPTH_MODES_AND_HANDOFFS.md`
+42. `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
 
 ## Canonical Interface Layer
 The interface source of truth no longer lives only inside `docs/master`.
@@ -55,6 +57,8 @@ The canonical UI/UX, shell, mode, state, and component contracts now live in:
 - `AETHEL_INTERFACE_BLUEPRINTS/17_STUDIO_LOCAL.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/18_DEPTH_MODES_AND_HANDOFFS.md`
 - `AETHEL_INTERFACE_BLUEPRINTS/19_BEST_IN_MARKET_CLEAN_UX_GUARDRAILS.md`
+- `docs/master/90_CANONICAL_PRODUCT_QUALITY_TRIAGE_2026-04-30.md`
+- `docs/master/91_PRODUCT_QUALITY_EXECUTION_CHECKLIST_2026-04-30.md`
 
 Rules:
 - `docs/master/65_*` and `66_*` define product and AI-experience direction.
@@ -116,7 +120,9 @@ Rules:
 | `86_AUDITORIA_V6_SEM_PIEDADE_2026-04-21.md` | Auditoria V6 reconciliada como lente de accountability, execution gap e alinhamento sem inflar claims legados | ACTIVE (PRIMARY COMPLEMENTARY AUDIT - ACCOUNTABILITY/EXECUTION GAP) |
 | `87_PARALLEL_SLICING_AND_BENCHMARK_WAVE_2026-04-24.md` | Onda canonica de fatiamento paralelo e ordem benchmark-aware dos proximos hotspots | ACTIVE |
 | `88_AI_ARSENAL_AND_DOMAIN_SUPERIORITY_BLUEPRINT_2026-04-28.md` | Blueprint canonico do arsenal de IA, limites criticos, contramedidas, triagem de usuarios e superioridade por dominio | ACTIVE |
-| `89_WEB_LIGHT_STUDIO_CLOUD_LOCAL_ARCHITECTURE_2026-04-29.md` | Blueprint canonico da experiencia unificada entre web leve, mission control, Studio cloud, Studio local e regras de transicao | ACTIVE |
+| `89_WEB_LIGHT_STUDIO_CLOUD_LOCAL_ARCHITECTURE_2026-04-29.md` | Blueprint canonico da experiencia unificada entre web leve, Studio Home, Studio cloud, Studio local e regras de transicao | ACTIVE |
+| `90_CANONICAL_PRODUCT_QUALITY_TRIAGE_2026-04-30.md` | Checkpoint canonico de qualidade, triagem de produto e alinhamento sem drift entre auditorias, blueprints e arsenal visual | ACTIVE |
+| `91_PRODUCT_QUALITY_EXECUTION_CHECKLIST_2026-04-30.md` | Checklist de execucao derivado do checkpoint de qualidade para orientar melhorias sem criar novas familias de produto | ACTIVE |
 
 ## Core Specs
 | Doc | Scope | Status |

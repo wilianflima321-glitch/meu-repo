@@ -4,14 +4,14 @@ Status: BLUEPRINT
 Surface Type: Product Continuity Contract
 
 ## Mission
-Define how Aethel transitions between light entry, mission control, Studio Cloud, Operator, and Studio Local without feeling fragmented.
+Define how Aethel transitions between light entry, Studio Home, Studio Cloud, Operator, and Studio Local without feeling fragmented.
 
 ## Core Thesis
 Users should feel depth increasing, not products changing.
 
 ## Canonical Depth Modes
 1. Web Light
-2. Mission Control
+2. Studio Home
 3. Operator Surface
 4. Studio Cloud
 5. Studio Local
@@ -37,7 +37,7 @@ Use when:
 Primary dominant object:
 - mission input
 
-### Mission Control
+### Studio Home
 Use when:
 - a mission already exists
 - the system must orient the user
@@ -74,7 +74,7 @@ Primary dominant object:
 
 ## Canonical Handoffs
 
-### Web Light -> Mission Control
+### Web Light -> Studio Home
 Trigger:
 - mission submitted
 - project selected
@@ -85,7 +85,7 @@ Must preserve:
 - inferred domain
 - mission type
 
-### Mission Control -> Operator
+### Studio Home -> Operator
 Trigger:
 - user asks the AI to operate a website or platform
 - task requires acting with user permission on the internet
@@ -95,7 +95,7 @@ Must preserve:
 - approval level
 - connected account context
 
-### Mission Control -> Studio Cloud
+### Studio Home -> Studio Cloud
 Trigger:
 - implementation work
 - artifact editing
@@ -133,7 +133,7 @@ Must preserve:
 ## Dominant Surface Rule
 Every mode must have one dominant surface:
 - Web Light -> mission card
-- Mission Control -> mission hero
+- Studio Home -> mission hero
 - Operator -> browser
 - Studio Cloud -> editor or viewport
 - Studio Local -> editor or viewport

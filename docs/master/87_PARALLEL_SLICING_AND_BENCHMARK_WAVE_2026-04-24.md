@@ -1,5 +1,6 @@
 # 87_PARALLEL_SLICING_AND_BENCHMARK_WAVE_2026-04-24
 Date: 2026-04-24
+Last refreshed: 2026-04-30
 Status: ACTIVE
 Role: parallel slicing wave plan that turns the audit cluster into a concrete, benchmark-aware execution order
 
@@ -20,6 +21,10 @@ Use this document together with:
 - `docs/master/86_AUDITORIA_V6_SEM_PIEDADE_2026-04-21.md`
 - `docs/master/81_VALIDATED_PRIORITY_BACKLOG_2026-04-20.md`
 - `docs/master/85_EXECUTION_STATUS_MAP_2026-04-22.md`
+- `docs/master/90_CANONICAL_PRODUCT_QUALITY_TRIAGE_2026-04-30.md`
+
+Naming override:
+- when this document refers to the logged-in continuity shell, the current canonical name is `Studio Home`.
 
 ## Visual Anchors Read Alongside The Audits
 - `docs/master/assets/auditoria-v5-2026-04-19/cursor-ide-composer-multifile.avif`
