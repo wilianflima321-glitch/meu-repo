@@ -13,19 +13,19 @@ import { TaskRunner, TaskDefinition, TaskExecution } from '../../lib/tasks/task-
 // ============================================================================
 
 const theme = {
-  base: '#1e1e2e',
-  surface: '#313244',
-  surface1: '#45475a',
-  surface2: '#585b70',
-  text: '#cdd6f4',
-  subtext: '#a6adc8',
-  primary: '#89b4fa',
-  success: '#a6e3a1',
-  warning: '#fab387',
-  error: '#f38ba8',
-  overlay: '#6c7086',
-  lavender: '#b4befe',
-  mauve: '#cba6f7',
+  base: 'var(--aethel-surface-primary)',
+  surface: 'var(--aethel-surface-tertiary)',
+  surface1: 'var(--aethel-surface-quaternary)',
+  surface2: 'var(--aethel-text-quaternary)',
+  text: 'var(--aethel-text-primary)',
+  subtext: 'var(--aethel-text-tertiary)',
+  primary: 'var(--aethel-info)',
+  success: 'var(--aethel-success-light)',
+  warning: 'var(--aethel-warning)',
+  error: 'var(--aethel-error-light)',
+  overlay: 'var(--aethel-text-muted)',
+  lavender: 'var(--aethel-primary-light)',
+  mauve: 'var(--aethel-accent-light)',
 };
 
 // ============================================================================
@@ -164,7 +164,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: `1px solid ${theme.surface1}`,
   },
   terminal: {
-    backgroundColor: '#11111b',
+    backgroundColor: 'var(--aethel-surface-primary)',
     borderRadius: '8px',
     padding: '12px',
     fontFamily: "'JetBrains Mono', monospace",

@@ -42,17 +42,17 @@ function buildPreviewHtml(name: string, runtimeMode: RuntimeMode, assetCount: nu
       :root {
         color-scheme: dark;
         font-family: "IBM Plex Sans", Inter, system-ui, sans-serif;
-        --aethel-primary: #6366f1;
-        --aethel-primary-dark: #4f46e5;
-        --aethel-accent: #8b5cf6;
-        --aethel-info: #06b6d4;
-        --aethel-info-light: #22d3ee;
-        --aethel-surface-primary: #0a0a0f;
-        --aethel-surface-secondary: #111118;
-        --aethel-surface-tertiary: #1a1a24;
-        --aethel-text-secondary: #e2e8f0;
-        --aethel-text-tertiary: #94a3b8;
-        --aethel-text-quaternary: #64748b;
+        --aethel-primary: rgb(99, 102, 241);
+        --aethel-primary-dark: rgb(79, 70, 229);
+        --aethel-accent: rgb(139, 92, 246);
+        --aethel-info: rgb(6, 182, 212);
+        --aethel-info-light: rgb(34, 211, 238);
+        --aethel-surface-primary: rgb(10, 10, 15);
+        --aethel-surface-secondary: rgb(17, 17, 24);
+        --aethel-surface-tertiary: rgb(26, 26, 36);
+        --aethel-text-secondary: rgb(226, 232, 240);
+        --aethel-text-tertiary: rgb(148, 163, 184);
+        --aethel-text-quaternary: rgb(100, 116, 139);
         --aethel-border-primary: rgba(255, 255, 255, 0.1);
         --aethel-border-secondary: rgba(255, 255, 255, 0.15);
       }

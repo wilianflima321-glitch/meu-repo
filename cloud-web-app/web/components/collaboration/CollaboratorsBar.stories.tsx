@@ -39,17 +39,17 @@ function peer(clientId: number, name: string, color: string, avatar?: string): R
 
 export const SingleCollaborator: Story = {
   args: {
-    peers: [peer(1, 'Ada Lovelace', '#ff6b6b')],
+    peers: [peer(1, 'Ada Lovelace', 'tomato')],
   },
 }
 
 export const AtCapacity: Story = {
   args: {
     peers: [
-      peer(1, 'Ada Lovelace', '#ff6b6b'),
-      peer(2, 'Grace Hopper', '#5eead4'),
-      peer(3, 'Alan Turing', '#60a5fa'),
-      peer(4, 'Linus Torvalds', '#fcd34d'),
+      peer(1, 'Ada Lovelace', 'tomato'),
+      peer(2, 'Grace Hopper', 'turquoise'),
+      peer(3, 'Alan Turing', 'cornflowerblue'),
+      peer(4, 'Linus Torvalds', 'gold'),
     ],
   },
 }
@@ -57,13 +57,13 @@ export const AtCapacity: Story = {
 export const WithOverflow: Story = {
   args: {
     peers: [
-      peer(1, 'Ada Lovelace', '#ff6b6b'),
-      peer(2, 'Grace Hopper', '#5eead4'),
-      peer(3, 'Alan Turing', '#60a5fa'),
-      peer(4, 'Linus Torvalds', '#fcd34d'),
-      peer(5, 'Margaret Hamilton', '#c4b5fd'),
-      peer(6, 'Donald Knuth', '#86efac'),
-      peer(7, 'Barbara Liskov', '#f472b6'),
+      peer(1, 'Ada Lovelace', 'tomato'),
+      peer(2, 'Grace Hopper', 'turquoise'),
+      peer(3, 'Alan Turing', 'cornflowerblue'),
+      peer(4, 'Linus Torvalds', 'gold'),
+      peer(5, 'Margaret Hamilton', 'mediumpurple'),
+      peer(6, 'Donald Knuth', 'mediumseagreen'),
+      peer(7, 'Barbara Liskov', 'hotpink'),
     ],
   },
 }
@@ -77,8 +77,8 @@ export const Empty: Story = {
 export const WithAvatars: Story = {
   args: {
     peers: [
-      peer(1, 'Ada Lovelace', '#ff6b6b', 'https://i.pravatar.cc/40?u=ada'),
-      peer(2, 'Grace Hopper', '#5eead4', 'https://i.pravatar.cc/40?u=grace'),
+      peer(1, 'Ada Lovelace', 'tomato', 'https://i.pravatar.cc/40?u=ada'),
+      peer(2, 'Grace Hopper', 'turquoise', 'https://i.pravatar.cc/40?u=grace'),
     ],
   },
 }

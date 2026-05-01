@@ -66,14 +66,14 @@ const DARK_THEME: ThemeColors = {
 };
 
 const LIGHT_THEME: ThemeColors = {
-  'bg-primary': 'var(--aethel-surface-base, #ffffff)',
-  'bg-surface': 'var(--aethel-surface-light, #f4f4f5)',
-  'bg-elevated': 'var(--aethel-surface-light-elevated, #e4e4e7)',
-  'bg-hover': 'var(--aethel-surface-light-hover, #d4d4d8)',
-  'text-primary': 'var(--aethel-text-light-primary, #18181b)',
-  'text-secondary': 'var(--aethel-text-light-secondary, #52525b)',
+  'bg-primary': 'var(--aethel-surface-base, rgb(255, 255, 255))',
+  'bg-surface': 'var(--aethel-surface-light, rgb(244, 244, 245))',
+  'bg-elevated': 'var(--aethel-surface-light-elevated, rgb(228, 228, 231))',
+  'bg-hover': 'var(--aethel-surface-light-hover, rgb(212, 212, 216))',
+  'text-primary': 'var(--aethel-text-light-primary, rgb(24, 24, 27))',
+  'text-secondary': 'var(--aethel-text-light-secondary, rgb(82, 82, 91))',
   'text-muted': 'var(--aethel-text-quaternary)',
-  'border-primary': 'var(--aethel-border-light, #d4d4d8)',
+  'border-primary': 'var(--aethel-border-light, rgb(212, 212, 216))',
   'border-focus': 'var(--aethel-border-focus)',
   'color-primary': 'var(--aethel-primary)',
   'color-accent': 'var(--aethel-accent)',

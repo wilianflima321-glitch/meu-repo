@@ -2,155 +2,38 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { openConfirmDialog } from '@/lib/ui/non-blocking-dialogs'
+import { createComponentLogger } from '@/lib/observability/logger'
+import {
+  PROJECT_FILE_EXTENSION,
+  PROJECT_FILE_MAGIC,
+  PROJECT_FILE_VERSION,
+} from './project-persistence-models'
+import type {
+  MediaAsset,
+  ProjectData,
+  ProjectFile,
+  ProjectMetadata,
+  ProjectSettings,
+  Timeline,
+  TimelineClip,
+  TimelineTrack,
+} from './project-persistence-models'
 
+const log = createComponentLogger('ProjectPersistence')
 
-// ============================================================================
-// PROJECT PERSISTENCE SYSTEM (Premiere Pro / DaVinci style)
-// ============================================================================
+export type {
+  ClipKeyframes,
+  MediaAsset,
+  ProjectData,
+  ProjectFile,
+  ProjectMetadata,
+  ProjectSettings,
+  Timeline,
+  TimelineClip,
+  TimelineMarker,
+  TimelineTrack,
+} from './project-persistence-models'
 
-export interface ProjectMetadata {
-  id: string
-  name: string
-  createdAt: string
-  modifiedAt: string
-  version: string
-  author?: string
-  description?: string
-  tags?: string[]
-  thumbnail?: string       // Base64 or URL
-}
-
-export interface ProjectSettings {
-  resolution: { width: number; height: number }
-  frameRate: number
-  sampleRate: number
-  bitDepth: number
-  colorSpace: 'sRGB' | 'Rec709' | 'DCI-P3' | 'Rec2020'
-  workingDirectory?: string
-}
-
-export interface MediaAsset {
-  id: string
-  name: string
-  type: 'video' | 'audio' | 'image'
-  path: string
-  originalPath?: string
-  duration?: number
-  size?: number
-  metadata?: {
-    width?: number
-    height?: number
-    frameRate?: number
-    codec?: string
-    sampleRate?: number
-    channels?: number
-  }
-  thumbnail?: string
-  importedAt: string
-  missing?: boolean
-}
-
-export interface TimelineMarker {
-  id: string
-  time: number
-  name: string
-  color: string
-  comment?: string
-  type: 'marker' | 'chapter' | 'todo'
-}
-
-export interface ClipKeyframes {
-  property: string
-  keyframes: Array<{
-    time: number
-    value: number | number[]
-    easing: string
-  }>
-}
-
-export interface TimelineClip {
-  id: string
-  assetId: string
-  trackId: string
-  startTime: number
-  duration: number
-  inPoint: number
-  outPoint: number
-  speed: number
-  reversed: boolean
-  opacity: number
-  volume: number
-  muted: boolean
-  locked: boolean
-  effects: Array<{
-    id: string
-    type: string
-    params: Record<string, unknown>
-    bypass: boolean
-  }>
-  keyframes: ClipKeyframes[]
-  transition?: {
-    type: string
-    duration: number
-    params?: Record<string, unknown>
-  }
-  color?: string
-  label?: string
-}
-
-export interface TimelineTrack {
-  id: string
-  name: string
-  type: 'video' | 'audio'
-  height: number
-  muted: boolean
-  solo: boolean
-  locked: boolean
-  visible: boolean
-  volume: number
-  pan: number
-  color: string
-}
-
-export interface Timeline {
-  duration: number
-  playheadPosition: number
-  zoomLevel: number
-  scrollPosition: number
-  tracks: TimelineTrack[]
-  clips: TimelineClip[]
-  markers: TimelineMarker[]
-}
-
-export interface ProjectData {
-  metadata: ProjectMetadata
-  settings: ProjectSettings
-  assets: MediaAsset[]
-  timeline: Timeline
-  // Extensible for future features
-  bins?: Array<{
-    id: string
-    name: string
-    assetIds: string[]
-  }>
-  sequences?: Timeline[]
-  notes?: string
-}
-
-// ============================================================================
-// PROJECT FILE FORMAT
-// ============================================================================
-
-const PROJECT_FILE_VERSION = '1.0.0'
-const PROJECT_FILE_EXTENSION = '.aethel'
-const PROJECT_FILE_MAGIC = 'AETHEL_PROJECT'
-
-interface ProjectFile {
-  magic: string
-  version: string
-  compressed: boolean
-  data: ProjectData
-}
 
 // ============================================================================
 // SERIALIZATION / DESERIALIZATION
@@ -182,7 +65,7 @@ export function deserializeProject(content: string): ProjectData {
 
   // Version migration could happen here
   if (file.version !== PROJECT_FILE_VERSION) {
-    console.warn(`Project version mismatch: ${file.version} vs ${PROJECT_FILE_VERSION}. Attempting migration...`)
+    log.warn(`Project version mismatch: ${file.version} vs ${PROJECT_FILE_VERSION}. Attempting migration...`)
     // Future: Add migration logic
   }
 
@@ -209,7 +92,7 @@ export function saveProjectToLocalStorage(project: ProjectData): void {
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects))
   } catch (error) {
-    console.error('Failed to save project to local storage:', error)
+    log.error('Failed to save project to local storage', error)
   }
 }
 
@@ -218,7 +101,7 @@ export function getProjectsFromLocalStorage(): ProjectData[] {
     const data = localStorage.getItem(STORAGE_KEY)
     return data ? JSON.parse(data) : []
   } catch (error) {
-    console.error('Failed to load projects from local storage:', error)
+    log.error('Failed to load projects from local storage', error)
     return []
   }
 }
@@ -229,7 +112,7 @@ export function deleteProjectFromLocalStorage(projectId: string): void {
     const filtered = projects.filter(p => p.metadata.id !== projectId)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered))
   } catch (error) {
-    console.error('Failed to delete project from local storage:', error)
+    log.error('Failed to delete project from local storage', error)
   }
 }
 
@@ -237,7 +120,7 @@ export function saveAutosave(project: ProjectData): void {
   try {
     localStorage.setItem(AUTOSAVE_KEY, serializeProject(project))
   } catch (error) {
-    console.error('Failed to save autosave:', error)
+    log.error('Failed to save autosave', error)
   }
 }
 
@@ -246,7 +129,7 @@ export function loadAutosave(): ProjectData | null {
     const data = localStorage.getItem(AUTOSAVE_KEY)
     return data ? deserializeProject(data) : null
   } catch (error) {
-    console.error('Failed to load autosave:', error)
+    log.error('Failed to load autosave', error)
     return null
   }
 }
@@ -255,7 +138,7 @@ export function clearAutosave(): void {
   try {
     localStorage.removeItem(AUTOSAVE_KEY)
   } catch (error) {
-    console.error('Failed to clear autosave:', error)
+    log.error('Failed to clear autosave', error)
   }
 }
 
@@ -284,7 +167,7 @@ export async function saveProjectToFile(project: ProjectData): Promise<void> {
     await writable.close()
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
-      console.error('Failed to save project file:', error)
+      log.error('Failed to save project file', error)
       throw error
     }
   }
@@ -309,7 +192,7 @@ export async function loadProjectFromFile(): Promise<ProjectData | null> {
     return deserializeProject(content)
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
-      console.error('Failed to load project file:', error)
+      log.error('Failed to load project file', error)
       throw error
     }
     return null
@@ -347,7 +230,7 @@ function loadProjectViaInput(): Promise<ProjectData | null> {
         const content = await file.text()
         resolve(deserializeProject(content))
       } catch (error) {
-        console.error('Failed to load project:', error)
+        log.error('Failed to load project', error)
         resolve(null)
       }
     }
@@ -491,8 +374,8 @@ export function ProjectProvider({
       zoomLevel: 1,
       scrollPosition: 0,
       tracks: [
-        { id: 'v1', name: 'Video 1', type: 'video', height: 60, muted: false, solo: false, locked: false, visible: true, volume: 1, pan: 0, color: '#339af0' },
-        { id: 'a1', name: 'Audio 1', type: 'audio', height: 40, muted: false, solo: false, locked: false, visible: true, volume: 1, pan: 0, color: '#51cf66' },
+        { id: 'v1', name: 'Video 1', type: 'video', height: 60, muted: false, solo: false, locked: false, visible: true, volume: 1, pan: 0, color: 'var(--aethel-info)' },
+        { id: 'a1', name: 'Audio 1', type: 'audio', height: 40, muted: false, solo: false, locked: false, visible: true, volume: 1, pan: 0, color: 'var(--aethel-success)' },
       ],
       clips: [],
       markers: []
@@ -826,18 +709,18 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
       zIndex: 1000
     }}>
       <div style={{
-        background: '#25262b',
+        background: 'var(--aethel-surface-secondary)',
         borderRadius: 8,
         padding: 24,
         minWidth: 400,
         boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
       }}>
-        <h2 style={{ color: '#fff', margin: '0 0 20px 0', fontSize: 18 }}>New Project</h2>
+        <h2 style={{ color: 'var(--aethel-text-primary)', margin: '0 0 20px 0', fontSize: 18 }}>New Project</h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Project name */}
           <div>
-            <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
+            <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
               Project Name
             </label>
             <input
@@ -847,10 +730,10 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
               style={{
                 width: '100%',
                 padding: '8px 12px',
-                background: '#1a1b1e',
-                border: '1px solid #373a40',
+                background: 'var(--aethel-surface-primary)',
+                border: '1px solid var(--aethel-border-primary)',
                 borderRadius: 4,
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 fontSize: 14
               }}
             />
@@ -858,7 +741,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
 
           {/* Resolution presets */}
           <div>
-            <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
+            <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
               Resolution Preset
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -871,10 +754,10 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
                   }}
                   style={{
                     padding: '6px 12px',
-                    background: width === preset.width && height === preset.height ? '#339af0' : '#373a40',
+                    background: width === preset.width && height === preset.height ? 'var(--aethel-info)' : 'var(--aethel-border-primary)',
                     border: 'none',
                     borderRadius: 4,
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     fontSize: 11,
                     cursor: 'pointer'
                   }}
@@ -888,7 +771,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
           {/* Custom resolution */}
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ flex: 1 }}>
-              <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
+              <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
                 Width
               </label>
               <input
@@ -898,16 +781,16 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
                 style={{
                   width: '100%',
                   padding: '8px 12px',
-                  background: '#1a1b1e',
-                  border: '1px solid #373a40',
+                  background: 'var(--aethel-surface-primary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: 4,
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   fontSize: 14
                 }}
               />
             </div>
             <div style={{ flex: 1 }}>
-              <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
+              <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
                 Height
               </label>
               <input
@@ -917,10 +800,10 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
                 style={{
                   width: '100%',
                   padding: '8px 12px',
-                  background: '#1a1b1e',
-                  border: '1px solid #373a40',
+                  background: 'var(--aethel-surface-primary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: 4,
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   fontSize: 14
                 }}
               />
@@ -929,7 +812,7 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
 
           {/* Frame rate */}
           <div>
-            <label style={{ color: '#909296', fontSize: 11, display: 'block', marginBottom: 4 }}>
+            <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: 11, display: 'block', marginBottom: 4 }}>
               Frame Rate
             </label>
             <select
@@ -938,10 +821,10 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
               style={{
                 width: '100%',
                 padding: '8px 12px',
-                background: '#1a1b1e',
-                border: '1px solid #373a40',
+                background: 'var(--aethel-surface-primary)',
+                border: '1px solid var(--aethel-border-primary)',
                 borderRadius: 4,
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
                 fontSize: 14
               }}
             >
@@ -961,9 +844,9 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
             style={{
               padding: '8px 16px',
               background: 'transparent',
-              border: '1px solid #373a40',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: 4,
-              color: '#909296',
+              color: 'var(--aethel-text-tertiary)',
               cursor: 'pointer'
             }}
           >
@@ -979,10 +862,10 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
             }}
             style={{
               padding: '8px 16px',
-              background: '#339af0',
+              background: 'var(--aethel-info)',
               border: 'none',
               borderRadius: 4,
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               cursor: 'pointer',
               fontWeight: 600
             }}
@@ -996,6 +879,3 @@ export function NewProjectDialog({ open, onClose, onCreate }: NewProjectDialogPr
 }
 
 export default ProjectProvider
-import { createComponentLogger } from '@/lib/observability/logger'
-
-const log = createComponentLogger('ProjectPersistence')

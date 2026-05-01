@@ -72,15 +72,15 @@ export function PreviewViewport3D({ content: _content = '', mode: _mode = '3d', 
     let animationId: number | undefined
     let lastTime = 0
 
-    const backgroundColor = resolveCssVar('--aethel-surface-primary', '#0f172a')
-    const gridColor = resolveCssVar('--aethel-border-primary', '#334155')
-    const axisX = resolveCssVar('--aethel-error', '#ef4444')
-    const axisY = resolveCssVar('--aethel-success', '#22c55e')
-    const axisZ = resolveCssVar('--aethel-warning', '#f59e0b')
-    const wireframeColor = resolveCssVar('--aethel-text-primary', '#f8fafc')
-    const solidColor = resolveCssVar('--aethel-primary', '#4f46e5')
-    const statsTextColor = resolveCssVar('--aethel-text-primary', '#f8fafc')
-    const statsBackground = hexToRgba(backgroundColor.startsWith('#') ? backgroundColor : '#0f172a', 0.72)
+    const backgroundColor = resolveCssVar('--aethel-surface-primary', 'rgb(15, 23, 42)')
+    const gridColor = resolveCssVar('--aethel-border-primary', 'rgb(51, 65, 85)')
+    const axisX = resolveCssVar('--aethel-error', 'rgb(239, 68, 68)')
+    const axisY = resolveCssVar('--aethel-success', 'rgb(34, 197, 94)')
+    const axisZ = resolveCssVar('--aethel-warning', 'rgb(245, 158, 11)')
+    const wireframeColor = resolveCssVar('--aethel-text-primary', 'rgb(248, 250, 252)')
+    const solidColor = resolveCssVar('--aethel-primary', 'rgb(79, 70, 229)')
+    const statsTextColor = resolveCssVar('--aethel-text-primary', 'rgb(248, 250, 252)')
+    const statsBackground = hexToRgba(backgroundColor.startsWith('#') ? backgroundColor : 'rgb(15, 23, 42)', 0.72)
 
     const render = (timestamp: number) => {
       const deltaTime = timestamp - lastTime || 16.67

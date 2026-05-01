@@ -45,19 +45,19 @@ import {
 // ============================================================================
 
 const colors = {
-  base: '#1e1e2e',
-  surface0: '#313244',
-  surface1: '#45475a',
-  surface2: '#585b70',
-  text: '#cdd6f4',
-  subtext0: '#a6adc8',
-  subtext1: '#bac2de',
-  blue: '#89b4fa',
-  green: '#a6e3a1',
-  red: '#f38ba8',
-  yellow: '#f9e2af',
-  mauve: '#cba6f7',
-  overlay0: '#6c7086',
+  base: 'var(--aethel-surface-primary)',
+  surface0: 'var(--aethel-surface-tertiary)',
+  surface1: 'var(--aethel-surface-quaternary)',
+  surface2: 'var(--aethel-text-quaternary)',
+  text: 'var(--aethel-text-primary)',
+  subtext0: 'var(--aethel-text-tertiary)',
+  subtext1: 'var(--aethel-text-secondary)',
+  blue: 'var(--aethel-info)',
+  green: 'var(--aethel-success-light)',
+  red: 'var(--aethel-error-light)',
+  yellow: 'var(--aethel-warning-light)',
+  mauve: 'var(--aethel-accent-light)',
+  overlay0: 'var(--aethel-text-muted)',
 };
 
 // ============================================================================

@@ -359,7 +359,7 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
 
   return (
     <div style={{
-      background: '#1a1b1e',
+      background: 'var(--aethel-surface-primary)',
       borderRadius: 4,
       padding: 8,
       minWidth: 200
@@ -371,19 +371,19 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
         justifyContent: 'space-between',
         marginBottom: 8,
         paddingBottom: 8,
-        borderBottom: '1px solid #373a40'
+        borderBottom: '1px solid var(--aethel-border-primary)'
       }}>
-        <span style={{ color: '#c1c2c5', fontSize: 12, fontWeight: 600 }}>History</span>
+        <span style={{ color: 'var(--aethel-text-secondary)', fontSize: 12, fontWeight: 600 }}>History</span>
         <div style={{ display: 'flex', gap: 4 }}>
           <button type="button" aria-label={undoName ? `Undo ${undoName}` : 'Undo unavailable'}
             onClick={undo}
             disabled={!canUndo}
             title={undoName ? `Undo: ${undoName}` : 'Nothing to undo'}
             style={{
-              background: canUndo ? '#25262b' : 'transparent',
-              border: '1px solid #373a40',
+              background: canUndo ? 'var(--aethel-surface-secondary)' : 'transparent',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: 3,
-              color: canUndo ? '#c1c2c5' : '#5c5f66',
+              color: canUndo ? 'var(--aethel-text-secondary)' : 'var(--aethel-text-quaternary)',
               padding: '2px 6px',
               cursor: canUndo ? 'pointer' : 'not-allowed',
               fontSize: 11
@@ -396,10 +396,10 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
             disabled={!canRedo}
             title={redoName ? `Redo: ${redoName}` : 'Nothing to redo'}
             style={{
-              background: canRedo ? '#25262b' : 'transparent',
-              border: '1px solid #373a40',
+              background: canRedo ? 'var(--aethel-surface-secondary)' : 'transparent',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: 3,
-              color: canRedo ? '#c1c2c5' : '#5c5f66',
+              color: canRedo ? 'var(--aethel-text-secondary)' : 'var(--aethel-text-quaternary)',
               padding: '2px 6px',
               cursor: canRedo ? 'pointer' : 'not-allowed',
               fontSize: 11
@@ -412,9 +412,9 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
             title="Clear history"
             style={{
               background: 'transparent',
-              border: '1px solid #373a40',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: 3,
-              color: '#868e96',
+              color: 'var(--aethel-text-tertiary)',
               padding: '2px 6px',
               cursor: 'pointer',
               fontSize: 11
@@ -434,8 +434,8 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
               padding: '4px 8px',
               marginBottom: 2,
               borderRadius: 3,
-              background: item.isCurrent ? '#339af0' : '#25262b',
-              color: item.isCurrent ? '#fff' : '#909296',
+              background: item.isCurrent ? 'var(--aethel-info)' : 'var(--aethel-surface-secondary)',
+              color: item.isCurrent ? 'var(--aethel-text-inverse)' : 'var(--aethel-text-tertiary)',
               fontSize: 11,
               cursor: 'default',
               display: 'flex',
@@ -452,7 +452,7 @@ export function HistoryPanel({ maxVisible = 20 }: HistoryPanelProps) {
       </div>
 
       {historyList.length > maxVisible && (
-        <div style={{ color: '#5c5f66', fontSize: 10, textAlign: 'center', marginTop: 4 }}>
+        <div style={{ color: 'var(--aethel-text-quaternary)', fontSize: 10, textAlign: 'center', marginTop: 4 }}>
           +{historyList.length - maxVisible} more
         </div>
       )}

@@ -11,6 +11,11 @@ interface GitGraphNode {
   parents: string[];
 }
 
+function resolveCanvasColor(token: string, fallback: string): string {
+  if (typeof document === 'undefined') return fallback;
+  return getComputedStyle(document.documentElement).getPropertyValue(token).trim() || fallback;
+}
+
 export default function GitGraph() {
   const [commits, setCommits] = useState<GitCommit[]>([]);
   const [nodes, setNodes] = useState<GitGraphNode[]>([]);
@@ -92,7 +97,7 @@ export default function GitGraph() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw connections
-    ctx.strokeStyle = '#64748b';
+    ctx.strokeStyle = resolveCanvasColor('--aethel-text-muted', 'rgb(100, 116, 139)');
     ctx.lineWidth = 2;
 
     for (const node of nodes) {
@@ -109,7 +114,13 @@ export default function GitGraph() {
 
     // Draw nodes
     for (const node of nodes) {
-      const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+      const colors = [
+        resolveCanvasColor('--aethel-accent', 'rgb(139, 92, 246)'),
+        resolveCanvasColor('--aethel-primary', 'rgb(59, 130, 246)'),
+        resolveCanvasColor('--aethel-success', 'rgb(16, 185, 129)'),
+        resolveCanvasColor('--aethel-warning', 'rgb(245, 158, 11)'),
+        resolveCanvasColor('--aethel-error', 'rgb(239, 68, 68)'),
+      ];
       const color = colors[node.branch % colors.length];
 
       ctx.fillStyle = color;
@@ -117,7 +128,7 @@ export default function GitGraph() {
       ctx.arc(node.x, node.y, 8, 0, 2 * Math.PI);
       ctx.fill();
 
-      ctx.strokeStyle = '#1e293b';
+      ctx.strokeStyle = resolveCanvasColor('--aethel-surface-tertiary', 'rgb(30, 41, 59)');
       ctx.lineWidth = 2;
       ctx.stroke();
     }

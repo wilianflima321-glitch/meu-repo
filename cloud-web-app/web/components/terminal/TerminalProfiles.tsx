@@ -64,22 +64,22 @@ export interface ActiveTerminal {
 // ============================================================================
 
 const colors = {
-  bg: '#0a0a0f',
-  surface: '#12121a',
-  surfaceHover: '#1a1a25',
-  surfaceActive: '#22222f',
-  border: '#2a2a3a',
-  borderFocus: '#4f46e5',
-  text: '#e4e4eb',
-  textMuted: '#8b8b9e',
-  textDim: '#5a5a6e',
-  primary: '#6366f1',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  accent: '#8b5cf6',
-  cyan: '#06b6d4',
-  magenta: '#ec4899',
+  bg: 'var(--aethel-surface-primary)',
+  surface: 'var(--aethel-surface-secondary)',
+  surfaceHover: 'var(--aethel-surface-tertiary)',
+  surfaceActive: 'var(--aethel-surface-quaternary)',
+  border: 'var(--aethel-border-primary)',
+  borderFocus: 'var(--aethel-border-focus)',
+  text: 'var(--aethel-text-primary)',
+  textMuted: 'var(--aethel-text-tertiary)',
+  textDim: 'var(--aethel-text-quaternary)',
+  primary: 'var(--aethel-accent)',
+  success: 'var(--aethel-success)',
+  warning: 'var(--aethel-warning)',
+  error: 'var(--aethel-error)',
+  accent: 'var(--aethel-accent)',
+  cyan: 'var(--aethel-info)',
+  magenta: 'var(--aethel-error-light)',
 };
 
 // ============================================================================

@@ -96,3 +96,11 @@ export const TERMINAL_THEMES: Record<string, TerminalTheme> = {
     brightWhite: '#ffffff',
   },
 };
+
+const catppuccinMocha = TERMINAL_THEMES.catppuccinMocha;
+
+export const XTERM_CATPPUCCIN_THEME = {
+  ...catppuccinMocha,
+  selectionBackground: catppuccinMocha.selection,
+  selectionForeground: catppuccinMocha.foreground,
+};

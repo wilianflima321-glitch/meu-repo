@@ -87,7 +87,7 @@ const defaultObjects: ViewportSceneObject[] = [
     name: 'Airlock Shell',
     type: 'mesh',
     geometry: 'box',
-    color: '#7dd3fc',
+    color: 'rgb(125, 211, 252)',
     position: [0, 0.55, 0],
     rotation: [0, 0.35, 0],
     scale: [1.8, 1.1, 1.2],
@@ -97,7 +97,7 @@ const defaultObjects: ViewportSceneObject[] = [
     id: 'camera-rig',
     name: 'Camera Rig',
     type: 'camera',
-    color: '#a78bfa',
+    color: 'rgb(167, 139, 250)',
     position: [2.2, 1.5, 2.4],
     rotation: [-0.35, 0.72, 0],
     scale: [1, 1, 1],
@@ -107,7 +107,7 @@ const defaultObjects: ViewportSceneObject[] = [
     id: 'key-light',
     name: 'Key Light',
     type: 'light',
-    color: '#fbbf24',
+    color: 'rgb(251, 191, 36)',
     position: [1.6, 2.2, 1.8],
     rotation: [0, 0, 0],
     scale: [1, 1, 1],
@@ -167,11 +167,11 @@ function GeometryForObject({ object, isSelected }: { object: ViewportSceneObject
       <>
         <mesh>
           <coneGeometry args={[0.24, 0.55, 4]} />
-          <meshStandardMaterial color={isSelected ? '#c4b5fd' : object.color} wireframe />
+          <meshStandardMaterial color={isSelected ? 0xc4b5fd : object.color} wireframe />
         </mesh>
         <mesh position={[0, 0, -0.22]}>
           <boxGeometry args={[0.24, 0.18, 0.22]} />
-          <meshStandardMaterial color={isSelected ? '#c4b5fd' : '#1f2937'} />
+          <meshStandardMaterial color={isSelected ? 0xc4b5fd : 0x1f2937} />
         </mesh>
       </>
     )
@@ -194,21 +194,21 @@ function GeometryForObject({ object, isSelected }: { object: ViewportSceneObject
       return (
         <mesh castShadow receiveShadow>
           <sphereGeometry args={[0.6, 32, 32]} />
-          <meshStandardMaterial color={object.color} metalness={0.5} roughness={0.28} emissive={isSelected ? '#1d4ed8' : '#000000'} emissiveIntensity={isSelected ? 0.4 : 0} />
+          <meshStandardMaterial color={object.color} metalness={0.5} roughness={0.28} emissive={isSelected ? 0x1d4ed8 : 0x000000} emissiveIntensity={isSelected ? 0.4 : 0} />
         </mesh>
       )
     case 'capsule':
       return (
         <mesh castShadow receiveShadow>
           <capsuleGeometry args={[0.4, 0.9, 6, 12]} />
-          <meshStandardMaterial color={object.color} metalness={0.35} roughness={0.3} emissive={isSelected ? '#0f766e' : '#000000'} emissiveIntensity={isSelected ? 0.35 : 0} />
+          <meshStandardMaterial color={object.color} metalness={0.35} roughness={0.3} emissive={isSelected ? 0x0f766e : 0x000000} emissiveIntensity={isSelected ? 0.35 : 0} />
         </mesh>
       )
     case 'cylinder':
       return (
         <mesh castShadow receiveShadow>
           <cylinderGeometry args={[0.42, 0.55, 1.2, 24]} />
-          <meshStandardMaterial color={object.color} metalness={0.55} roughness={0.24} emissive={isSelected ? '#f97316' : '#000000'} emissiveIntensity={isSelected ? 0.35 : 0} />
+          <meshStandardMaterial color={object.color} metalness={0.55} roughness={0.24} emissive={isSelected ? 0xf97316 : 0x000000} emissiveIntensity={isSelected ? 0.35 : 0} />
         </mesh>
       )
     case 'plane':
@@ -222,7 +222,7 @@ function GeometryForObject({ object, isSelected }: { object: ViewportSceneObject
       return (
         <mesh castShadow receiveShadow>
           <boxGeometry args={[1.4, 1, 1]} />
-          <meshStandardMaterial color={object.color} metalness={0.62} roughness={0.22} emissive={isSelected ? '#2563eb' : '#000000'} emissiveIntensity={isSelected ? 0.3 : 0} />
+          <meshStandardMaterial color={object.color} metalness={0.62} roughness={0.22} emissive={isSelected ? 0x2563eb : 0x000000} emissiveIntensity={isSelected ? 0.3 : 0} />
         </mesh>
       )
   }
@@ -243,10 +243,10 @@ function SceneObjectMesh({
   onTransformChange,
   onSelect,
 }: SceneObjectMeshProps & {
-  visualGlowColor?: string
+  visualGlowColor?: THREE.ColorRepresentation
   visualGlowIntensity?: number
   facialExpressionIntensity?: number
-  hairHighlightColor?: string | null
+  hairHighlightColor?: THREE.ColorRepresentation | null
   hairVolumeIntensity?: number
 }) {
   const groupRef = useRef<THREE.Group>(null)
@@ -297,13 +297,13 @@ function SceneObjectMesh({
       {visualGlowIntensity && visualGlowIntensity > 0 ? (
         <mesh scale={[1.08, 1.08, 1.08]}>
           <sphereGeometry args={[0.95, 20, 20]} />
-          <meshBasicMaterial color={visualGlowColor ?? '#60a5fa'} transparent opacity={Math.min(0.18, visualGlowIntensity * 0.08)} />
+          <meshBasicMaterial color={visualGlowColor ?? 0x60a5fa} transparent opacity={Math.min(0.18, visualGlowIntensity * 0.08)} />
         </mesh>
       ) : null}
       {primarySelected && hairVolumeIntensity > 0 ? (
         <mesh position={[0, 0.72 + hairVolumeIntensity * 0.08, 0]} scale={[1 + hairVolumeIntensity * 0.12, 0.18 + hairVolumeIntensity * 0.06, 1 + hairVolumeIntensity * 0.12]}>
           <sphereGeometry args={[0.5, 24, 24]} />
-          <meshBasicMaterial color={hairHighlightColor ?? '#6b3d22'} transparent opacity={0.22} />
+          <meshBasicMaterial color={hairHighlightColor ?? 0x6b3d22} transparent opacity={0.22} />
         </mesh>
       ) : null}
       {isSelected ? (
@@ -386,8 +386,8 @@ function ViewportScene({
       onPointerMissed={() => onSelectionChange([])}
       className="h-full w-full"
     >
-      <color attach="background" args={[renderMode === 'cinematic' ? '#070b12' : '#0b1220']} />
-      <fog attach="fog" args={[renderMode === 'cinematic' ? '#070b12' : '#0b1220', 10, 22]} />
+      <color attach="background" args={[renderMode === 'cinematic' ? 0x070b12 : 0x0b1220]} />
+      <fog attach="fog" args={[renderMode === 'cinematic' ? 0x070b12 : 0x0b1220, 10, 22]} />
       <ambientLight intensity={renderMode === 'cinematic' ? 0.45 : 0.72} />
       <directionalLight
         position={[5, 6, 4]}
@@ -396,14 +396,14 @@ function ViewportScene({
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
       />
-      <spotLight position={[-4, 4, 6]} angle={0.45} intensity={0.7} color="#7dd3fc" />
+      <spotLight position={[-4, 4, 6]} angle={0.45} intensity={0.7} color={0x7dd3fc} />
       <Suspense fallback={null}>
         <Environment preset={renderMode === 'cinematic' ? 'city' : 'studio'} />
       </Suspense>
       <Grid args={[28, 28]} cellSize={0.5} cellThickness={0.5} sectionSize={2} sectionThickness={1.1} fadeDistance={32} />
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, 0, 0]}>
         <planeGeometry args={[40, 40]} />
-        <meshStandardMaterial color="#111827" roughness={0.92} metalness={0.08} />
+        <meshStandardMaterial color={0x111827} roughness={0.92} metalness={0.08} />
       </mesh>
 
       {objects.map((object) => (
@@ -415,7 +415,7 @@ function ViewportScene({
           transformMode={transformMode}
           transformSpace={transformSpace}
           snapEnabled={snapEnabled}
-          visualGlowColor={selectedIds.includes(object.id) ? abilityAccentColor ?? '#60a5fa' : undefined}
+          visualGlowColor={selectedIds.includes(object.id) ? abilityAccentColor ?? 0x60a5fa : undefined}
           visualGlowIntensity={selectedIds.includes(object.id) ? vfxGlowIntensity + cinematicGlowIntensity : 0}
           facialExpressionIntensity={selectedIds.includes(object.id) ? facialExpressionIntensity : 0}
           hairHighlightColor={selectedIds.includes(object.id) ? hairHighlightColor : undefined}
@@ -425,11 +425,11 @@ function ViewportScene({
         />
       ))}
 
-      {trajectoryPoints.length > 1 ? <Line points={trajectoryPoints} color={creativeMode === 'film' ? '#f59e0b' : '#38bdf8'} lineWidth={2.2} dashed dashSize={0.2} gapSize={0.12} /> : null}
+      {trajectoryPoints.length > 1 ? <Line points={trajectoryPoints} color={creativeMode === 'film' ? 0xf59e0b : 0x38bdf8} lineWidth={2.2} dashed dashSize={0.2} gapSize={0.12} /> : null}
 
       <OrbitControls makeDefault enableDamping dampingFactor={0.12} maxDistance={14} minDistance={1.8} />
       <GizmoHelper alignment="bottom-right" margin={[88, 88]}>
-        <GizmoViewport axisColors={['#ff6b6b', '#4ade80', '#60a5fa']} labelColor="#ffffff" />
+        <GizmoViewport axisColors={['red', 'lime', 'deepskyblue']} labelColor="white" />
       </GizmoHelper>
     </Canvas>
   )

@@ -18,96 +18,27 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import {
+  categoryColors,
+  TARGET_FRAME_TIME,
+  WARNING_FRAME_TIME,
+} from './advanced-profiler-models';
+import type {
+  MemoryStats,
+  ProfilerCategory,
+  ProfilerFrame,
+  ProfilerMarker,
+  ProfilerSession,
+} from './advanced-profiler-models';
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface ProfilerFrame {
-  frameId: number;
-  timestamp: number;
-  duration: number;
-  cpuTime: number;
-  gpuTime: number;
-  markers: ProfilerMarker[];
-  memory: MemoryStats;
-  drawCalls: number;
-  triangles: number;
-  vertices: number;
-}
-
-export interface ProfilerMarker {
-  id: string;
-  name: string;
-  category: ProfilerCategory;
-  startTime: number;
-  duration: number;
-  depth: number;
-  color: string;
-  children?: ProfilerMarker[];
-  metadata?: Record<string, unknown>;
-}
-
-export type ProfilerCategory =
-  | 'render'
-  | 'physics'
-  | 'animation'
-  | 'ai'
-  | 'audio'
-  | 'scripts'
-  | 'ui'
-  | 'network'
-  | 'loading'
-  | 'custom';
-
-export interface MemoryStats {
-  totalHeap: number;
-  usedHeap: number;
-  textures: number;
-  geometries: number;
-  materials: number;
-  shaders: number;
-}
-
-export interface GPUStats {
-  frameTime: number;
-  drawCalls: number;
-  triangles: number;
-  vertices: number;
-  textureBinds: number;
-  shaderSwitches: number;
-  stateChanges: number;
-}
-
-export interface ProfilerSession {
-  id: string;
-  name: string;
-  startTime: number;
-  frames: ProfilerFrame[];
-  averageFPS: number;
-  minFPS: number;
-  maxFPS: number;
-}
-
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
-const categoryColors: Record<ProfilerCategory, string> = {
-  render: '#3b82f6',
-  physics: '#22c55e',
-  animation: '#f59e0b',
-  ai: '#8b5cf6',
-  audio: '#ec4899',
-  scripts: '#06b6d4',
-  ui: '#f97316',
-  network: '#84cc16',
-  loading: '#64748b',
-  custom: '#94a3b8',
-};
-
-const TARGET_FRAME_TIME = 16.67; // 60 FPS
-const WARNING_FRAME_TIME = 33.33; // 30 FPS
+export type {
+  GPUStats,
+  MemoryStats,
+  ProfilerCategory,
+  ProfilerFrame,
+  ProfilerMarker,
+  ProfilerSession,
+} from './advanced-profiler-models';
 
 // ============================================================================
 // FRAME TIMELINE COMPONENT
@@ -190,7 +121,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
         ref={containerRef}
         style={{
           height: '120px',
-          background: '#0f172a',
+          background: 'var(--aethel-surface-primary)',
           borderRadius: '8px',
           position: 'relative',
           overflow: 'hidden',
@@ -207,7 +138,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
             right: 0,
             bottom: `${(TARGET_FRAME_TIME / maxFrameTime) * 100}%`,
             height: '1px',
-            background: '#22c55e',
+            background: 'var(--aethel-success)',
             opacity: 0.5,
             zIndex: 1,
           }}
@@ -221,7 +152,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
             right: 0,
             bottom: `${(WARNING_FRAME_TIME / maxFrameTime) * 100}%`,
             height: '1px',
-            background: '#f59e0b',
+            background: 'var(--aethel-warning)',
             opacity: 0.5,
             zIndex: 1,
           }}
@@ -243,7 +174,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
                   flex: 1,
                   maxWidth: '10px',
                   height: `${Math.min(100, height)}%`,
-                  background: isSlow ? '#ef4444' : isWarning ? '#f59e0b' : '#3b82f6',
+                  background: isSlow ? 'var(--aethel-error)' : isWarning ? 'var(--aethel-warning)' : 'var(--aethel-primary)',
                   borderRadius: '2px 2px 0 0',
                   cursor: 'pointer',
                   opacity: isSelected ? 1 : 0.7,
@@ -263,7 +194,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
           right: '8px',
           top: '8px',
           fontSize: '10px',
-          color: '#64748b',
+          color: 'var(--aethel-text-muted)',
         }}>
           {(1000 / maxFrameTime).toFixed(0)} FPS
         </div>
@@ -272,7 +203,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
       {/* Scroll bar */}
       <div style={{
         height: '8px',
-        background: '#1e293b',
+        background: 'var(--aethel-surface-tertiary)',
         borderRadius: '4px',
         marginTop: '4px',
         position: 'relative',
@@ -283,7 +214,7 @@ function FrameTimeline({ frames, selectedFrame, onSelectFrame, viewRange, onView
             left: `${(viewRange.start / frames.length) * 100}%`,
             width: `${((viewRange.end - viewRange.start) / frames.length) * 100}%`,
             height: '100%',
-            background: '#3b82f6',
+            background: 'var(--aethel-primary)',
             borderRadius: '4px',
           }}
         />
@@ -334,7 +265,7 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
       </h3>
 
       <div style={{
-        background: '#0f172a',
+        background: 'var(--aethel-surface-primary)',
         borderRadius: '8px',
         padding: '8px',
         position: 'relative',
@@ -387,7 +318,7 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
           display: 'flex',
           justifyContent: 'space-between',
           fontSize: '9px',
-          color: '#64748b',
+          color: 'var(--aethel-text-muted)',
         }}>
           <span>0ms</span>
           <span>{(frameTime / 4).toFixed(1)}ms</span>
@@ -404,8 +335,8 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
             position: 'fixed',
             left: tooltipPos.x + 10,
             top: tooltipPos.y + 10,
-            background: '#1e293b',
-            border: '1px solid #374151',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '6px',
             padding: '8px 12px',
             zIndex: 1000,
@@ -415,10 +346,10 @@ function FlameGraph({ markers, frameTime, type }: FlameGraphProps) {
           <div style={{ color: 'white', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>
             {hoveredMarker.name}
           </div>
-          <div style={{ color: '#94a3b8', fontSize: '11px' }}>
+          <div style={{ color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>
             Duration: {hoveredMarker.duration.toFixed(3)}ms
           </div>
-          <div style={{ color: '#64748b', fontSize: '10px' }}>
+          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>
             Category: {hoveredMarker.category}
           </div>
         </div>
@@ -449,7 +380,7 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
   return (
     <div style={{
       padding: '12px',
-      background: '#0f172a',
+      background: 'var(--aethel-surface-primary)',
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Memory</h3>
@@ -457,14 +388,14 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
       {/* Heap usage bar */}
       <div style={{ marginBottom: '12px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <span style={{ color: '#94a3b8', fontSize: '12px' }}>Heap Usage</span>
-          <span style={{ color: '#64748b', fontSize: '11px' }}>
+          <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Heap Usage</span>
+          <span style={{ color: 'var(--aethel-text-muted)', fontSize: '11px' }}>
             {formatBytes(stats.usedHeap)} / {formatBytes(stats.totalHeap)}
           </span>
         </div>
         <div style={{
           height: '8px',
-          background: '#1e293b',
+          background: 'var(--aethel-surface-tertiary)',
           borderRadius: '4px',
           overflow: 'hidden',
         }}>
@@ -472,7 +403,7 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
             style={{
               width: `${usagePercent}%`,
               height: '100%',
-              background: usagePercent > 80 ? '#ef4444' : usagePercent > 60 ? '#f59e0b' : '#22c55e',
+              background: usagePercent > 80 ? 'var(--aethel-error)' : usagePercent > 60 ? 'var(--aethel-warning)' : 'var(--aethel-success)',
               transition: 'width 0.3s',
             }}
           />
@@ -481,29 +412,29 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
 
       {/* Memory breakdown */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-        <div style={{ padding: '8px', background: '#1e293b', borderRadius: '4px' }}>
-          <div style={{ color: '#64748b', fontSize: '10px' }}>Textures</div>
+        <div style={{ padding: '8px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
+          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>Textures</div>
           <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
             {formatBytes(stats.textures)}
           </div>
         </div>
 
-        <div style={{ padding: '8px', background: '#1e293b', borderRadius: '4px' }}>
-          <div style={{ color: '#64748b', fontSize: '10px' }}>Geometries</div>
+        <div style={{ padding: '8px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
+          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>Geometries</div>
           <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
             {formatBytes(stats.geometries)}
           </div>
         </div>
 
-        <div style={{ padding: '8px', background: '#1e293b', borderRadius: '4px' }}>
-          <div style={{ color: '#64748b', fontSize: '10px' }}>Materials</div>
+        <div style={{ padding: '8px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
+          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>Materials</div>
           <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
             {formatBytes(stats.materials)}
           </div>
         </div>
 
-        <div style={{ padding: '8px', background: '#1e293b', borderRadius: '4px' }}>
-          <div style={{ color: '#64748b', fontSize: '10px' }}>Shaders</div>
+        <div style={{ padding: '8px', background: 'var(--aethel-surface-tertiary)', borderRadius: '4px' }}>
+          <div style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>Shaders</div>
           <div style={{ color: 'white', fontSize: '14px', fontWeight: 'bold' }}>
             {formatBytes(stats.shaders)}
           </div>
@@ -512,10 +443,10 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
 
       {/* Memory graph */}
       <div style={{ marginTop: '12px' }}>
-        <div style={{ color: '#64748b', fontSize: '11px', marginBottom: '4px' }}>History</div>
+        <div style={{ color: 'var(--aethel-text-muted)', fontSize: '11px', marginBottom: '4px' }}>History</div>
         <div style={{
           height: '50px',
-          background: '#1e293b',
+          background: 'var(--aethel-surface-tertiary)',
           borderRadius: '4px',
           display: 'flex',
           alignItems: 'flex-end',
@@ -528,7 +459,7 @@ function MemoryPanel({ stats, history }: MemoryPanelProps) {
               style={{
                 flex: 1,
                 height: `${(h.usedHeap / h.totalHeap) * 100}%`,
-                background: '#3b82f6',
+                background: 'var(--aethel-primary)',
                 borderRadius: '1px',
                 minWidth: '2px',
               }}
@@ -555,7 +486,7 @@ function StatsPanel({ frame, session }: StatsPanelProps) {
   return (
     <div style={{
       padding: '12px',
-      background: '#0f172a',
+      background: 'var(--aethel-surface-primary)',
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Statistics</h3>
@@ -572,8 +503,8 @@ function StatsPanel({ frame, session }: StatsPanelProps) {
           height: '100px',
           borderRadius: '50%',
           background: `conic-gradient(
-            ${currentFPS >= 60 ? '#22c55e' : currentFPS >= 30 ? '#f59e0b' : '#ef4444'} ${(currentFPS / 60) * 360}deg,
-            #1e293b ${(currentFPS / 60) * 360}deg
+            ${currentFPS >= 60 ? 'var(--aethel-success)' : currentFPS >= 30 ? 'var(--aethel-warning)' : 'var(--aethel-error)'} ${(currentFPS / 60) * 360}deg,
+            var(--aethel-surface-tertiary) ${(currentFPS / 60) * 360}deg
           )`,
           display: 'flex',
           alignItems: 'center',
@@ -583,7 +514,7 @@ function StatsPanel({ frame, session }: StatsPanelProps) {
             width: '80px',
             height: '80px',
             borderRadius: '50%',
-            background: '#0f172a',
+            background: 'var(--aethel-surface-primary)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -592,7 +523,7 @@ function StatsPanel({ frame, session }: StatsPanelProps) {
             <span style={{ color: 'white', fontSize: '24px', fontWeight: 'bold' }}>
               {currentFPS.toFixed(0)}
             </span>
-            <span style={{ color: '#64748b', fontSize: '10px' }}>FPS</span>
+            <span style={{ color: 'var(--aethel-text-muted)', fontSize: '10px' }}>FPS</span>
           </div>
         </div>
       </div>
@@ -608,8 +539,8 @@ function StatsPanel({ frame, session }: StatsPanelProps) {
       </div>
 
       {/* Session stats */}
-      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #374151' }}>
-        <div style={{ color: '#64748b', fontSize: '11px', marginBottom: '8px' }}>Session Statistics</div>
+      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--aethel-border-primary)' }}>
+        <div style={{ color: 'var(--aethel-text-muted)', fontSize: '11px', marginBottom: '8px' }}>Session Statistics</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
           <StatBox label="Avg FPS" value={session.averageFPS.toFixed(0)} small />
           <StatBox label="Min FPS" value={session.minFPS.toFixed(0)} small warning={session.minFPS < 30} />
@@ -624,13 +555,13 @@ function StatBox({ label, value, small, warning }: { label: string; value: strin
   return (
     <div style={{
       padding: small ? '6px' : '8px',
-      background: '#1e293b',
+      background: 'var(--aethel-surface-tertiary)',
       borderRadius: '4px',
-      border: warning ? '1px solid #ef4444' : 'none',
+      border: warning ? '1px solid var(--aethel-error)' : 'none',
     }}>
-      <div style={{ color: '#64748b', fontSize: small ? '9px' : '10px' }}>{label}</div>
+      <div style={{ color: 'var(--aethel-text-muted)', fontSize: small ? '9px' : '10px' }}>{label}</div>
       <div style={{
-        color: warning ? '#ef4444' : 'white',
+        color: warning ? 'var(--aethel-error)' : 'white',
         fontSize: small ? '12px' : '14px',
         fontWeight: 'bold'
       }}>
@@ -676,7 +607,7 @@ function CategoryBreakdown({ markers, frameTime }: CategoryBreakdownProps) {
   return (
     <div style={{
       padding: '12px',
-      background: '#0f172a',
+      background: 'var(--aethel-surface-primary)',
       borderRadius: '8px',
     }}>
       <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Category Breakdown</h3>
@@ -694,17 +625,17 @@ function CategoryBreakdown({ markers, frameTime }: CategoryBreakdownProps) {
                   borderRadius: '2px',
                   background: categoryColors[category as ProfilerCategory],
                 }} />
-                <span style={{ color: '#94a3b8', fontSize: '12px', textTransform: 'capitalize' }}>
+                <span style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', textTransform: 'capitalize' }}>
                   {category}
                 </span>
               </div>
-              <span style={{ color: '#64748b', fontSize: '11px' }}>
+              <span style={{ color: 'var(--aethel-text-muted)', fontSize: '11px' }}>
                 {time.toFixed(2)}ms ({percent.toFixed(1)}%)
               </span>
             </div>
             <div style={{
               height: '4px',
-              background: '#1e293b',
+              background: 'var(--aethel-surface-tertiary)',
               borderRadius: '2px',
               overflow: 'hidden',
             }}>
@@ -890,7 +821,7 @@ export function AdvancedProfiler({
     : session.frames[session.frames.length - 1];
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: '#0f172a' }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', background: 'var(--aethel-surface-primary)' }}>
       {/* Main content */}
       <div style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Top bar */}
@@ -908,7 +839,7 @@ export function AdvancedProfiler({
               aria-label={isRecording ? 'Parar gravacao do profiler' : 'Iniciar gravacao do profiler'}
               aria-pressed={isRecording}
               style={{
-                background: isRecording ? '#ef4444' : '#22c55e',
+                background: isRecording ? 'var(--aethel-error)' : 'var(--aethel-success)',
                 border: 'none',
                 borderRadius: '6px',
                 padding: '8px 16px',
@@ -936,8 +867,8 @@ export function AdvancedProfiler({
                 setSelectedFrame(null);
               }}
               style={{
-                background: '#1e293b',
-                border: '1px solid #374151',
+                background: 'var(--aethel-surface-tertiary)',
+                border: '1px solid var(--aethel-border-primary)',
                 borderRadius: '6px',
                 padding: '8px 16px',
                 color: 'white',
@@ -958,7 +889,7 @@ export function AdvancedProfiler({
               onClick={() => setActiveTab(tab)}
               aria-label={`Abrir aba ${tab}`}
               style={{
-                background: activeTab === tab ? '#3b82f6' : '#1e293b',
+                background: activeTab === tab ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
                 border: 'none',
                 borderRadius: '4px',
                 padding: '8px 16px',
@@ -1012,7 +943,7 @@ export function AdvancedProfiler({
       {/* Right sidebar */}
       <div style={{
         width: '300px',
-        borderLeft: '1px solid #1e293b',
+        borderLeft: '1px solid var(--aethel-surface-tertiary)',
         padding: '16px',
         display: 'flex',
         flexDirection: 'column',

@@ -19,12 +19,12 @@ Command used:
 npm run qa:product-quality-progress
 ```
 
-Current verified readout after the 2026-05-01 quality pass:
+Current verified readout after the later 2026-05-01 quality pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
-- Hardcoded hex in component TSX: `501` -> still a major design-system gap, down from `775`.
+- Hardcoded hex in component TSX: `175` -> still a design-system gap, down from `775`.
 - `: any` in app code: `1136` -> still a major strictness gap.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
-- Component files over `1000` lines: `27` -> still a major maintainability gap, down from `28`.
+- Component files over `1000` lines: `24` -> still a maintainability gap, down from `28`.
 - Web unit/spec tests: `64` -> V10 claim of `12` is stale for the current branch.
 - E2E specs: `10` -> still below the target of `15`.
 - Prisma migration folders: `0` -> confirmed open gap.
@@ -56,6 +56,9 @@ Current verified readout after the 2026-05-01 quality pass:
 - `TerminalWidget.tsx` no longer owns ANSI theme palettes or hex fallbacks; terminal palettes now live in `cloud-web-app/web/lib/terminal/terminal-themes.ts`.
 - `SceneEditor.tsx` and `SoundCueEditor.tsx` had component-level hex styling replaced with CSS variables where safe.
 - `SoundCueEditor.tsx` is no longer over `1000` lines after extracting `sound-cue-models.ts`.
+- `AdvancedProfiler.tsx`, `ProjectPersistence.tsx`, and `MaterialEditor.tsx` were split so type/model data lives outside the TSX surface.
+- Viewport, terminal, git, task, settings, collaborator-story, and dashboard surfaces had component-level hex styling replaced by canonical CSS variables or non-hex portable color strings.
+- `ProjectPersistence.tsx` now uses the structured component logger instead of inline `console.warn/error`, and its import order is normalized.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.
