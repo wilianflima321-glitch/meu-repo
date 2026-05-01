@@ -82,7 +82,8 @@ What is aligned:
 
 What still needs tightening:
 - secondary lanes must stay subordinate to the mission hero,
-- operations and exploration should stay progressive, not equal-weight.
+- operations and exploration should stay progressive, not equal-weight,
+- Project Brain is now visible as a compact read model but still needs durable storage and mission-ledger backing.
 
 ### 3. Studio Cloud
 Status: STRONG DIRECTION, PARTIAL COMPLETION
@@ -172,12 +173,16 @@ What still needs tightening:
 - compile freshness is not the same as full prerender parity,
 - the platform must keep earning confidence, not borrowing it from UX.
 
+## 2026-05-01 Project Brain Update
+Studio Home now includes a compact Project Brain readout that summarizes mission, domain, runtime, AI setup, review approvals, budget, and next action. This aligns the dashboard with the benchmark pattern from Firebase/Replit/Manus/Cursor without adding another dashboard family.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
 - `tsc --noEmit` is green,
 - `npm run qa:enterprise-gate` is green,
 - `npm run qa:canonical-doc-alignment` is green,
+- the five public UX contracts for mission intake, Studio handoff, compare trust, pricing readiness, and local continuity pass in Chromium,
 - `git diff --check` is green when the repo is validated cleanly.
 
 Known factual residue:

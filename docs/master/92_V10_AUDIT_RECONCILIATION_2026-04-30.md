@@ -25,8 +25,8 @@ Current verified readout after the 2026-05-01 god-component closure pass:
 - `: any` in app code: `1135` -> still a major strictness gap.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
 - Component files over `1000` lines: `0` -> closed for the measured component scope, down from `28`.
-- Web unit/spec tests: `64` -> V10 claim of `12` is stale for the current branch.
-- E2E specs: `10` -> still below the target of `15`.
+- Web unit/spec tests: `65` -> V10 claim of `12` is stale for the current branch.
+- E2E specs: `15` -> closed for the current progress target.
 - Prisma migration folders: `0` -> confirmed open gap.
 - Active-doc absolute local paths: `0` -> closed for active docs in the progress scanner scope.
 - Next Image optimization: `PASS` -> V10 claim that `unoptimized: true` is active is stale.
@@ -41,7 +41,7 @@ Current verified readout after the 2026-05-01 god-component closure pass:
 - `: any` debt is still too high to enable strictness safely in one step.
 - Hardcoded component hex colors are below the current ratchet target; keep the gate active while remaining offenders are cleaned deliberately.
 - The measured engine/media/editor god-component backlog is closed at `0` files over `1000` lines; keep the ratchet so regressions fail early.
-- E2E coverage is below target.
+- E2E spec count is at the current target (`15`); keep adding depth for authenticated mission flows.
 - Active docs are now clean of local absolute paths in the progress scanner scope; keep this at `0`.
 
 ### Stale Or Already Improved
@@ -84,6 +84,10 @@ Current verified readout after the 2026-05-01 god-component closure pass:
 - `AudioProcessing.tsx` is no longer over `1000` lines after extracting EQ/compressor/effect-rack visualizers into `AudioProcessingVisualizers.tsx`.
 - `NiagaraVFX.tsx` is no longer over `1000` lines after extracting renderer, node graph definitions, emitter panels, and presets into `NiagaraVFXPanels.tsx`.
 - `qa:product-quality-progress` now reports `component files over 1000 lines` as `0 / 0 PASS`, closing the V10 god-component task for the measured TSX component scope.
+- Studio Home now has a compact `Project Brain` read model and card, aligning mission memory, runtime, AI setup, approvals, budget, and next action without creating a new dashboard family.
+- `94_MARKET_UX_BENCHMARK_RECONCILIATION_2026-05-01.md` records the current Firebase/Replit/Manus/Cursor/GitHub/Unreal benchmark decisions used for this pass.
+- Playwright no longer depends on the missing `server/` package or root `express` install; `tools/e2e-mock-api-server.mjs` provides a dependency-free contract API for E2E startup.
+- `/compare` is now explicitly public in `middleware.ts`, so procurement/buyer trust content is no longer hidden behind login.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.
@@ -100,7 +104,7 @@ For docs, clean active product-critical files first; archives are intentionally 
 
 ## Next Highest-ROI Blocks
 1. Reduce `: any` in the top server/runtime extension files so `noImplicitAny` can become a realistic ratchet instead of a risky flag flip.
-2. Add five missing E2E specs around first value, deploy, Studio Home, preview/review, and theme/navigation.
+2. Deepen the new E2E contracts into authenticated first-value, deploy, Studio Home, preview/review, and theme/navigation runs.
 3. Create a safe Prisma migration baseline only after confirming the target database state.
 4. Start i18n/product-language cleanup on user-facing dashboard, IDE, and onboarding strings.
 5. Keep god-component regressions blocked by the product-quality scanner; the current measured count is `0`.

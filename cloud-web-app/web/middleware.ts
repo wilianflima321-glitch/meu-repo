@@ -195,6 +195,7 @@ const PUBLIC_PATH_PREFIXES = [
   '/help',
   '/download',
   '/marketplace',
+  '/compare',
   '/api/auth',
   '/api/health',
   '/api/billing/webhook',

@@ -212,7 +212,7 @@ export default function DownloadPage() {
             Abra o Aethel Studio diretamente no browser, com os mesmos recursos do desktop.
           </p>
           <Link
-            href="/login"
+            href="/ide"
             className="inline-flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--aethel-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aethel-surface-primary)] bg-[var(--aethel-surface-tertiary)] text-[var(--aethel-text-primary)] hover:bg-[var(--aethel-surface-quaternary)] mt-6 rounded-xl px-6 py-3 text-sm font-semibold"
           >
             Abrir Aethel Web

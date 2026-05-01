@@ -158,20 +158,21 @@ Aethel should avoid one giant IDE screen. Instead, the Workbench opens focused r
 
 ## Execution Priority From Here
 P0: Keep current gates green while reducing structural debt.
-- Current measured `component files over 1000 lines`: 13 after this pass.
+- Current measured `component files over 1000 lines`: 0 after the 2026-05-01 god-component closure pass.
 - Current measured `: any`: 1135.
-- Current measured E2E specs: 10, target 15.
+- Current measured E2E specs: 15, target 15.
 - Current measured Prisma migrations: 0, target at least 1 after baseline decision.
 
-P1: Finish reachable editor splits.
-- Remaining large editors are mostly domain rooms: physics, character, environment, animation, narrative, audio, engine.
-- Split without changing behavior.
+P1: Keep editor split ratchets closed.
+- Reachable editor splits are now closed for the measured `>1000` TSX component scope.
+- Future work should wire/classify domain rooms, not re-expand extracted TSX surfaces.
 - Keep each extracted module under 800 lines where possible.
 
-P2: Add the Project Brain minimal implementation.
-- `project.brain.json` or database-backed equivalent.
+P2: Expand the Project Brain minimal implementation.
+- Studio Home now has a compact read model and card.
+- Next step is `project.brain.json` or database-backed equivalent.
 - Derive from existing `.aethelrules`, package metadata, docs, routes, assets, tests.
-- Show a compact "Project Brain" panel in Studio/IDE.
+- Keep the Project Brain compact in Studio/IDE and move deeper detail into mission/evidence rooms.
 
 P3: Add Mission Ledger minimal implementation.
 - Durable mission states: planned, running, needs_approval, blocked, complete, failed.
@@ -212,10 +213,10 @@ Option C: Hybrid path, recommended.
 - Game/film workflows are introduced as mission templates once contracts and validation are real.
 
 ## Recommended Next Implementation Blocks
-1. Finish reducing large editor components from 13 to under 8.
-2. Add a small `Project Brain` read model from repo rules/docs/routes/tests.
+1. Reduce `: any` debt so stricter TypeScript can become realistic.
+2. Expand Project Brain from the Studio Home read model into durable mission memory backed by project files/database.
 3. Add a `Mission Ledger` UI skeleton using existing mission/dashboard language.
-4. Add E2E for first mission, preview/review, deploy approval, Studio navigation, and theme persistence.
+4. Deepen E2E beyond the now-green public-route contracts into authenticated first mission, preview/review, deploy approval, Studio navigation, and theme persistence.
 5. Write safe local bridge spec before implementing local account/browser control.
 
 ## Final Rule

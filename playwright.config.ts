@@ -95,10 +95,13 @@ export default defineConfig({
       timeout: 120 * 1000,
     },
     {
-      command: 'npm --prefix server run dev:enhanced',
+      command: 'node tools/e2e-mock-api-server.mjs',
       url: 'http://localhost:1234/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
+      env: {
+        PORT: '1234',
+      },
     },
   ],
 
