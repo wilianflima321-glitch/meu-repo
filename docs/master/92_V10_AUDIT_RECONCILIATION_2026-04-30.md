@@ -24,7 +24,7 @@ Current verified readout after the 2026-05-01 editor-surface split pass:
 - Hardcoded hex in component TSX: `39` -> closed for the current ratchet target of `50`, down from `775`.
 - `: any` in app code: `1135` -> still a major strictness gap.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
-- Component files over `1000` lines: `15` -> still a maintainability gap, down from `28`.
+- Component files over `1000` lines: `13` -> still a maintainability gap, down from `28`.
 - Web unit/spec tests: `64` -> V10 claim of `12` is stale for the current branch.
 - E2E specs: `10` -> still below the target of `15`.
 - Prisma migration folders: `0` -> confirmed open gap.
@@ -68,6 +68,9 @@ Current verified readout after the 2026-05-01 editor-surface split pass:
 - `ContentBrowser.tsx` is no longer over `1000` lines after extracting asset cards, folder tree rows, context menu, and shared visual constants into `ContentBrowserParts.tsx`.
 - `DetailsPanel.tsx` is no longer over `1000` lines after extracting property editors and component sections into `DetailsPanelEditors.tsx`.
 - `LandscapeEditor.tsx` is no longer over `1000` lines after extracting terrain toolbar, brush settings, and layer management into `LandscapeEditorPanels.tsx`.
+- `ExportSystem.tsx` is no longer over `1000` lines after extracting export presets, settings, jobs, and manager logic into `export-system-model.ts`.
+- `AnimationBlueprint.tsx` is no longer over `1000` lines after extracting graph nodes, variable panel, state inspector, and transition inspector into `AnimationBlueprintPanels.tsx`.
+- `93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md` now captures the market-grade Unreal/AAA + cloud/local agent gap map and explicitly prevents inflated "Unreal in browser" claims.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.
@@ -83,7 +86,7 @@ Do not chase raw counts by rewriting broad documents blindly.
 For docs, clean active product-critical files first; archives are intentionally excluded from the progress scanner.
 
 ## Next Highest-ROI Blocks
-1. Continue splitting the remaining reachable engine/media god components without changing behavior.
+1. Continue splitting the remaining reachable engine/media god components without changing behavior; current measured count is `13`.
 2. Reduce `: any` in the top server/runtime extension files.
 3. Add five missing E2E specs around first value, deploy, Studio Home, preview/review, and theme/navigation.
 4. Create a safe Prisma migration baseline only after confirming the target database state.
