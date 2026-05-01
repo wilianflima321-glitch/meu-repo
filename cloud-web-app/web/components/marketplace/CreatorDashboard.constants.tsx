@@ -38,7 +38,7 @@ type PrimaryStatCard = {
     prefix?: string;
 };
 
-export const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+export const COLORS = ['var(--aethel-primary)', 'var(--aethel-success)', 'var(--aethel-warning)', 'var(--aethel-error)', 'var(--aethel-accent)'];
 
 export const STATUS_CONFIG: Record<AssetStatus, { label: string; color: string; icon: typeof CheckCircle }> = {
     published: { label: 'Publicado', color: 'bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)]', icon: CheckCircle },

@@ -280,12 +280,12 @@ function Bone3D({ bone, worldPosition, worldRotation, isSelected, onSelect, show
   if (!bone.visible) return null;
 
   const color = bone.locked
-    ? '#666666'
+    ? 0x666666
     : bone.ikEnabled && showIK
-      ? '#00ff88'
+      ? 0x00ff88
       : isSelected
-        ? '#ff9900'
-        : '#4488ff';
+        ? 0xff9900
+        : 0x4488ff;
 
   return (
     <group position={worldPosition} rotation={worldRotation}>
@@ -309,7 +309,7 @@ function Bone3D({ bone, worldPosition, worldRotation, isSelected, onSelect, show
       {/* Joint sphere */}
       <mesh position={[0, 0, 0]}>
         <sphereGeometry args={[0.015, 16, 16]} />
-        <meshStandardMaterial color={isSelected ? '#ffcc00' : '#ffffff'} />
+        <meshStandardMaterial color={isSelected ? 0xffcc00 : 0xffffff} />
       </mesh>
 
       {/* Label */}
@@ -352,8 +352,8 @@ function IKEffector({ chain, onPositionChange, isSelected, onSelect }: IKEffecto
       >
         <boxGeometry args={[0.06, 0.06, 0.06]} />
         <meshStandardMaterial
-          color={isSelected ? '#ff4444' : '#44ff44'}
-          emissive={isSelected ? '#ff4444' : '#44ff44'}
+          color={isSelected ? 0xff4444 : 0x44ff44}
+          emissive={isSelected ? 0xff4444 : 0x44ff44}
           emissiveIntensity={0.5}
         />
       </mesh>
@@ -364,13 +364,13 @@ function IKEffector({ chain, onPositionChange, isSelected, onSelect }: IKEffecto
           [0, 0, 0],
           chain.poleVector.toArray() as [number, number, number],
         ]}
-        color="#ffff00"
+        color={0xffff00}
         lineWidth={2}
         dashed
       />
       <mesh position={chain.poleVector}>
         <sphereGeometry args={[0.02, 8, 8]} />
-        <meshBasicMaterial color="#ffff00" />
+        <meshBasicMaterial color={0xffff00} />
       </mesh>
 
       <DreiHtml position={[0, 0.08, 0]} center>
@@ -463,7 +463,7 @@ function SkeletonVisualizer({
         <Line
           key={i}
           points={[conn.start.toArray(), conn.end.toArray()]}
-          color={conn.isIK && showIK ? '#00ff88' : '#4488ff'}
+          color={conn.isIK && showIK ? 0x00ff88 : 0x4488ff}
           lineWidth={conn.isIK && showIK ? 3 : 2}
         />
       ))}
@@ -827,7 +827,7 @@ export default function ControlRigEditor({
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [2, 2, 3], fov: 50 }}>
-          <color attach="background" args={['#0f172a']} />
+          <color attach="background" args={[0x0f172a]} />
 
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 5, 5]} intensity={1} />

@@ -71,15 +71,15 @@ interface SceneObjectProps {
 function SceneObject({ object, isSelected, onSelect, transformMode, onTransform }: SceneObjectProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
-  const selectionColor = useMemo(() => resolveCssVarColor('--aethel-warning', '#ffaa00'), []);
-  const neutralColor = useMemo(() => resolveCssVarColor('--aethel-text-quaternary', '#888888'), []);
-  const lightHelperColor = useMemo(() => resolveCssVarColor('--aethel-warning', '#ffaa00'), []);
-  const lightHelperBright = useMemo(() => resolveCssVarColor('--aethel-warning-light', '#ffcc66'), []);
-  const cameraSelectedColor = useMemo(() => resolveCssVarColor('--aethel-success', '#22c55e'), []);
-  const cameraNeutralColor = useMemo(() => resolveCssVarColor('--aethel-text-muted', '#666666'), []);
-  const cameraNeutralAltColor = useMemo(() => resolveCssVarColor('--aethel-text-quaternary', '#444444'), []);
-  const emptySelectedColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
-  const lightFallbackColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
+  const selectionColor = useMemo(() => resolveCssVarColor('--aethel-warning', 'rgb(255, 170, 0)'), []);
+  const neutralColor = useMemo(() => resolveCssVarColor('--aethel-text-quaternary', 'rgb(136, 136, 136)'), []);
+  const lightHelperColor = useMemo(() => resolveCssVarColor('--aethel-warning', 'rgb(255, 170, 0)'), []);
+  const lightHelperBright = useMemo(() => resolveCssVarColor('--aethel-warning-light', 'rgb(255, 204, 102)'), []);
+  const cameraSelectedColor = useMemo(() => resolveCssVarColor('--aethel-success', 'rgb(34, 197, 94)'), []);
+  const cameraNeutralColor = useMemo(() => resolveCssVarColor('--aethel-text-muted', 'rgb(102, 102, 102)'), []);
+  const cameraNeutralAltColor = useMemo(() => resolveCssVarColor('--aethel-text-quaternary', 'rgb(68, 68, 68)'), []);
+  const emptySelectedColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', 'rgb(255, 255, 255)'), []);
+  const lightFallbackColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', 'rgb(255, 255, 255)'), []);
 
   if (!object.visible) return null;
 
@@ -246,9 +246,9 @@ interface ViewportProps {
 
 function Viewport({ objects, selectedId, onSelect, transformMode, onTransform, viewMode, showGrid, showStats, environment }: ViewportProps) {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
-  const sceneBackground = useMemo(() => resolveCssVarColor('--aethel-surface-primary', '#1a1a1a'), []);
-  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#333333'), []);
-  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#555555'), []);
+  const sceneBackground = useMemo(() => resolveCssVarColor('--aethel-surface-primary', 'rgb(26, 26, 26)'), []);
+  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', 'rgb(51, 51, 51)'), []);
+  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', 'rgb(85, 85, 85)'), []);
 
   // Get camera position based on view mode
   const cameraPosition = useMemo(() => {

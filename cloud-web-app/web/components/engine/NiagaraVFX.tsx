@@ -671,9 +671,9 @@ export default function NiagaraVFX() {
   const [activeTab, setActiveTab] = useState<'parameters' | 'presets' | 'timeline'>('parameters');
   const [emitterConfig, setEmitterConfig] = useState<EmitterConfig>(defaultEmitterConfig);
   const [showStats, setShowStats] = useState(true);
-  const sceneBackground = useMemo(() => resolveCssVarColor('--aethel-surface-primary', '#1a1a1a'), []);
-  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#333333'), []);
-  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#555555'), []);
+  const sceneBackground = useMemo(() => resolveCssVarColor('--aethel-surface-primary', 'rgb(26, 26, 26)'), []);
+  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', 'rgb(51, 51, 51)'), []);
+  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', 'rgb(85, 85, 85)'), []);
   const overlayBackground = useMemo(() => resolveCssVarRgba('--aethel-surface-primary', 0.7, 'rgba(0,0,0,0.7)'), []);
   const emittersRef = useRef<ParticleEmitter[]>([new ParticleEmitter(defaultEmitterConfig)]);
   const onConnect = useCallback(
@@ -1061,7 +1061,7 @@ export default function NiagaraVFX() {
                       height: '24px',
                       borderRadius: '4px',
                       background:
-                        'linear-gradient(to right, var(--aethel-warning, #f59e0b), var(--aethel-accent-orange, #f97316), var(--aethel-error, #ef4444), var(--aethel-surface-primary, #1a1a1a))',
+                        'linear-gradient(to right, var(--aethel-warning, rgb(245, 158, 11)), var(--aethel-accent-orange, rgb(249, 115, 22)), var(--aethel-error, rgb(239, 68, 68)), var(--aethel-surface-primary, rgb(26, 26, 26)))',
                     }}
                   />
                 </div>

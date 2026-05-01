@@ -20,10 +20,10 @@ function RotatingCube() {
       <mesh ref={meshRef} castShadow>
         <boxGeometry args={[1.5, 1.5, 1.5]} />
         <meshStandardMaterial
-          color="#4f46e5"
+          color={0x4f46e5}
           metalness={0.7}
           roughness={0.2}
-          emissive="#3730a3"
+          emissive={0x3730a3}
           emissiveIntensity={0.2}
         />
       </mesh>
@@ -34,7 +34,7 @@ function RotatingCube() {
 function GridFloor() {
   return (
     <gridHelper
-      args={[20, 20, '#374151', '#1f2937']}
+      args={[20, 20, 0x374151, 0x1f2937]}
       position={[0, -2, 0]}
     />
   )
@@ -45,7 +45,7 @@ function Scene() {
     <>
       <ambientLight intensity={0.3} />
       <pointLight position={[10, 10, 10]} intensity={1} castShadow />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#8b5cf6" />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} color={0x8b5cf6} />
       <spotLight
         position={[5, 5, 5]}
         angle={0.3}

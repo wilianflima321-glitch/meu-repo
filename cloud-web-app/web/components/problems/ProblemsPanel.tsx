@@ -77,10 +77,10 @@ export const ProblemsPanel: React.FC = () => {
   // Get severity color
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'error': return '#f14c4c';
-      case 'warning': return '#cca700';
-      case 'info': return '#3794ff';
-      case 'hint': return '#75beff';
+      case 'error': return 'var(--aethel-error)';
+      case 'warning': return 'var(--aethel-warning)';
+      case 'info': return 'var(--aethel-info)';
+      case 'hint': return 'var(--aethel-info-light)';
       default: return 'inherit';
     }
   };
@@ -213,11 +213,11 @@ export const ProblemsPanel: React.FC = () => {
         }
 
         .error-count {
-          color: #f14c4c;
+          color: var(--aethel-error);
         }
 
         .warning-count {
-          color: #cca700;
+          color: var(--aethel-warning);
         }
 
         .problems-actions {

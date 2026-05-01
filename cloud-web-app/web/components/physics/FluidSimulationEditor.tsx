@@ -340,7 +340,7 @@ function BoundaryBox({ params, visible, onResize }: BoundaryBoxProps) {
       <mesh>
         <boxGeometry args={[boundarySize.x, boundarySize.y, boundarySize.z]} />
         <meshBasicMaterial
-          color="#06b6d4"
+          color={0x06b6d4}
           wireframe
           transparent
           opacity={0.5}
@@ -351,7 +351,7 @@ function BoundaryBox({ params, visible, onResize }: BoundaryBoxProps) {
       <mesh position={[0, -boundarySize.y / 2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[boundarySize.x, boundarySize.z]} />
         <meshBasicMaterial
-          color="#06b6d4"
+          color={0x06b6d4}
           transparent
           opacity={0.1}
           side={THREE.DoubleSide}
@@ -426,12 +426,12 @@ function FlowArrows({ params, visible }: FlowArrowsProps) {
         <group key={index} position={arrow.position}>
           <Line
             points={[[0, 0, 0], arrow.direction.toArray()]}
-            color="#22c55e"
+            color={0x22c55e}
             lineWidth={2}
           />
           <mesh position={arrow.direction}>
             <coneGeometry args={[0.08, 0.2, 8]} />
-            <meshBasicMaterial color="#22c55e" />
+            <meshBasicMaterial color={0x22c55e} />
           </mesh>
         </group>
       ))}
@@ -754,7 +754,7 @@ export default function FluidSimulationEditor({
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [5, 5, 5], fov: 50 }} shadows>
-          <color attach="background" args={['#0f172a']} />
+          <color attach="background" args={[0x0f172a]} />
 
           <ambientLight intensity={0.4} />
           <directionalLight
@@ -763,7 +763,7 @@ export default function FluidSimulationEditor({
             castShadow
             shadow-mapSize={[2048, 2048]}
           />
-          <pointLight position={[-5, 5, -5]} intensity={0.5} color="#0ea5e9" />
+          <pointLight position={[-5, 5, -5]} intensity={0.5} color={0x0ea5e9} />
 
           {/* Fluid particles */}
           <FluidParticles3D

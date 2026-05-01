@@ -132,9 +132,9 @@ export interface DialogueVariable {
 // ============================================================================
 
 const DEFAULT_CHARACTERS: Character[] = [
-  { id: 'player', name: 'Player', portrait: '/portraits/player.png', color: '#3b82f6', emotions: ['neutral', 'happy', 'angry', 'sad', 'surprised'] },
-  { id: 'npc1', name: 'Merchant', portrait: '/portraits/merchant.png', color: '#22c55e', emotions: ['neutral', 'happy', 'suspicious', 'friendly'] },
-  { id: 'npc2', name: 'Guard', portrait: '/portraits/guard.png', color: '#ef4444', emotions: ['neutral', 'stern', 'alert', 'relaxed'] },
+  { id: 'player', name: 'Player', portrait: '/portraits/player.png', color: 'var(--aethel-primary)', emotions: ['neutral', 'happy', 'angry', 'sad', 'surprised'] },
+  { id: 'npc1', name: 'Merchant', portrait: '/portraits/merchant.png', color: 'var(--aethel-success)', emotions: ['neutral', 'happy', 'suspicious', 'friendly'] },
+  { id: 'npc2', name: 'Guard', portrait: '/portraits/guard.png', color: 'var(--aethel-error)', emotions: ['neutral', 'stern', 'alert', 'relaxed'] },
 ];
 
 const DEFAULT_VARIABLES: DialogueVariable[] = [
@@ -790,7 +790,7 @@ function PreviewPanel({
           <div className="flex items-start gap-3 mb-4">
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center text-xl"
-              style={{ backgroundColor: character?.color || '#4488ff' }}
+              style={{ backgroundColor: character?.color || 'var(--aethel-info)' }}
             >
               {character?.name?.[0] || '?'}
             </div>
@@ -978,23 +978,23 @@ export default function DialogueEditor({
           snapToGrid
           snapGrid={[15, 15]}
           defaultEdgeOptions={{
-            style: { stroke: '#64748b', strokeWidth: 2 },
+            style: { stroke: 'var(--aethel-text-muted)', strokeWidth: 2 },
             markerEnd: { type: MarkerType.ArrowClosed },
           }}
         >
-          <Background color="#334155" gap={15} />
+          <Background color="var(--aethel-border-primary)" gap={15} />
           <Controls className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]" />
           <MiniMap
             className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]"
             nodeColor={(node) => {
               switch (node.type) {
-                case 'entry': return '#22c55e';
-                case 'dialogue': return '#3b82f6';
-                case 'choice': return '#f59e0b';
-                case 'condition': return '#a855f7';
-                case 'action': return '#06b6d4';
-                case 'exit': return '#ef4444';
-                default: return '#64748b';
+                case 'entry': return 'var(--aethel-success)';
+                case 'dialogue': return 'var(--aethel-primary)';
+                case 'choice': return 'var(--aethel-warning)';
+                case 'condition': return 'var(--aethel-accent)';
+                case 'action': return 'var(--aethel-info)';
+                case 'exit': return 'var(--aethel-error)';
+                default: return 'var(--aethel-text-muted)';
               }
             }}
           />

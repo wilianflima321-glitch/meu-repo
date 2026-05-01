@@ -70,7 +70,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
         case 'mesh':
           const geometry = new THREE.BoxGeometry(1, 1, 1);
           const material = new THREE.MeshStandardMaterial({
-            color: obj.material?.color || '#ffffff',
+            color: obj.material?.color || 'white',
             metalness: obj.material?.metalness || 0.5,
             roughness: obj.material?.roughness || 0.5,
           });
@@ -216,7 +216,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
     if (obj.type === 'mesh') {
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const material = new THREE.MeshStandardMaterial({
-        color: obj.material?.color || '#ffffff',
+        color: obj.material?.color || 'white',
       });
       threeObj = new THREE.Mesh(geometry, material);
     }
@@ -267,7 +267,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
             top: '10px',
             left: '10px',
             background: 'rgba(0, 0, 0, 0.7)',
-            color: '#00ff00',
+            color: 'lime',
             padding: '10px',
             fontFamily: 'monospace',
             fontSize: '12px',
@@ -289,7 +289,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
               top: '10px',
               right: '10px',
               background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(59, 130, 246, 0.9))',
-              color: '#ffffff',
+              color: 'white',
               padding: '12px 16px',
               borderRadius: '8px',
               zIndex: 101,
@@ -306,7 +306,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
                   width: '16px',
                   height: '16px',
                   borderRadius: '50%',
-                  background: '#ffffff',
+                  background: 'white',
                   animation: 'pulse 1.5s ease-in-out infinite',
                 }}
               />
@@ -328,7 +328,7 @@ export const NexusCanvasV2: React.FC<NexusCanvasProps> = ({
                 style={{
                   height: '100%',
                   width: `${paintingProgress}%`,
-                  background: '#ffffff',
+                  background: 'white',
                   transition: 'width 0.3s ease',
                 }}
               />

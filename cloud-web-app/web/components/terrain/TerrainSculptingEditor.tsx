@@ -150,7 +150,7 @@ function TerrainMesh({
   const geometryRef = useRef<THREE.PlaneGeometry | null>(null);
   const [isPainting, setIsPainting] = useState(false);
   const terrainColor = useMemo(
-    () => resolveCssVarColor('--aethel-success', '#4a7c59'),
+    () => resolveCssVarColor('--aethel-success', 'rgb(74, 124, 89)'),
     []
   );
   const geometry = useMemo(() => {
@@ -755,19 +755,19 @@ function ViewportScene({
 }: ViewportSceneProps) {
   const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
   const gridCellColor = useMemo(
-    () => resolveCssVarColor('--aethel-border-primary', '#374151'),
+    () => resolveCssVarColor('--aethel-border-primary', 'rgb(55, 65, 81)'),
     []
   );
   const gridSectionColor = useMemo(
-    () => resolveCssVarColor('--aethel-border-secondary', '#475569'),
+    () => resolveCssVarColor('--aethel-border-secondary', 'rgb(71, 85, 105)'),
     []
   );
   const brushPalette = useMemo(() => ({
-    success: resolveCssVarColor('--aethel-success', '#22c55e'),
-    error: resolveCssVarColor('--aethel-error', '#ef4444'),
-    primary: resolveCssVarColor('--aethel-primary', '#3b82f6'),
-    warning: resolveCssVarColor('--aethel-warning', '#f59e0b'),
-    muted: resolveCssVarColor('--aethel-text-quaternary', '#64748b'),
+    success: resolveCssVarColor('--aethel-success', 'rgb(34, 197, 94)'),
+    error: resolveCssVarColor('--aethel-error', 'rgb(239, 68, 68)'),
+    primary: resolveCssVarColor('--aethel-primary', 'rgb(59, 130, 246)'),
+    warning: resolveCssVarColor('--aethel-warning', 'rgb(245, 158, 11)'),
+    muted: resolveCssVarColor('--aethel-text-quaternary', 'rgb(100, 116, 139)'),
   }), []);
   const getBrushColor = () => {
     if (selectedTool.startsWith('sculpt_raise')) return brushPalette.success;

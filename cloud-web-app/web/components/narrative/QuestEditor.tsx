@@ -151,12 +151,12 @@ export interface QuestCategory {
 // ============================================================================
 
 const QUEST_CATEGORIES: QuestCategory[] = [
-  { id: 'main', name: 'Main Story', color: '#eab308', icon: '⭐' },
-  { id: 'side', name: 'Side Quest', color: '#3b82f6', icon: '📜' },
-  { id: 'faction', name: 'Faction', color: '#8b5cf6', icon: '🛡️' },
-  { id: 'bounty', name: 'Bounty', color: '#ef4444', icon: '⚔️' },
-  { id: 'exploration', name: 'Exploration', color: '#22c55e', icon: '🗺️' },
-  { id: 'crafting', name: 'Crafting', color: '#f97316', icon: '🔨' },
+  { id: 'main', name: 'Main Story', color: 'var(--aethel-warning)', icon: '⭐' },
+  { id: 'side', name: 'Side Quest', color: 'var(--aethel-primary)', icon: '📜' },
+  { id: 'faction', name: 'Faction', color: 'var(--aethel-accent)', icon: '🛡️' },
+  { id: 'bounty', name: 'Bounty', color: 'var(--aethel-error)', icon: '⚔️' },
+  { id: 'exploration', name: 'Exploration', color: 'var(--aethel-success)', icon: '🗺️' },
+  { id: 'crafting', name: 'Crafting', color: 'var(--aethel-warning-dark)', icon: '🔨' },
 ];
 
 const OBJECTIVE_ICONS: Record<ObjectiveType, React.ReactNode> = {
@@ -207,7 +207,7 @@ function QuestNode({ data, selected }: NodeProps<Node<QuestNodeData>>) {
       {/* Header */}
       <div
         className="px-3 py-2 rounded-t-md flex items-center gap-2"
-        style={{ borderBottom: `2px solid ${category?.color || '#64748b'}` }}
+        style={{ borderBottom: `2px solid ${category?.color || 'var(--aethel-text-muted)'}` }}
       >
         <span className="text-lg">{category?.icon}</span>
         <div className="flex-1 min-w-0">
@@ -380,10 +380,10 @@ const initialEdges: Edge[] = [
     source: 'q1',
     target: 'q2',
     markerEnd: { type: MarkerType.ArrowClosed },
-    style: { stroke: '#eab308', strokeWidth: 2 },
+    style: { stroke: 'var(--aethel-warning)', strokeWidth: 2 },
     label: 'requires',
-    labelStyle: { fill: '#eab308', fontSize: 10 },
-    labelBgStyle: { fill: '#1e293b' },
+    labelStyle: { fill: 'var(--aethel-warning)', fontSize: 10 },
+    labelBgStyle: { fill: 'var(--aethel-surface-tertiary)' },
   },
 ];
 
@@ -1030,10 +1030,10 @@ export default function QuestEditor({
       setEdges((eds) => addEdge({
         ...connection,
         markerEnd: { type: MarkerType.ArrowClosed },
-        style: { stroke: '#eab308', strokeWidth: 2 },
+        style: { stroke: 'var(--aethel-warning)', strokeWidth: 2 },
         label: 'requires',
-        labelStyle: { fill: '#eab308', fontSize: 10 },
-        labelBgStyle: { fill: '#1e293b' },
+        labelStyle: { fill: 'var(--aethel-warning)', fontSize: 10 },
+        labelBgStyle: { fill: 'var(--aethel-surface-tertiary)' },
       }, eds));
     },
     [setEdges]
@@ -1097,13 +1097,13 @@ export default function QuestEditor({
           snapToGrid
           snapGrid={[20, 20]}
         >
-          <Background color="#334155" gap={20} />
+          <Background color="var(--aethel-border-primary)" gap={20} />
           <Controls className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]" />
           <MiniMap
             className="!bg-[var(--aethel-surface-secondary)] !border-[var(--aethel-border-primary)]"
             nodeColor={(node) => {
               const data = node.data as QuestNodeData;
-              return QUEST_CATEGORIES.find((c) => c.id === data.category)?.color || '#64748b';
+              return QUEST_CATEGORIES.find((c) => c.id === data.category)?.color || 'var(--aethel-text-muted)';
             }}
           />
 

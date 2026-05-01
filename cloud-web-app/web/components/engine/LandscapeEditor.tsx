@@ -96,7 +96,7 @@ function TerrainMesh({
   const meshRef = useRef<THREE.Mesh>(null);
   const brushIndicatorRef = useRef<THREE.Mesh>(null);
   const [brushPosition, setBrushPosition] = useState<THREE.Vector3 | null>(null);
-  const brushColor = useMemo(() => resolveCssVarColor('--aethel-success', '#22c55e'), []);
+  const brushColor = useMemo(() => resolveCssVarColor('--aethel-success', 'rgb(34, 197, 94)'), []);
 
   // Generate geometry from heightmap
   const geometry = useMemo(() => {
@@ -118,7 +118,7 @@ function TerrainMesh({
   // Generate material with texture blending
   const material = useMemo(() => {
     const mat = new THREE.MeshStandardMaterial({
-      color: layers[0]?.color || '#4a7c4f',
+      color: layers[0]?.color || 'rgb(74, 124, 79)',
       roughness: 0.8,
       metalness: 0.0,
       flatShading: false,
@@ -193,19 +193,19 @@ function LandscapeScene({
   onHeightmapChange,
 }: LandscapeSceneProps) {
   const heightmapRef = useRef(heightmap);
-  const skyColor = useMemo(() => resolveCssVarColor('--aethel-info-light', '#87ceeb'), []);
-  const groundColor = useMemo(() => resolveCssVarColor('--aethel-success-dark', '#556b2f'), []);
-  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', '#333333'), []);
-  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', '#555555'), []);
+  const skyColor = useMemo(() => resolveCssVarColor('--aethel-info-light', 'rgb(135, 206, 235)'), []);
+  const groundColor = useMemo(() => resolveCssVarColor('--aethel-success-dark', 'rgb(85, 107, 47)'), []);
+  const gridCellColor = useMemo(() => resolveCssVarColor('--aethel-border-primary', 'rgb(51, 51, 51)'), []);
+  const gridSectionColor = useMemo(() => resolveCssVarColor('--aethel-border-secondary', 'rgb(85, 85, 85)'), []);
   const gizmoAxisColors = useMemo(
     () => [
-      resolveCssVarColor('--aethel-error', '#e74c3c'),
-      resolveCssVarColor('--aethel-success', '#22c55e'),
-      resolveCssVarColor('--aethel-info', '#06b6d4'),
+      resolveCssVarColor('--aethel-error', 'rgb(231, 76, 60)'),
+      resolveCssVarColor('--aethel-success', 'rgb(34, 197, 94)'),
+      resolveCssVarColor('--aethel-info', 'rgb(6, 182, 212)'),
     ] as [string, string, string],
     []
   );
-  const gizmoLabelColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', '#ffffff'), []);
+  const gizmoLabelColor = useMemo(() => resolveCssVarColor('--aethel-text-primary', 'rgb(255, 255, 255)'), []);
 
   useEffect(() => {
     heightmapRef.current = heightmap;
@@ -962,7 +962,7 @@ export default function LandscapeEditor({ onSave }: LandscapeEditorProps) {
   const [brushActive, setBrushActive] = useState(false);
   const [selectedLayer, setSelectedLayer] = useState<string | null>('1');
   const [activePanel, setActivePanel] = useState<'brush' | 'layers'>('brush');
-  const canvasBackground = useMemo(() => resolveCssVarColor('--aethel-info-light', '#87ceeb'), []);
+  const canvasBackground = useMemo(() => resolveCssVarColor('--aethel-info-light', 'rgb(135, 206, 235)'), []);
 
   // Generate terrain
   const handleGenerateTerrain = useCallback((type: string) => {

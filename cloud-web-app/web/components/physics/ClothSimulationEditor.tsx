@@ -433,7 +433,7 @@ function ClothMesh3D({
       {/* Cloth mesh */}
       <mesh ref={meshRef} geometry={geometry}>
         <meshStandardMaterial
-          color="#4a90d9"
+          color={0x4a90d9}
           side={THREE.DoubleSide}
           wireframe={editorState.showWireframe}
           metalness={0.1}
@@ -484,7 +484,7 @@ function ColliderVisualizer({
     <group>
       {colliders.map((collider, index) => {
         const isSelected = selectedCollider === index;
-        const color = isSelected ? '#ffaa00' : '#00aaff';
+        const color = isSelected ? 0xffaa00 : 0x00aaff;
 
         switch (collider.type) {
           case 'sphere':
@@ -556,12 +556,12 @@ function WindArrow({ direction, strength, visible }: WindArrowProps) {
     <group position={[0, 3, 0]}>
       <Line
         points={[[0, 0, 0], end.toArray()]}
-        color="#00ff88"
+        color={0x00ff88}
         lineWidth={3}
       />
       <mesh position={end}>
         <coneGeometry args={[0.15, 0.4, 8]} />
-        <meshBasicMaterial color="#00ff88" />
+        <meshBasicMaterial color={0x00ff88} />
       </mesh>
       <DreiHtml position={end.clone().add(new THREE.Vector3(0.3, 0.3, 0))}>
         <div className="text-xs text-[var(--aethel-success)] whitespace-nowrap bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_80%,transparent)] px-1 rounded">
@@ -840,7 +840,7 @@ export default function ClothSimulationEditor({
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [5, 5, 5], fov: 50 }}>
-          <color attach="background" args={['#0f172a']} />
+          <color attach="background" args={[0x0f172a]} />
 
           <ambientLight intensity={0.4} />
           <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
@@ -869,7 +869,7 @@ export default function ClothSimulationEditor({
           {config.groundPlane && (
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, config.groundHeight, 0]}>
               <planeGeometry args={[20, 20]} />
-              <meshStandardMaterial color="#1e293b" />
+              <meshStandardMaterial color={0x1e293b} />
             </mesh>
           )}
 

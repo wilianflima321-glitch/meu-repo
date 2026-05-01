@@ -376,7 +376,7 @@ function DestructibleMesh3D({
 
   // Health bar color
   const healthPercent = health / maxHealth;
-  const healthColor = healthPercent > 0.6 ? '#22c55e' : healthPercent > 0.3 ? '#eab308' : '#ef4444';
+  const healthColor = healthPercent > 0.6 ? 'var(--aethel-success)' : healthPercent > 0.3 ? 'var(--aethel-warning)' : 'var(--aethel-error)';
 
   return (
     <group>
@@ -390,7 +390,7 @@ function DestructibleMesh3D({
           onClick={handleClick}
         >
           <meshStandardMaterial
-            color="#4a6fa5"
+            color={0x4a6fa5}
             metalness={0.2}
             roughness={0.8}
             transparent={showPreview}
@@ -420,11 +420,11 @@ function DestructibleMesh3D({
         <group position={hoverPoint}>
           <mesh>
             <sphereGeometry args={[0.1, 16, 16]} />
-            <meshBasicMaterial color="#ff0000" />
+            <meshBasicMaterial color={0xff0000} />
           </mesh>
           <mesh>
             <ringGeometry args={[0.15, 0.2, 32]} />
-            <meshBasicMaterial color="#ff0000" side={THREE.DoubleSide} />
+            <meshBasicMaterial color={0xff0000} side={THREE.DoubleSide} />
           </mesh>
         </group>
       )}
@@ -434,7 +434,7 @@ function DestructibleMesh3D({
         <group position={impactPoint.position}>
           <mesh>
             <sphereGeometry args={[0.08, 16, 16]} />
-            <meshBasicMaterial color="#ff4444" />
+            <meshBasicMaterial color={0xff4444} />
           </mesh>
           {/* Arrow showing impact direction */}
           <arrowHelper
@@ -699,11 +699,11 @@ export default function DestructionEditor({
       {/* 3D Viewport */}
       <div className="flex-1 relative">
         <Canvas camera={{ position: [4, 4, 4], fov: 50 }}>
-          <color attach="background" args={['#0f172a']} />
+          <color attach="background" args={[0x0f172a]} />
 
           <ambientLight intensity={0.4} />
           <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-          <pointLight position={[-5, 5, -5]} intensity={0.5} color="#ff6600" />
+          <pointLight position={[-5, 5, -5]} intensity={0.5} color={0xff6600} />
 
           <DestructibleMesh3D
             config={config}
