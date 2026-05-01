@@ -12,95 +12,15 @@ import {
 import * as THREE from 'three';
 import { resolveCssVarColor } from '@/lib/style/resolve-css-var';
 import { createComponentLogger } from '@/lib/observability/logger'
+import { BrushSettingsPanel } from './TerrainBrushSettingsPanel';
+import { toolCategories } from './terrain-sculpting-models';
+import type { BrushFalloff, BrushSettings, ErosionSettings, FoliageInstance, TerrainData, TerrainLayer, TerrainSettings, TerrainToolType } from './terrain-sculpting-models';
+
+export type { BrushFalloff, BrushSettings, BrushShape, ErosionSettings, FoliageInstance, FoliageType, TerrainData, TerrainLayer, TerrainSettings, TerrainToolType } from './terrain-sculpting-models';
 
 const log = createComponentLogger('TerrainSculptingEditor')
 
 
-export type TerrainToolType =
-  | 'sculpt_raise'
-  | 'sculpt_lower'
-  | 'sculpt_smooth'
-  | 'sculpt_flatten'
-  | 'sculpt_noise'
-  | 'sculpt_erosion'
-  | 'paint_layer'
-  | 'paint_hole'
-  | 'foliage_paint'
-  | 'foliage_erase'
-  | 'select'
-  | 'region';
-export type BrushShape = 'circle' | 'square' | 'custom';
-export type BrushFalloff = 'linear' | 'smooth' | 'spherical' | 'tip' | 'constant';
-export interface BrushSettings {
-  size: number;           // Radius in world units
-  strength: number;       // 0-1
-  falloff: BrushFalloff;
-  shape: BrushShape;
-  rotation: number;       // Degrees
-  spacing: number;        // Stroke spacing
-  jitter: number;         // Position randomization
-  customMask?: ImageData; // For custom shapes
-}
-export interface TerrainLayer {
-  id: string;
-  name: string;
-  diffuseTexture: string;
-  normalTexture?: string;
-  roughnessTexture?: string;
-  tiling: { x: number; y: number };
-  heightBlend: number;
-  metallic: number;
-  roughness: number;
-}
-export interface ErosionSettings {
-  type: 'hydraulic' | 'thermal' | 'wind';
-  iterations: number;
-  strength: number;
-  rainAmount?: number;
-  evaporation?: number;
-  sedimentCapacity?: number;
-  talusAngle?: number;
-  windDirection?: { x: number; y: number };
-  windStrength?: number;
-}
-export interface FoliageType {
-  id: string;
-  name: string;
-  mesh: string;
-  density: number;
-  minScale: number;
-  maxScale: number;
-  alignToNormal: boolean;
-  randomRotation: boolean;
-  minSlope: number;
-  maxSlope: number;
-  minHeight: number;
-  maxHeight: number;
-  collisionEnabled: boolean;
-}
-export interface TerrainSettings {
-  resolution: number;        // Heightmap resolution
-  size: { x: number; y: number; z: number }; // World size
-  maxHeight: number;
-  lodLevels: number;
-  streamingEnabled: boolean;
-  tessellation: boolean;
-  castShadows: boolean;
-  receiveShadows: boolean;
-}
-export interface TerrainData {
-  heightmap: Float32Array;
-  splatmaps: Float32Array[]; // One per 4 layers
-  holemask: Uint8Array;
-  foliageInstances: FoliageInstance[];
-  resolution: number;
-}
-export interface FoliageInstance {
-  typeId: string;
-  position: { x: number; y: number; z: number };
-  rotation: { x: number; y: number; z: number };
-  scale: number;
-}
 interface BrushPreviewProps {
   position: THREE.Vector3 | null;
   settings: BrushSettings;
@@ -223,40 +143,6 @@ interface ToolbarProps {
   selectedTool: TerrainToolType;
   onToolChange: (tool: TerrainToolType) => void;
 }
-const toolCategories = [
-  {
-    name: 'Sculpt',
-    tools: [
-      { id: 'sculpt_raise', icon: '⬆️', label: 'Raise' },
-      { id: 'sculpt_lower', icon: '⬇️', label: 'Lower' },
-      { id: 'sculpt_smooth', icon: '🌊', label: 'Smooth' },
-      { id: 'sculpt_flatten', icon: '➖', label: 'Flatten' },
-      { id: 'sculpt_noise', icon: '🎲', label: 'Noise' },
-      { id: 'sculpt_erosion', icon: '💧', label: 'Erosion' },
-    ],
-  },
-  {
-    name: 'Paint',
-    tools: [
-      { id: 'paint_layer', icon: '🎨', label: 'Paint Layer' },
-      { id: 'paint_hole', icon: '🕳️', label: 'Hole Tool' },
-    ],
-  },
-  {
-    name: 'Foliage',
-    tools: [
-      { id: 'foliage_paint', icon: '🌿', label: 'Paint Foliage' },
-      { id: 'foliage_erase', icon: '🧹', label: 'Erase Foliage' },
-    ],
-  },
-  {
-    name: 'Selection',
-    tools: [
-      { id: 'select', icon: '👆', label: 'Select' },
-      { id: 'region', icon: '⬜', label: 'Region' },
-    ],
-  },
-];
 function Toolbar({ selectedTool, onToolChange }: ToolbarProps) {
   return (
     <div style={{
@@ -297,142 +183,6 @@ function Toolbar({ selectedTool, onToolChange }: ToolbarProps) {
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-interface BrushSettingsPanelProps {
-  settings: BrushSettings;
-  onChange: (settings: BrushSettings) => void;
-}
-function BrushSettingsPanel({ settings, onChange }: BrushSettingsPanelProps) {
-  const update = <K extends keyof BrushSettings>(key: K, value: BrushSettings[K]) => {
-    onChange({ ...settings, [key]: value });
-  };
-  return (
-    <div style={{
-      padding: '12px',
-      background: 'var(--aethel-surface-primary)',
-      borderRadius: '8px',
-    }}>
-      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>Brush Settings</h3>
-      {/* Size */}
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Size</label>
-          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px' }}>{settings.size.toFixed(1)}</span>
-        </div>
-        <input
-          type="range"
-          min={0.5}
-          max={50}
-          step={0.5}
-          value={settings.size}
-          onChange={(e) => update('size', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-      {/* Strength */}
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Strength</label>
-          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px' }}>{(settings.strength * 100).toFixed(0)}%</span>
-        </div>
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.01}
-          value={settings.strength}
-          onChange={(e) => update('strength', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-      {/* Falloff */}
-      <div style={{ marginBottom: '12px' }}>
-        <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
-          Falloff
-        </label>
-        <select
-          value={settings.falloff}
-          onChange={(e) => update('falloff', e.target.value as BrushFalloff)}
-          style={{
-            width: '100%',
-            background: 'var(--aethel-surface-tertiary)',
-            border: '1px solid var(--aethel-border-primary)',
-            borderRadius: '4px',
-            padding: '6px',
-            color: 'white',
-            fontSize: '12px',
-          }}
-        >
-          <option value="linear">Linear</option>
-          <option value="smooth">Smooth</option>
-          <option value="spherical">Spherical</option>
-          <option value="tip">Tip</option>
-          <option value="constant">Constant</option>
-        </select>
-      </div>
-      {/* Shape */}
-      <div style={{ marginBottom: '12px' }}>
-        <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
-          Shape
-        </label>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          {(['circle', 'square'] as BrushShape[]).map(shape => (
-            <button type="button"
-              key={shape}
-              onClick={() => update('shape', shape)}
-              aria-label={`Selecionar pincel ${shape}`}
-              aria-pressed={settings.shape === shape}
-              style={{
-                flex: 1,
-                padding: '6px',
-                background: settings.shape === shape ? 'var(--aethel-primary)' : 'var(--aethel-surface-tertiary)',
-                border: '1px solid var(--aethel-border-primary)',
-                borderRadius: '4px',
-                color: 'white',
-                fontSize: '12px',
-                cursor: 'pointer',
-                textTransform: 'capitalize',
-              }}
-            >
-              {shape}
-            </button>
-          ))}
-        </div>
-      </div>
-      {/* Rotation */}
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Rotation</label>
-          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px' }}>{settings.rotation}°</span>
-        </div>
-        <input
-          type="range"
-          min={0}
-          max={360}
-          step={1}
-          value={settings.rotation}
-          onChange={(e) => update('rotation', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
-      {/* Jitter */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Jitter</label>
-          <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px' }}>{(settings.jitter * 100).toFixed(0)}%</span>
-        </div>
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.01}
-          value={settings.jitter}
-          onChange={(e) => update('jitter', parseFloat(e.target.value))}
-          style={{ width: '100%' }}
-        />
-      </div>
     </div>
   );
 }

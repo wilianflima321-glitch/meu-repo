@@ -22,9 +22,9 @@ npm run qa:product-quality-progress
 Current verified readout after the final 2026-05-01 design-token pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
 - Hardcoded hex in component TSX: `39` -> closed for the current ratchet target of `50`, down from `775`.
-- `: any` in app code: `1136` -> still a major strictness gap.
+- `: any` in app code: `1135` -> still a major strictness gap.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
-- Component files over `1000` lines: `23` -> still a maintainability gap, down from `28`.
+- Component files over `1000` lines: `20` -> still a maintainability gap, down from `28`.
 - Web unit/spec tests: `64` -> V10 claim of `12` is stale for the current branch.
 - E2E specs: `10` -> still below the target of `15`.
 - Prisma migration folders: `0` -> confirmed open gap.
@@ -61,6 +61,8 @@ Current verified readout after the final 2026-05-01 design-token pass:
 - `ProjectPersistence.tsx` now uses the structured component logger instead of inline `console.warn/error`, and its import order is normalized.
 - Remaining component-level hex debt was reduced under the current ratchet target by cleaning the AAA/editor surfaces: quest/dialogue editors, control rig, physics editors, Niagara, preview, problem list, primitive badges, and collaboration stories.
 - `WaterEditor.tsx` is no longer over `1000` lines after extracting `water-editor-models.ts`.
+- `QuestEditor.tsx`, `TerrainSculptingEditor.tsx`, and `SceneEditor.tsx` are no longer over `1000` lines after extracting model/panel modules.
+- Terrain toolbar glyphs were normalized away from mojibake into stable compact labels so the editor remains legible across Windows/browser encodings.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.
