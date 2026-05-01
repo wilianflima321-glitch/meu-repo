@@ -171,7 +171,7 @@ function ArraySetting({ definition, value, onChange, modified, onReset }: BaseSe
             <button
               type="button"
               onClick={() => removeItem(index)}
-              className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-danger)]"
+              className="rounded p-1.5 text-[var(--aethel-text-tertiary)] transition-colors hover:bg-[var(--aethel-surface-tertiary)] hover:text-[var(--aethel-error)]"
               aria-label={`Remove ${definition.key} item ${index + 1}`}
             >
               <Minus className="h-4 w-4" />

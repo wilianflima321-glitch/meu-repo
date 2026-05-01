@@ -19,12 +19,12 @@ Command used:
 npm run qa:product-quality-progress
 ```
 
-Current verified readout on 2026-04-30:
+Current verified readout after the 2026-05-01 quality pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
-- Hardcoded hex in component TSX: `775` -> still a major design-system gap.
+- Hardcoded hex in component TSX: `501` -> still a major design-system gap, down from `775`.
 - `: any` in app code: `1136` -> still a major strictness gap.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
-- Component files over `1000` lines: `28` -> still a major maintainability gap.
+- Component files over `1000` lines: `27` -> still a major maintainability gap, down from `28`.
 - Web unit/spec tests: `64` -> V10 claim of `12` is stale for the current branch.
 - E2E specs: `10` -> still below the target of `15`.
 - Prisma migration folders: `0` -> confirmed open gap.
@@ -50,6 +50,12 @@ Current verified readout on 2026-04-30:
 - Deploy is not only backend. The IDE topbar already had deploy wiring, and the canonical reusable surface is now `cloud-web-app/web/components/deploy/DeployButton.tsx`.
 - Current console debt is much lower than the V10 number when scanning `console.log/info/debug` in app code only.
 - Current test count is higher than the V10 number.
+
+## 2026-05-01 Progress Applied
+- Design-system consistency warning closed: `qa:design-system-consistency` now reports `0` findings.
+- `TerminalWidget.tsx` no longer owns ANSI theme palettes or hex fallbacks; terminal palettes now live in `cloud-web-app/web/lib/terminal/terminal-themes.ts`.
+- `SceneEditor.tsx` and `SoundCueEditor.tsx` had component-level hex styling replaced with CSS variables where safe.
+- `SoundCueEditor.tsx` is no longer over `1000` lines after extracting `sound-cue-models.ts`.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.

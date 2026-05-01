@@ -169,7 +169,7 @@ function SceneObjectMesh({
       {isSelected && meshRef.current && (
         <lineSegments>
           <edgesGeometry args={[geometry]} />
-          <lineBasicMaterial color="#ffff00" linewidth={2} />
+          <lineBasicMaterial color={0xffff00} linewidth={2} />
         </lineSegments>
       )}
       {/* Render children */}
@@ -263,7 +263,7 @@ function LightObject({ object, isSelected, onSelect }: LightObjectProps) {
         {lightType === 'hemisphere' && <sphereGeometry args={[0.15, 16, 8]} />}
         {lightType === 'rect' && <boxGeometry args={[width * 0.3, height * 0.3, 0.05]} />}
         <meshBasicMaterial
-          color={isSelected ? '#ffff00' : color}
+          color={isSelected ? 0xffff00 : color}
           transparent
           opacity={0.9}
         />
@@ -282,12 +282,12 @@ function LightObject({ object, isSelected, onSelect }: LightObjectProps) {
         <DreiHtml position={[0, 0.4, 0]}>
           <div style={{
             background: 'rgba(0,0,0,0.8)',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '4px 8px',
             borderRadius: '4px',
             fontSize: '11px',
             whiteSpace: 'nowrap',
-            border: '1px solid #444'
+            border: '1px solid var(--aethel-border-primary)'
           }}>
             💡 {object.name} ({lightType})
           </div>
@@ -308,7 +308,7 @@ function CameraObject({ object, isSelected, onSelect }: CameraObjectProps) {
       <mesh onClick={onSelect}>
         <coneGeometry args={[0.3, 0.5, 4]} />
         <meshBasicMaterial
-          color={isSelected ? '#ffff00' : '#4a90d9'}
+          color={isSelected ? 0xffff00 : 0x4a90d9}
           wireframe
         />
       </mesh>
@@ -316,7 +316,7 @@ function CameraObject({ object, isSelected, onSelect }: CameraObjectProps) {
         <DreiHtml position={[0, 0.5, 0]}>
           <div style={{
             background: 'rgba(0,0,0,0.7)',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             padding: '4px 8px',
             borderRadius: '4px',
             fontSize: '12px',
@@ -372,10 +372,10 @@ function SceneCanvas({
           args={[20, 20]}
           cellSize={1}
           cellThickness={0.5}
-          cellColor="#444"
+          cellColor="var(--aethel-border-primary)"
           sectionSize={5}
           sectionThickness={1}
-          sectionColor="#666"
+          sectionColor="var(--aethel-text-quaternary)"
           fadeDistance={50}
           infiniteGrid
         />
@@ -425,7 +425,7 @@ function SceneCanvas({
       {/* Gizmo */}
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
         <GizmoViewport
-          axisColors={['#ff4444', '#44ff44', '#4444ff']}
+          axisColors={["red", "lime", "blue"]}
           labelColor="white"
         />
       </GizmoHelper>
@@ -461,7 +461,7 @@ function HierarchyPanel({
           alignItems: 'center',
           padding: '6px 8px',
           paddingLeft: `${8 + depth * 16}px`,
-          background: obj.id === selectedId ? '#4a90d9' : 'transparent',
+          background: obj.id === selectedId ? 'var(--aethel-info)' : 'transparent',
           cursor: 'pointer',
           borderRadius: '4px',
           marginBottom: '2px',
@@ -486,7 +486,7 @@ function HierarchyPanel({
               background: 'rgba(255,0,0,0.3)',
               border: 'none',
               borderRadius: '3px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               padding: '2px 6px',
               cursor: 'pointer',
               fontSize: '11px',
@@ -502,28 +502,28 @@ function HierarchyPanel({
   return (
     <div style={{
       width: '250px',
-      background: '#1e1e1e',
-      borderRight: '1px solid #333',
+      background: 'var(--aethel-surface-primary)',
+      borderRight: '1px solid var(--aethel-border-secondary)',
       display: 'flex',
       flexDirection: 'column',
     }}>
       {/* Header */}
       <div style={{
         padding: '12px',
-        borderBottom: '1px solid #333',
+        borderBottom: '1px solid var(--aethel-border-secondary)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-        <span style={{ fontWeight: 'bold', color: '#fff' }}>Hierarquia</span>
+        <span style={{ fontWeight: 'bold', color: 'var(--aethel-text-primary)' }}>Hierarquia</span>
         <div style={{ position: 'relative' }}>
           <button type="button"
             onClick={() => setShowAddMenu(!showAddMenu)}
             style={{
-              background: '#4a90d9',
+              background: 0x4a90d9,
               border: 'none',
               borderRadius: '4px',
-              color: '#fff',
+              color: 'var(--aethel-text-primary)',
               padding: '4px 12px',
               cursor: 'pointer',
               fontWeight: 'bold',
@@ -536,14 +536,14 @@ function HierarchyPanel({
               position: 'absolute',
               top: '100%',
               right: 0,
-              background: '#2d2d2d',
-              border: '1px solid #444',
+              background: 'var(--aethel-surface-secondary)',
+              border: '1px solid var(--aethel-border-primary)',
               borderRadius: '4px',
               padding: '8px 0',
               zIndex: 100,
               minWidth: '150px',
             }}>
-              <div style={{ padding: '4px 12px', color: '#888', fontSize: '11px' }}>
+              <div style={{ padding: '4px 12px', color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>
                 3D Objects
               </div>
               {Object.keys(PRIMITIVE_GEOMETRIES).map(geom => (
@@ -560,7 +560,7 @@ function HierarchyPanel({
                     padding: '8px 12px',
                     background: 'transparent',
                     border: 'none',
-                    color: '#fff',
+                    color: 'var(--aethel-text-primary)',
                     textAlign: 'left',
                     cursor: 'pointer',
                   }}
@@ -568,8 +568,8 @@ function HierarchyPanel({
                   🧊 {geom.charAt(0).toUpperCase() + geom.slice(1)}
                 </button>
               ))}
-              <div style={{ borderTop: '1px solid #444', margin: '8px 0' }} />
-              <div style={{ padding: '4px 12px', color: '#888', fontSize: '11px' }}>
+              <div style={{ borderTop: '1px solid var(--aethel-border-primary)', margin: '8px 0' }} />
+              <div style={{ padding: '4px 12px', color: 'var(--aethel-text-tertiary)', fontSize: '11px' }}>
                 Lights
               </div>
               <button type="button"
@@ -580,14 +580,14 @@ function HierarchyPanel({
                   padding: '8px 12px',
                   background: 'transparent',
                   border: 'none',
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   textAlign: 'left',
                   cursor: 'pointer',
                 }}
               >
                 💡 Point Light
               </button>
-              <div style={{ borderTop: '1px solid #444', margin: '8px 0' }} />
+              <div style={{ borderTop: '1px solid var(--aethel-border-primary)', margin: '8px 0' }} />
               <button type="button"
                 onClick={() => { onAdd('camera'); setShowAddMenu(false); }}
                 style={{
@@ -596,7 +596,7 @@ function HierarchyPanel({
                   padding: '8px 12px',
                   background: 'transparent',
                   border: 'none',
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   textAlign: 'left',
                   cursor: 'pointer',
                 }}
@@ -611,7 +611,7 @@ function HierarchyPanel({
                   padding: '8px 12px',
                   background: 'transparent',
                   border: 'none',
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                   textAlign: 'left',
                   cursor: 'pointer',
                 }}
@@ -627,7 +627,7 @@ function HierarchyPanel({
         {objects.map(obj => renderObject(obj))}
         {objects.length === 0 && (
           <div style={{
-            color: '#666',
+            color: 'var(--aethel-text-quaternary)',
             textAlign: 'center',
             padding: '20px',
             fontSize: '13px'
@@ -648,10 +648,10 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
     return (
       <div style={{
         width: '280px',
-        background: '#1e1e1e',
-        borderLeft: '1px solid #333',
+        background: 'var(--aethel-surface-primary)',
+        borderLeft: '1px solid var(--aethel-border-secondary)',
         padding: '16px',
-        color: '#666',
+        color: 'var(--aethel-text-quaternary)',
         fontSize: '13px',
       }}>
         Selecione um objeto para ver suas propriedades.
@@ -676,10 +676,10 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
   const inputStyle = {
     width: '60px',
     padding: '4px 8px',
-    background: '#333',
-    border: '1px solid #444',
+    background: 'var(--aethel-surface-tertiary)',
+    border: '1px solid var(--aethel-border-primary)',
     borderRadius: '4px',
-    color: '#fff',
+    color: 'var(--aethel-text-primary)',
     fontSize: '12px',
   };
   const labelStyle = {
@@ -691,14 +691,14 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
   return (
     <div style={{
       width: '280px',
-      background: '#1e1e1e',
-      borderLeft: '1px solid #333',
+      background: 'var(--aethel-surface-primary)',
+      borderLeft: '1px solid var(--aethel-border-secondary)',
       overflowY: 'auto',
     }}>
       {/* Header */}
       <div style={{
         padding: '12px',
-        borderBottom: '1px solid #333',
+        borderBottom: '1px solid var(--aethel-border-secondary)',
       }}>
         <input
           type="text"
@@ -707,27 +707,27 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
           style={{
             width: '100%',
             padding: '8px',
-            background: '#333',
-            border: '1px solid #444',
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
             borderRadius: '4px',
-            color: '#fff',
+            color: 'var(--aethel-text-primary)',
             fontSize: '14px',
             fontWeight: 'bold',
           }}
         />
       </div>
       {/* Transform */}
-      <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
-        <h4 style={{ margin: '0 0 12px 0', color: '#888', fontSize: '12px' }}>
+      <div style={{ padding: '12px', borderBottom: '1px solid var(--aethel-border-secondary)' }}>
+        <h4 style={{ margin: '0 0 12px 0', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
           TRANSFORM
         </h4>
         {/* Position */}
         <div style={{ marginBottom: '12px' }}>
-          <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+          <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
             Position
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ ...labelStyle, color: '#ff6b6b' }}>X</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-error-light)' }}>X</span>
             <input
               type="number"
               step="0.1"
@@ -735,7 +735,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
               onChange={(e) => updatePosition(0, parseFloat(e.target.value) || 0)}
               style={inputStyle}
             />
-            <span style={{ ...labelStyle, color: '#51cf66' }}>Y</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-success-light)' }}>Y</span>
             <input
               type="number"
               step="0.1"
@@ -743,7 +743,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
               onChange={(e) => updatePosition(1, parseFloat(e.target.value) || 0)}
               style={inputStyle}
             />
-            <span style={{ ...labelStyle, color: '#339af0' }}>Z</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-info)' }}>Z</span>
             <input
               type="number"
               step="0.1"
@@ -755,11 +755,11 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
         </div>
         {/* Rotation */}
         <div style={{ marginBottom: '12px' }}>
-          <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+          <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
             Rotation (degrees)
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ ...labelStyle, color: '#ff6b6b' }}>X</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-error-light)' }}>X</span>
             <input
               type="number"
               step="1"
@@ -767,7 +767,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
               onChange={(e) => updateRotation(0, parseFloat(e.target.value) || 0)}
               style={inputStyle}
             />
-            <span style={{ ...labelStyle, color: '#51cf66' }}>Y</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-success-light)' }}>Y</span>
             <input
               type="number"
               step="1"
@@ -775,7 +775,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
               onChange={(e) => updateRotation(1, parseFloat(e.target.value) || 0)}
               style={inputStyle}
             />
-            <span style={{ ...labelStyle, color: '#339af0' }}>Z</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-info)' }}>Z</span>
             <input
               type="number"
               step="1"
@@ -787,11 +787,11 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
         </div>
         {/* Scale */}
         <div>
-          <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+          <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
             Scale
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ ...labelStyle, color: '#ff6b6b' }}>X</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-error-light)' }}>X</span>
             <input
               type="number"
               step="0.1"
@@ -799,7 +799,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
               onChange={(e) => updateScale(0, parseFloat(e.target.value) || 1)}
               style={inputStyle}
             />
-            <span style={{ ...labelStyle, color: '#51cf66' }}>Y</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-success-light)' }}>Y</span>
             <input
               type="number"
               step="0.1"
@@ -807,7 +807,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
               onChange={(e) => updateScale(1, parseFloat(e.target.value) || 1)}
               style={inputStyle}
             />
-            <span style={{ ...labelStyle, color: '#339af0' }}>Z</span>
+            <span style={{ ...labelStyle, color: 'var(--aethel-info)' }}>Z</span>
             <input
               type="number"
               step="0.1"
@@ -821,12 +821,12 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
       {/* Type-specific properties */}
       {object.type === 'mesh' && (
         <>
-          <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
-            <h4 style={{ margin: '0 0 12px 0', color: '#888', fontSize: '12px' }}>
+          <div style={{ padding: '12px', borderBottom: '1px solid var(--aethel-border-secondary)' }}>
+            <h4 style={{ margin: '0 0 12px 0', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
               MESH
             </h4>
             <div style={{ marginBottom: '12px' }}>
-              <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+              <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
                 Geometry
               </div>
               <select
@@ -837,10 +837,10 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                 style={{
                   width: '100%',
                   padding: '8px',
-                  background: '#333',
-                  border: '1px solid #444',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: '4px',
-                  color: '#fff',
+                  color: 'var(--aethel-text-primary)',
                 }}
               >
                 {Object.keys(PRIMITIVE_GEOMETRIES).map(g => (
@@ -849,7 +849,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
               </select>
             </div>
             <div>
-              <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+              <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
                 Color
               </div>
               <input
@@ -862,7 +862,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                   width: '100%',
                   height: '32px',
                   padding: '0',
-                  border: '1px solid #444',
+                  border: '1px solid var(--aethel-border-primary)',
                   borderRadius: '4px',
                   cursor: 'pointer',
                 }}
@@ -870,8 +870,8 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
             </div>
           </div>
           {/* PHYSICS PANEL */}
-          <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
-             <h4 style={{ margin: '0 0 12px 0', color: '#888', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ padding: '12px', borderBottom: '1px solid var(--aethel-border-secondary)' }}>
+             <h4 style={{ margin: '0 0 12px 0', color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
                PHYSICS
                <input
                  type="checkbox"
@@ -889,14 +889,14 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
              {Boolean(properties.rigidbody) && (
                <>
                  <div style={{ marginBottom: '8px' }}>
-                   <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>Type</div>
+                   <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>Type</div>
                    <select
                      value={(properties.rigidbody as any).type || 'dynamic'}
                      onChange={(e) => {
                        const rb = properties.rigidbody as any;
                        onChange({ properties: { ...properties, rigidbody: { ...rb, type: e.target.value } } });
                      }}
-                     style={{ width: '100%', background: '#333', color: '#fff', border: '1px solid #444', padding: '4px' }}
+                     style={{ width: '100%', background: 'var(--aethel-surface-tertiary)', color: 'var(--aethel-text-primary)', border: '1px solid var(--aethel-border-primary)', padding: '4px' }}
                    >
                      <option value="dynamic">Dynamic</option>
                      <option value="static">Static (Floor)</option>
@@ -904,7 +904,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                    </select>
                  </div>
                  <div style={{ marginBottom: '8px' }}>
-                   <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>Mass</div>
+                   <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>Mass</div>
                    <input
                      type="number"
                      step="0.1"
@@ -913,7 +913,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                         const rb = properties.rigidbody as any;
                         onChange({ properties: { ...properties, rigidbody: { ...rb, mass: parseFloat(e.target.value) } } });
                      }}
-                     style={{ width: '100%', background: '#333', color: '#fff', border: '1px solid #444', padding: '4px' }}
+                     style={{ width: '100%', background: 'var(--aethel-surface-tertiary)', color: 'var(--aethel-text-primary)', border: '1px solid var(--aethel-border-primary)', padding: '4px' }}
                    />
                  </div>
                </>
@@ -922,12 +922,12 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
         </>
       )}
       {object.type === 'light' && (
-        <div style={{ padding: '12px', borderBottom: '1px solid #333' }}>
-          <h4 style={{ margin: '0 0 12px 0', color: '#888', fontSize: '12px' }}>
+        <div style={{ padding: '12px', borderBottom: '1px solid var(--aethel-border-secondary)' }}>
+          <h4 style={{ margin: '0 0 12px 0', color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>
             LIGHT
           </h4>
           <div style={{ marginBottom: '12px' }}>
-            <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+            <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
               Type
             </div>
             <select
@@ -938,10 +938,10 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
               style={{
                 width: '100%',
                 padding: '8px',
-                background: '#333',
-                border: '1px solid #444',
+                background: 'var(--aethel-surface-tertiary)',
+                border: '1px solid var(--aethel-border-primary)',
                 borderRadius: '4px',
-                color: '#fff',
+                color: 'var(--aethel-text-primary)',
               }}
             >
               <option value="point">Point</option>
@@ -950,7 +950,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
             </select>
           </div>
           <div style={{ marginBottom: '12px' }}>
-            <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+            <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
               Intensity
             </div>
             <input
@@ -966,7 +966,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
             />
           </div>
           <div>
-            <div style={{ color: '#aaa', fontSize: '11px', marginBottom: '4px' }}>
+            <div style={{ color: 'var(--aethel-text-secondary)', fontSize: '11px', marginBottom: '4px' }}>
               Color
             </div>
             <input
@@ -979,7 +979,7 @@ function PropertiesPanel({ object, onChange }: PropertiesPanelProps) {
                 width: '100%',
                 height: '32px',
                 padding: '0',
-                border: '1px solid #444',
+                border: '1px solid var(--aethel-border-primary)',
                 borderRadius: '4px',
                 cursor: 'pointer',
               }}
@@ -1008,18 +1008,18 @@ function Toolbar({
 }: ToolbarProps) {
   const buttonStyle = (active: boolean) => ({
     padding: '8px 12px',
-    background: active ? '#4a90d9' : '#333',
+    background: active ? 'var(--aethel-info)' : 'var(--aethel-surface-tertiary)',
     border: 'none',
     borderRadius: '4px',
-    color: '#fff',
+    color: 'var(--aethel-text-primary)',
     cursor: 'pointer',
     fontWeight: active ? 'bold' : 'normal' as 'bold' | 'normal',
   });
   return (
     <div style={{
       height: '48px',
-      background: '#1e1e1e',
-      borderBottom: '1px solid #333',
+      background: 'var(--aethel-surface-primary)',
+      borderBottom: '1px solid var(--aethel-border-secondary)',
       display: 'flex',
       alignItems: 'center',
       padding: '0 16px',
@@ -1049,7 +1049,7 @@ function Toolbar({
           📐 Scale
         </button>
       </div>
-      <div style={{ width: '1px', height: '24px', background: '#444' }} />
+      <div style={{ width: '1px', height: '24px', background: 'var(--aethel-border-primary)' }} />
       {/* View options */}
       <button type="button"
         onClick={onToggleGrid}
@@ -1065,7 +1065,7 @@ function Toolbar({
         onClick={onPlay}
         style={{
           ...buttonStyle(isPlaying),
-          background: isPlaying ? '#e74c3c' : '#27ae60',
+          background: isPlaying ? 'var(--aethel-error)' : 'var(--aethel-success)',
           padding: '8px 24px',
         }}
       >
@@ -1144,8 +1144,8 @@ export function SceneEditor({ initialScene = [], onChange, onSelect }: SceneEdit
       flexDirection: 'column',
       height: '100%',
       width: '100%',
-      background: '#0d0d0d',
-      color: '#fff',
+      background: 'var(--aethel-surface-primary)',
+      color: 'var(--aethel-text-primary)',
     }}>
       <Toolbar
         transformMode={transformMode}

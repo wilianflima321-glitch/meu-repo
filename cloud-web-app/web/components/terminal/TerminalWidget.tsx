@@ -12,6 +12,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useTerminal, TerminalTheme } from '../../lib/hooks/useTerminal';
+import { TERMINAL_THEMES } from '@/lib/terminal/terminal-themes';
 
 // ============================================================================
 // Types
@@ -38,105 +39,6 @@ export interface TerminalWidgetProps {
   onSessionCreated?: (sessionId: string) => void;
   onSessionClosed?: (sessionId: string) => void;
 }
-
-// ============================================================================
-// Themes
-// ============================================================================
-
-export const TERMINAL_THEMES: Record<string, TerminalTheme> = {
-  catppuccinMocha: {
-    background: '#1e1e2e',
-    foreground: '#cdd6f4',
-    cursor: '#f5e0dc',
-    cursorAccent: '#1e1e2e',
-    selection: 'rgba(137, 180, 250, 0.3)',
-    black: '#45475a',
-    red: '#f38ba8',
-    green: '#a6e3a1',
-    yellow: '#f9e2af',
-    blue: '#89b4fa',
-    magenta: '#f5c2e7',
-    cyan: '#94e2d5',
-    white: '#bac2de',
-    brightBlack: '#585b70',
-    brightRed: '#f38ba8',
-    brightGreen: '#a6e3a1',
-    brightYellow: '#f9e2af',
-    brightBlue: '#89b4fa',
-    brightMagenta: '#f5c2e7',
-    brightCyan: '#94e2d5',
-    brightWhite: '#a6adc8',
-  },
-  dracula: {
-    background: '#282a36',
-    foreground: '#f8f8f2',
-    cursor: '#f8f8f2',
-    cursorAccent: '#282a36',
-    selection: 'rgba(68, 71, 90, 0.5)',
-    black: '#21222c',
-    red: '#ff5555',
-    green: '#50fa7b',
-    yellow: '#f1fa8c',
-    blue: '#bd93f9',
-    magenta: '#ff79c6',
-    cyan: '#8be9fd',
-    white: '#f8f8f2',
-    brightBlack: '#6272a4',
-    brightRed: '#ff6e6e',
-    brightGreen: '#69ff94',
-    brightYellow: '#ffffa5',
-    brightBlue: '#d6acff',
-    brightMagenta: '#ff92df',
-    brightCyan: '#a4ffff',
-    brightWhite: '#ffffff',
-  },
-  tokyoNight: {
-    background: '#1a1b26',
-    foreground: '#c0caf5',
-    cursor: '#c0caf5',
-    cursorAccent: '#1a1b26',
-    selection: 'rgba(51, 59, 91, 0.5)',
-    black: '#15161e',
-    red: '#f7768e',
-    green: '#9ece6a',
-    yellow: '#e0af68',
-    blue: '#7aa2f7',
-    magenta: '#bb9af7',
-    cyan: '#7dcfff',
-    white: '#a9b1d6',
-    brightBlack: '#414868',
-    brightRed: '#f7768e',
-    brightGreen: '#9ece6a',
-    brightYellow: '#e0af68',
-    brightBlue: '#7aa2f7',
-    brightMagenta: '#bb9af7',
-    brightCyan: '#7dcfff',
-    brightWhite: '#c0caf5',
-  },
-  vscodeDark: {
-    background: '#1e1e1e',
-    foreground: '#d4d4d4',
-    cursor: '#aeafad',
-    cursorAccent: '#1e1e1e',
-    selection: 'rgba(38, 79, 120, 0.5)',
-    black: '#000000',
-    red: '#cd3131',
-    green: '#0dbc79',
-    yellow: '#e5e510',
-    blue: '#2472c8',
-    magenta: '#bc3fbc',
-    cyan: '#11a8cd',
-    white: '#e5e5e5',
-    brightBlack: '#666666',
-    brightRed: '#f14c4c',
-    brightGreen: '#23d18b',
-    brightYellow: '#f5f543',
-    brightBlue: '#3b8eea',
-    brightMagenta: '#d670d6',
-    brightCyan: '#29b8db',
-    brightWhite: '#ffffff',
-  },
-};
 
 // ============================================================================
 // Sub-components
@@ -195,8 +97,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
         justify-content: space-between;
         align-items: center;
         padding: 4px 8px;
-        background: var(--terminal-toolbar-bg, #252526);
-        border-bottom: 1px solid var(--terminal-border, #3c3c3c);
+        background: var(--terminal-toolbar-bg, var(--aethel-surface-secondary));
+        border-bottom: 1px solid var(--terminal-border, var(--aethel-border-secondary));
       }
       .toolbar-left {
         display: flex;
@@ -207,14 +109,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
         font-size: 8px;
       }
       .status-indicator.connected {
-        color: #4ec9b0;
+        color: var(--aethel-success-light);
       }
       .status-indicator.disconnected {
-        color: #f38ba8;
+        color: var(--aethel-error-light);
       }
       .status-text {
         font-size: 12px;
-        color: var(--terminal-text-muted, #858585);
+        color: var(--terminal-text-muted, var(--aethel-text-tertiary));
       }
       .toolbar-right {
         display: flex;
@@ -226,20 +128,20 @@ const Toolbar: React.FC<ToolbarProps> = ({
         padding: 4px 8px;
         cursor: pointer;
         border-radius: 4px;
-        color: var(--terminal-text, #ccc);
+        color: var(--terminal-text, var(--aethel-text-secondary));
         display: flex;
         align-items: center;
         justify-content: center;
       }
       .toolbar-right button:hover {
-        background: var(--terminal-button-hover, #3c3c3c);
+        background: var(--terminal-button-hover, var(--aethel-surface-quaternary));
       }
       .toolbar-right button.active {
-        background: var(--terminal-button-active, #505050);
+        background: var(--terminal-button-active, color-mix(in srgb, var(--aethel-info) 16%, var(--aethel-surface-quaternary)));
       }
       .toolbar-right button.danger:hover {
-        background: rgba(243, 139, 168, 0.2);
-        color: #f38ba8;
+        background: color-mix(in srgb, var(--aethel-error) 20%, transparent);
+        color: var(--aethel-error-light);
       }
     `}</style>
   </div>
@@ -314,7 +216,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onSelectTab, onCloseTab, onRenameTab 
       <style jsx>{`
         .terminal-tabs {
           display: flex;
-          background: var(--terminal-tabs-bg, #1e1e1e);
+          background: var(--terminal-tabs-bg, var(--aethel-surface-primary));
           overflow-x: auto;
           scrollbar-width: thin;
         }
@@ -324,17 +226,17 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onSelectTab, onCloseTab, onRenameTab 
           gap: 6px;
           padding: 6px 12px;
           cursor: pointer;
-          border-right: 1px solid var(--terminal-border, #3c3c3c);
-          background: var(--terminal-tab-bg, #2d2d2d);
+          border-right: 1px solid var(--terminal-border, var(--aethel-border-secondary));
+          background: var(--terminal-tab-bg, var(--aethel-surface-secondary));
           min-width: 100px;
           max-width: 200px;
         }
         .terminal-tab.active {
-          background: var(--terminal-tab-active-bg, #1e1e1e);
-          border-bottom: 2px solid var(--terminal-accent, #89b4fa);
+          background: var(--terminal-tab-active-bg, var(--aethel-surface-primary));
+          border-bottom: 2px solid var(--terminal-accent, var(--aethel-info));
         }
         .terminal-tab:hover {
-          background: var(--terminal-tab-hover-bg, #383838);
+          background: var(--terminal-tab-hover-bg, var(--aethel-surface-quaternary));
         }
         .tab-name {
           flex: 1;
@@ -342,13 +244,13 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onSelectTab, onCloseTab, onRenameTab 
           text-overflow: ellipsis;
           white-space: nowrap;
           font-size: 12px;
-          color: var(--terminal-text, #ccc);
+          color: var(--terminal-text, var(--aethel-text-secondary));
         }
         .tab-input {
           flex: 1;
           background: transparent;
-          border: 1px solid var(--terminal-accent, #89b4fa);
-          color: var(--terminal-text, #ccc);
+          border: 1px solid var(--terminal-accent, var(--aethel-info));
+          color: var(--terminal-text, var(--aethel-text-secondary));
           font-size: 12px;
           padding: 2px 4px;
           border-radius: 2px;
@@ -359,7 +261,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onSelectTab, onCloseTab, onRenameTab 
           border: none;
           padding: 2px;
           cursor: pointer;
-          color: var(--terminal-text-muted, #858585);
+          color: var(--terminal-text-muted, var(--aethel-text-tertiary));
           border-radius: 2px;
           display: flex;
           align-items: center;
@@ -370,8 +272,8 @@ const Tabs: React.FC<TabsProps> = ({ tabs, onSelectTab, onCloseTab, onRenameTab 
           opacity: 1;
         }
         .tab-close:hover {
-          background: rgba(243, 139, 168, 0.2);
-          color: #f38ba8;
+          background: color-mix(in srgb, var(--aethel-error) 20%, transparent);
+          color: var(--aethel-error-light);
         }
       `}</style>
     </div>
@@ -443,35 +345,35 @@ const SearchBar: React.FC<SearchBarProps> = ({
           display: flex;
           gap: 4px;
           padding: 4px 8px;
-          background: var(--terminal-search-bg, #252526);
-          border-bottom: 1px solid var(--terminal-border, #3c3c3c);
+          background: var(--terminal-search-bg, var(--aethel-surface-secondary));
+          border-bottom: 1px solid var(--terminal-border, var(--aethel-border-secondary));
         }
         .search-bar input {
           flex: 1;
-          background: var(--terminal-input-bg, #3c3c3c);
-          border: 1px solid var(--terminal-border, #545454);
-          color: var(--terminal-text, #ccc);
+          background: var(--terminal-input-bg, var(--aethel-surface-quaternary));
+          border: 1px solid var(--terminal-border, var(--aethel-border-primary));
+          color: var(--terminal-text, var(--aethel-text-secondary));
           padding: 4px 8px;
           border-radius: 4px;
           font-size: 12px;
           outline: none;
         }
         .search-bar input:focus {
-          border-color: var(--terminal-accent, #89b4fa);
+          border-color: var(--terminal-accent, var(--aethel-info));
         }
         .search-bar button {
           background: transparent;
           border: none;
           padding: 4px;
           cursor: pointer;
-          color: var(--terminal-text, #ccc);
+          color: var(--terminal-text, var(--aethel-text-secondary));
           border-radius: 4px;
           display: flex;
           align-items: center;
           justify-content: center;
         }
         .search-bar button:hover {
-          background: var(--terminal-button-hover, #3c3c3c);
+          background: var(--terminal-button-hover, var(--aethel-surface-quaternary));
         }
       `}</style>
     </div>
@@ -776,7 +678,7 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
         }
         .terminal-container :global(.xterm-viewport) {
           scrollbar-width: thin;
-          scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+          scrollbar-color: color-mix(in srgb, var(--aethel-text-primary) 20%, transparent) transparent;
         }
         .terminal-container :global(.xterm-viewport::-webkit-scrollbar) {
           width: 8px;
@@ -785,11 +687,11 @@ export const TerminalWidget: React.FC<TerminalWidgetProps> = ({
           background: transparent;
         }
         .terminal-container :global(.xterm-viewport::-webkit-scrollbar-thumb) {
-          background: rgba(255, 255, 255, 0.2);
+          background: color-mix(in srgb, var(--aethel-text-primary) 20%, transparent);
           border-radius: 4px;
         }
         .terminal-container :global(.xterm-viewport::-webkit-scrollbar-thumb:hover) {
-          background: rgba(255, 255, 255, 0.3);
+          background: color-mix(in srgb, var(--aethel-text-primary) 30%, transparent);
         }
       `}</style>
     </div>
