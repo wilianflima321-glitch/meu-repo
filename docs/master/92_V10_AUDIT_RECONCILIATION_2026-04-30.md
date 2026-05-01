@@ -19,12 +19,12 @@ Command used:
 npm run qa:product-quality-progress
 ```
 
-Current verified readout after the 2026-05-01 editor-surface split pass:
+Current verified readout after the 2026-05-01 god-component closure pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
-- Hardcoded hex in component TSX: `39` -> closed for the current ratchet target of `50`, down from `775`.
+- Hardcoded hex in component TSX: `36` -> closed for the current ratchet target of `50`, down from `775`.
 - `: any` in app code: `1135` -> still a major strictness gap.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
-- Component files over `1000` lines: `13` -> still a maintainability gap, down from `28`.
+- Component files over `1000` lines: `0` -> closed for the measured component scope, down from `28`.
 - Web unit/spec tests: `64` -> V10 claim of `12` is stale for the current branch.
 - E2E specs: `10` -> still below the target of `15`.
 - Prisma migration folders: `0` -> confirmed open gap.
@@ -40,7 +40,7 @@ Current verified readout after the 2026-05-01 editor-surface split pass:
 - `noImplicitAny` is still disabled.
 - `: any` debt is still too high to enable strictness safely in one step.
 - Hardcoded component hex colors are below the current ratchet target; keep the gate active while remaining offenders are cleaned deliberately.
-- Several engine/media/editor components are still too large.
+- The measured engine/media/editor god-component backlog is closed at `0` files over `1000` lines; keep the ratchet so regressions fail early.
 - E2E coverage is below target.
 - Active docs are now clean of local absolute paths in the progress scanner scope; keep this at `0`.
 
@@ -71,6 +71,19 @@ Current verified readout after the 2026-05-01 editor-surface split pass:
 - `ExportSystem.tsx` is no longer over `1000` lines after extracting export presets, settings, jobs, and manager logic into `export-system-model.ts`.
 - `AnimationBlueprint.tsx` is no longer over `1000` lines after extracting graph nodes, variable panel, state inspector, and transition inspector into `AnimationBlueprintPanels.tsx`.
 - `93_UNREAL_AGENTIC_PRODUCT_GAP_MAP_2026-05-01.md` now captures the market-grade Unreal/AAA + cloud/local agent gap map and explicitly prevents inflated "Unreal in browser" claims.
+- `AnimationBlueprintEditor.tsx` is no longer over `1000` lines after extracting reusable graph/state panels into `AnimationBlueprintEditorPanels.tsx`.
+- `FacialAnimationEditor.tsx` is no longer over `1000` lines after moving rig/blendshape model data into `facial-animation-model.ts`.
+- `HairFurEditor.tsx` is no longer over `1000` lines after moving grooming presets/constants into `hair-fur-model.ts`.
+- `ControlRigEditor.tsx` is no longer over `1000` lines after moving humanoid bones and IK defaults into `control-rig-model.ts`.
+- `ClothSimulationEditor.tsx` and `FluidSimulationEditor.tsx` are no longer over `1000` lines after extracting simulation panels into dedicated companion modules.
+- `FoliagePainter.tsx` is no longer over `1000` lines after extracting 3D preview and density/layer panels into `FoliagePainterPanels.tsx`.
+- `DialogueEditor.tsx` is no longer over `1000` lines after extracting React Flow nodes, inspectors, and initial graph data into `DialogueEditorPanels.tsx`.
+- `ProjectSettings.tsx` is no longer over `1000` lines after moving settings schema/defaults into `project-settings-model.ts`.
+- `SpriteEditor.tsx` is no longer over `1000` lines after extracting tool, swatch, layer, and timeline UI into `SpriteEditorParts.tsx`.
+- `WorldOutliner.tsx` is no longer over `1000` lines after extracting tree/config/context controls into `WorldOutlinerParts.tsx`.
+- `AudioProcessing.tsx` is no longer over `1000` lines after extracting EQ/compressor/effect-rack visualizers into `AudioProcessingVisualizers.tsx`.
+- `NiagaraVFX.tsx` is no longer over `1000` lines after extracting renderer, node graph definitions, emitter panels, and presets into `NiagaraVFXPanels.tsx`.
+- `qa:product-quality-progress` now reports `component files over 1000 lines` as `0 / 0 PASS`, closing the V10 god-component task for the measured TSX component scope.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.
@@ -86,8 +99,8 @@ Do not chase raw counts by rewriting broad documents blindly.
 For docs, clean active product-critical files first; archives are intentionally excluded from the progress scanner.
 
 ## Next Highest-ROI Blocks
-1. Continue splitting the remaining reachable engine/media god components without changing behavior; current measured count is `13`.
-2. Reduce `: any` in the top server/runtime extension files.
-3. Add five missing E2E specs around first value, deploy, Studio Home, preview/review, and theme/navigation.
-4. Create a safe Prisma migration baseline only after confirming the target database state.
-5. Start i18n/product-language cleanup on user-facing dashboard, IDE, and onboarding strings.
+1. Reduce `: any` in the top server/runtime extension files so `noImplicitAny` can become a realistic ratchet instead of a risky flag flip.
+2. Add five missing E2E specs around first value, deploy, Studio Home, preview/review, and theme/navigation.
+3. Create a safe Prisma migration baseline only after confirming the target database state.
+4. Start i18n/product-language cleanup on user-facing dashboard, IDE, and onboarding strings.
+5. Keep god-component regressions blocked by the product-quality scanner; the current measured count is `0`.

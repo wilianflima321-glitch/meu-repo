@@ -1,0 +1,831 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Edge, EdgeProps, getBezierPath, Handle, MarkerType, Node, NodeProps, Position } from '@xyflow/react';
+import type {
+  AnimationNodeType,
+  AnimationParameter,
+  AnimationState,
+  AnimationTransition,
+  BlendTree,
+  StateNodeData,
+  TransitionCondition,
+  TransitionEdgeData,
+} from './animation-blueprint-editor.types';
+
+function StateNode({ data, selected }: NodeProps<Node<StateNodeData>>) {
+  const { state, isDefault, onEdit, onSetDefault } = data;
+  const getNodeColor = () => {
+    switch (state.type) {
+      case 'entry': return 'var(--aethel-success)';
+      case 'exit': return 'var(--aethel-error)';
+      case 'conduit': return 'var(--aethel-warning)';
+      case 'blend_space_1d':
+      case 'blend_space_2d': return 'var(--aethel-accent)';
+      default: return 'var(--aethel-primary)';
+    }
+  };
+  return (
+    <div
+      style={{
+        background: selected ? 'var(--aethel-surface-quaternary)' : 'var(--aethel-surface-tertiary)',
+        border: `2px solid ${isDefault ? 'var(--aethel-success)' : getNodeColor()}`,
+        borderRadius: '8px',
+        padding: '12px 16px',
+        minWidth: '150px',
+        color: 'white',
+        position: 'relative',
+      }}
+    >
+      {/* Input handle */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{ background: 'var(--aethel-text-quaternary)', width: 10, height: 10 }}
+      />
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+        <div
+          style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: getNodeColor(),
+          }}
+        />
+        <span style={{ fontWeight: 'bold', fontSize: '14px' }}>{state.name}</span>
+        {isDefault && (
+          <span style={{ fontSize: '10px', background: 'var(--aethel-success)', padding: '2px 6px', borderRadius: '4px' }}>
+            Default
+          </span>
+        )}
+      </div>
+      {/* Animation info */}
+      {state.animation && (
+        <div style={{ fontSize: '12px', color: 'var(--aethel-text-tertiary)', marginBottom: '4px' }}>
+          Anim {state.animation}
+        </div>
+      )}
+      {/* Blend tree indicator */}
+      {state.blendTree && (
+        <div style={{ fontSize: '12px', color: 'var(--aethel-accent)' }}>
+          Blend Blend Tree ({state.blendTree.type})
+        </div>
+      )}
+      {/* Speed */}
+      <div style={{ fontSize: '11px', color: 'var(--aethel-text-quaternary)', marginTop: '4px' }}>
+        Speed: {state.speed}x {state.loop ? 'loop' : ''}
+      </div>
+      {/* Notifies count */}
+      {state.notifies.length > 0 && (
+        <div style={{ fontSize: '11px', color: 'var(--aethel-warning)', marginTop: '2px' }}>
+          Notes {state.notifies.length} notifies
+        </div>
+      )}
+      {/* Context menu buttons (visible on hover) */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '4px',
+          right: '4px',
+          display: 'flex',
+          gap: '4px',
+          opacity: selected ? 1 : 0,
+          transition: 'opacity 0.2s',
+        }}
+      >
+        <button type="button" aria-label={`Editar estado ${state.name}`}
+          onClick={(e) => { e.stopPropagation(); onEdit(state); }}
+          style={{
+            background: 'var(--aethel-surface-quaternary)',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '4px 8px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '10px',
+          }}
+        >
+          Edit
+        </button>
+        {!isDefault && state.type === 'state' && (
+          <button type="button" aria-label={`Definir ${state.name} como estado padrao`}
+            onClick={(e) => { e.stopPropagation(); onSetDefault(state.id); }}
+            style={{
+              background: 'var(--aethel-surface-quaternary)',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '10px',
+            }}
+          >
+            Set Default
+          </button>
+        )}
+      </div>
+      {/* Output handle */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{ background: 'var(--aethel-text-quaternary)', width: 10, height: 10 }}
+      />
+    </div>
+  );
+}
+function TransitionEdge({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  data,
+  selected,
+}: EdgeProps<Edge<TransitionEdgeData>>) {
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+  const transition = data?.transition;
+  return (
+    <>
+      <path
+        id={id}
+        className="react-flow__edge-path"
+        d={edgePath}
+        strokeWidth={selected ? 3 : 2}
+        stroke={selected ? 'var(--aethel-primary)' : 'var(--aethel-text-quaternary)'}
+        fill="none"
+        markerEnd="url(#arrow)"
+      />
+      {/* Transition label */}
+      {transition && (
+        <foreignObject
+          x={labelX - 50}
+          y={labelY - 15}
+          width={100}
+          height={30}
+          style={{ overflow: 'visible' }}
+        >
+          <div
+            style={{
+              background: 'var(--aethel-surface-tertiary)',
+              border: '1px solid var(--aethel-border-primary)',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              fontSize: '10px',
+              color: 'var(--aethel-text-tertiary)',
+              textAlign: 'center',
+              cursor: 'pointer',
+            }}
+            onClick={() => data?.onEdit?.(transition)}
+          >
+            {transition.conditions.length > 0
+              ? `${transition.conditions.length} conditions`
+              : 'No conditions'}
+            <br />
+            <span style={{ color: 'var(--aethel-text-quaternary)' }}>{transition.blendTime}s blend</span>
+          </div>
+        </foreignObject>
+      )}
+    </>
+  );
+}
+interface ParameterPanelProps {
+  parameters: AnimationParameter[];
+  onChange: (params: AnimationParameter[]) => void;
+  onValueChange: (id: string, value: number | boolean) => void;
+}
+export function ParameterPanel({ parameters, onChange, onValueChange }: ParameterPanelProps) {
+  const [newParamName, setNewParamName] = useState('');
+  const [newParamType, setNewParamType] = useState<AnimationParameter['type']>('float');
+  const addParameter = () => {
+    if (!newParamName.trim()) return;
+    const newParam: AnimationParameter = {
+      id: crypto.randomUUID(),
+      name: newParamName,
+      type: newParamType,
+      value: newParamType === 'bool' || newParamType === 'trigger' ? false : 0,
+      min: newParamType === 'float' || newParamType === 'int' ? 0 : undefined,
+      max: newParamType === 'float' ? 1 : newParamType === 'int' ? 100 : undefined,
+    };
+    onChange([...parameters, newParam]);
+    setNewParamName('');
+  };
+  const removeParameter = (id: string) => {
+    onChange(parameters.filter(p => p.id !== id));
+  };
+  return (
+    <div style={{ padding: '12px', background: 'var(--aethel-surface-primary)', borderRadius: '8px' }}>
+      <h3 style={{ color: 'white', fontSize: '14px', marginBottom: '12px' }}>
+        Parameters
+      </h3>
+      {/* Parameter list */}
+      <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
+        {parameters.map(param => (
+          <div
+            key={param.id}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '8px',
+              padding: '8px',
+              background: 'var(--aethel-surface-tertiary)',
+              borderRadius: '4px',
+            }}
+          >
+            {/* Type indicator */}
+            <span style={{
+              fontSize: '10px',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              background: param.type === 'bool' ? 'var(--aethel-success)' :
+                         param.type === 'trigger' ? 'var(--aethel-warning)' : 'var(--aethel-primary)',
+              color: 'white',
+            }}>
+              {param.type}
+            </span>
+            {/* Name */}
+            <span style={{ flex: 1, color: 'white', fontSize: '12px' }}>
+              {param.name}
+            </span>
+            {/* Value control */}
+            {(param.type === 'float' || param.type === 'int') && (
+              <input
+                type="range"
+                min={param.min ?? 0}
+                max={param.max ?? 1}
+                step={param.type === 'int' ? 1 : 0.01}
+                value={param.value as number}
+                onChange={(e) => onValueChange(param.id, parseFloat(e.target.value))}
+                style={{ width: '80px' }}
+              />
+            )}
+            {param.type === 'bool' && (
+              <input
+                type="checkbox"
+                checked={param.value as boolean}
+                onChange={(e) => onValueChange(param.id, e.target.checked)}
+              />
+            )}
+            {param.type === 'trigger' && (
+              <button type="button" aria-label={`Disparar gatilho ${param.name}`}
+                onClick={() => {
+                  onValueChange(param.id, true);
+                  setTimeout(() => onValueChange(param.id, false), 100);
+                }}
+                style={{
+                  background: 'var(--aethel-warning)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                }}
+              >
+                Fire
+              </button>
+            )}
+            {/* Value display */}
+            <span style={{ color: 'var(--aethel-text-quaternary)', fontSize: '11px', width: '40px', textAlign: 'right' }}>
+              {typeof param.value === 'boolean' ? (param.value ? 'true' : 'false') : param.value.toFixed(2)}
+            </span>
+            {/* Delete */}
+            <button type="button" aria-label={`Remover parametro ${param.name}`}
+              onClick={() => removeParameter(param.id)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--aethel-error)',
+                cursor: 'pointer',
+                fontSize: '14px',
+              }}
+            >
+              x
+            </button>
+          </div>
+        ))}
+      </div>
+      {/* Add new parameter */}
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <input
+          type="text"
+          value={newParamName}
+          onChange={(e) => setNewParamName(e.target.value)}
+          placeholder="Parameter name"
+          style={{
+            flex: 1,
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
+            borderRadius: '4px',
+            padding: '6px 10px',
+            color: 'white',
+            fontSize: '12px',
+          }}
+        />
+        <select
+          value={newParamType}
+          onChange={(e) => setNewParamType(e.target.value as AnimationParameter['type'])}
+          style={{
+            background: 'var(--aethel-surface-tertiary)',
+            border: '1px solid var(--aethel-border-primary)',
+            borderRadius: '4px',
+            padding: '6px',
+            color: 'white',
+            fontSize: '12px',
+          }}
+        >
+          <option value="float">Float</option>
+          <option value="int">Int</option>
+          <option value="bool">Bool</option>
+          <option value="trigger">Trigger</option>
+        </select>
+        <button type="button" aria-label="Adicionar novo parametro de animacao"
+          onClick={addParameter}
+          style={{
+            background: 'var(--aethel-primary)',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '6px 12px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '12px',
+          }}
+        >
+          Add
+        </button>
+      </div>
+    </div>
+  );
+}
+interface StateEditorModalProps {
+  state: AnimationState;
+  onSave: (state: AnimationState) => void;
+  onClose: () => void;
+  availableAnimations: string[];
+  parameters: AnimationParameter[];
+}
+export function StateEditorModal({ state, onSave, onClose, availableAnimations, parameters }: StateEditorModalProps) {
+  const [editedState, setEditedState] = useState<AnimationState>({ ...state });
+  const updateField = <K extends keyof AnimationState>(field: K, value: AnimationState[K]) => {
+    setEditedState(prev => ({ ...prev, [field]: value }));
+  };
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0,0,0,0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: 'var(--aethel-surface-tertiary)',
+          borderRadius: '12px',
+          padding: '24px',
+          width: '500px',
+          maxHeight: '80vh',
+          overflow: 'auto',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={{ color: 'white', marginBottom: '20px' }}>Edit State: {state.name}</h2>
+        {/* Name */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+            Name
+          </label>
+          <input
+            type="text"
+            value={editedState.name}
+            onChange={(e) => updateField('name', e.target.value)}
+            style={{
+              width: '100%',
+              background: 'var(--aethel-surface-primary)',
+              border: '1px solid var(--aethel-border-primary)',
+              borderRadius: '4px',
+              padding: '8px 12px',
+              color: 'white',
+            }}
+          />
+        </div>
+        {/* Animation */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+            Animation
+          </label>
+          <select
+            value={editedState.animation || ''}
+            onChange={(e) => updateField('animation', e.target.value || undefined)}
+            style={{
+              width: '100%',
+              background: 'var(--aethel-surface-primary)',
+              border: '1px solid var(--aethel-border-primary)',
+              borderRadius: '4px',
+              padding: '8px 12px',
+              color: 'white',
+            }}
+          >
+            <option value="">-- Select Animation --</option>
+            {availableAnimations.map(anim => (
+              <option key={anim} value={anim}>{anim}</option>
+            ))}
+          </select>
+        </div>
+        {/* Speed */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+            Speed: {editedState.speed.toFixed(2)}x
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={3}
+            step={0.1}
+            value={editedState.speed}
+            onChange={(e) => updateField('speed', parseFloat(e.target.value))}
+            style={{ width: '100%' }}
+          />
+        </div>
+        {/* Loop */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input
+              type="checkbox"
+              checked={editedState.loop}
+              onChange={(e) => updateField('loop', e.target.checked)}
+            />
+            Loop Animation
+          </label>
+        </div>
+        {/* Blend Tree option */}
+        <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--aethel-surface-primary)', borderRadius: '8px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <input
+              type="checkbox"
+              checked={!!editedState.blendTree}
+              onChange={(e) => updateField('blendTree', e.target.checked ? {
+                type: '1d',
+                parameterX: parameters[0]?.id || '',
+                children: [],
+              } : undefined)}
+            />
+            Use Blend Tree
+          </label>
+          {editedState.blendTree && (
+            <div style={{ marginTop: '8px' }}>
+              <select
+                value={editedState.blendTree.type}
+                onChange={(e) => updateField('blendTree', {
+                  ...editedState.blendTree!,
+                  type: e.target.value as BlendTree['type'],
+                })}
+                style={{
+                  width: '100%',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
+                  borderRadius: '4px',
+                  padding: '6px',
+                  color: 'white',
+                  marginBottom: '8px',
+                }}
+              >
+                <option value="1d">1D Blend Space</option>
+                <option value="2d">2D Blend Space</option>
+                <option value="additive">Additive</option>
+              </select>
+              <select
+                value={editedState.blendTree.parameterX}
+                onChange={(e) => updateField('blendTree', {
+                  ...editedState.blendTree!,
+                  parameterX: e.target.value,
+                })}
+                style={{
+                  width: '100%',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
+                  borderRadius: '4px',
+                  padding: '6px',
+                  color: 'white',
+                }}
+              >
+                <option value="">-- Parameter X --</option>
+                {parameters.filter(p => p.type === 'float').map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <button type="button" aria-label="Cancelar edicao do estado de animacao"
+            onClick={onClose}
+            style={{
+              background: 'var(--aethel-surface-quaternary)',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '10px 20px',
+              color: 'white',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+          <button type="button" aria-label={`Salvar alteracoes do estado ${editedState.name}`}
+            onClick={() => onSave(editedState)}
+            style={{
+              background: 'var(--aethel-primary)',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '10px 20px',
+              color: 'white',
+              cursor: 'pointer',
+            }}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+interface TransitionEditorModalProps {
+  transition: AnimationTransition;
+  onSave: (transition: AnimationTransition) => void;
+  onClose: () => void;
+  parameters: AnimationParameter[];
+}
+export function TransitionEditorModal({ transition, onSave, onClose, parameters }: TransitionEditorModalProps) {
+  const [editedTransition, setEditedTransition] = useState<AnimationTransition>({ ...transition });
+  const addCondition = () => {
+    const newCondition: TransitionCondition = {
+      parameter: parameters[0]?.id || '',
+      comparison: '==',
+      value: 0,
+    };
+    setEditedTransition(prev => ({
+      ...prev,
+      conditions: [...prev.conditions, newCondition],
+    }));
+  };
+  const updateCondition = (index: number, updates: Partial<TransitionCondition>) => {
+    setEditedTransition(prev => ({
+      ...prev,
+      conditions: prev.conditions.map((c, i) => i === index ? { ...c, ...updates } : c),
+    }));
+  };
+  const removeCondition = (index: number) => {
+    setEditedTransition(prev => ({
+      ...prev,
+      conditions: prev.conditions.filter((_, i) => i !== index),
+    }));
+  };
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0,0,0,0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: 'var(--aethel-surface-tertiary)',
+          borderRadius: '12px',
+          padding: '24px',
+          width: '500px',
+          maxHeight: '80vh',
+          overflow: 'auto',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={{ color: 'white', marginBottom: '20px' }}>Edit Transition</h2>
+        {/* Blend Time */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+            Blend Time: {editedTransition.blendTime.toFixed(2)}s
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={2}
+            step={0.05}
+            value={editedTransition.blendTime}
+            onChange={(e) => setEditedTransition(prev => ({ ...prev, blendTime: parseFloat(e.target.value) }))}
+            style={{ width: '100%' }}
+          />
+        </div>
+        {/* Blend Mode */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+            Blend Mode
+          </label>
+          <select
+            value={editedTransition.blendMode}
+            onChange={(e) => setEditedTransition(prev => ({
+              ...prev,
+              blendMode: e.target.value as AnimationTransition['blendMode']
+            }))}
+            style={{
+              width: '100%',
+              background: 'var(--aethel-surface-primary)',
+              border: '1px solid var(--aethel-border-primary)',
+              borderRadius: '4px',
+              padding: '8px',
+              color: 'white',
+            }}
+          >
+            <option value="linear">Linear</option>
+            <option value="cubic">Cubic</option>
+            <option value="custom">Custom Curve</option>
+          </select>
+        </div>
+        {/* Interruptible */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input
+              type="checkbox"
+              checked={editedTransition.interruptible}
+              onChange={(e) => setEditedTransition(prev => ({ ...prev, interruptible: e.target.checked }))}
+            />
+            Can Be Interrupted
+          </label>
+        </div>
+        {/* Priority */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+            Priority: {editedTransition.priority}
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={10}
+            step={1}
+            value={editedTransition.priority}
+            onChange={(e) => setEditedTransition(prev => ({ ...prev, priority: parseInt(e.target.value) }))}
+            style={{ width: '100%' }}
+          />
+        </div>
+        {/* Conditions */}
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <label style={{ color: 'var(--aethel-text-tertiary)', fontSize: '12px' }}>Conditions</label>
+            <button type="button" aria-label="Adicionar condicao de transicao"
+              onClick={addCondition}
+              style={{
+                background: 'var(--aethel-primary)',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '11px',
+              }}
+            >
+              + Add
+            </button>
+          </div>
+          {editedTransition.conditions.map((condition, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'center',
+                marginBottom: '8px',
+                padding: '8px',
+                background: 'var(--aethel-surface-primary)',
+                borderRadius: '4px',
+              }}
+            >
+              <select
+                value={condition.parameter}
+                onChange={(e) => updateCondition(index, { parameter: e.target.value })}
+                style={{
+                  flex: 1,
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: 'white',
+                  fontSize: '11px',
+                }}
+              >
+                {parameters.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <select
+                value={condition.comparison}
+                onChange={(e) => updateCondition(index, { comparison: e.target.value as TransitionCondition['comparison'] })}
+                style={{
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: 'white',
+                  fontSize: '11px',
+                }}
+              >
+                <option value="==">=</option>
+                <option value="!=">!=</option>
+                <option value=">">&gt;</option>
+                <option value="<">&lt;</option>
+                <option value=">=">&gt;=</option>
+                <option value="<=">&lt;=</option>
+              </select>
+              <input
+                type="number"
+                value={condition.value as number}
+                onChange={(e) => updateCondition(index, { value: parseFloat(e.target.value) })}
+                style={{
+                  width: '60px',
+                  background: 'var(--aethel-surface-tertiary)',
+                  border: '1px solid var(--aethel-border-primary)',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  color: 'white',
+                  fontSize: '11px',
+                }}
+              />
+              <button type="button" aria-label={`Remover condicao ${index + 1}`}
+                onClick={() => removeCondition(index)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--aethel-error)',
+                  cursor: 'pointer',
+                }}
+              >
+                x
+              </button>
+            </div>
+          ))}
+        </div>
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <button type="button" aria-label="Cancelar edicao da transicao"
+            onClick={onClose}
+            style={{
+              background: 'var(--aethel-surface-quaternary)',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '10px 20px',
+              color: 'white',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+          <button type="button" aria-label={`Salvar transicao para ${editedTransition.targetState}`}
+            onClick={() => onSave(editedTransition)}
+            style={{
+              background: 'var(--aethel-primary)',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '10px 20px',
+              color: 'white',
+              cursor: 'pointer',
+            }}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const nodeTypes = {
+  state: StateNode,
+};
+
+export const edgeTypes = {
+  transition: TransitionEdge,
+};

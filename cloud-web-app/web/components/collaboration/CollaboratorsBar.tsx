@@ -45,7 +45,7 @@ export function CollaboratorsBar({
   const activeCursors = peers.filter((peer) => peer.cursor).length
   const overflowNames = overflow > 0 ? peers.slice(maxVisible).map((peer) => peer.name).join(', ') : ''
   const summaryLabel =
-    peers.length === 1 ? '1 collaborator active' : `${peers.length} collaborators active`
+    peers.length === 1 ? '1 collaborator connected' : `${peers.length} collaborators connected`
   const activityLabel =
     activeCursors > 0
       ? `${activeCursors} live cursor${activeCursors === 1 ? '' : 's'}`
