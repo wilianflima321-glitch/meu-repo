@@ -19,12 +19,12 @@ Command used:
 npm run qa:product-quality-progress
 ```
 
-Current verified readout after the final 2026-05-01 design-token pass:
+Current verified readout after the 2026-05-01 editor-surface split pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
 - Hardcoded hex in component TSX: `39` -> closed for the current ratchet target of `50`, down from `775`.
 - `: any` in app code: `1135` -> still a major strictness gap.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
-- Component files over `1000` lines: `20` -> still a maintainability gap, down from `28`.
+- Component files over `1000` lines: `15` -> still a maintainability gap, down from `28`.
 - Web unit/spec tests: `64` -> V10 claim of `12` is stale for the current branch.
 - E2E specs: `10` -> still below the target of `15`.
 - Prisma migration folders: `0` -> confirmed open gap.
@@ -39,7 +39,7 @@ Current verified readout after the final 2026-05-01 design-token pass:
 - Prisma migrations are still not versioned.
 - `noImplicitAny` is still disabled.
 - `: any` debt is still too high to enable strictness safely in one step.
-- Hardcoded component colors remain a large design-system gap.
+- Hardcoded component hex colors are below the current ratchet target; keep the gate active while remaining offenders are cleaned deliberately.
 - Several engine/media/editor components are still too large.
 - E2E coverage is below target.
 - Active docs are now clean of local absolute paths in the progress scanner scope; keep this at `0`.
@@ -63,6 +63,11 @@ Current verified readout after the final 2026-05-01 design-token pass:
 - `WaterEditor.tsx` is no longer over `1000` lines after extracting `water-editor-models.ts`.
 - `QuestEditor.tsx`, `TerrainSculptingEditor.tsx`, and `SceneEditor.tsx` are no longer over `1000` lines after extracting model/panel modules.
 - Terrain toolbar glyphs were normalized away from mojibake into stable compact labels so the editor remains legible across Windows/browser encodings.
+- `LevelEditor.tsx` is no longer over `1000` lines after extracting toolbar, outliner, and details mini-panels into `LevelEditorPanels.tsx`.
+- `VideoTimelineEditor.tsx` is no longer over `1000` lines after extracting clip inspector and effects panels into `VideoTimelineSidePanels.tsx`.
+- `ContentBrowser.tsx` is no longer over `1000` lines after extracting asset cards, folder tree rows, context menu, and shared visual constants into `ContentBrowserParts.tsx`.
+- `DetailsPanel.tsx` is no longer over `1000` lines after extracting property editors and component sections into `DetailsPanelEditors.tsx`.
+- `LandscapeEditor.tsx` is no longer over `1000` lines after extracting terrain toolbar, brush settings, and layer management into `LandscapeEditorPanels.tsx`.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.
@@ -78,8 +83,8 @@ Do not chase raw counts by rewriting broad documents blindly.
 For docs, clean active product-critical files first; archives are intentionally excluded from the progress scanner.
 
 ## Next Highest-ROI Blocks
-1. Reduce hardcoded hex in the top TSX offenders reported by the progress script.
+1. Continue splitting the remaining reachable engine/media god components without changing behavior.
 2. Reduce `: any` in the top server/runtime extension files.
-3. Split the engine/media god components that are actually reachable from current product surfaces.
-4. Add five missing E2E specs around first value, deploy, Studio Home, preview/review, and theme/navigation.
-5. Create a safe Prisma migration baseline only after confirming the target database state.
+3. Add five missing E2E specs around first value, deploy, Studio Home, preview/review, and theme/navigation.
+4. Create a safe Prisma migration baseline only after confirming the target database state.
+5. Start i18n/product-language cleanup on user-facing dashboard, IDE, and onboarding strings.
