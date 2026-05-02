@@ -209,6 +209,8 @@ The runtime profile is now no longer browser-only. A local-native bridge can pub
 
 That bridge now also has an authenticated cloud handoff. Fresh native capability probes sync into a per-user runtime snapshot route/store, and the web shell can rehydrate from that trusted snapshot after reload instead of pretending the browser alone always knows the machine. This closes an important continuity gap between Studio Home in the web and Studio Local on the device.
 
+Runtime routing now has a canonical decision layer as well. Lane policy plus the local bridge snapshot resolves into an explicit execution target (`local-native`, `local-worker`, `local-main-safe`, `cloud-sandbox`, or `held`) before deploy hints and autonomous web-tool payloads use it. This keeps the product aligned around one runtime truth instead of letting each surface guess where work should run.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

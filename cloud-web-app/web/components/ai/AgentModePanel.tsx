@@ -115,8 +115,9 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
           requiresConfirmation: browserOperatorRequiresConfirmation,
           approved: browserOperatorApprovalOverrideRef.current,
           placement: browserOperatorLane.decision.placement,
+          target: browserOperatorLane.route.target,
           mode: capabilityProfile.policy.mode,
-          reason: browserOperatorLane.decision.reason,
+          reason: browserOperatorLane.route.reason,
         }),
       }
     })
@@ -128,7 +129,8 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
     agent,
     browserOperatorLane.decision.canStart,
     browserOperatorLane.decision.placement,
-    browserOperatorLane.decision.reason,
+    browserOperatorLane.route.reason,
+    browserOperatorLane.route.target,
     browserOperatorRequiresConfirmation,
     capabilityProfile.policy.mode,
   ])
@@ -325,8 +327,8 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
 
   const iconButtonClass = `h-8 w-8 ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
   const stepToggleClass = `flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[color-mix(in_srgb,var(--aethel-surface-tertiary)_82%,transparent)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`
-  const agentLaneLabel = `Agent lane - ${describeRuntimePlacement(aiAgentLane.decision.placement)}`
-  const browserOperatorLabel = `Browser operator - ${describeRuntimePlacement(browserOperatorLane.decision.placement)}`
+  const agentLaneLabel = `Agent lane - ${describeRuntimePlacement(aiAgentLane.route.target)}`
+  const browserOperatorLabel = `Browser operator - ${describeRuntimePlacement(browserOperatorLane.route.target)}`
 
   if (!isOpen) return null
 
@@ -589,7 +591,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
           <p className="mt-2 text-xs text-[var(--aethel-text-quaternary)]">
             Pressione <kbd className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] px-1">Ctrl</kbd> +{' '}
             <kbd className="rounded bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_10%,transparent)] px-1">Enter</kbd> para enviar. Browser steps prefer{' '}
-            <span className="text-[var(--aethel-text-secondary)]">{describeRuntimePlacement(browserOperatorLane.decision.placement)}</span>.
+            <span className="text-[var(--aethel-text-secondary)]">{describeRuntimePlacement(browserOperatorLane.route.target)}</span>.
           </p>
         )}
       </div>

@@ -22,6 +22,7 @@ describe('browser operator tool guard', () => {
     ).toMatchObject({
       code: 'BROWSER_OPERATOR_LANE_BLOCKED',
       placement: 'cloud-sandbox',
+      target: 'cloud-sandbox',
       mode: 'safe-mode',
     })
   })
@@ -38,6 +39,7 @@ describe('browser operator tool guard', () => {
     ).toMatchObject({
       code: 'BROWSER_OPERATOR_CONFIRMATION_REQUIRED',
       placement: 'cloud-sandbox',
+      target: 'cloud-sandbox',
       mode: 'cloud-isolated',
     })
   })
@@ -49,6 +51,7 @@ describe('browser operator tool guard', () => {
         requiresConfirmation: true,
         approved: true,
         placement: 'cloud-sandbox',
+        target: 'cloud-sandbox',
         mode: 'cloud-isolated',
         reason: 'Browser operator can start in cloud sandbox.',
       }),
@@ -58,6 +61,7 @@ describe('browser operator tool guard', () => {
         requiresConfirmation: true,
         approved: true,
         placement: 'cloud-sandbox',
+        target: 'cloud-sandbox',
         mode: 'cloud-isolated',
         reason: 'Browser operator can start in cloud sandbox.',
       },

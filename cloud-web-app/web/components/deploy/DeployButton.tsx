@@ -142,8 +142,8 @@ export function DeployButton({
     readiness?.canDeploy === false && readiness.missing?.length
       ? `Deploy unavailable: configure ${readiness.missing.join(', ')}.`
       : !buildExportLane.decision.canStart
-        ? buildExportLane.decision.reason
-        : 'Create a deployment and open status in a new tab';
+        ? buildExportLane.route.reason
+        : `Create a deployment through ${buildExportLane.route.target.replace(/-/g, ' ')} and open status in a new tab`;
 
   const handleDeploy = async () => {
     if (deployDisabled) return;

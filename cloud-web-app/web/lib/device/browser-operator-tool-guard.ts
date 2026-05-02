@@ -3,6 +3,7 @@ export interface BrowserOperatorRuntimeContext {
   requiresConfirmation?: boolean
   approved?: boolean
   placement?: string | null
+  target?: string | null
   mode?: string | null
   reason?: string | null
 }
@@ -11,6 +12,7 @@ export interface BrowserOperatorRuntimeBlock {
   code: 'BROWSER_OPERATOR_LANE_BLOCKED' | 'BROWSER_OPERATOR_CONFIRMATION_REQUIRED'
   message: string
   placement: string | null
+  target: string | null
   mode: string | null
 }
 
@@ -32,6 +34,7 @@ export function getBrowserOperatorRuntimeBlock(
         context.reason ||
         'Browser operator is currently held by runtime policy for this device profile.',
       placement: context.placement ?? null,
+      target: context.target ?? context.placement ?? null,
       mode: context.mode ?? null,
     }
   }
@@ -43,6 +46,7 @@ export function getBrowserOperatorRuntimeBlock(
         context.reason ||
         'Browser operator requires explicit confirmation before this web step can run.',
       placement: context.placement ?? null,
+      target: context.target ?? context.placement ?? null,
       mode: context.mode ?? null,
     }
   }
@@ -59,6 +63,7 @@ export function buildBrowserOperatorRuntimePayload(
       requiresConfirmation: context.requiresConfirmation,
       approved: context.approved,
       placement: context.placement ?? null,
+      target: context.target ?? context.placement ?? null,
       mode: context.mode ?? null,
       reason: context.reason ?? null,
     },

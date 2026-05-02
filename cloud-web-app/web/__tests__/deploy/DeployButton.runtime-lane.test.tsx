@@ -30,6 +30,18 @@ describe('DeployButton runtime lane guard', () => {
         reason: 'Build/export is at its concurrency limit.',
         requiresConfirmation: false,
       },
+      route: {
+        lane: 'build-export',
+        canStart: false,
+        target: 'held',
+        preferredPlacement: 'cloud-sandbox',
+        safety: 'held',
+        requiresConfirmation: false,
+        reason: 'Build/export is at its concurrency limit.',
+        label: 'build export held',
+        detail: 'Build/export is at its concurrency limit.',
+        nativeBridge: 'missing',
+      },
     })
 
     vi.stubGlobal(

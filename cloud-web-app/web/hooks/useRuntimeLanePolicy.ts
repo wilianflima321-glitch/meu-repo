@@ -4,6 +4,10 @@ import { useMemo } from 'react'
 
 import { useRuntimeCapabilityProfile } from '@/hooks/useRuntimeCapabilityProfile'
 import {
+  resolveRuntimeExecutionRoute,
+  type RuntimeExecutionRoute,
+} from '@/lib/device/runtime-execution-router'
+import {
   buildRuntimeLaneBudgets,
   decideRuntimeLaneStart,
   type RuntimeLaneBudget,
@@ -20,13 +24,14 @@ type RuntimeLanePressureOptions = {
 type RuntimeLanePolicyState = {
   budget: RuntimeLaneBudget | null
   decision: RuntimeLaneDecision
+  route: RuntimeExecutionRoute
 }
 
 export function useRuntimeLanePolicy(
   lane: RuntimeWorkLane,
   options: RuntimeLanePressureOptions = {}
 ): RuntimeLanePolicyState {
-  const { profile } = useRuntimeCapabilityProfile()
+  const { profile, localBridge } = useRuntimeCapabilityProfile()
   const activeCount = options.activeCount ?? 0
   const queuedCount = options.queuedCount ?? 0
   const userActive = options.userActive ?? false
@@ -42,8 +47,13 @@ export function useRuntimeLanePolicy(
     return {
       budget,
       decision,
+      route: resolveRuntimeExecutionRoute({
+        profile,
+        decision,
+        localBridge,
+      }),
     }
-  }, [activeCount, lane, profile.policy, queuedCount, userActive])
+  }, [activeCount, lane, localBridge, profile, queuedCount, userActive])
 }
 
 export default useRuntimeLanePolicy

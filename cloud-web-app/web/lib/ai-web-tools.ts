@@ -79,6 +79,7 @@ function getBrowserOperatorRuntimeContextFromParams(
         : undefined,
     approved: typeof context.approved === 'boolean' ? context.approved : undefined,
     placement: typeof context.placement === 'string' ? context.placement : null,
+    target: typeof context.target === 'string' ? context.target : null,
     mode: typeof context.mode === 'string' ? context.mode : null,
     reason: typeof context.reason === 'string' ? context.reason : null,
   }
@@ -102,6 +103,7 @@ function getRuntimeBlockedToolResult(
       code: block.code,
       runtime: {
         placement: block.placement,
+        target: block.target,
         mode: block.mode,
       },
     },

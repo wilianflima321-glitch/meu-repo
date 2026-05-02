@@ -31,6 +31,9 @@ The web shell now has a first-pass device guard:
 - `components/ai/AgentModePanel.tsx` now exposes `ai-agents` and `browser-operator` lane status directly inside the autonomous panel, blocking new runs when the agent lane is saturated and holding approval of web steps when the browser-operator lane is not available.
 - `lib/server/local-runtime-capability-store.ts` and `app/api/runtime/local-capabilities/route.ts` now give the local probe an authenticated file-backed handoff into the user's cloud account, so the web shell can recover the freshest trusted native snapshot even after reload.
 - `hooks/useLocalRuntimeBridge.ts` now hydrates from browser cache plus authenticated cloud fallback, syncs fresh native probes back to the account, and tracks whether the local-native bridge has completed its cloud handoff.
+- `lib/device/runtime-execution-router.ts` now turns lane policy plus the local bridge state into an explicit execution target: `local-native`, `local-worker`, `local-main-safe`, `cloud-sandbox`, or `held`.
+- `hooks/useRuntimeLanePolicy.ts` now returns that route alongside the lane decision, so product surfaces can display and pass the same execution target instead of reinterpreting placement locally.
+- `components/ai/AgentModePanel.tsx`, `lib/device/browser-operator-tool-guard.ts`, and deploy UI now carry the resolved execution target into agent web-tool context and user-facing hints.
 
 Measured policies include:
 
@@ -69,6 +72,7 @@ P0 rules:
 - Do not run heavy local models unless the device guard says local acceleration is safe.
 - Do not let browser operator, build, export, viewport, and indexing jobs compete on the main UI thread.
 - Route each heavy work type through a lane budget before it starts.
+- Resolve every lane decision into a concrete execution target before it reaches user-facing controls or agent tool payloads.
 - Use workers, cloud runtimes, or local sandbox lanes for long-running work.
 - Enforce the browser-operator lane inside the tool execution path, not only in surface-level buttons.
 - Pass explicit runtime payloads into web tools so local and cloud agent paths return honest block reasons instead of silent failure.
@@ -94,7 +98,7 @@ The local app should sync with the cloud account, but it must not become a forke
 ## Next Blocks
 
 1. Implement the real Studio Local emitter so the desktop runtime sends signed device probes instead of relying on browser-only relay events.
-2. Continue wiring the lane scheduler into deeper browser/build/render/indexing execution paths beyond the first dashboard, deploy, preview-runtime, and agent-mode entry points.
+2. Wire the execution route into deeper render/indexing/build workers so the selected target is not just displayed but used by dispatchers.
 3. Persist lane pressure telemetry so Aethel can learn safe defaults by device class.
 4. Add durable project memory backed by database/files instead of only UI read models.
 5. Add safety policy UI for local memory, browser operation, and device-native model execution.
