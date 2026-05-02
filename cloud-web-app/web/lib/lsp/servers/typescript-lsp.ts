@@ -6,7 +6,18 @@
  * Os mocks são fallbacks quando o servidor real não está disponível
  */
 
-import { LSPServerBase, LSPServerConfig } from '../lsp-server-base';
+import {
+  CodeAction,
+  CompletionItem,
+  Hover,
+  Location,
+  LSPParams,
+  LSPServerBase,
+  LSPServerConfig,
+  Position,
+  Range,
+} from '../lsp-server-base';
+import { getMockDocumentParams } from './lsp-mock-utils';
 
 export class TypeScriptLSPServer extends LSPServerBase {
   private useRealServer: boolean = true; // Tenta usar servidor real primeiro
@@ -43,7 +54,7 @@ export class TypeScriptLSPServer extends LSPServerBase {
     this.useRealServer = !useMock;
   }
 
-  protected getMockResponse(method: string, params: any): any {
+  protected getMockResponse(method: string, params: LSPParams): unknown {
     // Se está usando servidor real, retorna null para deixar a base class fazer o request
     if (this.useRealServer) {
       return null;
@@ -143,7 +154,7 @@ export class TypeScriptLSPServer extends LSPServerBase {
     }
   }
 
-  private getMockCompletions(params: any): any[] {
+  private getMockCompletions(_params: LSPParams): CompletionItem[] {
     return [
       {
         label: 'console',
@@ -155,7 +166,7 @@ export class TypeScriptLSPServer extends LSPServerBase {
       {
         label: 'log',
         kind: 2, // Method
-        detail: '(method) Console.log(...data: any[]): void',
+        detail: '(method) Console.log(...data: unknown[]): void',
         documentation: 'Prints to stdout with newline.',
         insertText: 'log(${1:data})',
         insertTextFormat: 2,
@@ -227,22 +238,26 @@ export class TypeScriptLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockHover(params: any): any {
+  private getMockHover(params: LSPParams): Hover {
+    const { position } = getMockDocumentParams(params);
+
     return {
       contents: {
         language: 'typescript',
-        value: '(method) Console.log(...data: any[]): void\n\nPrints to stdout with newline. Multiple arguments can be passed, with the first used as the primary message and all additional used as substitution values.',
+        value: '(method) Console.log(...data: unknown[]): void\n\nPrints to stdout with newline. Multiple arguments can be passed, with the first used as the primary message and all additional used as substitution values.',
       },
       range: {
-        start: { line: params.position.line, character: 0 },
-        end: { line: params.position.line, character: 10 },
+        start: { line: position.line, character: 0 },
+        end: { line: position.line, character: 10 },
       },
     };
   }
 
-  private getMockDefinition(params: any): any {
+  private getMockDefinition(params: LSPParams): Location {
+    const { textDocument } = getMockDocumentParams(params);
+
     return {
-      uri: params.textDocument.uri,
+      uri: textDocument.uri,
       range: {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 10 },
@@ -250,17 +265,19 @@ export class TypeScriptLSPServer extends LSPServerBase {
     };
   }
 
-  private getMockReferences(params: any): any[] {
+  private getMockReferences(params: LSPParams): Location[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 5, character: 4 },
           end: { line: 5, character: 14 },
         },
       },
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 10, character: 8 },
           end: { line: 10, character: 18 },
@@ -269,7 +286,9 @@ export class TypeScriptLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockCodeActions(params: any): any[] {
+  private getMockCodeActions(params: LSPParams): CodeAction[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
         title: 'Organize imports',
@@ -277,7 +296,7 @@ export class TypeScriptLSPServer extends LSPServerBase {
         command: {
           title: 'Organize imports',
           command: '_typescript.organizeImports',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -286,7 +305,7 @@ export class TypeScriptLSPServer extends LSPServerBase {
         command: {
           title: 'Add missing imports',
           command: '_typescript.applyCodeAction',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -295,7 +314,7 @@ export class TypeScriptLSPServer extends LSPServerBase {
         command: {
           title: 'Extract to function',
           command: '_typescript.applyRefactoring',
-          arguments: [params.textDocument.uri, 'Extract to function'],
+          arguments: [textDocument.uri, 'Extract to function'],
         },
       },
       {
@@ -304,7 +323,7 @@ export class TypeScriptLSPServer extends LSPServerBase {
         command: {
           title: 'Extract to constant',
           command: '_typescript.applyRefactoring',
-          arguments: [params.textDocument.uri, 'Extract to constant'],
+          arguments: [textDocument.uri, 'Extract to constant'],
         },
       },
     ];
@@ -313,27 +332,27 @@ export class TypeScriptLSPServer extends LSPServerBase {
   /**
    * TypeScript-specific features
    */
-  async organizeImports(uri: string): Promise<any> {
+  async organizeImports(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: '_typescript.organizeImports',
       arguments: [uri],
     });
   }
 
-  async getCallHierarchy(uri: string, position: any): Promise<any> {
+  async getCallHierarchy(uri: string, position: Position): Promise<unknown> {
     return await this.sendRequest('textDocument/prepareCallHierarchy', {
       textDocument: { uri },
       position,
     });
   }
 
-  async getSemanticTokens(uri: string): Promise<any> {
+  async getSemanticTokens(uri: string): Promise<unknown> {
     return await this.sendRequest('textDocument/semanticTokens/full', {
       textDocument: { uri },
     });
   }
 
-  async getInlayHints(uri: string, range: any): Promise<any> {
+  async getInlayHints(uri: string, range: Range): Promise<unknown> {
     return await this.sendRequest('textDocument/inlayHint', {
       textDocument: { uri },
       range,

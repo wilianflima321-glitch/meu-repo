@@ -3,7 +3,16 @@
  * Uses OmniSharp
  */
 
-import { LSPServerBase, LSPServerConfig } from '../lsp-server-base';
+import {
+  CodeAction,
+  CompletionItem,
+  Hover,
+  Location,
+  LSPParams,
+  LSPServerBase,
+  LSPServerConfig,
+} from '../lsp-server-base';
+import { getMockDocumentParams } from './lsp-mock-utils';
 
 export class CSharpLSPServer extends LSPServerBase {
   constructor(workspaceRoot: string) {
@@ -33,7 +42,7 @@ export class CSharpLSPServer extends LSPServerBase {
     super(config);
   }
 
-  protected getMockResponse(method: string, params: any): any {
+  protected getMockResponse(method: string, params: LSPParams): unknown {
     switch (method) {
       case 'initialize':
         return {
@@ -125,7 +134,7 @@ export class CSharpLSPServer extends LSPServerBase {
     }
   }
 
-  private getMockCompletions(params: any): any[] {
+  private getMockCompletions(_params: LSPParams): CompletionItem[] {
     return [
       {
         label: 'Console',
@@ -204,22 +213,26 @@ export class CSharpLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockHover(params: any): any {
+  private getMockHover(params: LSPParams): Hover {
+    const { position } = getMockDocumentParams(params);
+
     return {
       contents: {
         language: 'csharp',
         value: 'public static void WriteLine(string value)\n\nWrites the specified string value, followed by the current line terminator, to the standard output stream.',
       },
       range: {
-        start: { line: params.position.line, character: 0 },
-        end: { line: params.position.line, character: 10 },
+        start: { line: position.line, character: 0 },
+        end: { line: position.line, character: 10 },
       },
     };
   }
 
-  private getMockDefinition(params: any): any {
+  private getMockDefinition(params: LSPParams): Location {
+    const { textDocument } = getMockDocumentParams(params);
+
     return {
-      uri: params.textDocument.uri,
+      uri: textDocument.uri,
       range: {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 10 },
@@ -227,17 +240,19 @@ export class CSharpLSPServer extends LSPServerBase {
     };
   }
 
-  private getMockReferences(params: any): any[] {
+  private getMockReferences(params: LSPParams): Location[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 5, character: 4 },
           end: { line: 5, character: 14 },
         },
       },
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 10, character: 8 },
           end: { line: 10, character: 18 },
@@ -246,7 +261,9 @@ export class CSharpLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockCodeActions(params: any): any[] {
+  private getMockCodeActions(params: LSPParams): CodeAction[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
         title: 'Organize usings',
@@ -254,7 +271,7 @@ export class CSharpLSPServer extends LSPServerBase {
         command: {
           title: 'Organize usings',
           command: 'omnisharp.organizeImports',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -263,7 +280,7 @@ export class CSharpLSPServer extends LSPServerBase {
         command: {
           title: 'Fix all',
           command: 'omnisharp.fixAll',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -272,7 +289,7 @@ export class CSharpLSPServer extends LSPServerBase {
         command: {
           title: 'Extract method',
           command: 'omnisharp.runCodeAction',
-          arguments: [params.textDocument.uri, 'Extract method'],
+          arguments: [textDocument.uri, 'Extract method'],
         },
       },
       {
@@ -281,7 +298,7 @@ export class CSharpLSPServer extends LSPServerBase {
         command: {
           title: 'Extract local',
           command: 'omnisharp.runCodeAction',
-          arguments: [params.textDocument.uri, 'Extract local'],
+          arguments: [textDocument.uri, 'Extract local'],
         },
       },
     ];
@@ -290,14 +307,14 @@ export class CSharpLSPServer extends LSPServerBase {
   /**
    * C#-specific features
    */
-  async organizeUsings(uri: string): Promise<any> {
+  async organizeUsings(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'omnisharp.organizeImports',
       arguments: [uri],
     });
   }
 
-  async fixAll(uri: string): Promise<any> {
+  async fixAll(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'omnisharp.fixAll',
       arguments: [uri],

@@ -3,7 +3,19 @@
  * Uses Delve debugger
  */
 
-import { DAPAdapterBase, DAPAdapterConfig, LaunchRequestArguments, Capabilities } from '../dap-adapter-base';
+import {
+  Breakpoint,
+  Capabilities,
+  DAPAdapterBase,
+  DAPAdapterConfig,
+  DAPRequestArguments,
+  LaunchRequestArguments,
+  Scope,
+  StackFrame,
+  Thread,
+  Variable,
+} from '../dap-adapter-base';
+import { getMockBreakpoints, getMockExpression, getMockVariablesReference } from './dap-mock-utils';
 
 export interface GoLaunchRequestArguments extends LaunchRequestArguments {
   mode?: 'debug' | 'test' | 'exec';
@@ -35,7 +47,7 @@ export class GoDAPAdapter extends DAPAdapterBase {
     return 'go';
   }
 
-  protected getMockResponse(command: string, args: any): any {
+  protected getMockResponse(command: string, args: DAPRequestArguments): unknown {
     switch (command) {
       case 'initialize':
         return this.getMockInitializeResponse();
@@ -112,10 +124,10 @@ export class GoDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockSetBreakpointsResponse(args: any): any {
-    const breakpoints = args.breakpoints || [];
+  private getMockSetBreakpointsResponse(args: DAPRequestArguments): { breakpoints: Breakpoint[] } {
+    const breakpoints = getMockBreakpoints(args);
     return {
-      breakpoints: breakpoints.map((bp: any, index: number) => ({
+      breakpoints: breakpoints.map((bp, index) => ({
         id: index + 1,
         verified: true,
         line: bp.line,
@@ -125,7 +137,7 @@ export class GoDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockStackTraceResponse(args: any): any {
+  private getMockStackTraceResponse(_args: DAPRequestArguments): { stackFrames: StackFrame[]; totalFrames: number } {
     return {
       stackFrames: [
         {
@@ -169,7 +181,7 @@ export class GoDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockScopesResponse(args: any): any {
+  private getMockScopesResponse(_args: DAPRequestArguments): { scopes: Scope[] } {
     return {
       scopes: [
         {
@@ -186,8 +198,8 @@ export class GoDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockVariablesResponse(args: any): any {
-    const ref = args.variablesReference;
+  private getMockVariablesResponse(args: DAPRequestArguments): { variables: Variable[] } {
+    const ref = getMockVariablesReference(args);
     
     if (ref === 1000) {
       // Local variables
@@ -316,8 +328,8 @@ export class GoDAPAdapter extends DAPAdapterBase {
     return { variables: [] };
   }
 
-  private getMockEvaluateResponse(args: any): any {
-    const expression = args.expression;
+  private getMockEvaluateResponse(args: DAPRequestArguments): { result: string; type: string; variablesReference: number } {
+    const expression = getMockExpression(args);
     
     // Simple mock evaluation
     if (expression === 'count + 1') {
@@ -347,7 +359,7 @@ export class GoDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockThreadsResponse(): any {
+  private getMockThreadsResponse(): { threads: Thread[] } {
     return {
       threads: [
         {
@@ -381,9 +393,9 @@ export class GoDAPAdapter extends DAPAdapterBase {
   /**
    * Set function breakpoints
    */
-  async setFunctionBreakpoints(breakpoints: Array<{ name: string }>): Promise<any[]> {
+  async setFunctionBreakpoints(breakpoints: Array<{ name: string }>): Promise<unknown[]> {
     if (this.capabilities.supportsFunctionBreakpoints) {
-      const result = await this.sendRequest('setFunctionBreakpoints', {
+      const result = await this.sendRequest<{ breakpoints?: unknown[] }>('setFunctionBreakpoints', {
         breakpoints,
       });
       return result.breakpoints || [];
@@ -394,7 +406,7 @@ export class GoDAPAdapter extends DAPAdapterBase {
   /**
    * Disassemble
    */
-  async disassemble(memoryReference: string, offset: number, instructionCount: number): Promise<any> {
+  async disassemble(memoryReference: string, offset: number, instructionCount: number): Promise<unknown> {
     if (this.capabilities.supportsDisassembleRequest) {
       return await this.sendRequest('disassemble', {
         memoryReference,

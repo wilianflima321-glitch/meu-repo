@@ -17,7 +17,7 @@ export interface APIResponse<T> {
   error?: {
     code: string
     message: string
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   }
   meta?: {
     timestamp: string
@@ -96,6 +96,30 @@ export interface DeployData {
   duration?: number
 }
 
+export interface WebhookData {
+  id: string
+  url: string
+  events: string[]
+  active: boolean
+  createdAt?: string
+}
+
+export interface APIKeyData {
+  id: string
+  name: string
+  permissions: string[]
+  createdAt?: string
+  expiresAt?: string
+}
+
+export interface AuditLogData {
+  id: string
+  userId?: string
+  action: string
+  createdAt: string
+  metadata?: Record<string, unknown>
+}
+
 /**
  * API Client Centralizado
  */
@@ -118,15 +142,15 @@ export class AethelAPIIntegration {
   private async request<T>(
     method: string,
     endpoint: string,
-    data?: any
+    data?: unknown
   ): Promise<APIResponse<T>> {
     const url = `${this.baseURL}${endpoint}`
     const startTime = Date.now()
 
     try {
-      const response = await eliteFetcher(url, {
+      const response = await eliteFetcher<APIResponse<T>>(url, {
         method,
-        ...(data && { body: JSON.stringify(data) }),
+        ...(data !== undefined ? { body: JSON.stringify(data) } : {}),
       })
 
       const duration = Date.now() - startTime
@@ -258,7 +282,7 @@ export class AethelAPIIntegration {
   /**
    * GET /webhooks - Listar webhooks
    */
-  async getWebhooks(): Promise<APIResponse<any[]>> {
+  async getWebhooks(): Promise<APIResponse<WebhookData[]>> {
     return this.request('GET', '/webhooks')
   }
 
@@ -276,7 +300,7 @@ export class AethelAPIIntegration {
   /**
    * GET /api-keys - Listar API Keys
    */
-  async getAPIKeys(): Promise<APIResponse<any[]>> {
+  async getAPIKeys(): Promise<APIResponse<APIKeyData[]>> {
     return this.request('GET', '/api-keys')
   }
 
@@ -325,7 +349,7 @@ export class AethelAPIIntegration {
     userId?: string
     action?: string
     limit?: number
-  }): Promise<APIResponse<any[]>> {
+  }): Promise<APIResponse<AuditLogData[]>> {
     const params = new URLSearchParams()
     if (filters?.userId) params.append('userId', filters.userId)
     if (filters?.action) params.append('action', filters.action)
@@ -354,28 +378,28 @@ export function useAethelAPI() {
   return {
     getCurrentUser: () => aethelAPI.getCurrentUser(),
     getProjects: () => aethelAPI.getProjects(),
-    createProject: (data: any) => aethelAPI.createProject(data),
+    createProject: (data: Parameters<AethelAPIIntegration['createProject']>[0]) => aethelAPI.createProject(data),
     getProject: (id: string) => aethelAPI.getProject(id),
-    updateProject: (id: string, data: any) => aethelAPI.updateProject(id, data),
+    updateProject: (id: string, data: Parameters<AethelAPIIntegration['updateProject']>[1]) => aethelAPI.updateProject(id, data),
     deleteProject: (id: string) => aethelAPI.deleteProject(id),
     getBilling: () => aethelAPI.getBilling(),
     upgradePlan: (planId: string) => aethelAPI.upgradePlan(planId),
-    processPayment: (data: any) => aethelAPI.processPayment(data),
+    processPayment: (data: Parameters<AethelAPIIntegration['processPayment']>[0]) => aethelAPI.processPayment(data),
     getUsage: () => aethelAPI.getUsage(),
     startDeploy: (projectId: string) => aethelAPI.startDeploy(projectId),
     getDeployStatus: (deployId: string) => aethelAPI.getDeployStatus(deployId),
     getDeployLogs: (deployId: string) => aethelAPI.getDeployLogs(deployId),
-    createWebhook: (data: any) => aethelAPI.createWebhook(data),
+    createWebhook: (data: Parameters<AethelAPIIntegration['createWebhook']>[0]) => aethelAPI.createWebhook(data),
     getWebhooks: () => aethelAPI.getWebhooks(),
-    createAPIKey: (data: any) => aethelAPI.createAPIKey(data),
+    createAPIKey: (data: Parameters<AethelAPIIntegration['createAPIKey']>[0]) => aethelAPI.createAPIKey(data),
     getAPIKeys: () => aethelAPI.getAPIKeys(),
     revokeAPIKey: (keyId: string) => aethelAPI.revokeAPIKey(keyId),
     getTeamMembers: () => aethelAPI.getTeamMembers(),
-    inviteTeamMember: (data: any) => aethelAPI.inviteTeamMember(data),
+    inviteTeamMember: (data: Parameters<AethelAPIIntegration['inviteTeamMember']>[0]) => aethelAPI.inviteTeamMember(data),
     updateTeamMemberRole: (userId: string, role: string) =>
       aethelAPI.updateTeamMemberRole(userId, role),
     removeTeamMember: (userId: string) => aethelAPI.removeTeamMember(userId),
-    getAuditLogs: (filters?: any) => aethelAPI.getAuditLogs(filters),
+    getAuditLogs: (filters?: Parameters<AethelAPIIntegration['getAuditLogs']>[0]) => aethelAPI.getAuditLogs(filters),
     healthCheck: () => aethelAPI.healthCheck(),
   }
 }

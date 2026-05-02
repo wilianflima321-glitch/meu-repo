@@ -11,6 +11,14 @@ import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('swr-config')
 
+type HttpError = Error & { status?: number }
+type OptimisticEntity = { id?: string } & Record<string, unknown>
+type OptimisticCache<TItem extends OptimisticEntity> = TItem[] | TItem | undefined
+type OptimisticMutate<TItem extends OptimisticEntity> = (
+  data?: OptimisticCache<TItem> | ((data?: OptimisticCache<TItem>) => OptimisticCache<TItem>),
+  shouldRevalidate?: boolean
+) => Promise<OptimisticCache<TItem>>
+
 /**
  * Configuração padrão para SWR em todo o Studio
  * 
@@ -30,14 +38,15 @@ export const ELITE_SWR_CONFIG: SWRConfiguration = {
 
   // Retry automático com backoff exponencial
   onError: (error, key, config) => {
+    const swrError = error as HttpError
     // Não fazer retry em erros de autenticação
-    if (error.status === 401 || error.status === 403) {
+    if (swrError.status === 401 || swrError.status === 403) {
       return
     }
 
     // Retry em erros de rede ou 5xx
-    if (!error.status || error.status >= 500) {
-      console.warn(`[SWR] Erro em ${key}, tentando novamente...`, error)
+    if (!swrError.status || swrError.status >= 500) {
+      log.warn(`[SWR] Erro em ${key}, tentando novamente...`, swrError)
     }
   },
 
@@ -64,14 +73,14 @@ export const ELITE_SWR_CONFIG: SWRConfiguration = {
  * @param retryCount - Contador de tentativas
  */
 export function retryWithBackoff(
-  error: any,
+  _error: unknown,
   key: string | null,
   config: SWRConfiguration,
-  revalidate: () => Promise<any>,
+  revalidate: () => Promise<unknown>,
   retryCount: number = 0
 ): void {
   if (retryCount >= (config.errorRetryCount || 3)) {
-    console.error(`[SWR] Máximo de tentativas atingido para ${key}`)
+    log.error(`[SWR] Máximo de tentativas atingido para ${key}`)
     return
   }
 
@@ -135,10 +144,10 @@ export function createEliteSWRConfig(
  * @param options - Opções de fetch
  * @returns Promise com dados
  */
-export async function eliteFetcher(
+export async function eliteFetcher<TResponse = unknown>(
   url: string,
   options?: RequestInit
-): Promise<any> {
+): Promise<TResponse> {
   const maxRetries = 3
   let lastError: Error | null = null
 
@@ -150,12 +159,12 @@ export async function eliteFetcher(
       })
 
       if (!response.ok) {
-        const error = new Error(`HTTP ${response.status}`)
-        ;(error as any).status = response.status
+        const error: HttpError = new Error(`HTTP ${response.status}`)
+        error.status = response.status
         throw error
       }
 
-      return await response.json()
+      return await response.json() as TResponse
     } catch (error) {
       lastError = error as Error
       if (i < maxRetries - 1) {
@@ -197,15 +206,15 @@ export const optimisticUpdatePattern = {
   /**
    * Padrão para operações de criação
    */
-  create: async (
+  create: async <TItem extends OptimisticEntity>(
     key: string,
-    newItem: any,
-    mutate: (data?: any, shouldRevalidate?: boolean) => Promise<any>,
-    createFn: (item: any) => Promise<any>
+    newItem: TItem,
+    mutate: OptimisticMutate<TItem>,
+    createFn: (item: TItem) => Promise<unknown>
   ) => {
     // Atualizar cache otimisticamente
     const previousData = await mutate(
-      (data: any) => {
+      (data) => {
         if (Array.isArray(data)) {
           return [newItem, ...data]
         }
@@ -232,23 +241,23 @@ export const optimisticUpdatePattern = {
   /**
    * Padrão para operações de atualização
    */
-  update: async (
+  update: async <TItem extends OptimisticEntity>(
     key: string,
     id: string,
-    updates: any,
-    mutate: (data?: any, shouldRevalidate?: boolean) => Promise<any>,
-    updateFn: (id: string, updates: any) => Promise<any>
+    updates: Partial<TItem>,
+    mutate: OptimisticMutate<TItem>,
+    updateFn: (id: string, updates: Partial<TItem>) => Promise<unknown>
   ) => {
     // Atualizar cache otimisticamente
     const previousData = await mutate(
-      (data: any) => {
+      (data) => {
         if (Array.isArray(data)) {
-          return data.map((item: any) =>
-            item.id === id ? { ...item, ...updates } : item
+          return data.map((item) =>
+            item.id === id ? ({ ...item, ...updates } as TItem) : item
           )
         }
         if (data?.id === id) {
-          return { ...data, ...updates }
+          return { ...data, ...updates } as TItem
         }
         return data
       },
@@ -273,17 +282,17 @@ export const optimisticUpdatePattern = {
   /**
    * Padrão para operações de exclusão
    */
-  delete: async (
+  delete: async <TItem extends OptimisticEntity>(
     key: string,
     id: string,
-    mutate: (data?: any, shouldRevalidate?: boolean) => Promise<any>,
-    deleteFn: (id: string) => Promise<any>
+    mutate: OptimisticMutate<TItem>,
+    deleteFn: (id: string) => Promise<unknown>
   ) => {
     // Atualizar cache otimisticamente
     const previousData = await mutate(
-      (data: any) => {
+      (data) => {
         if (Array.isArray(data)) {
-          return data.filter((item: any) => item.id !== id)
+          return data.filter((item) => item.id !== id)
         }
         return data
       },

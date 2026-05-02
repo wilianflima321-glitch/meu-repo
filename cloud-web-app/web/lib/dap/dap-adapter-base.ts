@@ -120,14 +120,44 @@ export interface Capabilities {
   supportsClipboardContext?: boolean;
 }
 
+export type DAPRequestArguments = object;
+
+type PendingRequest = {
+  resolve: (value: unknown) => void;
+  reject: (error: Error) => void;
+};
+
+type DAPApiSessionStartResponse = {
+  success?: boolean;
+  sessionId?: string;
+};
+
+type DAPApiRequestResponse<TResult = unknown> = {
+  success?: boolean;
+  body?: TResult;
+  message?: string;
+};
+
+type DAPProtocolResponse<TResult = unknown> = {
+  type?: string;
+  request_seq: number;
+  success: boolean;
+  command?: string;
+  message?: string;
+  body?: TResult;
+};
+
+type DAPProtocolEvent = {
+  type?: string;
+  event: string;
+  body?: unknown;
+};
+
 export abstract class DAPAdapterBase extends EventEmitter {
   protected config: DAPAdapterConfig;
-  protected process: any = null;
+  protected process: unknown = null;
   protected messageId = 0;
-  protected pendingRequests = new Map<number, {
-    resolve: (value: any) => void;
-    reject: (error: any) => void;
-  }>();
+  protected pendingRequests = new Map<number, PendingRequest>();
   protected buffer = '';
   protected initialized = false;
   protected capabilities: Capabilities = {};
@@ -138,7 +168,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
   constructor(config: DAPAdapterConfig) {
     super();
     this.config = config;
-    console.warn('[DAP] DAPAdapterBase is deprecated. Use DAPClient from @/lib/dap instead.');
+    log.warn('[DAP] DAPAdapterBase is deprecated. Use DAPClient from @/lib/dap instead.');
   }
 
   /**
@@ -165,7 +195,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
           });
           
           if (response.ok) {
-            const data = await response.json();
+            const data = await response.json() as DAPApiSessionStartResponse;
             if (data.success && data.sessionId) {
               this.sessionId = data.sessionId;
               this.emit('ready');
@@ -174,7 +204,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
             }
           }
         } catch (apiError) {
-          console.warn('[DAP] API unavailable, falling back to mock mode:', apiError);
+          log.warn('[DAP] API unavailable, falling back to mock mode:', apiError);
           this.useRealAPI = false;
         }
       }
@@ -206,7 +236,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
             body: JSON.stringify({ sessionId: this.sessionId }),
           });
         } catch (e) {
-          console.warn('[DAP] Failed to stop session via API:', e);
+          log.warn('[DAP] Failed to stop session via API:', e);
         }
       }
       
@@ -229,7 +259,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
       throw new Error('Adapter already initialized');
     }
 
-    const result = await this.sendRequest('initialize', {
+    const result = await this.sendRequest<Capabilities>('initialize', {
       clientID: 'ai-ide',
       clientName: 'AI IDE',
       adapterID: this.getAdapterID(),
@@ -305,7 +335,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
    * Set breakpoints
    */
   async setBreakpoints(args: SetBreakpointsArguments): Promise<Breakpoint[]> {
-    const result = await this.sendRequest('setBreakpoints', args);
+    const result = await this.sendRequest<{ breakpoints?: Breakpoint[] }>('setBreakpoints', args);
     return result.breakpoints || [];
   }
 
@@ -348,7 +378,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
    * Get stack trace
    */
   async stackTrace(threadId: number, startFrame: number = 0, levels: number = 20): Promise<StackFrame[]> {
-    const result = await this.sendRequest('stackTrace', {
+    const result = await this.sendRequest<{ stackFrames?: StackFrame[] }>('stackTrace', {
       threadId,
       startFrame,
       levels,
@@ -360,7 +390,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
    * Get scopes for a stack frame
    */
   async scopes(frameId: number): Promise<Scope[]> {
-    const result = await this.sendRequest('scopes', { frameId });
+    const result = await this.sendRequest<{ scopes?: Scope[] }>('scopes', { frameId });
     return result.scopes || [];
   }
 
@@ -368,14 +398,14 @@ export abstract class DAPAdapterBase extends EventEmitter {
    * Get variables
    */
   async variables(variablesReference: number): Promise<Variable[]> {
-    const result = await this.sendRequest('variables', { variablesReference });
+    const result = await this.sendRequest<{ variables?: Variable[] }>('variables', { variablesReference });
     return result.variables || [];
   }
 
   /**
    * Evaluate expression
    */
-  async evaluate(expression: string, frameId?: number, context?: string): Promise<any> {
+  async evaluate(expression: string, frameId?: number, context?: string): Promise<unknown> {
     return await this.sendRequest('evaluate', {
       expression,
       frameId,
@@ -387,14 +417,14 @@ export abstract class DAPAdapterBase extends EventEmitter {
    * Get threads
    */
   async threads(): Promise<Thread[]> {
-    const result = await this.sendRequest('threads', {});
+    const result = await this.sendRequest<{ threads?: Thread[] }>('threads', {});
     return result.threads || [];
   }
 
   /**
    * Send a request to the debug adapter
    */
-  protected async sendRequest(command: string, args: any): Promise<any> {
+  protected async sendRequest<TResult = unknown>(command: string, args: DAPRequestArguments): Promise<TResult> {
     const seq = ++this.messageId;
     
     // Try real API if session is active
@@ -412,20 +442,20 @@ export abstract class DAPAdapterBase extends EventEmitter {
         });
         
         if (response.ok) {
-          const data = await response.json();
+          const data = await response.json() as DAPApiRequestResponse<TResult>;
           if (data.success !== false) {
-            return data.body || {};
+            return (data.body || {}) as TResult;
           }
           throw new Error(data.message || 'DAP request failed');
         }
       } catch (apiError) {
-        console.warn(`[DAP] API request failed for ${command}, using mock:`, apiError);
+        log.warn(`[DAP] API request failed for ${command}, using mock:`, apiError);
       }
     }
 
     // Fallback to mock response
-    return new Promise((resolve, reject) => {
-      this.pendingRequests.set(seq, { resolve, reject });
+    return new Promise<TResult>((resolve, reject) => {
+      this.pendingRequests.set(seq, { resolve: resolve as (value: unknown) => void, reject });
       
       // Mock implementation fallback
       setTimeout(() => {
@@ -444,12 +474,12 @@ export abstract class DAPAdapterBase extends EventEmitter {
   /**
    * Handle response from debug adapter
    */
-  protected handleResponse(response: any): void {
+  protected handleResponse(response: DAPProtocolResponse): void {
     const { request_seq, success, message, body } = response;
     const pending = this.pendingRequests.get(request_seq);
 
     if (!pending) {
-      console.warn(`[DAP] No pending request for seq ${request_seq}`);
+      log.warn(`[DAP] No pending request for seq ${request_seq}`);
       return;
     }
 
@@ -465,7 +495,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
   /**
    * Handle event from debug adapter
    */
-  protected handleEvent(event: any): void {
+  protected handleEvent(event: DAPProtocolEvent): void {
     const { event: eventType, body } = event;
     this.emit('event', { event: eventType, body });
 
@@ -512,7 +542,7 @@ export abstract class DAPAdapterBase extends EventEmitter {
    * Get mock response for testing
    * Override in subclasses for adapter-specific mocks
    */
-  protected abstract getMockResponse(command: string, args: any): any;
+  protected abstract getMockResponse(command: string, args: DAPRequestArguments): unknown;
 
   /**
    * Check if adapter is ready

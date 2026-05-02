@@ -3,7 +3,17 @@
  * Uses Eclipse JDT Language Server
  */
 
-import { LSPServerBase, LSPServerConfig } from '../lsp-server-base';
+import {
+  CodeAction,
+  CompletionItem,
+  Hover,
+  Location,
+  LSPParams,
+  LSPServerBase,
+  LSPServerConfig,
+  Position,
+} from '../lsp-server-base';
+import { getMockDocumentParams } from './lsp-mock-utils';
 
 export class JavaLSPServer extends LSPServerBase {
   constructor(workspaceRoot: string) {
@@ -68,7 +78,7 @@ export class JavaLSPServer extends LSPServerBase {
     super(config);
   }
 
-  protected getMockResponse(method: string, params: any): any {
+  protected getMockResponse(method: string, params: LSPParams): unknown {
     switch (method) {
       case 'initialize':
         return {
@@ -163,7 +173,7 @@ export class JavaLSPServer extends LSPServerBase {
     }
   }
 
-  private getMockCompletions(params: any): any[] {
+  private getMockCompletions(_params: LSPParams): CompletionItem[] {
     return [
       {
         label: 'System',
@@ -243,22 +253,26 @@ export class JavaLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockHover(params: any): any {
+  private getMockHover(params: LSPParams): Hover {
+    const { position } = getMockDocumentParams(params);
+
     return {
       contents: {
         language: 'java',
         value: 'public void println(String x)\n\nPrints a String and then terminates the line. This method behaves as though it invokes print(String) and then println().',
       },
       range: {
-        start: { line: params.position.line, character: 0 },
-        end: { line: params.position.line, character: 10 },
+        start: { line: position.line, character: 0 },
+        end: { line: position.line, character: 10 },
       },
     };
   }
 
-  private getMockDefinition(params: any): any {
+  private getMockDefinition(params: LSPParams): Location {
+    const { textDocument } = getMockDocumentParams(params);
+
     return {
-      uri: params.textDocument.uri,
+      uri: textDocument.uri,
       range: {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 10 },
@@ -266,17 +280,19 @@ export class JavaLSPServer extends LSPServerBase {
     };
   }
 
-  private getMockReferences(params: any): any[] {
+  private getMockReferences(params: LSPParams): Location[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 5, character: 4 },
           end: { line: 5, character: 14 },
         },
       },
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 10, character: 8 },
           end: { line: 10, character: 18 },
@@ -285,7 +301,9 @@ export class JavaLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockCodeActions(params: any): any[] {
+  private getMockCodeActions(params: LSPParams): CodeAction[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
         title: 'Organize imports',
@@ -293,7 +311,7 @@ export class JavaLSPServer extends LSPServerBase {
         command: {
           title: 'Organize imports',
           command: 'java.edit.organizeImports',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -302,7 +320,7 @@ export class JavaLSPServer extends LSPServerBase {
         command: {
           title: 'Generate getters and setters',
           command: 'java.action.generateAccessors',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -311,7 +329,7 @@ export class JavaLSPServer extends LSPServerBase {
         command: {
           title: 'Extract to method',
           command: 'java.action.extractMethod',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -320,7 +338,7 @@ export class JavaLSPServer extends LSPServerBase {
         command: {
           title: 'Extract to variable',
           command: 'java.action.extractVariable',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
     ];
@@ -329,21 +347,21 @@ export class JavaLSPServer extends LSPServerBase {
   /**
    * Java-specific features
    */
-  async organizeImports(uri: string): Promise<any> {
+  async organizeImports(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'java.edit.organizeImports',
       arguments: [uri],
     });
   }
 
-  async openTypeHierarchy(uri: string, position: any): Promise<any> {
+  async openTypeHierarchy(uri: string, position: Position): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'java.navigate.openTypeHierarchy',
       arguments: [uri, position],
     });
   }
 
-  async updateProject(uri: string): Promise<any> {
+  async updateProject(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'java.project.update',
       arguments: [uri],

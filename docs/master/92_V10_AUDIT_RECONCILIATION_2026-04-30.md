@@ -22,7 +22,7 @@ npm run qa:product-quality-progress
 Current verified readout after the 2026-05-01 god-component closure pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
 - Hardcoded hex in component TSX: `36` -> closed for the current ratchet target of `50`, down from `775`.
-- `: any` in app code: `661` -> still a major strictness gap, reduced by the 2026-05-02 runtime/workspace/window/extension/chat/sdk/tools plus DAP/LSP typing passes.
+- `: any` in app code: `505` -> still a major strictness gap, reduced by the 2026-05-02 runtime/workspace/window/extension/chat/sdk/tools, DAP/LSP, debug-adapter, SWR, and API integration typing passes.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
 - Component files over `1000` lines: `0` -> closed for the measured component scope, down from `28`.
 - Web unit/spec tests: `66` -> V10 claim of `12` is stale for the current branch.
@@ -95,6 +95,7 @@ Current verified readout after the 2026-05-01 god-component closure pass:
 - `extensions/vscode-api/window.ts` no longer contributes direct `: any` hits, reducing app-code `: any` from `984` to `963`.
 - `server/extension-host-runtime.ts`, `types/yjs.d.ts`, `server/workers/build-queue-worker.ts`, `components/ChatComponent.tsx`, `lib/aethel-sdk.ts`, and `lib/ai-tools-registry.ts` were tightened next; the measured app-code `: any` ratchet now reports `732`.
 - `api/dap-api.ts`, `api/lsp-api.ts`, `server/dap-runtime.ts`, `lsp/lsp-server-base.ts`, `lsp/servers/cpp-lsp.ts`, `lsp/servers/rust-lsp.ts`, `api/ai-api.ts`, and `integration/debug-integration.ts` were tightened next; the measured app-code `: any` ratchet now reports `661`.
+- `lsp/servers/{typescript,go,python,java,csharp}-lsp.ts`, `dap/dap-adapter-base.ts`, `dap/adapters/{nodejs,python,java,go}-dap.ts`, `swr-config.ts`, and `api-integration.ts` were tightened next; the measured app-code `: any` ratchet now reports `505`.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.

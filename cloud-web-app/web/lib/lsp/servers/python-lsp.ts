@@ -3,7 +3,17 @@
  * Uses pylsp (Python Language Server Protocol)
  */
 
-import { LSPServerBase, LSPServerConfig, InitializeResult } from '../lsp-server-base';
+import {
+  CodeAction,
+  CompletionItem,
+  Hover,
+  Location,
+  LSPParams,
+  LSPServerBase,
+  LSPServerConfig,
+  TextEdit,
+} from '../lsp-server-base';
+import { getMockDocumentParams } from './lsp-mock-utils';
 
 export class PythonLSPServer extends LSPServerBase {
   constructor(workspaceRoot: string) {
@@ -43,7 +53,7 @@ export class PythonLSPServer extends LSPServerBase {
    * Get mock response for Python LSP
    * This will be replaced with real server communication
    */
-  protected getMockResponse(method: string, params: any): any {
+  protected getMockResponse(method: string, params: LSPParams): unknown {
     switch (method) {
       case 'initialize':
         return {
@@ -102,7 +112,7 @@ export class PythonLSPServer extends LSPServerBase {
     }
   }
 
-  private getMockCompletions(params: any): any[] {
+  private getMockCompletions(_params: LSPParams): CompletionItem[] {
     // Mock Python completions
     return [
       {
@@ -185,22 +195,26 @@ export class PythonLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockHover(params: any): any {
+  private getMockHover(params: LSPParams): Hover {
+    const { position } = getMockDocumentParams(params);
+
     return {
       contents: {
         language: 'python',
         value: 'def print(*values, sep=" ", end="\\n", file=sys.stdout, flush=False)\n\nPrint values to a stream, or to sys.stdout by default.',
       },
       range: {
-        start: { line: params.position.line, character: 0 },
-        end: { line: params.position.line, character: 10 },
+        start: { line: position.line, character: 0 },
+        end: { line: position.line, character: 10 },
       },
     };
   }
 
-  private getMockDefinition(params: any): any {
+  private getMockDefinition(params: LSPParams): Location {
+    const { textDocument } = getMockDocumentParams(params);
+
     return {
-      uri: params.textDocument.uri,
+      uri: textDocument.uri,
       range: {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 10 },
@@ -208,17 +222,19 @@ export class PythonLSPServer extends LSPServerBase {
     };
   }
 
-  private getMockReferences(params: any): any[] {
+  private getMockReferences(params: LSPParams): Location[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 5, character: 4 },
           end: { line: 5, character: 14 },
         },
       },
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 10, character: 8 },
           end: { line: 10, character: 18 },
@@ -227,7 +243,7 @@ export class PythonLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockFormatting(params: any): any[] {
+  private getMockFormatting(_params: LSPParams): TextEdit[] {
     return [
       {
         range: {
@@ -239,7 +255,9 @@ export class PythonLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockCodeActions(params: any): any[] {
+  private getMockCodeActions(params: LSPParams): CodeAction[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
         title: 'Organize imports',
@@ -247,7 +265,7 @@ export class PythonLSPServer extends LSPServerBase {
         command: {
           title: 'Organize imports',
           command: 'pylsp.organize_imports',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -256,7 +274,7 @@ export class PythonLSPServer extends LSPServerBase {
         command: {
           title: 'Format document',
           command: 'pylsp.format',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
     ];
@@ -265,14 +283,14 @@ export class PythonLSPServer extends LSPServerBase {
   /**
    * Python-specific features
    */
-  async organizeImports(uri: string): Promise<any> {
+  async organizeImports(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'pylsp.organize_imports',
       arguments: [uri],
     });
   }
 
-  async formatDocument(uri: string): Promise<any> {
+  async formatDocument(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'pylsp.format',
       arguments: [uri],

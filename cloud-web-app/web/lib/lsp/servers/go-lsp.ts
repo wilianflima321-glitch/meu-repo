@@ -3,7 +3,18 @@
  * Uses gopls (Go language server)
  */
 
-import { LSPServerBase, LSPServerConfig } from '../lsp-server-base';
+import {
+  CodeAction,
+  CompletionItem,
+  Hover,
+  Location,
+  LSPParams,
+  LSPServerBase,
+  LSPServerConfig,
+  Position,
+  Range,
+} from '../lsp-server-base';
+import { getMockDocumentParams } from './lsp-mock-utils';
 
 export class GoLSPServer extends LSPServerBase {
   constructor(workspaceRoot: string) {
@@ -39,7 +50,7 @@ export class GoLSPServer extends LSPServerBase {
     super(config);
   }
 
-  protected getMockResponse(method: string, params: any): any {
+  protected getMockResponse(method: string, params: LSPParams): unknown {
     switch (method) {
       case 'initialize':
         return {
@@ -132,7 +143,7 @@ export class GoLSPServer extends LSPServerBase {
     }
   }
 
-  private getMockCompletions(params: any): any[] {
+  private getMockCompletions(_params: LSPParams): CompletionItem[] {
     return [
       {
         label: 'fmt',
@@ -216,22 +227,26 @@ export class GoLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockHover(params: any): any {
+  private getMockHover(params: LSPParams): Hover {
+    const { position } = getMockDocumentParams(params);
+
     return {
       contents: {
         language: 'go',
         value: 'func Println(a ...interface{}) (n int, err error)\n\nPrintln formats using the default formats for its operands and writes to standard output. Spaces are always added between operands and a newline is appended.',
       },
       range: {
-        start: { line: params.position.line, character: 0 },
-        end: { line: params.position.line, character: 10 },
+        start: { line: position.line, character: 0 },
+        end: { line: position.line, character: 10 },
       },
     };
   }
 
-  private getMockDefinition(params: any): any {
+  private getMockDefinition(params: LSPParams): Location {
+    const { textDocument } = getMockDocumentParams(params);
+
     return {
-      uri: params.textDocument.uri,
+      uri: textDocument.uri,
       range: {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 10 },
@@ -239,17 +254,19 @@ export class GoLSPServer extends LSPServerBase {
     };
   }
 
-  private getMockReferences(params: any): any[] {
+  private getMockReferences(params: LSPParams): Location[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 5, character: 4 },
           end: { line: 5, character: 14 },
         },
       },
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 10, character: 8 },
           end: { line: 10, character: 18 },
@@ -258,7 +275,9 @@ export class GoLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockCodeActions(params: any): any[] {
+  private getMockCodeActions(params: LSPParams): CodeAction[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
         title: 'Organize imports',
@@ -266,7 +285,7 @@ export class GoLSPServer extends LSPServerBase {
         command: {
           title: 'Organize imports',
           command: 'gopls.organize_imports',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -275,7 +294,7 @@ export class GoLSPServer extends LSPServerBase {
         command: {
           title: 'Run go mod tidy',
           command: 'gopls.tidy',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
       {
@@ -284,7 +303,7 @@ export class GoLSPServer extends LSPServerBase {
         command: {
           title: 'Generate code',
           command: 'gopls.generate',
-          arguments: [params.textDocument.uri],
+          arguments: [textDocument.uri],
         },
       },
     ];
@@ -293,35 +312,35 @@ export class GoLSPServer extends LSPServerBase {
   /**
    * Go-specific features
    */
-  async organizeImports(uri: string): Promise<any> {
+  async organizeImports(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'gopls.organize_imports',
       arguments: [uri],
     });
   }
 
-  async runGoModTidy(uri: string): Promise<any> {
+  async runGoModTidy(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'gopls.tidy',
       arguments: [uri],
     });
   }
 
-  async generateCode(uri: string): Promise<any> {
+  async generateCode(uri: string): Promise<unknown> {
     return await this.sendRequest('workspace/executeCommand', {
       command: 'gopls.generate',
       arguments: [uri],
     });
   }
 
-  async getCallHierarchy(uri: string, position: any): Promise<any> {
+  async getCallHierarchy(uri: string, position: Position): Promise<unknown> {
     return await this.sendRequest('textDocument/prepareCallHierarchy', {
       textDocument: { uri },
       position,
     });
   }
 
-  async getInlayHints(uri: string, range: any): Promise<any> {
+  async getInlayHints(uri: string, range: Range): Promise<unknown> {
     return await this.sendRequest('textDocument/inlayHint', {
       textDocument: { uri },
       range,

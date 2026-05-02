@@ -3,7 +3,19 @@
  * Uses debugpy protocol
  */
 
-import { DAPAdapterBase, DAPAdapterConfig, LaunchRequestArguments, Capabilities } from '../dap-adapter-base';
+import {
+  Breakpoint,
+  Capabilities,
+  DAPAdapterBase,
+  DAPAdapterConfig,
+  DAPRequestArguments,
+  LaunchRequestArguments,
+  Scope,
+  StackFrame,
+  Thread,
+  Variable,
+} from '../dap-adapter-base';
+import { getMockBreakpoints, getMockExpression, getMockVariablesReference } from './dap-mock-utils';
 
 export interface PythonLaunchRequestArguments extends LaunchRequestArguments {
   module?: string;
@@ -37,7 +49,7 @@ export class PythonDAPAdapter extends DAPAdapterBase {
     return 'python';
   }
 
-  protected getMockResponse(command: string, args: any): any {
+  protected getMockResponse(command: string, args: DAPRequestArguments): unknown {
     switch (command) {
       case 'initialize':
         return this.getMockInitializeResponse();
@@ -114,10 +126,10 @@ export class PythonDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockSetBreakpointsResponse(args: any): any {
-    const breakpoints = args.breakpoints || [];
+  private getMockSetBreakpointsResponse(args: DAPRequestArguments): { breakpoints: Breakpoint[] } {
+    const breakpoints = getMockBreakpoints(args);
     return {
-      breakpoints: breakpoints.map((bp: any, index: number) => ({
+      breakpoints: breakpoints.map((bp, index) => ({
         id: index + 1,
         verified: true,
         line: bp.line,
@@ -127,7 +139,7 @@ export class PythonDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockStackTraceResponse(args: any): any {
+  private getMockStackTraceResponse(_args: DAPRequestArguments): { stackFrames: StackFrame[]; totalFrames: number } {
     return {
       stackFrames: [
         {
@@ -171,7 +183,7 @@ export class PythonDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockScopesResponse(args: any): any {
+  private getMockScopesResponse(_args: DAPRequestArguments): { scopes: Scope[] } {
     return {
       scopes: [
         {
@@ -188,8 +200,8 @@ export class PythonDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockVariablesResponse(args: any): any {
-    const ref = args.variablesReference;
+  private getMockVariablesResponse(args: DAPRequestArguments): { variables: Variable[] } {
+    const ref = getMockVariablesReference(args);
     
     if (ref === 1000) {
       // Local variables
@@ -318,8 +330,8 @@ export class PythonDAPAdapter extends DAPAdapterBase {
     return { variables: [] };
   }
 
-  private getMockEvaluateResponse(args: any): any {
-    const expression = args.expression;
+  private getMockEvaluateResponse(args: DAPRequestArguments): { result: string; type: string; variablesReference: number } {
+    const expression = getMockExpression(args);
     
     // Simple mock evaluation
     if (expression === 'count + 1') {
@@ -355,7 +367,7 @@ export class PythonDAPAdapter extends DAPAdapterBase {
     };
   }
 
-  private getMockThreadsResponse(): any {
+  private getMockThreadsResponse(): { threads: Thread[] } {
     return {
       threads: [
         {
@@ -389,7 +401,7 @@ export class PythonDAPAdapter extends DAPAdapterBase {
   /**
    * Set exception breakpoints
    */
-  async setExceptionBreakpoints(filters: string[], exceptionOptions?: any[]): Promise<void> {
+  async setExceptionBreakpoints(filters: string[], exceptionOptions?: unknown[]): Promise<void> {
     await this.sendRequest('setExceptionBreakpoints', {
       filters,
       exceptionOptions,
@@ -399,7 +411,7 @@ export class PythonDAPAdapter extends DAPAdapterBase {
   /**
    * Set variable value
    */
-  async setVariable(variablesReference: number, name: string, value: string): Promise<any> {
+  async setVariable(variablesReference: number, name: string, value: string): Promise<unknown> {
     if (this.capabilities.supportsSetVariable) {
       return await this.sendRequest('setVariable', {
         variablesReference,
@@ -413,9 +425,9 @@ export class PythonDAPAdapter extends DAPAdapterBase {
   /**
    * Get completions for REPL
    */
-  async completions(text: string, column: number, frameId?: number): Promise<any[]> {
+  async completions(text: string, column: number, frameId?: number): Promise<unknown[]> {
     if (this.capabilities.supportsCompletionsRequest) {
-      const result = await this.sendRequest('completions', {
+      const result = await this.sendRequest<{ targets?: unknown[] }>('completions', {
         text,
         column,
         frameId,
@@ -428,7 +440,7 @@ export class PythonDAPAdapter extends DAPAdapterBase {
   /**
    * Get exception info
    */
-  async exceptionInfo(threadId: number): Promise<any> {
+  async exceptionInfo(threadId: number): Promise<unknown> {
     if (this.capabilities.supportsExceptionInfoRequest) {
       return await this.sendRequest('exceptionInfo', { threadId });
     }
