@@ -6,17 +6,26 @@ import { type PreviewRuntimeInfo } from '@/components/preview/previewRuntime.typ
 import {
   derivePreviewRecommendedAction,
   INITIAL_PREVIEW_RUNTIME,
+  type PreviewRuntimePayload,
   resolvePreviewStrategy,
 } from '@/components/preview/previewRuntimeState';
 import { usePreviewRuntimeHealthMonitor } from '@/components/preview/usePreviewRuntimeHealthMonitor';
 import { usePreviewRuntimeHmrBridge } from '@/components/preview/usePreviewRuntimeHmrBridge';
+
+function isPreviewRuntimePayload(value: unknown): value is PreviewRuntimePayload {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function getPayloadText(value: unknown): string | null {
+  return typeof value === 'string' && value.trim().length > 0 ? value : null;
+}
 
 export function usePreviewRuntime(projectId?: string, autoProvision = false) {
   const [runtime, setRuntime] = useState<PreviewRuntimeInfo>(INITIAL_PREVIEW_RUNTIME);
   const { clearHealthPolling, startHealthPolling } = usePreviewRuntimeHealthMonitor(setRuntime);
   const { clearHmrBridge, connectHMR } = usePreviewRuntimeHmrBridge(setRuntime);
 
-  const extractRuntimeContext = useCallback((payload: any) => {
+  const extractRuntimeContext = useCallback((payload: PreviewRuntimePayload) => {
     const metadata = payload?.metadata && typeof payload.metadata === 'object' ? payload.metadata : null;
     const provider =
       typeof payload?.provider === 'string'
@@ -65,21 +74,24 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || data.message || `Falha ao provisionar (${res.status})`);
+        const rawData = await res.json().catch(() => ({}));
+        const data = isPreviewRuntimePayload(rawData) ? rawData : {};
+        throw new Error(getPayloadText(data.error) || getPayloadText(data.message) || `Falha ao provisionar (${res.status})`);
       }
 
-      const data = await res.json();
+      const rawData = await res.json();
+      const data = isPreviewRuntimePayload(rawData) ? rawData : {};
       const runtimeContext = extractRuntimeContext(data);
 
-      if (data.runtimeUrl) {
+      if (typeof data.runtimeUrl === 'string' && data.runtimeUrl.length > 0) {
+        const runtimeUrl = data.runtimeUrl;
         const resolvedStrategy = resolvePreviewStrategy(data);
         setRuntime((prev) => ({
           ...prev,
           state: 'warming',
           strategy: resolvedStrategy,
-          runtimeUrl: data.runtimeUrl,
-          sandboxId: data.sandboxId || null,
+          runtimeUrl,
+          sandboxId: typeof data.sandboxId === 'string' ? data.sandboxId : null,
           provider: runtimeContext.provider,
           startedAt: Date.now(),
           error: null,
@@ -88,22 +100,30 @@ export function usePreviewRuntime(projectId?: string, autoProvision = false) {
           setupEnv: runtimeContext.setupEnv,
         }));
 
-        startHealthPolling(data.runtimeUrl);
-      } else if (data.discoveryResult?.preferredRuntimeUrl) {
+        startHealthPolling(runtimeUrl);
+      } else if (
+        data.discoveryResult &&
+        typeof data.discoveryResult.preferredRuntimeUrl === 'string' &&
+        data.discoveryResult.preferredRuntimeUrl.length > 0
+      ) {
+        const preferredRuntimeUrl = data.discoveryResult.preferredRuntimeUrl;
+        const firstCandidate = data.discoveryResult.candidates?.[0];
+        const latencyMs = typeof firstCandidate?.latencyMs === 'number' ? firstCandidate.latencyMs : null;
+
         setRuntime((prev) => ({
           ...prev,
           state: 'warming',
           strategy: 'iframe',
-          runtimeUrl: data.discoveryResult.preferredRuntimeUrl,
+          runtimeUrl: preferredRuntimeUrl,
           startedAt: Date.now(),
-          latencyMs: data.discoveryResult.candidates?.[0]?.latencyMs || null,
+          latencyMs,
           error: null,
           provider: runtimeContext.provider,
           guidance: runtimeContext.guidance,
           recommendedAction: runtimeContext.recommendedAction,
           setupEnv: runtimeContext.setupEnv,
         }));
-        startHealthPolling(data.discoveryResult.preferredRuntimeUrl);
+        startHealthPolling(preferredRuntimeUrl);
       } else {
         setRuntime((prev) => ({
           ...prev,

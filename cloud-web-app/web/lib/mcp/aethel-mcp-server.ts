@@ -115,7 +115,9 @@ async function createRealFSAdapter(): Promise<FileSystemAdapter | null> {
             return results;
           } else {
             const entries = await fs.readdir(fullPath, { withFileTypes: true });
-            return entries.map(e => path.join(dirPath, e.name + (e.isDirectory() ? '/' : '')));
+            return entries.map((e: { name: string; isDirectory: () => boolean }) =>
+              path.join(dirPath, e.name + (e.isDirectory() ? '/' : ''))
+            );
           }
         } catch {
           return [];

@@ -83,7 +83,12 @@ async function generateWithSuno(
   if (options.genre) enhancedPrompt += `, ${options.genre} style`;
   if (options.mood) enhancedPrompt += `, ${options.mood} mood`;
 
-  const body: any = {
+  const body: {
+    prompt: string;
+    make_instrumental: boolean;
+    wait_audio: boolean;
+    custom_lyrics?: string;
+  } = {
     prompt: enhancedPrompt,
     make_instrumental: options.instrumental ?? false,
     wait_audio: false,

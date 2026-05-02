@@ -319,7 +319,7 @@ export function MonacoEditorPro({
 
     publishMarkers();
 
-    const markerListener = monaco.editor.onDidChangeMarkers((resources) => {
+    const markerListener = monaco.editor.onDidChangeMarkers((resources: readonly monacoEditor.Uri[]) => {
       if (resources.some((resource) => resource.toString() === model.uri.toString())) {
         publishMarkers();
       }

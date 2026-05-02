@@ -86,6 +86,14 @@ const SLO_TARGETS = {
   firstDeploy: { p50: 300_000, p95: 600_000 },      // 5min / 10min
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isFirstValueStep(value: unknown): value is FirstValueStep {
+  return typeof value === 'string' && (STEP_ORDER as readonly string[]).includes(value);
+}
+
 // ============================================================================
 // HANDLERS
 // ============================================================================
@@ -93,16 +101,23 @@ const SLO_TARGETS = {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    if (!isRecord(body)) {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
+
     const { userId, step, metadata } = body;
 
-    if (!userId || !step) {
+    if (typeof userId !== 'string' || !step) {
       return NextResponse.json(
         { error: 'userId and step are required' },
         { status: 400 }
       );
     }
 
-    if (!STEP_ORDER.includes(step)) {
+    if (!isFirstValueStep(step)) {
       return NextResponse.json(
         { error: `Invalid step. Valid steps: ${STEP_ORDER.join(', ')}` },
         { status: 400 }
@@ -129,7 +144,7 @@ export async function POST(req: NextRequest) {
     funnel.events.push({
       step,
       timestamp: now,
-      metadata,
+      metadata: isRecord(metadata) ? metadata : undefined,
     });
 
     // Update current step (highest reached)

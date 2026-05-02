@@ -36,8 +36,25 @@ export function buildLivePreviewSystemMessage(): ChatMessage {
   }
 }
 
-export function extractPrimaryAssistantContent(data: any): string {
-  return data?.choices?.[0]?.message?.content || data?.message?.content || ''
+type AssistantPayload = {
+  choices?: Array<{
+    message?: {
+      content?: unknown
+    }
+  }>
+  message?: {
+    content?: unknown
+  }
+}
+
+export function extractPrimaryAssistantContent(data: unknown): string {
+  const payload = data as AssistantPayload | null
+  const choiceContent = payload?.choices?.[0]?.message?.content
+  if (typeof choiceContent === 'string') {
+    return choiceContent
+  }
+  const messageContent = payload?.message?.content
+  return typeof messageContent === 'string' ? messageContent : ''
 }
 
 export function buildLivePreviewSuggestionMessage(suggestion: string): ChatMessage {

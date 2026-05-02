@@ -7,9 +7,27 @@ export interface WorkflowTemplate {
   category: string
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   steps: string[]
-  nodes: any[]
-  edges: any[]
+  nodes: WorkflowGraphNode[]
+  edges: WorkflowGraphEdge[]
   thumbnail?: string
+}
+
+export interface WorkflowGraphNode {
+  id: string
+  type?: string
+  position?: {
+    x: number
+    y: number
+  }
+  data?: Record<string, unknown>
+}
+
+export interface WorkflowGraphEdge {
+  id: string
+  source: string
+  target: string
+  type?: string
+  data?: Record<string, unknown>
 }
 
 export interface UseCase {

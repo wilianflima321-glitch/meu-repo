@@ -24,6 +24,10 @@ import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('audio-engine')
 
+type AudioContextWindow = Window & {
+    webkitAudioContext?: typeof AudioContext;
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -77,7 +81,7 @@ export interface PlayOptions {
     position?: { x: number; y: number; z: number };
     onEnd?: () => void;
     onLoad?: () => void;
-    onError?: (error: any) => void;
+    onError?: (error: unknown) => void;
 }
 
 // ============================================================================
@@ -119,7 +123,11 @@ class AethelAudioEngine {
     
     private initializeWebAudio(): void {
         try {
-            this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const AudioContextCtor = window.AudioContext || (window as AudioContextWindow).webkitAudioContext;
+            if (!AudioContextCtor) {
+                throw new Error('Web Audio API not available');
+            }
+            this.audioContext = new AudioContextCtor();
             this.masterGain = this.audioContext.createGain();
             this.masterGain.connect(this.audioContext.destination);
             

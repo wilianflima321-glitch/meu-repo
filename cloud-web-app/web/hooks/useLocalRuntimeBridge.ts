@@ -41,6 +41,7 @@ let localDeviceId: string | null = null
 let lastSyncedSignature: string | null = null
 let inflightSyncSignature: string | null = null
 let queuedSyncSignature: string | null = null
+let cachedSnapshot: LocalRuntimeBridgeHookSnapshot | null = null
 const subscribers = new Set<() => void>()
 
 function readStoredLocalRuntimeReport(): LocalRuntimeCapabilityReport | null {
@@ -111,6 +112,7 @@ function getReportSignature(report: LocalRuntimeCapabilityReport | null | undefi
 }
 
 function emitChange() {
+  cachedSnapshot = null
   subscribers.forEach((subscriber) => subscriber())
 }
 
@@ -352,13 +354,26 @@ function subscribe(onStoreChange: () => void) {
 }
 
 function getSnapshot(): LocalRuntimeBridgeHookSnapshot {
-  return {
+  if (cachedSnapshot) {
+    return cachedSnapshot
+  }
+
+  cachedSnapshot = {
     ...buildLocalRuntimeBridgeState(currentReport),
     cloudSyncStatus,
     cloudSyncError,
     cloudSyncedAt,
     deviceId: localDeviceId,
   }
+  return cachedSnapshot
+}
+
+const SERVER_SNAPSHOT: LocalRuntimeBridgeHookSnapshot = {
+  ...buildLocalRuntimeBridgeState(null),
+  cloudSyncStatus: 'idle',
+  cloudSyncError: null,
+  cloudSyncedAt: null,
+  deviceId: null,
 }
 
 export interface LocalRuntimeBridgeHookSnapshot extends LocalRuntimeBridgeState {
@@ -377,15 +392,7 @@ export interface LocalRuntimeBridgeHookState extends LocalRuntimeBridgeState {
 }
 
 export function useLocalRuntimeBridge(): LocalRuntimeBridgeHookState {
-  const bridgeState = useSyncExternalStore(subscribe, getSnapshot, () =>
-    ({
-      ...buildLocalRuntimeBridgeState(null),
-      cloudSyncStatus: 'idle' as const,
-      cloudSyncError: null,
-      cloudSyncedAt: null,
-      deviceId: null,
-    })
-  )
+  const bridgeState = useSyncExternalStore(subscribe, getSnapshot, () => SERVER_SNAPSHOT)
 
   const requestCapabilities = useCallback(() => {
     const stored = readStoredLocalRuntimeReport()

@@ -200,7 +200,7 @@ async function maybeCollectWebBenchmarkContext(
               .filter((r: { title: string; url: string }) => r.url)
           : [];
         if (refs.length > 0) {
-          const summary = refs.map((r, i) => `${i + 1}. ${r.title} (${r.url})`).join('\n');
+          const summary = refs.map((r: { title: string; url: string }, i: number) => `${i + 1}. ${r.title} (${r.url})`).join('\n');
           return { summary, evidence: refs };
         }
       }

@@ -213,6 +213,8 @@ Runtime routing now has a canonical decision layer as well. Lane policy plus the
 
 The jobs dispatcher now preserves that same runtime truth. `/api/jobs` sanitizes incoming execution routes, rejects `held` work before it enters BullMQ, stores the target on queue payloads and metadata, and returns `runtimeTarget` when listing jobs. The creation workbench also sends its AI-agent route into music, voice, and 3D generation calls, so device policy is no longer only visible chrome; it is becoming part of the end-to-end dispatch contract.
 
+The database and TypeScript gates were tightened next. Prisma now has a versioned baseline migration folder (`20260502161641_init`), and `noImplicitAny` is enabled while keeping typecheck green. This closes two platform-confidence gaps from the V10 audit without pretending the remaining explicit `: any` debt is solved.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

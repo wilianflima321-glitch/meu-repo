@@ -7,6 +7,14 @@ ships with a versioned SQL migration. This fixes the V5 audit blocker:
 
 ## Baseline
 
+The repository now includes the initial baseline migration generated from the
+current Prisma schema:
+
+- `20260502161641_init/migration.sql`
+
+This gives CI and production a versioned starting point. Future schema changes
+must add a new timestamped folder instead of editing this baseline.
+
 1. Ensure `DATABASE_URL` points at a **throwaway** Postgres (never prod).
 
    ```bash

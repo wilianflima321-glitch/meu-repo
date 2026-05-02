@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth } from '@/lib/rbac';
 
@@ -19,17 +20,29 @@ type RegistryPayload = {
   licenses: Record<string, LicenseEntry>;
 };
 
+type AllowedRow = {
+  id: string;
+  slug: string;
+};
+
+type LicenseRow = {
+  slug: string;
+  status: string;
+  holder?: string | null;
+  since?: Date | null;
+  until?: Date | null;
+  notes?: string | null;
+};
+
 export const GET = withAdminAuth(
   async () => {
     try {
-      const ipRegistryAllowed = (prisma as any).ipRegistryAllowed;
-      const ipRegistryLicense = (prisma as any).ipRegistryLicense;
       const [allowedRows, licenseRows] = await Promise.all([
-        ipRegistryAllowed.findMany({ orderBy: { slug: 'asc' } }),
-        ipRegistryLicense.findMany({ orderBy: { slug: 'asc' } }),
+        prisma.ipRegistryAllowed.findMany({ orderBy: { slug: 'asc' } }),
+        prisma.ipRegistryLicense.findMany({ orderBy: { slug: 'asc' } }),
       ]);
 
-      const licenses = licenseRows.reduce((acc: Record<string, LicenseEntry>, item: any) => {
+      const licenses = (licenseRows as LicenseRow[]).reduce<Record<string, LicenseEntry>>((acc, item) => {
         acc[item.slug] = {
           status: item.status,
           holder: item.holder,
@@ -59,22 +72,20 @@ export const POST = withAdminAuth(
       const allowed = (body.allowed || []).map((slug) => slug.toLowerCase().trim()).filter(Boolean);
       const licenses = body.licenses || {};
 
-      const ipRegistryAllowed = (prisma as any).ipRegistryAllowed;
-      const ipRegistryLicense = (prisma as any).ipRegistryLicense;
-      const currentAllowed = await ipRegistryAllowed.findMany();
-      const currentAllowedSet = new Set(currentAllowed.map((row) => row.slug));
+      const currentAllowed = await prisma.ipRegistryAllowed.findMany();
+      const currentAllowedSet = new Set(currentAllowed.map((row: AllowedRow) => row.slug));
       const nextAllowedSet = new Set(allowed);
 
-      const deleteAllowed = currentAllowed.filter((row) => !nextAllowedSet.has(row.slug));
-      const createAllowed = allowed.filter((slug) => !currentAllowedSet.has(slug));
+      const deleteAllowed = currentAllowed.filter((row: AllowedRow) => !nextAllowedSet.has(row.slug));
+      const createAllowed = allowed.filter((slug: string) => !currentAllowedSet.has(slug));
 
       const allowedOps = [
-        ...deleteAllowed.map((row) => ipRegistryAllowed.delete({ where: { id: row.id } })),
-        ...createAllowed.map((slug) => ipRegistryAllowed.create({ data: { slug } })),
+        ...deleteAllowed.map((row: AllowedRow) => prisma.ipRegistryAllowed.delete({ where: { id: row.id } })),
+        ...createAllowed.map((slug: string) => prisma.ipRegistryAllowed.create({ data: { slug } })),
       ];
 
       const licenseOps = Object.entries(licenses).map(([slug, entry]) =>
-        ipRegistryLicense.upsert({
+        prisma.ipRegistryLicense.upsert({
           where: { slug: slug.toLowerCase() },
           create: {
             slug: slug.toLowerCase(),
@@ -108,7 +119,7 @@ export const POST = withAdminAuth(
           metadata: {
             allowedCount: allowed.length,
             licensesCount: Object.keys(licenses).length,
-          } as any,
+          } satisfies Prisma.JsonObject,
         },
       });
 

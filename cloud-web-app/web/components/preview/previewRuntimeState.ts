@@ -5,6 +5,25 @@ import type {
   PreviewStrategy,
 } from '@/components/preview/previewRuntime.types';
 
+export interface PreviewRuntimePayload {
+  provider?: unknown;
+  strategy?: unknown;
+  runtimeUrl?: unknown;
+  sandboxId?: unknown;
+  message?: unknown;
+  error?: unknown;
+  metadata?: {
+    provider?: unknown;
+    strategy?: unknown;
+    mode?: unknown;
+    setupEnv?: unknown;
+  } | null;
+  discoveryResult?: {
+    preferredRuntimeUrl?: unknown;
+    candidates?: Array<{ latencyMs?: unknown }>;
+  } | null;
+}
+
 export const INITIAL_PREVIEW_RUNTIME: PreviewRuntimeInfo = {
   state: 'idle',
   strategy: 'none',
@@ -26,7 +45,7 @@ export const INITIAL_PREVIEW_RUNTIME: PreviewRuntimeInfo = {
   failureCount: 0,
 };
 
-export function resolvePreviewStrategy(payload: any): PreviewStrategy {
+export function resolvePreviewStrategy(payload: PreviewRuntimePayload): PreviewStrategy {
   const provider = payload?.provider || payload?.metadata?.provider;
   const rawStrategy = payload?.strategy || payload?.metadata?.strategy;
 
@@ -45,7 +64,7 @@ export function resolvePreviewStrategy(payload: any): PreviewStrategy {
   return 'iframe';
 }
 
-export function derivePreviewRecommendedAction(payload: any): string | null {
+export function derivePreviewRecommendedAction(payload: PreviewRuntimePayload): string | null {
   const errorCode = String(payload?.error || '').trim();
   const strategy = String(payload?.strategy || payload?.metadata?.strategy || '').trim();
   const mode = String(payload?.metadata?.mode || '').trim();

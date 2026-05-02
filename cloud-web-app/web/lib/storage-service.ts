@@ -16,8 +16,23 @@ const log = createComponentLogger('storage-service')
  */
 
 // Tipos para o serviço de storage (evita dependência direta do SDK)
+type StorageObjectResponse = {
+  Key?: string;
+  Size?: number;
+  LastModified?: Date;
+  ETag?: string;
+};
+
+type StorageSendResponse = {
+  ETag?: string;
+  Body?: AsyncIterable<Uint8Array>;
+  ContentType?: string;
+  Metadata?: Record<string, string>;
+  Contents?: StorageObjectResponse[];
+};
+
 interface StorageClient {
-  send(command: any): Promise<any>;
+  send(command: unknown): Promise<StorageSendResponse>;
 }
 
 // Configuração do cliente S3/MinIO - lazy loading

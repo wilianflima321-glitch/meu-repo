@@ -528,7 +528,7 @@ class RedisCache {
       if (this.isConnected && this.redis) {
         const keys = await this.redis.keys('*');
         if (keys.length > 0) {
-          const keysWithoutPrefix = keys.map(k => k.replace(config.keyPrefix, ''));
+          const keysWithoutPrefix = keys.map((k: string) => k.replace(config.keyPrefix, ''));
           await this.redis.del(...keysWithoutPrefix);
         }
       }
