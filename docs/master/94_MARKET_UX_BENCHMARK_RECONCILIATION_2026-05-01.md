@@ -79,6 +79,8 @@ Aethel response:
 - Made `/compare` public in `cloud-web-app/web/middleware.ts`, keeping buyer trust/procurement evaluation available before login.
 - Added Project Brain continuity rails for checkpoint, evidence, and permission state, borrowing Replit's rollback discipline and Manus's permission clarity without adding visual noise.
 - Typed the level serialization and VS Code language API boundaries enough to reduce app-code `: any` from `1135` to `1011`, which directly helps long game/film/app agents avoid weak runtime assumptions.
+- Added a compact Mission Ledger surface for mission state, acceptance checks, evidence, and next safe action.
+- Typed the VS Code workspace API boundary, reducing app-code `: any` again from `1011` to `984`.
 
 ## Product Impact
 The dashboard now has a compact memory/risk/readiness object that makes the current mission legible before the user opens the deep Studio.

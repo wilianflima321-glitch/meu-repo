@@ -181,6 +181,8 @@ Project Brain now shows compact continuity rails for checkpoint, evidence, and p
 
 The level serialization and VS Code language API boundaries were typed to remove their direct `: any` contribution. The app-code `: any` metric moved from `1135` to `1011`; this is still a gap, but it is now moving in the right direction without fake strictness.
 
+Mission Ledger now appears in Studio Home as a compact state/evidence/checklist surface. This is not durable mission storage yet, but it gives users and agents a visible contract before deeper work starts. The VS Code workspace API boundary was also typed, moving app-code `: any` from `1011` to `984`.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

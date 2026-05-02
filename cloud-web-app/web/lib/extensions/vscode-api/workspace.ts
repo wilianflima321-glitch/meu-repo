@@ -2,6 +2,27 @@ import { createComponentLogger } from '@/lib/observability/logger'
 
 const log = createComponentLogger('extensions/vscode-api/workspace')
 
+export type WorkspaceApiValue = unknown
+
+export type WorkspacePosition = {
+  line: number
+  character: number
+}
+
+export type WorkspaceRange = {
+  start?: WorkspacePosition
+  end?: WorkspacePosition
+}
+
+export type WorkspaceFoldersChangeEvent = {
+  added: WorkspaceFolder[]
+  removed: WorkspaceFolder[]
+}
+
+export type TextDocumentChangeEvent = {
+  document: TextDocument
+  contentChanges?: WorkspaceApiValue[]
+}
 
 /**
  * VS Code Workspace API Implementation
@@ -25,12 +46,12 @@ export interface TextDocument {
   save(): Promise<boolean>;
   eol: number;
   lineCount: number;
-  getText(range?: any): string;
-  getWordRangeAtPosition(position: any, regex?: RegExp): any;
-  validateRange(range: any): any;
-  validatePosition(position: any): any;
-  positionAt(offset: number): any;
-  offsetAt(position: any): number;
+  getText(range?: WorkspaceRange): string;
+  getWordRangeAtPosition(position: WorkspacePosition, regex?: RegExp): WorkspaceRange | undefined;
+  validateRange(range: WorkspaceRange): WorkspaceRange;
+  validatePosition(position: WorkspacePosition): WorkspacePosition;
+  positionAt(offset: number): WorkspacePosition;
+  offsetAt(position: WorkspacePosition): number;
 }
 
 export interface FileSystemWatcher {
@@ -53,18 +74,18 @@ export interface WorkspaceConfiguration {
     workspaceValue?: T;
     workspaceFolderValue?: T;
   } | undefined;
-  update(section: string, value: any, configurationTarget?: number): Promise<void>;
+  update(section: string, value: WorkspaceApiValue, configurationTarget?: number): Promise<void>;
 }
 
 class WorkspaceAPI {
   private _workspaceFolders: WorkspaceFolder[] = [];
   private _textDocuments: Map<string, TextDocument> = new Map();
   private fileWatchers: FileSystemWatcher[] = [];
-  private configuration: Map<string, any> = new Map();
-  private onDidChangeWorkspaceFoldersListeners: Array<(event: any) => void> = [];
+  private configuration: Map<string, WorkspaceApiValue> = new Map();
+  private onDidChangeWorkspaceFoldersListeners: Array<(event: WorkspaceFoldersChangeEvent) => void> = [];
   private onDidOpenTextDocumentListeners: Array<(document: TextDocument) => void> = [];
   private onDidCloseTextDocumentListeners: Array<(document: TextDocument) => void> = [];
-  private onDidChangeTextDocumentListeners: Array<(event: any) => void> = [];
+  private onDidChangeTextDocumentListeners: Array<(event: TextDocumentChangeEvent) => void> = [];
   private onDidSaveTextDocumentListeners: Array<(document: TextDocument) => void> = [];
 
   /**
@@ -189,7 +210,7 @@ class WorkspaceAPI {
     log.info('[Workspace] Saving document:', document.uri);
 
     // Mark as not dirty
-    (document as any).isDirty = false;
+    document.isDirty = false;
 
     // Notify listeners
     this.onDidSaveTextDocumentListeners.forEach(listener => listener(document));
@@ -216,7 +237,7 @@ class WorkspaceAPI {
   /**
    * Apply edit
    */
-  async applyEdit(edit: any): Promise<boolean> {
+  async applyEdit(edit: WorkspaceApiValue): Promise<boolean> {
     log.info('[Workspace] Applying edit:', edit);
 
     // Mock implementation
@@ -280,7 +301,7 @@ class WorkspaceAPI {
     include: string,
     exclude?: string | null,
     maxResults?: number,
-    token?: any
+    token?: WorkspaceApiValue
   ): Promise<string[]> {
     log.info('[Workspace] Finding files:', { include, exclude, maxResults });
 
@@ -291,7 +312,7 @@ class WorkspaceAPI {
   /**
    * Get configuration
    */
-  getConfiguration(section?: string, scope?: any): WorkspaceConfiguration {
+  getConfiguration(section?: string, scope?: WorkspaceApiValue): WorkspaceConfiguration {
     const config: WorkspaceConfiguration = {
       get: <T>(key: string, defaultValue?: T): T => {
         const fullKey = section ? `${section}.${key}` : key;
@@ -311,7 +332,7 @@ class WorkspaceAPI {
           workspaceFolderValue: undefined as T | undefined,
         };
       },
-      update: async (key: string, value: any, target?: number) => {
+      update: async (key: string, value: WorkspaceApiValue, target?: number) => {
         const fullKey = section ? `${section}.${key}` : key;
         this.configuration.set(fullKey, value);
         log.info('[Workspace] Updated configuration:', fullKey, value);
@@ -326,7 +347,7 @@ class WorkspaceAPI {
    */
   registerTextDocumentContentProvider(
     scheme: string,
-    provider: any
+    provider: WorkspaceApiValue
   ): { dispose: () => void } {
     log.info('[Workspace] Registered text document content provider:', scheme);
 
@@ -342,8 +363,8 @@ class WorkspaceAPI {
    */
   registerFileSystemProvider(
     scheme: string,
-    provider: any,
-    options?: any
+    provider: WorkspaceApiValue,
+    options?: WorkspaceApiValue
   ): { dispose: () => void } {
     log.info('[Workspace] Registered file system provider:', scheme);
 
@@ -357,7 +378,7 @@ class WorkspaceAPI {
   /**
    * Event listeners
    */
-  onDidChangeWorkspaceFolders(listener: (event: any) => void): { dispose: () => void } {
+  onDidChangeWorkspaceFolders(listener: (event: WorkspaceFoldersChangeEvent) => void): { dispose: () => void } {
     this.onDidChangeWorkspaceFoldersListeners.push(listener);
     return {
       dispose: () => {
@@ -387,7 +408,7 @@ class WorkspaceAPI {
     };
   }
 
-  onDidChangeTextDocument(listener: (event: any) => void): { dispose: () => void } {
+  onDidChangeTextDocument(listener: (event: TextDocumentChangeEvent) => void): { dispose: () => void } {
     this.onDidChangeTextDocumentListeners.push(listener);
     return {
       dispose: () => {
@@ -407,7 +428,7 @@ class WorkspaceAPI {
     };
   }
 
-  onDidChangeConfiguration(listener: (event: any) => void): { dispose: () => void } {
+  onDidChangeConfiguration(listener: (event: WorkspaceApiValue) => void): { dispose: () => void } {
     log.info('[Workspace] Registered configuration change listener');
     return {
       dispose: () => {
@@ -423,7 +444,7 @@ class WorkspaceAPI {
     const fileName = uri.split('/').pop() || 'untitled';
     const languageId = this.detectLanguageId(fileName);
 
-    return {
+    const document: TextDocument = {
       uri,
       fileName,
       isUntitled: uri.startsWith('untitled:'),
@@ -431,16 +452,18 @@ class WorkspaceAPI {
       version: 1,
       isDirty: false,
       isClosed: false,
-      save: async () => this.saveTextDocument(this as any),
+      save: async () => this.saveTextDocument(document),
       eol: 1, // LF
       lineCount: 0,
-      getText: (range?: any) => '',
-      getWordRangeAtPosition: (position: any, regex?: RegExp) => undefined,
-      validateRange: (range: any) => range,
-      validatePosition: (position: any) => position,
+      getText: (range?: WorkspaceRange) => '',
+      getWordRangeAtPosition: (position: WorkspacePosition, regex?: RegExp) => undefined,
+      validateRange: (range: WorkspaceRange) => range,
+      validatePosition: (position: WorkspacePosition) => position,
       positionAt: (offset: number) => ({ line: 0, character: offset }),
-      offsetAt: (position: any) => position.character,
+      offsetAt: (position: WorkspacePosition) => position.character,
     };
+
+    return document;
   }
 
   /**

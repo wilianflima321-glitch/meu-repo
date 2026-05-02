@@ -5,7 +5,9 @@ import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 
 import type { Project } from './aethel-dashboard-model'
+import { DashboardMissionLedgerCard } from './DashboardMissionLedgerCard'
 import { DashboardProjectBrainCard } from './DashboardProjectBrainCard'
+import { buildDashboardMissionLedgerSnapshot } from './dashboard-mission-ledger'
 import { buildDashboardProjectBrainSnapshot } from './dashboard-project-brain'
 
 type Point3 = {
@@ -262,6 +264,14 @@ export function DashboardOverviewTab({
     walletReady: Boolean(walletData),
     connectivityStatus: connectivityData?.overall_status,
   })
+  const missionLedgerSnapshot = buildDashboardMissionLedgerSnapshot({
+    primaryProject,
+    backendOnline,
+    aiProviderConfigured,
+    pendingApprovals,
+    walletReady: Boolean(walletData),
+    connectivityStatus: connectivityData?.overall_status,
+  })
 
   const panelClass =
     'overflow-hidden rounded-[28px] border border-[var(--aethel-border-subtle)] bg-[linear-gradient(180deg,rgba(15,23,42,0.76),rgba(8,10,16,0.96))] p-5 shadow-[0_24px_80px_rgba(2,6,23,0.34)] sm:p-6'
@@ -380,6 +390,13 @@ export function DashboardOverviewTab({
 
       <DashboardProjectBrainCard
         snapshot={projectBrainSnapshot}
+        onOpenAiChat={onOpenAiChat}
+        onOpenIde={onOpenIde}
+        onOpenProjects={onOpenProjects}
+      />
+
+      <DashboardMissionLedgerCard
+        snapshot={missionLedgerSnapshot}
         onOpenAiChat={onOpenAiChat}
         onOpenIde={onOpenIde}
         onOpenProjects={onOpenProjects}

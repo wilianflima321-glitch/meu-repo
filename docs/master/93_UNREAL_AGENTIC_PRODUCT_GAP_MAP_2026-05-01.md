@@ -159,7 +159,7 @@ Aethel should avoid one giant IDE screen. Instead, the Workbench opens focused r
 ## Execution Priority From Here
 P0: Keep current gates green while reducing structural debt.
 - Current measured `component files over 1000 lines`: 0 after the 2026-05-01 god-component closure pass.
-- Current measured `: any`: 1011 after typing the level serializer and language API boundary.
+- Current measured `: any`: 984 after typing the level serializer, language API, and workspace API boundaries.
 - Current measured E2E specs: 15, target 15.
 - Current measured Prisma migrations: 0, target at least 1 after baseline decision.
 
@@ -179,6 +179,7 @@ P3: Add Mission Ledger minimal implementation.
 - Durable mission states: planned, running, needs_approval, blocked, complete, failed.
 - Evidence attachments: files, screenshots, logs, test output, links.
 - Required before trusting long autonomous runs.
+- Current pass adds the compact Studio Home skeleton; next pass should back it with durable mission records.
 
 P4: Local Agent Bridge design and MVP.
 - Do not let cloud agents touch local logged-in accounts directly.

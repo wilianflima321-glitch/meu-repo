@@ -22,10 +22,10 @@ npm run qa:product-quality-progress
 Current verified readout after the 2026-05-01 god-component closure pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
 - Hardcoded hex in component TSX: `36` -> closed for the current ratchet target of `50`, down from `775`.
-- `: any` in app code: `1011` -> still a major strictness gap, reduced by the 2026-05-02 runtime typing pass.
+- `: any` in app code: `984` -> still a major strictness gap, reduced by the 2026-05-02 runtime/workspace typing pass.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
 - Component files over `1000` lines: `0` -> closed for the measured component scope, down from `28`.
-- Web unit/spec tests: `65` -> V10 claim of `12` is stale for the current branch.
+- Web unit/spec tests: `66` -> V10 claim of `12` is stale for the current branch.
 - E2E specs: `15` -> closed for the current progress target.
 - Prisma migration folders: `0` -> confirmed open gap.
 - Active-doc absolute local paths: `0` -> closed for active docs in the progress scanner scope.
@@ -90,6 +90,8 @@ Current verified readout after the 2026-05-01 god-component closure pass:
 - `/compare` is now explicitly public in `middleware.ts`, so procurement/buyer trust content is no longer hidden behind login.
 - Project Brain now exposes compact continuity rails for checkpoint, evidence, and permission state without creating a second dashboard surface.
 - `level-serialization.ts` and `extensions/vscode-api/languages.ts` no longer contribute direct `: any` hits, reducing app-code `: any` from `1135` to `1011`.
+- Studio Home now includes a compact `Mission Ledger` surface with mission state, acceptance checks, evidence, and next safe action.
+- `extensions/vscode-api/workspace.ts` no longer contributes direct `: any` hits, reducing app-code `: any` from `1011` to `984`.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.
