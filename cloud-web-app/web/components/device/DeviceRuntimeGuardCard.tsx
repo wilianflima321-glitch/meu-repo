@@ -3,13 +3,15 @@
 import { Cpu, Gauge, HardDrive, ShieldCheck, Zap } from 'lucide-react'
 
 import type { DeviceCapabilityProfile, DeviceRuntimeMode } from '@/lib/device/device-capability-profile'
+import type { LocalRuntimeBridgeState } from '@/lib/device/local-runtime-bridge'
 import { buildRuntimeLaneBudgets, decideRuntimeLaneStart } from '@/lib/device/runtime-lane-scheduler'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import { useRuntimeInteractionPressure } from '@/components/providers/runtime/useRuntimeInteractionPressure'
 
 type DeviceRuntimeGuardCardProps = {
   profile: DeviceCapabilityProfile
-  onOpenStudioLocal?: () => void
+  localBridge?: LocalRuntimeBridgeState
+  onRequestLocalProbe?: () => void
 }
 
 const modeLabels: Record<DeviceRuntimeMode, string> = {
@@ -40,7 +42,21 @@ function formatStorage(quotaGb?: number, usageGb?: number) {
   return `${free.toFixed(1)} GB free`
 }
 
-export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRuntimeGuardCardProps) {
+function formatFreeStorage(storageGb?: number) {
+  return storageGb ? `${storageGb.toFixed(1)} GB free` : 'Unknown'
+}
+
+function formatBridgeAge(ageMs: number | null | undefined) {
+  if (typeof ageMs !== 'number' || !Number.isFinite(ageMs)) return 'Awaiting probe'
+  const minutes = Math.max(0, Math.round(ageMs / 60000))
+  return minutes <= 1 ? 'Just now' : `${minutes} min ago`
+}
+
+export function DeviceRuntimeGuardCard({
+  profile,
+  localBridge,
+  onRequestLocalProbe,
+}: DeviceRuntimeGuardCardProps) {
   const { policy, signals } = profile
   const userActive = useRuntimeInteractionPressure()
   const laneBudgets = buildRuntimeLaneBudgets(policy).slice(0, 4)
@@ -54,9 +70,45 @@ export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRun
   const npuLabel =
     policy.npuSignal === 'webnn-available'
       ? 'WebNN present'
+      : policy.npuSignal === 'native-runtime-available'
+        ? localBridge?.acceleratorLabel ?? 'Native runtime connected'
       : policy.npuSignal === 'native-required'
         ? 'Native app can probe'
         : 'Not detectable'
+  const bridgeTone =
+    localBridge?.connection === 'connected'
+      ? 'border-[color-mix(in_srgb,var(--aethel-success)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+      : localBridge?.connection === 'stale'
+        ? 'border-[color-mix(in_srgb,var(--aethel-warning)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+        : 'border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_54%,transparent)] text-[var(--aethel-text-secondary)]'
+  const bridgeLabel =
+    localBridge?.connection === 'connected'
+      ? 'Local bridge connected'
+      : localBridge?.connection === 'stale'
+        ? 'Local bridge stale'
+        : 'Browser-only'
+  const effectiveCoreCount =
+    localBridge?.connection === 'connected'
+      ? localBridge.report?.cpuCores ?? signals.hardwareConcurrency
+      : signals.hardwareConcurrency
+  const effectiveMemoryGb =
+    localBridge?.connection === 'connected'
+      ? localBridge.report?.memoryGb ?? signals.deviceMemoryGb
+      : signals.deviceMemoryGb
+  const gpuComputeLabel =
+    localBridge?.connection === 'connected'
+      ? localBridge.report?.gpuComputeAvailable
+        ? 'Native GPU compute'
+        : signals.webgpuAvailable
+          ? 'WebGPU available'
+          : 'Fallback'
+      : signals.webgpuAvailable
+        ? 'WebGPU available'
+        : 'Fallback'
+  const storageLabel =
+    localBridge?.connection === 'connected'
+      ? formatFreeStorage(localBridge.report?.freeStorageGb)
+      : formatStorage(signals.storageQuotaGb, signals.storageUsageGb)
 
   const facts = [
     {
@@ -66,17 +118,17 @@ export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRun
     },
     {
       label: 'GPU compute',
-      value: signals.webgpuAvailable ? 'WebGPU available' : 'Fallback',
+      value: gpuComputeLabel,
       icon: <Gauge className="h-3.5 w-3.5" />,
     },
     {
       label: 'CPU/RAM',
-      value: `${signals.hardwareConcurrency ?? 'Unknown'} cores / ${formatMemory(signals.deviceMemoryGb)}`,
+      value: `${effectiveCoreCount ?? 'Unknown'} cores / ${formatMemory(effectiveMemoryGb)}`,
       icon: <Cpu className="h-3.5 w-3.5" />,
     },
     {
       label: 'Memory store',
-      value: formatStorage(signals.storageQuotaGb, signals.storageUsageGb),
+      value: storageLabel,
       icon: <HardDrive className="h-3.5 w-3.5" />,
     },
   ]
@@ -113,6 +165,16 @@ export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRun
             ? 'Studio is prioritizing visible interaction and holding pauseable background work.'
             : 'Background lanes can scale back up when the device is idle.'}
         </span>
+        <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${bridgeTone}`}>
+          {bridgeLabel}
+        </span>
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">
+          {localBridge?.connection === 'connected'
+            ? `${localBridge.executorLabel} - last sync ${formatBridgeAge(localBridge.ageMs)}`
+            : localBridge?.connection === 'stale'
+              ? `Last native probe ${formatBridgeAge(localBridge.ageMs)}`
+              : 'Studio Local can attach a native probe when the desktop runtime is present.'}
+        </span>
       </div>
 
       <div className="mt-5 grid gap-3 md:grid-cols-4">
@@ -146,15 +208,16 @@ export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRun
 
         <div className="rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_34%,transparent)] px-4 py-4">
           <p className="text-xs leading-5 text-[var(--aethel-text-secondary)]">
-            Studio Local should run native NPU/GPU probes and isolate heavy jobs. Web stays responsive and never assumes NPU access blindly.
+            {localBridge?.summary ??
+              'Studio Local should run native NPU/GPU probes and isolate heavy jobs. Web stays responsive and never assumes NPU access blindly.'}
           </p>
-          {onOpenStudioLocal ? (
+          {onRequestLocalProbe ? (
             <button
               type="button"
-              onClick={onOpenStudioLocal}
+              onClick={onRequestLocalProbe}
               className={`mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--aethel-info)_30%,transparent)] bg-[color-mix(in_srgb,var(--aethel-info)_10%,transparent)] px-4 py-2 text-sm font-semibold text-[var(--aethel-info-light)] ${CANONICAL_FOCUS} ${CANONICAL_MOTION}`}
             >
-              Open local path
+              {localBridge?.connection === 'connected' ? 'Refresh local probe' : 'Request local probe'}
             </button>
           ) : null}
         </div>

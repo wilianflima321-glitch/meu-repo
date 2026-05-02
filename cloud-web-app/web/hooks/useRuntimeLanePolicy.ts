@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 
-import { useDeviceCapabilityProfile } from '@/hooks/useDeviceCapabilityProfile'
+import { useRuntimeCapabilityProfile } from '@/hooks/useRuntimeCapabilityProfile'
 import {
   buildRuntimeLaneBudgets,
   decideRuntimeLaneStart,
@@ -26,7 +26,7 @@ export function useRuntimeLanePolicy(
   lane: RuntimeWorkLane,
   options: RuntimeLanePressureOptions = {}
 ): RuntimeLanePolicyState {
-  const profile = useDeviceCapabilityProfile()
+  const { profile } = useRuntimeCapabilityProfile()
   const activeCount = options.activeCount ?? 0
   const queuedCount = options.queuedCount ?? 0
   const userActive = options.userActive ?? false

@@ -205,6 +205,8 @@ Agent mode now reflects the same runtime grammar. The panel exposes `ai-agents` 
 
 The browser-operator guard now also lives in the real tool execution path instead of only the approval chrome. Local and server `AutonomousAgent` flows auto-register the web tools registry, pass a runtime payload into `web_search`, `fetch_url`, `search_docs`, and `web_scrape`, and return explicit runtime block codes when the device policy says those steps must wait or require confirmation.
 
+The runtime profile is now no longer browser-only. A local-native bridge can publish a capability probe from Studio Local into the web shell, and the scheduler, Project Brain, Device Guard, Agent Mode, and runtime boot policy all consume the merged profile. That gives Aethel a real path to recognize native NPU/GPU capacity, stale probes, and thermal pressure before deciding where agent work should run.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

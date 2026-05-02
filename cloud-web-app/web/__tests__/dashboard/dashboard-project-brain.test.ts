@@ -51,4 +51,31 @@ describe('dashboard project brain', () => {
     expect(snapshot.nextAction).toBe('Expand Studio')
     expect(snapshot.continuity).toContainEqual({ label: 'Checkpoint', value: 'Ready', status: 'ready' })
   })
+
+  it('surfaces a connected local runtime as part of mission continuity', () => {
+    const snapshot = buildDashboardProjectBrainSnapshot({
+      primaryProject: { id: 3, name: 'Studio sync', type: 'code', status: 'active' },
+      backendOnline: true,
+      aiProviderConfigured: true,
+      pendingApprovals: 0,
+      walletReady: true,
+      connectivityStatus: 'healthy',
+      localRuntime: {
+        connection: 'connected',
+        executorLabel: 'Local native',
+      },
+    })
+
+    expect(snapshot.signals).toContainEqual({
+      label: 'Runtime',
+      value: 'Healthy / Local native',
+      status: 'ready',
+    })
+    expect(snapshot.continuity).toContainEqual({
+      label: 'Device',
+      value: 'Local native',
+      status: 'ready',
+    })
+    expect(snapshot.summary).toContain('local-native handoff')
+  })
 })

@@ -6,7 +6,7 @@ import { APIError } from '@/lib/api'
 import type { ConnectivityResponse, WalletSummary } from '@/lib/api'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import { DeviceRuntimeGuardCard } from '@/components/device/DeviceRuntimeGuardCard'
-import { useDeviceCapabilityProfile } from '@/hooks/useDeviceCapabilityProfile'
+import { useRuntimeCapabilityProfile } from '@/hooks/useRuntimeCapabilityProfile'
 
 import type { Project } from './aethel-dashboard-model'
 import { DashboardMissionLedgerCard } from './DashboardMissionLedgerCard'
@@ -133,7 +133,7 @@ export function DashboardOverviewTab({
   onSendSuggestion,
   isGenerating,
 }: DashboardOverviewTabProps) {
-  const deviceProfile = useDeviceCapabilityProfile()
+  const { profile: deviceProfile, localBridge } = useRuntimeCapabilityProfile()
   const activeProjects = projects.filter((project) => project.status === 'active')
   const primaryProject = activeProjects[0] ?? projects[0]
   const pendingApprovals = livePreviewSuggestions.length
@@ -268,6 +268,10 @@ export function DashboardOverviewTab({
     pendingApprovals,
     walletReady: Boolean(walletData),
     connectivityStatus: connectivityData?.overall_status,
+    localRuntime: {
+      connection: localBridge.connection,
+      executorLabel: localBridge.executorLabel,
+    },
   })
   const missionLedgerSnapshot = buildDashboardMissionLedgerSnapshot({
     primaryProject,
@@ -407,7 +411,11 @@ export function DashboardOverviewTab({
         onOpenProjects={onOpenProjects}
       />
 
-      <DeviceRuntimeGuardCard profile={deviceProfile} />
+      <DeviceRuntimeGuardCard
+        profile={deviceProfile}
+        localBridge={localBridge}
+        onRequestLocalProbe={localBridge.requestCapabilities}
+      />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_380px]">
         <div className={panelClass}>

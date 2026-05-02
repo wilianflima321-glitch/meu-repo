@@ -28,8 +28,8 @@ import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
 import { ScrollArea } from '@/components/ui/ScrollArea'
 import { AutonomousAgent, AgentTask, AgentStep, ToolCall } from '@/lib/ai/agent-mode'
-import { useDeviceCapabilityProfile } from '@/hooks/useDeviceCapabilityProfile'
 import { useRuntimeLanePolicy } from '@/hooks/useRuntimeLanePolicy'
+import { useRuntimeCapabilityProfile } from '@/hooks/useRuntimeCapabilityProfile'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
 import { buildBrowserOperatorRuntimePayload } from '@/lib/device/browser-operator-tool-guard'
 import {
@@ -80,7 +80,7 @@ export function AgentModePanel({ isOpen, onClose }: AgentModePanelProps) {
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set())
   const scrollRef = useRef<HTMLDivElement>(null)
   const browserOperatorApprovalOverrideRef = useRef(false)
-  const capabilityProfile = useDeviceCapabilityProfile()
+  const { profile: capabilityProfile } = useRuntimeCapabilityProfile()
   const aiAgentLane = useRuntimeLanePolicy('ai-agents', {
     activeCount: status === 'running' || status === 'paused' ? 1 : 0,
   })

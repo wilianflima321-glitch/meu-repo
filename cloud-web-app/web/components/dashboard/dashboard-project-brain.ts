@@ -1,4 +1,5 @@
 import type { Project } from './aethel-dashboard-model'
+import type { LocalRuntimeConnectionState } from '@/lib/device/local-runtime-bridge'
 
 export type ProjectBrainStatus = 'ready' | 'attention' | 'blocked'
 
@@ -26,6 +27,10 @@ type BuildProjectBrainSnapshotInput = {
   pendingApprovals: number
   walletReady: boolean
   connectivityStatus?: string | null
+  localRuntime?: {
+    connection: LocalRuntimeConnectionState
+    executorLabel?: string | null
+  }
 }
 
 const formatDomain = (project?: Project): string => {
@@ -43,9 +48,25 @@ const formatDomain = (project?: Project): string => {
   }
 }
 
-const resolveRuntimeStatus = (backendOnline: boolean, connectivityStatus?: string | null): ProjectBrainSignal => {
+const resolveRuntimeStatus = (
+  backendOnline: boolean,
+  connectivityStatus?: string | null,
+  localRuntime?: BuildProjectBrainSnapshotInput['localRuntime']
+): ProjectBrainSignal => {
   if (!backendOnline) {
     return { label: 'Runtime', value: 'Blocked', status: 'blocked' }
+  }
+
+  if (localRuntime?.connection === 'connected') {
+    return {
+      label: 'Runtime',
+      value: `Healthy / ${localRuntime.executorLabel || 'Local native'}`,
+      status: 'ready',
+    }
+  }
+
+  if (localRuntime?.connection === 'stale') {
+    return { label: 'Runtime', value: 'Probe stale', status: 'attention' }
   }
 
   if (connectivityStatus === 'degraded') {
@@ -66,6 +87,7 @@ export const buildDashboardProjectBrainSnapshot = ({
   pendingApprovals,
   walletReady,
   connectivityStatus,
+  localRuntime,
 }: BuildProjectBrainSnapshotInput): ProjectBrainSnapshot => {
   const signals: ProjectBrainSignal[] = [
     {
@@ -73,7 +95,7 @@ export const buildDashboardProjectBrainSnapshot = ({
       value: primaryProject ? primaryProject.name : 'Needs goal',
       status: primaryProject ? 'ready' : 'attention',
     },
-    resolveRuntimeStatus(backendOnline, connectivityStatus),
+    resolveRuntimeStatus(backendOnline, connectivityStatus, localRuntime),
     {
       label: 'AI',
       value: aiProviderConfigured ? 'Configured' : 'Setup needed',
@@ -111,6 +133,16 @@ export const buildDashboardProjectBrainSnapshot = ({
       value: 'Gated',
       status: 'ready',
     },
+    {
+      label: 'Device',
+      value:
+        localRuntime?.connection === 'connected'
+          ? localRuntime.executorLabel || 'Local native'
+          : localRuntime?.connection === 'stale'
+            ? 'Probe stale'
+            : 'Browser shell',
+      status: localRuntime?.connection === 'stale' ? 'attention' : 'ready',
+    },
   ]
 
   const nextAction = !primaryProject
@@ -126,7 +158,9 @@ export const buildDashboardProjectBrainSnapshot = ({
             : 'Expand Studio'
 
   const summary = primaryProject
-    ? 'Project Brain keeps the current mission, runtime, approvals, budget, and trust state in one compact readout before the deep cockpit opens.'
+    ? localRuntime?.connection === 'connected'
+      ? 'Project Brain keeps mission, runtime, local-native handoff, approvals, budget, and trust state in one compact readout before the deep cockpit opens.'
+      : 'Project Brain keeps the current mission, runtime, approvals, budget, and trust state in one compact readout before the deep cockpit opens.'
     : 'Project Brain will become the durable mission memory once the user chooses what Aethel should build, research, operate, or review.'
 
   return {

@@ -2,7 +2,7 @@ export type DeviceCapabilityTier = 'accelerated-local' | 'balanced-local' | 'clo
 
 export type DeviceRuntimeMode = 'local-accelerated' | 'hybrid-balanced' | 'cloud-isolated' | 'safe-mode'
 
-export type NpuSignal = 'webnn-available' | 'native-required' | 'not-detectable'
+export type NpuSignal = 'webnn-available' | 'native-runtime-available' | 'native-required' | 'not-detectable'
 
 export interface RawDeviceCapabilitySignals {
   hardwareConcurrency?: number
