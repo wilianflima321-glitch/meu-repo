@@ -22,7 +22,7 @@ npm run qa:product-quality-progress
 Current verified readout after the 2026-05-01 god-component closure pass:
 - `console.log/info/debug` in app code: `0` -> closed for the measured app-code scope.
 - Hardcoded hex in component TSX: `36` -> closed for the current ratchet target of `50`, down from `775`.
-- `: any` in app code: `984` -> still a major strictness gap, reduced by the 2026-05-02 runtime/workspace typing pass.
+- `: any` in app code: `963` -> still a major strictness gap, reduced by the 2026-05-02 runtime/workspace/window typing pass.
 - PT hardcoded component strings: `287` -> still a major i18n/product-language gap.
 - Component files over `1000` lines: `0` -> closed for the measured component scope, down from `28`.
 - Web unit/spec tests: `66` -> V10 claim of `12` is stale for the current branch.
@@ -92,6 +92,7 @@ Current verified readout after the 2026-05-01 god-component closure pass:
 - `level-serialization.ts` and `extensions/vscode-api/languages.ts` no longer contribute direct `: any` hits, reducing app-code `: any` from `1135` to `1011`.
 - Studio Home now includes a compact `Mission Ledger` surface with mission state, acceptance checks, evidence, and next safe action.
 - `extensions/vscode-api/workspace.ts` no longer contributes direct `: any` hits, reducing app-code `: any` from `1011` to `984`.
+- `extensions/vscode-api/window.ts` no longer contributes direct `: any` hits, reducing app-code `: any` from `984` to `963`.
 
 ## Canonical Execution Impact
 Do not create another deploy button family.

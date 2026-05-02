@@ -183,6 +183,8 @@ The level serialization and VS Code language API boundaries were typed to remove
 
 Mission Ledger now appears in Studio Home as a compact state/evidence/checklist surface. This is not durable mission storage yet, but it gives users and agents a visible contract before deeper work starts. The VS Code workspace API boundary was also typed, moving app-code `: any` from `1011` to `984`.
 
+The VS Code window API boundary was typed next, removing another direct IDE/runtime weak-type seam. App-code `: any` moved from `984` to `963`; this is still not strict enough for a 10/10 agentic IDE, but the debt is shrinking without masking remaining hotspots.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

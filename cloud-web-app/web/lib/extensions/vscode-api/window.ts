@@ -64,11 +64,62 @@ export interface SaveDialogOptions {
   title?: string;
 }
 
+export type Disposable = { dispose: () => void };
+export type MessageOptions = { modal?: boolean };
+export type MessageArg = string | MessageItem | MessageOptions;
+export type WindowMessage = {
+  type: MessageType;
+  message: string;
+  options?: MessageOptions;
+  items: Array<string | MessageItem>;
+};
+export type TextEditor = {
+  uri?: string;
+  document?: { uri: string };
+  [key: string]: unknown;
+};
+export type TextDocumentShowOptions = Record<string, unknown>;
+export type OutputChannel = {
+  name: string;
+  append: (value: string) => void;
+  appendLine: (value: string) => void;
+  clear: () => void;
+  show: (preserveFocus?: boolean) => void;
+  hide: () => void;
+  dispose: () => void;
+};
+export type Terminal = {
+  name: string;
+  processId: Promise<number>;
+  sendText: (text: string, addNewLine?: boolean) => void;
+  show: (preserveFocus?: boolean) => void;
+  hide: () => void;
+  dispose: () => void;
+};
+export type StatusBarItem = {
+  text: string;
+  tooltip: string;
+  color: string | undefined;
+  command: string | undefined;
+  alignment?: number;
+  priority?: number;
+  show: () => void;
+  hide: () => void;
+  dispose: () => void;
+};
+export type ProgressReporter = {
+  report: (value: { message?: string; increment?: number }) => void;
+};
+export type CancellationToken = {
+  isCancellationRequested: boolean;
+  onCancellationRequested: () => Disposable;
+};
+
 class WindowAPI {
-  private _activeTextEditor: any = null;
-  private _visibleTextEditors: any[] = [];
-  private _terminals: any[] = [];
-  private messageListeners: Array<(message: any) => void> = [];
+  private _activeTextEditor: TextEditor | null = null;
+  private _visibleTextEditors: TextEditor[] = [];
+  private _terminals: Terminal[] = [];
+  private messageListeners: Array<(message: WindowMessage) => void> = [];
 
   /**
    * Show information message
@@ -84,8 +135,8 @@ class WindowAPI {
   ): Promise<MessageItem | undefined>;
   async showInformationMessage(
     message: string,
-    ...args: any[]
-  ): Promise<any> {
+    ...args: MessageArg[]
+  ): Promise<MessageItem | undefined> {
     return this.showMessage(MessageType.Info, message, args);
   }
 
@@ -103,8 +154,8 @@ class WindowAPI {
   ): Promise<MessageItem | undefined>;
   async showWarningMessage(
     message: string,
-    ...args: any[]
-  ): Promise<any> {
+    ...args: MessageArg[]
+  ): Promise<MessageItem | undefined> {
     return this.showMessage(MessageType.Warning, message, args);
   }
 
@@ -122,8 +173,8 @@ class WindowAPI {
   ): Promise<MessageItem | undefined>;
   async showErrorMessage(
     message: string,
-    ...args: any[]
-  ): Promise<any> {
+    ...args: MessageArg[]
+  ): Promise<MessageItem | undefined> {
     return this.showMessage(MessageType.Error, message, args);
   }
 
@@ -185,7 +236,7 @@ class WindowAPI {
   /**
    * Show text document
    */
-  async showTextDocument(uri: string, options?: any): Promise<any> {
+  async showTextDocument(uri: string, options?: TextDocumentShowOptions): Promise<TextEditor> {
     log.info('[Window] Show text document:', uri, options);
 
     // Mock implementation
@@ -198,7 +249,7 @@ class WindowAPI {
   /**
    * Create output channel
    */
-  createOutputChannel(name: string): any {
+  createOutputChannel(name: string): OutputChannel {
     log.info('[Window] Create output channel:', name);
 
     return {
@@ -215,7 +266,7 @@ class WindowAPI {
   /**
    * Create terminal
    */
-  createTerminal(name?: string, shellPath?: string, shellArgs?: string[]): any {
+  createTerminal(name?: string, shellPath?: string, shellArgs?: string[]): Terminal {
     const terminal = {
       name: name || `Terminal ${this._terminals.length + 1}`,
       processId: Promise.resolve(Math.floor(Math.random() * 10000)),
@@ -247,8 +298,8 @@ class WindowAPI {
    * Set status bar message
    */
   setStatusBarMessage(text: string, hideAfterTimeout?: number): { dispose: () => void };
-  setStatusBarMessage(text: string, hideWhenDone: Promise<any>): { dispose: () => void };
-  setStatusBarMessage(text: string, arg?: any): { dispose: () => void } {
+  setStatusBarMessage(text: string, hideWhenDone: Promise<unknown>): { dispose: () => void };
+  setStatusBarMessage(text: string, arg?: number | Promise<unknown>): { dispose: () => void } {
     log.info('[Window] Status bar message:', text);
 
     if (typeof arg === 'number') {
@@ -271,7 +322,7 @@ class WindowAPI {
   /**
    * Create status bar item
    */
-  createStatusBarItem(alignment?: number, priority?: number): any {
+  createStatusBarItem(alignment?: number, priority?: number): StatusBarItem {
     return {
       text: '',
       tooltip: '',
@@ -294,7 +345,7 @@ class WindowAPI {
       title?: string;
       cancellable?: boolean;
     },
-    task: (progress: any, token: any) => Promise<R>
+    task: (progress: ProgressReporter, token: CancellationToken) => Promise<R>
   ): Promise<R> {
     log.info('[Window] With progress:', options);
 
@@ -315,35 +366,35 @@ class WindowAPI {
   /**
    * Get active text editor
    */
-  get activeTextEditor(): any {
+  get activeTextEditor(): TextEditor | null {
     return this._activeTextEditor;
   }
 
   /**
    * Set active text editor
    */
-  setActiveTextEditor(editor: any): void {
+  setActiveTextEditor(editor: TextEditor | null): void {
     this._activeTextEditor = editor;
   }
 
   /**
    * Get visible text editors
    */
-  get visibleTextEditors(): any[] {
+  get visibleTextEditors(): TextEditor[] {
     return this._visibleTextEditors;
   }
 
   /**
    * Get terminals
    */
-  get terminals(): any[] {
+  get terminals(): Terminal[] {
     return this._terminals;
   }
 
   /**
    * Get active terminal
    */
-  get activeTerminal(): any | undefined {
+  get activeTerminal(): Terminal | undefined {
     return this._terminals[this._terminals.length - 1];
   }
 
@@ -353,10 +404,10 @@ class WindowAPI {
   private async showMessage(
     type: MessageType,
     message: string,
-    args: any[]
-  ): Promise<any> {
-    const options = args.find(arg => typeof arg === 'object' && 'modal' in arg);
-    const items = args.filter(arg => typeof arg === 'string' || (typeof arg === 'object' && 'title' in arg));
+    args: MessageArg[]
+  ): Promise<MessageItem | undefined> {
+    const options = args.find((arg): arg is MessageOptions => typeof arg === 'object' && arg !== null && 'modal' in arg);
+    const items = args.filter((arg): arg is string | MessageItem => typeof arg === 'string' || (typeof arg === 'object' && arg !== null && 'title' in arg));
 
     log.info(`[Window] Show ${type} message:`, message, { options, items });
 
@@ -376,7 +427,7 @@ class WindowAPI {
   /**
    * Add message listener
    */
-  onDidShowMessage(listener: (message: any) => void): { dispose: () => void } {
+  onDidShowMessage(listener: (message: WindowMessage) => void): { dispose: () => void } {
     this.messageListeners.push(listener);
 
     return {

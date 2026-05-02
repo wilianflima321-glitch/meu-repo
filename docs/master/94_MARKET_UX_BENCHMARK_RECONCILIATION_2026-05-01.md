@@ -81,6 +81,7 @@ Aethel response:
 - Typed the level serialization and VS Code language API boundaries enough to reduce app-code `: any` from `1135` to `1011`, which directly helps long game/film/app agents avoid weak runtime assumptions.
 - Added a compact Mission Ledger surface for mission state, acceptance checks, evidence, and next safe action.
 - Typed the VS Code workspace API boundary, reducing app-code `: any` again from `1011` to `984`.
+- Typed the VS Code window API boundary, reducing app-code `: any` from `984` to `963` and tightening another IDE seam that agents depend on for safe editor/message/terminal behavior.
 
 ## Product Impact
 The dashboard now has a compact memory/risk/readiness object that makes the current mission legible before the user opens the deep Studio.
