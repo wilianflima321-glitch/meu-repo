@@ -211,6 +211,8 @@ That bridge now also has an authenticated cloud handoff. Fresh native capability
 
 Runtime routing now has a canonical decision layer as well. Lane policy plus the local bridge snapshot resolves into an explicit execution target (`local-native`, `local-worker`, `local-main-safe`, `cloud-sandbox`, or `held`) before deploy hints and autonomous web-tool payloads use it. This keeps the product aligned around one runtime truth instead of letting each surface guess where work should run.
 
+The jobs dispatcher now preserves that same runtime truth. `/api/jobs` sanitizes incoming execution routes, rejects `held` work before it enters BullMQ, stores the target on queue payloads and metadata, and returns `runtimeTarget` when listing jobs. The creation workbench also sends its AI-agent route into music, voice, and 3D generation calls, so device policy is no longer only visible chrome; it is becoming part of the end-to-end dispatch contract.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

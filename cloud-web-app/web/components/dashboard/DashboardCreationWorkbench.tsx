@@ -408,13 +408,21 @@ export default function DashboardCreationWorkbench({
 
   const startAsyncJob = useCallback(
     async (kind: ProjectJob['kind'], route: string, body: Record<string, unknown>, prompt: string) => {
-      if (!aiAgentLane.decision.canStart) {
-        throw new Error(aiAgentLane.decision.reason);
+      if (!aiAgentLane.route.canStart) {
+        throw new Error(aiAgentLane.route.reason);
       }
       const id = makeId(`job_${kind}`);
       const now = new Date().toISOString();
       upsertJob({ id, kind, status: 'queued', prompt, progress: 0, sourceRoute: route, createdAt: now, updatedAt: now });
-      const response = await fetch(route, { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(body) });
+      const response = await fetch(route, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          ...body,
+          runtimeRoute: aiAgentLane.route,
+          runtimeTarget: aiAgentLane.route.target,
+        }),
+      });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload?.task?.id) throw new Error(payload?.error || `${kind} start failed`);
       upsertJob({
@@ -430,7 +438,7 @@ export default function DashboardCreationWorkbench({
         updatedAt: new Date().toISOString(),
       });
     },
-    [aiAgentLane.decision.canStart, aiAgentLane.decision.reason, upsertJob]
+    [aiAgentLane.route, upsertJob]
   );
 
   const generateMusic = useCallback(
@@ -462,8 +470,8 @@ export default function DashboardCreationWorkbench({
   );
 
   const generateVoice = useCallback(async () => {
-    if (!aiAgentLane.decision.canStart) {
-      throw new Error(aiAgentLane.decision.reason);
+    if (!aiAgentLane.route.canStart) {
+      throw new Error(aiAgentLane.route.reason);
     }
     const id = makeId('job_voice');
     const now = new Date().toISOString();
@@ -481,7 +489,13 @@ export default function DashboardCreationWorkbench({
     const response = await fetch('/api/ai/voice/generate', {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ text: voiceText, provider: 'openai', format: 'mp3' }),
+      body: JSON.stringify({
+        text: voiceText,
+        provider: 'openai',
+        format: 'mp3',
+        runtimeRoute: aiAgentLane.route,
+        runtimeTarget: aiAgentLane.route.target,
+      }),
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || !payload?.audio?.data) throw new Error(payload?.error || 'voice generation failed');
@@ -502,7 +516,7 @@ export default function DashboardCreationWorkbench({
       createdAt: now,
       updatedAt: new Date().toISOString(),
     });
-  }, [aiAgentLane.decision.canStart, aiAgentLane.decision.reason, createAsset, upsertJob, voiceText]);
+  }, [aiAgentLane.route, createAsset, upsertJob, voiceText]);
 
   useEffect(() => {
     const timer = window.setInterval(async () => {
@@ -711,12 +725,12 @@ export default function DashboardCreationWorkbench({
               <div className="rounded border border-[var(--aethel-border-primary)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_40%,transparent)] p-3 text-xs">
                 <div className="mb-2 text-[11px] uppercase tracking-wider text-[var(--aethel-text-quaternary)]">AI lane budget</div>
                 <div className="text-[var(--aethel-text-primary)]">
-                  {aiAgentLane.budget?.maxConcurrent ?? 0} concurrent / {aiAgentLane.budget?.placement?.replace(/-/g, ' ') ?? 'unknown'}
+                  {aiAgentLane.budget?.maxConcurrent ?? 0} concurrent / {aiAgentLane.route.target.replace(/-/g, ' ')}
                 </div>
                 <div className="mt-1 text-[var(--aethel-text-tertiary)]">
-                  {aiAgentLane.decision.canStart
-                    ? `New job capacity available (${Math.max((aiAgentLane.budget?.maxConcurrent ?? 0) - inFlightAiJobs, 0)} slots left).`
-                    : aiAgentLane.decision.reason}
+                  {aiAgentLane.route.canStart
+                    ? `${aiAgentLane.route.label} (${Math.max((aiAgentLane.budget?.maxConcurrent ?? 0) - inFlightAiJobs, 0)} slots left).`
+                    : aiAgentLane.route.reason}
                 </div>
               </div>
               <textarea value={musicPrompt} onChange={(e) => setMusicPrompt(e.target.value)} placeholder="Prompt de musica..." className={textAreaClass} aria-label="Prompt para gerar musica" />

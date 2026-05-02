@@ -34,6 +34,8 @@ The web shell now has a first-pass device guard:
 - `lib/device/runtime-execution-router.ts` now turns lane policy plus the local bridge state into an explicit execution target: `local-native`, `local-worker`, `local-main-safe`, `cloud-sandbox`, or `held`.
 - `hooks/useRuntimeLanePolicy.ts` now returns that route alongside the lane decision, so product surfaces can display and pass the same execution target instead of reinterpreting placement locally.
 - `components/ai/AgentModePanel.tsx`, `lib/device/browser-operator-tool-guard.ts`, and deploy UI now carry the resolved execution target into agent web-tool context and user-facing hints.
+- `app/api/jobs/route.ts` now accepts a sanitized runtime route, persists it into queue payloads/metadata, exposes `runtimeTarget` when listing jobs, and rejects held routes before work reaches a dispatcher.
+- `components/dashboard/DashboardCreationWorkbench.tsx` now passes the resolved AI-agent execution target into music, voice, and 3D generation requests while keeping the jobs rail compact.
 
 Measured policies include:
 
@@ -98,7 +100,7 @@ The local app should sync with the cloud account, but it must not become a forke
 ## Next Blocks
 
 1. Implement the real Studio Local emitter so the desktop runtime sends signed device probes instead of relying on browser-only relay events.
-2. Wire the execution route into deeper render/indexing/build workers so the selected target is not just displayed but used by dispatchers.
+2. Wire the execution route into deeper render/indexing/build workers so the selected target is not only persisted by `/api/jobs`, but actively consumed by the workers.
 3. Persist lane pressure telemetry so Aethel can learn safe defaults by device class.
 4. Add durable project memory backed by database/files instead of only UI read models.
 5. Add safety policy UI for local memory, browser operation, and device-native model execution.
