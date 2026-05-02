@@ -195,6 +195,8 @@ The AI chat/complete route contracts, editor integration bridge, extension runti
 
 Device runtime triage was added next so Studio Home can adapt work to the user's actual machine instead of blindly running every agent, viewport, browser, memory, and AI job locally. The first guard classifies WebNN/WebGPU/CPU/RAM/storage/network signals into accelerated-local, hybrid, cloud-isolated, or safe-mode policies.
 
+Runtime lane scheduling was added on top of the device guard. AI agents, browser operator, viewport/render, build/export, memory indexing, and file sync now have explicit budgets, placements, confirmation needs, and pause-on-user-input rules so future execution can route heavy work without freezing the UI.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

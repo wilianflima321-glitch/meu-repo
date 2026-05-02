@@ -19,8 +19,9 @@ The product needs a runtime governor that chooses the safest execution lane per 
 The web shell now has a first-pass device guard:
 
 - `lib/device/device-capability-profile.ts` classifies device capability.
+- `lib/device/runtime-lane-scheduler.ts` maps that capability into lane budgets and backpressure decisions.
 - `hooks/useDeviceCapabilityProfile.ts` collects browser-side signals without blocking render.
-- `components/device/DeviceRuntimeGuardCard.tsx` surfaces the policy in Studio Home.
+- `components/device/DeviceRuntimeGuardCard.tsx` surfaces the policy in Studio Home and shows live protection state while the user is actively interacting.
 - `DashboardOverviewTab.tsx` shows the guard near mission/project continuity, not hidden in settings.
 
 Measured policies include:
@@ -31,6 +32,7 @@ Measured policies include:
 - Browser operator throttling policy.
 - Persistent memory policy.
 - Background task budget.
+- Runtime lane placement and concurrency for AI agents, browser operator, viewport/render, build/export, memory indexing, and file sync.
 
 ## NPU Reality Check
 
@@ -58,6 +60,7 @@ P0 rules:
 
 - Do not run heavy local models unless the device guard says local acceleration is safe.
 - Do not let browser operator, build, export, viewport, and indexing jobs compete on the main UI thread.
+- Route each heavy work type through a lane budget before it starts.
 - Use workers, cloud runtimes, or local sandbox lanes for long-running work.
 - Cap parallel agents per device profile.
 - Pause background indexing during direct user interaction.
@@ -79,7 +82,7 @@ The local app should sync with the cloud account, but it must not become a forke
 ## Next Blocks
 
 1. Add native local Studio probe contract for CPU/GPU/NPU/RAM/storage and expose it to the web account.
-2. Add runtime scheduler queues for agent/browser/build/render/indexing lanes.
-3. Add per-lane backpressure so the UI remains responsive under load.
+2. Wire the lane scheduler into real agent/browser/build/render/indexing execution paths.
+3. Persist lane pressure telemetry so Aethel can learn safe defaults by device class.
 4. Add durable project memory backed by database/files instead of only UI read models.
 5. Add safety policy UI for local memory, browser operation, and device-native model execution.

@@ -3,7 +3,9 @@
 import { Cpu, Gauge, HardDrive, ShieldCheck, Zap } from 'lucide-react'
 
 import type { DeviceCapabilityProfile, DeviceRuntimeMode } from '@/lib/device/device-capability-profile'
+import { buildRuntimeLaneBudgets, decideRuntimeLaneStart } from '@/lib/device/runtime-lane-scheduler'
 import { CANONICAL_FOCUS, CANONICAL_MOTION } from '@/lib/canonical-spacing'
+import { useRuntimeInteractionPressure } from '@/components/providers/runtime/useRuntimeInteractionPressure'
 
 type DeviceRuntimeGuardCardProps = {
   profile: DeviceCapabilityProfile
@@ -40,6 +42,15 @@ function formatStorage(quotaGb?: number, usageGb?: number) {
 
 export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRuntimeGuardCardProps) {
   const { policy, signals } = profile
+  const userActive = useRuntimeInteractionPressure()
+  const laneBudgets = buildRuntimeLaneBudgets(policy).slice(0, 4)
+  const laneDecisions = laneBudgets.map((lane) =>
+    decideRuntimeLaneStart(policy, lane.lane, {
+      userActive,
+      activeByLane: {},
+      queuedByLane: {},
+    })
+  )
   const npuLabel =
     policy.npuSignal === 'webnn-available'
       ? 'WebNN present'
@@ -60,7 +71,7 @@ export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRun
     },
     {
       label: 'CPU/RAM',
-      value: `${signals.hardwareConcurrency ?? 'Unknown'} cores · ${formatMemory(signals.deviceMemoryGb)}`,
+      value: `${signals.hardwareConcurrency ?? 'Unknown'} cores / ${formatMemory(signals.deviceMemoryGb)}`,
       icon: <Cpu className="h-3.5 w-3.5" />,
     },
     {
@@ -75,13 +86,32 @@ export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRun
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--aethel-text-tertiary)]">Device guard</p>
-          <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">Keep agents fast without freezing the device.</h3>
+          <h3 className="mt-2 text-xl font-semibold text-[var(--aethel-text-primary)]">
+            Keep agents fast without freezing the device.
+          </h3>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--aethel-text-secondary)]">
             {policy.safetySummary}
           </p>
         </div>
         <span className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${modeTone[policy.mode]}`}>
           {modeLabels[policy.mode]}
+        </span>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span
+          className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${
+            userActive
+              ? 'border-[color-mix(in_srgb,var(--aethel-warning)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+              : 'border-[color-mix(in_srgb,var(--aethel-success)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+          }`}
+        >
+          {userActive ? 'Protection active' : 'Background window open'}
+        </span>
+        <span className="text-xs text-[var(--aethel-text-tertiary)]">
+          {userActive
+            ? 'Studio is prioritizing visible interaction and holding pauseable background work.'
+            : 'Background lanes can scale back up when the device is idle.'}
         </span>
       </div>
 
@@ -127,6 +157,47 @@ export function DeviceRuntimeGuardCard({ profile, onOpenStudioLocal }: DeviceRun
               Open local path
             </button>
           ) : null}
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-[22px] border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_28%,transparent)] px-4 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-semibold text-[var(--aethel-text-primary)]">Lane scheduler</p>
+          <p className="text-xs text-[var(--aethel-text-tertiary)]">
+            Backpressure keeps heavy work away from the UI thread.
+          </p>
+        </div>
+        <div className="mt-3 grid gap-2 md:grid-cols-4">
+          {laneBudgets.map((lane, index) => (
+            <div
+              key={lane.lane}
+              className="rounded-2xl border border-[var(--aethel-border-subtle)] bg-[color-mix(in_srgb,var(--aethel-surface-secondary)_44%,transparent)] px-3 py-3"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs font-semibold text-[var(--aethel-text-primary)]">{lane.label}</div>
+                <div
+                  className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${
+                    laneDecisions[index]?.canStart
+                      ? 'border-[color-mix(in_srgb,var(--aethel-success)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-success)_12%,transparent)] text-[var(--aethel-success-light)]'
+                      : 'border-[color-mix(in_srgb,var(--aethel-warning)_34%,transparent)] bg-[color-mix(in_srgb,var(--aethel-warning)_12%,transparent)] text-[var(--aethel-warning-light)]'
+                  }`}
+                >
+                  {laneDecisions[index]?.canStart ? 'ready' : 'held'}
+                </div>
+              </div>
+              <div className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-secondary)]">
+                {lane.maxConcurrent} concurrent / {lane.placement.replace(/-/g, ' ')}
+              </div>
+              <div className="mt-2 text-[11px] leading-5 text-[var(--aethel-text-tertiary)]">
+                {laneDecisions[index]?.reason}
+              </div>
+              {lane.pauseWhenUserActive || lane.requiresConfirmation ? (
+                <div className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[var(--aethel-warning-light)]">
+                  {lane.requiresConfirmation ? 'confirm' : 'pauses on input'}
+                </div>
+              ) : null}
+            </div>
+          ))}
         </div>
       </div>
     </section>

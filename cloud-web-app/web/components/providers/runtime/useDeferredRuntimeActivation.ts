@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type DeferredRuntimeActivationState = {
   sessionTrackingReady: boolean
@@ -9,11 +9,46 @@ type DeferredRuntimeActivationState = {
   ambientUiReady: boolean
 }
 
+type DeferredRuntimeBudget = 'deep' | 'standard' | 'limited'
+
+type DeferredRuntimeActivationOptions = {
+  enabled?: boolean
+  backgroundBudget?: DeferredRuntimeBudget
+  userActive?: boolean
+}
+
 const INITIAL_STATE: DeferredRuntimeActivationState = {
   sessionTrackingReady: false,
   telemetryReady: false,
   serviceWorkerReady: false,
   ambientUiReady: false,
+}
+
+const RUNTIME_BUDGET_DELAYS: Record<
+  DeferredRuntimeBudget,
+  { idle: number; serviceWorker: number; ambientUi: number; activePenalty: number }
+> = {
+  deep: { idle: 1000, serviceWorker: 1800, ambientUi: 2600, activePenalty: 0 },
+  standard: { idle: 1400, serviceWorker: 2400, ambientUi: 3400, activePenalty: 450 },
+  limited: { idle: 2200, serviceWorker: 3800, ambientUi: 5200, activePenalty: 900 },
+}
+
+function normalizeOptions(
+  options: boolean | DeferredRuntimeActivationOptions | undefined
+): Required<DeferredRuntimeActivationOptions> {
+  if (typeof options === 'boolean' || options === undefined) {
+    return {
+      enabled: options ?? true,
+      backgroundBudget: 'standard',
+      userActive: false,
+    }
+  }
+
+  return {
+    enabled: options.enabled ?? true,
+    backgroundBudget: options.backgroundBudget ?? 'standard',
+    userActive: options.userActive ?? false,
+  }
 }
 
 function scheduleIdleTask(callback: () => void, timeoutMs: number) {
@@ -30,8 +65,16 @@ function scheduleIdleTask(callback: () => void, timeoutMs: number) {
   return () => globalThis.clearTimeout(timer)
 }
 
-export function useDeferredRuntimeActivation(enabled = true): DeferredRuntimeActivationState {
+export function useDeferredRuntimeActivation(
+  options: boolean | DeferredRuntimeActivationOptions = true
+): DeferredRuntimeActivationState {
+  const { enabled, backgroundBudget, userActive } = normalizeOptions(options)
   const [state, setState] = useState<DeferredRuntimeActivationState>(INITIAL_STATE)
+  const userActiveRef = useRef(userActive)
+
+  useEffect(() => {
+    userActiveRef.current = userActive
+  }, [userActive])
 
   useEffect(() => {
     if (!enabled) {
@@ -40,24 +83,46 @@ export function useDeferredRuntimeActivation(enabled = true): DeferredRuntimeAct
     }
 
     let active = true
+    const delays = RUNTIME_BUDGET_DELAYS[backgroundBudget]
 
     const markReady = (key: keyof DeferredRuntimeActivationState) => {
       if (!active) return
       setState((previous) => (previous[key] ? previous : { ...previous, [key]: true }))
     }
 
+    const scheduleWithPressure = (callback: () => void, delayMs: number) => {
+      const timer = window.setTimeout(() => {
+        if (!active) return
+        if (userActiveRef.current && delays.activePenalty > 0) {
+          scheduleWithPressure(callback, delays.activePenalty)
+          return
+        }
+        callback()
+      }, delayMs)
+
+      return () => window.clearTimeout(timer)
+    }
+
     const cancelIdleActivation = scheduleIdleTask(() => {
+      if (userActiveRef.current && delays.activePenalty > 0) {
+        scheduleWithPressure(() => {
+          markReady('sessionTrackingReady')
+          markReady('telemetryReady')
+        }, delays.activePenalty)
+        return
+      }
+
       markReady('sessionTrackingReady')
       markReady('telemetryReady')
-    }, 1000)
+    }, delays.idle)
 
-    const serviceWorkerTimer = window.setTimeout(() => {
+    const cancelServiceWorker = scheduleWithPressure(() => {
       markReady('serviceWorkerReady')
-    }, 1800)
+    }, delays.serviceWorker)
 
-    const ambientUiTimer = window.setTimeout(() => {
+    const cancelAmbientUi = scheduleWithPressure(() => {
       markReady('ambientUiReady')
-    }, 2600)
+    }, delays.ambientUi)
 
     const activateRemainingOnIntent = () => {
       markReady('serviceWorkerReady')
@@ -71,13 +136,13 @@ export function useDeferredRuntimeActivation(enabled = true): DeferredRuntimeAct
     return () => {
       active = false
       cancelIdleActivation()
-      window.clearTimeout(serviceWorkerTimer)
-      window.clearTimeout(ambientUiTimer)
+      cancelServiceWorker()
+      cancelAmbientUi()
       window.removeEventListener('pointerdown', activateRemainingOnIntent)
       window.removeEventListener('keydown', activateRemainingOnIntent)
       window.removeEventListener('focus', activateRemainingOnIntent)
     }
-  }, [enabled])
+  }, [backgroundBudget, enabled])
 
   return state
 }

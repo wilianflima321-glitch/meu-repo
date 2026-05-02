@@ -4,8 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useDeferredRuntimeActivation } from '@/components/providers/runtime/useDeferredRuntimeActivation'
 
-function RuntimeActivationProbe({ enabled = true }: { enabled?: boolean }) {
-  const state = useDeferredRuntimeActivation(enabled)
+function RuntimeActivationProbe({
+  enabled = true,
+  backgroundBudget,
+  userActive,
+}: {
+  enabled?: boolean
+  backgroundBudget?: 'deep' | 'standard' | 'limited'
+  userActive?: boolean
+}) {
+  const state = useDeferredRuntimeActivation({ enabled, backgroundBudget, userActive })
 
   return (
     <div>
@@ -42,7 +50,7 @@ describe('useDeferredRuntimeActivation', () => {
   })
 
   it('stages runtime effects instead of enabling all background activity immediately', () => {
-    render(<RuntimeActivationProbe />)
+    render(<RuntimeActivationProbe backgroundBudget="deep" />)
 
     expect(screen.getByTestId('session')).toHaveTextContent('false')
     expect(screen.getByTestId('telemetry')).toHaveTextContent('false')
@@ -79,5 +87,23 @@ describe('useDeferredRuntimeActivation', () => {
 
     expect(screen.getByTestId('service-worker')).toHaveTextContent('true')
     expect(screen.getByTestId('ambient')).toHaveTextContent('true')
+  })
+
+  it('uses a slower boot budget on constrained devices while the user is active', () => {
+    render(<RuntimeActivationProbe backgroundBudget="limited" userActive />)
+
+    act(() => {
+      vi.advanceTimersByTime(2200)
+    })
+
+    expect(screen.getByTestId('session')).toHaveTextContent('false')
+    expect(screen.getByTestId('telemetry')).toHaveTextContent('false')
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.getByTestId('session')).toHaveTextContent('false')
+    expect(screen.getByTestId('telemetry')).toHaveTextContent('false')
   })
 })

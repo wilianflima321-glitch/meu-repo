@@ -16,10 +16,12 @@ import TelemetryBootstrap from '@/components/observability/TelemetryBootstrap'
 import CoreUiProviders from '@/components/providers/CoreUiProviders'
 import { ServiceWorkerProvider } from '@/components/ServiceWorkerProvider'
 import WebVitalsReporter from '@/components/analytics/WebVitalsReporter'
+import { useDeviceCapabilityProfile } from '@/hooks/useDeviceCapabilityProfile'
 
 import StudioRuntimeCommandRegistration from './StudioRuntimeCommandRegistration'
 import StudioRuntimeLoadingFallback from './StudioRuntimeLoadingFallback'
 import { useDeferredRuntimeActivation } from './useDeferredRuntimeActivation'
+import { useRuntimeInteractionPressure } from './useRuntimeInteractionPressure'
 
 export default function FullStudioRuntime({
   children,
@@ -28,7 +30,13 @@ export default function FullStudioRuntime({
   children: ReactNode
   onboardingChrome?: boolean
 }) {
-  const deferredActivation = useDeferredRuntimeActivation()
+  const deviceProfile = useDeviceCapabilityProfile()
+  const userActive = useRuntimeInteractionPressure()
+  const deferredActivation = useDeferredRuntimeActivation({
+    enabled: true,
+    backgroundBudget: deviceProfile.policy.backgroundTaskBudget,
+    userActive,
+  })
 
   return (
     <CoreUiProviders>
