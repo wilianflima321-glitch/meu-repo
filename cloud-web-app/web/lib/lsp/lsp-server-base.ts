@@ -14,7 +14,7 @@ export interface LSPServerConfig {
   args: string[];
   env?: Record<string, string | undefined>;
   cwd?: string;
-  initializationOptions?: any;
+  initializationOptions?: unknown;
   language?: string;
 }
 
@@ -122,6 +122,7 @@ export interface CompletionItem {
   sortText?: string;
   filterText?: string;
   insertText?: string;
+  insertTextFormat?: number;
   textEdit?: {
     range: Range;
     newText: string;
@@ -133,14 +134,38 @@ export interface Hover {
   range?: Range;
 }
 
+export type LSPParams = object;
+export type WorkspaceEdit = Record<string, unknown> | null;
+export type TextEdit = { range: Range; newText: string };
+export type CodeActionContext = Record<string, unknown>;
+export type CodeAction = { title: string; kind: string; [key: string]: unknown };
+export type ContentChange = { range?: Range; rangeLength?: number; text: string };
+
+type JsonRpcResponse<TResult = unknown> = {
+  jsonrpc?: '2.0';
+  id: number;
+  result?: TResult;
+  error?: {
+    code?: number;
+    message?: string;
+    data?: unknown;
+  };
+};
+
+type PendingRequest = {
+  resolve: (value: unknown) => void;
+  reject: (error: Error) => void;
+};
+
+function isJsonRpcResponse(value: unknown): value is JsonRpcResponse {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value) && 'id' in value);
+}
+
 export abstract class LSPServerBase extends EventEmitter {
   protected config: LSPServerConfig;
-  protected process: any = null;
+  protected process: unknown = null;
   protected messageId = 0;
-  protected pendingRequests = new Map<number, {
-    resolve: (value: any) => void;
-    reject: (error: any) => void;
-  }>();
+  protected pendingRequests = new Map<number, PendingRequest>();
   protected buffer = '';
   protected initialized = false;
   protected capabilities: ServerCapabilities = {};
@@ -214,7 +239,7 @@ export abstract class LSPServerBase extends EventEmitter {
       throw new Error('Server already initialized');
     }
 
-    const result = await this.sendRequest('initialize', params);
+    const result = await this.sendRequest<InitializeResult>('initialize', params);
     this.capabilities = result.capabilities;
     this.initialized = true;
 
@@ -228,11 +253,11 @@ export abstract class LSPServerBase extends EventEmitter {
   /**
    * Send a request to the LSP server
    */
-  protected async sendRequest(method: string, params: any): Promise<any> {
+  protected async sendRequest<TResult = unknown>(method: string, params: LSPParams): Promise<TResult> {
     const id = ++this.messageId;
 
     return new Promise((resolve, reject) => {
-      this.pendingRequests.set(id, { resolve, reject });
+      this.pendingRequests.set(id, { resolve: resolve as (value: unknown) => void, reject });
 
       const token = this.getAuthToken();
       fetch('/api/lsp/request', {
@@ -251,10 +276,10 @@ export abstract class LSPServerBase extends EventEmitter {
         .then(async (res) => {
           const data = await res.json().catch(() => null);
           // Sempre tenta respeitar o payload JSON-RPC.
-          if (data && typeof data === 'object' && (data as any).error) {
-            const errObj = (data as any).error;
+          if (isJsonRpcResponse(data) && data.error) {
+            const errObj = data.error;
             const e = new Error(String(errObj.data || errObj.message || 'LSP error'));
-            (e as any).code = errObj.message;
+            Object.assign(e, { code: errObj.code });
             throw e;
           }
           if (!res.ok) {
@@ -264,8 +289,8 @@ export abstract class LSPServerBase extends EventEmitter {
         })
         .then((data) => {
           // Endpoint retorna {jsonrpc,id,result} no sucesso.
-          if (data && typeof data === 'object' && (data as any).result !== undefined) {
-            this.handleResponse({ jsonrpc: '2.0', id, result: (data as any).result });
+          if (isJsonRpcResponse(data) && data.result !== undefined) {
+            this.handleResponse({ jsonrpc: '2.0', id, result: data.result });
             return;
           }
           // fallback
@@ -284,7 +309,7 @@ export abstract class LSPServerBase extends EventEmitter {
   /**
    * Send a notification to the LSP server
    */
-  protected async sendNotification(method: string, params: any): Promise<void> {
+  protected async sendNotification(method: string, params: LSPParams): Promise<void> {
     const token = this.getAuthToken();
     try {
       const res = await fetch('/api/lsp/notification', {
@@ -302,23 +327,23 @@ export abstract class LSPServerBase extends EventEmitter {
 
       // 501 é esperado enquanto não houver backend LSP real.
       if (!res.ok && res.status !== 501) {
-        console.warn(`[LSP] Notification failed (${res.status}) for ${method}`);
+        log.warn(`[LSP] Notification failed (${res.status}) for ${method}`);
       }
     } catch (error) {
       // Não quebra o fluxo do editor por notification.
-      console.warn('[LSP] Notification error', error);
+      log.warn('[LSP] Notification error', error);
     }
   }
 
   /**
    * Handle response from LSP server
    */
-  protected handleResponse(response: any): void {
+  protected handleResponse(response: JsonRpcResponse): void {
     const { id, result, error } = response;
     const pending = this.pendingRequests.get(id);
 
     if (!pending) {
-      console.warn(`[LSP] No pending request for id ${id}`);
+      log.warn(`[LSP] No pending request for id ${id}`);
       return;
     }
 
@@ -334,7 +359,7 @@ export abstract class LSPServerBase extends EventEmitter {
   /**
    * Handle notification from LSP server
    */
-  protected handleNotification(notification: any): void {
+  protected handleNotification(notification: { method: string; params?: unknown }): void {
     const { method, params } = notification;
     this.emit('notification', { method, params });
 
@@ -348,7 +373,7 @@ export abstract class LSPServerBase extends EventEmitter {
    * Get mock response for testing
    * Override in subclasses for language-specific mocks
    */
-  protected abstract getMockResponse(method: string, params: any): any;
+  protected abstract getMockResponse(method: string, params: LSPParams): unknown;
 
   /**
    * Document sync notifications
@@ -364,7 +389,7 @@ export abstract class LSPServerBase extends EventEmitter {
     });
   }
 
-  async didChange(uri: string, version: number, changes: any[]): Promise<void> {
+  async didChange(uri: string, version: number, changes: ContentChange[]): Promise<void> {
     await this.sendNotification('textDocument/didChange', {
       textDocument: { uri, version },
       contentChanges: changes,
@@ -392,7 +417,7 @@ export abstract class LSPServerBase extends EventEmitter {
       return [];
     }
 
-    const result = await this.sendRequest('textDocument/completion', {
+    const result = await this.sendRequest<CompletionItem[] | { items?: CompletionItem[] }>('textDocument/completion', {
       textDocument: { uri },
       position,
     });
@@ -405,7 +430,7 @@ export abstract class LSPServerBase extends EventEmitter {
       return null;
     }
 
-    return await this.sendRequest('textDocument/hover', {
+    return await this.sendRequest<Hover | null>('textDocument/hover', {
       textDocument: { uri },
       position,
     });
@@ -416,7 +441,7 @@ export abstract class LSPServerBase extends EventEmitter {
       return [];
     }
 
-    const result = await this.sendRequest('textDocument/definition', {
+    const result = await this.sendRequest<Location[] | Location | null>('textDocument/definition', {
       textDocument: { uri },
       position,
     });
@@ -429,7 +454,7 @@ export abstract class LSPServerBase extends EventEmitter {
       return [];
     }
 
-    const result = await this.sendRequest('textDocument/references', {
+    const result = await this.sendRequest<Location[]>('textDocument/references', {
       textDocument: { uri },
       position,
       context: { includeDeclaration },
@@ -438,24 +463,24 @@ export abstract class LSPServerBase extends EventEmitter {
     return result || [];
   }
 
-  async rename(uri: string, position: Position, newName: string): Promise<any> {
+  async rename(uri: string, position: Position, newName: string): Promise<WorkspaceEdit> {
     if (!this.capabilities.renameProvider) {
       return null;
     }
 
-    return await this.sendRequest('textDocument/rename', {
+    return await this.sendRequest<WorkspaceEdit>('textDocument/rename', {
       textDocument: { uri },
       position,
       newName,
     });
   }
 
-  async formatting(uri: string, options: any): Promise<any[]> {
+  async formatting(uri: string, options: Record<string, unknown>): Promise<TextEdit[]> {
     if (!this.capabilities.documentFormattingProvider) {
       return [];
     }
 
-    const result = await this.sendRequest('textDocument/formatting', {
+    const result = await this.sendRequest<TextEdit[]>('textDocument/formatting', {
       textDocument: { uri },
       options,
     });
@@ -463,12 +488,12 @@ export abstract class LSPServerBase extends EventEmitter {
     return result || [];
   }
 
-  async codeAction(uri: string, range: Range, context: any): Promise<any[]> {
+  async codeAction(uri: string, range: Range, context: CodeActionContext): Promise<CodeAction[]> {
     if (!this.capabilities.codeActionProvider) {
       return [];
     }
 
-    const result = await this.sendRequest('textDocument/codeAction', {
+    const result = await this.sendRequest<CodeAction[]>('textDocument/codeAction', {
       textDocument: { uri },
       range,
       context,

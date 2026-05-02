@@ -3,7 +3,29 @@
  * Uses rust-analyzer
  */
 
-import { LSPServerBase, LSPServerConfig } from '../lsp-server-base';
+import {
+  CodeAction,
+  CompletionItem,
+  Hover,
+  Location,
+  LSPParams,
+  LSPServerBase,
+  LSPServerConfig,
+  Position,
+} from '../lsp-server-base';
+
+type MockDocumentParams = {
+  textDocument?: { uri?: string };
+  position?: Position;
+};
+
+function getMockDocumentParams(params: LSPParams): { textDocument: { uri: string }; position: Position } {
+  const mockParams = params as MockDocumentParams;
+  return {
+    textDocument: { uri: mockParams.textDocument?.uri || '' },
+    position: mockParams.position || { line: 0, character: 0 },
+  };
+}
 
 export class RustLSPServer extends LSPServerBase {
   constructor(workspaceRoot: string) {
@@ -37,7 +59,7 @@ export class RustLSPServer extends LSPServerBase {
     super(config);
   }
 
-  protected getMockResponse(method: string, params: any): any {
+  protected getMockResponse(method: string, params: LSPParams): unknown {
     switch (method) {
       case 'initialize':
         return {
@@ -133,7 +155,7 @@ export class RustLSPServer extends LSPServerBase {
     }
   }
 
-  private getMockCompletions(params: any): any[] {
+  private getMockCompletions(_params: LSPParams): CompletionItem[] {
     return [
       {
         label: 'println!',
@@ -214,22 +236,26 @@ export class RustLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockHover(params: any): any {
+  private getMockHover(params: LSPParams): Hover {
+    const { position } = getMockDocumentParams(params);
+
     return {
       contents: {
         language: 'rust',
         value: 'macro println!($($arg:tt)*)\n\nPrints to the standard output, with a newline.\n\nThis macro uses the same syntax as format!, but writes to the standard output instead.',
       },
       range: {
-        start: { line: params.position.line, character: 0 },
-        end: { line: params.position.line, character: 10 },
+        start: { line: position.line, character: 0 },
+        end: { line: position.line, character: 10 },
       },
     };
   }
 
-  private getMockDefinition(params: any): any {
+  private getMockDefinition(params: LSPParams): Location {
+    const { textDocument } = getMockDocumentParams(params);
+
     return {
-      uri: params.textDocument.uri,
+      uri: textDocument.uri,
       range: {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 10 },
@@ -237,17 +263,19 @@ export class RustLSPServer extends LSPServerBase {
     };
   }
 
-  private getMockReferences(params: any): any[] {
+  private getMockReferences(params: LSPParams): Location[] {
+    const { textDocument } = getMockDocumentParams(params);
+
     return [
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 5, character: 4 },
           end: { line: 5, character: 14 },
         },
       },
       {
-        uri: params.textDocument.uri,
+        uri: textDocument.uri,
         range: {
           start: { line: 10, character: 8 },
           end: { line: 10, character: 18 },
@@ -256,7 +284,7 @@ export class RustLSPServer extends LSPServerBase {
     ];
   }
 
-  private getMockCodeActions(params: any): any[] {
+  private getMockCodeActions(_params: LSPParams): CodeAction[] {
     return [
       {
         title: 'Add #[derive(Debug)]',
@@ -291,16 +319,16 @@ export class RustLSPServer extends LSPServerBase {
   /**
    * Rust-specific features
    */
-  async expandMacro(uri: string, position: any): Promise<string> {
-    const result = await this.sendRequest('rust-analyzer/expandMacro', {
+  async expandMacro(uri: string, position: Position): Promise<string> {
+    const result = await this.sendRequest<{ expansion?: string }>('rust-analyzer/expandMacro', {
       textDocument: { uri },
       position,
     });
     return result?.expansion || '';
   }
 
-  async openDocs(uri: string, position: any): Promise<string> {
-    const result = await this.sendRequest('rust-analyzer/openDocs', {
+  async openDocs(uri: string, position: Position): Promise<string> {
+    const result = await this.sendRequest<{ url?: string }>('rust-analyzer/openDocs', {
       textDocument: { uri },
       position,
     });

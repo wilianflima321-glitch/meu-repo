@@ -4,24 +4,29 @@ import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { resolveWorkspaceRoot } from '@/lib/server/workspace-path';
 
 export type DapSessionId = string;
+export type DapPayload = Record<string, unknown>;
+export type DapEventRecord = { event: string; body?: DapPayload; ts: number };
 
 type DapMessage =
-  | { type: 'request'; seq: number; command: string; arguments?: any }
-  | { type: 'response'; seq: number; request_seq: number; success: boolean; command: string; message?: string; body?: any }
-  | { type: 'event'; seq: number; event: string; body?: any };
+  | { type: 'request'; seq: number; command: string; arguments?: DapPayload }
+  | { type: 'response'; seq: number; request_seq: number; success: boolean; command: string; message?: string; body?: DapPayload }
+  | { type: 'event'; seq: number; event: string; body?: DapPayload };
 
 type Pending = {
-  resolve: (value: any) => void;
+  resolve: (value: DapPayload) => void;
   reject: (error: Error) => void;
   command: string;
 };
 
+declare global {
+  var __AETHEL_DAP_SESSIONS__: Map<DapSessionId, DapSession> | undefined;
+}
+
 function getGlobalSessions(): Map<DapSessionId, DapSession> {
-  const g = globalThis as any;
-  if (!g.__AETHEL_DAP_SESSIONS__) {
-    g.__AETHEL_DAP_SESSIONS__ = new Map();
+  if (!globalThis.__AETHEL_DAP_SESSIONS__) {
+    globalThis.__AETHEL_DAP_SESSIONS__ = new Map();
   }
-  return g.__AETHEL_DAP_SESSIONS__ as Map<DapSessionId, DapSession>;
+  return globalThis.__AETHEL_DAP_SESSIONS__;
 }
 
 function makeSessionId(): string {
@@ -33,9 +38,9 @@ class DapStdioClient {
   private child: ChildProcessWithoutNullStreams;
   private buffer: Buffer = Buffer.alloc(0);
   private pending = new Map<number, Pending>();
-  private onEvent: (evt: { event: string; body?: any }) => void;
+  private onEvent: (evt: { event: string; body?: DapPayload }) => void;
 
-  constructor(child: ChildProcessWithoutNullStreams, onEvent: (evt: { event: string; body?: any }) => void) {
+  constructor(child: ChildProcessWithoutNullStreams, onEvent: (evt: { event: string; body?: DapPayload }) => void) {
     this.child = child;
     this.onEvent = onEvent;
 
@@ -50,8 +55,8 @@ class DapStdioClient {
   private onData(chunk: Buffer) {
     // Append (casts locais por causa de tipagem Buffer/Uint8Array em TS)
     const next = Buffer.allocUnsafe(this.buffer.length + chunk.length);
-    (this.buffer as any).copy(next as any, 0);
-    (chunk as any).copy(next as any, this.buffer.length);
+    this.buffer.copy(next, 0);
+    chunk.copy(next, this.buffer.length);
     this.buffer = next;
 
     while (true) {
@@ -75,35 +80,33 @@ class DapStdioClient {
 
       let msg: DapMessage | null = null;
       try {
-        msg = JSON.parse(bodyText);
+        msg = JSON.parse(bodyText) as DapMessage;
       } catch {
         continue;
       }
 
       if (!msg) continue;
 
-      if ((msg as any).type === 'event') {
-        const e = msg as any;
-        this.onEvent({ event: e.event, body: e.body });
+      if (msg.type === 'event') {
+        this.onEvent({ event: msg.event, body: msg.body });
         continue;
       }
 
-      if ((msg as any).type === 'response') {
-        const r = msg as any;
-        const pending = this.pending.get(r.request_seq);
+      if (msg.type === 'response') {
+        const pending = this.pending.get(msg.request_seq);
         if (!pending) continue;
-        this.pending.delete(r.request_seq);
+        this.pending.delete(msg.request_seq);
 
-        if (!r.success) {
-          pending.reject(new Error(String(r.message || `DAP request failed: ${pending.command}`)));
+        if (!msg.success) {
+          pending.reject(new Error(String(msg.message || `DAP request failed: ${pending.command}`)));
         } else {
-          pending.resolve(r.body ?? {});
+          pending.resolve(msg.body ?? {});
         }
       }
     }
   }
 
-  sendRequest(seq: number, command: string, args: any): Promise<any> {
+  sendRequest(seq: number, command: string, args: DapPayload): Promise<DapPayload> {
     const payload: DapMessage = { type: 'request', seq, command, arguments: args };
     const json = JSON.stringify(payload);
     const frame = `Content-Length: ${Buffer.byteLength(json, 'utf8')}\r\n\r\n${json}`;
@@ -144,7 +147,7 @@ export type DapSession = {
   createdAt: number;
   lastUsedAt: number;
   rpc: DapStdioClient;
-  events: Array<{ event: string; body?: any; ts: number }>;
+  events: DapEventRecord[];
   stop: () => void;
 };
 
@@ -215,7 +218,7 @@ export async function startDapSession(opts: {
   });
 
   const sessionId = makeSessionId();
-  const events: Array<{ event: string; body?: any; ts: number }> = [];
+  const events: DapEventRecord[] = [];
 
   const rpc = new DapStdioClient(child, (evt) => {
     events.push({ event: evt.event, body: evt.body, ts: Date.now() });
@@ -267,7 +270,7 @@ export function stopDapSession(sessionId: string): boolean {
   return true;
 }
 
-export function drainDapEvents(sessionId: string): Array<{ event: string; body?: any; ts: number }> {
+export function drainDapEvents(sessionId: string): DapEventRecord[] {
   const s = getDapSession(sessionId);
   if (!s) return [];
   s.lastUsedAt = Date.now();
@@ -275,7 +278,7 @@ export function drainDapEvents(sessionId: string): Array<{ event: string; body?:
   return out;
 }
 
-export async function dapRequest(sessionId: string, seq: number, command: string, args: any): Promise<any> {
+export async function dapRequest(sessionId: string, seq: number, command: string, args: DapPayload): Promise<DapPayload> {
   const s = getDapSession(sessionId);
   if (!s) {
     throw Object.assign(new Error('DAP_SESSION_NOT_FOUND'), { code: 'DAP_SESSION_NOT_FOUND' });

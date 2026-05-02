@@ -40,22 +40,22 @@ export interface AICodeActionRequest {
   language: string;
   code: string;
   range: { start: { line: number; character: number }; end: { line: number; character: number } };
-  diagnostics?: any[];
+  diagnostics?: unknown[];
 }
 
 export interface AICodeActionResponse {
   actions: Array<{
     title: string;
     kind: string;
-    edit?: any;
-    command?: any;
+    edit?: unknown;
+    command?: unknown;
   }>;
 }
 
 export interface AIDebugAnalysisRequest {
   language: string;
   stackTrace: string;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   code?: string;
 }
 
@@ -125,6 +125,16 @@ export interface AIConflictResolutionResponse {
   explanation: string;
   confidence: number;
 }
+
+export interface AIModelInfo {
+  name: string;
+  provider?: string;
+  version?: string;
+  capabilities?: string[];
+  [key: string]: unknown;
+}
+
+export type AIUsageStats = Record<string, unknown>;
 
 export class AIApiClient {
   private baseUrl: string;
@@ -323,7 +333,7 @@ export class AIApiClient {
   /**
    * Get AI model info
    */
-  async getModelInfo(): Promise<any> {
+  async getModelInfo(): Promise<AIModelInfo> {
     const response = await fetch(`${this.baseUrl}/model/info`);
 
     if (!response.ok) {
@@ -336,7 +346,7 @@ export class AIApiClient {
   /**
    * Get AI usage statistics
    */
-  async getUsageStats(): Promise<any> {
+  async getUsageStats(): Promise<AIUsageStats> {
     const response = await fetch(`${this.baseUrl}/usage/stats`);
 
     if (!response.ok) {

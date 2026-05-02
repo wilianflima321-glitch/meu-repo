@@ -3,8 +3,8 @@
  * Integrates DAP and AI debugging features with the debugger UI
  */
 
-import { getDAPApiClient, DAPAdapterConfig } from '../api/dap-api';
-import { getAIApiClient } from '../api/ai-api';
+import { getDAPApiClient, DAPAdapterConfig, DAPEvaluateResponse } from '../api/dap-api';
+import { getAIApiClient, AIDebugAnalysisResponse } from '../api/ai-api';
 
 import { createComponentLogger } from '@/lib/observability/logger'
 
@@ -206,7 +206,13 @@ export class DebugIntegration {
     }
 
     const response = await this.dapClient.stackTrace(session.name, session.threadId);
-    return response.stackFrames || [];
+    return (response.stackFrames || []).map((frame) => ({
+      id: frame.id,
+      name: frame.name,
+      source: { path: frame.source?.path || '' },
+      line: frame.line,
+      column: frame.column,
+    }));
   }
 
   /**
@@ -235,7 +241,7 @@ export class DebugIntegration {
   /**
    * Evaluate expression
    */
-  async evaluate(sessionId: string, expression: string, frameId?: number): Promise<any> {
+  async evaluate(sessionId: string, expression: string, frameId?: number): Promise<DAPEvaluateResponse> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Invalid session: ${sessionId}`);
@@ -247,7 +253,7 @@ export class DebugIntegration {
   /**
    * Get AI debug analysis
    */
-  async getAIAnalysis(sessionId: string): Promise<any> {
+  async getAIAnalysis(sessionId: string): Promise<AIDebugAnalysisResponse> {
     if (!this.aiClient.getConsent()) {
       throw new Error('AI features require user consent');
     }
@@ -264,7 +270,7 @@ export class DebugIntegration {
       .join('\n');
 
     // Get variables
-    const variables: Record<string, any> = {};
+    const variables: Record<string, unknown> = {};
     if (stackFrames.length > 0) {
       const vars = await this.getVariables(sessionId, stackFrames[0].id);
       for (const v of vars) {

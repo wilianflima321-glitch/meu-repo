@@ -12,27 +12,60 @@ export interface LSPServerConfig {
   language: string;
   command: string;
   args: string[];
-  initializationOptions?: any;
+  initializationOptions?: unknown;
 }
 
 export interface LSPRequest {
   method: string;
-  params?: any;
+  params?: LSPParams;
 }
 
-export interface LSPResponse {
-  result?: any;
+export interface LSPResponse<TResult = LSPResult> {
+  result?: TResult;
   error?: {
     code: number;
     message: string;
-    data?: any;
+    data?: unknown;
   };
 }
 
 export interface LSPNotification {
   method: string;
-  params?: any;
+  params?: LSPParams;
 }
+
+export type LSPParams = Record<string, unknown>;
+export type LSPResult = unknown;
+
+export interface LSPPosition {
+  line: number;
+  character: number;
+}
+
+export interface LSPRange {
+  start: LSPPosition;
+  end: LSPPosition;
+}
+
+export interface LSPTextDocumentContentChangeEvent {
+  range?: LSPRange;
+  rangeLength?: number;
+  text: string;
+}
+
+export interface LSPClientCapabilities {
+  [key: string]: unknown;
+}
+
+export type LSPCompletionResult = { items?: unknown[] } | unknown[];
+export type LSPHoverResult = { contents?: unknown; range?: LSPRange } | null;
+export type LSPLocationResult = unknown[] | null;
+export type LSPSymbolResult = unknown[];
+export type LSPCodeActionContext = Record<string, unknown>;
+export type LSPCodeActionResult = unknown[];
+export type LSPFormattingOptions = Record<string, unknown>;
+export type LSPTextEditResult = unknown[];
+export type LSPWorkspaceEditResult = Record<string, unknown> | null;
 
 export class LSPApiClient {
   private baseUrl: string;
@@ -57,8 +90,11 @@ export class LSPApiClient {
       throw new Error(`Failed to start LSP server: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as { sessionId?: string };
     const sessionId = data.sessionId;
+    if (!sessionId) {
+      throw new Error('LSP server did not return a sessionId');
+    }
     this.sessions.set(config.language, sessionId);
 
     log.info(`[LSP API] Started server for ${config.language}: ${sessionId}`);
@@ -91,7 +127,7 @@ export class LSPApiClient {
   /**
    * Initialize LSP server
    */
-  async initialize(language: string, rootUri: string, capabilities: any): Promise<any> {
+  async initialize(language: string, rootUri: string, capabilities: LSPClientCapabilities): Promise<LSPResult> {
     return this.sendRequest(language, {
       method: 'initialize',
       params: {
@@ -132,7 +168,7 @@ export class LSPApiClient {
   /**
    * Change document
    */
-  async didChange(language: string, uri: string, version: number, changes: any[]): Promise<void> {
+  async didChange(language: string, uri: string, version: number, changes: LSPTextDocumentContentChangeEvent[]): Promise<void> {
     await this.sendNotification(language, {
       method: 'textDocument/didChange',
       params: {
@@ -157,7 +193,7 @@ export class LSPApiClient {
   /**
    * Request completion
    */
-  async completion(language: string, uri: string, position: { line: number; character: number }): Promise<any> {
+  async completion(language: string, uri: string, position: LSPPosition): Promise<LSPCompletionResult> {
     return this.sendRequest(language, {
       method: 'textDocument/completion',
       params: {
@@ -170,7 +206,7 @@ export class LSPApiClient {
   /**
    * Request hover
    */
-  async hover(language: string, uri: string, position: { line: number; character: number }): Promise<any> {
+  async hover(language: string, uri: string, position: LSPPosition): Promise<LSPHoverResult> {
     return this.sendRequest(language, {
       method: 'textDocument/hover',
       params: {
@@ -183,7 +219,7 @@ export class LSPApiClient {
   /**
    * Request definition
    */
-  async definition(language: string, uri: string, position: { line: number; character: number }): Promise<any> {
+  async definition(language: string, uri: string, position: LSPPosition): Promise<LSPLocationResult> {
     return this.sendRequest(language, {
       method: 'textDocument/definition',
       params: {
@@ -196,7 +232,7 @@ export class LSPApiClient {
   /**
    * Request references
    */
-  async references(language: string, uri: string, position: { line: number; character: number }): Promise<any> {
+  async references(language: string, uri: string, position: LSPPosition): Promise<LSPLocationResult> {
     return this.sendRequest(language, {
       method: 'textDocument/references',
       params: {
@@ -210,7 +246,7 @@ export class LSPApiClient {
   /**
    * Request document symbols
    */
-  async documentSymbols(language: string, uri: string): Promise<any> {
+  async documentSymbols(language: string, uri: string): Promise<LSPSymbolResult> {
     return this.sendRequest(language, {
       method: 'textDocument/documentSymbol',
       params: {
@@ -222,7 +258,7 @@ export class LSPApiClient {
   /**
    * Request workspace symbols
    */
-  async workspaceSymbols(language: string, query: string): Promise<any> {
+  async workspaceSymbols(language: string, query: string): Promise<LSPSymbolResult> {
     return this.sendRequest(language, {
       method: 'workspace/symbol',
       params: { query },
@@ -232,7 +268,7 @@ export class LSPApiClient {
   /**
    * Request code actions
    */
-  async codeActions(language: string, uri: string, range: any, context: any): Promise<any> {
+  async codeActions(language: string, uri: string, range: LSPRange, context: LSPCodeActionContext): Promise<LSPCodeActionResult> {
     return this.sendRequest(language, {
       method: 'textDocument/codeAction',
       params: {
@@ -246,7 +282,7 @@ export class LSPApiClient {
   /**
    * Request formatting
    */
-  async formatting(language: string, uri: string, options: any): Promise<any> {
+  async formatting(language: string, uri: string, options: LSPFormattingOptions): Promise<LSPTextEditResult> {
     return this.sendRequest(language, {
       method: 'textDocument/formatting',
       params: {
@@ -259,7 +295,7 @@ export class LSPApiClient {
   /**
    * Request rename
    */
-  async rename(language: string, uri: string, position: { line: number; character: number }, newName: string): Promise<any> {
+  async rename(language: string, uri: string, position: LSPPosition, newName: string): Promise<LSPWorkspaceEditResult> {
     return this.sendRequest(language, {
       method: 'textDocument/rename',
       params: {
@@ -273,7 +309,7 @@ export class LSPApiClient {
   /**
    * Send generic request
    */
-  async sendRequest(language: string, request: LSPRequest): Promise<any> {
+  async sendRequest<TResult = LSPResult>(language: string, request: LSPRequest): Promise<TResult> {
     const sessionId = this.sessions.get(language);
     if (!sessionId) {
       throw new Error(`No active session for ${language}`);
@@ -289,13 +325,13 @@ export class LSPApiClient {
       throw new Error(`LSP request failed: ${response.statusText}`);
     }
 
-    const data: LSPResponse = await response.json();
+    const data = await response.json() as LSPResponse<TResult>;
     
     if (data.error) {
       throw new Error(`LSP error: ${data.error.message}`);
     }
 
-    return data.result;
+    return data.result as TResult;
   }
 
   /**

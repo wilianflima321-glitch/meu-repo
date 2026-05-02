@@ -298,7 +298,7 @@ const ChatComponent: React.FC = () => {
 
     const patch = buildContextPatch(activeWorkflowId, ctx);
     if (!patch) {
-      pushError('Esse trabalho n„o tem contexto salvo para importar.');
+      pushError('Esse trabalho n√£o tem contexto salvo para importar.');
       return;
     }
 

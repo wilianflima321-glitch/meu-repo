@@ -187,6 +187,8 @@ The VS Code window API boundary was typed next, removing another direct IDE/runt
 
 The extension host runtime, local Yjs declaration boundary, build/export worker, chat surface, unified SDK, and AI tools registry were tightened next. The measured app-code `: any` ratchet moved from `963` to `732`; the remaining gap is still large, but the highest-risk agent/IDE seams now have explicit contracts instead of broad `any`.
 
+The debug adapter protocol, language server protocol API, LSP server base, C++/Rust LSP mocks, AI debug payloads, and debug integration boundary were typed next. The measured app-code `: any` ratchet moved from `732` to `661`; this directly strengthens the IDE layer that agents use for debugging, completions, hover, definitions, code actions, and local/cloud tool continuity.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,
