@@ -12,6 +12,43 @@ import { buildAppUrl } from '@/lib/server/app-origin';
 
 export const dynamic = 'force-dynamic';
 
+type InviteRole = 'viewer' | 'editor';
+
+interface InviteLinkRecord {
+  id: string;
+  code: string;
+  role: InviteRole;
+  expiresAt: Date | null;
+  usageCount: number;
+  maxUsage: number | null;
+}
+
+interface InviteLinkDelegate {
+  findMany(args: {
+    where: {
+      projectId: string;
+      OR: Array<{ expiresAt: { gt: Date } } | { expiresAt: null }>;
+    };
+    orderBy: { createdAt: 'desc' };
+  }): Promise<InviteLinkRecord[]>;
+  create(args: {
+    data: {
+      projectId: string;
+      code: string;
+      role: InviteRole;
+      expiresAt: Date;
+      maxUsage: number | null;
+      usageCount: number;
+      createdBy: string;
+    };
+  }): Promise<InviteLinkRecord>;
+}
+
+function getInviteLinkDelegate(client: unknown): InviteLinkDelegate | null {
+  const maybeClient = client as { inviteLink?: InviteLinkDelegate };
+  return maybeClient.inviteLink ?? null;
+}
+
 // GET /api/projects/[id]/invite-links
 export async function GET(
   request: NextRequest,
@@ -40,11 +77,11 @@ export async function GET(
     }
 
     // Busca links de convite existentes
-    let inviteLinks: any[] = [];
+    let inviteLinks: InviteLinkRecord[] = [];
     
     try {
       // Tenta buscar do modelo InviteLink se existir
-      inviteLinks = await (prisma as any).inviteLink.findMany({
+      inviteLinks = await getInviteLinkDelegate(prisma)?.findMany({
         where: { 
           projectId,
           OR: [
@@ -53,7 +90,7 @@ export async function GET(
           ],
         },
         orderBy: { createdAt: 'desc' },
-      });
+      }) ?? [];
     } catch {
       // InviteLink model não existe - retorna array vazio
       // Em produção, criar migration para adicionar modelo InviteLink
@@ -62,7 +99,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: inviteLinks.map((link: any) => ({
+      data: inviteLinks.map((link) => ({
         id: link.id,
         code: link.code,
         role: link.role,
@@ -88,11 +125,13 @@ export async function POST(
   try {
     const user = requireAuth(request);
     const projectId = params.id;
-    const body = await request.json();
-    const { role = 'viewer', expiresIn, maxUsage } = body;
+    const body = await request.json().catch(() => ({})) as { role?: unknown; expiresIn?: unknown; maxUsage?: unknown };
+    const role: InviteRole = body.role === 'editor' ? 'editor' : 'viewer';
+    const expiresIn = typeof body.expiresIn === 'number' && Number.isFinite(body.expiresIn) ? body.expiresIn : null;
+    const maxUsage = typeof body.maxUsage === 'number' && Number.isFinite(body.maxUsage) ? Math.max(1, Math.floor(body.maxUsage)) : null;
 
     // Validar role
-    if (!['editor', 'viewer'].includes(role)) {
+    if (body.role !== undefined && body.role !== 'editor' && body.role !== 'viewer') {
       return NextResponse.json(
         { success: false, error: 'Invalid role' },
         { status: 400 }
@@ -125,17 +164,21 @@ export async function POST(
       ? new Date(Date.now() + expiresIn)
       : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-    let inviteLink: any;
+    let inviteLink: InviteLinkRecord;
     
     try {
       // Tenta criar no modelo InviteLink se existir
-      inviteLink = await (prisma as any).inviteLink.create({
+      const delegate = getInviteLinkDelegate(prisma);
+      if (!delegate) {
+        throw new Error('InviteLink delegate not available');
+      }
+      inviteLink = await delegate.create({
         data: {
           projectId,
           code,
           role,
           expiresAt,
-          maxUsage: maxUsage || null,
+          maxUsage,
           usageCount: 0,
           createdBy: user.userId,
         },

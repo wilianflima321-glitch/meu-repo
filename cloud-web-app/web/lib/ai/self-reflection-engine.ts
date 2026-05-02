@@ -16,8 +16,14 @@ const log = createComponentLogger('ai/self-reflection-engine')
 
 export interface ProposedAction {
   type: 'create_code' | 'create_asset' | 'modify_story' | 'delete_file';
-  content: any;
+  content: unknown;
   reasoning: string;
+}
+
+export interface ProjectReflectionContext {
+  worldRules?: unknown;
+  timeline?: unknown;
+  [key: string]: unknown;
 }
 
 export interface ReflectionResult {
@@ -32,7 +38,7 @@ export class SelfReflectionEngine {
   /**
    * O "Momento de Dúvida". A IA para e pensa: "Isso que eu vou fazer faz sentido?"
    */
-  async reflectOnAction(action: ProposedAction, projectContext: any): Promise<ReflectionResult> {
+  async reflectOnAction(action: ProposedAction, projectContext: ProjectReflectionContext): Promise<ReflectionResult> {
     log.info(`[SelfReflection] Analisando ação: ${action.type}`);
 
     // 1. Verificar Leis da Física e Lógica do Mundo
@@ -68,7 +74,7 @@ export class SelfReflectionEngine {
     };
   }
 
-  private async checkPhysicsAndLogic(action: ProposedAction, context: any): Promise<{passed: boolean, issues: string[], suggestions: string[]}> {
+  private async checkPhysicsAndLogic(action: ProposedAction, context: ProjectReflectionContext): Promise<{passed: boolean, issues: string[], suggestions: string[]}> {
     // Simulação: Aqui o agente consultaria as regras definidas no DeepContext
     // Ex: "Se o jogo é medieval, não pode ter nave espacial"
     
@@ -85,7 +91,7 @@ export class SelfReflectionEngine {
     return { passed: true, issues: [], suggestions: [] };
   }
 
-  private async checkContinuity(action: ProposedAction, context: any): Promise<{passed: boolean, issues: string[], suggestions: string[]}> {
+  private async checkContinuity(action: ProposedAction, context: ProjectReflectionContext): Promise<{passed: boolean, issues: string[], suggestions: string[]}> {
     // Verifica se contradiz algo que já aconteceu
     return { passed: true, issues: [], suggestions: [] };
   }

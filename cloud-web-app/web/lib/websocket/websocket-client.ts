@@ -27,7 +27,7 @@ export interface WsClientConfig {
 export interface WsMessage {
   type: string;
   channel: string;
-  payload: any;
+  payload: unknown;
   timestamp?: number;
 }
 
@@ -77,6 +77,10 @@ export const WS_MESSAGE_TYPES = {
   ERROR: 'error',
   BROADCAST: 'broadcast',
 } as const;
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
 
 // ============================================================================
 // WebSocket Client
@@ -269,7 +273,9 @@ export class AethelWebSocketClient extends EventEmitter {
     // Handle system messages
     switch (message.type) {
       case 'welcome':
-        this.clientId = message.payload.clientId;
+        this.clientId = typeof asRecord(message.payload).clientId === 'string'
+          ? asRecord(message.payload).clientId as string
+          : '';
         this.emit('welcome', message.payload);
         break;
         
@@ -289,7 +295,7 @@ export class AethelWebSocketClient extends EventEmitter {
         
       case WS_MESSAGE_TYPES.SUBSCRIBED:
         this.subscribedChannels.add(message.channel);
-        this.emit('subscribed', { channel: message.channel, ...message.payload });
+        this.emit('subscribed', { channel: message.channel, ...asRecord(message.payload) });
         break;
         
       case WS_MESSAGE_TYPES.UNSUBSCRIBED:
@@ -325,7 +331,7 @@ export class AethelWebSocketClient extends EventEmitter {
   // Channels
   // ==========================================================================
   
-  subscribe(channel: string, options?: any): void {
+  subscribe(channel: string, options?: unknown): void {
     this.subscribedChannels.add(channel);
     this.send({
       type: WS_MESSAGE_TYPES.SUBSCRIBE,
@@ -415,7 +421,7 @@ export class AethelWebSocketClient extends EventEmitter {
     });
   }
   
-  sendOperation(documentId: string, operation: any): void {
+  sendOperation(documentId: string, operation: unknown): void {
     this.send({
       type: WS_MESSAGE_TYPES.COLLAB_OPERATION,
       channel: `collab:${documentId}`,
@@ -524,7 +530,7 @@ export class AethelWebSocketClient extends EventEmitter {
   // Utils
   // ==========================================================================
   
-  private log(...args: any[]): void {
+  private log(...args: unknown[]): void {
     if (this.config.debug) {
       log.info('[AethelWS]', ...args);
     }

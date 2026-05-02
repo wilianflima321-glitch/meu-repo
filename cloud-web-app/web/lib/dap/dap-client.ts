@@ -81,13 +81,19 @@ export type DebugEvent =
   | { type: 'output'; category: 'console' | 'stdout' | 'stderr'; output: string }
   | { type: 'breakpoint'; reason: 'changed' | 'new' | 'removed'; breakpoint: Breakpoint };
 
+interface DapApiResponse<T> {
+  success?: boolean;
+  message?: string;
+  body?: T;
+}
+
 export class DAPClient {
   private config: DAPClientConfig;
   private initialized: boolean = false;
   private messageId: number = 0;
   private pendingRequests: Map<number, {
-    resolve: (value: any) => void;
-    reject: (error: any) => void;
+    resolve: (value: unknown) => void;
+    reject: (error: unknown) => void;
   }> = new Map();
   private eventListeners: Map<string, Array<(event: DebugEvent) => void>> = new Map();
   private sessionId: string | null = null;
@@ -109,8 +115,8 @@ export class DAPClient {
         body: JSON.stringify(this.config)
       });
 
-      const sessionData = await sessionResponse.json();
-      this.sessionId = sessionData.sessionId;
+      const sessionData = await sessionResponse.json() as { sessionId?: string };
+      this.sessionId = sessionData.sessionId ?? null;
 
       // Initialize debug adapter
       await this.sendRequest('initialize', {
@@ -155,7 +161,7 @@ export class DAPClient {
     hitCondition?: string;
     logMessage?: string;
   }>): Promise<Breakpoint[]> {
-    const response = await this.sendRequest('setBreakpoints', {
+    const response = await this.sendRequest<{ breakpoints?: Breakpoint[] }>('setBreakpoints', {
       source,
       breakpoints,
       sourceModified: false
@@ -185,12 +191,12 @@ export class DAPClient {
   }
 
   async threads(): Promise<Thread[]> {
-    const response = await this.sendRequest('threads', {});
+    const response = await this.sendRequest<{ threads?: Thread[] }>('threads', {});
     return response.threads || [];
   }
 
   async stackTrace(threadId: number, startFrame: number = 0, levels: number = 20): Promise<StackFrame[]> {
-    const response = await this.sendRequest('stackTrace', {
+    const response = await this.sendRequest<{ stackFrames?: StackFrame[] }>('stackTrace', {
       threadId,
       startFrame,
       levels
@@ -200,12 +206,12 @@ export class DAPClient {
   }
 
   async scopes(frameId: number): Promise<Scope[]> {
-    const response = await this.sendRequest('scopes', { frameId });
+    const response = await this.sendRequest<{ scopes?: Scope[] }>('scopes', { frameId });
     return response.scopes || [];
   }
 
   async variables(variablesReference: number, start?: number, count?: number): Promise<Variable[]> {
-    const response = await this.sendRequest('variables', {
+    const response = await this.sendRequest<{ variables?: Variable[] }>('variables', {
       variablesReference,
       start,
       count
@@ -219,7 +225,7 @@ export class DAPClient {
     type?: string;
     variablesReference: number;
   }> {
-    const response = await this.sendRequest('evaluate', {
+    const response = await this.sendRequest<{ result: string; type?: string; variablesReference: number }>('evaluate', {
       expression,
       frameId,
       context: context || 'repl'
@@ -272,14 +278,14 @@ export class DAPClient {
     }
   }
 
-  private async sendRequest(command: string, args: any): Promise<any> {
+  private async sendRequest<T = Record<string, never>>(command: string, args: unknown): Promise<T> {
     if (!this.sessionId) {
       throw new Error('No active debug session');
     }
 
     const id = ++this.messageId;
 
-    return new Promise((resolve, reject) => {
+    const result = await new Promise<unknown>((resolve, reject) => {
       this.pendingRequests.set(id, { resolve, reject });
 
       fetch('/api/dap/request', {
@@ -292,7 +298,7 @@ export class DAPClient {
           seq: id
         })
       })
-        .then(res => res.json())
+        .then(res => res.json() as Promise<DapApiResponse<T>>)
         .then(data => {
           const pending = this.pendingRequests.get(id);
           if (pending) {
@@ -321,6 +327,7 @@ export class DAPClient {
         }
       }, 30000);
     });
+    return result as T;
   }
 
   private startEventPolling(): void {

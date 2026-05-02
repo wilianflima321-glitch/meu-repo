@@ -74,6 +74,20 @@ export interface GitConflict {
   base?: string;
 }
 
+type RawGitCommit = Omit<GitCommit, 'date'> & { date: string | number | Date };
+type RawGitBlame = {
+  line: number;
+  hash: string;
+  author: string;
+  date: string | number | Date;
+  content: string;
+};
+type RawGitStash = {
+  index: number;
+  message: string;
+  date: string | number | Date;
+};
+
 export class GitClient {
   private workspaceRoot: string;
 
@@ -450,8 +464,8 @@ export class GitClient {
       body: JSON.stringify({ cwd: this.workspaceRoot, limit, skip, branch })
     });
 
-    const data = await response.json();
-    return data.commits.map((c: any) => ({
+    const data = await response.json() as { commits?: RawGitCommit[] };
+    return (data.commits ?? []).map((c) => ({
       ...c,
       date: new Date(c.date)
     }));
@@ -498,8 +512,8 @@ export class GitClient {
       body: JSON.stringify({ cwd: this.workspaceRoot, path })
     });
 
-    const data = await response.json();
-    return data.blame.map((b: any) => ({
+    const data = await response.json() as { blame?: RawGitBlame[] };
+    return (data.blame ?? []).map((b) => ({
       ...b,
       date: new Date(b.date)
     }));
@@ -532,8 +546,8 @@ export class GitClient {
       body: JSON.stringify({ cwd: this.workspaceRoot })
     });
 
-    const data = await response.json();
-    return data.stashes.map((s: any) => ({
+    const data = await response.json() as { stashes?: RawGitStash[] };
+    return (data.stashes ?? []).map((s) => ({
       ...s,
       date: new Date(s.date)
     }));

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-server';
 import { apiErrorToResponse, apiInternalError } from '@/lib/api-errors';
 import { requireEntitlementsForUser } from '@/lib/entitlements';
-import { aiService } from '@/lib/ai-service';
+import { aiService, type LLMProvider, type Message } from '@/lib/ai-service';
 import {
 	acquireConcurrencyLease,
 	estimateTokensFromText,
@@ -34,6 +34,38 @@ function getBackendBaseUrl(): string | null {
 	return raw.replace(/\/$/, '');
 }
 
+type AiStreamRequestBody = {
+	prompt?: unknown;
+	messages?: unknown;
+	provider?: unknown;
+	model?: unknown;
+	maxTokens?: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function isMessage(value: unknown): value is Message {
+	return isRecord(value)
+		&& (value.role === 'system' || value.role === 'user' || value.role === 'assistant')
+		&& typeof value.content === 'string';
+}
+
+function parseProvider(value: unknown): LLMProvider | undefined {
+	return value === 'openai'
+		|| value === 'openrouter'
+		|| value === 'anthropic'
+		|| value === 'google'
+		|| value === 'groq'
+		? value
+		: undefined;
+}
+
+function hasErrorCode(error: unknown, code: string): boolean {
+	return isRecord(error) && error.code === code;
+}
+
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -56,14 +88,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			return NextResponse.json({ error: 'INVALID_BODY', message: 'Body JSON inválido.' }, { status: 400 });
 		}
 
-		const prompt = typeof (body as any).prompt === 'string' ? (body as any).prompt : '';
-		const messages = Array.isArray((body as any).messages) ? (body as any).messages : [];
-		const provider = typeof (body as any).provider === 'string' ? (body as any).provider : undefined;
-		const model = typeof (body as any).model === 'string' ? (body as any).model : undefined;
+		const payload = body as AiStreamRequestBody;
+		const prompt = typeof payload.prompt === 'string' ? payload.prompt : '';
+		const rawMessages = Array.isArray(payload.messages) ? payload.messages : [];
+		const messages = rawMessages.filter(isMessage);
+		const provider = parseProvider(payload.provider);
+		const model = typeof payload.model === 'string' ? payload.model : undefined;
 		const promptText = prompt
 			? prompt
-			: messages.map((m: any) => (typeof m?.content === 'string' ? m.content : '')).join('\n');
-		const maxTokens = typeof (body as any).maxTokens === 'number' ? Math.max(0, Math.floor((body as any).maxTokens)) : 0;
+			: messages.map((m) => m.content).join('\n');
+		const maxTokens = typeof payload.maxTokens === 'number' ? Math.max(0, Math.floor(payload.maxTokens)) : 0;
 
 		const estimatedPromptTokens = estimateTokensFromText(promptText);
 		const estimatedTotalTokens = estimatedPromptTokens + maxTokens;
@@ -210,8 +244,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 				try {
 					for await (const chunk of aiService.chatStream({
 						messages: messages
-							.filter((m: any) => typeof m?.role === 'string' && typeof m?.content === 'string')
-							.map((m: any) => ({ role: m.role, content: m.content })),
+							.map((m) => ({ role: m.role, content: m.content })),
 						model,
 						provider,
 						maxTokens: maxTokens > 0 ? maxTokens : undefined,
@@ -251,7 +284,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
 
-		if ((error as any)?.code === 'AI_BACKEND_NOT_CONFIGURED') {
+		if (hasErrorCode(error, 'AI_BACKEND_NOT_CONFIGURED')) {
 			return NextResponse.json(
 				{ error: 'AI_BACKEND_NOT_CONFIGURED', message: (error as Error).message },
 				{ status: 501 }

@@ -45,7 +45,7 @@ export interface AudioTrack {
     preload?: boolean;
     html5?: boolean;
     format?: string[];
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 export interface AudioInstance {
@@ -97,7 +97,7 @@ class AethelAudioEngine {
     private playlistShuffle = false;
     private crossfadeDuration = 2000;
     private duckingEnabled = true;
-    private listeners: Map<string, Set<(data: any) => void>> = new Map();
+    private listeners: Map<string, Set<(data: unknown) => void>> = new Map();
     private audioContext: AudioContext | null = null;
     private masterGain: GainNode | null = null;
     private effects: Map<AudioChannel, AudioEffect[]> = new Map();
@@ -151,18 +151,18 @@ class AethelAudioEngine {
     // EVENT SYSTEM
     // ========================================================================
     
-    public on(event: string, callback: (data: any) => void): () => void {
+    public on<T = unknown>(event: string, callback: (data: T) => void): () => void {
         if (!this.listeners.has(event)) {
             this.listeners.set(event, new Set());
         }
-        this.listeners.get(event)!.add(callback);
+        this.listeners.get(event)!.add(callback as (data: unknown) => void);
         
         return () => {
-            this.listeners.get(event)?.delete(callback);
+            this.listeners.get(event)?.delete(callback as (data: unknown) => void);
         };
     }
     
-    private emit(event: string, data: any): void {
+    private emit(event: string, data: unknown): void {
         this.listeners.get(event)?.forEach(cb => cb(data));
     }
     
@@ -609,7 +609,7 @@ class AethelAudioEngine {
         
         setTimeout(() => {
             this.play(this.playlist[this.playlistIndex], {
-                channel: 'bgm' as any,
+                channel: 'bgm',
                 fade: this.crossfadeDuration / 2
             });
         }, this.crossfadeDuration / 2);

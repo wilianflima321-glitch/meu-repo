@@ -23,6 +23,14 @@ type WorkspaceFileItem = {
 	modified?: string;
 };
 
+type WorkspaceTreeDraft = {
+	name: string;
+	path: string;
+	type: 'file' | 'directory';
+	children: Map<string, WorkspaceTreeDraft>;
+	expanded: boolean;
+};
+
 function normalizePath(path: string): string {
 	if (!path) return '/';
 	const p = path.startsWith('/') ? path : `/${path}`;
@@ -30,7 +38,7 @@ function normalizePath(path: string): string {
 }
 
 function buildTree(filePaths: string[]): WorkspaceTreeNode[] {
-	const root: { children: Map<string, any> } = { children: new Map() };
+	const root: { children: Map<string, WorkspaceTreeDraft> } = { children: new Map() };
 
 	for (const raw of filePaths) {
 		const full = normalizePath(raw);
@@ -43,32 +51,33 @@ function buildTree(filePaths: string[]): WorkspaceTreeNode[] {
 			currentPath += `/${part}`;
 			const isLeaf = i === parts.length - 1;
 
-			if (!cursor.children.has(part)) {
-				cursor.children.set(part, {
+			let node = cursor.children.get(part);
+			if (!node) {
+				node = {
 					name: part,
 					path: currentPath,
 					type: isLeaf ? 'file' : 'directory',
-					children: new Map<string, any>(),
+					children: new Map<string, WorkspaceTreeDraft>(),
 					expanded: false,
-				});
+				};
+				cursor.children.set(part, node);
 			}
 
-			const node = cursor.children.get(part);
 			if (!isLeaf && node.type !== 'directory') {
 				node.type = 'directory';
-				node.children = node.children || new Map<string, any>();
+				node.children = node.children || new Map<string, WorkspaceTreeDraft>();
 			}
 
 			cursor = node;
 		}
 	}
 
-	const toArray = (map: Map<string, any>): WorkspaceTreeNode[] => {
-		const rawNodes: any[] = [];
+	const toArray = (map: Map<string, WorkspaceTreeDraft>): WorkspaceTreeNode[] => {
+		const rawNodes: WorkspaceTreeDraft[] = [];
 		map.forEach((value) => rawNodes.push(value));
 
-		const nodes = rawNodes.map((n: any) => {
-			const childrenMap: Map<string, any> | undefined = n.children instanceof Map ? n.children : undefined;
+		const nodes = rawNodes.map((n) => {
+			const childrenMap: Map<string, WorkspaceTreeDraft> | undefined = n.children instanceof Map ? n.children : undefined;
 			const children = childrenMap ? toArray(childrenMap) : undefined;
 			const out: WorkspaceTreeNode = {
 				name: n.name,
@@ -93,7 +102,7 @@ function buildTree(filePaths: string[]): WorkspaceTreeNode[] {
 
 type ActionBody = {
 	action?: string;
-	params?: any;
+	params?: Record<string, unknown>;
 	projectId?: string;
 };
 
@@ -104,6 +113,10 @@ function assertAllowedAction(action: string): asserts action is AllowedAction {
 	if (!allowed.includes(action as AllowedAction)) {
 		throw Object.assign(new Error('ACTION_NOT_ALLOWED'), { code: 'ACTION_NOT_ALLOWED' });
 	}
+}
+
+function hasErrorCode(error: unknown, code: string): boolean {
+	return Boolean(error && typeof error === 'object' && 'code' in error && (error as { code?: unknown }).code === code);
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -196,11 +209,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
 
-		if ((error as any)?.code === 'ACTION_NOT_ALLOWED') {
+		if (hasErrorCode(error, 'ACTION_NOT_ALLOWED')) {
 			return NextResponse.json({ error: 'ACTION_NOT_ALLOWED' }, { status: 400 });
 		}
 
-		if ((error as any)?.code === 'PROJECT_NOT_FOUND') {
+		if (hasErrorCode(error, 'PROJECT_NOT_FOUND')) {
 			return NextResponse.json({ error: 'PROJECT_NOT_FOUND' }, { status: 404 });
 		}
 

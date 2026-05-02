@@ -9,8 +9,23 @@ import { assertProjectOwnership, resolveProjectIdFromRequest } from '@/lib/copil
 
 export const dynamic = 'force-dynamic';
 
-async function resolveWorkflowId(userId: string, req: NextRequest, projectId: string | null, body?: any): Promise<string | null> {
-	const prismaAny = prisma as any;
+type CopilotContextBody = Record<string, unknown> & {
+	projectId?: unknown;
+	workflowId?: unknown;
+	livePreview?: unknown;
+	editor?: unknown;
+	openFiles?: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function hasErrorCode(error: unknown, code: string): boolean {
+	return isRecord(error) && error.code === code;
+}
+
+async function resolveWorkflowId(userId: string, req: NextRequest, projectId: string | null, body?: CopilotContextBody): Promise<string | null> {
 	const url = new URL(req.url);
 	const headerWorkflowId = req.headers.get('x-workflow-id');
 	const queryWorkflowId = url.searchParams.get('workflowId');
@@ -18,7 +33,7 @@ async function resolveWorkflowId(userId: string, req: NextRequest, projectId: st
 
 	const candidate = headerWorkflowId || queryWorkflowId || bodyWorkflowId;
 	if (typeof candidate === 'string' && candidate.trim()) {
-		const owned = await prismaAny.copilotWorkflow.findFirst({
+		const owned = await prisma.copilotWorkflow.findFirst({
 			where: { id: candidate, userId },
 			select: { id: true },
 		});
@@ -27,14 +42,14 @@ async function resolveWorkflowId(userId: string, req: NextRequest, projectId: st
 
 	if (!projectId) return null;
 
-	const latest = await prismaAny.copilotWorkflow.findFirst({
+	const latest = await prisma.copilotWorkflow.findFirst({
 		where: { userId, projectId, archived: false },
 		orderBy: [{ lastUsedAt: 'desc' }, { updatedAt: 'desc' }],
 		select: { id: true },
 	});
 	if (latest?.id) return latest.id;
 
-	const created = await prismaAny.copilotWorkflow.create({
+	const created = await prisma.copilotWorkflow.create({
 		data: {
 			userId,
 			projectId,
@@ -46,49 +61,53 @@ async function resolveWorkflowId(userId: string, req: NextRequest, projectId: st
 	return created.id;
 }
 
-function toPatchFromBody(body: any) {
-	const livePreview = body?.livePreview;
+function toPatchFromBody(body: CopilotContextBody) {
+	const livePreview = isRecord(body.livePreview) ? body.livePreview : null;
+	const selectedPoint = isRecord(livePreview?.selectedPoint) ? livePreview.selectedPoint : null;
+	const camera = isRecord(livePreview?.camera) ? livePreview.camera : null;
+	const editor = isRecord(body.editor) ? body.editor : null;
+	const selection = isRecord(editor?.selection) ? editor.selection : null;
 	return {
 		livePreview:
-			livePreview && typeof livePreview === 'object'
+			livePreview
 				?
 					{
 						selectedPoint:
-							livePreview.selectedPoint && typeof livePreview.selectedPoint === 'object'
+							selectedPoint
 								?
 									{
-										x: Number(livePreview.selectedPoint.x),
-										y: Number(livePreview.selectedPoint.y),
-										z: Number(livePreview.selectedPoint.z),
+										x: Number(selectedPoint.x),
+										y: Number(selectedPoint.y),
+										z: Number(selectedPoint.z),
 									}
 								: undefined,
 						camera:
-							livePreview.camera && typeof livePreview.camera === 'object'
+							camera
 								?
 									{
-										x: Number(livePreview.camera.x),
-										y: Number(livePreview.camera.y),
-										z: Number(livePreview.camera.z),
+										x: Number(camera.x),
+										y: Number(camera.y),
+										z: Number(camera.z),
 									}
 								: undefined,
 					}
 				: undefined,
 		editor:
-			body?.editor && typeof body.editor === 'object'
+			editor
 				?
 					{
-						activeFilePath: typeof body.editor.activeFilePath === 'string' ? body.editor.activeFilePath : undefined,
+						activeFilePath: typeof editor.activeFilePath === 'string' ? editor.activeFilePath : undefined,
 						selection:
-							body.editor.selection && typeof body.editor.selection === 'object'
+							selection
 								?
 									{
-										start: Number(body.editor.selection.start),
-										end: Number(body.editor.selection.end),
+										start: Number(selection.start),
+										end: Number(selection.end),
 									}
 								: undefined,
 					}
 				: undefined,
-		openFiles: Array.isArray(body?.openFiles) ? body.openFiles.filter((p: any) => typeof p === 'string') : undefined,
+		openFiles: Array.isArray(body.openFiles) ? body.openFiles.filter((p): p is string => typeof p === 'string') : undefined,
 	};
 }
 
@@ -109,8 +128,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 			return NextResponse.json({ projectId, workflowId: null, context: null });
 		}
 
-		const prismaAny = prisma as any;
-		const wf = await prismaAny.copilotWorkflow.findFirst({
+		const wf = await prisma.copilotWorkflow.findFirst({
 			where: { id: workflowId, userId: user.userId },
 			select: { id: true, projectId: true, chatThreadId: true, context: true, contextVersion: true },
 		});
@@ -118,7 +136,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 			return NextResponse.json({ projectId, workflowId: null, context: null });
 		}
 
-		await prismaAny.copilotWorkflow.update({
+		await prisma.copilotWorkflow.update({
 			where: { id: wf.id },
 			data: { lastUsedAt: new Date() },
 			select: { id: true },
@@ -135,7 +153,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
 
-		if ((error as any)?.code === 'PROJECT_NOT_FOUND') {
+		if (hasErrorCode(error, 'PROJECT_NOT_FOUND')) {
 			return NextResponse.json({ error: 'PROJECT_NOT_FOUND' }, { status: 404 });
 		}
 
@@ -148,7 +166,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		const user = requireAuth(req);
 		await requireEntitlementsForUser(user.userId);
 
-		const body = await req.json().catch(() => ({}));
+		const body = (await req.json().catch(() => ({}))) as CopilotContextBody;
 		const projectId = await resolveProjectIdFromRequest(user.userId, req, body);
 		if (!projectId) {
 			return NextResponse.json({ error: 'NO_PROJECT_AVAILABLE' }, { status: 404 });
@@ -161,8 +179,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			return NextResponse.json({ error: 'WORKFLOW_NOT_FOUND' }, { status: 404 });
 		}
 
-		const prismaAny = prisma as any;
-		const wf = await prismaAny.copilotWorkflow.findFirst({
+		const wf = await prisma.copilotWorkflow.findFirst({
 			where: { id: workflowId, userId: user.userId },
 			select: { id: true, context: true, contextVersion: true },
 		});
@@ -176,13 +193,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 		// Guarda o JSON completo (inclui campos extras), mantendo compatibilidade.
 		const contextJson = {
-			...(typeof wf.context === 'object' && wf.context ? (wf.context as any) : null),
+			...(isRecord(wf.context) ? wf.context : {}),
 			...merged,
 			...(patch.editor ? { editor: patch.editor } : {}),
 			...(patch.openFiles ? { openFiles: patch.openFiles } : {}),
 		};
 
-		const updated = await prismaAny.copilotWorkflow.update({
+		const updated = await prisma.copilotWorkflow.update({
 			where: { id: wf.id },
 			data: {
 				context: contextJson,
@@ -197,7 +214,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		const mapped = apiErrorToResponse(error);
 		if (mapped) return mapped;
 
-		if ((error as any)?.code === 'PROJECT_NOT_FOUND') {
+		if (hasErrorCode(error, 'PROJECT_NOT_FOUND')) {
 			return NextResponse.json({ error: 'PROJECT_NOT_FOUND' }, { status: 404 });
 		}
 

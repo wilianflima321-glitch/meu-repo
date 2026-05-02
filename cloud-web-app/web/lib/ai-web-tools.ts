@@ -56,6 +56,18 @@ interface WebPageContent {
   };
 }
 
+interface TavilySearchResponse {
+  results?: Array<{ title?: string; url?: string; content?: string; score?: number }>;
+}
+
+interface SerperSearchResponse {
+  organic?: Array<{ title?: string; link?: string; snippet?: string }>;
+}
+
+interface MdnSearchResponse {
+  documents?: Array<{ title?: string; mdn_url?: string; summary?: string }>;
+}
+
 function getBrowserOperatorRuntimeContextFromParams(
   params: Record<string, unknown>
 ): BrowserOperatorRuntimeContext | null {
@@ -142,12 +154,12 @@ async function searchTavily(query: string, numResults: number = 5): Promise<Sear
     throw new Error(`Tavily API error: ${response.status}`);
   }
   
-  const data = await response.json();
+  const data = await response.json() as TavilySearchResponse;
   
-  return data.results.map((r: any) => ({
-    title: r.title,
-    url: r.url,
-    snippet: r.content,
+  return (data.results ?? []).map((r) => ({
+    title: r.title ?? '',
+    url: r.url ?? '',
+    snippet: r.content ?? '',
     score: r.score,
   }));
 }
@@ -177,12 +189,12 @@ async function searchSerper(query: string, numResults: number = 5): Promise<Sear
     throw new Error(`Serper API error: ${response.status}`);
   }
   
-  const data = await response.json();
+  const data = await response.json() as SerperSearchResponse;
   
-  return (data.organic || []).map((r: any) => ({
-    title: r.title,
-    url: r.link,
-    snippet: r.snippet,
+  return (data.organic || []).map((r) => ({
+    title: r.title ?? '',
+    url: r.link ?? '',
+    snippet: r.snippet ?? '',
   }));
 }
 
@@ -424,10 +436,10 @@ async function searchDocs(query: string, source: string): Promise<SearchResult[]
       });
       
       if (response.ok) {
-        const data = await response.json();
-        return (data.documents || []).slice(0, 5).map((doc: any) => ({
-          title: doc.title,
-          url: `${docSource.baseUrl}${doc.mdn_url}`,
+        const data = await response.json() as MdnSearchResponse;
+        return (data.documents || []).slice(0, 5).map((doc) => ({
+          title: doc.title ?? '',
+          url: `${docSource.baseUrl}${doc.mdn_url ?? ''}`,
           snippet: doc.summary || '',
         }));
       }

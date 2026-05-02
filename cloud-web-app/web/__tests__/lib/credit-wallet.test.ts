@@ -441,7 +441,10 @@ describe('CreditWallet', () => {
         expect.objectContaining({
           where: { 
             userId: 'user1',
-            operationType: 'image_generation',
+            metadata: {
+              path: ['operationType'],
+              equals: 'image_generation',
+            },
           },
         })
       );

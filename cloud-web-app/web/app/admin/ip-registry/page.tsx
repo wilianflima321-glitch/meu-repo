@@ -40,10 +40,10 @@ export default function AdminIpRegistryPage() {
     try {
       const res = await fetch('/api/admin/ip-registry');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const j = await res.json();
+      const j = await res.json() as Registry;
       setData(j);
-    } catch (e: any) {
-      setError(e.message || "Erro ao carregar registro");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao carregar registro");
     } finally {
       setLoading(false);
     }
@@ -66,8 +66,8 @@ export default function AdminIpRegistryPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setMessage('Registro salvo com sucesso.');
       await fetchRegistry();
-    } catch (e: any) {
-      setError(e.message || "Erro ao salvar registro");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao salvar registro");
     } finally {
       setLoading(false);
     }
@@ -84,8 +84,8 @@ export default function AdminIpRegistryPage() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setMessage(`Ingestão solicitada para ${ip}.`);
-    } catch (e: any) {
-      setError(e.message || "Erro ao ingerir RAG");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro ao ingerir RAG");
     } finally {
       setLoading(false);
     }

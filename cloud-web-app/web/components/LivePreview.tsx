@@ -6,9 +6,11 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import type { ThreeEvent } from '@react-three/fiber'
 import { OrbitControls, Text, Html as DreiHtml } from '@react-three/drei'
 import * as THREE from 'three'
 import nipplejs from 'nipplejs'
+import type { EventData, JoystickManager, JoystickManagerOptions, JoystickOutputData } from 'nipplejs'
 
 interface LivePreviewProps {
   onMagicWandSelect: (position: THREE.Vector3) => void
@@ -66,8 +68,8 @@ function Scene({ onMagicWandSelect, suggestions, onOpenMiniChat }: { onMagicWand
     }
   })
 
-  const handleClick = (event: any) => {
-    const point: THREE.Vector3 | undefined = event?.point;
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+    const point: THREE.Vector3 | undefined = event.point;
     if (point) {
       setSelectedPoint(point)
       onMagicWandSelect(point)
@@ -126,7 +128,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
   const [magicWandActive, setMagicWandActive] = useState(false)
   const [miniChatOpen, setMiniChatOpen] = useState(false)
   const [suggestionText, setSuggestionText] = useState('')
-  const joystickRef = useRef<any>(null)
+  const joystickRef = useRef<JoystickManager | null>(null)
   const joystickZoneRef = useRef<HTMLDivElement | null>(null)
 
   const openMiniChat = () => setMiniChatOpen(true)
@@ -134,7 +136,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
   useEffect(() => {
     const joystickZone = joystickZoneRef.current
     if (joystickZone) {
-      const options: any = {
+      const options: JoystickManagerOptions = {
         zone: joystickZone,
         mode: 'static' as const,
         position: { left: '50%', top: '50%' },
@@ -142,7 +144,7 @@ export default function LivePreview({ onMagicWandSelect, suggestions, onSendSugg
       }
       joystickRef.current = nipplejs.create(options)
 
-      joystickRef.current.on('move', (evt: any, data: any) => {
+      joystickRef.current.on('move', (evt: EventData, data: JoystickOutputData) => {
         void evt
         void data
       })

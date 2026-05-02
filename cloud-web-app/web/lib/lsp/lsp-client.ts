@@ -86,13 +86,30 @@ export interface CodeAction {
   };
 }
 
+type TextEdit = {
+  range: {
+    start: { line: number; character: number };
+    end: { line: number; character: number };
+  };
+  newText: string;
+};
+
+type WorkspaceEdit = {
+  changes: Record<string, TextEdit[]>;
+};
+
+interface LspApiResponse<T> {
+  result?: T;
+  error?: unknown;
+}
+
 export class LSPClient {
   private config: LSPClientConfig;
   private initialized: boolean = false;
   private messageId: number = 0;
   private pendingRequests: Map<number, {
-    resolve: (value: any) => void;
-    reject: (error: any) => void;
+    resolve: (value: unknown) => void;
+    reject: (error: unknown) => void;
   }> = new Map();
 
   constructor(config: LSPClientConfig) {
@@ -220,7 +237,7 @@ export class LSPClient {
     };
 
     try {
-      const response = await this.sendRequest('initialize', initializeParams);
+      await this.sendRequest('initialize', initializeParams);
       this.initialized = true;
       await this.sendNotification('initialized', {});
       log.info(`LSP client initialized for ${this.config.language}`);
@@ -276,7 +293,7 @@ export class LSPClient {
   }
 
   async completion(uri: string, line: number, character: number): Promise<CompletionItem[]> {
-    const response = await this.sendRequest('textDocument/completion', {
+    const response = await this.sendRequest<CompletionItem[] | { items?: CompletionItem[] } | null>('textDocument/completion', {
       textDocument: { uri },
       position: { line, character }
     });
@@ -290,7 +307,7 @@ export class LSPClient {
   }
 
   async hover(uri: string, line: number, character: number): Promise<Hover | null> {
-    const response = await this.sendRequest('textDocument/hover', {
+    const response = await this.sendRequest<Hover | null>('textDocument/hover', {
       textDocument: { uri },
       position: { line, character }
     });
@@ -299,7 +316,7 @@ export class LSPClient {
   }
 
   async signatureHelp(uri: string, line: number, character: number): Promise<SignatureHelp | null> {
-    const response = await this.sendRequest('textDocument/signatureHelp', {
+    const response = await this.sendRequest<SignatureHelp | null>('textDocument/signatureHelp', {
       textDocument: { uri },
       position: { line, character }
     });
@@ -308,7 +325,7 @@ export class LSPClient {
   }
 
   async definition(uri: string, line: number, character: number): Promise<Location[]> {
-    const response = await this.sendRequest('textDocument/definition', {
+    const response = await this.sendRequest<Location | Location[] | null>('textDocument/definition', {
       textDocument: { uri },
       position: { line, character }
     });
@@ -321,7 +338,7 @@ export class LSPClient {
   }
 
   async references(uri: string, line: number, character: number, includeDeclaration: boolean = true): Promise<Location[]> {
-    const response = await this.sendRequest('textDocument/references', {
+    const response = await this.sendRequest<Location[] | null>('textDocument/references', {
       textDocument: { uri },
       position: { line, character },
       context: { includeDeclaration }
@@ -330,16 +347,8 @@ export class LSPClient {
     return response || [];
   }
 
-  async rename(uri: string, line: number, character: number, newName: string): Promise<{
-    changes: Record<string, Array<{
-      range: {
-        start: { line: number; character: number };
-        end: { line: number; character: number };
-      };
-      newText: string;
-    }>>;
-  } | null> {
-    const response = await this.sendRequest('textDocument/rename', {
+  async rename(uri: string, line: number, character: number, newName: string): Promise<WorkspaceEdit | null> {
+    const response = await this.sendRequest<WorkspaceEdit | null>('textDocument/rename', {
       textDocument: { uri },
       position: { line, character },
       newName
@@ -352,7 +361,7 @@ export class LSPClient {
     start: { line: number; character: number };
     end: { line: number; character: number };
   }, diagnostics: Diagnostic[]): Promise<CodeAction[]> {
-    const response = await this.sendRequest('textDocument/codeAction', {
+    const response = await this.sendRequest<CodeAction[] | null>('textDocument/codeAction', {
       textDocument: { uri },
       range,
       context: { diagnostics }
@@ -364,14 +373,8 @@ export class LSPClient {
   async formatting(uri: string, options: {
     tabSize: number;
     insertSpaces: boolean;
-  }): Promise<Array<{
-    range: {
-      start: { line: number; character: number };
-      end: { line: number; character: number };
-    };
-    newText: string;
-  }>> {
-    const response = await this.sendRequest('textDocument/formatting', {
+  }): Promise<TextEdit[]> {
+    const response = await this.sendRequest<TextEdit[] | null>('textDocument/formatting', {
       textDocument: { uri },
       options
     });
@@ -379,10 +382,10 @@ export class LSPClient {
     return response || [];
   }
 
-  private async sendRequest(method: string, params: any): Promise<any> {
+  private async sendRequest<T = unknown>(method: string, params: unknown): Promise<T> {
     const id = ++this.messageId;
 
-    return new Promise((resolve, reject) => {
+    const result = await new Promise<unknown>((resolve, reject) => {
       this.pendingRequests.set(id, { resolve, reject });
 
       // Simulate LSP request via API
@@ -396,7 +399,7 @@ export class LSPClient {
           id
         })
       })
-        .then(res => res.json())
+        .then(res => res.json() as Promise<LspApiResponse<T>>)
         .then(data => {
           const pending = this.pendingRequests.get(id);
           if (pending) {
@@ -404,7 +407,7 @@ export class LSPClient {
             if (data.error) {
               pending.reject(data.error);
             } else {
-              pending.resolve(data.result);
+              pending.resolve(data.result as T);
             }
           }
         })
@@ -425,9 +428,10 @@ export class LSPClient {
         }
       }, 30000);
     });
+    return result as T;
   }
 
-  private async sendNotification(method: string, params: any): Promise<void> {
+  private async sendNotification(method: string, params: unknown): Promise<void> {
     // Notifications don't expect a response
     await fetch('/api/lsp/notification', {
       method: 'POST',

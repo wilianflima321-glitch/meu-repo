@@ -27,6 +27,12 @@ const activeAgents = new Map<string, { agent: AutonomousAgent; userId: string; c
 // Limpar agentes inativos após 1 hora
 const AGENT_TTL_MS = 60 * 60 * 1000;
 
+function isRateLimitError(error: unknown): error is Error & { code: 'RATE_LIMITED'; limitType?: string } {
+  return error instanceof Error
+    && 'code' in error
+    && (error as { code?: unknown }).code === 'RATE_LIMITED';
+}
+
 setInterval(() => {
   const now = Date.now();
   for (const [key, { createdAt }] of activeAgents.entries()) {
@@ -108,8 +114,8 @@ export async function POST(req: NextRequest) {
             limits: entitlements.plan.limits,
             cost: { requests: 1, tokens: estimatedTokens },
           });
-        } catch (error: any) {
-          if (error?.code === 'RATE_LIMITED') {
+        } catch (error) {
+          if (isRateLimitError(error)) {
             return NextResponse.json(
               { error: error.message || 'Rate limit exceeded', code: error.limitType },
               { status: 429 }
@@ -294,7 +300,7 @@ export async function GET(req: NextRequest) {
     
     const stream = new ReadableStream({
       start(controller) {
-        const sendEvent = (event: string, data: any) => {
+        const sendEvent = (event: string, data: unknown) => {
           controller.enqueue(
             encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
           );
@@ -328,7 +334,7 @@ export async function GET(req: NextRequest) {
         ];
         
         const handlers = events.map(event => {
-          const handler = (data: any) => {
+          const handler = (data: unknown) => {
             sendEvent(event, data);
           };
           agent.on(event, handler);

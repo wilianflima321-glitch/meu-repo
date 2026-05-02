@@ -35,6 +35,10 @@ async function verifyAssetAccess(assetId: string, userId: string) {
   });
 }
 
+function isUnauthorizedError(error: unknown): boolean {
+  return error instanceof Error && error.message === 'Unauthorized';
+}
+
 // ============================================================================
 // GET - Fetch Asset Details
 // ============================================================================
@@ -65,9 +69,9 @@ export async function GET(
       createdAt: asset.createdAt.toISOString(),
       projectId: asset.projectId,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Get asset error:', error);
-    if (error.message === 'Unauthorized') {
+    if (isUnauthorizedError(error)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return NextResponse.json(
@@ -123,9 +127,9 @@ export async function PATCH(
       id: updatedAsset.id,
       name: updatedAsset.name,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Update asset error:', error);
-    if (error.message === 'Unauthorized') {
+    if (isUnauthorizedError(error)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return NextResponse.json(
@@ -180,9 +184,9 @@ export async function DELETE(
       message: 'Asset deleted successfully',
       assetId: params.id,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Delete asset error:', error);
-    if (error.message === 'Unauthorized') {
+    if (isUnauthorizedError(error)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return NextResponse.json(

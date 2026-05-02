@@ -19,6 +19,33 @@ interface ServiceHealth {
   details?: string;
 }
 
+interface PrismaMetricSample {
+  key: string;
+  value?: number | { mean?: number };
+}
+
+interface PrismaMetricsPayload {
+  counters?: PrismaMetricSample[];
+  gauges?: PrismaMetricSample[];
+  histograms?: PrismaMetricSample[];
+}
+
+type PrismaMetricsClient = typeof prisma & {
+  $metrics?: {
+    json?: () => Promise<PrismaMetricsPayload>;
+  };
+};
+
+function metricNumber(samples: PrismaMetricSample[] | undefined, key: string): number {
+  const value = samples?.find((sample) => sample.key === key)?.value;
+  return typeof value === 'number' ? value : 0;
+}
+
+function histogramMean(samples: PrismaMetricSample[] | undefined, key: string): number {
+  const value = samples?.find((sample) => sample.key === key)?.value;
+  return typeof value === 'object' && value !== null && typeof value.mean === 'number' ? value.mean : 0;
+}
+
 async function checkServiceHealth(
   name: string,
   checkFn: () => Promise<{ latency: number; details?: string }>
@@ -149,15 +176,15 @@ async function handler(req: NextRequest) {
     }));
     
     // Get database connection stats
-    const dbMetrics = await (prisma as any).$metrics?.json?.() as any;
+    const dbMetrics = await (prisma as PrismaMetricsClient).$metrics?.json?.();
     const dbConnections = {
-      active: dbMetrics?.counters?.find((c: any) => c.key === 'prisma_client_queries_active')?.value || 0,
-      idle: dbMetrics?.gauges?.find((g: any) => g.key === 'prisma_pool_connections_idle')?.value || 0,
-      max: dbMetrics?.gauges?.find((g: any) => g.key === 'prisma_pool_connections_max')?.value || 0,
+      active: metricNumber(dbMetrics?.counters, 'prisma_client_queries_active'),
+      idle: metricNumber(dbMetrics?.gauges, 'prisma_pool_connections_idle'),
+      max: metricNumber(dbMetrics?.gauges, 'prisma_pool_connections_max'),
     };
     
     // Estimate query time from recent queries
-    const dbQueryTime = dbMetrics?.histograms?.find((h: any) => h.key === 'prisma_client_queries_duration_histogram_ms')?.value?.mean || 0;
+    const dbQueryTime = histogramMean(dbMetrics?.histograms, 'prisma_client_queries_duration_histogram_ms');
     
     // Get Redis stats
     const cacheStats = await cache.getStats();

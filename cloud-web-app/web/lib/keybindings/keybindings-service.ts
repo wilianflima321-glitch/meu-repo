@@ -14,7 +14,7 @@ import { EventEmitter } from 'events';
 export interface Keybinding {
   key: string;
   command: string;
-  args?: any;
+  args?: unknown;
   when?: string;
 }
 
@@ -32,7 +32,7 @@ export interface KeyCombo {
 }
 
 export interface WhenContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============================================================================
@@ -373,11 +373,11 @@ export class KeybindingsService extends EventEmitter {
   // CONTEXT
   // ==========================================================================
   
-  setContext(key: string, value: any): void {
+  setContext(key: string, value: unknown): void {
     this.context[key] = value;
   }
   
-  getContext(key: string): any {
+  getContext(key: string): unknown {
     return this.context[key];
   }
   

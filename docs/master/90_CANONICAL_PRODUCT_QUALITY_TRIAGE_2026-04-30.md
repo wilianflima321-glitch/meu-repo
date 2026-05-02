@@ -217,6 +217,8 @@ The database and TypeScript gates were tightened next. Prisma now has a versione
 
 The next strictness sweep removed explicit `: any` from collaboration/Yjs presence, settings, dialogue/cutscene, S3, Pixel Streaming, Redis, marketplace ingestion, LSP runtime, system health parsing, sandbox output, advanced input, quest custom events, and world streaming seams. The measured app-code `: any` ratchet moved from `379` to `246`; the remaining hotspots are now smaller and more isolated instead of spread across core runtime foundations.
 
+The follow-up strictness sweep removed explicit `: any` from AI-enhanced LSP, the 3D properties panel, infrastructure Prisma metrics, self-reflection context, legacy live preview input/joystick handling, the credit wallet ledger path, systems integration tests, render progress websocket messages, keybinding contexts, websocket payloads, LSP/DAP clients, E2B runtime sandbox boundaries, AI agent/stream/director routes, asset CRUD errors, chat clone/merge copy paths, copilot action/context routes, project invite-link delegates, engine/settings panels, web-search parsing, audio events, and git response parsing. The measured app-code `: any` ratchet moved from `246` to `134`; the remaining gap is still above the target of `50`, but the weak seams are now mostly small endpoint/library edges rather than broad IDE/runtime foundations.
+
 ## Quality Gates Snapshot
 As of this checkpoint:
 - `npm run lint` is green,

@@ -18,7 +18,7 @@ import {
   getManagedPreviewProviderConfig,
   parseConfiguredProvisionEndpoints,
 } from '@/lib/server/preview-provider-config'
-import { loadE2BModule, resolveE2BSandboxCtor } from '@/lib/server/e2b-runtime'
+import { loadE2BModule, resolveE2BSandboxCtor, type E2BSandboxLike } from '@/lib/server/e2b-runtime'
 import { getScopedWorkspaceRoot } from '@/lib/server/workspace-scope'
 
 const CAPABILITY = 'IDE_PREVIEW_RUNTIME_PROVISION'
@@ -231,7 +231,7 @@ function bufferToArrayBuffer(buffer: Buffer): ArrayBuffer {
 }
 
 async function syncWorkspaceToSandbox(params: {
-  sandbox: any
+  sandbox: E2BSandboxLike
   workspaceRoot: string
   workdir: string
   maxFiles: number
@@ -276,7 +276,7 @@ async function syncWorkspaceToSandbox(params: {
 }
 
 async function startSandboxRuntime(params: {
-  sandbox: any
+  sandbox: E2BSandboxLike
   workdir: string
   port: number
   installTimeoutMs: number

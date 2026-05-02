@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 export async function resolveProjectIdFromRequest(
 	userId: string,
 	request: NextRequest,
-	body?: any
+	body?: { projectId?: unknown }
 ): Promise<string | null> {
 	const url = new URL(request.url);
 	const headerProjectId = request.headers.get('x-project-id');

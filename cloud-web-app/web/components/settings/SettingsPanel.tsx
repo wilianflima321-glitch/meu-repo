@@ -38,6 +38,7 @@ import {
   UserProfile,
   SyncState,
   SettingDefinition,
+  SettingValue,
 } from '@/lib/settings/settings-service';
 
 // ============================================================================
@@ -67,11 +68,15 @@ const colors = {
 interface SettingInputProps {
   settingKey: string;
   definition?: SettingDefinition;
-  value: any;
-  onChange: (value: any) => void;
+  value: SettingValue;
+  onChange: (value: SettingValue) => void;
   onReset: () => void;
   isModified: boolean;
 }
+
+type SyncItem = SyncState['syncedItems'][number];
+
+const SYNC_ITEMS: SyncItem[] = ['settings', 'extensions', 'keybindings', 'snippets', 'tasks', 'profiles'];
 
 const SettingInput: React.FC<SettingInputProps> = ({
   settingKey,
@@ -97,7 +102,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
           >
             <input
               type="checkbox"
-              checked={value}
+              checked={Boolean(value)}
               onChange={(e) => onChange(e.target.checked)}
               style={{
                 width: '18px',
@@ -115,7 +120,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
         return (
           <input
             type="number"
-            value={value}
+            value={typeof value === 'number' || typeof value === 'string' ? value : ''}
             onChange={(e) => onChange(Number(e.target.value))}
             min={definition?.minimum}
             max={definition?.maximum}
@@ -134,7 +139,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
       case 'enum':
         return (
           <select
-            value={value}
+            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
             onChange={(e) => onChange(e.target.value)}
             style={{
               padding: '6px 10px',
@@ -147,7 +152,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
             }}
           >
             {definition?.enum?.map((opt, idx) => (
-              <option key={opt} value={opt}>
+              <option key={String(opt)} value={opt}>
                 {opt}
                 {definition.enumDescriptions?.[idx] && ` - ${definition.enumDescriptions[idx]}`}
               </option>
@@ -183,7 +188,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
         return (
           <input
             type="text"
-            value={value}
+            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
             onChange={(e) => onChange(e.target.value)}
             style={{
               width: '100%',
@@ -377,7 +382,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
     }];
   }, [searchQuery, settingsService]);
 
-  const handleSettingChange = useCallback(async (key: string, value: any) => {
+  const handleSettingChange = useCallback(async (key: string, value: SettingValue) => {
     await settingsService.set(key, value);
     setSettings(settingsService.getAll());
   }, [settingsService]);
@@ -846,16 +851,16 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                     Itens Sincronizados
                   </h3>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {['settings', 'extensions', 'keybindings', 'snippets', 'tasks', 'profiles'].map((item) => (
+                    {SYNC_ITEMS.map((item) => (
                       <div
                         key={item}
                         style={{
                           padding: '8px 12px',
-                          background: syncState.syncedItems.includes(item as any)
+                          background: syncState.syncedItems.includes(item)
                             ? colors.green + '20'
                             : colors.surface0,
                           border: `1px solid ${
-                            syncState.syncedItems.includes(item as any)
+                            syncState.syncedItems.includes(item)
                               ? colors.green
                               : colors.surface1
                           }`,
@@ -865,7 +870,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ settingsService })
                           gap: '6px',
                         }}
                       >
-                        {syncState.syncedItems.includes(item as any) && (
+                        {syncState.syncedItems.includes(item) && (
                           <Check size={14} color={colors.green} />
                         )}
                         <span style={{ textTransform: 'capitalize' }}>{item}</span>

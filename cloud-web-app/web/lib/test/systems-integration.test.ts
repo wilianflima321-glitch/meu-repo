@@ -9,12 +9,26 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+type WeatherSystemConstructor = typeof import('../environment/weather-system').WeatherSystem;
+type DayNightCycleConstructor = typeof import('../environment/day-night-cycle').DayNightCycle;
+type SaveManagerConstructor = typeof import('../save/save-manager').SaveManager;
+type SettingsManagerConstructor = typeof import('../settings/settings-system').SettingsManager;
+type NotificationManagerConstructor = typeof import('../ui/notification-system').NotificationManager;
+type NotificationRecord = import('../ui/notification-system').Notification;
+type HapticsSystemConstructor = typeof import('../input/haptics-system').HapticsSystem;
+type ControllerMapperConstructor = typeof import('../input/controller-mapper').ControllerMapper;
+type ControllerProfile = import('../input/controller-mapper').ControllerProfile;
+type TooltipManagerConstructor = typeof import('../ui/tooltip-system').TooltipManager;
+type CaptureSystemConstructor = typeof import('../capture/capture-system').CaptureSystem;
+type WorldStreamingSystemConstructor = typeof import('../world/world-streaming').WorldStreamingSystem;
+type OctreeConstructor = typeof import('../world/world-streaming').Octree;
+
 // ============================================================================
 // WEATHER SYSTEM TESTS
 // ============================================================================
 
 describe('WeatherSystem', () => {
-  let WeatherSystem: any;
+  let WeatherSystem: WeatherSystemConstructor;
   
   beforeEach(async () => {
     const mod = await import('../environment/weather-system');
@@ -77,7 +91,7 @@ describe('WeatherSystem', () => {
 // ============================================================================
 
 describe('DayNightCycle', () => {
-  let DayNightCycle: any;
+  let DayNightCycle: DayNightCycleConstructor;
   
   beforeEach(async () => {
     const mod = await import('../environment/day-night-cycle');
@@ -148,7 +162,7 @@ describe('DayNightCycle', () => {
 // ============================================================================
 
 describe('SaveManager', () => {
-  let SaveManager: any;
+  let SaveManager: SaveManagerConstructor;
   
   beforeEach(async () => {
     const mod = await import('../save/save-manager');
@@ -225,7 +239,7 @@ describe('SaveManager', () => {
 // ============================================================================
 
 describe('SettingsManager', () => {
-  let SettingsManager: any;
+  let SettingsManager: SettingsManagerConstructor;
   
   beforeEach(async () => {
     const mod = await import('../settings/settings-system');
@@ -292,7 +306,7 @@ describe('SettingsManager', () => {
 // ============================================================================
 
 describe('NotificationManager', () => {
-  let NotificationManager: any;
+  let NotificationManager: NotificationManagerConstructor;
   
   beforeEach(async () => {
     const mod = await import('../ui/notification-system');
@@ -321,7 +335,7 @@ describe('NotificationManager', () => {
     
     manager.close(id);
     // close triggers removal after animation timeout, check immediately for visible=false
-    expect(manager.getVisible().every((n: any) => n.id !== id || !n.visible)).toBe(true);
+    expect(manager.getVisible().every((n: NotificationRecord) => n.id !== id || !n.visible)).toBe(true);
   });
   
   it('should auto-dismiss after duration', async () => {
@@ -355,7 +369,7 @@ describe('NotificationManager', () => {
     manager.closeAll();
     
     // closeAll triggers close which removes after animation delay
-    expect(manager.getVisible().every((n: any) => !n.visible)).toBe(true);
+    expect(manager.getVisible().every((n: NotificationRecord) => !n.visible)).toBe(true);
   });
 });
 
@@ -364,7 +378,7 @@ describe('NotificationManager', () => {
 // ============================================================================
 
 describe('HapticsSystem', () => {
-  let HapticsSystem: any;
+  let HapticsSystem: HapticsSystemConstructor;
   
   beforeEach(async () => {
     const mod = await import('../input/haptics-system');
@@ -418,7 +432,7 @@ describe('HapticsSystem', () => {
 // ============================================================================
 
 describe('ControllerMapper', () => {
-  let ControllerMapper: any;
+  let ControllerMapper: ControllerMapperConstructor;
   
   beforeEach(async () => {
     const mod = await import('../input/controller-mapper');
@@ -445,7 +459,7 @@ describe('ControllerMapper', () => {
     const profiles = mod.DEFAULT_PROFILES;
     
     expect(profiles.length).toBeGreaterThan(0);
-    expect(profiles.find((p: any) => p.id === 'default-fps')).toBeDefined();
+    expect(profiles.find((p: ControllerProfile) => p.id === 'default-fps')).toBeDefined();
   });
   
   it('should start and stop polling', () => {
@@ -486,7 +500,7 @@ describe('ControllerMapper', () => {
 // ============================================================================
 
 describe('TooltipManager', () => {
-  let TooltipManager: any;
+  let TooltipManager: TooltipManagerConstructor;
   
   beforeEach(async () => {
     const mod = await import('../ui/tooltip-system');
@@ -554,7 +568,7 @@ describe('TooltipManager', () => {
 // ============================================================================
 
 describe('CaptureSystem', () => {
-  let CaptureSystem: any;
+  let CaptureSystem: CaptureSystemConstructor;
   
   beforeEach(async () => {
     const mod = await import('../capture/capture-system');
@@ -650,7 +664,7 @@ describe('CaptureSystem', () => {
 // ============================================================================
 
 describe('WorldStreamingSystem', () => {
-  let WorldStreamingSystem: any;
+  let WorldStreamingSystem: WorldStreamingSystemConstructor;
   
   beforeEach(async () => {
     const mod = await import('../world/world-streaming');
@@ -713,7 +727,7 @@ describe('WorldStreamingSystem', () => {
 // ============================================================================
 
 describe('Octree', () => {
-  let Octree: any;
+  let Octree: OctreeConstructor;
   
   beforeEach(async () => {
     const mod = await import('../world/world-streaming');

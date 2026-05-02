@@ -1,26 +1,51 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowDown, ArrowUp, Move, Rotate3D, Maximize, Layers, Palette, Box as BoxIcon } from 'lucide-react'
+import { ArrowDown, ArrowUp, Move, Layers, Palette, Box as BoxIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+type Vector3Value = [number, number, number]
+type PropertyValue = Vector3Value | number | string | boolean
 
 interface PropertySection {
   title: string
-  icon: any
+  icon: LucideIcon
   properties: Property[]
 }
 
-interface Property {
-  name: string
-  type: 'vector3' | 'float' | 'color' | 'boolean' | 'string' | 'enum'
-  value: any
-  min?: number
-  max?: number
-  options?: string[]
-}
+type Property =
+  | {
+      name: string
+      type: 'vector3'
+      value: Vector3Value
+    }
+  | {
+      name: string
+      type: 'float'
+      value: number
+      min?: number
+      max?: number
+    }
+  | {
+      name: string
+      type: 'color' | 'string'
+      value: string
+    }
+  | {
+      name: string
+      type: 'boolean'
+      value: boolean
+    }
+  | {
+      name: string
+      type: 'enum'
+      value: string
+      options?: string[]
+    }
 
 interface PropertiesPanelProps {
   sections?: PropertySection[]
-  onPropertyChange?: (section: string, property: string, value: any) => void
+  onPropertyChange?: (section: string, property: string, value: PropertyValue) => void
 }
 
 export function PropertiesPanel3D({
@@ -31,7 +56,7 @@ export function PropertiesPanel3D({
   const inputClass =
     'w-full rounded border border-[var(--aethel-border-secondary)] bg-[color-mix(in_srgb,var(--aethel-surface-primary)_60%,transparent)] text-[var(--aethel-text-secondary)] outline-none focus:border-[var(--aethel-primary)]'
 
-  const handleValueChange = (sectionIndex: number, propertyIndex: number, newValue: any) => {
+  const handleValueChange = (sectionIndex: number, propertyIndex: number, newValue: PropertyValue) => {
     onPropertyChange(sections[sectionIndex].title, sections[sectionIndex].properties[propertyIndex].name, newValue)
   }
 
@@ -47,7 +72,7 @@ export function PropertiesPanel3D({
                   type="number"
                   value={prop.value[i]}
                   onChange={(e) => {
-                    const newValue = [...prop.value]
+                    const newValue: Vector3Value = [...prop.value]
                     newValue[i] = parseFloat(e.target.value)
                     handleValueChange(sectionIndex, propIndex, newValue)
                   }}

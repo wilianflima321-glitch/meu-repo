@@ -61,6 +61,18 @@ export interface RenderFailedEvent {
   details: string | null;
 }
 
+interface RenderQueuedPayload {
+  jobId: string;
+  projectId: string;
+  name?: string;
+  totalFrames?: number;
+}
+
+interface RenderWebSocketMessage {
+  type: string;
+  payload: unknown;
+}
+
 export interface UseRenderProgressOptions {
   wsUrl?: string;
   autoConnect?: boolean;
@@ -95,7 +107,7 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
   
   const wsRef = useRef<AethelWebSocketClient | null>(null);
   const subscribedJobs = useRef<Set<string>>(new Set());
-  const handleRenderMessageRef = useRef<(msg: any) => void>(() => {});
+  const handleRenderMessageRef = useRef<(msg: RenderWebSocketMessage) => void>(() => {});
 
   // Inicializa conexão WebSocket
   useEffect(() => {
@@ -141,8 +153,10 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
     });
 
     // Handler de mensagens
-    ws.on('message', (msg: any) => {
-      handleRenderMessageRef.current(msg);
+    ws.on('message', (msg: unknown) => {
+      if (isRenderWebSocketMessage(msg)) {
+        handleRenderMessageRef.current(msg);
+      }
     });
 
     ws.connect().catch((err) => {
@@ -156,7 +170,7 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
   }, [wsUrl, autoConnect, projectId]);
 
   // Handler de mensagens de render
-  const handleRenderMessage = useCallback((msg: any) => {
+  const handleRenderMessage = useCallback((msg: RenderWebSocketMessage) => {
     switch (msg.type) {
       case 'render:progress':
         handleProgressUpdate(msg.payload as RenderProgressEvent);
@@ -171,11 +185,15 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
         break;
         
       case 'render:queued':
-        handleJobQueued(msg.payload);
+        if (isRenderQueuedPayload(msg.payload)) {
+          handleJobQueued(msg.payload);
+        }
         break;
         
       case 'render:cancelled':
-        handleJobCancelled(msg.payload.jobId);
+        if (isRecord(msg.payload) && typeof msg.payload.jobId === 'string') {
+          handleJobCancelled(msg.payload.jobId);
+        }
         break;
     }
   }, []);
@@ -229,7 +247,7 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
   };
 
   // Novo job adicionado à fila
-  const handleJobQueued = (payload: any) => {
+  const handleJobQueued = (payload: RenderQueuedPayload) => {
     const newJob: RenderJob = {
       id: payload.jobId,
       projectId: payload.projectId,
@@ -323,3 +341,17 @@ export function useRenderProgress(options: UseRenderProgressOptions = {}): UseRe
 }
 
 export default useRenderProgress;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function isRenderWebSocketMessage(value: unknown): value is RenderWebSocketMessage {
+  return isRecord(value) && typeof value.type === 'string' && 'payload' in value;
+}
+
+function isRenderQueuedPayload(value: unknown): value is RenderQueuedPayload {
+  return isRecord(value)
+    && typeof value.jobId === 'string'
+    && typeof value.projectId === 'string';
+}

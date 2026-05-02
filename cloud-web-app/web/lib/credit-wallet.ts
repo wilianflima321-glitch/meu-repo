@@ -27,6 +27,44 @@ import { Prisma } from '@prisma/client';
 // TIPOS
 // ============================================================================
 
+type CreditMetadata = Prisma.InputJsonObject;
+type CreditLedgerHistoryEntry = Awaited<ReturnType<typeof prisma.creditLedgerEntry.findMany>>[number];
+
+interface LegacyCreditUser {
+  id?: string;
+  credits?: number;
+  reservedCredits?: number;
+  plan?: string;
+}
+
+interface LegacyCreditReservationRecord {
+  id: string;
+  userId: string;
+  amount: number;
+  operationType: string;
+  createdAt?: Date;
+  expiresAt?: Date;
+}
+
+interface LegacyCreditPrismaClient {
+  user?: {
+    findUnique?: (args: { where: { id: string } }) => Promise<LegacyCreditUser | null>;
+    update?: (args: { where: { id: string }; data: Record<string, unknown> }) => Promise<LegacyCreditUser>;
+  };
+  creditReservation?: {
+    create?: (args: { data: Omit<LegacyCreditReservationRecord, 'id'> }) => Promise<LegacyCreditReservationRecord>;
+    delete?: (args: { where: { id: string } }) => Promise<unknown>;
+    deleteMany?: (args: { where: { expiresAt: { lt: Date } } }) => Promise<{ count: number }>;
+  };
+  creditLedgerEntry?: {
+    create?: (args: { data: Record<string, unknown> }) => Promise<unknown>;
+  };
+}
+
+function asLegacyCreditPrisma(client: unknown): LegacyCreditPrismaClient {
+  return client as LegacyCreditPrismaClient;
+}
+
 export interface CreditCheckResult {
   allowed: boolean;
   balance: number;
@@ -50,7 +88,7 @@ export interface CreditDeduction {
   amount: number;
   operationType: AIOperationType;
   reference?: string;
-  metadata?: Record<string, any>;
+  metadata?: CreditMetadata;
 }
 
 export type AIOperationType = 
@@ -267,7 +305,7 @@ export async function reserveCredits(
 export async function settleCredits(
   reservationId: string,
   actualCost: number,
-  metadata?: Record<string, any>
+  metadata?: CreditMetadata
 ): Promise<void> {
   const normalizedCost = clampNonNegative(actualCost);
   // Buscar reserva
@@ -382,7 +420,7 @@ export async function addCredits(
   amount: number,
   entryType: 'PURCHASE' | 'BONUS' | 'REFUND' | 'GRANT',
   reference?: string,
-  metadata?: Record<string, any>
+  metadata?: CreditMetadata
 ): Promise<void> {
   ensurePositiveAmount(amount, 'amount');
   await prisma.creditLedgerEntry.create({
@@ -438,8 +476,8 @@ export async function cleanupExpiredReservations(): Promise<number> {
 
 export class CreditWallet {
   async getBalance(userId: string): Promise<{ total: number; reserved: number; available: number }> {
-    const prismaAny = prisma as any;
-    const user = await prismaAny.user.findUnique({ where: { id: userId } });
+    const legacyPrisma = asLegacyCreditPrisma(prisma);
+    const user = await legacyPrisma.user?.findUnique?.({ where: { id: userId } }) ?? null;
     if (!user) {
       return { total: 0, reserved: 0, available: 0 };
     }
@@ -450,8 +488,8 @@ export class CreditWallet {
   }
 
   async checkBalance(userId: string, operationType: AIOperationType, estimatedCost: number): Promise<CreditCheckResult> {
-    const prismaAny = prisma as any;
-    const user = await prismaAny.user.findUnique({ where: { id: userId } });
+    const legacyPrisma = asLegacyCreditPrisma(prisma);
+    const user = await legacyPrisma.user?.findUnique?.({ where: { id: userId } }) ?? null;
     if (!user) {
       return {
         allowed: false,
@@ -494,8 +532,8 @@ export class CreditWallet {
     const expiresAt = new Date(now.getTime() + 5 * 60 * 1000);
 
     const result = await prisma.$transaction(async (tx) => {
-      const txAny = tx as any;
-      const reservation = await txAny.creditReservation?.create?.({
+      const txLegacy = asLegacyCreditPrisma(tx);
+      const reservation = await txLegacy.creditReservation?.create?.({
         data: {
           userId,
           amount,
@@ -512,8 +550,8 @@ export class CreditWallet {
         expiresAt,
       };
 
-      if (txAny.user?.update) {
-        await txAny.user.update({
+      if (txLegacy.user?.update) {
+        await txLegacy.user.update({
           where: { id: userId },
           data: { reservedCredits: { increment: amount } },
         });
@@ -533,8 +571,8 @@ export class CreditWallet {
   }
 
   async deductCredits(params: CreditDeduction & { reservationId?: string }): Promise<{ success: boolean; newBalance?: number; error?: string }> {
-    const prismaAny = prisma as any;
-    const existingUser = await prismaAny.user?.findUnique?.({ where: { id: params.userId } });
+    const legacyPrisma = asLegacyCreditPrisma(prisma);
+    const existingUser = await legacyPrisma.user?.findUnique?.({ where: { id: params.userId } });
     if (existingUser) {
       const check = await this.checkBalance(params.userId, params.operationType, params.amount);
       if (!check.allowed) {
@@ -544,17 +582,17 @@ export class CreditWallet {
 
     try {
       const result = await prisma.$transaction(async (tx) => {
-        const txAny = tx as any;
-        if (params.reservationId && txAny.creditReservation?.delete) {
-          await txAny.creditReservation.delete({ where: { id: params.reservationId } });
+        const txLegacy = asLegacyCreditPrisma(tx);
+        if (params.reservationId && txLegacy.creditReservation?.delete) {
+          await txLegacy.creditReservation.delete({ where: { id: params.reservationId } });
         }
 
-        const user = await txAny.user?.update?.({
+        const user = await txLegacy.user?.update?.({
           where: { id: params.userId },
           data: { credits: { decrement: params.amount } },
         });
 
-        await txAny.creditLedgerEntry?.create?.({
+        await txLegacy.creditLedgerEntry?.create?.({
           data: {
             userId: params.userId,
             amount: -params.amount,
@@ -570,21 +608,21 @@ export class CreditWallet {
       });
 
       return { success: true, newBalance: result.user?.credits };
-    } catch (error: any) {
-      return { success: false, error: error?.message || 'Failed to deduct credits' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to deduct credits' };
     }
   }
 
   async refundCredits(params: { userId: string; amount: number; reason?: string; originalReference?: string }): Promise<{ success: boolean; newBalance?: number; error?: string }> {
     try {
       const result = await prisma.$transaction(async (tx) => {
-        const txAny = tx as any;
-        const user = await txAny.user?.update?.({
+        const txLegacy = asLegacyCreditPrisma(tx);
+        const user = await txLegacy.user?.update?.({
           where: { id: params.userId },
           data: { credits: { increment: params.amount } },
         });
 
-        await txAny.creditLedgerEntry?.create?.({
+        await txLegacy.creditLedgerEntry?.create?.({
           data: {
             userId: params.userId,
             amount: Math.abs(params.amount),
@@ -601,23 +639,25 @@ export class CreditWallet {
       });
 
       return { success: true, newBalance: result.user?.credits };
-    } catch (error: any) {
-      return { success: false, error: error?.message || 'Failed to refund credits' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to refund credits' };
     }
   }
 
   async cleanupExpiredReservations(): Promise<number> {
-    const prismaAny = prisma as any;
-    const result = await prismaAny.creditReservation?.deleteMany?.({
+    const legacyPrisma = asLegacyCreditPrisma(prisma);
+    const result = await legacyPrisma.creditReservation?.deleteMany?.({
       where: { expiresAt: { lt: new Date() } },
     });
     return result?.count || 0;
   }
 
-  async getLedgerHistory(userId: string, params: { page: number; limit: number; operationType?: string; startDate?: Date; endDate?: Date }): Promise<{ entries: any[] }> {
+  async getLedgerHistory(userId: string, params: { page: number; limit: number; operationType?: string; startDate?: Date; endDate?: Date }): Promise<{ entries: CreditLedgerHistoryEntry[] }> {
     const { page, limit, operationType, startDate, endDate } = params;
-    const where: any = { userId };
-    if (operationType) where.operationType = operationType;
+    const where: Prisma.CreditLedgerEntryWhereInput = { userId };
+    if (operationType) {
+      where.metadata = { path: ['operationType'], equals: operationType };
+    }
     if (startDate || endDate) {
       where.createdAt = {
         ...(startDate ? { gte: startDate } : {}),
@@ -626,7 +666,7 @@ export class CreditWallet {
     }
 
     const entries = await prisma.creditLedgerEntry.findMany({
-      where: where as any,
+      where,
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip: (page - 1) * limit,
@@ -670,7 +710,7 @@ export async function withCreditControl<T>(
   estimatedCost: number,
   operation: () => Promise<{ result: T; actualTokens?: number; actualCost?: number }>,
   reference?: string
-): Promise<{ success: boolean; result?: T; error?: any; creditsUsed?: number }> {
+): Promise<{ success: boolean; result?: T; error?: unknown; creditsUsed?: number }> {
   const normalizedCost = clampNonNegative(estimatedCost);
   if (normalizedCost <= 0) {
     const { result, actualTokens, actualCost } = await operation();

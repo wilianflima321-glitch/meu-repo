@@ -49,6 +49,13 @@ interface DirectorSession {
   isAnalyzing: boolean;
 }
 
+interface DirectorProject {
+  name: string;
+  template?: string | null;
+  description?: string | null;
+  settings?: unknown;
+}
+
 type DirectorSessionPayload = DirectorSession & {
   capabilityStatus: 'PARTIAL';
   analysisMode: 'heuristic_preview';
@@ -125,7 +132,7 @@ export async function GET(
 
 async function getOrCreateDirectorSession(
   projectId: string, 
-  project: any
+  project: DirectorProject
 ): Promise<DirectorSession> {
   // Analisar projeto e gerar notas baseadas em heurísticas
   // Em produção, isso usaria IA real via Ollama/OpenAI
@@ -146,24 +153,36 @@ async function getOrCreateDirectorSession(
   };
 }
 
-function detectProjectType(project: any): DirectorSession['projectType'] {
+function detectProjectType(project: DirectorProject): DirectorSession['projectType'] {
   const name = (project.name || '').toLowerCase();
-  const tags = project.tags || [];
+  const template = (project.template || '').toLowerCase();
+  const tags = extractProjectTags(project.settings);
   
-  if (tags.includes('game') || name.includes('game') || name.includes('jogo')) {
+  if (tags.includes('game') || template.includes('game') || name.includes('game') || name.includes('jogo')) {
     return 'game';
   }
-  if (tags.includes('film') || name.includes('film') || name.includes('filme')) {
+  if (tags.includes('film') || template.includes('film') || name.includes('film') || name.includes('filme')) {
     return 'film';
   }
-  if (tags.includes('archviz') || name.includes('arch') || name.includes('arq')) {
+  if (tags.includes('archviz') || template.includes('archviz') || name.includes('arch') || name.includes('arq')) {
     return 'archviz';
   }
   return 'general';
 }
 
+function extractProjectTags(settings: unknown): string[] {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+    return [];
+  }
+
+  const tags = (settings as { tags?: unknown }).tags;
+  return Array.isArray(tags)
+    ? tags.filter((tag): tag is string => typeof tag === 'string').map((tag) => tag.toLowerCase())
+    : [];
+}
+
 async function generateDirectorNotes(
-  project: any,
+  project: DirectorProject,
   projectType: DirectorSession['projectType']
 ): Promise<DirectorNote[]> {
   const notes: DirectorNote[] = [];

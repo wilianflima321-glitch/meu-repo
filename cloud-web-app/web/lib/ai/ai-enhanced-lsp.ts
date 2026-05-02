@@ -3,8 +3,22 @@
  * Integrates Chat Orchestrator with LSP for intelligent code assistance
  */
 
-import { LSPServerBase, Position, CompletionItem, Hover, Location, Range } from '../lsp/lsp-server-base';
+import { Position, CompletionItem, Hover, Range, CodeAction, CodeActionContext } from '../lsp/lsp-server-base';
 import { getLSPManager } from '../lsp/lsp-manager';
+
+type JsonRecord = Record<string, unknown>;
+
+interface AIResponsePayload {
+  response?: unknown;
+}
+
+function isJsonRecord(value: unknown): value is JsonRecord {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function stringFromUnknown(value: unknown, fallback = ''): string {
+  return typeof value === 'string' ? value : fallback;
+}
 
 export interface AICompletionContext {
   fileContent: string;
@@ -16,8 +30,8 @@ export interface AICompletionContext {
 export interface AICodeAction {
   title: string;
   kind: string;
-  edit?: any;
-  command?: any;
+  edit?: unknown;
+  command?: unknown;
   isAIGenerated: boolean;
   confidence: number;
 }
@@ -107,7 +121,7 @@ export class AIEnhancedLSP {
     language: string,
     uri: string,
     range: Range,
-    context: any
+    context: CodeActionContext
   ): Promise<AICodeAction[]> {
     try {
       // 1. Get LSP code actions
@@ -122,7 +136,7 @@ export class AIEnhancedLSP {
 
       // 3. Combine
       return [
-        ...lspActions.map(a => ({ ...a, isAIGenerated: false, confidence: 1.0 })),
+        ...lspActions.map(a => this.toAICodeAction(a, false, 1.0)),
         ...aiActions,
       ];
     } catch (error) {
@@ -131,7 +145,7 @@ export class AIEnhancedLSP {
       const lspActions = lspServer 
         ? await lspServer.codeAction(uri, range, context)
         : [];
-      return lspActions.map(a => ({ ...a, isAIGenerated: false, confidence: 1.0 }));
+      return lspActions.map(a => this.toAICodeAction(a, false, 1.0));
     }
   }
 
@@ -162,8 +176,8 @@ export class AIEnhancedLSP {
         throw new Error(`Chat Orchestrator error: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      return this.parseAICompletions(data.response);
+      const data = await response.json() as AIResponsePayload;
+      return this.parseAICompletions(stringFromUnknown(data.response));
     } catch (error) {
       console.error('[AI-Enhanced LSP] Error getting AI completions:', error);
       return [];
@@ -175,7 +189,7 @@ export class AIEnhancedLSP {
    */
   private async getAIExplanation(
     language: string,
-    code: string | any
+    code: unknown
   ): Promise<string> {
     try {
       const codeStr = typeof code === 'string' ? code : JSON.stringify(code);
@@ -195,8 +209,8 @@ export class AIEnhancedLSP {
         return '';
       }
 
-      const data = await response.json();
-      return data.response || '';
+      const data = await response.json() as AIResponsePayload;
+      return stringFromUnknown(data.response);
     } catch (error) {
       console.error('[AI-Enhanced LSP] Error getting AI explanation:', error);
       return '';
@@ -209,15 +223,18 @@ export class AIEnhancedLSP {
   private async getAICodeActions(
     language: string,
     code: string,
-    context: any
+    context: CodeActionContext
   ): Promise<AICodeAction[]> {
     try {
+      const diagnosticSummary = Array.isArray(context.diagnostics)
+        ? `\n\nKnown diagnostics: ${JSON.stringify(context.diagnostics).slice(0, 1500)}`
+        : '';
       const response = await fetch(this.chatOrchestratorUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           agent: 'Coder',
-          prompt: `Analyze this ${language} code and suggest refactorings:\n\n${code}\n\nConsider:\n- Performance optimizations\n- Readability improvements\n- Best practices\n- Code smells\n\nProvide specific, actionable suggestions.`,
+          prompt: `Analyze this ${language} code and suggest refactorings:\n\n${code}${diagnosticSummary}\n\nConsider:\n- Performance optimizations\n- Readability improvements\n- Best practices\n- Code smells\n\nProvide specific, actionable suggestions.`,
           temperature: 0.4,
           maxTokens: 800,
         }),
@@ -227,8 +244,8 @@ export class AIEnhancedLSP {
         return [];
       }
 
-      const data = await response.json();
-      return this.parseAICodeActions(data.response);
+      const data = await response.json() as AIResponsePayload;
+      return this.parseAICodeActions(stringFromUnknown(data.response));
     } catch (error) {
       console.error('[AI-Enhanced LSP] Error getting AI code actions:', error);
       return [];
@@ -274,15 +291,22 @@ export class AIEnhancedLSP {
         return [];
       }
 
-      const completions = JSON.parse(jsonMatch[0]);
-      return completions.map((c: any) => ({
-        label: c.label || '',
-        kind: 1, // Text
-        detail: c.detail || 'AI Suggestion',
-        documentation: c.documentation || '',
-        insertText: c.insertText || c.label,
-        sortText: `z_ai_${c.label}`, // Sort AI suggestions after LSP
-      }));
+      const completions = JSON.parse(jsonMatch[0]) as unknown;
+      if (!Array.isArray(completions)) {
+        return [];
+      }
+
+      return completions.filter(isJsonRecord).map((completion) => {
+        const label = stringFromUnknown(completion.label);
+        return {
+          label,
+          kind: 1, // Text
+          detail: stringFromUnknown(completion.detail, 'AI Suggestion'),
+          documentation: stringFromUnknown(completion.documentation),
+          insertText: stringFromUnknown(completion.insertText, label),
+          sortText: `z_ai_${label}`, // Sort AI suggestions after LSP
+        };
+      });
     } catch (error) {
       console.error('[AI-Enhanced LSP] Error parsing AI completions:', error);
       return [];
@@ -355,7 +379,7 @@ export class AIEnhancedLSP {
    * Combine hover contents
    */
   private combineHoverContents(
-    lspContents: string | any,
+    lspContents: unknown,
     aiExplanation: string
   ): string {
     const lspStr = typeof lspContents === 'string' 
@@ -382,8 +406,8 @@ export class AIEnhancedLSP {
       if (!res.ok) {
         return '';
       }
-      const data = await res.json().catch(() => null);
-      const content = data && typeof data === 'object' ? String((data as any).content ?? '') : '';
+      const data = await res.json().catch(() => null) as unknown;
+      const content = isJsonRecord(data) ? String(data.content ?? '') : '';
       if (!content) return '';
 
       const lines = content.split(/\r?\n/);
@@ -394,6 +418,16 @@ export class AIEnhancedLSP {
     } catch {
       return '';
     }
+  }
+
+  private toAICodeAction(action: CodeAction, isAIGenerated: boolean, confidence: number): AICodeAction {
+    return {
+      ...action,
+      title: action.title,
+      kind: action.kind,
+      isAIGenerated,
+      confidence,
+    };
   }
 }
 

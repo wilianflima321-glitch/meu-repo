@@ -48,12 +48,14 @@ interface SettingSection {
   subsections?: { id: string; label: string }[]
 }
 
+type SettingValue = boolean | number | string
+
 interface Setting {
   id: string
   label: string
   description?: string
   type: 'toggle' | 'select' | 'input' | 'slider' | 'color' | 'keybinding'
-  value: any
+  value: SettingValue
   options?: { value: string; label: string }[]
   min?: number
   max?: number
@@ -316,7 +318,7 @@ const GENERAL_SETTINGS: Record<string, Setting[]> = {
 
 interface SettingInputProps {
   setting: Setting
-  onChange: (value: any) => void
+  onChange: (value: SettingValue) => void
 }
 
 function SettingInput({ setting, onChange }: SettingInputProps) {
@@ -340,7 +342,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
     case 'select':
       return (
         <select
-          value={setting.value}
+          value={String(setting.value)}
           onChange={(e) => onChange(e.target.value)}
           className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)]"
         >
@@ -354,7 +356,7 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
       return (
         <input
           type="text"
-          value={setting.value}
+          value={String(setting.value)}
           onChange={(e) => onChange(e.target.value)}
           className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] w-32"
         />
@@ -368,11 +370,11 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
             min={setting.min}
             max={setting.max}
             step={setting.step}
-            value={setting.value}
+            value={typeof setting.value === 'number' ? setting.value : Number(setting.value) || 0}
             onChange={(e) => onChange(parseFloat(e.target.value))}
             className="w-32 accent-[var(--aethel-info)]"
           />
-          <span className="text-sm text-[var(--aethel-text-tertiary)] w-12 text-right">{setting.value}</span>
+          <span className="text-sm text-[var(--aethel-text-tertiary)] w-12 text-right">{String(setting.value)}</span>
         </div>
       )
 
@@ -381,18 +383,18 @@ function SettingInput({ setting, onChange }: SettingInputProps) {
         <div className="flex items-center gap-2">
           <input
             type="color"
-            value={setting.value}
+            value={typeof setting.value === 'string' ? setting.value : '#6366f1'}
             onChange={(e) => onChange(e.target.value)}
             className="w-8 h-8 rounded border border-[var(--aethel-border-secondary)] cursor-pointer"
           />
-          <span className="text-sm text-[var(--aethel-text-tertiary)] font-mono">{setting.value}</span>
+          <span className="text-sm text-[var(--aethel-text-tertiary)] font-mono">{String(setting.value)}</span>
         </div>
       )
 
     case 'keybinding':
       return (
         <button type="button" aria-label={`Editar atalho ${setting.label}`} className="px-3 py-1.5 bg-[var(--aethel-surface-tertiary)] border border-[var(--aethel-border-secondary)] rounded-lg text-sm text-[var(--aethel-text-primary)] font-mono">
-          {setting.value}
+          {String(setting.value)}
         </button>
       )
 
@@ -407,7 +409,7 @@ export default function EngineSettingsPage() {
   const [activeSection, setActiveSection] = useState('general')
   const [activeSubsection, setActiveSubsection] = useState('appearance')
   const [searchQuery, setSearchQuery] = useState('')
-  const [settings, setSettings] = useState<Record<string, any>>({})
+  const [settings, setSettings] = useState<Record<string, SettingValue>>({})
   const [hasChanges, setHasChanges] = useState(false)
 
   // Get current settings based on selection
@@ -425,7 +427,7 @@ export default function EngineSettingsPage() {
   }, [activeSection, activeSubsection])
 
   // Handle setting change
-  const handleSettingChange = useCallback((id: string, value: any) => {
+  const handleSettingChange = useCallback((id: string, value: SettingValue) => {
     setSettings(prev => ({ ...prev, [id]: value }))
     setHasChanges(true)
   }, [])
